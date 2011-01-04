@@ -1,0 +1,6 @@
+config.node: eoko\database
+
+host: localhost
+database: oce_dev
+user: root
+password: root
