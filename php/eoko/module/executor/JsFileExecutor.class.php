@@ -4,6 +4,7 @@ namespace eoko\module\executor;
 
 use eoko\file\FileType;
 use eoko\util\Files;
+use eoko\template\Template;
 
 use \Logger;
 
@@ -19,21 +20,34 @@ class JsFileExecutor extends ExecutorBase {
 		return false;
 	}
 
+//	protected function prepareJsTemplate(Template $tpl) {}
+
 	public function get_module() {
 		$name = $this->request->req('name');
 
 		Logger::dbg('js module is: {}', $name);
 
 		if (!($path = $this->searchPath($name, FileType::JS))) {
-			if (false === $this->getDefaultModule($name)) {
+			if (($path = $this->searchPath($name, FileType::JS_TPL))) {
+				require $path;
+			} else if (false === $this->getDefaultModule($name)) {
 				Logger::get($this)->error('Cannot find js file for: "{}"', $name);
 				return $this->answer404();
 			} else {
 				return;
 			}
+		} else {
+			$content = rtrim(file_get_contents($path));
+			if (strstr($content, '<?php')) {
+				$tpl = Template::create()->setContent($content);
+				if (method_exists($this, $m = "prepare{$name}Template")) {
+					$this->$m($tpl);
+				}
+				$tpl->render();
+			} else {
+				echo $content;
+			}
 		}
-//		require($path);
-		echo rtrim(file_get_contents($path));
 
 		foreach (array_merge(
 			$this->module->listFiles(Files::regex("{$name}_*.js"), null, FileType::JS),

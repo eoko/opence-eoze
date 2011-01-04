@@ -45,7 +45,7 @@ class menu extends BasicHtmlExecutor {
 		$avMenuItems = &$menuData['menu-items'];
 
 		$menuItems = array();
-		foreach ($menuData[$menu] as $level => $items) {
+		if (isset($menuData[$menu])) foreach ($menuData[$menu] as $level => $items) {
 			if (UserSession::isAuthorized((int) $level)) {
 				foreach ($items as $item) {
 					if (!array_key_exists($item, $avMenuItems)) {

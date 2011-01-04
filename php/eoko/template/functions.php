@@ -19,6 +19,13 @@ function _() {
 	echo Language::callTranslate(func_get_args());
 }
 
+function _jsString($text) {
+	echo str_replace(
+		"\n", ' ',
+		str_replace('"', '\"', $text)
+	);
+}
+
 function useCss($css, $order = null, $require = true) {
 	CurrentRenderer::get()->pushCss($css, $order, $require);
 }

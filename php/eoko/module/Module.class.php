@@ -768,7 +768,7 @@ class Module implements file\Finder {
 		if (!($module instanceof Module)) {
 			$module = ModuleManager::getModule($module);
 		}
-		
+
 		return $module->createRequestExecutor($request, $executor);
 	}
 	
@@ -842,7 +842,9 @@ class Module implements file\Finder {
 			array(
 				null => array($path => ''),
 				FileType::CSS      => 'css',
+
 				FileType::JS       => 'js',
+				FileType::JS_TPL   => 'js',
 
 				FileType::HTML     => 'html',
 				FileType::HTML_TPL => 'html',
