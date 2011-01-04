@@ -10,7 +10,7 @@ use ExtJSResponse;
 
 abstract class HtmlExecutor extends HtmlTemplateExecutor {
 	
-	protected $ajax = true;
+	protected $ajax = null;
 	protected $hasPartialRendering = false;
 	protected $ajaxTarget = '#page';
 	
@@ -53,7 +53,7 @@ abstract class HtmlExecutor extends HtmlTemplateExecutor {
 			$template = $tpl;
 		}
 		
-		if (!$this->ajax || !$this->request->get('fragment', false)) {
+		if ($this->ajax === false || !$this->request->get('fragment', false)) {
 			if (!$this->hasPartialRendering && !$this->request->get('rawFragment', false)) {
 				$this->onCreateLayout($layout = $this->createLayout($template));
 				$layout->render();

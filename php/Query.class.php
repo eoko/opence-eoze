@@ -144,7 +144,7 @@ class Query {
 	 * @param String $table
 	 * @return Query
 	 */
-	public static function create($table = null, array $context = array()) {
+	public static function create(ModelTable $table = null, array $context = array()) {
 		return new Query($table, $context);
    	}
 

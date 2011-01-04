@@ -15,7 +15,7 @@ class <?php echo $modelName ?>Query extends <?php echo $baseQueryName ?> {
 	 *
 	 * @return <?php echo $modelName ?>Query
 	 */
-	public static function create(<?php echo $className ?> $table = null, array $params = null) {
+	public static function create(ModelTable $table = null, array $params = null) {
 		if ($table === null) $table = <?php echo $className ?>::getInstance();
 		return new <?php echo $modelName ?>Query($table, $params);
 	}
