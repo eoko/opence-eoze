@@ -26,8 +26,8 @@ class Router {
 	/** @var Router */
 	private static $instance = null;
 
-	const ROOT_MODULE_NAME = 'root';
-	protected $rootModuleName = 'root';
+//	const ROOT_MODULE_NAME = 'root';
+//	protected $rootModuleName = 'root';
 
 	public $request;
 	public $actionTimestamp;
@@ -40,15 +40,11 @@ class Router {
 		return self::$instance;
 	}
 
-	public function __construct() {
+	private function __construct() {
 
 		$this->request = new Request($_REQUEST);
 		$this->actionTimestamp = time();
 		Logger::getLogger($this)->info('Start action #{}', $this->actionTimestamp);
-
-//		if (defined('APP_INDEX_MODULE')) {
-//			self::ROOT_MODULE_NAME = APP_INDEX_MODULE;
-//		}
 
 		UserMessageService::parseRequest($this->request);
 	}
@@ -65,8 +61,9 @@ class Router {
 
 		if (!$this->request->has('controller')) {
 			$this->request->override(
-				'controller', 
-				defined('APP_INDEX_MODULE') ? APP_INDEX_MODULE : self::ROOT_MODULE_NAME
+				'controller',
+				ConfigManager::get(self::CONFIG_NODE, 'indexModule')
+//				defined('APP_INDEX_MODULE') ? APP_INDEX_MODULE : self::ROOT_MODULE_NAME
 			);
 		}
 
