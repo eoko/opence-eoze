@@ -4,6 +4,7 @@
  * @license http://www.planysphere.fr/licenses/psopence.txt
  */
 
+use eoko\config\ConfigManager;
 use eoko\module\ModuleManager;
 use eoko\module\Module;
 
@@ -22,6 +23,8 @@ if (!isset($GLOBALS['directAccess'])) { header('HTTP/1.0 404 Not Found'); exit('
  * module will be used.
  */
 class Router {
+
+	const CONFIG_NODE = 'eoko/router';
 
 	/** @var Router */
 	private static $instance = null;
