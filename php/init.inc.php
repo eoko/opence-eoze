@@ -162,7 +162,6 @@ eoko\i18n\Language::importFunctions(__NAMESPACE__);
 //... Logger
 require_once PHP_PATH . 'Logger.class.php';
 
-
 // TODO: make that ondemand compliant!
 require_once PHP_PATH . 'ModelRelation.class.php';
 require_once PHP_PATH . 'ModelField.class.php';
@@ -172,7 +171,7 @@ require_once PHP_PATH . 'ModelRelationInfo.class.php';
 //require_once PHP_PATH . str_replace('\\', DS, 'eoko/cqlix/Relation/RelationInfo') . '.classes.php';
 
 // --- Exception handler ---
-if (!isset($test) && !$is_script) require_once (PHP_PATH . 'ExceptionHandler.class.php');
+if ((!isset($test) || !$test) && (!isset($is_script) || !$is_script)) require_once (PHP_PATH . 'ExceptionHandler.class.php');
 
 // --- Class loader --
 // Autoload for helpers in /inc
@@ -186,7 +185,7 @@ $includePaths = array(
 
 if (USE_CONTROLLER_CACHE) $includePaths[CACHE_PATH . 'php'];
 
-//REMModuleManager::addIncludePaths($includePaths);
+//REM ModuleManager::addIncludePaths($includePaths);
 
 foreach ($phpSubDirs as $dir) {
 	$includePaths[] = PHP_PATH . $dir . DS;
@@ -201,7 +200,7 @@ function __autoload($class) {
 function tryAutoLoad($class, $suffix = '.class') {
 
 	$classPath = str_replace('\\', DS, $class);
-	
+
 	global $includePaths;
 	foreach ($includePaths as $path) {
 		if (file_exists($filename = "$path$classPath$suffix.php")) {
@@ -220,11 +219,11 @@ function tryAutoLoad($class, $suffix = '.class') {
 //		}
 //	}
 	if (ModuleManager::autoLoad($class, $suffix)) return true;
-	
+
 	if (ClassGeneratorManager::generate($class)) {
 		return true;
 	}
-	
+
 	if (2 === count($parts = explode('_', $classPath, 2))) {
 		$classPath = $parts[0];
 		foreach ($includePaths as $path) {
@@ -250,6 +249,14 @@ function tryAutoLoad($class, $suffix = '.class') {
 	return false;
 }
 
+
+// === Configure Plugins ===
+
+eoko\plugin\PluginManager::init();
+
+
+// === Configure application ===
+
 if (function_exists('configure_application')) {
 	$bootstrap = configure_application();
 }
@@ -271,4 +278,4 @@ if (!defined('ADD_LOG_APPENDERS') || ADD_LOG_APPENDERS) {
 
 \eoko\util\file\FileTypes::getInstance();
 
-if (!isset($is_script)) Router::getInstance()->route();
+if ((!isset($test) || !$test) && (!isset($is_script) || !$is_script)) Router::getInstance()->route();

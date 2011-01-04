@@ -22,6 +22,11 @@ class FileHelper {
 		$directory = rtrim(str_replace('\\', '/', $directory), '/') . '/';
 		if (DIRECTORY_SEPARATOR != '/') $directory = str_replace('/', DIRECTORY_SEPARATOR, $directory);
 
+		if (!is_dir($directory)) {
+			Logger::get($this)->warn("$directory is not a directory (cannot listFiles)");
+			return array();
+		}
+
 		$entries = Array();
 		$dir = dir($directory);
 		while (false !== ($entry = $dir->read())) {
@@ -98,6 +103,11 @@ class FileHelper {
 
 		$directory = rtrim(str_replace('\\', '/', $directory), '/') . '/';
 		if (DIRECTORY_SEPARATOR != '/') $directory = str_replace('/', DIRECTORY_SEPARATOR, $directory);
+
+		if (!is_dir($directory)) {
+			Logger::get($this)->warn("$directory is not a directory (cannot listDirs)");
+			return array();
+		}
 
 		$entries = Array();
 		$dir = dir($directory);

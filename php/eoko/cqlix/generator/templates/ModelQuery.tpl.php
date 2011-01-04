@@ -9,7 +9,7 @@
 
 <?php endforeach ?>
  */
-class <?php echo $modelName ?>Query extends myQuery {
+class <?php echo $modelName ?>Query extends <?php echo $baseQueryName ?> {
 
 	/**
 	 *

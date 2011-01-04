@@ -2,6 +2,7 @@
 
 namespace eoko\cqlix\generator;
 
+use eoko\config\ConfigManager;
 use eoko\util\Files;
 use eoko\util\Arrays;
 use eoko\util\YmlReader;
@@ -18,28 +19,28 @@ class Config extends \eoko\config\Config {
 	}
 
 	private function loadBaseConfig() {
-		$configPath = MODEL_PATH . 'config' . DS;
-		$baseConfigFilename = '/^base_?(\d*)\.yml$/';
-
-		$files = array();
-		foreach (Files::listFiles($configPath, $baseConfigFilename) as $filename) {
-			if (preg_match($baseConfigFilename, $filename, $m) && isset($m[1])) {
-				$index = $m[1];
-			} else {
-				$index = $filename;
-			}
-			$files[$index] = "$configPath$filename";
-		}
-
-		ksort($files);
-
-		$config = array();
-		foreach ($files as $file) {
-			$cfg = YmlReader::loadFile($file);
-			Arrays::apply($config, $cfg, false);
-		}
-
-		$this->values = $config;
+//		$configPath = MODEL_PATH . 'config' . DS;
+//		$baseConfigFilename = '/^base_?(\d*)\.yml$/';
+//
+//		$files = array();
+//		foreach (Files::listFiles($configPath, $baseConfigFilename) as $filename) {
+//			if (preg_match($baseConfigFilename, $filename, $m) && isset($m[1])) {
+//				$index = $m[1];
+//			} else {
+//				$index = $filename;
+//			}
+//			$files[$index] = "$configPath$filename";
+//		}
+//
+//		ksort($files);
+//
+//		$config = array();
+//		foreach ($files as $file) {
+//			$cfg = YmlReader::loadFile($file);
+//			Arrays::apply($config, $cfg, false);
+//		}
+//		$this->values = $config;
+		$this->values = ConfigManager::get(get_namespace($this));
 	}
 
 	public function buildModelInfo($dbTable) {

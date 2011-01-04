@@ -2,6 +2,8 @@
 
 namespace eoko\template;
 
+use IllegalArgumentException;
+
 class Template extends Renderer {
 	
 	protected $vars = array();
