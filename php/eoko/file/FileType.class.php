@@ -9,6 +9,7 @@ class FileType extends Enum {
 	const HTML		= 'HTML';
 	const HTML_TPL	= 'HTML_TPL';
 	const JS		= 'JS';
+	const JS_TPL    = 'JS_TPL';
 	const CSS		= 'CSS';
 	const PHP		= 'PHP';
 	const YML       = 'YML';
@@ -34,6 +35,9 @@ class FileType extends Enum {
 			),
 			self::JS => array(
 				self::JS, 'js'
+			),
+			self::JS_TPL => array(
+				self::JS_TPL, 'js.php'
 			),
 			self::CSS => array(
 				self::CSS, 'css'

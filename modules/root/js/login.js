@@ -69,7 +69,7 @@ Oce.Modules.root.login = Ext.extend(Oce.Module, {
 				autoEl: {
 					tag: 'div',
 					html: '<div class="app-msg">'
-					+ (text ? text : 'OpenCE est un service proposé par le comité inter-entreprise de Rhodia. Ses services sont réservé aux membres du comité et à ses adhérents. <br /><br />Pour accéder à openCE il est nécessaire de s\'identifier.')
+					+ (text ? text : "<?php _jsString($text) ?>")
 					+ '<br /><br />'
 					+ '</div>'
 				}
@@ -123,13 +123,16 @@ Oce.Modules.root.login = Ext.extend(Oce.Module, {
 //		}, {
 //			text: 'Réinitialiser',
 //			handler: this.loginForm.getForm().reset.createDelegate(this.loginForm)
-		}, {
+		}
+/*<?php if ($help): ?>*/
+		, {
 			iconCls: 'ico_help',
 //			handler: function() {
 //				Ext.ux.OnDemandLoadByAjax.load(w_help);
 //			}.createDelegate(this)
 			handler: this.showHelp
 		}
+/*<?php endif ?>*/
 		]);
 
 		return this.loginWindow;
@@ -152,7 +155,7 @@ Oce.Modules.root.login = Ext.extend(Oce.Module, {
 //			});
 
 // --- wrapper.php ---
-//<?php
+//<#php
 //$url = $_REQUEST['url'];
 //$baseUrl = 'http://wiki.eoko-lab.fr/';
 //$html = file_get_contents($url);

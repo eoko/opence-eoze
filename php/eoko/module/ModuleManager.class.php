@@ -278,8 +278,8 @@ class ModuleManager {
 			return $this->createDefaultModule($config, $name, null, $namespace, null, $baseLocation);
 		} else {
 			
-			$path = $inLocation->path . $name . DS;
-			$url = "$inLocation->url$name/";
+			$path = $baseLocation->path . $name . DS;
+			$url = "$baseLocation->url$name/";
 
 			foreach (array("$name.class.php", 'module.class.php', "{$name}Module.class.php") as $file) {
 				if (file_exists($file = "$path$file")) {
@@ -300,11 +300,23 @@ class ModuleManager {
 			// how to create the Module class.
 			if ($config) {
 				return $this->createDefaultModule($config, $name, $path, $namespace, $url, $baseLocation);
+
 			// If there isn't one, that may be the case of a Module having a
 			// folder overriding some parts of its parent module, so we must
 			// search in parent paths to see if there is a module with that name.
 			} else if ($inLocation->parent && (false !== $class = $this->tryGetModule($name, $inLocation->parent, $baseLocation))) {
-				return $class;
+				// TODO there's a problem here, when a module override a parent
+				// module without declaring the module class itself
+				// (eg. espanki\modules\root extends eoko\modules\root),
+				// the intermediate module should be correctly generated. This is
+				// not the case... (see bellow, a tentative on solving this issue --
+				// not the time to make it work right now :/ )
+				return $this->tryGetModule($name, $inLocation, $baseLocation);
+				// TODO this is not very logical that the base module is instanciated
+				// instead of being simply extended...
+				$c = class_extend($newClass = "$namespace$name", get_class($class));
+				$c = new $newClass($name, $path, $url, $baseLocation);
+
 			// In last resort, we create an alias of the base Module for the
 			// given module $name...
 			} else {
@@ -315,7 +327,8 @@ class ModuleManager {
 		
 		return false;
 	}
-	
+
+
 //REM	private function findConfigFile($name, ModulesLocation $md, &$hasDir) {
 //		if (($hasDir = is_dir("$md->path$name"))) {
 //			$md->path = "$md->path$name" . DS;
