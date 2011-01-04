@@ -7,7 +7,9 @@ use eoko\module\ModuleManager;
 class BaseBootstrap extends Bootstrap {
 
 	protected function initConfigPaths() {
-		self::addConfigPath(CONFIG_PATH);
+		if (defined('CONFIG_PATH')) {
+			self::addConfigPath(CONFIG_PATH);
+		}
 	}
 
 	protected function initModulesLocations() {
