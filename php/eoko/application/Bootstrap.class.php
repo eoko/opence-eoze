@@ -3,6 +3,7 @@
 namespace eoko\application;
 
 use eoko\config\ConfigManager;
+use eoko\log\Logger;
 
 abstract class Bootstrap {
 
@@ -13,7 +14,13 @@ abstract class Bootstrap {
 	}
 
 	protected static final function addConfigPath($path) {
-		ConfigManager::addPath($path);
+		if (is_dir($path)) {
+			ConfigManager::addPath($path);
+		} else {
+			Logger::get(get_called_class())->warn((file_exists($path) ? "$path does not exist ("
+				: "$path is not a directory")
+				. ' (cannot be added as config path -- Bootstrap::addConfigPath)');
+		}
 	}
 
 	abstract protected function initConfigPaths();
