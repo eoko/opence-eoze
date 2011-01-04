@@ -112,6 +112,12 @@ class Files extends \FileHelper {
 	}
 	
 	public static function testExtension($filename, $extension) {
+
+		if (is_array($extension)) {
+			foreach ($extension as $x) if (self::testExtension($filename, $x)) return true;
+			return false;
+		}
+
 		if (substr($extension, 0, 1) !== '.') $extension = ".$extension";
 		if (is_array($extension)) foreach ($extension as $extension) {
 			if (substr($filename, -strlen($extension)) === $extension) return true;
