@@ -5,11 +5,13 @@ namespace eoko\module;
 use Request;
 use SystemException, SecurityException, UnsupportedOperationException,
 	IllegalStateException, IllegalArgumentException;
+
 use eoko\util\Files;
 use eoko\file, eoko\file\FileType;
 use eoko\config\Application as ApplicationConfig;
 use eoko\config\Config;
 use eoko\template\PHPCompiler;
+use eoko\module\executor\Executor;
 
 class Module implements file\Finder {
 	
