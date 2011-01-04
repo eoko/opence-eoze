@@ -172,7 +172,7 @@ require_once PHP_PATH . 'ModelRelationInfo.class.php';
 //require_once PHP_PATH . str_replace('\\', DS, 'eoko/cqlix/Relation/RelationInfo') . '.classes.php';
 
 // --- Exception handler ---
-if (!isset($test)) require_once (PHP_PATH . 'ExceptionHandler.class.php');
+if (!isset($test) && !$is_script) require_once (PHP_PATH . 'ExceptionHandler.class.php');
 
 // --- Class loader --
 // Autoload for helpers in /inc
