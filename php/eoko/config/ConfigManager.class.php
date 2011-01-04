@@ -82,8 +82,17 @@ class ConfigManager {
 		return self::$instance;
 	}
 
-	public static function get($node) {
-		return self::getInstance()->node($node);
+	public static function get($node, $key = null, $default = null) {
+		$node = self::getInstance()->node($node);
+		if ($key !== null) {
+			if (!array_key_exists($key, $node)) {
+				return $default;
+			} else {
+				return $node[$key];
+			}
+		} else {
+			return $node;
+		}
 	}
 
 	public static function addPath($path) {
