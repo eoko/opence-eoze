@@ -7,7 +7,6 @@ use eoko\url\Maker as UrlMaker;
 use eoko\i18n\Language;
 
 function lang() {
-	dump('fuck');
 	return Language::callTranslate(func_get_args());
 }
 
