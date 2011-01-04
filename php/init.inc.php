@@ -61,7 +61,7 @@ defineIf('LIB_PATH', ROOT . LIB_DIR . DS);
 defineIf('EOZE_DIR', 'eoze');
 defineIf('EOZE_PATH', str_replace(DS . DS, DS, LIB_PATH . EOZE_DIR . DS));
 defineIf('EOZE_CONFIG_PATH', EOZE_PATH . 'config' . DS);
-defineIf('EOZE_BASE_URL', preg_replace('@([^:/])//@', '$1/', SITE_BASE_URL . '/' . EOZE_DIR));
+defineIf('EOZE_BASE_URL', preg_replace('@([^:/])//@', '$1/', SITE_BASE_URL . '/' . EOZE_DIR) . '/');
 
 defineIf('PHP_DIR', 'php');
 defineIf('PHP_PATH', EOZE_PATH . PHP_DIR . DS);
@@ -81,14 +81,22 @@ defineIf('IMAGES_PATH', ROOT . 'images' . DS);
 defineIf('HTML_TPL_PATH', ROOT . 'tpl' . DS);
 defineIf('CSS_BASE_URL', 'css/');
 
-defineIf('JSCORE_BASE_URL', 'js/');
-defineIf('JSCORE_BASE_PATH', ROOT . 'js' . DS);
-defineIf('EXTJS_BASE_URL', JSCORE_BASE_URL . 'ext/');
+//defineIf('JSCORE_BASE_URL', 'js/');
+//defineIf('JSCORE_BASE_PATH', ROOT . 'js' . DS);
+//defineIf('EXTJS_BASE_URL', JSCORE_BASE_URL . 'ext/');
+defineIf('CSS_PATH', EOZE_PATH . 'css' . DS);
+defineIf('CSS_URL', EOZE_BASE_URL . 'css/');
+defineIf('JS_PATH', EOZE_PATH . 'js' . DS);
+defineIf('JS_URL', EOZE_BASE_URL . 'js/');
 
-defineIf('CSS_PATH', ROOT . 'css' . DS);
-defineIf('CSS_URL', 'css/');
-defineIf('JS_PATH', ROOT . 'js' . DS);
-defineIf('JS_URL', 'js/');
+//if (!defined(APP_JS_PATH) && is_dir($dir = ROOT . 'js')) {
+//	define('APP_JS_PATH', $dir . DS);
+//	define('APP_JS_URL', SITE_BASE_URL . 'js/');
+//}
+//if (!defined(APP_CSS_PATH) && is_dir($dir = ROOT . 'css')) {
+//	define('APP_CSS_PATH', $dir . DS);
+//	define('APP_CSS_URL', SITE_BASE_URL . 'css/');
+//}
 
 defineIf('MODEL_PATH', ROOT . 'models' . DS);
 defineIf('MODEL_BASE_PATH', MODEL_PATH . 'base' . DS);
