@@ -5,6 +5,7 @@ use eoko\script\Script;
 use eoko\database\Query;
 use eoko\database\ConnectionManager;
 use eoko\template\Template;
+use eoko\plugin\PluginManager;
 
 use PDO;
 use ModelColumn;
@@ -64,6 +65,8 @@ use eoko\config\ConfigManager;
  *
  */
 class Generator extends Script {
+
+	const EVT_BEFORE = 'before';
 
 	private $database;
 
@@ -412,7 +415,7 @@ class Generator extends Script {
 
 	private function discoverSecondaryRelations() {
 
-		$this->secondaryRelations = null;
+		$this->secondaryRelations = array();
 
 		foreach ($this->tables as $dbTable => $table) {
 			// --- many to many

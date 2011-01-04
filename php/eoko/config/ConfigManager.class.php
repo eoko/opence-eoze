@@ -67,10 +67,16 @@ class ConfigManager {
 	}
 
 	private function node($node) {
+		if (is_object($node)) {
+			$node = get_class($node);
+		}
 		if ($node === null) return $this->data;
 		else return $this->getNode($node);
 	}
-	
+
+	/**
+	 * @return ConfigManager
+	 */
 	private static function getInstance() {
 		if (self::$instance === null) self::$instance = new ConfigManager();
 		return self::$instance;
