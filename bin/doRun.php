@@ -15,26 +15,27 @@ if (!isset($class)) {
 
 // ---- INIT -------------------------------------------------------------------
 
-define('ADD_LOG_APPENDERS', false);
-
-$directAccess = false;
-define('PROPER_ENTRY', true);
-
-$phpPath = realpath(dirname(__FILE__) . DIRECTORY_SEPARATOR . '..')
-	. DIRECTORY_SEPARATOR . 'php' . DIRECTORY_SEPARATOR;
-
-require_once $phpPath . 'init.inc.php';
-
-Logger::removeAllAppender('LoggerFirePHPAppender');
-Logger::setDefaultContext('');
-Logger::addAppender(new LoggerOutputAppender(false));
-
-$dumpPre = null;
-$endDumpPre = "\n";
-
-ExtJSResponse::setEnabled(false);
-
-ob_end_flush();
+require_once 'init.inc.php';
+//define('ADD_LOG_APPENDERS', false);
+//
+//$directAccess = false;
+//define('PROPER_ENTRY', true);
+//
+//$phpPath = realpath(dirname(__FILE__) . DIRECTORY_SEPARATOR . '..')
+//	. DIRECTORY_SEPARATOR . 'php' . DIRECTORY_SEPARATOR;
+//
+//require_once $phpPath . 'init.inc.php';
+//
+//Logger::removeAllAppender('LoggerFirePHPAppender');
+//Logger::setDefaultContext('');
+//Logger::addAppender(new LoggerOutputAppender(false));
+//
+//$dumpPre = null;
+//$endDumpPre = "\n";
+//
+//ExtJSResponse::setEnabled(false);
+//
+//ob_end_flush();
 
 // -----------------------------------------------------------------------------
 
