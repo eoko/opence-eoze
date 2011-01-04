@@ -129,7 +129,7 @@ class HtmlTemplate extends Template {
 			foreach (self::nameOrder($name, $order) as $name => $order2) {
 				$this->pushAlias($name, $order);
 			}
-			return;
+			return $this;
 		}
 		
 		if (FileType::ALIAS() !== ($r = $this->getFileFinder()->searchPath($name, null, $url, null, true))
@@ -139,6 +139,8 @@ class HtmlTemplate extends Template {
 		} else {
 			$this->pushAliasInclude(null, null, $url, $order);
 		}
+		
+		return $this;
 	}
 	
 	public function pushCss($name, $order = null, $require = true) {
@@ -147,7 +149,7 @@ class HtmlTemplate extends Template {
 			foreach (self::nameOrder($name, $order) as $css => $order) {
 				$this->pushCss($css, $order, $require);
 			}
-			return;
+			return $this;
 		}
 
 		if (null !== ($r = $this->fileFinder->searchPath($name, FileType::CSS, $url, null, $require))
@@ -159,6 +161,8 @@ class HtmlTemplate extends Template {
 				$this->pushInclude('css', $url, $order);
 			}
 		}
+
+		return $this;
 	}
 	
 	private static function nameOrder(array $name, $baseOrder) {
@@ -183,7 +187,7 @@ class HtmlTemplate extends Template {
 			foreach (self::nameOrder($name, $order) as $js => $order) {
 				$this->pushJs($js, $order, $require);
 			}
-			return;
+			return $this;
 		}
 		
 		$r = null;
@@ -192,13 +196,14 @@ class HtmlTemplate extends Template {
 			|| (null !== ($r = $this->fileFinder->searchPath($name, FileType::JS, $url, null, $require))
 				&& $url !== null)
 		) {
-			
 			if ($r === FileType::ALIAS()) {
 				$this->pushAliasInclude(FileType::JS, 'js', $url, $order);
 			} else {
 				$this->pushInclude('js', $url, $order);
 			}
 		}
+		
+		return $this;
 	}
 	
 	public function findImageUrl($name, $type = FileType::IMAGE) {
