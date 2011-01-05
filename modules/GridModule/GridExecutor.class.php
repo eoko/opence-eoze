@@ -177,7 +177,8 @@ abstract class GridExecutor extends JsonExecutor {
 					->getTargetTable();
 		}
 
-		$query->select($selects)->whereIsActif(); // TODO actif
+		$query->select($selects);
+		if (method_exists($query, 'whereIsActif')) $query->whereIsActif(); // TODO actif
 
 		if ($this->request->has('limit', true)) {
 			if ($this->request->has('start', true)) {

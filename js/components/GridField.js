@@ -892,11 +892,13 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 				Oce.mx.application.getModuleInstance(
 					me.editModule
 					,function(module) {
-						module.editRowById.apply(module, params).on('aftersave', function(){
-							me.store.reload(Ext.apply(me.store.lastOptions.params, {
-								reload:1
-							}));
-						})
+						module.editRowById.apply(module, params, function(win) {
+							win.on('aftersave', function(){
+								me.store.reload(Ext.apply(me.store.lastOptions.params, {
+									reload: true
+								}));
+							});						
+						});
 					}
 				);
 			}
