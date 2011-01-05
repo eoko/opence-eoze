@@ -19,6 +19,8 @@ Oce.GridModule = Ext.extend(Ext.Panel, {
 		this.activeAddWindows = {};
 		this.editWindows = {};
 
+		this.pageSize = this.extra.pageSize || 30;
+
 		Oce.GridModule.superclass.constructor.apply(this, arguments);
 
 		this.model.initRelations(this.modelRelations);
@@ -296,7 +298,7 @@ Oce.GridModule = Ext.extend(Ext.Panel, {
 			enableColumnHide: false,
 
 			bbar: new Ext.PagingToolbar({
-				pageSize: 30,
+				pageSize: this.pageSize,
 				store: this.store,
 				params: {action:'load'},
 				displayInfo: true,
@@ -2436,7 +2438,7 @@ Oce.GridModule = Ext.extend(Ext.Panel, {
 			var store = this.store;
 			var controller = this.controller;
 			store.load({
-				params: {start: 0, limit: 30, action:'load'}
+				params: {start: 0, limit: this.pageSize, action:'load'}
 	// --- EXPERIMENTS ---
 //				,callback: function(records, opts, success) {
 //					var params = opts.params,

@@ -70,18 +70,20 @@ class LegacyGridModule {
 				->toArray();
 
 		// --- Year ---
-		if (isset($extra['year'])) {
-			if (is_array($extra['year']) && isset($extra['enabled']) && $extra['enabled']) {
-				$year = $extra['year'];
-			} else if (is_bool($extra['year'])) {
-				$year = $extra['year'];
+		if (method_exists($table, 'isAnnualized')) {
+			if (isset($extra['year'])) {
+				if (is_array($extra['year']) && isset($extra['enabled']) && $extra['enabled']) {
+					$year = $extra['year'];
+				} else if (is_bool($extra['year'])) {
+					$year = $extra['year'];
+				} else {
+					$year = $table->isAnnualized();
+					$extra['year'] = $year;
+				}
 			} else {
 				$year = $table->isAnnualized();
 				$extra['year'] = $year;
 			}
-		} else {
-			$year = $table->isAnnualized();
-			$extra['year'] = $year;
 		}
 //		if ($year) {
 //			$config->columns['year'] = 'year';
