@@ -143,6 +143,11 @@ function get_namespace_trimmed($class, &$className = false, $opts = GET_NAMESPAC
  * @return string the code which performs the extend operation
  */
 function class_extend($newClassName, $baseClassName, $namespace = null, $execute = true) {
+
+	if (class_exists($newClassName, false)) {
+		throw new IllegalStateException('Cannot redeclare class ' . $newClassName);
+	}
+
 	if ($namespace !== null) {
 		$namespace = rtrim($namespace, '\\');
 	} else {

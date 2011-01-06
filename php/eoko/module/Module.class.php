@@ -43,12 +43,13 @@ class Module implements file\Finder {
 	protected $defaultInternalExecutor = self::DEFAULT_EXECUTOR;
 	private $executorClassNames = null;
 
-	public function __construct($name, $basePath, $url, ModulesLocation $baseLocation) {
+//REM	public function __construct($name, $basePath, $url, ModulesDirectory $baseLocation) {
+	public function __construct(ModuleLocation $location) {
 
 		// These 3 could be known without having to pass them as params
-		$this->name = $name;
-		$this->basePath = $basePath;
-		$this->baseUrl = $url;
+		$this->name = $location->moduleName;
+		$this->basePath = $location->path;
+		$this->baseUrl = $location->url;
 
 		$this->namespace = get_namespace($this);
 
@@ -58,8 +59,8 @@ class Module implements file\Finder {
 		foreach ($lineage as $item) $lineageItems[$item] = true;
 		$lineage = array_keys($lineageItems);
 
-		$this->pathsUrl = $baseLocation->getLineagePathsUrl($lineage);
-		$this->lineageLocations = $baseLocation->getLineageLocations($lineage);
+		$this->pathsUrl = $location->directory->getLineagePathsUrl($lineage);
+		$this->lineageLocations = $location->directory->getLineageLocations($lineage);
 
 //		dumpl(array(
 //			$name,
@@ -538,7 +539,7 @@ class Module implements file\Finder {
 
 		foreach ($locations as $location) {
 			if (null !== $classFile = $this->findExecutorClassFile(
-					$type, $location->path, $location->name)) {
+					$type, $location->path, $location->moduleName)) {
 
 				$baseLoaders[] = array(
 					$classFile,

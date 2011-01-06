@@ -13,6 +13,8 @@ use \ModelTable;
 // TODO: the Module.tpl.php template is not used anymore... clean out all
 // references to that
 
+//dump_trace();
+
 class GridModule extends Module {
 	
 	private $codeTemplatePath = 'php-template/';
