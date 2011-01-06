@@ -23,7 +23,6 @@ class Module implements file\Finder {
 
 	protected $name;
 
-
 	protected $namespace;
 	protected $basePath;
 	protected $baseUrl;

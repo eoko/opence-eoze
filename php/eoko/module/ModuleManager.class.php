@@ -262,35 +262,40 @@ class ModuleManager {
 	 * module.
 	 * @return class
 	 */
-	private function tryGetModule($name, ModulesDirectory $dir = null) {
+	private function tryGetModule($name, ModulesDirectory $dir) {
 		
-		if (false === $config = $dir->findConfigFile($name, $hasDir)) {
+		$location = new ModuleLocation($dir, $name);
+
+		if (false === $config = $location->searchConfigFile()) {
 			return false;
 		}
 
-		if (!$hasDir) {
+		if (!$location->isActual()) {
 			$namespace = "$dir->namespace$name\\";
-			return $this->createDefaultModule($config, $name, null, $namespace, null, $dir);
+			return $this->createDefaultModule($config, $name, $namespace, $dir);
 		} else {
-
-			$location = new ModuleLocation($dir, $name);
 
 			if (null !== $class = $location->searchModuleClass()) {
 				$module = new $class($location);
-				$module->setConfig($config);
-				return $module;
-
-			// If there is a config file, it will give us the information needed
-			// to create the Module class.
-			} else if ($config) {
-				return $this->createDefaultModule($config, $name, $path, $namespace, $url, $dir);
-
-			} else {
-				$superclass = $location->searchModuleSuperclass();
-				if ($superclass === null) $superclass = __NAMESPACE__ . '\\Module';
-				class_extend($class = "$location->namespace$name", $superclass);
-				return new $class($location);
 			}
+
+			// try to create the module from the config file information
+			if ($config && ($m = $this->createDefaultModule($config, $name, $location->namespace, $dir))) {
+				return $m;
+			}
+
+			// generate the module class in the namespace
+			$superclass = $location->searchModuleSuperclass();
+			if ($superclass === null) {
+				$superclass = __NAMESPACE__ . '\\Module';
+			}
+			class_extend($class = "$location->namespace$name", $superclass);
+			$module = new $class($location);
+
+			// if the method has not returned yet, that means that the module
+			// has not been created from config: the config must be set!
+			$module->setConfig($config);
+			return $module;
 		}
 //REM
 //			// REM...
@@ -372,8 +377,8 @@ class ModuleManager {
 	 * Generates a default module class and instanciates it, according to its
 	 * configuration file "class" item.
 	 */
-	public function createDefaultModule($config, $name, $path, $namespace, $url,
-			ModulesDirectory $dir = null) {
+	public function createDefaultModule($config, $name, $namespace, ModulesDirectory $dir = null) {
+//	public function createDefaultModule($config, $name, $namespace, ModulesDirectory $dir = null) {
 
 		if ($dir === null) $dir = self::$moduleLocations[count(self::$moduleLocations) - 1];
 
@@ -386,7 +391,7 @@ class ModuleManager {
 		// get the base module, as defined by the "class" option in the the
 		// config file
 		if (!$config->class) {
-			throw new IllegalStateException();
+			return false;
 		}
 		$baseModule = self::getModule($config->class);
 		// use the base module to generate the default class
@@ -466,9 +471,45 @@ class ModuleLocation extends Location {
 
 		parent::__construct(
 			$path,
-			$dir->url !== null ? "$dir->url$moduleName/" : null,
+			$path !== null && $dir->url !== null ? "$dir->url$moduleName/" : null,
 			"$dir->namespace$moduleName\\"
 		);
+	}
+
+	/**
+	 * Finds the module's config file path. The directory parents are not
+	 * searched by this method.
+	 * @return string The path of the found config file, or NULL if no config
+	 * file is found in this location.
+	 */
+	public function searchConfigFile() {
+		if ($this->isActual()) {
+			if (file_exists($file = "$this->path$this->moduleName.yml")
+					|| file_exists($file = "{$this->path}config.yml")) {
+
+				return $file;
+			} else {
+				return null;
+			}
+		} else if (file_exists($file = "{$this->directory->path}$this->moduleName.yml")) {
+			return $file;
+		} else {
+			return false;
+		}
+//		if (($hasDir = is_dir($path = "$this->path$moduleName"))) {
+//			$path .= DS;
+//			if (file_exists($file = "$path$moduleName.yml")
+//					|| file_exists($file = "{$path}config.yml")) {
+//
+//				return $file;
+//			} else {
+//				return null;
+//			}
+//		} else if (file_exists($file = "$this->path$moduleName.yml")) {
+//			return $file;
+//		} else {
+//			return false;
+//		}
 	}
 
 	/**
@@ -479,6 +520,35 @@ class ModuleLocation extends Location {
 	 */
 	public function isActual() {
 		return $this->path !== null;
+	}
+	
+	/**
+	 * Gets the ModuleLocations of this location's module, starting from this
+	 * locations and including only location in which a directory for this
+	 * module exists.
+	 * @return array[ModuleLocation]
+	 */
+	public function getActualLocations($includeSelf = true) {
+		
+		if ($this->actualLocations !== null) return $this->actualLocations;
+
+		$this->actualLocations = array();
+
+		// if _this_ is an actual location
+		if ($includeSelf && $this->path !== null) {
+			$this->actualLocations[] = $this;
+		}
+
+		// search parents
+		$dir = $this->directory->parent;
+		while ($dir) {
+			if (is_dir($path = "$dir->path$this->moduleName")) {
+				$this->actualLocations[] = new ModuleLocation($dir, $this->moduleName, $path . DS);
+			}
+			$dir = $dir->parent;
+		}
+
+		return $this->actualLocations;
 	}
 
 	/**
@@ -507,35 +577,6 @@ class ModuleLocation extends Location {
 		}
 
 		return null;
-	}
-	
-	/**
-	 * Gets the ModuleLocations of this location's module, starting from this
-	 * locations and including only location in which a directory for this
-	 * module exists.
-	 * @return array[ModuleLocation]
-	 */
-	public function getActualLocations($includeSelf = true) {
-		
-		if ($this->actualLocations !== null) return $this->actualLocations;
-
-		$this->actualLocations = array();
-
-		// if _this_ is an actual location
-		if ($includeSelf && $this->path !== null) {
-			$this->actualLocations[] = $this;
-		}
-
-		// search parents
-		$dir = $this->directory->parent;
-		while ($dir) {
-			if (is_dir($path = "$dir->path$this->moduleName")) {
-				$this->actualLocations[] = new ModuleLocation($dir, $this->moduleName, $path);
-			}
-			$dir = $dir->parent;
-		}
-
-		return $this->actualLocations;
 	}
 
 	public function searchModuleSuperclass() {
@@ -574,32 +615,32 @@ class ModulesDirectory extends Location {
 		return $ns === $this->namespace;
 	}
 
-	/**
-	 * Finds the config file path for the given $moduleName. The directory
-	 * parents are not searched by this method.
-	 * @param string $moduleName
-	 * @param bool &$hasDir  will be set to TRUE if the config file is found in
-	 * its own directory, else will be set to FALSE (i.e. if the config file is
-	 * found in the location's base path).
-	 * @return string  the path of the found config file, or NULL if no config
-	 * file for the passed $moduleName is found in this location.
-	 */
-	public function findConfigFile($moduleName, &$hasDir) {
-		if (($hasDir = is_dir($path = "$this->path$moduleName"))) {
-			$path .= DS;
-			if (file_exists($file = "$path$moduleName.yml")
-					|| file_exists($file = "{$path}config.yml")) {
-
-				return $file;
-			} else {
-				return null;
-			}
-		} else if (file_exists($file = "$this->path$moduleName.yml")) {
-			return $file;
-		} else {
-			return false;
-		}
-	}
+//	/**
+//	 * Finds the config file path for the given $moduleName. The directory
+//	 * parents are not searched by this method.
+//	 * @param string $moduleName
+//	 * @param bool &$hasDir  will be set to TRUE if the config file is found in
+//	 * its own directory, else will be set to FALSE (i.e. if the config file is
+//	 * found in the location's base path).
+//	 * @return string  the path of the found config file, or NULL if no config
+//	 * file for the passed $moduleName is found in this location.
+//	 */
+//	public function findConfigFile($moduleName, &$hasDir) {
+//		if (($hasDir = is_dir($path = "$this->path$moduleName"))) {
+//			$path .= DS;
+//			if (file_exists($file = "$path$moduleName.yml")
+//					|| file_exists($file = "{$path}config.yml")) {
+//
+//				return $file;
+//			} else {
+//				return null;
+//			}
+//		} else if (file_exists($file = "$this->path$moduleName.yml")) {
+//			return $file;
+//		} else {
+//			return false;
+//		}
+//	}
 
 	public function getLineagePathsUrl($names) {
 		$pathsUrl = array();
