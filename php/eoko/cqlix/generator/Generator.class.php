@@ -6,7 +6,6 @@ use eoko\database\Query;
 use eoko\database\ConnectionManager;
 use eoko\template\Template;
 use eoko\plugin\PluginManager;
-use eoko\config\Config;
 use eoko\config\ConfigManager;
 
 use PDO;
