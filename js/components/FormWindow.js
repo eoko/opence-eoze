@@ -74,7 +74,7 @@ eo.Window = Ext.extend(Ext.Window, {
 			var el = win.el,
 				x = el.getX(),
 				y = el.getY(),
-				h = 8, v = 6, d = .2;
+				h = 8, v = 6, d = .085;
 
 			el.stopFx();
 
@@ -108,7 +108,7 @@ eo.Window = Ext.extend(Ext.Window, {
 			});
 
 			if (next()) win.el.frame(null, null, {
-				duration: 2*d
+				duration: 3*d
 			});
 		}
 		,onRootActivate = function() {
