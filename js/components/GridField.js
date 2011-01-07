@@ -481,7 +481,6 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 //
 //		return record;
 
-
 		var init = {};
 		Ext.iterate(json, function(k,v) {init[k]=null});
 //		var rec = new this.store.recordType(json);
@@ -493,7 +492,7 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 		// auto generated for the row by ext, which is important as the row
 		// id must uniquely identify the row for the grid selection model to
 		// work correctly
-		if (this.pkName && json[this.pkName] !== undefined) rec.id = json[this.pkName];
+		if (this.pkName && json[this.pkName]) rec.id = json[this.pkName];
 		return rec;
 	}
 
