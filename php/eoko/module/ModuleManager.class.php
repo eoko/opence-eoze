@@ -278,7 +278,7 @@ class ModuleManager {
 
 		if (!$location->isActual()) {
 			$namespace = "$dir->namespace$name\\";
-			return $this->createDefaultModule($config, $name, $namespace, $dir);
+			return $this->createDefaultModule($location, $config);
 		} else {
 
 			$module = null;
@@ -287,7 +287,7 @@ class ModuleManager {
 			}
 
 			// try to create the module from the config file information
-			if ($config && ($m = $this->createDefaultModule($config, $name, $location->namespace, $dir))) {
+			if ($config && ($m = $this->createDefaultModule($location, $config))) {
 				return $m;
 			}
 
@@ -386,22 +386,19 @@ class ModuleManager {
 	 * Generates a default module class and instanciates it, according to its
 	 * configuration file "class" item.
 	 */
-	public function createDefaultModule($config, $name, $namespace, ModulesDirectory $dir = null) {
-//	public function createDefaultModule($config, $name, $namespace, ModulesDirectory $dir = null) {
-
-		if ($dir === null) $dir = self::$moduleLocations[count(self::$moduleLocations) - 1];
+	public function createDefaultModule(ModuleLocation $location, $config) {
 
 		$config = Config::create($config);
-		if (isset($config[$name])) $config = $config->node($name, true);
+		if (isset($config[$location->moduleName])) $config = $config->node($location->moduleName, true);
 
 		if (!isset($config['class'])) {
 			// this is a base module, in the vertical hierarchy (direct descendant
-			// of Module)
+			// of Module) -- it cannot be created from config, let's return false
+			// to let the ModuleManager find and instanciate the module class
 			return false;
 		}
 
-		if (substr($namespace, -1) !== '\\') $namespace .= '\\';
-		$class = $namespace . $name;
+		$class = $location->namespace . $location->moduleName;
 
 		// Generate the module class, if needed
 		if (!class_exists($class)) {
@@ -411,10 +408,8 @@ class ModuleManager {
 		}
 		
 		// create an instance of the newly created class
-		$module = new $class(new ModuleLocation($dir, $name));
-
+		$module = new $class($location);
 		$module->setConfig($config);
-
 		return $module;
 	}
 	
