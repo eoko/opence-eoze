@@ -1,5 +1,7 @@
 <?php
 
+use eoko\config\Config;
+
 /**
  * Handle internal operations for controllers. This class mainly exists to
  * separate actual controller, of which every public method must represent

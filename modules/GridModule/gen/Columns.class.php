@@ -2,7 +2,7 @@
 
 namespace eoko\modules\GridModule\gen;
 
-use \Config;
+use eoko\config\Config;
 use \ConfigInheritor;
 use \ModelColumn;
 use \ModelTable;

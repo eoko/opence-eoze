@@ -3,7 +3,7 @@
 namespace eoko\modules\GridModule\gen;
 
 use \ModelTable;
-use \Config;
+use eoko\config\Config;
 
 use eoko\module\ModuleManager;
 
@@ -34,8 +34,12 @@ abstract class GeneratorBase {
 	protected function loadParentConfig() {
 		$config = ModuleManager::getModule($this->config->class)->getConfig();
 		if (isset($config['class'])) {
-			$parentConfig = clone ModuleManager::getModule($config['class'])->getConfig();
-			$config = $parentConfig->apply($config, false);
+			if ($config['class'] === null) {
+				throw new \InvalidConfigurationException($file, $nodePath, $debugMessage, $message, $previous);
+			} else {
+				$parentConfig = clone ModuleManager::getModule($config['class'])->getConfig();
+				$config = $parentConfig->apply($config, false);
+			}
 		}
 		return $config;
 	}

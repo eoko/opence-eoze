@@ -6,6 +6,7 @@ use eoko\template\Template;
 use eoko\file\FileType;
 use eoko\cqlix\EnumColumn;
 use eoko\util\Arrays;
+use eoko\config\Config;
 
 class LegacyGridModule {
 

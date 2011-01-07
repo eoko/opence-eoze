@@ -856,6 +856,7 @@ class Module implements file\Finder {
 				FileType::IMAGE    => 'images',
 				FileType::PNG      => 'images',
 				FileType::JPG      => 'images',
+				FileType::GIF      => 'images',
 			),
 			array(
 				'forbidUpwardResolution' => true,

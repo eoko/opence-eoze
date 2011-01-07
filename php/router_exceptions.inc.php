@@ -11,6 +11,8 @@ class OpenceException extends Exception {
 	private $debugMessage = null;
 	private $msg = null;
 
+	private $details = null;
+
 	/**
 	 *
 	 * @param String $debugMessage	technical details message; not meant to be
@@ -22,6 +24,15 @@ class OpenceException extends Exception {
 		$this->debugMessage = $debugMessage;
 		$this->msg = $message;
 //		parent::__construct($debugMessage, 1, $previous);
+	}
+
+	/**
+	 * @return OpenceException
+	 */
+	public static function create() {
+		$class = get_called_class();
+		$r = new ReflectionClass($class);
+		return $r->newInstanceArgs(func_get_args());
 	}
 
 	function hasUserMessage() {
@@ -57,6 +68,29 @@ class OpenceException extends Exception {
 		return get_class($this) . ' -- ' . $this->getDebugMessage() . PHP_EOL .
 				'## ' . $this->getFile() . ':' . $this->getLine() . PHP_EOL .
 				$this->getTraceAsString();
+	}
+
+	/**
+	 * @param string $details
+	 * @return OpenceException
+	 */
+	public function addDetails($details) {
+		if ($this->details === null) {
+			$this->details = $details;
+		} else if (is_array($this->details)) {
+			$this->details = array($this->details, $details);
+		} else {
+			$this->details[] = $details;
+		}
+		return $this;
+	}
+
+	/**
+	 * @param string $docRef Syntactically correct PHPDoc reference.
+	 * @return OpenceException
+	 */
+	public function addDocRef($docRef) {
+		return $this->addDetails('doc://' . $docRef);
 	}
 }
 

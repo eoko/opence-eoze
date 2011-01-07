@@ -6,6 +6,8 @@ use eoko\database\Query;
 use eoko\database\ConnectionManager;
 use eoko\template\Template;
 use eoko\plugin\PluginManager;
+use eoko\config\Config;
+use eoko\config\ConfigManager;
 
 use PDO;
 use ModelColumn;
@@ -14,7 +16,6 @@ use Logger, Debug;
 use Exception, SystemException, IllegalStateException, IllegalArgumentException, UnsupportedOperationException;
 use ConfigurationException;
 
-use eoko\config\ConfigManager;
 /**
  * Generates the data model information by reverse engineering the database
  *

@@ -1,5 +1,7 @@
 <?php
 
+use eoko\config\Config;
+
 class ConfigInheritor {
 
 	private static $instance = null;

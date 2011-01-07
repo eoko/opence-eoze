@@ -11,7 +11,7 @@ use eoko\file\FileType;
 
 use \UserSession;
 
-class html extends BasicHtmlExecutor {
+class Html extends BasicHtmlExecutor {
 	
 	protected function onCreateLayout(HtmlRootTemplate $layout) {
 		
@@ -21,6 +21,14 @@ class html extends BasicHtmlExecutor {
 
 		$this->pushLayoutExtraJs($layout);
 
+		$url = str_replace("'", "\\'", EOZE_BASE_URL . 'images/s.gif');
+		$js = <<<JS
+<script type="text/javascript">
+	if (!window.Oce) window.Oce = { ext: {} };
+	Oce.ext.BLANK_IMAGE_URL = '$url';
+</script>
+JS;
+		$layout->head->set('beforeJs', $js, false);
 		$layout->head->extra = $this->createTemplate('head_extra_script');
 	}
 

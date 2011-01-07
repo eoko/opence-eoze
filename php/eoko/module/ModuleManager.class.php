@@ -10,6 +10,11 @@ use eoko\php\generator\ClassGeneratorManager;
 use IllegalStateException;
 use Logger;
 
+/**
+ * Terminology:
+ *   - Module _line_: vertical inheritance (eg. r\m\GridModule => eoko\modules\GridModule, ...)
+ *   - Module _lineage_: horizontal inheritance (eg. r\m\Membres => r\m\GridModule, ...)
+ */
 class ModuleManager {
 
 	private static $moduleLocations = null;
@@ -19,7 +24,7 @@ class ModuleManager {
 
 	private static $moduleFactories = null;
 	
-	private $modules = null;
+	private static $modules = null;
 
 	private $getModuleNamespaceRegex;
 
@@ -187,11 +192,18 @@ class ModuleManager {
 	 * @return Module
 	 */
 	public static function getModule($name) {
-		if ($name instanceof Module) return $name;
-		return self::getInstance()->doGetModule($name);
+		if ($name instanceof Module) {
+			return $name;
+		} else if (isset(self::$modules[$name])) {
+			return self::$modules[$name];
+		} else {
+			return self::$modules[$name] = self::getInstance()->doGetModule($name);
+		}
 	}
 	
 	private function doGetModule($name) {
+
+		dump_mark(1);
 
 		if (strstr($name, '\\')) {
 			$ns = get_namespace($name, $relName);
@@ -200,11 +212,6 @@ class ModuleManager {
 			} catch (MissingModuleException $ex) {
 				throw new MissingModuleException($name, $ex);
 			}
-		}
-
-		// cache
-		if (isset($this->modules[$name])) {
-			return $this->modules[$name];
 		}
 
 		// try to delegate
@@ -218,7 +225,7 @@ class ModuleManager {
 		// ... or do the job
 		foreach (self::$moduleLocations as $location) {
 			if (($module = $this->tryGetModule($name, $location))) {
-				return $this->modules[$name] = $module;
+				return $module;
 			}
 		}
 
@@ -226,6 +233,8 @@ class ModuleManager {
 	}
 
 	private function getModuleInNamespace($name, $ns) {
+
+		throw new \Exception('DEPRECATED');
 			
 		Logger::get($this)->warn(
 			'GetModule used to retrieve absolute class: {}. This is wrong. '
@@ -233,16 +242,12 @@ class ModuleManager {
 			$name
 		);
 		
-		if (isset($this->modules[$name])) {
-			return $this->modules[$name];
-		}
-
 		foreach (self::$moduleLocations as $location) {
 			$location instanceof ModulesDirectory;
 			if ($location->testNamespace($ns)) {
 				$module = $this->tryGetModule($name, $location);
 				if ($module) {
-					return $this->modules[$name] = $module;
+					return $module;
 				}
 			}
 		}
@@ -263,18 +268,20 @@ class ModuleManager {
 	 * @return class
 	 */
 	private function tryGetModule($name, ModulesDirectory $dir) {
-		
-		$location = new ModuleLocation($dir, $name);
 
-		if (false === $config = $location->searchConfigFile()) {
-			return false;
-		}
+		$location = new ModuleLocation($dir, $name);
+		$config = $location->loadConfig();
+		
+//		if (false === $config = $location->searchConfigFile()) {
+//			return false;
+//		}
 
 		if (!$location->isActual()) {
 			$namespace = "$dir->namespace$name\\";
 			return $this->createDefaultModule($config, $name, $namespace, $dir);
 		} else {
 
+			$module = null;
 			if (null !== $class = $location->searchModuleClass()) {
 				$module = new $class($location);
 			}
@@ -284,13 +291,15 @@ class ModuleManager {
 				return $m;
 			}
 
-			// generate the module class in the namespace
-			$superclass = $location->searchModuleSuperclass();
-			if ($superclass === null) {
-				$superclass = __NAMESPACE__ . '\\Module';
+			if (!$module) {
+				// generate the module class in the namespace
+				$superclass = $location->searchModuleSuperclass();
+				if ($superclass === null) {
+					$superclass = __NAMESPACE__ . '\\Module';
+				}
+				class_extend($class = "$location->namespace$name", $superclass);
+				$module = new $class($location);
 			}
-			class_extend($class = "$location->namespace$name", $superclass);
-			$module = new $class($location);
 
 			// if the method has not returned yet, that means that the module
 			// has not been created from config: the config must be set!
@@ -385,17 +394,21 @@ class ModuleManager {
 		$config = Config::create($config);
 		if (isset($config[$name])) $config = $config->node($name, true);
 
+		if (!isset($config['class'])) {
+			// this is a base module, in the vertical hierarchy (direct descendant
+			// of Module)
+			return false;
+		}
+
 		if (substr($namespace, -1) !== '\\') $namespace .= '\\';
 		$class = $namespace . $name;
 
-		// get the base module, as defined by the "class" option in the the
-		// config file
-		if (!$config->class) {
-			return false;
+		// Generate the module class, if needed
+		if (!class_exists($class)) {
+			$baseModule = self::getModule($config->class);
+			// use the base module to generate the default class
+			$baseModule->generateDefaultModuleClass($class, $config);
 		}
-		$baseModule = self::getModule($config->class);
-		// use the base module to generate the default class
-		$baseModule->generateDefaultModuleClass($class, $config);
 		
 		// create an instance of the newly created class
 		$module = new $class(new ModuleLocation($dir, $name));
@@ -448,7 +461,7 @@ class ModuleLocation extends Location {
 	public $directory;
 
 	/** @var array[ModuleLocation] Cache for actual locations */
-	private $actualLocations = null;
+	private $actualLocations = null, $locations = null;
 
 	/**
 	 * Creates a new ModuleLocation. If no directory for the module exists in
@@ -496,20 +509,25 @@ class ModuleLocation extends Location {
 		} else {
 			return false;
 		}
-//		if (($hasDir = is_dir($path = "$this->path$moduleName"))) {
-//			$path .= DS;
-//			if (file_exists($file = "$path$moduleName.yml")
-//					|| file_exists($file = "{$path}config.yml")) {
-//
-//				return $file;
-//			} else {
-//				return null;
-//			}
-//		} else if (file_exists($file = "$this->path$moduleName.yml")) {
-//			return $file;
-//		} else {
-//			return false;
-//		}
+	}
+
+	/**
+	 * Load the config of all the module's {@link ModuleManager line}.
+	 */
+	public function loadConfig() {
+		$r = null;
+		foreach ($this->getLocations() as $location) {
+			$config = $location->searchConfigFile();
+			if ($config) {
+				$config = Config::create($config);
+				if ($r === null) {
+					$r = $config;
+				} else {
+					$r->apply($config, false);
+				}
+			}
+		}
+		return $r;
 	}
 
 	/**
@@ -530,12 +548,20 @@ class ModuleLocation extends Location {
 	 */
 	public function getActualLocations($includeSelf = true) {
 		
-		if ($this->actualLocations !== null) return $this->actualLocations;
+		if ($this->actualLocations !== null) {
+			if ($includeSelf || !$this->path !== null) {
+				return $this->actualLocations;
+			} else {
+				$r = $this->actualLocations;
+				array_unshift($r);
+				return $r;
+			}
+		}
 
 		$this->actualLocations = array();
 
 		// if _this_ is an actual location
-		if ($includeSelf && $this->path !== null) {
+		if ($this->path !== null) {
 			$this->actualLocations[] = $this;
 		}
 
@@ -548,7 +574,30 @@ class ModuleLocation extends Location {
 			$dir = $dir->parent;
 		}
 
-		return $this->actualLocations;
+		return $this->getActualLocations($includeSelf);
+	}
+
+	public function getLocations($includeSelf = true) {
+
+		if ($this->locations !== null) {
+			if ($includeSelf) {
+				return $this->locations;
+			} else {
+				$r = $this->locations;
+				array_unshift($r);
+				return $r;
+			}
+		}
+
+		$this->locations = array($this);
+
+		$dir = $this->directory->parent;
+		while ($dir) {
+			$this->locations[] = new ModuleLocation($dir, $this->moduleName);
+			$dir = $dir->parent;
+		}
+
+		return $this->locations;
 	}
 
 	/**
