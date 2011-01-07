@@ -449,6 +449,15 @@ Oce.GridModule = Ext.extend(Ext.Panel, {
 
 	,addRecord: function(callback, loadModelData, initValues) {
 		var win = this.createAddWindow(callback);
+		
+		//
+		this.activeAddWindows[win.getId()] = win;
+
+		win.on('destroy', function(){
+			delete this.activeAddWindows[win.getId()]
+		}.createDelegate(this))
+
+		//
 		if (loadModelData) win.loadModelData = true;
 
 		if (initValues) {
@@ -1115,11 +1124,11 @@ Oce.GridModule = Ext.extend(Ext.Panel, {
 			this.saveNew.call(this, win, callback, win.loadModelData);
 		}, this.addWindowToolbarAddExtra.createDelegate(this));
 
-		this.activeAddWindows[win.getId()] = win;
-
-		win.on('destroy', function(){
-			delete this.activeAddWindows[win.getId()]
-		}.createDelegate(this))
+//		this.activeAddWindows[win.getId()] = win;
+//
+//		win.on('destroy', function(){
+//			delete this.activeAddWindows[win.getId()]
+//		}.createDelegate(this))
 
 		return win;
 	}
