@@ -17,7 +17,7 @@ use Logger;
  */
 class ModuleManager {
 
-	private static $moduleLocations = null;
+	private static $modulesDirectories = null;
 	private static $infoLocked = false;
 	
 	private static $instance = null;
@@ -39,8 +39,16 @@ class ModuleManager {
 		
 		$this->loadConfig();
 		
-		self::$moduleLocations = array_reverse(self::$moduleLocations, true);
+		self::$modulesDirectories = array_reverse(self::$modulesDirectories, true);
 		self::$infoLocked = true;
+	}
+
+	/**
+	 * Returns the first ModulesDirectory from the registered ones list.
+	 * @return ModulesDirectory
+	 */
+	public static function getTopLevelDirectory() {
+		return self::$modulesDirectories[count(self::$modulesDirectories) - 1];
 	}
 
 	private function loadConfig() {
@@ -68,8 +76,8 @@ class ModuleManager {
 				'All module locations must be added before the first use of ModuleManager'
 			);
 		}
-		$parent = self::$moduleLocations === null ? null : self::$moduleLocations[count(self::$moduleLocations) - 1];
-		self::$moduleLocations[] = new ModulesDirectory($basePath, $baseUrl, $namespace, $parent);
+		$parent = self::$modulesDirectories === null ? null : self::$modulesDirectories[count(self::$modulesDirectories) - 1];
+		self::$modulesDirectories[] = new ModulesDirectory($basePath, $baseUrl, $namespace, $parent);
 	}
 
 	private function testGetModuleNamespace($classOrNamespace) {
@@ -93,7 +101,7 @@ class ModuleManager {
 			return true;
 		}
 
-		foreach (self::$moduleLocations as $location) {
+		foreach (self::$modulesDirectories as $location) {
 			$location instanceof ModulesDirectory;
 			if ($location->testNamespace($class)) {
 
@@ -114,7 +122,7 @@ class ModuleManager {
 	 */
 	private static function getModulesLocations() {
 		self::getInstance();
-		return self::$moduleLocations;
+		return self::$modulesDirectories;
 	}
 
 	public static function registerModuleFactory(ModuleFactory $factory) {
@@ -223,7 +231,7 @@ class ModuleManager {
 		}
 
 		// ... or do the job
-		foreach (self::$moduleLocations as $location) {
+		foreach (self::$modulesDirectories as $location) {
 			if (($module = $this->tryGetModule($name, $location))) {
 				return $module;
 			}
@@ -242,7 +250,7 @@ class ModuleManager {
 			$name
 		);
 		
-		foreach (self::$moduleLocations as $location) {
+		foreach (self::$modulesDirectories as $location) {
 			$location instanceof ModulesDirectory;
 			if ($location->testNamespace($ns)) {
 				$module = $this->tryGetModule($name, $location);
