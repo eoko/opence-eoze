@@ -306,82 +306,8 @@ class ModuleManager {
 			$module->setConfig($config);
 			return $module;
 		}
-//REM
-//			// REM...
-//
-//			$path = $dir->path . $name . DS;
-//			$url = "$dir->url$name/";
-//
-//			foreach (array("$name.class.php", 'module.class.php', "{$name}Module.class.php") as $file) {
-//				if (file_exists($file = "$path$file")) {
-//					require_once $file;
-//					foreach (array($name, 'module', "{$name}module") as $class) {
-//						$class = $namespace . $class;
-//						if (class_exists($class, false)) {
-//							$module = new $class($name, $path, $url, $dir);
-//							$module->setConfig($config);
-//							return $module;
-//						}
-//					}
-//					throw new InvalidModuleException($name, 'cannot find module class');
-//				}
-//			}
-//
-//			dumpl(func_get_args());
-//			dumpl($config);
-//
-//			// If there is a config file, it will give us the information needed
-//			// to create the Module class.
-//			if ($config) {
-//				return $this->createDefaultModule($config, $name, $path, $namespace, $url, $dir);
-//
-//			// If there isn't one, that may be the case of a Module having a
-//			// folder overriding some parts of its parent module (ie. vertical
-//			// inheritance instead of horizontal one). We must find the parent
-//			// class of the module.
-//			} else {
-////			} else if ($inLocation->parent && (false !== $class = $this->tryGetModule($name, $inLocation->parent, $baseLocation))) {
-////				// TODO there's a problem here, when a module override a parent
-////				// module without declaring the module class itself
-////				// (eg. espanki\modules\root extends eoko\modules\root),
-////				// the intermediate module should be correctly generated. This is
-////				// not the case... (see bellow, a tentative on solving this issue --
-////				// not the time to make it work right now :/ )
-////				return $this->tryGetModule($name, $inLocation, $baseLocation);
-////				// TODO this is not very logical that the base module is instanciated
-////				// instead of being simply extended...
-////				$c = class_extend($newClass = "$namespace$name", get_class($class));
-////				$c = new $newClass($name, $path, $url, $baseLocation);
-//
-//			// In last resort, we create an alias of the base Module for the
-//			// given module $name...
-////			} else {
-//				class_extend($class = "$namespace$name", __NAMESPACE__ . "\\Module");
-//				return new $class($name, $path, $url, $dir);
-//			}
-//		}
-//
-//		return false;
 	}
 
-
-//REM	private function findConfigFile($name, ModulesLocation $md, &$hasDir) {
-//		if (($hasDir = is_dir("$md->path$name"))) {
-//			$md->path = "$md->path$name" . DS;
-//			if (file_exists($file = "$md->path$name.yml")
-//					|| file_exists($file = "config.yml")) {
-//
-//				return $file;
-//			} else {
-//				return null;
-//			}
-//		} else if (file_exists($file = "$md->path$name.yml")) {
-//			return $file;
-//		} else {
-//			return false;
-//		}
-//	}
-	
 	/**
 	 * Generates a default module class and instanciates it, according to its
 	 * configuration file "class" item.
@@ -659,33 +585,6 @@ class ModulesDirectory extends Location {
 		return $ns === $this->namespace;
 	}
 
-//	/**
-//	 * Finds the config file path for the given $moduleName. The directory
-//	 * parents are not searched by this method.
-//	 * @param string $moduleName
-//	 * @param bool &$hasDir  will be set to TRUE if the config file is found in
-//	 * its own directory, else will be set to FALSE (i.e. if the config file is
-//	 * found in the location's base path).
-//	 * @return string  the path of the found config file, or NULL if no config
-//	 * file for the passed $moduleName is found in this location.
-//	 */
-//	public function findConfigFile($moduleName, &$hasDir) {
-//		if (($hasDir = is_dir($path = "$this->path$moduleName"))) {
-//			$path .= DS;
-//			if (file_exists($file = "$path$moduleName.yml")
-//					|| file_exists($file = "{$path}config.yml")) {
-//
-//				return $file;
-//			} else {
-//				return null;
-//			}
-//		} else if (file_exists($file = "$this->path$moduleName.yml")) {
-//			return $file;
-//		} else {
-//			return false;
-//		}
-//	}
-
 	public function getLineagePathsUrl($names) {
 		$pathsUrl = array();
 		foreach ($names as $name) {
@@ -717,12 +616,6 @@ class ModulesDirectory extends Location {
 		$locations = array();
 		if (file_exists($path = "$this->path$moduleName" . DS)) {
 			$locations[] = new ModuleLocation($this, $moduleName);
-//REM			$locations[] = new Location(
-//				$path,
-//				$this->url !== null ? "$this->url$moduleName/" : null,
-//				"$this->namespace$moduleName\\",
-//				$moduleName
-//			);
 		}
 		if ($this->parent) {
 			$locations = array_merge($locations, $this->parent->getLocations($moduleName));
