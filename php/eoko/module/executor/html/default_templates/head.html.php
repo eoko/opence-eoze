@@ -11,6 +11,8 @@
 <?php if (isset($css)) foreach ($css as $url): ?>
 	<link rel="stylesheet" type="text/css" href="<?php echo $url ?>" />
 <?php endforeach ?>
+
+<?php if (isset($beforeJs)) tabEcho(1, $beforeJs) ?>
 	
 <?php if (isset($js)) foreach ($js as $url): ?>
 	<script type="text/javascript" src="<?php echo $url ?>"></script>

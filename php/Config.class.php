@@ -19,6 +19,12 @@ class Config implements ArrayAccess, IteratorAggregate {
 	 * refer to the filename) represented by this object.
 	 */
 	public function __construct(&$value = array(), $nodeName = null, $configName = null) {
+
+		Logger::get($this)->warn('DEPRECATED: class \Config will be removed soon.'
+				. ' You should use \eoko\config\Config');
+
+//		dump_trace();
+
 		$this->configName = $configName;
 		$this->nodeName = $nodeName;
 		$this->value = self::extractQualifiedArray($value); // replace aaa.xxx by aaa = array(xxx);
@@ -75,7 +81,7 @@ class Config implements ArrayAccess, IteratorAggregate {
 
 	public static function createEmpty($nodeName = null, $configName = null) {
 		$array = array();
-		return new Config($array, $nodeName, $configName);
+		return new eoko\config\Config($array, $nodeName, $configName);
 	}
 
 	public function getNodeName() {
@@ -143,7 +149,7 @@ class Config implements ArrayAccess, IteratorAggregate {
 	}
 	
 	/**
-	 * return Config
+	 * return \eoko\config\Config
 	 */
 	public static function loadString($contentString, $node = null, $require = true, $filename = null) {
 		return self::fromArray(
@@ -153,11 +159,11 @@ class Config implements ArrayAccess, IteratorAggregate {
 	}
 
 	/**
-	 * return Config
+	 * return \eoko\config\Config
 	 */
 	public static function fromArray(array $values, $node = null, $require = true, $name = null) {
 
-		$config = new Config($values, null, $name);
+		$config = new \eoko\config\Config($values, null, $name);
 
 		try {
 			return $config->node($node, true);
@@ -178,7 +184,7 @@ class Config implements ArrayAccess, IteratorAggregate {
 	 * unmodified. If the argument is a string, it will first be tested if a
 	 * file with that name exists
 	 * @param mixed $config
-	 * @return Config
+	 * @return \eoko\config\Config
 	 */
 	public static function create($config, $opts = 7) {
 		if (is_string($config)) {
@@ -222,8 +228,26 @@ class Config implements ArrayAccess, IteratorAggregate {
 		else return $default;
 	}
 
+	/**
+	 * @param <type> $name
+	 * @return <type>
+	 *
+	 * @throws IllegalArgumentException if $name doesn't match an actual,
+	 * already set key in the config value array.
+	 *
+	 * Only Config values that actually exists can be accessed with the ->
+	 * operator. Keys existence should be tested with isset()
+	 * (eg. <code>isset($config['myKey'])</code>) before trying to access them.
+	 */
 	public function &__get($name) {
-		return $this->value[$name];
+
+		if (array_key_exists($name, $this->value)) {
+			return $this->value[$name];
+		} else {
+			$ex = new IllegalArgumentException('Invalid config key (not set): ' . $name);
+			$ex->addDocRef(get_class() . '::' . '__get()');
+			throw $ex;
+		}
 	}
 
 	public function __set($name, $value) {
@@ -295,7 +319,7 @@ class Config implements ArrayAccess, IteratorAggregate {
 
 		if (count($pathElt) == 1) {
 			if (isset($this->value[$path])) {
-				return new Config($this->value[$path], $path, $this->configName);
+				return new eoko\config\Config($this->value[$path], $path, $this->configName);
 			} else if ($require) {
 				MissingConfigurationException::throwFrom($this,
 						"Cannot resolve path: $path");

@@ -162,11 +162,19 @@ function class_extend($newClassName, $baseClassName, $namespace = null, $execute
 		$code = "class $newClassName extends $baseClassName {}";
 	}
 
-	if ($execute) eval($code);
+	if ($execute) {
+		if (false === eval($code)) {
+		 dump_trace();
+			throw new IllegalStateException('class_extend code failed: ' . $code);
+		}
+	}
 
 	return $code;
 }
 
+/**
+ * @internal rx: ??? what is that??
+ */
 function bcabs($n) {
 	if (substr($n, 0, 1) === '-') return substr($n, 1);
 	else return $n;

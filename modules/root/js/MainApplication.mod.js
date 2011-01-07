@@ -466,7 +466,7 @@ Oce.deps.wait('Oce.GridModule.YearCombo', function() {
 //					Oce.cmd('Oce.Modules.facturations.facturations', 'addRecord')();
 //					Oce.cmd('Oce.Modules.tickets_cinema.tickets_cinema', 'open')();
 //					Oce.cmd('Oce.Modules.SMManager.SMManager#editRowById(15)')()
-					Oce.cmd('Oce.Modules.sm_child_47.sm_child_47', 'open')();
+//					Oce.cmd('Oce.Modules.sm_child_47.sm_child_47', 'open')();
 //					Oce.cmd('Oce.Modules.SMManager.SMManager', 'open')();
 //					Oce.cmd('Oce.Modules.SMManager.SMManager#addRecord')();
 //					Oce.mx.application.open('Oce.Modules.backups.backups');
