@@ -33,7 +33,7 @@ NS.Model = eo.Object.create({
 					//fields[field.alias] = field;
 					aliasLookup[field.alias] = field;
 				}
-			})
+			}, this);
 		}
 
 		Ext.apply(this, config);
@@ -293,19 +293,39 @@ NS.ModelField = eo.Object.create({
 		return this.primaryKey;
 	}
 
+	/**
+	 * protected
+	 * Converts the given value to the natural internal representation for this
+	 * type of field.
+	 */
 	,extractValue: function(value) {
 		return value;
 	}
 
+	/**
+	 * protected
+	 * Converts the given value to the natural representation for the end user
+	 * for this type of field. The passed value is expected to be in the
+	 * internal (ie. storage) type for this kind of field.
+	 */
 	,extractDisplayValue: function(value) {
 		return this.extractValue(value);
 	}
 
-	,testValue: function(tested, value, strict) {
+	/**
+	 * protected
+	 * Tests whether the passed testedVar equals the passed value. The tested
+	 * variable type is expected to be in the internal (storage) type of this
+	 * field, while the value passed for comparison is expected to be in the
+	 * working type for this field (ie. the type used between the coder and the
+	 * code -- eg. for an enum, the internal type would most often be an integer,
+	 * while the working type would be a string representing the constant code).
+	 */
+	,testValue: function(testedVar, value, strict) {
 		if (strict) {
-			return tested === value;
+			return testedVar === value;
 		} else {
-			return tested == value;
+			return testedVar == value;
 		}
 	}
 
@@ -336,7 +356,7 @@ NS.ModelField = eo.Object.create({
 			return this.createReadOnlyField(config);
 
 		}
-		
+
 		return this.doCreateField.call(this, config);
 	} // createField
 

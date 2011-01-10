@@ -191,6 +191,7 @@ MyModule2.greats();
 */
 
 (function() {
+
 Ext.ns('eo.Object');
 
 var NS = eo.Object;
@@ -202,7 +203,7 @@ var NS = eo.Object;
  * @param {Object} members
  * @return the constructor of the new Object
  */
-NS.create = function(members) {
+eo.Class = NS.create = function(members) {
 	if (members.constructor === Object) members.constructor = function() {};
 	var constructor = members.constructor;
 	constructor.prototype = members;
@@ -338,4 +339,21 @@ eo.extendMultiple = function() {
 		r = Ext.extend(r, arguments[i]);
 	}
 	return r;
+}
+
+/**
+ * Makes the specified methods of the given class static, by copying them from
+ * the class' prototype to the class Function itself.
+ * @param {Function} clazz	constructor of the class
+ * @param {Array|String}	members
+ * @return {Function}		the class constructor
+ */
+eo.makeStatic = function(clazz, members) {
+	var run = function(method) {
+		clazz[method] = clazz.prototype[method];
+	};
+	if (Ext.isArray(members)) Ext.each(members, run);
+	else if (Ext.isString(members)) run(members);
+	else throw new Error("Invalid argument: must be Array or String");
+	return clazz;
 }
