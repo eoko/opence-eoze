@@ -1608,7 +1608,7 @@ Oce.GridModule = Ext.extend(Ext.Panel, {
 			if (!this.primaryKeyName) this.primaryKeyName = 'id';
 
 			this.buildGridColumnsConfig();
-			this.buildFormsConfiguration();
+			this.buildFormsConfig();
 
 			// --- Store ---
 
