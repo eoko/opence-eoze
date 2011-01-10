@@ -1362,7 +1362,7 @@ Oce.GridModule = Ext.extend(Ext.Panel, {
 		}
 	}
 
-	,buildFormsConfiguration: function() {
+	,buildFormsConfig: function() {
 
 		var defaults = this.getGridColumnDefaults();
 
