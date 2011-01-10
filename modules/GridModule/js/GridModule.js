@@ -752,13 +752,14 @@ Oce.GridModule = Ext.extend(Ext.Panel, {
 				if (win.forceClose) win.forceClose();
 				else win.close();
 			}
-			,save: function() {
-				saveFn.call(me, handlers.win);
+			,save: function(onSuccess) {
+				saveFn.call(me, handlers.win, onSuccess);
 			}
 			,onFormPanelCreated: function(fn) {
 				formPanelCreationListeners.push(fn);
 			}
 			,notifyFormPanelCreation: function(formPanel) {
+				formPanel.save = handlers.save;
 				Ext.each(formPanelCreationListeners, function(l) {
 					l(formPanel);
 				});
@@ -857,16 +858,38 @@ Oce.GridModule = Ext.extend(Ext.Panel, {
 				}
 				,beforerefresh: function(win) {
 					if (win.formPanel.isModified()) {
-						Ext.MessageBox.confirm(
-							"Confirmer le rechargement",
-							"Cette fenêtre comporte des modifications qui n'ont pas été "
-							+ "enregistrées. Si elle est rechargées maintenant, ces "
-							+ "modifications seront perdues. Vous-vous vraiment recharger "
-							+ "la fenêtre maintenant ?",
-							function(btn) {
-								if (btn === 'yes') win.refresh(true);
+//						Ext.MessageBox.confirm(
+//							"Confirmer le rechargement",
+//							"Cette fenêtre comporte des modifications qui n'ont pas été "
+//							+ "enregistrées. Si elle est rechargées maintenant, ces "
+//							+ "modifications seront perdues. Vous-vous vraiment recharger "
+//							+ "la fenêtre maintenant ?",
+//							function(btn) {
+//								if (btn === 'yes') win.refresh(true);
+//							}
+//						);
+						Ext.Msg.show({
+							// i18n
+							title: "Confirmer le rechargement"
+							,msg: "Cette fenêtre comporte des modifications qui n'ont pas été "
+								+ "enregistrées. Si elle est rechargée maintenant, ces "
+								+ "modifications seront perdues. Souhaitez-vous continuer "
+								+ "en abandonnant les modifications ?"
+							,buttons: {
+								yes: "Recharger"
+								,cancel: "Annuler"
 							}
-						);
+							,fn: function(btn) {
+								switch (btn) {
+									case 'yes':
+										win.refresh(true);
+										break;
+									case 'cancel':
+										break;
+								}
+							}
+						});
+
 						return false;
 					}
 					return true;
@@ -874,17 +897,43 @@ Oce.GridModule = Ext.extend(Ext.Panel, {
 				,beforeclose: function() {
 					if (win.forceClosing) return true;
 					if (win.formPanel.isModified()) {
-						win.forceClosing = true;
-						Ext.MessageBox.confirm(
-							"Confirmer la fermeture",
-							"Cette fenêtre comporte des modifications qui n'ont pas été "
-							+ "enregistrées. Voulez-vous vraiment la fermer et abandonner "
-							+ "ces modifications ?",
-							function(btn) {
-								if (btn === 'yes') win.close();
-								else win.forceClosing = false;
+						// i18n
+						Ext.Msg.show({
+							title: "Confirmer la fermeture"
+							,msg: "Cette fenêtre comporte des modifications qui n'ont pas été "
+								+ "enregistrées. Souhaitez-vous les enregistrer ?"
+							,buttons: {
+								yes: "Oui"
+								,no: "Non"
+								,cancel: "Annuler"
 							}
-						);
+							,fn: function(btn) {
+								switch (btn) {
+									case 'yes':
+										win.formPanel.save(function(){
+											win.forceClosing = true;
+											win.close();
+										});
+										break;
+									case 'no': 
+										win.forceClosing = true;
+										win.close();
+										break;
+									case 'cancel':
+										break;
+								}
+							}
+						});
+//						Ext.MessageBox.confirm(
+//							"Confirmer la fermeture",
+//							"Cette fenêtre comporte des modifications qui n'ont pas été "
+//							+ "enregistrées. Voulez-vous vraiment la fermer et abandonner "
+//							+ "ces modifications ?",
+//							function(btn) {
+//								if (btn === 'yes') win.close();
+//								else win.forceClosing = false;
+//							}
+//						);
 						return false;
 					}
 					return true;
@@ -1357,18 +1406,18 @@ Oce.GridModule = Ext.extend(Ext.Panel, {
 				this.gridColumns.push(col);
 			}
 
-//REM			// --- Grid Store
-//			this.storeColumns.push({name: col.name});
+			// --- Grid Store
+			this.storeColumns.push({name: col.name});
 		}
 	}
 
-	,buildStoreColumnsConfig: function() {
-		Ext.each(this.gridColumns, function(col) {
-			if (col.dataIndex) { // exclude plugin columns
-				this.storeColumns.push({name: col.dataIndex});
-			}
-		}, this);
-	}
+//	,buildStoreColumnsConfig: function() {
+//		Ext.each(this.gridColumns, function(col) {
+//			if (col.dataIndex) { // exclude plugin columns
+//				this.storeColumns.push({name: col.dataIndex});
+//			}
+//		}, this);
+//	}
 
 	,buildFormsConfig: function() {
 
@@ -1616,7 +1665,7 @@ Oce.GridModule = Ext.extend(Ext.Panel, {
 			if (!this.primaryKeyName) this.primaryKeyName = 'id';
 
 			this.buildGridColumnsConfig();
-			this.buildStoreColumnsConfig();
+//			this.buildStoreColumnsConfig();
 			this.buildFormsConfig();
 
 			// --- Store ---
