@@ -8,8 +8,8 @@ Oce.GridModule = Ext.extend(Ext.Panel, {
 			selectAllText: "Tout sélectionner"
 			,showAllColsText: "Toutes"
 			,tab: null
-			,addWinLayout: 'auto'
-			,editWinLayout: 'auto'
+//rem			,addWinLayout: 'auto'
+//			,editWinLayout: 'auto'
 		}, this.my || {})
 
 		Ext.apply(this, this.my);
@@ -25,7 +25,11 @@ Oce.GridModule = Ext.extend(Ext.Panel, {
 
 		this.model.initRelations(this.modelRelations);
 
-		this.initExtra();
+		// Init plugins
+		// Must be done before initActions, to give plugins the opportunity to
+		// add their own actions.
+		this.initPlugins();
+
 		this.initActions();
 		Ext.iterate(this.actions, function(name, action) {
 			Ext.applyIf(action, {
@@ -121,8 +125,11 @@ Oce.GridModule = Ext.extend(Ext.Panel, {
 		this.getHelpFactory().view(topic);
 	}
 
+	,initPlugins: function() {}
+
+	// TODO REM
 	,initExtra: function() {
-		
+		throw new Error('DEPRECATED');
 	}
 
 //	,activeAddWindows: {}
@@ -754,25 +761,6 @@ Oce.GridModule = Ext.extend(Ext.Panel, {
 
 	,createFormWindow: function(formConfig, winConfig, saveFn, toolbarAddExtraFn, tbarOpts) {
 
-//		var me = this
-//REM			,win
-//
-//			,reloadStore = this.reload.createDelegate(this)
-//
-//			// because the window will be undefined during its creation...
-//			// (must be wrapped in another fn)
-//			,closeWindow = function() {win.close()}.createDelegate(this)
-//
-//			,getWindowFn = function() {return win;}
-//
-//			,handlers = {
-//				reload: reloadStore
-//				,close: closeWindow
-//				,save: function() {
-//					saveFn.call(me, win);
-//				}
-//			}
-
 		var handlers = this.createFormWindowHandlers({
 			saveFn: saveFn
 		});
@@ -1112,9 +1100,9 @@ Oce.GridModule = Ext.extend(Ext.Panel, {
 	}
 
 	,createAddWindow: function(callback) {
-
-		var formConfig = {};
-		this.onConfigureAddFormPanel(Ext.apply(formConfig, this.my.addFormConfig));
+		
+		var formConfig = Ext.apply({}, this.getAddFormConfig());
+		this.onConfigureAddFormPanel(formConfig);
 
 		return this.createFormWindow(formConfig, {
 			 title: this.my.addWindowTitle || ("Ajouter : " + this.title) // i18n
@@ -1124,13 +1112,16 @@ Oce.GridModule = Ext.extend(Ext.Panel, {
 			this.saveNew.call(this, win, callback, win.loadModelData);
 		}, this.addWindowToolbarAddExtra.createDelegate(this));
 
-//		this.activeAddWindows[win.getId()] = win;
-//
-//		win.on('destroy', function(){
-//			delete this.activeAddWindows[win.getId()]
-//		}.createDelegate(this))
-
 		return win;
+	}
+
+	/**
+	 * protected method
+	 *
+	 * Gets the configuration for the add Oce.FormPanel.
+	 */
+	,getAddFormConfig: function() {
+		return this.my.addFormConfig;
 	}
 
 	,getVisibleColumnsNames: function() {
@@ -1298,6 +1289,8 @@ Oce.GridModule = Ext.extend(Ext.Panel, {
 								item = Ext.apply({}, item, itemitem);
 							}
 						}
+						// DEBUG INFO: dying here often means that the module
+						// actions have not been initialized correctly
 						if (item.depends && !me.hasDependance(item.depends)) return;
 						groupItems.push(item);
 					}
@@ -2705,6 +2698,6 @@ Oce.GridModule = Ext.extend(Ext.Panel, {
 		else this.actions = actions;
 	}
 
-})
+});
 
 Oce.deps.reg('Oce.GridModule');
