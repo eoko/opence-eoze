@@ -1357,9 +1357,17 @@ Oce.GridModule = Ext.extend(Ext.Panel, {
 				this.gridColumns.push(col);
 			}
 
-			// --- Grid Store
-			this.storeColumns.push({name: col.name});
+//REM			// --- Grid Store
+//			this.storeColumns.push({name: col.name});
 		}
+	}
+
+	,buildStoreColumnsConfig: function() {
+		Ext.each(this.gridColumns, function(col) {
+			if (col.dataIndex) { // exclude plugin columns
+				this.storeColumns.push({name: col.dataIndex});
+			}
+		}, this);
 	}
 
 	,buildFormsConfig: function() {
@@ -1608,6 +1616,7 @@ Oce.GridModule = Ext.extend(Ext.Panel, {
 			if (!this.primaryKeyName) this.primaryKeyName = 'id';
 
 			this.buildGridColumnsConfig();
+			this.buildStoreColumnsConfig();
 			this.buildFormsConfig();
 
 			// --- Store ---
