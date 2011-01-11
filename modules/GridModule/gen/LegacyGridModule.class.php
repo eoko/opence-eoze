@@ -150,10 +150,11 @@ class LegacyGridModule {
 		// --- Model Config ---
 		$tpl->modelConfig = self::createModelConfig($table);
 
+//		dump($config['extra']['modelRelations']);
 		if ($config->has('extra', 'modelRelations')) {
 			$extraModelConfigs = $config['extra']['modelRelations'];
-			if (!is_array($extraModelConfigs)) $extraModelConfigs = array($extraModelConfigs);
 			$extraModels = array();
+			if (!is_array($extraModelConfigs)) $extraModelConfigs = array($extraModelConfigs);
 //			if (Arrays::isAssoc($extraModelConfigs)) {
 //				foreach ($extraModelConfigs as $alias => $extraModel) {
 //					if (null !== $extraModelEnums = self::createModelConfig(ModelTable::getModelTable($extraModel), false)) {
@@ -162,15 +163,23 @@ class LegacyGridModule {
 //				}
 //			} else {
 				foreach ($extraModelConfigs as $extraModel) {
-					$modelTable = $table->getRelationInfo($extraModel)->getTargetTable();
-//					if (null !== $extraModelEnums = self::createModelConfig(ModelTable::getModelTable($extraModel), false)) {
-					if (null !== $extraModelEnums = self::createModelConfig($modelTable, false)) {
-						$extraModels[$extraModel] = $extraModelEnums;
+					if ($extraModel === '*') {
+						foreach ($table->getRelationsInfo() as $rel) {
+							$modelTable = $rel->getTargetTable();
+							if (null !== $extraModelEnums = self::createModelConfig($modelTable, false)) {
+								$extraModels[$rel->name] = $extraModelEnums;
+							}
+						}
+					} else {
+						$modelTable = $table->getRelationInfo($extraModel)->getTargetTable();
+	//					if (null !== $extraModelEnums = self::createModelConfig(ModelTable::getModelTable($extraModel), false)) {
+						if (null !== $extraModelEnums = self::createModelConfig($modelTable, false)) {
+							$extraModels[$extraModel] = $extraModelEnums;
+						}
 					}
 				}
 //			}
 			if ($extraModels) {
-//				dump($extraModels);
 				$tpl->extraModels = $extraModels = self::toJSTemplate($extraModels);
 			}
 		}
@@ -577,6 +586,9 @@ class LegacyGridModule {
 		$config = array();
 		foreach ($table->getColumns() as $column) {
 			$config['fields'][] = $column->createCqlixFieldConfig();
+		}
+		foreach ($table->getRelationsInfo() as $rel) {
+			$config['fields'][] = $rel->createCqlixFieldConfig();
 		}
 		if ($encode) {
 			$config = self::toJSTemplate($config);

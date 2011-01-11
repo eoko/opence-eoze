@@ -335,6 +335,46 @@ abstract class ModelRelationInfo implements ModelField {
 		return new ModelRelationInfoField($this, "$this->name->$name", $name);
 	}
 
+	/**
+	 * @return ModelColumn
+	 * @todo Finish implem
+	 */
+	public function getReferenceField() {
+		//throw new UnsupportedOperationException(get_class($this) . '->getReferenceField()');
+		Logger::get($this)->error('Unsupported operation: ' . get_class($this) . '->getReferenceField()');
+		return null;
+	}
+
+	/**
+	 * @todo Finish implem -- not possible right now: we need a controller
+	 * to autocreate the form field. Currently, controllers are user generated,
+	 * so we are out of luck ...
+	 */
+	public function createCqlixFieldConfig() {
+		// TODO
+		// for now, getReferenceField() will return null for unsupported
+		// relation types (ie indirect ones).
+		if (null === $referenceField = $this->getReferenceField()) {
+			return null;
+		}
+		$r = array(
+			'name' => $this->name,
+			'fieldType' => 'hasOne',
+			'type' => $this->getType(),
+			'allowNull' => $this->isNullable(),
+			'hasDefault' => $referenceField->hasDefault(),
+			'allowBlank' => $referenceField->isNullable() || $referenceField->hasDefault(),
+			'defaultValue' => $referenceField->getDefault(),
+// not relevant			'length' => $referenceField->length,
+			'primaryKey' => $referenceField->isPrimary(),
+		);
+
+		if (null !== $controller = $this->targetTable->getDefaultController()) {
+			$r['controller'] = $controller;
+		}
+
+		return $r;
+	}
 }
 
 class ModelRelationInfoField implements ModelField {
@@ -347,6 +387,7 @@ class ModelRelationInfoField implements ModelField {
 	public function __construct(ModelRelationInfo $info, $name, $fieldName) {
 		$this->info = $info;
 		$this->fieldName = $fieldName;
+		$this->name = $name;
 	}
 
 	public function orderClause($dir) {
@@ -430,6 +471,11 @@ abstract class ModelRelationInfoHasReference extends ModelRelationInfoByReferenc
 			$this->referenceField => $targetPkValue
 		));
 	}
+
+	public function getReferenceField() {
+		return $this->localTable->getColumn($this->referenceField);
+	}
+
 }
 
 class ModelRelationInfoReferencesOne extends ModelRelationInfoHasReference
@@ -523,6 +569,10 @@ class ModelRelationInfoIsRefered extends ModelRelationInfoByReference {
 				$srcId
 			)
 			->executeUpdate();
+	}
+
+	public function getReferenceField() {
+		return $this->targetTable->getColumn($this->referenceField);
 	}
 }
 

@@ -303,7 +303,7 @@ class ModelRelationReferencesOne extends ModelRelationHasReference
 				throw new UnsupportedOperationException('Cannot create model for overriden contexts');
 			}
 
-			$model = $this->targetTable->createModel(
+			$model = $this->targetTable->createNewModel(
 				null, false,
 				$context
 			);
@@ -363,7 +363,7 @@ class ModelRelationReferedByOne extends ModelRelationByReference
 		}
 
 		if ($model === null && $createIfNone) {
-			$model = $this->targetTable->createModel(
+			$model = $this->targetTable->createNewModel(
 				null, false,
 				$context
 			);
@@ -402,7 +402,7 @@ class ModelRelationReferedByOne extends ModelRelationByReference
 	}
 
 	public function setFromModel(Model $model) {
-		// TODO inspect why the next line was here (commented out to prevent
+		// TODO investigate why the next line was here (commented out to prevent
 		// a deadly warning "only variables should be assigned by reference")
 		// $cache =& $this->getAsModel();
 		$cache = $model;
@@ -410,7 +410,7 @@ class ModelRelationReferedByOne extends ModelRelationByReference
 
 	public function setFromId($id, $forceAcceptNull = false) {
 		if ($id !== null) {
-			// TODO inspect why the next line was here (commented out to prevent
+			// TODO investigate why the next line was here (commented out to prevent
 			// a deadly warning "only variables should be assigned by reference")
 			// $model =& $this->getAsModel();
 			$model = $this->targetTable->loadModel($id, $this->parentModel->context);
@@ -491,7 +491,7 @@ class ModelRelationReferedByOneOnMultipleFields extends ModelRelationReferedByOn
 		}
 
 		if ($model === null && $createIfNone) {
-			$model = $this->targetTable->createModel(
+			$model = $this->targetTable->createNewModel(
 				null, false,
 				$context
 			);
@@ -964,7 +964,7 @@ class ModelRelationIndirectHasOne extends ModelRelationHasOneByAssoc {
 
 		if ($assocModel === null) {
 			if ($createIfNone) {
-				$assocModel = $this->assocTable->createModel(
+				$assocModel = $this->assocTable->createNewModel(
 					null, // setters (empty model)
 					false, // strict
 					$context
@@ -1034,7 +1034,7 @@ class ModelRelationIndirectHasOne extends ModelRelationHasOneByAssoc {
 
 		if ($model === null) {
 			if ($createIfNone) {
-				return $model = $this->targetTable->createModel(
+				return $model = $this->targetTable->createNewModel(
 					null, false,
 					$context
 				);

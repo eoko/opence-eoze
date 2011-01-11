@@ -74,7 +74,7 @@ abstract class ModelTable extends ModelTableProxy {
 	public $renderers = null;
 
 	private $plugins = null;
-	
+
 	/**
 	 * Create a new ModelTable
 	 *
@@ -135,7 +135,7 @@ abstract class ModelTable extends ModelTableProxy {
 	 * is mandatory though, to allow subclasses to declare a static method with
 	 * the same name.
 	 *
-	 * @internal an abstract static method is quite a non-sense, maybe this
+	 * @internal an abstract static method is quite a nonsense, maybe this
 	 * declaration will not remain legal in future PHP versions...
 	 *
 	 * @param array $initValues an array containing values with which the
@@ -146,6 +146,17 @@ abstract class ModelTable extends ModelTableProxy {
 	 * @return Model
 	 */
 	abstract static function createModel($initValues = null, $strict = false, array $params = array());
+
+	/**
+	 *
+	 * @param array $initValues
+	 * @param <type> $strict
+	 * @param array $params
+	 * @return <type>
+	 */
+	protected function _createNewModel($initValues = null, $strict = false, array $params = array()) {
+		return $this->createModel($initValues, $strict, $params)->forceNew();
+	}
 
 	/**
 	 * Load a Model reccord from the database, selected by
@@ -221,6 +232,16 @@ abstract class ModelTable extends ModelTableProxy {
 	 * @return Query
 	 */
 	public abstract static function createQuery(array $params = array());
+
+	/**
+	 * Gets the default controller for CRUD operation on this table's model.
+	 * This information is used by UI generator (like cqlix form generator),
+	 * for example to create foreign combo fields.
+	 * @return string
+	 */
+	public static function getDefaultController() {
+		return null;
+	}
 
 	/**
 	 *

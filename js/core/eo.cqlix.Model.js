@@ -482,6 +482,22 @@ NS.DateTimeField = Ext.extend(NS.DateField, {
 	}
 });
 
+NS.RelationOneField = Ext.extend(NS.StringField, {
+	xtype: "oce.foreigncombo"
+	,doCreateField: function(config) {
+		if (!this.controller) {
+			throw new Error("Cannot create field without knowing the controller");
+		}
+		return Ext.apply({
+			column: this.name
+			,controller: this.controller
+			,autoComplete: this.autoCompleteParam || this.name
+			,editable: this.editable === true
+			,forceSelection: true
+		}, NS.RelationOneField.superclass.doCreateField.call(this, config));
+	}
+});
+
 NS.ModelField.constructors = {
 	field: NS.ModelField
 	,'int': NS.IntegerField
@@ -496,20 +512,22 @@ NS.ModelField.constructors = {
 	,'bool': NS.ModelField
 	,'float': NS.NumberField
 	,'decimal': NS.DecimalField
+	,'hasOne': NS.RelationOneField
 };
 
 NS.ModelField.create = function(config) {
 
+	var type = config.fieldType || config.type;
 	var constructor;
-	if (!config.type) {
+	if (!type) {
 		//throw new Error('Missing type in config');
 		constructor = NS.ModelField.constructors.field;
 	} else {
-		constructor = NS.ModelField.constructors[config.type];
+		constructor = NS.ModelField.constructors[type];
 	}
 
 	if (!constructor) {
-		throw new Error('Missing constructor for type: ' + (config.type || 'DEFAULT'));
+		throw new Error('Missing constructor for type: ' + (type || 'DEFAULT'));
 	}
 
 	return new constructor(config);

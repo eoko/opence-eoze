@@ -52,6 +52,7 @@ class TplTable implements ConfigConstants {
 	}
 	
 	private $configured = false;
+	private $config = null;
 
 	public function configure($config) {
 
@@ -61,14 +62,19 @@ class TplTable implements ConfigConstants {
 			$this->configured = true;
 		}
 
-//		if ($config !== null) {
 		$this->doConfigure($config);
-//		}
-
-		$this->mergeRelations();
 	}
 
+	public $defaultController = null;
+
 	private function doConfigure($config) {
+
+		$this->config = $config;
+
+		if (isset($config['defaultController'])) {
+			$this->defaultController = $config['defaultController'];
+		}
+
 		if ($config === null || !isset($config[self::CFG_COLUMNS])) {
 			foreach ($this->columns as $name => $field) {
 				$field->configure(null);
@@ -87,6 +93,20 @@ class TplTable implements ConfigConstants {
 	private function configureColumns($config) {
 		foreach ($config as $field => $config) {
 			$this->getField($field)->configure($config);
+		}
+	}
+
+	public function configureRelations() {
+
+		$this->mergeRelations();
+		
+		if (!$this->config) return;
+
+		$colConfig = $this->config[self::CFG_COLUMNS];
+		foreach ($this->directLocalRelations as $name => $relation) {
+			if (isset($colConfig[$relation->referenceField]['relation'])) {
+				$relation->configure($colConfig[$relation->referenceField]['relation']);
+			}
 		}
 	}
 
@@ -114,6 +134,7 @@ class TplTable implements ConfigConstants {
 	}
 
 	private function mergeRelations() {
+		$this->relations = array();
 		foreach ($this->directLocalRelations as $referenceField => $relation) {
 			$this->addRelation($relation);
 		}
@@ -197,4 +218,5 @@ class TplTable implements ConfigConstants {
 			);
 		}
 	}
+
 }

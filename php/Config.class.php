@@ -213,9 +213,9 @@ class Config implements ArrayAccess, IteratorAggregate {
 		if (func_num_args() > 1) {
 			$array =& $this->value;
 			foreach (func_get_args() as $key) {
+				if (!is_array($array) && !($array instanceof ArrayAccess)) return false;
 				if (!array_key_exists($key, $array)) return false;
 				$array =& $array[$key];
-				if (!is_array($array) && !($array instanceof ArrayAccess)) return false;
 			}
 			return true;
 		} else {

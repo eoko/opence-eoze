@@ -148,6 +148,8 @@ class Generator extends Script {
 
 		// --- Configuration ---------------------------------------------------
 
+		$this->configureRelations();
+
 //		$this->configureTables();
 
 		// --- Mark foreign keys ---
@@ -533,6 +535,12 @@ class Generator extends Script {
 		}
 	}
 
+	private function configureRelations() {
+		foreach ($this->tables as $table) {
+			$table->configureRelations();
+		}
+	}
+
 /**
 	 * @param array $fields
 	 * @return ModelColumn
@@ -651,6 +659,7 @@ class Generator extends Script {
 
 		$tpl->merge(array(
 //			'tableName' => $tableName,
+			'table' => $this->tables[$tableName],
 			'fields' => $fields,
 //			'modelName' => $modelName,
 			'className' => $className,

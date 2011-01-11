@@ -37,6 +37,12 @@ abstract class <?php echo $tableName ?>Base extends <?php echo $baseTableName ?>
 <?php endforeach ?>
 
 		);
+<?php foreach ($relations as $relation): ?>
+<?php if ($relation->onDeleteAction): ?>
+		<?php echo $relation->tplOnDeleteAction() ?>
+<?php endif ?>
+<?php endforeach ?>
+
 		parent::__construct($cols, $relations);
 	}
 
@@ -116,6 +122,12 @@ abstract class <?php echo $tableName ?>Base extends <?php echo $baseTableName ?>
 		return <?php echo $modelName ?>::create($initValues, $strict, $params);
 	}
 
+<?php if ($table->defaultController): ?>
+	public static function getDefaultController() {
+		return '<?php echo $table->defaultController ?>';
+	}
+
+<?php endif ?>
 	/**
 	 * @return Bool
 	 */
@@ -188,7 +200,7 @@ abstract class <?php echo $tableName ?>Base extends <?php echo $baseTableName ?>
 	 * This method always throws an UnsupportedOperationException because
 	 * <?php echo $dbTable ?> doesn't have a primary key.
 	 */
-	public static function loadModel($ignored) {
+	public static function loadModel($ignoredId, array $ignoredContext = array()) {
 		throw new UnsupportedOperationException('The model <?php echo $modelName ?> has no primary key');
 	}
 

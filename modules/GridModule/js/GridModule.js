@@ -1419,6 +1419,9 @@ Oce.GridModule = Ext.extend(Ext.Panel, {
 //		}, this);
 //	}
 
+	/**
+	 * Must call afterBuildFormsConfig()
+	 */
 	,buildFormsConfig: function() {
 
 		var defaults = this.getGridColumnDefaults();
@@ -1590,11 +1593,8 @@ Oce.GridModule = Ext.extend(Ext.Panel, {
 			}, this);
 		}
 
-		// --- Form configuration events
-		this.onFormItemsConfig(addConfig.fields);
-		this.onFormItemsConfig(editConfig.fields);
-		this.onAddFormItemsConfig(addConfig.fields);
-		this.onEditFormItemsConfig(editConfig.fields);
+		debugger
+		this.afterBuildFormsConfig(addConfig.fields, editConfig.fields);
 
 		// Edit & Add forms
 		var addTabFormItems = null, editTabFormItems = null;
@@ -1649,6 +1649,15 @@ Oce.GridModule = Ext.extend(Ext.Panel, {
 				,items: addConfig.fields
 			}
 		}
+	}
+
+	,afterBuildFormsConfig: function(addConfigFields, editConfigFields) {
+
+		// --- Form configuration events
+		this.onFormItemsConfig(addConfigFields);
+		this.onFormItemsConfig(editConfigFields);
+		this.onAddFormItemsConfig(addConfigFields);
+		this.onEditFormItemsConfig(editConfigFields);
 	}
 
 	,initConfiguration: function() {
