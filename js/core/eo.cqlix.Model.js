@@ -486,7 +486,11 @@ NS.RelationOneField = Ext.extend(NS.StringField, {
 	xtype: "oce.foreigncombo"
 	,doCreateField: function(config) {
 		if (!this.controller) {
-			throw new Error("Cannot create field without knowing the controller");
+			//throw new Error("Cannot create field without knowing the controller");
+			if (console && console.warn) {
+				console.warn("Cannot create field without knowing the controller for: " + this.name);
+			}
+			return null;
 		}
 		return Ext.apply({
 			column: this.name
@@ -497,6 +501,13 @@ NS.RelationOneField = Ext.extend(NS.StringField, {
 		}, NS.RelationOneField.superclass.doCreateField.call(this, config));
 	}
 });
+
+NS.RelationManyField = Ext.extend(NS.ModelField, {
+	xtype: "gridfield"
+	,doCreateField: function(config) {
+		
+	}
+})
 
 NS.ModelField.constructors = {
 	field: NS.ModelField
@@ -512,7 +523,9 @@ NS.ModelField.constructors = {
 	,'bool': NS.ModelField
 	,'float': NS.NumberField
 	,'decimal': NS.DecimalField
+	// Relations
 	,'hasOne': NS.RelationOneField
+	,'hasMany': NS.RelationManyField
 };
 
 NS.ModelField.create = function(config) {

@@ -341,7 +341,7 @@ abstract class ModelRelationInfo implements ModelField {
 	 */
 	public function getReferenceField() {
 		//throw new UnsupportedOperationException(get_class($this) . '->getReferenceField()');
-		Logger::get($this)->error('Unsupported operation: ' . get_class($this) . '->getReferenceField()');
+		Logger::get($this)->warn('Unsupported operation: ' . get_class($this) . '->getReferenceField()');
 		return null;
 	}
 
@@ -371,6 +371,12 @@ abstract class ModelRelationInfo implements ModelField {
 
 		if (null !== $controller = $this->targetTable->getDefaultController()) {
 			$r['controller'] = $controller;
+		}
+
+		foreach (array('label', 'internal') as $meta) {
+			if ($referenceField->meta->$meta !== null) {
+				$r[$meta] = $referenceField->meta->$meta;
+			}
 		}
 
 		return $r;
@@ -673,6 +679,10 @@ class ModelRelationInfoReferredByOneAssocMirror extends ModelRelationInfoReferre
 	protected function getJoinReferenceField() {
 		return new QueryJoinField_Multiple($this->referenceField);
 	}
+
+	public function getReferenceField() {
+		return $this->targetTable->getColumn($this->referenceField[0]);
+	}
 }
 
 /**
@@ -847,7 +857,7 @@ abstract class ModelRelationInfoByAssoc extends ModelRelationInfo {
 		ModelTableProxy $localTable, ModelTableProxy $targetTableProxy,
 		ModelTableProxy $assocTableProxy,
 		$localForeignKey, $otherForeignKey,
-		$reciproqueRelationName, $targetAssocName
+		$reciproqueRelationName = null, $targetAssocName = null
 	) {
 
 		parent::__construct($name, $localTable, $targetTableProxy);
@@ -889,6 +899,16 @@ abstract class ModelRelationInfoByAssoc extends ModelRelationInfo {
 	public function addJoinWhere(QueryJoin $join) {
 		$this->assocTable->addJoinWhere($join);
 		return $join;
+	}
+
+	public function getReferenceField() {
+		return $this->assocTable->getColumn($this->otherForeignKey);
+	}
+
+	public function createCqlixFieldConfig() {
+		$cfg = parent::createCqlixFieldConfig();
+		$cfg['fieldType'] = 'hasMany';
+		return $cfg;
 	}
 }
 

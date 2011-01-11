@@ -420,6 +420,7 @@ abstract class ModelTable extends ModelTableProxy {
 	const LOAD_NONE   = 0;
 	const LOAD_NAME   = 1;
 	const LOAD_ID     = 2;
+	const LOAD_FIELD  = 3;
 	const LOAD_FULL   = 3;
 
 	/**

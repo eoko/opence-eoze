@@ -1407,7 +1407,7 @@ Oce.GridModule = Ext.extend(Ext.Panel, {
 			}
 
 			// --- Grid Store
-			this.storeColumns.push({name: col.name});
+			this.storeColumns.push({name: col.dataIndex || col.name});
 		}
 	}
 
@@ -1593,7 +1593,6 @@ Oce.GridModule = Ext.extend(Ext.Panel, {
 			}, this);
 		}
 
-		debugger
 		this.afterBuildFormsConfig(addConfig.fields, editConfig.fields);
 
 		// Edit & Add forms

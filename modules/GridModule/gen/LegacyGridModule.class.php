@@ -588,7 +588,9 @@ class LegacyGridModule {
 			$config['fields'][] = $column->createCqlixFieldConfig();
 		}
 		foreach ($table->getRelationsInfo() as $rel) {
-			$config['fields'][] = $rel->createCqlixFieldConfig();
+			if (null !== $cfg = $rel->createCqlixFieldConfig()) {
+				$config['fields'][] = $cfg;
+			}
 		}
 		if ($encode) {
 			$config = self::toJSTemplate($config);
