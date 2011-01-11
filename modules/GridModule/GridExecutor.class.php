@@ -20,6 +20,7 @@ use ExceptionHandler;
 use UserSession;
 
 use Exception;
+use UserException;
 use IllegalStateException, UnsupportedActionException, SystemException;
 use ModelSaveException;
 
@@ -445,6 +446,15 @@ abstract class GridExecutor extends JsonExecutor {
 		$result = $query->andWhere("$idField = ?", $id)->executeSelectFirst();
 
 		$model = $this->table->loadModel($id, $this->load_one_createContext());
+
+		if ($model === null) {
+			$msg = <<<'MSG'
+L'enregistrement sélectioné n'existe pas dans la base de donnée. Ceci signifie
+probablement qu'il vient d'être effacé par un autre utilisateur. Utilisez le
+bouton "Rafraichir" pour mettre à jour l'affichage.
+MSG;
+			throw new UserException($msg, 'Enregistrement inexistant'); // i18n
+		}
 
 		$this->generateLoadFormPages($model);
 
