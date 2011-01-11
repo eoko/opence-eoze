@@ -107,11 +107,12 @@ abstract class GridExecutor extends JsonExecutor {
 			return false;
 		}
 
-		//dump($setters);
+//		dump($setters);
 
-		$model = $this->table->createModel(
+		$model = $this->table->createNewModel(
 			$setters
 			,false
+			// TODO eoze cleanout (rhodia leftover)
 			,array(
 				'year' => $this->request->get('year', null)
 			)

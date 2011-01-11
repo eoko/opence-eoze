@@ -37,6 +37,8 @@ abstract class TplRelation {
 
 	public $reciproqueName;
 
+	public $onDeleteAction = null;
+
 	function __construct($alias, $localTableName, $targetTableName, $reciproque) {
 		$this->alias = $alias;
 		$this->localDBTableName = $localTableName;
@@ -182,7 +184,19 @@ new <?php echo $this->getClass() ?>(<?php echo $head ? $rTabs : '' ?>
 	}
 
 	public function configure($config) {
-		
+		if (isset($config['onDelete'])) {
+			$this->onDeleteAction = $config['onDelete'];
+		}
+	}
+
+	public function tplOnDeleteAction() {
+		switch ($this->onDeleteAction) {
+			case 'DELETE':
+			case 'SET_NULL':
+				echo <<<PHP
+\$relations['{$this->getName()}']->onDeleteAction = ModelRelationInfoHasReference::ODA_$this->onDeleteAction;
+PHP;
+		}
 	}
 
 }

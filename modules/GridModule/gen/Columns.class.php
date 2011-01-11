@@ -121,7 +121,7 @@ class Columns {
 
 		foreach ($this->columnsConfig as $name => $colConfig) {
 
-			if ($name === 'password2') dump_mark();
+			//if ($name === 'password2') dump_mark();
 
 			if (isset($this->columns[$name]))
 				throw new IllegalStateException("Cannot redefine column $name");

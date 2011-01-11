@@ -211,7 +211,7 @@ class ModuleManager {
 	
 	private function doGetModule($name) {
 
-		dump_mark(1);
+		//dump_mark(1);
 
 		if (strstr($name, '\\')) {
 			$ns = get_namespace($name, $relName);

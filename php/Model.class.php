@@ -52,6 +52,14 @@ abstract class Model {
 
 	protected $initiated = false;
 
+	/**
+	 * @var boolean If set to TRUE, the model will be considered new even if the
+	 * primary key is set. This is needed for model that have a primary key that
+	 * is also used as data, since the primary key field can be set by the user.
+	 * The value of $forceNew is cleared each time the model is saved.
+	 */
+	private $forceNew = null;
+
 	protected $determinationMultifieldListeners = null;
 	protected $determinationListeners = null;
 	protected $undeterminedFields = array();
@@ -352,8 +360,11 @@ abstract class Model {
 			if ($value === null) {
 				if (!$col->isNullable()) {
 					if (!($col->isPrimary() && $this->isNew()) && !$col->hasDefault() && !$col->isAuto($operation)) {
-						if ($return) return false;
-						else throw new SystemException("{$this->getModelName()}.$col->name must be set");
+						if ($return) {
+							return false;
+						} else {
+							throw new SystemException("{$this->getModelName()}.$col->name must be set");
+						}
 					}
 				}
 			}
@@ -413,26 +424,47 @@ abstract class Model {
 	}
 
 	/**
-	 * Whether this Model represent a new row (that is, one that doesn't have
-	 * a mathing representation in the database). A newly instanciated Model is
+	 * Whether this Model represent a new record (that is, one that doesn't have
+	 * a matching representation in the database). A newly instanciated Model is
 	 * considered new, until one of the following happens:
+	 *
 	 * <ul>
-	 * <li>some model's data are loaded from the database,
+	 * <li>some model's data is loaded from the database,
 	 * <li>the model is successfuly persisted (saved) in the database,
 	 * <li>or the model's primary key is set to a non-NULL value
 	 * </ul>
-	 * <p>In the two first cases, the reccord is garanteed to have a matching
+	 *
+	 * In the two first cases, the reccord is garanteed to have a matching
 	 * representation in the database (unless some external operation have
 	 * removed it), while in the third case, that will be known only when the
 	 * reccord will be saved.
-	 * <p>This property has an effect on the operation conducted by the save()
+	 *
+	 * This property has an effect on the operation conducted by the save()
 	 * method of the model (new reccords will be created, will non-new reccords
 	 * will be updated).
-	 * @return <type>
+	 *
+	 * @return boolean
 	 */
 	public function isNew() {
-//		return $this->getPrimaryKeyValue() !== null;
-		return $this->internal->fields[$this->getPrimaryKeyName()] === null;
+		//return $this->getPrimaryKeyValue() !== null;
+		return $this->forceNew === true ||
+			$this->internal->fields[$this->getPrimaryKeyName()] === null;
+	}
+
+	/**
+	 * Forces the model to be considered new. That may be needed when the
+	 * model's primary key also represent some actual data, since the primary
+	 * key field value may be set by the user, thus tricking the automatic
+	 * algorithm evaluating if the model is new into thinking that it isn't.
+	 *
+	 * The forced new state will be cleared each time the model is successfuly
+	 * saved in the datastore (database).
+	 *
+	 * @return Model $this
+	 */
+	public function forceNew() {
+		$this->forceNew = true;
+		return $this;
 	}
 
 	/**
@@ -470,10 +502,9 @@ abstract class Model {
 		}
 	}
 
-	protected function beforeSave($new) {
-	}
-	protected function afterSave($new) {
-	}
+	protected function beforeSave($new) {}
+	protected function afterSave($new) {}
+
 	protected function beforeSaveRelation(ModelRelation $relation, $newRecord) {
 		if (method_exists($this, $m = "beforeSaveRelation_$relation->name")) {
 			$this->$m($relation, $newRecord);
@@ -502,7 +533,7 @@ abstract class Model {
 	public function save($new = null) {
 
 		$new = $new === true || $this->isNew();
-		
+
 		// Relation to which the parent model holds a reference field must be
 		// saved before it, to that primary keys of new referenced model can
 		// be known at the time of saving the parent.
@@ -573,6 +604,9 @@ abstract class Model {
 				$this->events->fire(self::EVT_AFTER_SAVE_BASE, $this);
 				$this->afterSave(false);
 			}
+
+			// clear $forceNew state
+			$this->forceNew = null;
 			
 			// afterSave event
 			// The afterSave event must not be fired here, because it must be
