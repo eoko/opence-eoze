@@ -160,7 +160,6 @@ Oce.deps.wait('Ext.ux.form.TwinComboBox', function() {
 		,constructor: function(cfg) {
 
 			var me = this;
-
 			var storeBaseParams = Ext.apply({
 				controller:cfg.controller,
 				action:'auto_complete'
