@@ -155,7 +155,16 @@ Oce.deps.wait('Ext.ux.form.TwinComboBox', function() {
 
 	Oce.form.ForeignComboBox = Ext.extend(Ext.ux.form.TwinComboBox, {
 
-		hasLoading: true
+//REM (unused) 		hasLoading: true
+
+		/**
+		 * @cfg {Boolean} remoteOnce
+		 * True to switch the store on local mode after the initial loading has
+		 * occured. This will make the combo more reactive, especially on query
+		 * operation, if you know that all the data will be loaded in one time
+		 * and won't depend on server side processing after that.
+		 */
+		remoteOnce: false
 
 		,constructor: function(cfg) {
 
