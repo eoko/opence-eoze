@@ -159,10 +159,11 @@ abstract class GridExecutor extends JsonExecutor {
 	function auto_complete() {
 	
 		$table = $this->table;
-		$context = array(
-			'year' => $this->request->get('year', null)
-		);
-		$query = $table->createQuery($context);
+//REM		$context = array(
+//			'year' => $this->request->get('year', null)
+//		);
+//		$query = $table->createQuery($context);
+		$query = $table->createQuery($this->createAutoCompleteQueryContext());
 		
 		$selects = $this->getAutoCompleteSelects($query);
 
@@ -224,6 +225,10 @@ abstract class GridExecutor extends JsonExecutor {
 		$this->count = $count;
 		
 		return true;
+	}
+
+	protected function createAutoCompleteQueryContext() {
+		return $this->getLoadQueryContext();
 	}
 
 	protected function getAutoCompleteSelectString() {

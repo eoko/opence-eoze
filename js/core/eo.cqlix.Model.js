@@ -485,7 +485,8 @@ NS.DateTimeField = Ext.extend(NS.DateField, {
 NS.RelationOneField = Ext.extend(NS.StringField, {
 	xtype: "oce.foreigncombo"
 	,doCreateField: function(config) {
-		if (!this.controller) {
+		var controller = config.controller || this.controller;
+		if (!controller) {
 			//throw new Error("Cannot create field without knowing the controller");
 			if (console && console.warn) {
 				console.warn("Cannot create field without knowing the controller for: " + this.name);
@@ -494,7 +495,7 @@ NS.RelationOneField = Ext.extend(NS.StringField, {
 		}
 		return Ext.apply({
 			column: this.name
-			,controller: this.controller
+			,controller: controller
 			,autoComplete: this.autoCompleteParam || this.name
 			,editable: this.editable === true
 			,forceSelection: true

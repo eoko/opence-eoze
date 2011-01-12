@@ -310,10 +310,12 @@ Ext.ux.grid.RowEditor = Ext.extend(Ext.Panel, {
 //rx-        }
 //rx-        this.hide();
 			this.hide();
-            this.fireEvent('afteredit', this, changes, r, this.rowIndex);
+//            this.fireEvent('afteredit', this, changes, r, this.rowIndex);
         } else {
 			this.hide();
 		}
+		this.fireEvent('afteredit', this, changes, r, this.rowIndex);
+//		debugger
     },
 
 	tryEditPrev: function() {

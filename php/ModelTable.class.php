@@ -484,6 +484,7 @@ abstract class ModelTable extends ModelTableProxy {
 	 * @return ModelRelationInfo
 	 */
 	public abstract static function getRelationInfo($name, $requireType = false);
+
 	/**
 	 *
 	 * @param string $name
