@@ -306,9 +306,9 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 				}
 			});
 			this.rowEditor.on('afteredit', function(editor) {
-				if (editor.repeat && me.newRecord) {
+				if (me.newRecord) {
 					me.newRecord = null;
-					this.onAddEditor();
+					if (editor.repeat) this.onAddEditor();
 				}
 				me.grid.getSelectionModel().selectRow(editor.rowIndex, false);
 			}.createDelegate(this));
