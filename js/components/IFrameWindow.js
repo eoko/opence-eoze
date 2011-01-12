@@ -203,10 +203,10 @@ eoko.ext.IFramePanel = Ext.extend(Ext.Panel, {
 
 		if (!Ext.isIE) {
 			// working in ff/chrome, but not IE
-		var div = doc.documentElement.createElement("div");
-		div.innerHTML = html;
-		doc.documentElement.appendChild(div);
-//			doc.documentElement.innerHTML = html;
+//		var div = doc.documentElement.createElement("div");
+//		div.innerHTML = html;
+//		doc.documentElement.appendChild(div);
+			doc.documentElement.innerHTML = html;
 			this.hackLinks(doc);
 			callback(doc);
 			return;
