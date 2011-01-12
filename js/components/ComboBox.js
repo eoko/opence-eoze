@@ -314,6 +314,9 @@ Oce.deps.wait('Ext.ux.form.TwinComboBox', function() {
 		}
 
 		,onStoreFirstLoaded: function() {
+			
+			if (this.remoteOnce) this.mode = 'local';
+
 			this.fireEvent('storefirstloaded');
 			this.fireEvent('afterfirstload');
 			if (this.storeLoadingListeners) {
