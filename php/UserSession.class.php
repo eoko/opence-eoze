@@ -74,7 +74,12 @@ class UserSession {
 			throw new IllegalStateException();
 		}
 		if ($now === null) $now = time();
-		return $now - $instance->lastActivity > self::$SESSION_LENGTH;
+		return $now - $instance->lastActivity >= self::$SESSION_LENGTH;
+	}
+
+	public static function getExpirationDelay($now = null) {
+		if ($now === null) $now = time();
+		return self::getInstance()->lastActivity + self::$SESSION_LENGTH - $now;
 	}
 
 	private static function startIdentifiedSession(User $user, $loggedIn) {

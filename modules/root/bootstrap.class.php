@@ -29,6 +29,7 @@ class Bootstrap extends \eoko\module\executor\JsFileExecutor {
 	public function ping_session() {
 		if (UserSession::isIdentified()) {
 			ExtJSResponse::put('pong', true);
+			ExtJSResponse::put('remainingTime', UserSession::getExpirationDelay());
 		} else {
 			ExtJSResponse::put('pong', false);
 			ExtJSResponse::put('text',

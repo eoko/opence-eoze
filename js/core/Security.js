@@ -1,6 +1,7 @@
 Oce.Security = function() {
 
-	var sessionPingInterval = 5*60*1000;
+//	var sessionPingInterval = 5*60*1000;
+	var sessionPingInterval = 60000; // First check after 1 min
 	var identified;
 	var eventManager = new Oce.EventManager(this);
 	var pingTimeout;
@@ -16,11 +17,13 @@ Oce.Security = function() {
 				,onSuccess: function(data, obj) {
 					if (!obj.pong) {
 						setIdentified(false, obj);
+					} else {
+						setTimeout(pingSession, data.remainingTime * 1000)
 					}
 				}
 			});
 
-			pingTimeout = setTimeout(pingSession, sessionPingInterval);
+//			pingTimeout = setTimeout(pingSession, sessionPingInterval);
 		}
 	}
 
