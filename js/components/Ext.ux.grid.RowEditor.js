@@ -90,7 +90,8 @@ Ext.ux.grid.RowEditor = Ext.extend(Ext.Panel, {
         this.ownerCt = grid;
         if(this.clicksToEdit === 2){
             grid.on('rowdblclick', this.onRowDblClick, this);
-        }else{
+        } else if (this.clicksToEdit === 1 || this.clicksToEdit === 'auto') { // rx+
+//rx-        }else{
             grid.on('rowclick', this.onRowClick, this);
             if(Ext.isIE){
                 grid.on('rowdblclick', this.onRowDblClick, this);
@@ -668,3 +669,7 @@ Ext.ux.grid.RowEditor = Ext.extend(Ext.Panel, {
     }
 });
 Ext.preg('roweditor', Ext.ux.grid.RowEditor);
+
+Ext.ns('Oce.grid').RowEditor = Ext.extend(Ext.ux.grid.RowEditor, {
+
+});

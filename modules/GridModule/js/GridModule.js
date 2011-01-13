@@ -199,7 +199,7 @@ Oce.GridModule = Ext.extend(Ext.Panel, {
 				totalProperty: 'count',
 				fields: this.storeColumns,
 				remoteSort: true
-			})
+			});
 
 			this.beforeInitStore(this.store);
 
@@ -2526,10 +2526,9 @@ Oce.GridModule = Ext.extend(Ext.Panel, {
 	,doFirstLoad: function() {
 		if (!this.firstLoad) {
 			var store = this.store;
-			var controller = this.controller;
 			store.load({
 				params: {start: 0, limit: this.pageSize, action:'load'}
-	// --- EXPERIMENTS ---
+// --- EXPERIMENTS ---
 //				,callback: function(records, opts, success) {
 //					var params = opts.params,
 //						start = params.realstart || 0,

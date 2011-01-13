@@ -687,7 +687,7 @@ class ModelRelationIndirectHasMany extends ModelRelationByAssoc
 					);
 				} else {
 					$childPkName = $this->assocTable->getPrimaryKeyName();
-					if ($childPkName !== $this->otherForeignKey) {
+					if ($childPkName !== $this->otherForeignKey && !isset($v[$this->otherForeignKey])) {
 						$v[$this->otherForeignKey] = $v[$childPkName];
 						unset($v[$childPkName]);
 					}

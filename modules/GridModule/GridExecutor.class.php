@@ -381,7 +381,7 @@ abstract class GridExecutor extends JsonExecutor {
 	protected function addLoadQueryFiltersWhenAll(ModelTableQuery $query, array $filters) {}
 	protected function addLoadQueryFilters(ModelTableQuery $query, array $filters) {}
 
-	protected function createLoadQuery_extra($query) {}
+	protected function createLoadQuery_extra(ModelTableQuery $query) {}
 
 	protected function getLoadQueryContext() {
 		return array();
