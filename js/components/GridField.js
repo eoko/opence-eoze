@@ -185,7 +185,10 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 
 			this.gridColumns.push(colConfig);
 
-		}, this)
+		}, this);
+
+		var storeFields = [].concat(dataIndexes);
+		if (this.storeExtraFields) storeFields = storeFields.concat(this.storeExtraFields);
 
 //		var store = this.store = new Ext.data.JsonStore(Ext.apply({
 		var store = this.store = Ext.create(Ext.apply({
@@ -199,7 +202,8 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 			}, this.baseParams || {})
 			,pruneModifiedRecords: true
 			,root: 'data'
-			,fields: dataIndexes
+//REM			,fields: dataIndexes
+			,fields: storeFields
 			,autoload: true
 			,sortInfo: this.sortInfo
 			,reader: !this.createReader ? undefined : this.createReader({
@@ -319,10 +323,23 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 				singleSelect: false
 			});
 		}
-		
-		if (extraData.length) {
-			this.extraData = extraData;
+
+		if (this.extraData) {
+			if (!Ext.isArray(this.extraData)) this.extraData = [this.extraData];
+			var xd = this.extraData, len = xd.length;
+			for (i=0; i<len; i++) {
+				if (Ext.isString(xd[i])) xd[i] = {
+					name: xd[i], dataIndex: xd[i]
+				}
+			}
 		}
+		if (extraData.length) {
+			if (!this.extraData) this.extraData = [];
+			this.extraData = this.extraData.concat(extraData);
+		}
+//		if (extraData.length) {
+//			this.extraData = extraData;
+//		}
 	}
 
 	,value: ''
@@ -817,6 +834,9 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 		this.el.setHeight = this.el.setHeight.createSequence(function(h) {
 			if (me.grid) me.grid.setHeight(h);
 		})
+
+		// The height param would prevent the membre from flexing the component
+		if (this.flex) delete this.height;
 
 		if (this.autoload) {
 			this.load();
