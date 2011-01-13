@@ -149,6 +149,7 @@ class UserSession {
 		}
 		$infos = array(
 			'restricted' => !self::isAuthorized(100), // TODO security
+			'userId' => self::getUser()->id,
 		);
 		return ArrayHelper::apply($infos, self::getUser()->context);
 	}
