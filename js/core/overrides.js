@@ -112,3 +112,52 @@ Ext.data.JsonStore.prototype.loadRecords = function(o, options, success){
 };
 
 }
+
+Ext.override(Ext.Panel, {
+
+	/**
+	 * Hide the panel border, after it has been rendered.
+	 */
+	hideBorders: function() {
+		if (this.border === false) return;
+		this.border = false;
+		if (!this.el) return;
+		this.el.addClass(this.baseCls + '-noborder');
+		this.body.addClass(this.bodyCls + '-noborder');
+		if(this.header){
+			this.header.addClass(this.headerCls + '-noborder');
+		}
+		if(this.footer){
+			this.footer.addClass(this.footerCls + '-noborder');
+		}
+		if(this.tbar){
+			this.tbar.addClass(this.tbarCls + '-noborder');
+		}
+		if(this.bbar){
+			this.bbar.addClass(this.bbarCls + '-noborder');
+		}
+	}
+
+	/**
+	 * Hide the panel border, after it has been rendered.
+	 */
+	,showBorders: function() {
+		if (this.border !== false) return;
+		this.border = true;
+		if (!this.el) return;
+		this.el.removeClass(this.baseCls + '-noborder');
+		this.body.removeClass(this.bodyCls + '-noborder');
+		if(this.header){
+			this.header.removeClass(this.headerCls + '-noborder');
+		}
+		if(this.footer){
+			this.footer.removeClass(this.footerCls + '-noborder');
+		}
+		if(this.tbar){
+			this.tbar.removeClass(this.tbarCls + '-noborder');
+		}
+		if(this.bbar){
+			this.bbar.removeClass(this.bbarCls + '-noborder');
+		}
+	}
+});
