@@ -60,6 +60,7 @@ class <?php echo $class ?> extends <?php echo $extend ?> {
 <?php endif ?>
 <?php if (isset($add_mod_autoVals)): ?>
 	protected function addExtraSetters(&$form, &$setters, &$missingFields) {
+<?php foreach ($add_mod_autoVals as $name => $autoVal): ?>
 <?php list($autoVal, $unset) = $autoVal ?>
 <?php if (isset($autoVal)): ?>
 		$setters['<?php echo $name ?>'] = <?php echo $autoVal ?>;
@@ -67,6 +68,7 @@ class <?php echo $class ?> extends <?php echo $extend ?> {
 <?php if (isset($unset)): ?>
 		unset($missingFields['<?php echo $unset ?>']);
 <?php endif ?>
+<?php endforeach ?>
 	}
 
 <?php endif ?>
