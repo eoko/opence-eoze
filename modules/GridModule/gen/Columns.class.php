@@ -193,6 +193,8 @@ class Columns {
 						}
 					} else if ($ff['xtype'] == 'oce.foreigncombo') {
 						if (!isset($ff['column'])) $ff['column'] = $col['name'];
+					} else if ($ff['xtype'] == 'htmleditor') {
+						if (!isset($ff['name'])) $ff['name'] = $col['name'];
 					}
 				}
 			} else {
