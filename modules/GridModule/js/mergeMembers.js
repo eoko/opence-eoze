@@ -77,7 +77,7 @@ Oce.deps.wait('Oce.GridModule', function() {
 							,action: 'merge_members'
 						}
 						,waitTitle : 'Exécution' // i18n
-						,waitMsg : 'Traitement en court' // i18n
+						,waitMsg : 'Traitement en cours' // i18n
 						,success: function(form, action) {
 							win.close();
 							var msg = Oce.pickFirst(action.result, ['message','messages','msg']);

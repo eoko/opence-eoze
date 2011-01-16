@@ -416,7 +416,7 @@ Oce.GridModule = Ext.extend(Ext.Panel, {
 				url: 'index.php'
 				,params: params
 				,waitTitle : 'Interrogation du serveur' // i18n
-				,waitMsg : 'Enregistrement en court' // i18n
+				,waitMsg : 'Enregistrement en cours' // i18n
 				,success: successHandler
 				,failure: function(form, action) {
 					Oce.Ajax.handleFormError(
