@@ -21,8 +21,8 @@ class <?php echo $class ?> extends <?php echo $extend ?> {
 	protected $mergeMembersTable = '<?php echo $mergeMembersTable ?>';
 <?php else: ?>
 	protected $hasMergeMembers = false;
-<?php endif ?>
 
+<?php endif ?>
 	protected static function getModelName() {
 		return $this->modelName;
 	}
@@ -31,29 +31,43 @@ class <?php echo $class ?> extends <?php echo $extend ?> {
 	protected function getAutoCompleteSelectString() {
 		return '<?php echo $autocomplete ?>';
 	}
+
 <?php elseif (isset($label)): ?>
 	protected function getAutoCompleteSelectString() {
 		return '<?php echo $label ?>';
 	}
-<?php endif ?>
 
+<?php endif ?>
 <?php if (isset($tabPages)): ?>
 	protected function getFormPageNames() {
 		return array(<?php echo $tabPages ?>);
 	}
-<?php endif ?>
 
+<?php endif ?>
 <?php if (isset($relationSelectionModes)): ?>
 	protected function getRelationSelectionModes($mode = 'form') {
 		$selModes = <?php echo $relationSelectionModes ?>;
 		return $selModes[$mode];
 	}
-<?php endif ?>
 
+<?php endif ?>
 <?php if (isset($selectionModeForRelations)): ?>
 	protected function getSelectionModeForRelations($mode = 'form') {
 		$selModes = <?php echo $selectionModeForRelations ?>;
 		return $selModes[$mode];
 	}
+
+<?php endif ?>
+<?php if (isset($add_mod_autoVals)): ?>
+	protected function addExtraSetters(&$form, &$setters, &$missingFields) {
+<?php list($autoVal, $unset) = $autoVal ?>
+<?php if (isset($autoVal)): ?>
+		$setters['<?php echo $name ?>'] = <?php echo $autoVal ?>;
+<?php endif ?>
+<?php if (isset($unset)): ?>
+		unset($missingFields['<?php echo $unset ?>']);
+<?php endif ?>
+	}
+
 <?php endif ?>
 }

@@ -84,6 +84,7 @@ abstract class GridExecutor extends JsonExecutor {
 			}
 		}
 
+		$this->addExtraSetters($request, $setters, $missingFields);
 		$this->add_extra($request, $setters, $missingFields);
 
 		if (count($missingFields) > 0) {
@@ -151,6 +152,17 @@ abstract class GridExecutor extends JsonExecutor {
 	}
 
 	protected function add_extra(&$form, &$setters, &$missingFields) {}
+
+	/**
+	 * Hook for add and mod action, providing opportunity to modify the $setters
+	 * of the Model. If overriden, this method is required to call its
+	 * parent::addExtraSetters, in order to be sure that the module configuration
+	 * will be applied.
+	 * @param Request $form
+	 * @param array $setters
+	 * @param array $missingFields
+	 */
+	protected function addExtraSetters(&$form, &$setters, &$missingFields) {}
 
 	  //////////////////////////////////////////////////////////////////////////
 	 // AUTOCOMPLETE
@@ -587,6 +599,7 @@ MSG;
 			}
 		}
 
+		$this->addExtraSetters($request, $setters, $missingFields);
 		$this->mod_getFields($request, $setters, $missingFields);
 
 		// TODO rx add a where constraint to loadModel
