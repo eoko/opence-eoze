@@ -135,7 +135,7 @@ class ExecutorGenerator extends GeneratorBase {
 		}
 		switch ($tag) {
 			case 'currentUser':
-				$r = array('UserSession::getUser()');
+				$r = array('\UserSession::getUser()->id');
 				if (preg_match('/^currentUser\s+on\s+(.+)$/', $autoVal, $m)) {
 					$r[] = $m[1];
 				} else if ($this->table->hasRelation($name)
