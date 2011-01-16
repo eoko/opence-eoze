@@ -12,7 +12,13 @@ use \Inflector;
 
 class ExecutorGenerator extends GeneratorBase {
 
+	private $add_mod_autoField = array();
+	/** @var PHPCompiler */
+	private $tpl;
+
 	public function populate(PHPCompiler $tpl) {
+
+		$this->tpl = $tpl;
 		
 		$this->config->controllerInfo = $this->config->node('controllerInfo')
 				// Inherit parent module
@@ -81,7 +87,9 @@ class ExecutorGenerator extends GeneratorBase {
 		$tpl->tabPages = implode(', ', $pages);
 
 		// --- Process columns infos ---
-		$this->processColumnsInfo($tpl);
+		$this->processColumnsInfo();
+
+		$this->processAutoValues();
 
 		// --- Autocomplete ---
 		if ($this->config->has('autocomplete')) {
@@ -104,7 +112,44 @@ class ExecutorGenerator extends GeneratorBase {
 //		return $tpl->compile(null, "$dir$name.class.php");
 	}
 
-	private function processColumnsInfo(Template $tpl) {
+	private function processAutoValues() {
+
+		$autoVals = null;
+
+		foreach ($this->columns->columnsConfig as $name => $col) {
+			if (isset($col['autoValue'])) {
+				if (null !== $r = $this->processAutoVal($name, $col['autoValue'])) {
+					$autoVals[$name] = $r;
+				}
+			}
+		}
+
+		if ($autoVals) $this->tpl->add_mod_autoVals = $autoVals;
+	}
+
+	private function processAutoVal($name, $autoVal) {
+		if (preg_match('/^(\w+)\s/', $autoVal, $m)) {
+			$tag = $m[1];
+		} else {
+			$tag = $autoVal;
+		}
+		switch ($tag) {
+			case 'currentUser':
+				$r = array('UserSession::getUser()');
+				if (preg_match('/^currentUser\s+on\s+(.+)$/', $autoVal, $m)) {
+					$r[] = $m[1];
+				} else if ($this->table->hasRelation($name)
+						&& ($rel = $this->table->getRelationInfo($name)) instanceof \ModelRelationInfoHasReference) {
+					$r[] = $rel->referenceField;
+				}
+				return $r;
+		}
+		return null;
+	}
+
+	private function processColumnsInfo() {
+
+		$tpl = $this->tpl;
 
 		$tpl->modelName = $modelName = $this->config->model;
 		$tableName = Inflector::tableFromModel($modelName);
