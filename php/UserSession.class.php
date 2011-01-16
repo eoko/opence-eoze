@@ -5,7 +5,7 @@
 
 class UserSession {
 
-	private static $SESSION_LENGTH = 900; // in seconds
+	private static $SESSION_LENGTH = 3600; // in seconds
 
 	/** @var UserSession */
 	private static $instance;
