@@ -4,8 +4,6 @@
 require_once 'init.inc.php';
 
 $dirs = array(
-	LOG_PATH,
-	CACHE_PATH,
 	EXPORTS_PATH,
 );
 
@@ -14,6 +12,8 @@ $required_dirs = array(
 	MODEL_BASE_PATH,
 	MODEL_PROXY_PATH,
 	MODEL_QUERY_PATH,
+	LOG_PATH,
+	CACHE_PATH,
 );
 
 
