@@ -1,1 +1,0 @@
-[ERROR 2010/11/22 11:51:14] SPRITER: that's works!                                                                            rs/merlin/NetBeansProjects/opence/bin/test_min.php:53
