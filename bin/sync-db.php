@@ -53,5 +53,5 @@ function dbLoad() {
 		throw new Exception('Missing dump file: ' . $out);
 	}
 
-	$cmd = "mysql --user $params[user] --password=$params[password] $params[database] < $out";
+	$cmd = "gunzip < $out | mysql --user $params[user] --password=$params[password] $params[database]";
 }
