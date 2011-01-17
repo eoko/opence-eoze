@@ -1680,8 +1680,8 @@ Oce.GridModule = Ext.extend(Ext.Panel, {
 
 			if (this.gridColumns.length > 1) {
 				Ext.applyIf(this, {
-					defaultSortColumn: this.gridColumns[1].dataIndex
-					,defaultSortDirection: 'ASC'
+					defaultSortColumn: this.extra.defaultSortColumn || this.gridColumns[1].dataIndex
+					,defaultSortDirection: this.extra.defaultSortDirection || 'ASC'
 				});
 			}
 
