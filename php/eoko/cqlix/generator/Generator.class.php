@@ -198,6 +198,10 @@ class Generator extends Script {
 
 		// --- Process -----------------------------------------------------------------
 
+		foreach (array(MODEL_BASE_PATH, MODEL_PROXY_PATH, MODEL_QUERY_PATH) as $dir) {
+			if (!file_exists($dir)) mkdir($dir, 0644);
+		}
+
 		foreach ($this->tableFields as $table => $fields) {
 
 			$modelName = NameMaker::modelFromDB($table);
