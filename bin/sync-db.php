@@ -7,8 +7,12 @@ function dieUsage() {
 	die;
 }
 
-if ($argc !== 2) dieUsage();
-else $arg = $argv[1];
+if (isset($syncDbAction)) {
+	$arg = $syncDbAction;
+} else {
+	if ($argc !== 2) dieUsage();
+	else $arg = $argv[1];
+}
 
 if ($arg === 'dump') $fn = 'dbDump';
 else if ($arg === 'load') $fn = 'dbLoad';
@@ -29,6 +33,8 @@ try {
 function dbDump() {
 
 	global $params, $out;
+
+	echo "\n\nDumping database to " . getcwd() . "$out...\n";
 	
 	if (file_exists($out)) unlink($out);
 
