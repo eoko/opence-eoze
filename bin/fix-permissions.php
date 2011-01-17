@@ -1,7 +1,9 @@
-#!usr/bin/php
 <?php
 
 require_once 'init.inc.php';
+
+$quiet = isset($script['quiet']) && $script['quiet'];
+$changes = 0;
 
 $dirs = array(
 	EXPORTS_PATH,
@@ -103,7 +105,7 @@ function createDirectory($dir) {
 
 function fixDirectory($dir, $createIf) {
 
-	global $phpUser;
+	global $phpUser, $quiet, $changes;
 
 	if (!file_exists($dir)) {
 		if ($createIf) {
@@ -117,8 +119,17 @@ function fixDirectory($dir, $createIf) {
 	}
 
 	// File group
-	if (chgrp($dir, $phpUser)) echo "'$dir' group changed to $phpUser\n";
-	else echo "ERROR: Cannot change group for '$dir'\n";
+	$group = posix_getgrnam($phpUser);
+	$gid = $group['gid'];
+
+	if (filegroup($dir) !== $gid) {
+		if (chgrp($dir, $phpUser)) {
+			if (!$quiet) echo "'$dir' group changed to $phpUser\n";
+			$changes++;
+		} else {
+			echo "ERROR: Cannot change group for '$dir'\n";
+		}
+	}
 
 	// File permission
 	$perm = substr(sprintf('%o', fileperms($dir)), -4);
@@ -128,11 +139,14 @@ function fixDirectory($dir, $createIf) {
 		if (chmod($dir, $perm)) {
 			clearstatcache();
 			$perm = substr(sprintf('%o', fileperms($dir)), -4);
-			echo "'$dir' permission changed to $perm\n";
+			if (!$quiet) echo "'$dir' permission changed to $perm\n";
+			$changes++;
 		} else {
 			echo "ERROR: Cannot change permissions for '$dir'\n";
 		}
 	} else {
-		echo "Group already has write-access on '$dir'.\n";
+		if (!$quiet) echo "Group already has write-access on '$dir'.\n";
 	}
 }
+
+echo "Changes: $changes\n";
