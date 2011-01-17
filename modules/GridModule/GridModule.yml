@@ -190,3 +190,9 @@ columns-templates:
     form:
       vtype: password
       initialPassFieldName: password
+
+  email:
+    header: Email
+    form:
+      vtype: email
+
