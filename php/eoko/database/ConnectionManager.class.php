@@ -30,7 +30,7 @@ class ConnectionManager {
 		return self::$connection;
 	}
 
-	private static function getParams($name = null) {
+	public static function getParams($name = null) {
 		
 		if (self::$params === null) {
 			$params = self::$defaults;

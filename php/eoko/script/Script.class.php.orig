@@ -1,0 +1,75 @@
+<?php
+
+namespace eoko\script;
+
+use eoko\util\Arrays;
+
+use Debug;
+
+abstract class Script {
+
+	private $log = true;
+
+	/**
+	 * @var ScriptArguments
+	 */
+	protected $arguments;
+
+	public $executionTime;
+
+	final public function start($args = null) {
+		$startTime = microtime();
+		$this->arguments = $this->callLoadArguments($args);
+		$this->run();
+		$this->executionTime = Debug::elapsedTime($startTime, microtime());
+	}
+	
+	static function isCli() {
+		return php_sapi_name() !== 'cli';
+	}
+
+	/**
+	 * @param array $args
+	 * @return ScriptArguments
+	 */
+	private function callLoadArguments($args) {
+		if (self::isCli()) {
+			global $argv;
+			$cpArgv = $argv;
+			array_shift($cpArgv);
+			if (count($cpArgv > 1)) {
+				if ($args !== null) $args = Arrays::apply($cpArgv, $args);
+				else $args = $cpArgv;
+			}
+		}
+		return $this->loadArguments($args);
+	}
+
+	/**
+	 * @param array $args
+	 * @return ScriptArguments
+	 */
+	protected function loadArguments($args) {
+		return new ScriptArguments($args);
+	}
+	
+	abstract protected function run();
+}
+
+class ScriptArguments {
+
+	private $args;
+
+	function __construct($args = null) {
+		$this->args = $args;
+	}
+
+	public function __get($name) {
+	}
+
+	public function __call($name, $params) {
+		if (substr($name, 0, 2) === 'is') {
+
+		}
+	}
+}
