@@ -308,7 +308,6 @@ Oce.deps.wait('Ext.ux.form.HtmlEditor.Image', function() {
 			}, this);
 		}
 		,insertImage: function(img) {
-			debugger
 			this.cmp.insertAtCursor(String.format('<img src="{0}" alt="{1}" />', img.url, img.name));
 		}
 	});
