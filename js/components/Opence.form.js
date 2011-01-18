@@ -285,3 +285,33 @@ Oce.form.LoadLatch.addFirstTo = function(field) {
 		ll.firstLoadLatches++;
 	}
 }
+
+
+Oce.form.HtmlEditor = Ext.extend(Ext.form.HtmlEditor, {
+
+	initComponent: function() {
+		if (this.enableInsertImage !== false) {
+			if (!this.plugins) this.plugins = [];
+			else if (!Ext.isArray(this.plugins)) this.plugins = [this.plugins];
+			this.plugins.push(new Ext.ux.form.HtmlEditor.Image);
+			Oce.form.HtmlEditor.superclass.initComponent.call(this);
+		}
+	}
+
+});
+
+Oce.deps.wait('Ext.ux.form.HtmlEditor.Image', function() {
+	Ext.override(Ext.ux.form.HtmlEditor.Image, {
+		selectImage: function() {
+			eo.MediaManager.selectImage(function(img) {
+				this.insertImage(img.data);
+			}, this);
+		}
+		,insertImage: function(img) {
+			debugger
+			this.cmp.insertAtCursor(String.format('<img src="{0}" alt="{1}" />', img.url, img.name));
+		}
+	});
+});
+
+Ext.reg("htmleditor", Oce.form.HtmlEditor);

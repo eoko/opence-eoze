@@ -1405,12 +1405,15 @@ Oce.GridModule = Ext.extend(Ext.Panel, {
 					v = v.replace(/<[^>]*\bstyle\b[^>]*>[\s\S]*?<\/style>/gm, '');
 					var tmp = document.createElement("DIV");
 					tmp.innerHTML = v;
-					v = tmp.textContent||tmp.innerText;
+					v = tmp.textContent||tmp.innerText||"";
 					if (v.length > 150) return v.substr(0,150) + '...';
 					else return v;
 				}
 				if (col.renderer) {
-					col.renderer = renderer.createSequence(col.renderer);
+					var prevColRenderer = col.renderer;
+					col.renderer = function(v) {
+						return prevColRenderer(renderer(v));
+					}
 				} else {
 					col.renderer = renderer;
 				}
