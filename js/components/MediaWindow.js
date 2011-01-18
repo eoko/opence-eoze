@@ -45,6 +45,9 @@ eo.MediaPanel = Ext.extend(Ext.Panel, {
 					,scope: this
 					,buffer: 100
 				}
+				,dblclick: function(view, index, node, e) {
+					me.fireEvent("dblclick", me, view.getRecord(node));
+				}
 			}
 		});
 
@@ -100,6 +103,23 @@ eo.MediaPanel = Ext.extend(Ext.Panel, {
 		});
 
 		dirTree.load({expand: true});
+	}
+
+	,reload: function() {
+		this.view.store.reload();
+	}
+
+	,getSelectedRecord: function() {
+		var records = this.view.getSelectedRecords();
+		if (!records.length) return null;
+		return records[0];
+	}
+
+	,getSelectedItemUrl: function() {
+		var records = this.view.getSelectedRecords();
+		if (!records.length) return null;
+		var r = records[0];
+		return r.data.url;
 	}
 
 	,initTemplate: function() {
@@ -252,13 +272,50 @@ eo.MediaPanel.TreePanel = Ext.extend(Ext.tree.TreePanel, {
 			params: Ext.apply(opts.params || {}, this.loadParams)
 			,onSuccess: function(o) {
 				me.loadDirs(o.dirs, opts.expand);
+				me.getRootNode().select();
 			}
 		}));
 	}
 });
 
 
+eo.MediaManager = {
 
+	selectImage: function(callback, scope) {
+		var win,
+			mp = new eo.MediaPanel({
+				listeners: {
+					dblclick: function(mp, img) {
+						callback.call(scope || this, img);
+						win.close();
+					}
+				}
+			});
+		win = new Ext.Window({
+			width: 640
+			,height: 480
+			,constrainHeader: true
+			,layout: "fit"
+			,items: mp
+			,title: "Sélectionnez une image"
+			,buttons: [{
+				text: "Ok"
+				,handler: function() {
+					var r = mp.getSelectedRecord();
+					if (r) callback.call(scope || this, r);
+					win.close();
+				}
+				,scope: this
+			}, {
+				text: "Annuler"
+				,handler: function() {
+					win.close();
+				}
+			}]
+		});
+		win.show();
+	}
+}
 function testMediaWindow() {
 	var win = new Ext.Window({
 		width: 640

@@ -7,6 +7,7 @@ $changes = 0;
 
 $dirs = array(
 	EXPORTS_PATH,
+	MEDIA_PATH,
 );
 
 $required_dirs = array(
