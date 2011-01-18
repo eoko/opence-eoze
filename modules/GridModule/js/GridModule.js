@@ -1402,11 +1402,12 @@ Oce.GridModule = Ext.extend(Ext.Panel, {
 			if (col.formField && col.formField.xtype === "htmleditor") {
 				var renderer = function(v) {
 					if (!v) return v;
+					v = v.replace(/<[^>]*\bstyle\b[^>]*>[\s\S]*?<\/style>/gm, '');
 					var tmp = document.createElement("DIV");
 					tmp.innerHTML = v;
-					tmp = tmp.textContent||tmp.innerText;
-					if (tmp.length > 150) return tmp.substr(0,150) + '...';
-					else return tmp;
+					v = tmp.textContent||tmp.innerText;
+					if (v.length > 150) return v.substr(0,150) + '...';
+					else return v;
 				}
 				if (col.renderer) {
 					col.renderer = renderer.createSequence(col.renderer);
