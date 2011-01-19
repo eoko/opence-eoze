@@ -84,6 +84,10 @@ NS.EnumField = NS.Enum = eo.Object.extend(NS.ModelField, {
 	}
 
 	,testValue: function(testedVar, enumCode, strict) {
+		if (enumCode === null || enumCode === undefined) {
+			if (strict) return testedVar === enumCode;
+			else return testedVar === null || testedVar === undefined || testedVar === "";
+		}
 		if (enumCode in this.codeLookup == false) {
 			throw new Error('Enum has no code: ' + enumCode);
 		}
