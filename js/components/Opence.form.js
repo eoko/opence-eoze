@@ -290,11 +290,27 @@ Oce.form.LoadLatch.addFirstTo = function(field) {
 Oce.form.HtmlEditor = Ext.extend(Ext.form.HtmlEditor, {
 
 	initComponent: function() {
+
+		this.enableFont = false;
+
+		var plugins = [];
 		if (this.enableInsertImage !== false) {
-			if (!this.plugins) this.plugins = [];
-			else if (!Ext.isArray(this.plugins)) this.plugins = [this.plugins];
-			this.plugins.push(new Ext.ux.form.HtmlEditor.Image);
+			plugins.push(new Ext.ux.form.HtmlEditor.Image);
 			Oce.form.HtmlEditor.superclass.initComponent.call(this);
+		}
+		if (this.enableHeading !== false) {
+			plugins.push(new Ext.ux.form.HtmlEditor.HeadingMenu({
+				index: 0
+				,pushAfter: new Ext.Toolbar.Separator
+			}));
+//			plugins.push(new Ext.ux.form.HtmlEditor.HeadingButtons);
+		}
+		if (plugins.length) {
+			if (!this.plugins) this.plugins = plugins;
+			else {
+				if (!Ext.isArray(this.plugins)) this.plugins = [this.plugins];
+				this.plugins = this.plugins.concat(plugins);
+			}
 		}
 	}
 
