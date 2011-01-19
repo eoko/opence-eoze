@@ -226,6 +226,10 @@ NS.BooleanField = eo.Object.extend(NS.EnumField, {
 //			,data: this.createComboBoxData()
 		}, config);
 	}
+
+	,extractValue: function(value) {
+		return value ? true : false;
+	}
 });
 
 Ext.apply(NS.ModelField.constructors, {
