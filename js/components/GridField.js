@@ -376,14 +376,14 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 		this.clear();
 	}
 	
-	,masked: false
+//	,masked: false
 
 	,mask: function() {
-		var el = this.grid.el;
+		var el = this.grid && this.grid.el;
 		if (el) {
 			el.mask.apply(el, arguments);
 		} else {
-			this.grid.masked = true;
+			this.masked = true;
 		}
 	}
 
