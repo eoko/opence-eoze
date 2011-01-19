@@ -85,7 +85,7 @@ Ext.ux.form.HtmlEditor.HeadingMenu = Ext.extend(Ext.util.Observable, {
 			tb.insert(this.index, btn);
 		} else {
 			tb.addItem(btn);
-			if (this.pushAfter) tb.insert(btn);
+			if (this.pushAfter) tb.addItem(this.pushAfter);
 		}
     }
 });

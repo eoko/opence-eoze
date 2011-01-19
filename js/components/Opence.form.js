@@ -301,7 +301,7 @@ Oce.form.HtmlEditor = Ext.extend(Ext.form.HtmlEditor, {
 		if (this.enableHeading !== false) {
 			plugins.push(new Ext.ux.form.HtmlEditor.HeadingMenu({
 				index: 0
-				,pushAfter: new Ext.Toolbar.Separator
+				,pushAfter: '-'
 			}));
 //			plugins.push(new Ext.ux.form.HtmlEditor.HeadingButtons);
 		}
