@@ -91,6 +91,7 @@ Ext.ux.form.HtmlEditor.HeadingMenu = Ext.extend(Ext.util.Observable, {
 		if (this.index !== undefined) {
 			if (this.pushAfter) tb.insertButton(this.index, this.pushAfter);
 			tb.insertButton(this.index, btn);
+			if (tb.rendered) tb.doLayout();
 		} else {
 			tb.addItem(btn);
 			if (this.pushAfter) tb.addItem(this.pushAfter);
