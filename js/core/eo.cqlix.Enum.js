@@ -207,9 +207,9 @@ NS.BooleanField = eo.Object.extend(NS.EnumField, {
 			value: 1
 		}, {
 			label: 'Non', // i18n
-//			'default': getDefault() === true,
+//			'default': getDefault() === false,
 			code: 'NO',
-			value: 1
+			value: 0
 		}];
 
 		NS.BooleanField.superclass.constructor.call(this, config);
@@ -228,6 +228,8 @@ NS.BooleanField = eo.Object.extend(NS.EnumField, {
 	}
 
 	,extractValue: function(value) {
+		if (value === undefined) return undefined;
+		if (Ext.isString(value)) value = parseInt(value);
 		return value ? true : false;
 	}
 });
