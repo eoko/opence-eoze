@@ -1157,7 +1157,7 @@ Oce.GridModule = Ext.extend(Ext.Panel, {
 	}
 
 	,createAddWindow: function(callback) {
-		
+
 		var formConfig = Ext.apply({}, this.getAddFormConfig());
 		this.onConfigureAddFormPanel(formConfig);
 
@@ -1672,10 +1672,14 @@ Oce.GridModule = Ext.extend(Ext.Panel, {
 	,afterBuildFormsConfig: function(addConfigFields, editConfigFields) {
 
 		// --- Form configuration events
-		this.onFormItemsConfig(addConfigFields);
-		this.onFormItemsConfig(editConfigFields);
-		this.onAddFormItemsConfig(addConfigFields);
-		this.onEditFormItemsConfig(editConfigFields);
+		if (addConfigFields) {
+			this.onFormItemsConfig(addConfigFields);
+			this.onAddFormItemsConfig(addConfigFields);
+		}
+		if (editConfigFields) {
+			this.onFormItemsConfig(editConfigFields);
+			this.onEditFormItemsConfig(editConfigFields);
+		}
 	}
 
 	,initConfiguration: function() {
