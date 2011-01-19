@@ -1116,7 +1116,7 @@ Oce.GridModule = Ext.extend(Ext.Panel, {
 	 */
 	,createEditWindow: function(recordId, cb) {
 		return this.createFormWindow(
-			this.my.editFormConfig,
+			this.getEditFormConfig(),
 			{
 				 title: this.my.editWindowTitle || (this.title + " : Modifier") // i18n
 				,id: this.editWinId(recordId)
@@ -1129,6 +1129,10 @@ Oce.GridModule = Ext.extend(Ext.Panel, {
 				monitorFormModification: true
 			}
 		);
+	}
+
+	,getEditFormConfig: function() {
+		return this.my.editFormConfig;
 	}
 
 	/**
