@@ -69,7 +69,15 @@ Ext.ux.form.HtmlEditor.HeadingMenu = Ext.extend(Ext.util.Observable, {
                 autoDestroy: true,
                 fields: ['value','display'],
 //                data: [['H1','1st Heading'],['H2','2nd Heading'],['H3','3rd Heading'],['H4','4th Heading'],['H5','5th Heading'],['H6','6th Heading']]
-                data: [['H1','Titre'],['H2','Titre 2'],['H3','Titre 3'],['H4','Titre 4'],['H5','Titre 5'],['H6','Titre 6']]
+                data: [
+					['H1','Titre']
+					,['H2','Titre 2']
+					,['H3','Titre 3']
+					,['H4','Titre 4']
+					,['H5','Titre 5']
+					,['H6','Titre 6']
+					,['P','Paragraphe']
+				]
             },
             listeners: {
                 'select': function(combo,rec){
@@ -81,8 +89,8 @@ Ext.ux.form.HtmlEditor.HeadingMenu = Ext.extend(Ext.util.Observable, {
         };
 
 		if (this.index !== undefined) {
-			if (this.pushAfter) tb.insert(this.index, this.pushAfter);
-			tb.insert(this.index, btn);
+			if (this.pushAfter) tb.insertButton(this.index, this.pushAfter);
+			tb.insertButton(this.index, btn);
 		} else {
 			tb.addItem(btn);
 			if (this.pushAfter) tb.addItem(this.pushAfter);
