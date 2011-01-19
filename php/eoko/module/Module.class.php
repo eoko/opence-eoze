@@ -767,6 +767,12 @@ class Module implements file\Finder {
 			'executor' => "$executor",
 		));
 
+		if (!$module) {
+			throw new \eoko\routing\InvalidRequestException(
+				"Invalid controller information: {$request->req('controller')}"
+			);
+		}
+
 		if (!($module instanceof Module)) {
 			$module = ModuleManager::getModule($module);
 		}
