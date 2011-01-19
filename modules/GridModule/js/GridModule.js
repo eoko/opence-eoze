@@ -915,7 +915,7 @@ Oce.GridModule = Ext.extend(Ext.Panel, {
 											win.close();
 										});
 										break;
-									case 'no': 
+									case 'no':
 										win.forceClosing = true;
 										win.close();
 										break;
@@ -1398,6 +1398,25 @@ Oce.GridModule = Ext.extend(Ext.Panel, {
 
 			if (Ext.isString(col.renderer)) {
 				col.renderer = this.renderers[col.renderer];
+			}
+			if (col.formField && col.formField.xtype === "htmleditor") {
+				var renderer = function(v) {
+					if (!v) return v;
+					v = v.replace(/<[^>]*\bstyle\b[^>]*>[\s\S]*?<\/style>/gm, '');
+					var tmp = document.createElement("DIV");
+					tmp.innerHTML = v;
+					v = tmp.textContent||tmp.innerText||"";
+					if (v.length > 150) return v.substr(0,150) + '...';
+					else return v;
+				}
+				if (col.renderer) {
+					var prevColRenderer = col.renderer;
+					col.renderer = function(v) {
+						return prevColRenderer(renderer(v));
+					}
+				} else {
+					col.renderer = renderer;
+				}
 			}
 
 			// --- Grid ---
