@@ -842,7 +842,7 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 			this.load();
 		}
 
-		if (this.masked !== false) {
+		if (this.masked) {
 			this.mask(this.masked);
 		}
 	}
