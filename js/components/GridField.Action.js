@@ -146,11 +146,16 @@ eo.form.GridField.ModelAction.Add = Ext.extend(ACTION, {
 		,text: "Ajouter" // i18n
 	}
 
+	// hook
+	,createForm: function() {
+		return this.model.createForm();
+	}
+
 	,createWin: function() {
 
 		var win;
 		var WIN_CLASS = Oce.FormWindow;
-		var form = this.model.createForm();
+		var form = this.createForm();
 		var gf = this.gridField;
 
 		this.addWin = win = new WIN_CLASS({

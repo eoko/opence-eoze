@@ -70,6 +70,118 @@ eo.form.GridField.CqlixPlugin = eo.Object.create({
 					model: this.model
 					,addWindow: true
 					,winTitle: this.addTitle
+// XXX DEMO
+					,demoHackRemiseFixed: this.demoHackRemiseFixed
+					,demoHackRemisePercent: this.demoHackRemisePercent
+
+					,createForm: function() {
+						if (this.demoHackRemiseFixed || this.demoHackRemisePercent) {
+							var grid, items = [{
+									xtype: "textfield"
+									,name: "name"
+									,fieldLabel: "Nom"
+								}];
+
+							if (this.demoHackRemiseFixed) {
+								items.push(grid = Ext.create({
+									xtype: "gridfield"
+									,anchor: "100%"
+									,hideLabel: true
+									,height: 200
+									,fields: {
+										name: {
+											header: "Saison"
+											,editor: {
+												xtype: "oce.simplecombo"
+												,data: {
+													0: "Saison 1"
+													,1: "Saison 2"
+													,2: "Saison 3"
+													,3: "Saison 4"
+												}
+											}
+										}
+										,price: {
+											header: "Prix"
+											,editor: {xtype: "numberfield"}
+										}
+										,price_remise: {
+											header: "Prix avec remise"
+											,editor: {xtype: "numberfield"}
+										}
+									}
+									,defaultRecord: {
+										name: ""
+										,price: ""
+										,price_remise: ""
+									}
+									,gridConfig: {
+										tbar: {
+											items: {
+												text: "Add"
+												,iconCls: 'ico ico_add'
+												,handler: function() {
+													grid.add(grid.defaultRecord);
+												}
+											}
+										}
+									}
+								}))
+							} else if (this.demoHackRemisePercent) {
+								items.push({
+									xtype: "numberfield"
+									,fieldLabel: "Prix de base"
+									,name: "price_unit"
+								}, grid = Ext.create({
+									xtype: "gridfield"
+									,anchor: "100%"
+									,hideLabel: true
+									,height: 200
+									,fields: {
+										name: {
+											header: "Saison"
+											,editor: {
+												xtype: "oce.simplecombo"
+												,data: {
+													0: "Saison 1"
+													,1: "Saison 2"
+													,2: "Saison 3"
+													,3: "Saison 4"
+												}
+											}
+										}
+										,price: {
+											header: "Pourcentage"
+											,editor: {xtype: "numberfield"}
+										}
+									}
+									,defaultRecord: {
+										name: ""
+										,price: ""
+									}
+									,gridConfig: {
+										tbar: {
+											items: {
+												text: "Add"
+												,iconCls: 'ico ico_add'
+												,handler: function() {
+													grid.add(grid.defaultRecord);
+												}
+											}
+										}
+									}
+								}))
+							}
+
+							return new Oce.FormPanel({
+								items: items
+								,width: 350
+							});
+						} else {
+							return eo.form.GridField.ModelAction.Add.prototype.createForm.call(this);
+						}
+					}
+// < XXX DEMO
 				})
 				,new GRID_ACTION.Remove({
 				})
