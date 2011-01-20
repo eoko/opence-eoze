@@ -60,6 +60,25 @@ NS.Model = eo.Object.create({
 			throw new Error();
 		}
 		else return this.relations[name];
+//		if (!this.relations || !this.relations[name]) {
+//			debugger
+//			throw new Error();
+//		} else {
+//			var r = this.relations[name];
+//			var br = name + "->", brlen = br.length;
+//			var foreignRel = {};
+//			Ext.iterate(this.relations, function(name, rel) {
+//				if (name.substr(0, brlen) === br) {
+//					// push relation in returned model
+//					foreignRel[name.substr(brlen)] = rel;
+//				}
+//			});
+//			function F() {
+//				this.relations = foreignRel;
+//			}
+//			F.prototype = r;
+//			return new F();
+//		}
 	}
 
 	,findFieldsBy: function(testFn) {
@@ -88,10 +107,14 @@ NS.Model = eo.Object.create({
 
 	,getField: function(name) {
 
+		// if ModelField is passed directly, returns it unchanged
+		// (but what does that happen ???)
 		if (Ext.isObject(name)) {
 			if (name instanceof NS.ModelField) {
 				return name;
 			} else if (name.name) {
+				// what is this case ???
+				debugger
 				name = name.name;
 			}
 		}
@@ -105,6 +128,7 @@ NS.Model = eo.Object.create({
 			if (!baseRel) {
 				return field;
 			} else {
+				// propagate baseRel to the returned field
 				function F() {
 					this.name = baseRel + '->' + field.name;
 				}
@@ -112,6 +136,7 @@ NS.Model = eo.Object.create({
 				return new F();
 			}
 		} else {
+			// try to find a relation or a relation field
 			var parts = name.split("->");
 			if (parts.length > 1) {
 				var nextRel = parts.shift();
@@ -125,6 +150,24 @@ NS.Model = eo.Object.create({
 		}
 
 		throw new Error('No field: ' + name);
+	}
+
+	// Get a specified version of this model, as one of its subclass
+	// experimental, not tested, etc... do not use!!!
+	,as: function(subclass) {
+		throw new Error();
+		// Get the subclass which is necessarilly a hasOne relation
+		var subClassModel = this.getRelationModel(subclass);
+
+		var al = this.aliasLookup;
+		function F() {
+			var myAl = this.aliasLookup = Ext.apply({}, this.al);
+			subClassModel.fields.each(function(field) {
+				myAl[field.name] = field;
+			});
+		}
+
+		return new F();
 	}
 
 	,getDataIndex: function(field) {
