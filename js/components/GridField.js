@@ -544,6 +544,7 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 			if (id) ids.push(id);
 			if (this.pkName) xData[this.pkName] = id;
 
+			debugger
 			Ext.each(this.extraData, function(xd) {
 				xData[xd.name] = 
 					reccord.data[xd.dataIndex] === undefined || reccord.data[xd.dataIndex] === null ?
