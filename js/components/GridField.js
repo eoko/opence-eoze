@@ -388,7 +388,7 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 	}
 
 	,unmask: function() {
-		var el = this.grid.el;
+		var el = this.grid && this.grid.el;
 		if (el) el.unmask();
 		this.masked = false;
 	}
