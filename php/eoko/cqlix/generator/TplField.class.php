@@ -71,6 +71,7 @@ class TplField extends ModelColumn implements ConfigConstants {
 			case 'varchar':
 			case 'blob':
 			case 'char': $type = self::T_STRING; break;
+			case 'double':
 			case 'float': $type = self::T_FLOAT; break;
 			default: throw new IllegalStateException('Unrecognized type: "' . $type . '"');
 		}
