@@ -299,7 +299,7 @@ Oce.GridModule = Ext.extend(Ext.Panel, {
 
 		var checkboxSel = this.gridColumns[0];
 
-		var config = {
+		var config = Ext.apply({
 			store: this.store,
 			columns: this.gridColumns,
 			sm:checkboxSel,
@@ -321,10 +321,14 @@ Oce.GridModule = Ext.extend(Ext.Panel, {
 				emptyMsg: "Aucune données existantes"
 			})
 
+			,viewConfig: Ext.apply({
+				// grid view config can be added here
+			}, this.extra.gridView)
+
 			,listeners: {
 				rowdblclick: this.editReccordLine.createDelegate(this)
 			}
-		};
+		}, this.extra.grid);
 
 		this.beforeCreateGrid(config);
 
@@ -1425,7 +1429,7 @@ Oce.GridModule = Ext.extend(Ext.Panel, {
 
 			// --- Grid ---
 
-			if (col.grid === undefined || col.grid) {
+			if (col.grid !== false) {
 				this.gridColumns.push(col);
 			}
 
