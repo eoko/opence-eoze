@@ -204,7 +204,7 @@ class ModuleManager {
 		// include .js files without modification
 		foreach (self::getModulePathsAndUrls() as $path => $url) {
 			if (is_dir($jsDir = $path . 'js')) {
-				foreach (FileHelper::listFiles($jsDir, '/\.js$/', true, false) as $file) {
+				foreach (FileHelper::listFiles($jsDir, '/\.js$/i', true, false) as $file) {
 					$jsUrls[] = "$url/js/$file";
 				}
 			}
@@ -228,7 +228,7 @@ class ModuleManager {
 				$r[] = new OceModule($module, MODULES_PATH . $module, false);
 			}
 		}
-		foreach (FileHelper::listFiles(MODULES_PATH, '/\.yml$/') as $module) {
+		foreach (FileHelper::listFiles(MODULES_PATH, '/\.yml$/i') as $module) {
 			if (OceModule::isValid($module, MODULES_PATH)) {
 				$r[] = new OceModule($module, MODULES_PATH, true);
 			}
@@ -241,7 +241,7 @@ class ModuleManager {
 		foreach (FileHelper::listDirs(MODULES_PATH) as $module) {
 			$r[] = $module;
 		}
-		foreach (FileHelper::listFiles(MODULES_PATH, '/\.yml$/') as $module) {
+		foreach (FileHelper::listFiles(MODULES_PATH, '/\.yml$/i') as $module) {
 			$r[] = $module;
 		}
 		return $r;

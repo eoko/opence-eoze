@@ -6,6 +6,7 @@ const GET_MODULE_NAMESPACE = 'eoko\\_getModule\\';
 
 use eoko\config\Config, eoko\config\ConfigManager;
 use eoko\php\generator\ClassGeneratorManager;
+use eoko\util\Files;
 
 use IllegalStateException;
 use Logger;
@@ -53,8 +54,8 @@ class ModuleManager {
 
 	private function loadConfig() {
 		$config = ConfigManager::get(__NAMESPACE__);
-		foreach (array_reverse($config['locations']) as $location) {
-			self::addModuleLocationInfo($location['path'], $location['url'], $location['namespace']);
+		foreach (array_reverse($config['locations']) as $dirName => $location) {
+			self::addModuleLocationInfo($dirName, $location['path'], $location['url'], $location['namespace']);
 		}
 	}
 
@@ -66,18 +67,19 @@ class ModuleManager {
 	 * be considered potential parents for all upper locations (i.e. if a module
 	 * from an upper location has the same name as one from a lower location,
 	 * it will be considered as extending the latter).
+	 * @param string $dirName
 	 * @param string $basePath
 	 * @param string $baseUrl
 	 * @param string $namespace
 	 */
-	private static function addModuleLocationInfo($basePath, $baseUrl, $namespace) {
+	private static function addModuleLocationInfo($dirName, $basePath, $baseUrl, $namespace) {
 		if (self::$infoLocked) {
 			throw new IllegalStateException(
 				'All module locations must be added before the first use of ModuleManager'
 			);
 		}
 		$parent = self::$modulesDirectories === null ? null : self::$modulesDirectories[count(self::$modulesDirectories) - 1];
-		self::$modulesDirectories[] = new ModulesDirectory($basePath, $baseUrl, $namespace, $parent);
+		self::$modulesDirectories[] = new ModulesDirectory($dirName, $basePath, $baseUrl, $namespace, $parent);
 	}
 
 	private function testGetModuleNamespace($classOrNamespace) {
@@ -119,10 +121,30 @@ class ModuleManager {
 
 	/**
 	 * @return array[ModulesLocation]
+	 * @deprecated this method should follow the listModulesLocations naming
+	 * convention
 	 */
 	private static function getModulesLocations() {
 		self::getInstance();
 		return self::$modulesDirectories;
+	}
+
+	public static function listModules($onlyWithDir = false) {
+		$self = self::getInstance();
+		$config = ConfigManager::get(__NAMESPACE__);
+		
+//		dump($config);
+		$r = array();
+
+		foreach (self::$modulesDirectories as $modulesDir) {
+			//$modulesDir instanceof ModulesDirectory;
+			$usedModules = isset($config['used'][$modulesDir->name]) ? $config['used'][$modulesDir->name] : null;
+			foreach($modulesDir->listModules($usedModules, $onlyWithDir) as $module) {
+				$r[$module->getName()] = $module;
+			}
+		}
+
+		return array_values($r);
 	}
 
 	public static function registerModuleFactory(ModuleFactory $factory) {
@@ -197,21 +219,20 @@ class ModuleManager {
 	 *
 	 * 
 	 * @param string $name
+	 * @param boolean $required
 	 * @return Module
 	 */
-	public static function getModule($name) {
+	public static function getModule($name, $required = true) {
 		if ($name instanceof Module) {
 			return $name;
 		} else if (isset(self::$modules[$name])) {
 			return self::$modules[$name];
 		} else {
-			return self::$modules[$name] = self::getInstance()->doGetModule($name);
+			return self::$modules[$name] = self::getInstance()->doGetModule($name, $required);
 		}
 	}
 	
-	private function doGetModule($name) {
-
-		//dump_mark(1);
+	private function doGetModule($name, $required) {
 
 		if (strstr($name, '\\')) {
 			$ns = get_namespace($name, $relName);
@@ -237,7 +258,8 @@ class ModuleManager {
 			}
 		}
 
-		throw new MissingModuleException($name);
+		if ($required) throw new MissingModuleException($name);
+		else return null;
 	}
 
 	private function getModuleInNamespace($name, $ns) {
@@ -280,9 +302,7 @@ class ModuleManager {
 		$location = new ModuleLocation($dir, $name);
 		$config = $location->loadConfig();
 		
-//		if (false === $config = $location->searchConfigFile()) {
-//			return false;
-//		}
+		if ($location->isDisabled()) return null;
 
 		if (!$location->isActual()) {
 			$namespace = "$dir->namespace$name\\";
@@ -386,11 +406,17 @@ class Location {
 class ModuleLocation extends Location {
 
 	public $moduleName;
-	/** @var ModuleDirectory */
+	/** @var ModulesDirectory */
 	public $directory;
 
 	/** @var array[ModuleLocation] Cache for actual locations */
 	private $actualLocations = null, $locations = null;
+
+	/**
+	 * @var mixed Cache for the {@link loadConfig()} method. FALSE if the config
+	 * has not been loaded yet, else the value of loadConfig() (that can be NULL).
+	 */
+	private $configCache = false;
 
 	/**
 	 * Creates a new ModuleLocation. If no directory for the module exists in
@@ -441,9 +467,18 @@ class ModuleLocation extends Location {
 	}
 
 	/**
-	 * Load the config of all the module's {@link ModuleManager line}.
+	 * Load the config of all the module's {@link ModuleManager line}. The 
+	 * returned Config object is cached for subsequent call to the method.
+	 * @return Config or NULL
 	 */
 	public function loadConfig() {
+		if ($this->configCache === false) {
+			$this->configCache = $this->doLoadConfig();
+		}
+		return $this->configCache;
+	}
+	
+	private function doLoadConfig() {
 		$r = null;
 		foreach ($this->getLocations() as $location) {
 			$config = $location->searchConfigFile();
@@ -467,6 +502,22 @@ class ModuleLocation extends Location {
 	 */
 	public function isActual() {
 		return $this->path !== null;
+	}
+
+	/**
+	 * A module location can be ignored by placing a file named "disabled" in
+	 * its directory. This method will return FALSE if such a file is present,
+	 * OR if the module doesn't exist in the current location (independantly of
+	 * its existence in parent locations). Namely, a module will exists, if it
+	 * has a directory with its name in the location, or a configuration file
+	 * in the root of the location directory.
+	 * @return boolean
+	 */
+	public function isDisabled() {
+		return $this->path === null ? 
+//				($this->directory->path === null || !file_exists("{$this->directory->path}$this->moduleName.yml"))
+				($this->directory->path === null || !$this->loadConfig())
+				: file_exists($this->path . 'disabled');
 	}
 	
 	/**
@@ -504,6 +555,14 @@ class ModuleLocation extends Location {
 		}
 
 		return $this->getActualLocations($includeSelf);
+	}
+
+	public function getLineActualLocations($includeSelf = true) {
+		$r = array();
+		foreach ($this->getActualLocations($includeSelf) as $loc) {
+			if ($loc->moduleName === $this->moduleName) $r[] = $loc;
+		}
+		return $r;
 	}
 
 	public function getLocations($includeSelf = true) {
@@ -572,13 +631,22 @@ class ModulesDirectory extends Location {
 
 	/** @var ModulesDirectory */
 	public $parent;
+	/**
+	 * @var string The module name, as it is referred in the config. This name
+	 * is either extracted from the "locations" param in the config, or an
+	 * arbitrary bame can be given when the ModulesDirectory instance is
+	 * created. This name can be used in other configuration items to refer to
+	 * this particular ModulesDirectory, so it must be unique.
+	 */
+	public $name;
 
-	function __construct($path, $url, $namespace, ModulesDirectory $prev = null) {
+	function __construct($name, $path, $url, $namespace, ModulesDirectory $prev = null) {
 		if (substr($path, -1) !== DS) $path .= DS;
 		if (substr($url, -1) !== '/') $url .= '/';
 		if (substr($namespace, -1) !== '\\') $namespace .= '\\';
 		parent::__construct($path, $url, $namespace);
 		$this->parent = $prev;
+		$this->name = $name;
 	}
 
 	/**
@@ -629,6 +697,35 @@ class ModulesDirectory extends Location {
 			$locations = array_merge($locations, $this->parent->getLocations($moduleName));
 		}
 		return $locations;
+	}
+
+	/**
+	 * List the Modules in this directory. This method should be avoided when
+	 * performance is desired, since it will instanciate all the modules in the
+	 * directory, which requires quite a bit of file parsing and config file
+	 * reading...
+	 * @return array[Module]
+	 */
+	public function listModules($usedModules = null, $onlyWithDir = false) {
+		if ($usedModules === '*') $usedModules = null;
+		$r = array();
+		if ($this->path) {
+			foreach (Files::listDirs($this->path) as $dir) {
+				if (($usedModules === null || array_search($dir, $usedModules, true) !== false)
+						&& null !== $module = ModuleManager::getModule($dir, false)) {
+					$r[] = $module;
+				}
+			}
+			if (!$onlyWithDir) {
+				foreach (Files::listFiles($this->path, 'glob:*.yml') as $file) {
+					if (($usedModules === null || array_search($dir, $usedModules, true) !== false)
+							&& null !== $module = ModuleManager::getModule(substr($file, 0, -4), false)) {
+						$r[] = $module;
+					}
+				}
+			}
+		}
+		return $r;
 	}
 
 	/**

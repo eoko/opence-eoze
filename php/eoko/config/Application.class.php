@@ -64,10 +64,10 @@ class Application implements FileFinder {
 		} else if ($alias === '@oce-core') {
 			$js = array();
 			$js['init/init.js'] = 0;
-			foreach (Files::listFiles(JS_PATH . 'init', Files::regex('*.js')) as $file) {
+			foreach (Files::listFiles(JS_PATH . 'init', 'glob:*.js') as $file) {
 				$js['init/' . $file] = 1;
 			}
-			foreach (Files::listFiles(JS_PATH . 'core', Files::regex('*.js')) as $file) {
+			foreach (Files::listFiles(JS_PATH . 'core', 'glob:*.js') as $file) {
 				$js['core/' . $file] = 2;
 			}
 			return array(
@@ -85,11 +85,11 @@ class Application implements FileFinder {
 		} else if ($alias === '@oce-components') {
 			$js = array();
 			$js['init/init.js'] = 0;
-			foreach (Files::listFiles(JS_PATH . 'components', Files::regex('*.js')) as $file) {
+			foreach (Files::listFiles(JS_PATH . 'components', 'glob:*.js') as $file) {
 				$js['components/' . $file] = 3;
 			}
 			$css = array();
-			foreach (Files::listFiles(CSS_PATH . 'auto', Files::regex('*.css')) as $file) {
+			foreach (Files::listFiles(CSS_PATH . 'auto', 'glob:*.css') as $file) {
 				$css['auto/' . $file] = 10;
 			}
 			return array(

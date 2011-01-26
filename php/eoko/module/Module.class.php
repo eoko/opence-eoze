@@ -30,6 +30,8 @@ class Module implements file\Finder {
 	private $pathsUrl;
 	/** @var array[ModulesLocation] */
 	private $lineageLocations;
+	/** @var ModuleLocation */
+	private $location;
 
 	/** @var Config */
 	private $config = null;
@@ -60,6 +62,8 @@ class Module implements file\Finder {
 
 		$this->pathsUrl = $location->directory->getLineagePathsUrl($lineage);
 		$this->lineageLocations = $location->directory->getLineageLocations($lineage);
+		
+		$this->location = $location;
 
 //		dumpl(array(
 //			$name,
@@ -829,12 +833,13 @@ class Module implements file\Finder {
 		return $files;
 	}
 	
-	public function listFilesUrl($pattern, $dir, $type) {
+	public function listFilesUrl($pattern, $dir, $type = null) {
 		$r = array();
 		foreach ($this->pathsUrl as $basePath => $baseUrl) {
 			if ($baseUrl === null) continue;
 			// TODO use real declared path for $type
-			$typeDir = strtolower($type) . '/' . $dir . ($dir ? '/' : '');
+			$dir = str_replace('\\', '/', $dir);
+			$typeDir = ($type ? strtolower($type) . '/' : '') . $dir . ($dir ? '/' : '');
 			$path = "$basePath$typeDir";
 			$baseUrl .= $typeDir;
 			$urls = Files::listFilesIfDirExists($path, $pattern, false, false);
@@ -842,6 +847,22 @@ class Module implements file\Finder {
 			$r = array_merge($r, $urls);
 		}
 		return $r;
+	}
+
+	public function listLineFilesUrl($pattern, $dir) {
+		$r = array();
+		if ($dir) {
+			$urlDir = str_replace('\\', '/', $dir) . '/';
+		}
+		foreach (array_reverse($this->location->getLineActualLocations()) as $loc) {
+			$loc instanceof ModuleLocation;
+			if (!$loc->url) continue;
+			$baseUrl = $loc->url . $urlDir;
+			$urls = Files::listFilesIfDirExists($loc->path . $dir, $pattern, false, false);
+			foreach ($urls as &$url) $url = "$baseUrl$url";
+			$r = array_merge($r, $urls);
+		}
+		return $urls;
 	}
 	
 	private function createTypeFinder($path, $url, $fallbackFinder) {

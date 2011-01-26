@@ -109,7 +109,7 @@ class Config implements ArrayAccess, IteratorAggregate {
 		if ($dir === null) $dir = substr(CONFIG_PATH,0,-1);
 		else $dir = CONFIG_PATH . $dir;
 
-		$files = FileHelper::listFiles($dir, '\.ya?ml$', true, true);
+		$files = FileHelper::listFiles($dir, 're:\.ya?ml$', true, true);
 		foreach ($files as $file) {
 			// TODO error here => Fatal error: Call to undefined method Config::create()
 			$config = self::create(YAML::load(str_replace("\t", "  ", file_get_contents($file))));

@@ -50,8 +50,8 @@ class JsFileExecutor extends ExecutorBase {
 		}
 
 		foreach (array_merge(
-			$this->module->listFiles(Files::regex("{$name}_*.js"), null, FileType::JS),
-			$this->module->listFiles(Files::regex("*.js"), $name, FileType::JS)
+			$this->module->listFiles("glob:{$name}_*.js", null, FileType::JS),
+			$this->module->listFiles("glob:*.js", $name, FileType::JS)
 		) as $plugin) {
 			$cmtName = PHP_EOL . PHP_EOL . '// --- ' . basename($plugin) . ' ';
 			echo $cmtName . str_repeat('-', 80 - strlen($cmtName)) . PHP_EOL;

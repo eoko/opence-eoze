@@ -166,7 +166,7 @@ class ConfigManager {
 
 		$this->files = array();
 		foreach (self::$configPaths as $path) {
-			$this->files[$path] = Files::listFiles($path, Files::regex('*.yml'), true, false);
+			$this->files[$path] = Files::listFiles($path, 'glob:*.yml', true, false);
 		}
 		if (self::$extraFiles) {
 			foreach (self::$extraFiles as $path) {

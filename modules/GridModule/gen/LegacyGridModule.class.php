@@ -99,8 +99,8 @@ class LegacyGridModule {
 		// --- Javascript templates ---
 		$parts = array();
 		$files = array_merge(
-			FileHelper::listFilesIfDirExists(MODULES_PATH . 'grid' . DS . 'jstpl', '.html\.php$', false, true)
-			,FileHelper::listFilesIfDirExists(MODULES_PATH . $controllerName . DS . 'jstpl', '.html\.php$', false, true)
+			FileHelper::listFilesIfDirExists(MODULES_PATH . 'grid' . DS . 'jstpl', 're:.html\.php$', false, true)
+			,FileHelper::listFilesIfDirExists(MODULES_PATH . $controllerName . DS . 'jstpl', 're:.html\.php$', false, true)
 		);
 		foreach ($files as $file) {
 //			preg_match('/^(.*)\.html\.php$/', basename($file), $matches);

@@ -3,9 +3,11 @@
  * @author Éric Ortéga <eric@mail.com>
  */
 
+use eoko\util\Files;
+
 class FileHelper {
 
-	public static function listFilesIfDirExists($directory, $pattern = '.*',
+	public static function listFilesIfDirExists($directory, $pattern = null,
 			$recursive = false, $absolute = false) {
 
 		if (file_exists($directory)) {
@@ -17,7 +19,39 @@ class FileHelper {
 	
 	const LF_PATH_ABS_REL = 1;
 
-	public static function listFiles($directory, $pattern = '.*', $recursive = false, $absolute = false) {
+	/**
+	 * Convert the $pattern argument to the equivalent regex. The pattern format
+	 * can be specified with the prefix glob: or re: (shortcut for regex:).
+	 *
+	 * If no prefix is specified, then the $pattern is assumed to be a regex. If
+	 * the $pattern is a regex and a prefix is specified, then the delimiters
+	 * can be either omitted, or else they MUST be '/'; if the delimiters are
+	 * omitted in this fashion, then the i (case insensitive) modifier will be
+	 * added to the regex.
+	 * 
+	 * If the $pattern is a regex but no prefix is used, then the delimiters
+	 * MUST be present.
+	 *
+	 * @param string $pattern
+	 * @return string
+	 */
+	private static function convertPattern($pattern) {
+		if (preg_match('/^glob:(.+)$/', $pattern, $m)) {
+			// TODO real glob support
+			return Files::regex($m[1]);
+		} else if (preg_match('/^(?:re|regex):(.+)$/', $pattern, $m)) {
+			if (preg_match('@^/.+/[imsxeADSUXJu]*$@', $m[1])) {
+				return $m[1];
+			} else {
+				return '/' . addcslashes($m[1], '/') . '/i';
+			}
+			return $m[1];
+		} else {
+			return $pattern;
+		}
+	}
+
+	public static function listFiles($directory, $pattern = null, $recursive = false, $absolute = false) {
 
 		$directory = rtrim(str_replace('\\', '/', $directory), '/') . '/';
 		if (DIRECTORY_SEPARATOR != '/') $directory = str_replace('/', DIRECTORY_SEPARATOR, $directory);
@@ -33,29 +67,8 @@ class FileHelper {
 			$entries[] = $entry;
 		}
 		$dir->close();
-		
-//		if ($pattern == '*' && !$recursive) {
-//			$matches = array();
-//			foreach ($entries as $entry) {
-//				$fullname = $directory . $entry;
-//				if (is_file($fullname)) {
-//					$matches[] = $fullname;
-//				}
-//			}
-//			return $matches;
-//		}
 
-//		$pattern = preg_quote($pattern);
-//		$pattern = str_replace(array('\\*', '\\?'), array('.*', '.?'), $pattern);
-//		$pattern = '/^' . $pattern . '$/';
-
-		if ($pattern === null) {
-			$p2 = null;
-		} else if ($pattern[0] === '/' && $pattern[count($pattern)-1] === '/') {
-			$p2 = $pattern;
-		} else {
-			$p2 = '/' . $pattern . '/';
-		}
+		$pattern = self::convertPattern($pattern);
 
 		$matches = array();
 		foreach ($entries as $entry) {
@@ -74,7 +87,7 @@ class FileHelper {
 					}
 				}
 			} else {
-				if (is_file($fullname) && ($p2 === null || preg_match($p2, $entry))) {
+				if (is_file($fullname) && ($pattern === null || preg_match($pattern, $entry))) {
 					if ($absolute === true) {
 						$matches[] = $fullname;
 					} else if ($absolute === false) {
@@ -93,10 +106,10 @@ class FileHelper {
 
 	/**
 	 *
-	 * @param <type> $directory
-	 * @param <type> $pattern
-	 * @param <type> $recursive
-	 * @param <type> $absolute
+	 * @param string $directory
+	 * @param string $pattern
+	 * @param boolean $recursive
+	 * @param boolean $absolute
 	 * @return string
 	 */
 	public static function listDirs($directory, $absolute = false, $pattern = null, $recursive = false) {
@@ -116,13 +129,7 @@ class FileHelper {
 		}
 		$dir->close();
 
-		if ($pattern === null) {
-			$p2 = null;
-		} else if ($pattern[0] === '/' && $pattern[count($pattern)-1] === '/') {
-			$p2 = $pattern;
-		} else {
-			$p2 = '/' . $pattern . '/';
-		}
+		$pattern = self::convertPattern($pattern);
 
 		$matches = array();
 		foreach ($entries as $entry) {
@@ -133,7 +140,7 @@ class FileHelper {
 
 				$entry = utf8_encode(utf8_decode($entry));
 
-				if ($p2 === null || preg_match($p2, $entry)) {
+				if ($pattern === null || preg_match($pattern, $entry)) {
 					if ($absolute === true) {
 						$matches[] = $fullname;
 					} else if ($absolute === false) {

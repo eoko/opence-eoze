@@ -34,7 +34,7 @@ JS;
 
 	protected function pushLayoutExtraJs(HtmlRootTemplate $layout) {
 		$layout->pushJs(
-			ModuleManager::getModule('GridModule')->listFilesUrl(Files::regex('*.js'), null, FileType::JS), 10
+			ModuleManager::getModule('GridModule')->listFilesUrl('glob:*.js', null, FileType::JS), 10
 		);
 	}
 

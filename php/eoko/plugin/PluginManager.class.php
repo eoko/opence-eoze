@@ -14,7 +14,7 @@ class PluginManager {
 //	private static $eventListeners = array();
 
 	public static function init() {
-		foreach (Files::listDirs(PHP_PATH . 'eoko', true, '^[^.]', false) as $dir) {
+		foreach (Files::listDirs(PHP_PATH . 'eoko', true, '/^[^.]/', false) as $dir) {
 			if (file_exists($path = $dir . DS . 'plugin.init.php')) {
 				$r = require_once $path;
 				if (isset($r) && $r instanceof Plugin) {
