@@ -161,3 +161,16 @@ Ext.override(Ext.Panel, {
 		}
 	}
 });
+
+
+// Fixes negative dates...
+(function() {
+	var uber = Ext.form.DateField.prototype.parseDate;
+	Ext.form.DateField.prototype.parseDate = function(value) {
+		if (value === "0000-00-00") {
+			return uber(null);
+		} else {
+			return uber();
+		}
+	};
+})();
