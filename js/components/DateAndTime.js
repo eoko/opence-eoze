@@ -5,7 +5,7 @@
 	var dateFormat = "d/m/Y",
 		altDateFormats = "j/n/Y|j/n/y|j/n|j n Y|j n y|j n|Y-m-d|Y n j",
 		timeFormat = "H:i",
-		altTimeFormats = "G:i|G:i|G i|Gi|G";
+		altTimeFormats = "G:i|G:i|G i|Gi|G|G:i:s|G i s";
 
 	eo.form.DateField = Ext.extend(Ext.form.DateField, {
 		constructor: function(config) {
@@ -160,6 +160,21 @@
 		,setTime: function(time) {
 			this.timeField.setValue(time);
 			this.updateFieldValue();
+		}
+
+		,setValue: function(value) {
+			if (!value) {
+				setDate(undefined);
+				setValue(undefined);
+				return;
+			}
+			value = value.split(this.dateTimeSeparator);
+			var ufn = this.updateFieldValue;
+			this.updateFieldValue = Ext.emptyFn;
+			this.setDate(value.shift());
+			this.setTime(value.shift());
+			this.updateFieldValue =  ufn;
+			ufn();
 		}
 	});
 
