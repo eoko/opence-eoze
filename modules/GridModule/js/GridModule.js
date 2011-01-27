@@ -1407,7 +1407,9 @@ Oce.GridModule = Ext.extend(Ext.Panel, {
 			if (Ext.isString(col.renderer)) {
 				col.renderer = this.renderers[col.renderer];
 			}
-			if (col.formField && col.formField.xtype === "htmleditor") {
+			if (((col.formField && col.formField.xtype === "htmleditor")
+					|| (col.type && col.type === "htmleditor"))
+					&& !col.renderHtml) {
 				var renderer = function(v) {
 					if (!v) return v;
 					v = v.replace(/<[^>]*\bstyle\b[^>]*>[\s\S]*?<\/style>/gm, '');
