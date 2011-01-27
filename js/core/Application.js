@@ -5,11 +5,14 @@ Oce.MainApplication = {
 	moduleInstances: {}
 
 	,start: function(){
-		Oce.ClassLoader.require('root', 'MainApplication.mod', function(success){
-			if (success) {
-				Ext.getBody().removeClass('bg')
-			}
+		Oce.ClassLoader.require('root', 'ApplicationBootstrap', function(success) {
+			if (success) eo.root.MainApplication.start();
 		});
+//		Oce.ClassLoader.require('root', 'MainApplication.mod', function(success){
+//			if (success) {
+//				Ext.getBody().removeClass('bg')
+//			}
+//		});
 	}
 
 	,defaultModuleLoadingErrorCallback: function(error) {
