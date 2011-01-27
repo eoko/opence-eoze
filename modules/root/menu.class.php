@@ -16,11 +16,37 @@ class menu extends BasicHtmlExecutor {
 
 	protected $hasPartialRendering = true;
 
+	private $menuConfig = null;
+
 	public function get() {
 		$this->setTemplate(
 			$this->request->requireFirst(array('menu', 'name'), true)
 		);
 		return true;
+	}
+	
+	private function getMenuData() {
+		if (!$this->menuConfig) $this->menuConfig = YAML::load($this->findPath('menu.yml'));
+		return $this->menuConfig;
+	}
+
+	public function getMenuGroup($menu) {
+		$cfg = $this->getMenuData();
+		if (isset($cfg['menus'])) {
+			if (array_key_exists($menu, $cfg['menus'])) {
+				return isset($cfg['menus'][$menu]) ? $cfg['menus'][$menu] : array();
+			}
+		} else {
+			// Legacy syntax
+			// Known projects depending upon:
+			// - spanki
+			// - copb
+			if (isset($cfg[$menu])) {
+				return $cfg[$menu];
+			}
+		}
+		// Not found
+		throw new IllegalArgumentException('Not a menu: ' . $menu);
 	}
 
 	/**
@@ -28,24 +54,13 @@ class menu extends BasicHtmlExecutor {
 	 * @return HtmlTemplate
 	 */
 	private function createMenu($menu) {
-		switch ($menu) {
-			default: throw new IllegalArgumentException('Not a menu: ' . $menu);
+		
+		$menuData = $this->getMenuData();
 
-			case 'bookmarks':
-			case 'admin':
-			case 'general':
-//REM				$this->get_menu_bookmarks();
-		}
-
-//		$this->setTemplate(
-//			$this->findPath('menu.html.php', FileType::HTML_TPL)
-//		);
-		$tpl = $this->createTemplate('menu');
-		$menuData = YAML::load($this->findPath('menu.yml'));
-		$avMenuItems = &$menuData['menu-items'];
-
+		$avMenuItems = $menuData['menu-items'];
 		$menuItems = array();
-		if (isset($menuData[$menu])) foreach ($menuData[$menu] as $level => $items) {
+
+		foreach ($this->getMenuGroup($menu) as $level => $items) {
 			if (UserSession::isAuthorized((int) $level)) {
 				foreach ($items as $item) {
 					if (!array_key_exists($item, $avMenuItems)) {
@@ -56,6 +71,7 @@ class menu extends BasicHtmlExecutor {
 			}
 		}
 
+		$tpl = $this->createTemplate('menu');
 		$tpl->items = $menuItems;
 
 		return $tpl;

@@ -152,25 +152,7 @@
 
 		,createWest: function() {
 
-			var menuPanelOpts = {
-				tools: [{id: "gear"}]
-				,border: false
-				,collapsible: true
-				,titleCollapse: true
-			};
-
-			var menus = {
-				bookmarks: new Ext.Panel(Ext.applyIf({
-					title: "Favoris"
-				}, menuPanelOpts))
-				,general: new Ext.Panel(Ext.applyIf({
-					title: "Général"
-					,collapsed: true
-				}, menuPanelOpts))
-				,admin: new Ext.Panel(Ext.applyIf({
-					title: "Administration"
-				}, menuPanelOpts))
-			};
+			var menus = this.createWestPanelMenus();
 
 			var names = [], items = [];
 			Ext.iterate(menus, function(name, v) {
@@ -208,6 +190,32 @@
 			});
 
 			return menuPanel;
+		}
+
+		,createWestPanelMenus: function() {
+			return this.doCreateWestPanelMenus({
+				tools: [{id: "gear"}]
+				,border: false
+				,collapsible: true
+				,titleCollapse: true
+				,xtype: "panel"
+			});
+		}
+
+		,doCreateWestPanelMenus: function(menuPanelOpts) {
+
+			return {
+				bookmarks: new Ext.Panel(Ext.applyIf({
+					title: "Favoris"
+				}, menuPanelOpts))
+				,general: new Ext.Panel(Ext.applyIf({
+					title: "Général"
+					,collapsed: true
+				}, menuPanelOpts))
+				,admin: new Ext.Panel(Ext.applyIf({
+					title: "Administration"
+				}, menuPanelOpts))
+			};
 		}
 
 		,createWestMenu: function(items) {
