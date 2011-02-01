@@ -1636,6 +1636,8 @@ Oce.GridModule = Ext.extend(Ext.Panel, {
 				editTabFormItems = this.makeTabPanel(this.tabs.edit, editConfig);
 				this.my.editWinLayout = 'fit';
 			}
+		} else {
+			this.my.addWinLayout = this.my.editWinLayout = "fit";
 		}
 
 		//... Edit form
@@ -1648,7 +1650,7 @@ Oce.GridModule = Ext.extend(Ext.Panel, {
 					,jsonFormParam: 'json_form'
 					,bodyStyle: 'padding:0; background:transparent'
 					,items: editTabFormItems
-				}
+				};
 			}
 		} else {
 			this.my.editFormConfig = {
@@ -1675,6 +1677,25 @@ Oce.GridModule = Ext.extend(Ext.Panel, {
 				xtype: 'oce.form'
 				,jsonFormParam: 'json_form'
 				,items: addConfig.fields
+			}
+		}
+
+		// Form size
+		var w = this.extra.windowWidth, h = this.extra.windowHeight;
+		if (w) {
+			if (Ext.isObject(w)) {
+				if (w.add) this.my.addFormConfig.width = w.add;
+				if (w.edit) this.my.editFormConfig.width = w.edit;
+			} else {
+				this.my.addFormConfig.width = this.my.editFormConfig.width = w;
+			}
+		}
+		if (h) {
+			if (Ext.isObject(h)) {
+				if (h.add) this.my.addFormConfig.height = h.add;
+				if (h.edit) this.my.editFormConfig.height = h.edit;
+			} else {
+				this.my.addFormConfig.height = this.my.editFormConfig.height = h;
 			}
 		}
 	}

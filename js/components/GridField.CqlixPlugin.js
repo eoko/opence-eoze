@@ -2,11 +2,14 @@ Oce.deps.wait('eo.form.GridField', function() {
 
 var GRID_ACTION = eo.form.GridField.Action;
 
-eo.form.GridField.CqlixPlugin = eo.Object.create({
+var CQLIX_PLUGIN = eo.form.GridField.CqlixPlugin = eo.Object.create({
 
 	constructor: function(config) {
 		Ext.apply(this, config);
+		this.created = true;
+		
 		if (!this.model) throw new Error();
+		if (Ext.isFunction(this.model)) this.model = this.model.call(this.modelScope || this.scope || this);
 	}
 	
 	,configure: function(gridField) {
@@ -37,6 +40,24 @@ eo.form.GridField.CqlixPlugin = eo.Object.create({
 			,winTitle: this.editTitle
 		});
 
+		// Orderable
+		if (this.model.orderable) {
+			if (this.model.orderField) {
+				gridField.orderable = true;
+				gridField.orderField = this.model.orderField;
+			} else {
+				throw new Error("Model orderField must be set to create orderable grid");
+			}
+		}
+
+		// Auto expand main field
+		if (this.model.mainField) {
+			gridField.gridConfig = gridField.gridConfig || {};
+			Ext.applyIf(gridField.gridConfig, {
+				autoExpandColumn: this.model.mainField.name
+			});
+		}
+
 		var cm = gridField.fields = this.model.createColumnModel({
 			override: this.override
 			,fields: this.fields
@@ -46,7 +67,7 @@ eo.form.GridField.CqlixPlugin = eo.Object.create({
 					xtype: "actioncolumn"
 //					,header: "Supprimer"
 					,editable: false
-					,width: 40
+					,width: 2*16+3*5
 					,resizable: false
 					,items: [{
 						handler: function(grid, rowIndex, colIndex, item, e) {
@@ -64,124 +85,12 @@ eo.form.GridField.CqlixPlugin = eo.Object.create({
 			}
 		});
 
-		gridField.toolbar = Ext.apply(gridField.toolbar || {}, {
+		if (this.toolbar !== false) gridField.toolbar = Ext.apply(gridField.toolbar || {}, {
 			actions: [
 				new eo.form.GridField.ModelAction.Add({
 					model: this.model
 					,addWindow: true
 					,winTitle: this.addTitle
-// XXX DEMO
-					,demoHackRemiseFixed: this.demoHackRemiseFixed
-					,demoHackRemisePercent: this.demoHackRemisePercent
-
-					,createForm: function() {
-						if (this.demoHackRemiseFixed || this.demoHackRemisePercent) {
-							var grid, items = [{
-									xtype: "textfield"
-									,name: "name"
-									,fieldLabel: "Nom"
-								}];
-
-							if (this.demoHackRemiseFixed) {
-								items.push(grid = Ext.create({
-									xtype: "gridfield"
-									,anchor: "100%"
-									,hideLabel: true
-									,height: 200
-									,fields: {
-										name: {
-											header: "Saison"
-											,editor: {
-												xtype: "oce.simplecombo"
-												,data: {
-													0: "Saison 1"
-													,1: "Saison 2"
-													,2: "Saison 3"
-													,3: "Saison 4"
-												}
-											}
-										}
-										,price: {
-											header: "Prix"
-											,editor: {xtype: "numberfield"}
-										}
-										,price_remise: {
-											header: "Prix avec remise"
-											,editor: {xtype: "numberfield"}
-										}
-									}
-									,defaultRecord: {
-										name: ""
-										,price: ""
-										,price_remise: ""
-									}
-									,gridConfig: {
-										tbar: {
-											items: {
-												text: "Add"
-												,iconCls: 'ico ico_add'
-												,handler: function() {
-													grid.add(grid.defaultRecord);
-												}
-											}
-										}
-									}
-								}))
-							} else if (this.demoHackRemisePercent) {
-								items.push({
-									xtype: "numberfield"
-									,fieldLabel: "Prix de base"
-									,name: "price_unit"
-								}, grid = Ext.create({
-									xtype: "gridfield"
-									,anchor: "100%"
-									,hideLabel: true
-									,height: 200
-									,fields: {
-										name: {
-											header: "Saison"
-											,editor: {
-												xtype: "oce.simplecombo"
-												,data: {
-													0: "Saison 1"
-													,1: "Saison 2"
-													,2: "Saison 3"
-													,3: "Saison 4"
-												}
-											}
-										}
-										,price: {
-											header: "Pourcentage"
-											,editor: {xtype: "numberfield"}
-										}
-									}
-									,defaultRecord: {
-										name: ""
-										,price: ""
-									}
-									,gridConfig: {
-										tbar: {
-											items: {
-												text: "Add"
-												,iconCls: 'ico ico_add'
-												,handler: function() {
-													grid.add(grid.defaultRecord);
-												}
-											}
-										}
-									}
-								}))
-							}
-
-							return new Oce.FormPanel({
-								items: items
-								,width: 350
-							});
-						} else {
-							return eo.form.GridField.ModelAction.Add.prototype.createForm.call(this);
-						}
-					}
-// < XXX DEMO
 				})
 				,new GRID_ACTION.Remove({
 				})
@@ -233,5 +142,7 @@ eo.form.GridField.CqlixPlugin = eo.Object.create({
 //		return r;
 //	}
 });
+
+Ext.reg("gridfield.cqlix", CQLIX_PLUGIN);
 
 }); // deps closure

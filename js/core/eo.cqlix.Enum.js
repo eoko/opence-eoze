@@ -232,6 +232,16 @@ NS.BooleanField = eo.Object.extend(NS.EnumField, {
 		if (Ext.isString(value)) value = parseInt(value);
 		return value ? true : false;
 	}
+
+	,createGridColumnEditor: function(config) {
+		return "checkbox";
+	}
+
+	,doCreateGridColumn: function(config) {
+		return Ext.applyIf(NS.BooleanField.superclass.doCreateGridColumn.call(this, config), {
+			width: 42
+		});
+	}
 });
 
 Ext.apply(NS.ModelField.constructors, {
