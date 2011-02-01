@@ -106,8 +106,7 @@ class Generator extends Script {
 		// superseeded by the new config implementation
 		$this->baseConfig = new Config();
 
-		// TODO make the config namespace configurable
-		$this->modelsConfig = ConfigManager::get('rhodia/cqlix/models');
+		$this->modelsConfig = ConfigManager::get(APP_NAMESPACE . '/cqlix/models');
 	}
 
 	protected function run() {
