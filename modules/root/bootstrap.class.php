@@ -61,4 +61,12 @@ class Bootstrap extends \eoko\module\executor\JsFileExecutor {
 //TXT;
 		$tpl->text = 'Bonjour, veuillez vous identifier pour accéder à la console d\'administration.';
 	}
+
+	protected function getDefaultModule($name) {
+		if ($name === 'ApplicationBootstrap') {
+			return true;
+		} else {
+			return parent::getDefaultModule($name);
+		}
+	}
 }
