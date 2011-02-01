@@ -118,6 +118,9 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 		}
 
 		if (this.configurator) {
+			if (!this.configurator.created) {
+				this.configurator = Ext.create(this.configurator);
+			}
 			this.configurator.configure(this);
 		}
 
@@ -139,9 +142,8 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 					,dataIndex: di
 				}, this.columnDefaults);
 			} else if (config.editor) {
-				var editor;
 				if (config.editor == 'checkbox') {
-					editor = colConfig = new Oce.grid.CheckColumn(
+					colConfig = new Oce.grid.CheckColumn(
 						Ext.apply({
 							dataIndex: config.dataIndex || di
 						}, config)
@@ -334,7 +336,20 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 			}
 		}
 		if (extraData.length) {
-			if (!this.extraData) this.extraData = [];
+			if (!this.extraData) {
+				this.extraData = [];
+			} else {
+				var autoXD = {};
+				Ext.each(extraData, function(xd) {
+					autoXD[xd.name] = xd;
+				});
+				var myXDs = this.extraData, myXD;
+				for (i=0,len=myXDs.length; i<len; i++) {
+					myXD = myXDs[i];
+					if (autoXD[myXD.name]) myXDs[i] = Ext.apply(autoXD[myXD.name], myXD);
+					delete autoXD[myXD.name];
+				}
+			}
 			this.extraData = this.extraData.concat(extraData);
 		}
 //		if (extraData.length) {
