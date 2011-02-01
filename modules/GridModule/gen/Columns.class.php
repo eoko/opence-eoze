@@ -184,7 +184,7 @@ class Columns {
 				$ff = &$col['formField'];
 				if (isset($ff['xtype'])) {
 					if ($ff['xtype'] == 'gridfield') {
-						foreach ($ff['fields'] as &$c) {
+						if (isset($ff['fields'])) foreach ($ff['fields'] as &$c) {
 							if (is_array($c)
 									&& null !== $tpl = Arrays::pickOneOf($c, array('tpl', 'template'))) {
 
