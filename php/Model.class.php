@@ -208,7 +208,7 @@ abstract class Model {
 
 	public function __set($fieldName, $value) {
 		Logger::dbg('Setting {} => {}', $fieldName, $value);
-		if ($this->getTable()->getColumn($fieldName)->isPrimary()) $this->setPrimaryKeyValueImpl($fieldName, $value);
+		if ($this->getTable()->getColumn($fieldName)->isPrimary()) $this->setPrimaryKeyValue($fieldName, $value);
 		else $this->setField($fieldName, $value, false);
 	}
 
