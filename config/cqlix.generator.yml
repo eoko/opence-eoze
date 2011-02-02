@@ -1,0 +1,12 @@
+config.node: eoko\cqlix\generator
+
+*:
+  applies: /^.*$/
+  modelNameFormat: $1
+#  extends: myModel
+  # alternative syntaxe:
+  extends:
+    model: myModel | Model
+    table: myModelTable | ModelTable
+    query: myQuery | ModelTableQuery
+    proxy: ModelTableProxy
