@@ -71,7 +71,34 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 	// If set to true, the field will issue a request to load its subset
 	// when first rendered
 	,autoload: false
-	
+
+	/**
+	 * GridField is an implementation of Ext.form.Field that uses a GridPanel
+	 * to interact with the user. The content of the grid's store is serialized
+	 * into an html input, so that the standard form submission is preserved.
+	 * The way the data are aggregated depends on the configuration of the
+	 * GridField.
+	 *
+	 * @cfg {Array[Object]} fields An array of configuration objects used to
+	 * configure the fields to be represented/modified in the GridField.
+	 *
+	 * Each item of the fields can contains configuration accepted by Ext's
+	 * grid Column, along with a few others:<ul>
+	 *
+	 * <li>{Boolean} submit [undefined] Can be used either to force a column that
+	 * would not normally be submitted by default (i.e. if it is neither the primary
+	 * key, nor editable) to be submitted, or to prevent a column that would be
+	 * submitted by default to not be. Be careful if you decide to not submit the
+	 * PK, since that would must probably result in funky things on the side of the
+	 * default eoze's GridModule controllers.</li>
+	 *
+	 * <li>{Boolean} internal [undefined] A field flagged as <b>internal</b> will
+	 * be added to the DataStore backing the Grid, but it won't be added to the
+	 * Grid's columns, or ColumnModel. That means that the value of this Record's
+	 * field can be used and/or submitted, but the user cannot see them in the grid,
+	 * even if the show/hide command are enabled for grid header.</li>
+	 * </ul>
+	 */
 	,constructor: function(config) {
 
 		Oce.form.GridField.superclass.constructor.call(this, config);
@@ -128,13 +155,10 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 		Ext.each(eo.hashToArray(this.fields, 'dataIndex'), function(config) {
 			
 			var di = config.dataIndex;
-			dataIndexes.push(di);
 
 			config.editor = config.editor || config.editable;
-//			if (config.editable) {
-//				config.editor = config.editable;
-////				delete config.editable;
-//			}
+
+			var extraDataConfig;
 
 			var colConfig;
 			if (Ext.isString(config)) {
@@ -142,6 +166,8 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 					header: config
 					,dataIndex: di
 				}, this.columnDefaults);
+
+			// Editable columns
 			} else if (config.editor) {
 				if (config.editor == 'checkbox') {
 					colConfig = new Oce.grid.CheckColumn(
@@ -151,12 +177,12 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 					);
 					this.gridPlugins.push(colConfig);
 					delete colConfig.editor;
-					colConfig.on('changed', function() {
-						debugger // I thing this event doesn't exists for columns,
-								// and consequently is never called...
-								// TODO cleaning remove that if this is true
-						this.syncValue.createDelegate(this)
-					}, this);
+//REM					colConfig.on('changed', function() {
+//						debugger // I thing this event doesn't exists for columns,
+//								// and consequently is never called...
+//								// TODO cleaning remove that if this is true
+//						this.syncValue.createDelegate(this)
+//					}, this);
 				} else if (config.editor.xtype) {
 					colConfig = Ext.apply({
 						dataIndex: config.dataIndex || di
@@ -166,32 +192,47 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 						colConfig.renderer = colConfig.editor.createRenderer('-');
 					}
 					colConfig = new Ext.grid.Column(colConfig);
-//					colConfig.editor.on('select', function(combo, record, colConfig) {
-//						this.syncValue();
-//					}.createDelegate(this, [colConfig], 2));
 				} else {
 					throw new Error('GridField Invalid Config');
 				}
-				extraData.push({
+				extraDataConfig = {
 					dataIndex: colConfig.dataIndex
 					,name: colConfig.name || colConfig.dataIndex
 					,defaultValue: colConfig.defaultValue || null
-				});
+				};
 			} else {
 				colConfig = Ext.apply({
 					dataIndex: config.name || di
 				}, config, this.columnDefaults);
 				
 				if (colConfig.submit) {
-					extraData.push({
+					extraDataConfig = {
 						dataIndex: colConfig.dataIndex
 						,name: colConfig.name || colConfig.dataIndex
 						,defaultValue: colConfig.defaultValue || null
-					});
+					};
 				}
 			}
 
-			this.gridColumns.push(colConfig);
+			// submit option (makes the column be submitted, ie. its dataIndex
+			// is added to extraData)
+			if (!extraDataConfig && colConfig.submit) {
+				extraDataConfig = {
+					dataIndex: colConfig.dataIndex
+					,name: colConfig.name || colConfig.dataIndex
+					,defaultValue: colConfig.defaultValue || null
+				}
+			}
+
+			// add to extraData if needed
+			if (extraDataConfig) extraData.push(extraDataConfig);
+
+			// add to store fields
+			dataIndexes.push(di);
+
+			// internal option means the column must not be displayed to the
+			// user, yet it must exists in the store
+			if (!config.internal) this.gridColumns.push(colConfig);
 
 		}, this);
 
@@ -202,6 +243,7 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 		var store = this.store = Ext.create(Ext.apply({
 			url: 'index.php'
 			,totalProperty: 'count'
+			,idProperty: this.pkName
 			,baseParams: Ext.apply({
 				controller: this.controller
 				,action: this.action || 'load_subset'
@@ -218,8 +260,8 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 				fields: dataIndexes
 				,root: 'data'
 				,totalProperty: 'count'
+				,idProperty: this.pkName
 			})
-		
 		}, this.storeConfig, {
 
 			xtype: "jsonstore"
@@ -561,6 +603,7 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 		var extraData = [];
 		var i = this.orderStartIndex;
 		this.store.each(function(reccord) {
+			debugger
 			var id = reccord.data[this.pkName],
 				xData = {};
 			
