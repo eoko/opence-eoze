@@ -186,10 +186,10 @@ Ext.override(Ext.Panel, {
 	};
 })();
 
-// We don't want ActionColumn to have undefined dataIndex, or
-// GridView.prototype.getColumnData will try to guess its name from the column
-// with the same index in the DataStore... and that could not correspond, since
-// the store may have extra columns!
+// We don't want ActionColumn to have undefined dataIndex, or GridView's 
+// getColumnData method will try to guess its name from the column with the same
+// index in the DataStore... and that could not match, since the store may
+// have extra columns!
 // See ext-all-debug.js:47164 (Ext 3.3.0)
 (function() {
 	var uber = Ext.grid.ActionColumn.prototype.constructor;
