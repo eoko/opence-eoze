@@ -26,6 +26,7 @@ class DataStore {
 
 	/** @var ModelTableQuery */
 	protected $query = null;
+	protected $queryExecutor = null;
 	/** @var Closure */
 	protected $rowConverter = null;
 
@@ -48,14 +49,14 @@ class DataStore {
 ////	}
 
 	public function forceReload() {
-		if (null !== $this->query) {
+		if (null !== $this->queryExecutor) {
 			if (null !== $rowConverter = $this->rowConverter) {
 				$this->rows = array();
-				foreach ($this->query->executeSelect() as $row) {
+				foreach ($this->queryExecutor->execute() as $row) {
 					$this->rows[] = $rowConverter->convert($row);
 				}
 			} else {
-				$this->rows = $this->query->executeSelect();
+				$this->rows = $this->queryExecutor->execute();
 			}
 			$this->count = count($this->rows);
 		} else if ($this->initialRows !== null && $this->initialCount !== null) {
@@ -74,7 +75,7 @@ class DataStore {
 	 */
 	public static function fromQuery(ModelTableQuery $query, $rowConverterCallback = null) {
 		$instance = new DataStore();
-		$instance->query = $query;
+		$instance->queryExecutor = $query->createExecutor();
 		$instance->rowConverter = $rowConverterCallback;
 		// Load rows
 		$instance->forceReload();
