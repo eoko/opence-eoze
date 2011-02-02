@@ -58,7 +58,8 @@ var CQLIX_PLUGIN = eo.form.GridField.CqlixPlugin = eo.Object.create({
 			});
 		}
 
-		var cm = gridField.fields = this.model.createColumnModel({
+		// ColumnModel
+		var cm = gridField.fields = this.model.createGridFieldColumnModel({
 			override: this.override
 			,fields: this.fields
 			,editable: this.editable
@@ -144,5 +145,34 @@ var CQLIX_PLUGIN = eo.form.GridField.CqlixPlugin = eo.Object.create({
 });
 
 Ext.reg("gridfield.cqlix", CQLIX_PLUGIN);
+
+}); // deps closure
+
+
+// Injection of GridField specific methods in cqlix.Model
+Oce.deps.wait('eo.cqlix.Model', function() {
+
+	Ext.override(eo.cqlix.Model, {
+		createGridFieldColumnModel: function(config) {
+			var tmp = this.fieldCreateGridColumnMethod;
+			this.fieldCreateGridColumnMethodName = "createGridFieldColumn";
+			var r = this.doCreateColumnModel(config);
+			this.fieldCreateGridColumnMethodName = tmp;
+			return r;
+		}
+	}); // eo.cqlix.Model overrides
+
+	Ext.override(eo.cqlix.ModelField, {
+		createGridFieldColumn: function(config) {
+			if (this.internal === true && this.isPrimaryKey()) {
+				return this.doCreateGridColumn(Ext.apply({
+					internal: true
+					,submit: true
+				}, config));
+			} else {
+				return this.createGridColumn(config);
+			}
+		}
+	}); // eo.cqlix.ModelField overrides
 
 }); // deps closure
