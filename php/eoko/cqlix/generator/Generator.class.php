@@ -641,29 +641,6 @@ class Generator extends Script {
 		$tpl = Template::create()->setFile($this->tplPath . 'ModelTableProxy.tpl.php');
 		$this->tplSetTableBaseVars($tpl, $tableName, $fields);
 		return $tpl->render(true);
-	// <editor-fold defaultstate="collapsed" desc="REM">
-	//	$modelName = NameMaker::modelFromDB($tableName);
-	//	$className = NameMaker::tableFromDB($tableName);
-	//	$primaryField = self::getPrimaryField($fields);
-	//	$primaryColName = $primaryField !== null ? $primaryField->getName() : null;
-	//
-	//	g lobal $proxyTableMethods;
-	//	$proxyMethods = $proxyTableMethods;
-	//
-	//	foreach ($proxyMethods as &$method) {
-	//		$method = str_replace('%%ModelTable%%', $className, $method);
-	//		$method = str_replace('%%Model%%', $modelName, $method);
-	//	} unset($method);
-	//
-	//	g lobal $allRelations;
-	//	$relations = $allRelations[$tableName];
-	//	if (!is_array($relations)) $relations = array();
-	//
-	//	$package = APP_NAME;
-	//	ob_start();
-	//	include 'model_tpl' . DS . 'ModelTableProxy.tpl.php';
-	//	return ob_get_clean();
-	// </editor-fold>
 	}
 
 	function tplSetTableBaseVars(Template &$tpl, $tableName, $fields) {
