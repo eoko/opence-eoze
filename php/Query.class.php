@@ -1128,6 +1128,25 @@ class Query {
 		return $sql;
 	}
 
+	public function createExecutor() {
+
+		// TODO implement QueryExecutors for all actions...
+		if ($this->action !== self::SELECT) throw new UnsupportedActionException('Not implemented yet...');
+
+		$clean = false;
+		if ($this->sql === null) {
+			$clean = true;
+			$this->build();
+		}
+		$executor = new SelectExecutor($this->sql, $this->bindings);
+		if ($clean) {
+			$this->sql = null;
+			$this->bindings = array();
+		}
+
+		return $executor;
+	}
+
 	public function getSqlString() {
 		$clean = false;
 		if ($this->sql === null) {
@@ -1646,4 +1665,27 @@ interface QueryAliasable {
 
 	/** @return arary */
 	function &getContext();
+}
+
+class SelectExecutor {
+
+	private $sql, $bindings;
+
+	function __construct($sql, $bindings) {
+		$this->sql = $sql;
+		$this->bindings = $bindings;
+	}
+
+	public function execute() {
+
+		$pdo = ConnectionManager::get();
+		$pdoStatement = $pdo->prepare($this->sql);
+
+		if (!$pdoStatement->execute($this->bindings)) {
+			$errorInfo = $pdoStatement->errorInfo();
+			throw new SystemException($errorInfo[2]);
+		}
+
+		return $pdoStatement->fetchAll(PDO::FETCH_ASSOC);;
+	}
 }
