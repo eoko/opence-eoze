@@ -131,7 +131,7 @@ class Query {
 		$this->context = $context;
 
 		if ($table instanceof ModelTable) {
-			$table->attach($this->modeltable);
+			$table->attach($this->modelTable);
 			$this->dbTable = $table->getDBTableName();
 		} else {
 			$this->dbTable = $table;
