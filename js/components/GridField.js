@@ -60,6 +60,7 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 	,pkRowId: 'id'
 	,orderField: 'order'
 	,orderStartIndex: 0
+	,jsonNamePrefix: 'json_'
 
 	,edit: true
 
@@ -707,6 +708,18 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 		return this.name || eo.form.GridField.superclass.getName.apply(this, arguments);
 	}
 
+	,setName: function(name) {
+		this.name = name;
+		if (!this.el) return;
+		if (this.displayOnly || !name) {
+			this.el.set({name: null});
+		} else {
+			name = this.jsonNamePrefix ? this.jsonNamePrefix + this.name : this.name;
+//			this.el.set({name: 'json_' + this.name});
+			this.el.set({name: name});
+		}
+	}
+
 	,onRender: function(ct, position) {
 		Oce.form.GridField.superclass.onRender.apply(this, arguments);
 
@@ -716,11 +729,12 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 		this.el.dom.setAttribute('tabIndex', -1);
 		this.el.addClass('x-hidden');
 
-		if (this.displayOnly) {
-			this.el.set({name: null});
-		} else {
-			this.el.set({name: 'json_' + this.name});
-		}
+		this.setName(this.name);
+//REM		if (this.displayOnly) {
+//			this.el.set({name: null});
+//		} else {
+//			this.el.set({name: 'json_' + this.name});
+//		}
 
 		var phantom = this.phantom; // prevent the modified event from firing for new records
 		this.phantom = false;
