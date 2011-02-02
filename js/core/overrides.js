@@ -168,9 +168,20 @@ Ext.override(Ext.Panel, {
 	var uber = Ext.form.DateField.prototype.parseDate;
 	Ext.form.DateField.prototype.parseDate = function(value) {
 		if (value === "0000-00-00") {
-			return uber(null);
+			return uber.call(this, null);
 		} else {
-			return uber();
+			return uber.apply(this, arguments);
 		}
 	};
+})();
+
+
+// Prevent HtmlEditor from returning only <br/>
+(function() {
+	var uber = Ext.form.HtmlEditor.prototype.getValue;
+	Ext.form.HtmlEditor.prototype.getValue = function() {
+		var v = uber.apply(this, arguments);
+		if (Ext.isString(v) && /^\s*<br\/?>\s*$/.test(v)) return '';
+		else return v;
+	}
 })();
