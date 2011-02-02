@@ -227,6 +227,9 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 
 		if (this.subset) this.store.baseParams.subset = this.subset;
 
+		// Autoset name from subset
+		if (!this.name && this.subset) this.setName(this.subset);
+
 		if (this.fullBuffer) {
 			var deletedRecord = this.deletedRecords = [];
 			store.on({
