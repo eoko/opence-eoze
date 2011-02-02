@@ -63,6 +63,7 @@ var CQLIX_PLUGIN = eo.form.GridField.CqlixPlugin = eo.Object.create({
 			override: this.override
 			,fields: this.fields
 			,editable: this.editable
+			,pkName: this.model.primaryKeyName
 			,addExtraColumns: function(cols) {
 				cols.push({
 					xtype: "actioncolumn"
@@ -156,7 +157,7 @@ Oce.deps.wait('eo.cqlix.Model', function() {
 		createGridFieldColumnModel: function(config) {
 			var tmp = this.fieldCreateGridColumnMethod;
 			this.fieldCreateGridColumnMethodName = "createGridFieldColumn";
-			var r = this.doCreateColumnModel(config);
+			var r = this.createColumnModel(config);
 			this.fieldCreateGridColumnMethodName = tmp;
 			return r;
 		}
