@@ -478,6 +478,19 @@ NS.StringField = Ext.extend(NS.ModelField, {
 			(this.defaultConfig = this.defaultConfig || {}).maxLength = this.length;
 		}
 	}
+
+	,doCreateGridColumn: function(config) {
+		return Ext.applyIf(NS.StringField.superclass.doCreateGridColumn.call(this, config), {
+			// TODO this is a GridField specific field, but it should propably
+			// tried to be used somewhat, when creating a standard grid store...
+			storeFieldConfig: {
+				convert: function(v) {
+					if (!v) return "";
+					else return v;
+				}
+			}
+		});
+	}
 //	createField: function(config) {
 //		return NS.DateField.superclass.createField({
 //			xtype: "textfield"

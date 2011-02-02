@@ -240,6 +240,13 @@ NS.BooleanField = eo.Object.extend(NS.EnumField, {
 	,doCreateGridColumn: function(config) {
 		return Ext.applyIf(NS.BooleanField.superclass.doCreateGridColumn.call(this, config), {
 			width: 42
+			// TODO this is a GridField specific field, but it should propably 
+			// tried to be used somewhat, when creating a standard grid store...
+			,storeFieldConfig: {
+				convert: function(v) {
+					return v !== false;
+				}
+			}
 		});
 	}
 });
