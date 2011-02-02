@@ -23,8 +23,10 @@ NS.Model = eo.Object.create({
 					throw new Error('Field ' + field.name + ' already defined');
 				}
 
+				// catches primary key
 				if (field.primaryKey) {
 					this.primaryKeyField = field;
+					this.primaryKeyName = field.name;
 				}
 
 				fields.push(field);
@@ -242,7 +244,7 @@ NS.Model = eo.Object.create({
 				} else {
 					cfg = override;
 				}
-				var c = f.createGridColumn(cfg);
+				var c = f[cgcFn](cfg);
 				if (c) cols.push(c);
 			});
 		}
