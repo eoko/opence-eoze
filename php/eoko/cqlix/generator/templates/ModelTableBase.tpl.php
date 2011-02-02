@@ -4,7 +4,10 @@ require_once MODEL_QUERY_PATH . '<?php echo $modelName ?>Query.class.php';
  * Base of the <?php echo $modelName ?> Table.
  * @package <?php echo $package ?> 
  * @subpackage models_base
- * @version <?php echo date('Y-m-d h:i:s') ?> 
+<?php if ($version): ?>
+ * @since <?php echo $version ?>
+
+<?php endif ?>
  *
 <?php foreach ($fields as $field): ?>
  * @method mixed findBy<?php echo ucfirst($field->getVarName()) ?>($<?php echo $field->getVarName() ?>)

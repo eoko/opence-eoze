@@ -6,8 +6,10 @@
  * @package <?php echo $package ?>
 
  * @subpackage models_base
- * @version <?php echo date('Y-m-d h:i:s') ?>
+<?php if ($version): ?>
+ * @since <?php echo $version ?>
 
+<?php endif ?>
  *
 <?php foreach ($fields as $field): ?>
  * @property $<?php echo $field->getName() . PHP_EOL ?>

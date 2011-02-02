@@ -2,7 +2,10 @@
  * Proxy of the <?php echo $modelName ?> Table.
  * @package <?php echo $package ?>
  * @subpackage models_base
- * @version <?php echo date('Y-m-d h:i:s') ?>
+<?php if ($version): ?>
+ * @since <?php echo $version ?>
+
+<?php endif ?>
  */
 class <?php echo $tableName ?>Proxy extends ModelTableProxy {
 
