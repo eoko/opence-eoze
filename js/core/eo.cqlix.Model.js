@@ -215,6 +215,9 @@ NS.Model = eo.Object.create({
 		delete this.ignoredBaseRel;
 	}
 
+	// this allow for hooking by plugins
+	,fieldCreateGridColumnMethodName: "createGridColumn"
+
 	,createColumnModel: function(config) {
 		if (!config) config = {}
 
@@ -223,11 +226,11 @@ NS.Model = eo.Object.create({
 			editable: config.editable
 		}, config.override);
 
-
+		var cgcFn = this.fieldCreateGridColumnMethodName;
 		var fields = config.fields;
 		if (!fields) {
 			Ext.each(this.fields, function(f) {
-				var c = f.createGridColumn(override);
+				var c = f[cgcFn](override);
 				if (c) cols.push(c);
 			});
 		} else {
@@ -635,6 +638,10 @@ NS.ModelField.create = function(config) {
 //	}
 //});
 
+/**
+ * Known dependencies:
+ * - GridField.CqlixPlugin overrides eo.cqlix.Model & eo.cqlix.ModelField on this
+ */
 Oce.deps.reg('eo.cqlix.Model');
 
 NS.SpecialFields = {
