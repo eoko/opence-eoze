@@ -98,6 +98,9 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 	 * field can be used and/or submitted, but the user cannot see them in the grid,
 	 * even if the show/hide command are enabled for grid header.</li>
 	 * </ul>
+	 *
+	 * <li>{Object} storeFieldConfig [undefined] A object to be passed as the
+	 * config object for the DataStore corresponding record Field.</li>
 	 */
 	,constructor: function(config) {
 
@@ -224,7 +227,14 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 			// add to store fields
 			// (we don't want to add undefined dataIndex though, from action
 			// columns, for example)
-			if (di) dataIndexes.push(di);
+			if (colConfig.storeFieldConfig) {
+				dataIndexes.push(Ext.apply({
+					name: di
+				}, colConfig.storeFieldConfig));
+				delete colConfig.storeFieldConfig;
+			} else if (di) {
+				dataIndexes.push(di);
+			}
 
 			// internal option means the column must not be displayed to the
 			// user, yet it must exists in the store
