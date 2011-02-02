@@ -177,12 +177,6 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 					);
 					this.gridPlugins.push(colConfig);
 					delete colConfig.editor;
-//REM					colConfig.on('changed', function() {
-//						debugger // I thing this event doesn't exists for columns,
-//								// and consequently is never called...
-//								// TODO cleaning remove that if this is true
-//						this.syncValue.createDelegate(this)
-//					}, this);
 				} else if (config.editor.xtype) {
 					colConfig = Ext.apply({
 						dataIndex: config.dataIndex || di
@@ -228,7 +222,9 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 			if (extraDataConfig) extraData.push(extraDataConfig);
 
 			// add to store fields
-			dataIndexes.push(di);
+			// (we don't want to add undefined dataIndex though, from action
+			// columns, for example)
+			if (di) dataIndexes.push(di);
 
 			// internal option means the column must not be displayed to the
 			// user, yet it must exists in the store
@@ -401,8 +397,18 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 					if (autoXD[myXD.name]) myXDs[i] = Ext.apply(autoXD[myXD.name], myXD);
 					delete autoXD[myXD.name];
 				}
+				extraData = eo.hashToArray(autoXD);
 			}
 			this.extraData = this.extraData.concat(extraData);
+		}
+
+		// decipher orderFieldName
+		if (this.orderable && this.orderField) {
+			this.orderFieldName = Ext.isString(this.orderField) ?
+				this.orderField : this.orderField.name;
+			if (!this.orderFieldName) throw new Error(
+				"Invalid order field (name is missing): " + this.orderField
+			);
 		}
 	}
 
@@ -603,7 +609,6 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 		var extraData = [];
 		var i = this.orderStartIndex;
 		this.store.each(function(reccord) {
-			debugger
 			var id = reccord.data[this.pkName],
 				xData = {};
 			
@@ -616,8 +621,8 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 					xd.defaultValue : reccord.data[xd.dataIndex];
 			});
 
-			if (this.orderable && this.orderField) {
-				xData[this.orderField] = i++;
+			if (this.orderable && this.orderFieldName) {
+				xData[this.orderFieldName] = i++;
 			}
 
 			extraData.push(xData);
