@@ -150,7 +150,12 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 					);
 					this.gridPlugins.push(colConfig);
 					delete colConfig.editor;
-					colConfig.on('changed', this.syncValue.createDelegate(this))
+					colConfig.on('changed', function() {
+						debugger // I thing this event doesn't exists for columns,
+								// and consequently is never called...
+								// TODO cleaning remove that if this is true
+						this.syncValue.createDelegate(this)
+					}, this);
 				} else if (config.editor.xtype) {
 					colConfig = Ext.apply({
 						dataIndex: config.dataIndex || di
@@ -233,6 +238,7 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 
 		store.on('add', this.syncValue, this);
 		store.on('remove', this.syncValue, this);
+		store.on('update', this.syncValue, this);
 		
 		if (this.rowId !== undefined) {
 			store.baseParams[this.pkRowId] = this.rowId;
@@ -352,9 +358,6 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 			}
 			this.extraData = this.extraData.concat(extraData);
 		}
-//		if (extraData.length) {
-//			this.extraData = extraData;
-//		}
 	}
 
 	,value: ''
@@ -547,6 +550,7 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 		return record;
 	}
 
+	// private
 	,syncValue: function() {
 		if (!this.el) return;
 		var ids = [];
@@ -559,7 +563,6 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 			if (id) ids.push(id);
 			if (this.pkName) xData[this.pkName] = id;
 
-			debugger
 			Ext.each(this.extraData, function(xd) {
 				xData[xd.name] = 
 					reccord.data[xd.dataIndex] === undefined || reccord.data[xd.dataIndex] === null ?
