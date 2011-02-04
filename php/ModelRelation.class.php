@@ -84,7 +84,8 @@ abstract class ModelRelation {
 			}
 		}
 
-		if ($this instanceof ModelRelationInfoHasMany && !is_array($value)) {
+//		if ($this instanceof ModelRelationInfoHasMany && !is_array($value)) {
+		if ($this instanceof ModelRelationHasMany && !is_array($value)) {
 			$value = explode(',', $value);
 			foreach ($value as &$v) {
 				$v = (int) trim($v);
@@ -668,7 +669,7 @@ class ModelRelationHasOneByAssoc
 }
 
 class ModelRelationIndirectHasMany extends ModelRelationByAssoc
-		implements ModelRelationHasMany {
+		implements ModelRelationHasMany, IteratorAggregate {
 
 	protected $assocModels = null;
 
@@ -848,6 +849,10 @@ class ModelRelationIndirectHasMany extends ModelRelationByAssoc
 
 	protected function doGetAsModel($createIfNone = false, array $overrideContext = null) {
 		return $this->get($overrideContext);
+	}
+	
+	public function getIterator() {
+		return $this->get();
 	}
 	
 	public function get(array $overrideContext = null) {
