@@ -651,6 +651,7 @@ class Generator extends Script {
 //		$className = NameMaker::tableFromDB($tableName);
 		$modelName = $modelInfos['modelName'];
 		$className = $modelInfos['tableName'];
+		$pkName = self::getPrimaryField($fields) !== null ? self::getPrimaryField($fields)->getName() : null;
 
 		$tpl->merge(array(
 //			'tableName' => $tableName,
@@ -659,7 +660,8 @@ class Generator extends Script {
 //			'modelName' => $modelName,
 			'className' => $className,
 			'primaryField' => self::getPrimaryField($fields),
-			'primaryColName' => self::getPrimaryField($fields) !== null ? self::getPrimaryField($fields)->getName() : null
+			'primaryColName' => $pkName,
+			'primaryKeyName' => $pkName,
 		));
 
 		$tpl->merge($modelInfos);

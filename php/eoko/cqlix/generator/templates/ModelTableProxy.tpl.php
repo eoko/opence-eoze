@@ -80,6 +80,6 @@ class <?php echo $tableName ?>Proxy extends ModelTableProxy {
  */
 ?>
 	public static function getPrimaryKeyName() {
-		return <?php echo $primaryKeyName ?>;
+		return '<?php echo $primaryKeyName ?>';
 	}
 }
