@@ -79,6 +79,9 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 	 * The way the data are aggregated depends on the configuration of the
 	 * GridField.
 	 *
+	 * @cfg {Object} addComboConfig A configuration object that can be passed to set
+	 * some options on the add ComboBox, if one is created.
+	 *
 	 * @cfg {Array[Object]} fields An array of configuration objects used to
 	 * configure the fields to be represented/modified in the GridField.
 	 *
@@ -315,13 +318,13 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 					this.syncValue();
 				}, this);
 
-				var addComboConfig = {
+				var addComboConfig = Ext.apply({
 					controller: this.initialConfig.addController || this.initialConfig.controller
 					,editable: true
 					,baseParams: this.initialConfig.baseParams || {}
 					,clearable: false
 					,width: 200
-				};
+				}, this.addComboConfig);
 
 				if (this.autoComplete) {
 					addComboConfig.baseParams.autoComplete = this.autoComplete;
