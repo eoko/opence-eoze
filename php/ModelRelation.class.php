@@ -891,19 +891,19 @@ class ModelRelationIndirectHasMany extends ModelRelationByAssoc
 
 		foreach ($models as $i => $model) {
 			$model instanceof Model;
-			if ($this->info->targetAssocName !== null) {
-				$relation = $this->targetTable
-						->getRelationInfo($this->info->targetAssocName)
-						->createRelation($model);
-				$relation->setFromModel($assocModels[$i]);
-				$model->getInternal()->setRelation($relation);
-			}
-			// Associate parentModel to reciproque relation in the new Model
-			$relation = $this->targetTable
-					->getRelationInfo($this->info->reciproqueName)
-					->createRelation($model);
-			$relation->setFromModel($this->parentModel);
-			$model->getInternal()->setRelation($relation);
+//TODO			if ($this->info->targetAssocName !== null) {
+//				$relation = $this->assocTable
+//						->getRelationInfo($this->info->targetAssocName)
+//						->createRelation($model);
+//				$relation->setFromModel($assocModels[$i]);
+//				$model->getInternal()->setRelation($relation);
+//			}
+//TODO			// Associate parentModel to reciproque relation in the new Model
+//			$relation = $this->targetTable
+//					->getRelationInfo($this->info->reciproqueName)
+//					->createRelation($model);
+//			$relation->setFromModel($this->parentModel);
+//			$model->getInternal()->setRelation($relation);
 		}
 
 		return $models;
