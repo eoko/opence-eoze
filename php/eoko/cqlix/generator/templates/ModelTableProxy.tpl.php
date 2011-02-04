@@ -74,5 +74,12 @@ class <?php echo $tableName ?>Proxy extends ModelTableProxy {
 	public static function getModelName() {
 		return self::$modelName;
 	}
-
+<?php
+/* The primary key name must be proxyied in order to avoid infinite recursion
+ * between two separate tables which have an IndirectHasMany relationship.
+ */
+?>
+	public static function getPrimaryKeyName() {
+		return <?php echo $primaryKeyName ?>;
+	}
 }
