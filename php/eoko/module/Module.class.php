@@ -703,7 +703,7 @@ class Module implements file\Finder {
 			$executor = null;
 		} else if ($controller instanceof Executor) {
 			$module = $controller->getModule();
-			$executor = $controller;
+			$executor = $controller->name;
 		} else if (is_string($controller)) {
 			if (count($parts = explode('.', $controller, 2)) === 2) {
 				$module = $parts[0];
