@@ -168,9 +168,9 @@ Ext.override(Ext.Panel, {
 	var uber = Ext.form.DateField.prototype.parseDate;
 	Ext.form.DateField.prototype.parseDate = function(value) {
 		if (value === "0000-00-00") {
-			return uber(null);
+			return uber.call(this, null);
 		} else {
-			return uber();
+			return uber.call(this, value);
 		}
 	};
 })();
