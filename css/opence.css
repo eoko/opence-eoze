@@ -37,3 +37,6 @@
 .x-edit-image {
 	background: url(../images/icons/image_add.png) no-repeat 0 0 !important;
 }
+.x-edit-wordpaste {
+	background: url(../images/icons/paste_word.png) no-repeat 0 0 !important;
+}
