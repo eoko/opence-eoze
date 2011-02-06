@@ -89,6 +89,8 @@ class Generator extends Script {
 	
 	private $fileWritten = 0, $modelProcessed = 0;
 
+	public $addTimeVersionInGeneratedFiles = false;
+
 	public function __construct() {
 
 		// We want exceptions to show off at the face of the user, not being
@@ -106,8 +108,7 @@ class Generator extends Script {
 		// superseeded by the new config implementation
 		$this->baseConfig = new Config();
 
-		// TODO make the config namespace configurable
-		$this->modelsConfig = ConfigManager::get('rhodia/cqlix/models');
+		$this->modelsConfig = ConfigManager::get(APP_NAMESPACE . '/cqlix/models');
 	}
 
 	protected function run() {
@@ -556,9 +557,18 @@ class Generator extends Script {
 		return null;
 	}
 
+	private function getVersionString() {
+		if ($this->addTimeVersionInGeneratedFiles) {
+			return date('Y-m-d h:i:s');
+		} else {
+			return null;
+		}
+	}
+
 	function tplModel($tableName, $fields) {
 		$modelName = NameMaker::modelFromDB($tableName);
 		$package = APP_NAME;
+		$version = $this->getVersionString();
 		ob_start();
 		include $this->tplPath . 'Model.tpl.php';
 		return ob_get_clean();
@@ -577,6 +587,7 @@ class Generator extends Script {
 //		$tableName = NameMaker::tableFromDB($table);
 		$primaryField = self::getPrimaryField($fields);
 		$package = APP_NAME;
+		$version = $this->getVersionString();
 
 		$proxyMethods = $this->proxyModelMethods;
 		foreach ($proxyMethods as &$method) {
@@ -605,6 +616,8 @@ class Generator extends Script {
 
 		if (!is_array($relations)) $relations = array();
 
+		$generator = $this;
+		
 		ob_start();
 		include $this->tplPath . 'ModelBase.tpl.php';
 		return ob_get_clean();
@@ -618,6 +631,7 @@ class Generator extends Script {
 	function tplTable($tableName, $fields) {
 		$className = NameMaker::tableFromDB($tableName);
 		$package = APP_NAME;
+		$version = $this->getVersionString();
 		ob_start();
 		include $this->tplPath . 'ModelTable.tpl.php';
 		return ob_get_clean();
@@ -627,29 +641,6 @@ class Generator extends Script {
 		$tpl = Template::create()->setFile($this->tplPath . 'ModelTableProxy.tpl.php');
 		$this->tplSetTableBaseVars($tpl, $tableName, $fields);
 		return $tpl->render(true);
-	// <editor-fold defaultstate="collapsed" desc="REM">
-	//	$modelName = NameMaker::modelFromDB($tableName);
-	//	$className = NameMaker::tableFromDB($tableName);
-	//	$primaryField = self::getPrimaryField($fields);
-	//	$primaryColName = $primaryField !== null ? $primaryField->getName() : null;
-	//
-	//	g lobal $proxyTableMethods;
-	//	$proxyMethods = $proxyTableMethods;
-	//
-	//	foreach ($proxyMethods as &$method) {
-	//		$method = str_replace('%%ModelTable%%', $className, $method);
-	//		$method = str_replace('%%Model%%', $modelName, $method);
-	//	} unset($method);
-	//
-	//	g lobal $allRelations;
-	//	$relations = $allRelations[$tableName];
-	//	if (!is_array($relations)) $relations = array();
-	//
-	//	$package = APP_NAME;
-	//	ob_start();
-	//	include 'model_tpl' . DS . 'ModelTableProxy.tpl.php';
-	//	return ob_get_clean();
-	// </editor-fold>
 	}
 
 	function tplSetTableBaseVars(Template &$tpl, $tableName, $fields) {
@@ -660,6 +651,7 @@ class Generator extends Script {
 //		$className = NameMaker::tableFromDB($tableName);
 		$modelName = $modelInfos['modelName'];
 		$className = $modelInfos['tableName'];
+		$pkName = self::getPrimaryField($fields) !== null ? self::getPrimaryField($fields)->getName() : null;
 
 		$tpl->merge(array(
 //			'tableName' => $tableName,
@@ -668,7 +660,8 @@ class Generator extends Script {
 //			'modelName' => $modelName,
 			'className' => $className,
 			'primaryField' => self::getPrimaryField($fields),
-			'primaryColName' => self::getPrimaryField($fields) !== null ? self::getPrimaryField($fields)->getName() : null
+			'primaryColName' => $pkName,
+			'primaryKeyName' => $pkName,
 		));
 
 		$tpl->merge($modelInfos);
@@ -684,6 +677,7 @@ class Generator extends Script {
 		if (!is_array($tpl->relations)) $tpl->relations = array();
 
 		$tpl->package = APP_NAME;
+		$tpl->version = $this->getVersionString();
 	}
 
 	function tplTableBase($tableName, $fields) {

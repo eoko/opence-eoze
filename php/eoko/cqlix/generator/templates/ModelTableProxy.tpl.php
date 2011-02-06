@@ -2,7 +2,10 @@
  * Proxy of the <?php echo $modelName ?> Table.
  * @package <?php echo $package ?>
  * @subpackage models_base
- * @version <?php echo date('Y-m-d h:i:s') ?>
+<?php if ($version): ?>
+ * @since <?php echo $version ?>
+
+<?php endif ?>
  */
 class <?php echo $tableName ?>Proxy extends ModelTableProxy {
 
@@ -71,5 +74,12 @@ class <?php echo $tableName ?>Proxy extends ModelTableProxy {
 	public static function getModelName() {
 		return self::$modelName;
 	}
-
+<?php
+/* The primary key name must be proxyied in order to avoid infinite recursion
+ * between two separate tables which have an IndirectHasMany relationship.
+ */
+?>
+	public static function getPrimaryKeyName() {
+		return '<?php echo $primaryKeyName ?>';
+	}
 }

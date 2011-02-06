@@ -84,7 +84,8 @@ abstract class ModelRelation {
 			}
 		}
 
-		if ($this instanceof ModelRelationInfoHasMany && !is_array($value)) {
+//		if ($this instanceof ModelRelationInfoHasMany && !is_array($value)) {
+		if ($this instanceof ModelRelationHasMany && !is_array($value)) {
 			$value = explode(',', $value);
 			foreach ($value as &$v) {
 				$v = (int) trim($v);
@@ -668,7 +669,7 @@ class ModelRelationHasOneByAssoc
 }
 
 class ModelRelationIndirectHasMany extends ModelRelationByAssoc
-		implements ModelRelationHasMany {
+		implements ModelRelationHasMany, IteratorAggregate {
 
 	protected $assocModels = null;
 
@@ -850,6 +851,10 @@ class ModelRelationIndirectHasMany extends ModelRelationByAssoc
 		return $this->get($overrideContext);
 	}
 	
+	public function getIterator() {
+		return $this->get();
+	}
+	
 	public function get(array $overrideContext = null) {
 		if (null !== $models =& $this->cache->get($overrideContext)) {
 			return $models;
@@ -886,19 +891,19 @@ class ModelRelationIndirectHasMany extends ModelRelationByAssoc
 
 		foreach ($models as $i => $model) {
 			$model instanceof Model;
-			if ($this->info->targetAssocName !== null) {
-				$relation = $this->targetTable
-						->getRelationInfo($this->info->targetAssocName)
-						->createRelation($model);
-				$relation->setFromModel($assocModels[$i]);
-				$model->getInternal()->setRelation($relation);
-			}
-			// Associate parentModel to reciproque relation in the new Model
-			$relation = $this->targetTable
-					->getRelationInfo($this->info->reciproqueName)
-					->createRelation($model);
-			$relation->setFromModel($this->parentModel);
-			$model->getInternal()->setRelation($relation);
+//TODO			if ($this->info->targetAssocName !== null) {
+//				$relation = $this->assocTable
+//						->getRelationInfo($this->info->targetAssocName)
+//						->createRelation($model);
+//				$relation->setFromModel($assocModels[$i]);
+//				$model->getInternal()->setRelation($relation);
+//			}
+//TODO			// Associate parentModel to reciproque relation in the new Model
+//			$relation = $this->targetTable
+//					->getRelationInfo($this->info->reciproqueName)
+//					->createRelation($model);
+//			$relation->setFromModel($this->parentModel);
+//			$model->getInternal()->setRelation($relation);
 		}
 
 		return $models;
