@@ -170,31 +170,7 @@ Ext.override(Ext.Panel, {
 		if (value === "0000-00-00") {
 			return uber.call(this, null);
 		} else {
-			return uber.apply(this, arguments);
+			return uber.call(this, value);
 		}
-	};
-})();
-
-
-// Prevent HtmlEditor from returning only <br/>
-(function() {
-	var uber = Ext.form.HtmlEditor.prototype.getValue;
-	Ext.form.HtmlEditor.prototype.getValue = function() {
-		var v = uber.apply(this, arguments);
-		if (Ext.isString(v) && /^\s*<br\/?>\s*$/.test(v)) return '';
-		else return v;
-	};
-})();
-
-// We don't want ActionColumn to have undefined dataIndex, or GridView's 
-// getColumnData method will try to guess its name from the column with the same
-// index in the DataStore... and that could not match, since the store may
-// have extra columns!
-// See ext-all-debug.js:47164 (Ext 3.3.0)
-(function() {
-	var uber = Ext.grid.ActionColumn.prototype.constructor;
-	Ext.grid.ActionColumn.prototype.constructor = function() {
-		uber.apply(this, arguments);
-		if (this.dataIndex === undefined) this.dataIndex = null;
 	};
 })();

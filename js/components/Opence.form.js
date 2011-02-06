@@ -305,6 +305,9 @@ Oce.form.HtmlEditor = Ext.extend(Ext.form.HtmlEditor, {
 			}));
 //			plugins.push(new Ext.ux.form.HtmlEditor.HeadingButtons);
 		}
+		if (this.enableWordPast !== false) {
+			plugins.push(new Ext.ux.form.HtmlEditor.Word());
+		}
 		if (plugins.length) {
 			if (!this.plugins) this.plugins = plugins;
 			else {
