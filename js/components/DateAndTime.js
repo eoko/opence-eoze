@@ -170,11 +170,13 @@
 			}
 			value = value.split(this.dateTimeSeparator);
 			var ufn = this.updateFieldValue;
+			// disable field update while setting value
 			this.updateFieldValue = Ext.emptyFn;
 			this.setDate(value.shift());
 			this.setTime(value.shift());
+			// restore & apply field update
 			this.updateFieldValue =  ufn;
-			ufn();
+			this.updateFieldValue();
 		}
 	});
 
