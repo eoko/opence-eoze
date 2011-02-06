@@ -355,6 +355,16 @@ abstract class Model {
 	}
 
 	public function testIntegrity($operation, $return = false) {
+		// TODO testIntegrity could be used to ensure that fields' value do
+		// respects the BL constraints.
+
+		// Fields should not be tested against NULL if the Model isn't new. NULL
+		// means that the field has not been modified, but it is expected to be
+		// valid in the datastore, since it must have passed an integrity test
+		// before being created.
+		// Since no other test are performed for now, we might as well return now...
+		if (!$this->isNew()) return true;
+
 		foreach ($this->table->getColumns() as $col) {
 			$value = $this->getField($col->name);
 			if ($value === null) {

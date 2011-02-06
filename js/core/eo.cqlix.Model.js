@@ -23,8 +23,10 @@ NS.Model = eo.Object.create({
 					throw new Error('Field ' + field.name + ' already defined');
 				}
 
+				// catches primary key
 				if (field.primaryKey) {
 					this.primaryKeyField = field;
+					this.primaryKeyName = field.name;
 				}
 
 				fields.push(field);
@@ -38,6 +40,7 @@ NS.Model = eo.Object.create({
 
 		Ext.apply(this, config);
 
+		// fields functions
 		fields.each = function(cb, scope) {
 			if (!scope) scope = this;
 			for (var i=0, l=fields.length; i<l; i++) {
@@ -46,10 +49,16 @@ NS.Model = eo.Object.create({
 		};
 
 		fields.findBy = this.findFieldsBy.createDelegate(this);
-		
+
+		// Instance vars
 		this.fields = fields;
 		this.nameLookup = nameLookup;
 		this.aliasLookup = aliasLookup;
+
+		// Fields specials etc
+		fields.each(function(field) {
+			if (field.onModelCreate) field.onModelCreate(this);
+		}, this);
 	}
 
 	,getRelationModel: function(name) {
@@ -208,6 +217,9 @@ NS.Model = eo.Object.create({
 		delete this.ignoredBaseRel;
 	}
 
+	// this allow for hooking by plugins
+	,fieldCreateGridColumnMethodName: "createGridColumn"
+
 	,createColumnModel: function(config) {
 		if (!config) config = {}
 
@@ -216,11 +228,11 @@ NS.Model = eo.Object.create({
 			editable: config.editable
 		}, config.override);
 
-
+		var cgcFn = this.fieldCreateGridColumnMethodName;
 		var fields = config.fields;
 		if (!fields) {
 			Ext.each(this.fields, function(f) {
-				var c = f.createGridColumn(override);
+				var c = f[cgcFn](override);
 				if (c) cols.push(c);
 			});
 		} else {
@@ -232,7 +244,7 @@ NS.Model = eo.Object.create({
 				} else {
 					cfg = override;
 				}
-				var c = f.createGridColumn(cfg);
+				var c = f[cgcFn](cfg);
 				if (c) cols.push(c);
 			});
 		}
@@ -330,7 +342,15 @@ NS.ModelField = eo.Object.create({
 		Ext.apply(this, config);
 
 		if (!this.alias) this.alias = this.name;
+
+		if (this.special) NS.SpecialFields[this.special](this);
 	}
+
+	/**
+	 * Called when the model owning this field is constructed, to provide an
+	 * opportunity to configure the model...
+	 */
+	,onModelCreate: function(model) {}
 
 	,isPrimaryKey: function() {
 		return this.primaryKey;
@@ -422,20 +442,27 @@ NS.ModelField = eo.Object.create({
 	}
 
 	,createGridColumn: function(config) {
-
 		if (this.internal === true) return null;
+		else return this.doCreateGridColumn(config);
+	}
+
+	,doCreateGridColumn: function(config) {
 
 		config = config || {};
 		
 		var r = Ext.apply({
 			dataIndex: this.name
+			,id: this.name
 			,header: this.getLabel(['grid','column','abbrev'])
-//			,editor: this.createField(config.editor)
 		}, config);
 
-		if (config.editable) r.editor = this.createField(config.editor);
+		if (config.editable) r.editor = this.createGridColumnEditor(config.editor);
 
 		return r;
+	}
+
+	,createGridColumnEditor: function(config) {
+		return this.createField(config);
 	}
 
 	,getLabel: function(type, defaultLabel) {
@@ -451,6 +478,19 @@ NS.StringField = Ext.extend(NS.ModelField, {
 			(this.defaultConfig = this.defaultConfig || {}).maxLength = this.length;
 		}
 	}
+
+	,doCreateGridColumn: function(config) {
+		return Ext.applyIf(NS.StringField.superclass.doCreateGridColumn.call(this, config), {
+			// TODO this is a GridField specific field, but it should propably
+			// tried to be used somewhat, when creating a standard grid store...
+			storeFieldConfig: {
+				convert: function(v) {
+					if (!v) return "";
+					else return v;
+				}
+			}
+		});
+	}
 //	createField: function(config) {
 //		return NS.DateField.superclass.createField({
 //			xtype: "textfield"
@@ -458,13 +498,29 @@ NS.StringField = Ext.extend(NS.ModelField, {
 //	}
 });
 
-//NS.TextField = eo.Object.extend(NS.StringField, {
 NS.TextField = Ext.extend(NS.StringField, {
 	xtype: "textarea"
+	,constructor: function(config) {
+		if (config.format === "html" && !(this instanceof NS.HtmlField)) {
+			return new NS.HtmlField(config);
+		} else {
+			return NS.TextField.superclass.constructor.call(this, config);
+		}
+	}
 	,doCreateField: function(config) {
 		return Ext.apply({
 			height: 40
 		}, NS.TextField.superclass.doCreateField.call(this, config));
+	}
+});
+
+NS.HtmlField = Ext.extend(NS.TextField, {
+	xtype: "htmleditor"
+	,doCreateField: function(config) {
+		return Ext.apply(NS.HtmlField.superclass.doCreateField.call(this, config), {
+			height: 120
+			,anchor: "100%"
+		});
 	}
 });
 
@@ -597,6 +653,28 @@ NS.ModelField.create = function(config) {
 //	}
 //});
 
+/**
+ * Known dependencies:
+ * - GridField.CqlixPlugin overrides eo.cqlix.Model & eo.cqlix.ModelField on this
+ */
 Oce.deps.reg('eo.cqlix.Model');
+
+NS.SpecialFields = {
+
+	orderable: function(field) {
+		field.internal = true;
+		field.onModelCreate = field.onModelCreate.createSequence(function(model) {
+			if (model.orderField) throw new Exception("Model can have only one order field");
+			model.orderable = true;
+			model.orderField = this;
+		})
+	}
+
+	,main: function(field) {
+		field.onModelCreate = field.onModelCreate.createSequence(function(model) {
+			if (!model.mainField) model.mainField = this;
+		});
+	}
+};
 
 })(); // closure

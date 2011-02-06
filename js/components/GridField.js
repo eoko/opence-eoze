@@ -60,6 +60,7 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 	,pkRowId: 'id'
 	,orderField: 'order'
 	,orderStartIndex: 0
+	,jsonNamePrefix: 'json_'
 
 	,edit: true
 
@@ -70,7 +71,40 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 	// If set to true, the field will issue a request to load its subset
 	// when first rendered
 	,autoload: false
-	
+
+	/**
+	 * GridField is an implementation of Ext.form.Field that uses a GridPanel
+	 * to interact with the user. The content of the grid's store is serialized
+	 * into an html input, so that the standard form submission is preserved.
+	 * The way the data are aggregated depends on the configuration of the
+	 * GridField.
+	 *
+	 * @cfg {Object} addComboConfig A configuration object that can be passed to set
+	 * some options on the add ComboBox, if one is created.
+	 *
+	 * @cfg {Array[Object]} fields An array of configuration objects used to
+	 * configure the fields to be represented/modified in the GridField.
+	 *
+	 * Each item of the fields can contains configuration accepted by Ext's
+	 * grid Column, along with a few others:<ul>
+	 *
+	 * <li>{Boolean} submit [undefined] Can be used either to force a column that
+	 * would not normally be submitted by default (i.e. if it is neither the primary
+	 * key, nor editable) to be submitted, or to prevent a column that would be
+	 * submitted by default to not be. Be careful if you decide to not submit the
+	 * PK, since that would must probably result in funky things on the side of the
+	 * default eoze's GridModule controllers.</li>
+	 *
+	 * <li>{Boolean} internal [undefined] A field flagged as <b>internal</b> will
+	 * be added to the DataStore backing the Grid, but it won't be added to the
+	 * Grid's columns, or ColumnModel. That means that the value of this Record's
+	 * field can be used and/or submitted, but the user cannot see them in the grid,
+	 * even if the show/hide command are enabled for grid header.</li>
+	 * </ul>
+	 *
+	 * <li>{Object} storeFieldConfig [undefined] A object to be passed as the
+	 * config object for the DataStore corresponding record Field.</li>
+	 */
 	,constructor: function(config) {
 
 		Oce.form.GridField.superclass.constructor.call(this, config);
@@ -118,19 +152,19 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 		}
 
 		if (this.configurator) {
+			if (!this.configurator.created) {
+				this.configurator = Ext.create(this.configurator);
+			}
 			this.configurator.configure(this);
 		}
 
 		Ext.each(eo.hashToArray(this.fields, 'dataIndex'), function(config) {
 			
 			var di = config.dataIndex;
-			dataIndexes.push(di);
 
 			config.editor = config.editor || config.editable;
-//			if (config.editable) {
-//				config.editor = config.editable;
-////				delete config.editable;
-//			}
+
+			var extraDataConfig;
 
 			var colConfig;
 			if (Ext.isString(config)) {
@@ -138,17 +172,17 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 					header: config
 					,dataIndex: di
 				}, this.columnDefaults);
+
+			// Editable columns
 			} else if (config.editor) {
-				var editor;
 				if (config.editor == 'checkbox') {
-					editor = colConfig = new Oce.grid.CheckColumn(
+					colConfig = new Oce.grid.CheckColumn(
 						Ext.apply({
 							dataIndex: config.dataIndex || di
 						}, config)
 					);
 					this.gridPlugins.push(colConfig);
 					delete colConfig.editor;
-					colConfig.on('changed', this.syncValue.createDelegate(this))
 				} else if (config.editor.xtype) {
 					colConfig = Ext.apply({
 						dataIndex: config.dataIndex || di
@@ -158,32 +192,56 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 						colConfig.renderer = colConfig.editor.createRenderer('-');
 					}
 					colConfig = new Ext.grid.Column(colConfig);
-//					colConfig.editor.on('select', function(combo, record, colConfig) {
-//						this.syncValue();
-//					}.createDelegate(this, [colConfig], 2));
 				} else {
 					throw new Error('GridField Invalid Config');
 				}
-				extraData.push({
+				extraDataConfig = {
 					dataIndex: colConfig.dataIndex
 					,name: colConfig.name || colConfig.dataIndex
 					,defaultValue: colConfig.defaultValue || null
-				});
+				};
 			} else {
 				colConfig = Ext.apply({
 					dataIndex: config.name || di
 				}, config, this.columnDefaults);
 				
 				if (colConfig.submit) {
-					extraData.push({
+					extraDataConfig = {
 						dataIndex: colConfig.dataIndex
 						,name: colConfig.name || colConfig.dataIndex
 						,defaultValue: colConfig.defaultValue || null
-					});
+					};
 				}
 			}
 
-			this.gridColumns.push(colConfig);
+			// submit option (makes the column be submitted, ie. its dataIndex
+			// is added to extraData)
+			if (!extraDataConfig && colConfig.submit) {
+				extraDataConfig = {
+					dataIndex: colConfig.dataIndex
+					,name: colConfig.name || colConfig.dataIndex
+					,defaultValue: colConfig.defaultValue || null
+				}
+			}
+
+			// add to extraData if needed
+			if (extraDataConfig) extraData.push(extraDataConfig);
+
+			// add to store fields
+			// (we don't want to add undefined dataIndex though, from action
+			// columns, for example)
+			if (colConfig.storeFieldConfig) {
+				dataIndexes.push(Ext.apply({
+					name: di
+				}, colConfig.storeFieldConfig));
+				delete colConfig.storeFieldConfig;
+			} else if (di) {
+				dataIndexes.push(di);
+			}
+
+			// internal option means the column must not be displayed to the
+			// user, yet it must exists in the store
+			if (!config.internal) this.gridColumns.push(colConfig);
 
 		}, this);
 
@@ -194,6 +252,7 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 		var store = this.store = Ext.create(Ext.apply({
 			url: 'index.php'
 			,totalProperty: 'count'
+			,idProperty: this.pkName
 			,baseParams: Ext.apply({
 				controller: this.controller
 				,action: this.action || 'load_subset'
@@ -210,14 +269,17 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 				fields: dataIndexes
 				,root: 'data'
 				,totalProperty: 'count'
+				,idProperty: this.pkName
 			})
-		
 		}, this.storeConfig, {
 
 			xtype: "jsonstore"
 		}));
 
 		if (this.subset) this.store.baseParams.subset = this.subset;
+
+		// Autoset name from subset
+		if (!this.name && this.subset) this.setName(this.subset);
 
 		if (this.fullBuffer) {
 			var deletedRecord = this.deletedRecords = [];
@@ -231,6 +293,7 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 
 		store.on('add', this.syncValue, this);
 		store.on('remove', this.syncValue, this);
+		store.on('update', this.syncValue, this);
 		
 		if (this.rowId !== undefined) {
 			store.baseParams[this.pkRowId] = this.rowId;
@@ -255,13 +318,13 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 					this.syncValue();
 				}, this);
 
-				var addComboConfig = {
+				var addComboConfig = Ext.apply({
 					controller: this.initialConfig.addController || this.initialConfig.controller
 					,editable: true
 					,baseParams: this.initialConfig.baseParams || {}
 					,clearable: false
 					,width: 200
-				};
+				}, this.addComboConfig);
 
 				if (this.autoComplete) {
 					addComboConfig.baseParams.autoComplete = this.autoComplete;
@@ -334,12 +397,32 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 			}
 		}
 		if (extraData.length) {
-			if (!this.extraData) this.extraData = [];
+			if (!this.extraData) {
+				this.extraData = [];
+			} else {
+				var autoXD = {};
+				Ext.each(extraData, function(xd) {
+					autoXD[xd.name] = xd;
+				});
+				var myXDs = this.extraData, myXD;
+				for (i=0,len=myXDs.length; i<len; i++) {
+					myXD = myXDs[i];
+					if (autoXD[myXD.name]) myXDs[i] = Ext.apply(autoXD[myXD.name], myXD);
+					delete autoXD[myXD.name];
+				}
+				extraData = eo.hashToArray(autoXD);
+			}
 			this.extraData = this.extraData.concat(extraData);
 		}
-//		if (extraData.length) {
-//			this.extraData = extraData;
-//		}
+
+		// decipher orderFieldName
+		if (this.orderable && this.orderField) {
+			this.orderFieldName = Ext.isString(this.orderField) ?
+				this.orderField : this.orderField.name;
+			if (!this.orderFieldName) throw new Error(
+				"Invalid order field (name is missing): " + this.orderField
+			);
+		}
 	}
 
 	,value: ''
@@ -532,6 +615,7 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 		return record;
 	}
 
+	// private
 	,syncValue: function() {
 		if (!this.el) return;
 		var ids = [];
@@ -544,15 +628,14 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 			if (id) ids.push(id);
 			if (this.pkName) xData[this.pkName] = id;
 
-			debugger
 			Ext.each(this.extraData, function(xd) {
 				xData[xd.name] = 
 					reccord.data[xd.dataIndex] === undefined || reccord.data[xd.dataIndex] === null ?
 					xd.defaultValue : reccord.data[xd.dataIndex];
 			});
 
-			if (this.orderable && this.orderField) {
-				xData[this.orderField] = i++;
+			if (this.orderable && this.orderFieldName) {
+				xData[this.orderFieldName] = i++;
 			}
 
 			extraData.push(xData);
@@ -689,6 +772,18 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 		return this.name || eo.form.GridField.superclass.getName.apply(this, arguments);
 	}
 
+	,setName: function(name) {
+		this.name = name;
+		if (!this.el) return;
+		if (this.displayOnly || !name) {
+			this.el.set({name: null});
+		} else {
+			name = this.jsonNamePrefix ? this.jsonNamePrefix + this.name : this.name;
+//			this.el.set({name: 'json_' + this.name});
+			this.el.set({name: name});
+		}
+	}
+
 	,onRender: function(ct, position) {
 		Oce.form.GridField.superclass.onRender.apply(this, arguments);
 
@@ -698,11 +793,12 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 		this.el.dom.setAttribute('tabIndex', -1);
 		this.el.addClass('x-hidden');
 
-		if (this.displayOnly) {
-			this.el.set({name: null});
-		} else {
-			this.el.set({name: 'json_' + this.name});
-		}
+		this.setName(this.name);
+//REM		if (this.displayOnly) {
+//			this.el.set({name: null});
+//		} else {
+//			this.el.set({name: 'json_' + this.name});
+//		}
 
 		var phantom = this.phantom; // prevent the modified event from firing for new records
 		this.phantom = false;

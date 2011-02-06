@@ -122,9 +122,13 @@ abstract class ModelTable extends ModelTableProxy {
 	}
 
 	/**
-	 * Create a new Model
+	 * Creates a new Model.
 	 *
-	 * The new reccord will be considered new until its primary key is set.
+	 * The new reccord will be considered new until its primary key is set. This
+	 * default behaviour can be controlled with the {@link ModelTable::forceNew()
+	 * forceNew()} method (if you intend to use forceNew() just after the call
+	 * of the present method, both calls can be combined by using the {@link
+	 * createNewModel()} method).
 	 *
 	 * An array of values can be given to initialize the reccord's fields. It
 	 * is not required for all model's fields to have a value in the given
@@ -140,7 +144,7 @@ abstract class ModelTable extends ModelTableProxy {
 	 *
 	 * @param array $initValues an array containing values with which the
 	 * Model's fields will be initialized.
-	 * @param Bool $strict if set to TRUE, then all field of the model will be
+	 * @param boolean $strict if set to TRUE, then all field of the model will be
 	 * required to be set in $initValues, or an IllegalArgumentException will
 	 * be thrown
 	 * @return Model
@@ -148,11 +152,13 @@ abstract class ModelTable extends ModelTableProxy {
 	abstract static function createModel($initValues = null, $strict = false, array $params = array());
 
 	/**
+	 * Creates a new Model instance (see {@link createModel()}), and set the
+	 * forceNew flag to TRUE.
 	 *
-	 * @param array $initValues
-	 * @param <type> $strict
-	 * @param array $params
-	 * @return <type>
+	 * @param array $initValues see {@link createModel()}
+	 * @param boolean $strict   see {@link createModel()}
+	 * @param array $params     see {@link createModel()}
+	 * @return Model
 	 */
 	protected function _createNewModel($initValues = null, $strict = false, array $params = array()) {
 		return $this->createModel($initValues, $strict, $params)->forceNew();

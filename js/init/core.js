@@ -306,10 +306,12 @@ eo.hashToArray = function(hash, keyIndex, checkConflicts) {
 		var r = [];
 		Ext.iterate(hash, function(k,v) {
 			v = Ext.apply({}, v);
-			if (checkConflicts && v[keyIndex] !== undefined && v[keyIndex] !== k) {
-				throw new Error('Hash index conflicts with object property: ' + keyIndex);
+			if (keyIndex) {
+				if (checkConflicts && v[keyIndex] !== undefined && v[keyIndex] !== k) {
+					throw new Error('Hash index conflicts with object property: ' + keyIndex);
+				}
+				v[keyIndex] = k;
 			}
-			v[keyIndex] = k;
 			r.push(v);
 		});
 		return r;

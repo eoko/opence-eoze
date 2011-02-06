@@ -4,8 +4,10 @@ require_once MODEL_BASE_PATH . '<?php echo $className ?>Base.class.php';
  * @package <?php echo $package ?>
 
  * @subpackage models
- * @since <?php echo date('Y-m-d h:i:s') ?>
- 
+<?php if ($version): ?>
+ * @since <?php echo $version ?>
+
+<?php endif ?>
  */
 class <?php echo $className ?> extends <?php echo $className ?>Base {
 
