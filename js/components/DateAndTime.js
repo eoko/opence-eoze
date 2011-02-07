@@ -64,6 +64,8 @@
 	eo.form.DateTimeField = Ext.extend(Ext.form.CompositeField, {
 
 		dateTimeSeparator: " "
+		,outDateFormat: 'Y-m-d'
+		,outTimeFormat: 'H:i'
 
 		,initComponent: function() {
 
@@ -90,6 +92,21 @@
 			if (!timeName) tf.on("afterrender", removeFieldName);
 
 			items.push(df, tf);
+
+			if (true || this.nowButton) {
+				items.push({
+					xtype: "button"
+					,width: 24
+					,height: 18
+					,cls: "x-form-now-button"
+					,tooltip: "Now"
+					,handler: function() {
+						var now = new Date();
+						df.setValue(now);
+						tf.setValue(now);
+					}
+				});
+			}
 
 			if (this.name && this.submitValue !== false) {
 				items.push(this.hiddenField = new Ext.form.Hidden({
@@ -149,7 +166,10 @@
 		,getRawValue: function() {
 			var date = this.getValue();
 			if (!date) return "";
-			return date.format(this.dateField.format + this.dateTimeSeparator + this.timeField.format);
+			var df = this.outDateFormat || this.dateField.format,
+				tf = this.outTimeFormat || this.timeField.format;
+//			return date.format(this.dateField.format + this.dateTimeSeparator + this.timeField.format);
+			return date.format(df + this.dateTimeSeparator + tf);
 		}
 
 		,setDate: function(date) {
@@ -168,7 +188,11 @@
 				setValue(undefined);
 				return;
 			}
-			value = value.split(this.dateTimeSeparator);
+			if (Ext.isString(value)) {
+				value = value.split(this.dateTimeSeparator);
+			} else if (Ext.isDate(value)) {
+				value = [value, value];
+			}
 			var ufn = this.updateFieldValue;
 			// disable field update while setting value
 			this.updateFieldValue = Ext.emptyFn;
