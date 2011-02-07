@@ -415,12 +415,18 @@ NS.ModelField = eo.Object.create({
 				return undefined;
 			}
 
-		} else if (config.readOnly) {
-			return this.createReadOnlyField(config);
+		} else {
+			if (config.readOnly
+					// if config.readOnly === false, we want to override this.readOnly value
+					|| (this.readOnly && (config.readOnly !== false))) {
 
+				return this.createReadOnlyField(config);
+
+			} else {
+
+				return this.doCreateField.call(this, config);
+			}
 		}
-
-		return this.doCreateField.call(this, config);
 	} // createField
 
 	// protected
