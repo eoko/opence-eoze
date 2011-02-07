@@ -4,6 +4,9 @@
  * @extends Ext.util.Observable
  * <p>A plugin that creates a button on the HtmlEditor for pasting text from Word without all the jibberish html.</p>
  */
+
+Ext.ns("Ext.ux.form.HtmlEditor");
+
 Ext.ux.form.HtmlEditor.Word = Ext.extend(Ext.util.Observable, {
     // Word language text
 //    langTitle: 'Word Paste',
