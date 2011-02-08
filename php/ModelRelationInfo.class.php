@@ -260,16 +260,26 @@ abstract class ModelRelationInfo implements ModelField {
 	 *		alias params
 	 */
 	public function selectFields(ModelTableQuery $query, $field_s) {
-		if (false === $this instanceof ModelRelationInfoHasOne) {
+//		if (false === $this instanceof ModelRelationInfoHasOne) {
+		if (!$this->canSelectFields($query, $field_s)) {
 			throw new UnsupportedOperationException($this . '::selectField()'
 					. ' Field(s) can only be selected from relations of type "has one"');
+		} else {
+			return $this->doSelectFields($query, $field_s);
 		}
+	}
+
+	final protected function doSelectFields(ModelTableQuery $query, $field_s) {
 
 		$this->parseSelectJoinAlias($this->name, $joinAlias, $leftAlias);
 		$join = $query->join($this, $joinAlias, $leftAlias);
 		$join->select($field_s);
 
 		return $query;
+	}
+
+	protected function canSelectFields(ModelTableQuery $query, $field_s) {
+		return $this instanceof ModelRelationInfoHasOne;
 	}
 
 	protected $relationInstances = array();
@@ -829,6 +839,17 @@ class ModelRelationInfoReferedByMany extends ModelRelationInfoIsRefered
 		);
 	}
 
+	/**
+	 * Select fields from this relation, considering it as an associative
+	 * relation {@internal (effectively bypassing the canSelectFields() test)}.
+	 * @param ModelTableQuery $query
+	 * @param mixed $field_s
+	 * @return ModelTableQuery
+	 */
+	public function selectAssocFields(ModelTableQuery $query, $field_s) {
+		return $this->doSelectFields($query, $field_s);
+	}
+
 }
 
 /**
@@ -847,17 +868,17 @@ abstract class ModelRelationInfoByAssoc extends ModelRelationInfo {
 	/** 
 	 * @var string name of the target model(s)' assoc relation
 	 */
-	public $targetAssocName;
+	public $assocRelationName;
 	
 	/** @var ModelRelationInfo */
-	public $assocRelationInfo = null;
+	private $assocRelationInfo = null;
 	
 	function  __construct(
 		$name,
 		ModelTableProxy $localTable, ModelTableProxy $targetTableProxy,
 		ModelTableProxy $assocTableProxy,
 		$localForeignKey, $otherForeignKey,
-		$reciproqueRelationName = null, $targetAssocName = null
+		$reciproqueRelationName = null, $assocRelationName = null
 	) {
 
 		parent::__construct($name, $localTable, $targetTableProxy);
@@ -873,7 +894,17 @@ abstract class ModelRelationInfoByAssoc extends ModelRelationInfo {
 		$this->virtualVariables['assocTable'] = $this->assocTable;
 
 		$this->reciproqueName = $reciproqueRelationName;
-		$this->targetAssocName = $targetAssocName;
+		$this->assocRelationName = $assocRelationName;
+	}
+
+	public function getAssocRelationInfo() {
+		if (!$this->assocRelationInfo) {
+			if (!$this->assocRelationName) throw new IllegalStateException(
+				'Missing information: assoc relation name'
+			);
+			$this->assocRelationInfo = $this->localTable->getRelationInfo($this->assocRelationName);
+		}
+		return $this->assocRelationInfo;
 	}
 
 	/**
@@ -930,13 +961,13 @@ class ModelRelationInfoIndirectHasOneMirror extends ModelRelationInfoIndirectHas
 		$name,
 		ModelTableProxy $localTable, ModelTableProxy $targetTableProxy, ModelTableProxy $assocTableProxy,
 		$localForeignKey, $otherForeignKey,
-		$targetAssocName
+		$assocRelationName
 	) {
 		parent::__construct(
 			$name,
 			$localTable, $targetTableProxy, $assocTableProxy,
 			$localForeignKey, $otherForeignKey,
-			$name, $targetAssocName
+			$name, $assocRelationName
 		);
 	}
 
@@ -1057,7 +1088,8 @@ class ModelRelationInfoIndirectHasMany extends ModelRelationInfoByAssoc
 
 	public function createLoadQuery(array $context = array(), $joinAlias = null, &$join = null) {
 
-		if ($joinAlias === null) $joinAlias = $this->name . 'Assoc';
+		if ($joinAlias === null) $joinAlias = $this->assocRelationName ?
+				$this->assocRelationName : $this->name . 'Assoc';
 
 		$assocRelation = new ModelRelationInfoReferedByMany(
 			$joinAlias,                 // name
