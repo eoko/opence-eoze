@@ -186,4 +186,32 @@ Ext.override(Ext.Component, {
 			this.disable();
 		}
 	}
-})
+});
+
+
+// Add a change event to HtmlEditor
+(function() {
+	var uber = Ext.form.HtmlEditor.prototype.initComponent;
+	Ext.override(Ext.form.HtmlEditor, {
+
+		initComponent: function() {
+			uber.apply(this, arguments);
+			var lastValue = this.getValue();
+			this.on({
+				sync: {
+					fn: function(me, html) {
+						if (!lastValue) {
+							lastValue = html;
+							return;
+						}
+						if (lastValue !== html) {
+							lastValue = html;
+							this.fireEvent("change", this, html);
+						}
+					}
+					,buffer: 200
+				}
+			});
+		}
+	});
+})();
