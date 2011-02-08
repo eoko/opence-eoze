@@ -1045,7 +1045,10 @@ class ModelRelationInfoIndirectHasMany extends ModelRelationInfoByAssoc
 
 	public function selectName(ModelTableQuery $query, $alias = null, $relationName = null) {
 		$query->select(
-			$this->getNameClause($query, $relationName, $alias)
+			new SqlVariable($this->getNameClause(
+				$query, $relationName,
+				$alias !== null ? $alias : $this->name
+			))
 		);
 	}
 
