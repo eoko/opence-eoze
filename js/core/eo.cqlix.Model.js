@@ -448,7 +448,8 @@ NS.ModelField = eo.Object.create({
 	}
 
 	,createGridColumn: function(config) {
-		if (this.internal === true) return null;
+//		if (this.internal === true) return null;
+		if (this.internal === true) return this.doCreateGridColumn(Ext.apply({ internal: true }, config));
 		else return this.doCreateGridColumn(config);
 	}
 
