@@ -38,7 +38,7 @@
 		,onConfigure: function(config) {}
 
 		,initStateProvider: function() {
-			Ext.state.Manager.setProvider(new Ext.state.CookieProvider());
+			//Ext.state.Manager.setProvider(new Ext.state.CookieProvider());
 		}
 
 		,loadConfiguration: function(callback) {
