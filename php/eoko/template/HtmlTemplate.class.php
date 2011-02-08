@@ -152,8 +152,12 @@ class HtmlTemplate extends Template {
 			return $this;
 		}
 
-		if (null !== ($r = $this->fileFinder->searchPath($name, FileType::CSS, $url, null, $require))
-				&& $url !== null) {
+		$r = null;
+		if (
+			preg_match('@\w+://@', $url = $name)
+			|| (null !== ($r = $this->fileFinder->searchPath($name, FileType::CSS, $url, null, $require))
+				&& $url !== null)
+		) {
 			
 			if ($r === FileType::ALIAS()) {
 				$this->pushAliasInclude(FileType::CSS, 'css', $url, $order);
