@@ -171,7 +171,8 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
 				item.on('modified', changeListener);
 			}
 			if (item instanceof Ext.form.HtmlEditor) {
-				item.on('sync', changeListener);
+//				item.on('sync', changeListener);
+				item.on('change', changeListener);
 			}
 			if (item instanceof Ext.form.CompositeField) {
 				item.items.each(addChangeListener);
