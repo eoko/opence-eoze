@@ -180,7 +180,10 @@ class ModelTableQuery extends Query implements QueryAliasable {
 					return $relation->targetTable->getVirtual($fieldName)
 							->getOrderFieldAlias($this, $field);
 //					return Query::quoteName($field);
-				} else if (!$relation->targetTable->hasColumn($fieldName)) {
+				} else if ($relation->targetTable->hasColumn($fieldName)) {
+					// to be analysed and probably corrected
+					return Query::quoteName($field);
+				} else {
 					throw new IllegalArgumentException("No field '$field' in $this->dbTable");
 				}
 			} else if (count($parts = explode('.', $field)) == 2) {
