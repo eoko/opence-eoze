@@ -23,7 +23,8 @@ function defineIf($name, $value) {
 // Directories
 defineIf('DS', DIRECTORY_SEPARATOR);
 //defineIf('ROOT', realpath(dirname(__FILE__) . DS . '..') . DS);
-defineIf('ROOT', realpath(dirname($_SERVER['SCRIPT_FILENAME'])) . DS);
+//defineIf('ROOT', realpath(dirname($_SERVER['SCRIPT_FILENAME'])) . DS);
+defineIf('ROOT', realpath(dirname(__FILE__) . DS . '..' . DS . '..') . DS);
 
 defineIf('SITE_BASE_URL', 'http://' .
 		(isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost')
@@ -56,7 +57,7 @@ defineIf('USE_CONTROLLER_CACHE', false);
 defineIf('BIN_PATH', ROOT . 'bin' . DS);
 
 defineIf('LIB_DIR', null);
-defineIf('LIB_PATH', ROOT . LIB_DIR . DS);
+defineIf('LIB_PATH', ROOT . (LIB_DIR ? LIB_DIR . DS : null));
 
 defineIf('EOZE_DIR', 'eoze');
 defineIf('EOZE_PATH', str_replace(DS . DS, DS, LIB_PATH . EOZE_DIR . DS));
