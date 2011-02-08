@@ -336,9 +336,20 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 
 //				addComboConfig.firstLoadLatchCount = this.firstLoadLatchCount;
 
-				this.addCombo = new Oce.form.ForeignComboBox(addComboConfig);
+				var addCombo = this.addCombo = new Oce.form.ForeignComboBox(addComboConfig);
 				this.addStore = this.addCombo.store;
 				this.addStore.on('load', this.sortOutIds, this);
+				var setAddStoreEnabled = function() {
+					var enabled = this.getCount();
+					addCombo.setEnabled(enabled);
+					if (me.addButton) me.addButton.setEnabled(enabled);
+				}
+				this.addStore.on({
+					add: setAddStoreEnabled,
+					remove: setAddStoreEnabled,
+					datachanged: setAddStoreEnabled,
+					load: setAddStoreEnabled
+				});
 				this.onAddStoreInit(this.addStore);
 			
 			}
@@ -601,7 +612,9 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 			return this.addFormRecord(json);
 		} else {
 			this.addedIds.push(json[this.pkName]);
-			this.store.add(this.createRecord(json));
+			var record = this.createRecord(json);
+			this.store.add(record);
+			return record
 		}
 	}
 
@@ -665,17 +678,23 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 		var rec = this.store.getById(id);
 		if (rec) {
 			this.store.remove(rec);
-			// it is risky to add the record back to the combo's store, because it
-			// could not match the current query... but since the user has just
-			// removed it, we can hope for the best that he won't need to add it
-			// right away. In the word case, it will show up on the next search
 			if (this.addStore) {
-				if (this.addStore.lastOptions && this.addStore.lastOptions.query
+				// if the add combo is not paginated, then we can lightheartedly
+				// add the record back in it!
+				if (!this.comboPageSize) {
+					this.addStore.add(rec);
+
+				// it is risky to add the record back to the combo's store, because it
+				// could not match the current query... but since the user has just
+				// removed it, we can hope for the best that he won't need to add it
+				// right away. In the worst case, it will show up on the next search
+				} else if (this.addStore.lastOptions && this.addStore.lastOptions.query
 						&& this.addStore.lastOptions.params) {
 
 					if (!this.addStore.lastOptions.params.query
 							|| this.matchQuery(rec.json, this.addStore.lastOptions.params.query)) {
-						this.add(rec.json);
+
+						this.addStore.add(rec);
 					}
 				} else {
 					this.addStore.reload();
@@ -861,12 +880,12 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 //						tbarItems.push(tbItem);
 //					}
 //				} else {
-					tbarItems.push({
+					tbarItems.push(this.addButton = new Ext.Button({
 						text: this.toolbar.addText
 						,handler: this.onAdd
 						,scope: this
 						,iconCls: "ico ico_add"
-					});
+					}));
 //				}
 			}
 			if (this.addStore) {
