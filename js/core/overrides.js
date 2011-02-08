@@ -174,3 +174,16 @@ Ext.override(Ext.Panel, {
 		}
 	};
 })();
+
+
+// Add setEnabled function to ext components
+Ext.override(Ext.Component, {
+
+	setEnabled: function(enabled) {
+		if (enabled) {
+			this.enable();
+		} else {
+			this.disable();
+		}
+	}
+})
