@@ -20,20 +20,6 @@ var CQLIX_PLUGIN = eo.form.GridField.CqlixPlugin = eo.Object.create({
 			,controller: gridField.controller || this.controller
 		});
 
-		var fieldDataIndices = [], fieldConfigs = {}, hasFieldConfig = false;
-		if (this.fields) {
-			Ext.each(this.fields, function(field) {
-				if (Ext.isString(field)) {
-					fieldDataIndices.push(field);
-				} else if (Ext.isObject(field)) {
-					hasFieldConfig = true;
-					var di = field.dataIndex;
-					fieldDataIndices.push(di);
-					fieldConfigs[di] = field;
-				}
-			});
-		}
-
 		var editAction = new eo.form.GridField.ModelAction.Edit({
 			model: this.model
 			,gridField: gridField
