@@ -596,11 +596,34 @@ abstract class ModelTable extends ModelTableProxy {
 	}
 
 	/**
+	 * Parses the given $name and tests whether it matches an assoc relation
+	 * field naming pattern. If it is the case, the passed $relationName and
+	 * $fieldName variable will be set; notice that is the test doesn't pass,
+	 * then these variables won't be modified.
+	 * @param string $name
+	 * @param string $relationName
+	 * @param string $fieldName
+	 * @return TRUE if the submitted name is recognized as an assoc relation
+	 * field, else FALSE
+	 */
+	public static function parseAssocRelationField($name, &$relationName = null, &$fieldName = null) {
+		if (preg_match('/^<(\w+)>(\w+)$/', $name, $m)) {
+			list(, $relationName, $fieldName) = $m;
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
 	 * @return ModelField
 	 */
 	abstract public static function getField($name, $require = false);
 
-	protected function _getField($name, $require = false) {
+	/**
+	 * @internal on 2011-02-07, $require default has been changed from FALSE to TRUE!!!
+	 */
+	protected function _getField($name, $require = true) {
 		if ($this->_hasColumn($name)) {
 			return $this->cols[$name];
 		} else if ($this->_hasRelation($name)) {
@@ -611,6 +634,9 @@ abstract class ModelTable extends ModelTableProxy {
 			$field = array_pop($parts);
 			$relation = implode('->', $parts);
 			return $this->getRelationInfo($relation)->getField($field);
+		} else if (self::parseAssocRelationField($name, $assocRelation, $field)) {
+			throw new UnsupportedOperationException('The following has not been tested...');
+			return $this->getRelationInfo($assocRelation)->getField($field);
 		} else if (!$require) {
 			return null;
 		} else throw new IllegalArgumentException(
