@@ -420,12 +420,12 @@ abstract class GridExecutor extends JsonExecutor {
 
 	public function load() {
 
-		$cometMsg = <<<JS
-{success: true, alert: "Loading {$this->module->getName()} ..."}
-JS;
-		$path = CACHE_PATH . 'comet/' . UserSession::getUser()->id;
-		if (!file_exists(dirname($path))) mkdir(dirname($path), 0777, true);
-		file_put_contents($path, $cometMsg);
+////		$cometMsg = <<<JS
+////{success: true, alert: "Loading {$this->module->getName()} ..."}
+////JS;
+////		$path = CACHE_PATH . 'comet/' . UserSession::getUser()->id;
+//		if (!file_exists(dirname($path))) mkdir(dirname($path), 0777, true);
+//		file_put_contents($path, $cometMsg);
 
 		$query = $this->createLoadQuery('grid');
 
