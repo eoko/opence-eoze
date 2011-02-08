@@ -156,7 +156,7 @@ class Columns {
 
 			if (!isset($col['name'])) $col = array_merge(array('name'=>$name),$col);
 
-			if (null !== $f = $this->table->getField($col['name'])) {
+			if (null !== $f = $this->table->getField($col['name'], false)) {
 				switch ($f->getType()) {
 					case ModelColumn::T_INT:
 						if (!isset($col['renderer']))
