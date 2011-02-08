@@ -60,6 +60,15 @@ class ModelTableQuery extends Query implements QueryAliasable {
 				$fieldAlias = $fieldAlias !== null ? "$fieldAlias" : "$fieldName";
 				$joinFieldName = array_pop($fieldParts);
 				$fieldName = implode('->', $fieldParts);
+
+			// Process assoc relations (in the type <AssocRelationName>fieldName)
+			} else if (ModelTable::parseAssocRelationField($fieldName, $relation, $field)) {
+				$this->table->getRelationInfo($relation)->getAssocRelationInfo()
+						->selectAssocFields(
+							$this,
+							array($fieldAlias !== null ? "$fieldAlias" : "$fieldName" => $field)
+						);
+				return;
 			} else {
 				// eg. Contact
 				$joinFieldName = $fieldName;
