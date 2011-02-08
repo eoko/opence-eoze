@@ -1121,18 +1121,32 @@ Oce.GridModule = Ext.extend(Ext.Panel, {
 	,createEditWindow: function(recordId, cb) {
 		return this.createFormWindow(
 			this.getEditFormConfig(),
-			{
+			this.applyExtraWinConfig('edit', {
 				 title: this.my.editWindowTitle || (this.title + " : Modifier") // i18n
 				,id: this.editWinId(recordId)
 				,layout: this.my.editWinLayout
 				,refreshable: true
-			},
+			}),
 			this.saveEdit,
 			this.editWindowToolbarAddExtra.createDelegate(this),
 			{
 				monitorFormModification: true
 			}
 		);
+	}
+
+	,applyExtraWinConfig: function(action, config) {
+		var cache = this.extraWinConfigCache = this.extraWinConfigCache || {};
+		if (!cache[action]) {
+			var extra = this.extra;
+			if (!this.extra) return config;
+			var winConfig = extra.winConfig;
+			if (!winConfig) return config;
+			var actionConfig = extra[action + 'WinConfig'];
+
+			cache[action] = Ext.apply(Ext.apply({}, winConfig), actionConfig);
+		}
+		return Ext.apply(config, cache[action]);
 	}
 
 	,getEditFormConfig: function() {
@@ -1169,13 +1183,17 @@ Oce.GridModule = Ext.extend(Ext.Panel, {
 		var formConfig = Ext.apply({}, this.getAddFormConfig());
 		this.onConfigureAddFormPanel(formConfig);
 
-		return this.createFormWindow(formConfig, {
-			 title: this.my.addWindowTitle || ("Ajouter : " + this.title) // i18n
-			,layout: this.my.addWinLayout
-			,id: this.nextAddWinId()
-		}, function(win) {
-			this.saveNew.call(this, win, callback, win.loadModelData);
-		}, this.addWindowToolbarAddExtra.createDelegate(this));
+		return this.createFormWindow(
+			formConfig
+			,this.applyExtraWinConfig('add', {
+				 title: this.my.addWindowTitle || ("Ajouter : " + this.title) // i18n
+				,layout: this.my.addWinLayout
+				,id: this.nextAddWinId()
+			})
+			,function(win) {
+				this.saveNew.call(this, win, callback, win.loadModelData);
+			}, this.addWindowToolbarAddExtra.createDelegate(this)
+		);
 
 		return win;
 	}
