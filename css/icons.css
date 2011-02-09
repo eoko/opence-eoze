@@ -106,6 +106,7 @@
 .ico_accept {
 	background-image:url(../images/icons/accept.png) !important;
 }
+.ico.add,
 .ico_add {
 	background-image:url(../images/icons/add.png) !important;
 }
@@ -113,6 +114,7 @@
 .ico_arrow_undo {
 	background-image:url(../images/icons/arrow_undo.png) !important;
 }
+.ico.delete,
 .ico_delete {
 	background-image:url(../images/icons/delete.png) !important;
 }
