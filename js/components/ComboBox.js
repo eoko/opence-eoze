@@ -28,9 +28,13 @@ Oce.deps.wait('Ext.ux.form.TwinComboBox', function() {
 					data.push([value,label]);
 				});
 			} else if (Ext.isArray(cfg.data)) {
-				data = cfg.data;
+//				data = cfg.data;
 				var i=0;
-				Ext.each(cfg.data, function(v){this.oData[i++] = v;}, this);
+				data = [];
+				Ext.each(cfg.data, function(v){
+					data.push(Ext.isArray(v) ? v : [i, v]);
+					this.oData[i++] = v;
+				}, this);
 			} else {
 				throw new Error('Invalid config option "data": ' + cfg.data);
 			}
