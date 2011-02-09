@@ -163,7 +163,7 @@ class UnsupportedActionException extends SystemException {
 
 		if ($action === null) {
 			if (false == ($module instanceof Controller)) {
-				throw new IllegalArgumentException('', $this);
+//				throw new IllegalArgumentException('', $this);
 			} else {
 				$this->module = $module->getModule();
 				$this->action = $module->getAction();
