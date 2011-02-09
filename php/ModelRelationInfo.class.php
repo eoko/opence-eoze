@@ -443,8 +443,14 @@ abstract class ModelRelationInfoHasReference extends ModelRelationInfoByReferenc
 	const ODA_SET_NULL = 0;
 	const ODA_DELETE = 1;
 
-	// What to do when the refered model is deleted?
-	public $onDeleteAction = self::ODA_SET_NULL;
+	/**
+	 * What to do when the refered model is deleted?
+	 * @internal Each relation kind can specify its default onDeleteAction,
+	 * in getDefaultOnDeleteAction()
+	 * @var int NULL means default behaviour, this is dependant on the type and
+	 * properties of the relation involved
+	 */
+	public $onDeleteAction = null;
 
 	/**
 	 * @return ModelTableQuery
@@ -462,18 +468,45 @@ abstract class ModelRelationInfoHasReference extends ModelRelationInfoByReferenc
 	}
 
 	/**
-	 * Dispatch on delete processing of a record being refered by other tables.
+	 * Dispatches on delete processing of a record being refered by other tables.
 	 * This method could be overriden to implement custom onDelete action.
 	 * @param mixed $targetPkValue the value of the primary key of the record
 	 * being removed
 	 * @return mixed
 	 */
 	public function onTargetDelete($targetPkValue) {
-		switch ($this->onDeleteAction) {
+		switch ($this->getOnDeleteAction()) {
 			case self::ODA_SET_NULL: return $this->onTargetDelete_setNull($targetPkValue);
 			case self::ODA_DELETE: return $this->onTargetDelete_delete($targetPkValue);
 			default: throw new IllegalArgumentException();
 		}
+	}
+
+	/**
+	 * Gets the current onDelete action.
+	 * @return const<ODA>
+	 */
+	private function getOnDeleteAction() {
+		return $this->onDeleteAction !== null ?
+				$this->onDeleteAction : $this->getDefaultOnDeleteAction();
+	}
+
+	/**
+	 * Gets the current default onDelete action. This method will be called
+	 * when the relation is notified other side's deletion, and no explicit
+	 * onDelete action has been set. The method is called at the time it is
+	 * needed, so it can access variables in the context to dynamically decide
+	 * what the onDelete action should be.
+	 * @internal The determining of the default onDelete action is mostly
+	 * dependant on the kind of relation and the properties of the tables and
+	 * reference fields. It cannot be determined in the constructor of the
+	 * relation though, because trying to access the ModelTable instances from
+	 * there would most oftenly result in infinite loops at the Relation
+	 * building stage...
+	 * @return const<ODA>
+	 */
+	protected function getDefaultOnDeleteAction() {
+		return self::ODA_SET_NULL;
 	}
 
 	protected function onTargetDelete_setNull($targetPkValue) {
@@ -503,6 +536,20 @@ class ModelRelationInfoReferencesOne extends ModelRelationInfoHasReference
 		parent::__construct($name, $localTable, $targetTableProxy, $referenceField, $rightField);
 		$this->selectable = true;
 		$this->rightField = $rightField;
+	}
+
+	protected function getDefaultOnDeleteAction() {
+		// If the reference field must be unique (that is, what define the
+		// relation as referencesOne, as opposed to referencesMany) AND the
+		// said field cannot be NULL, then the default onDelete action should
+		// be DELETE. If the field can be NULL, dupplicate NULL value would be
+		// allowed though.
+		$refField = $this->localTable->getColumn($this->referenceField);
+		if (!$refField->isNullable() && $refField->isUnique()) {
+			return self::ODA_DELETE;
+		} else {
+			return parent::getDefaultOnDeleteAction();
+		}
 	}
 
 	public function createRelation(Model $parentModel) {
