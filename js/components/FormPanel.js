@@ -14,7 +14,7 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
 			,modified: true
 		});
 
-		Ext.applyIf(config, {
+		config = Ext.applyIf(config || {}, {
 			 url:'index.php'
 			,bodyStyle: 'padding:25px; background:transparent'
 			,border: false
