@@ -193,13 +193,15 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 					}
 					colConfig = new Ext.grid.Column(colConfig);
 				} else {
-					throw new Error('GridField Invalid Config');
+					// TODO: commented out to let pass an error with SM wizard
+					// but that will need a real fix...
+//					throw new Error('GridField Invalid Config');
 				}
-				extraDataConfig = {
+				if (colConfig) extraDataConfig = {
 					dataIndex: colConfig.dataIndex
 					,name: colConfig.name || colConfig.dataIndex
 					,defaultValue: colConfig.defaultValue || null
-				};
+				}; else colConfig = {};
 			} else {
 				colConfig = Ext.apply({
 					dataIndex: config.name || di
