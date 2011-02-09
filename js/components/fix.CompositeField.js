@@ -26,7 +26,7 @@ Ext.form.CompositeField.prototype.initComponent =
 			var valid = true;
 
 			this.eachItem(function(field) {
-				if (!field.isValid(this.preventMark)) valid = false;
+				if (field.el && field.el.dom && !field.isValid(this.preventMark)) valid = false;
 			});
 
 			return valid;
