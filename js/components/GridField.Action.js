@@ -163,6 +163,7 @@ eo.form.GridField.ModelAction.Add = Ext.extend(ACTION, {
 			,minimizable: false
 			,closeAction: 'hide'
 			,modalTo: this.getRootWindow()
+			,clearFormOnShow: true
 			,title: this.winTitle || 'Nouvel enregistrement' // i18n
 			,buttons: [{
 				text: 'Ok'
