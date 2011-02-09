@@ -59,6 +59,7 @@ Oce.Security = function() {
 	var loginModule = null;
 
 	this.requestLogin = function(modal, text) {
+		return; // TODO remove debug
 		if (loginModule !== null) {
 			loginModule.start(modal, text);
 		} else {
