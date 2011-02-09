@@ -613,6 +613,19 @@ class Generator extends Script {
 		}
 
 		$relations = $this->allRelations[$table];
+		$relations = $this->allRelations[$tableName];
+
+		// TODO
+		// removing dupplicates caused by mirror relations
+		if ($relations) foreach ($relations as $i => $rel) {
+			foreach ($relations as $i2 => $rel2) {
+				if (($i !== $i2) && ($rel->getName() === $rel2->getName())) {
+					unset($relations[$i]);
+				}
+			}
+		}
+
+		$tpl->relations = $relations;
 
 		if (!is_array($relations)) $relations = array();
 
@@ -673,7 +686,20 @@ class Generator extends Script {
 			$method = str_replace('%%Model%%', $modelName, $method);
 		} unset($method);
 
-		$tpl->relations = $this->allRelations[$tableName];
+		$relations = $this->allRelations[$tableName];
+
+		// TODO
+		// removing dupplicates caused by mirror relations
+		foreach ($relations as $i => $rel) {
+			foreach ($relations as $i2 => $rel2) {
+				if (($i !== $i2) && ($rel->getName() === $rel2->getName())) {
+					unset($relations[$i]);
+				}
+			}
+		}
+
+		$tpl->relations = $relations;
+		
 		if (!is_array($tpl->relations)) $tpl->relations = array();
 
 		$tpl->package = APP_NAME;

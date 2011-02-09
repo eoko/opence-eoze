@@ -123,14 +123,22 @@ class TplTable implements ConfigConstants {
 	
 	private function addRelation(TplRelation $relation) {
 		if (isset($this->relations[$relation->getName()])) {
-			throw new IllegalStateException(
+			$prev = $this->relations[$relation->getName()];
+
+			// TODO this line has been added to skip a crash with a mirror relation
+			// WebsitePages->Parent, in Rhodia.Opence... this should be investigated
+			// that this is OK, and implement a real way to handle mirror relation
+			if ($prev->tableName !== $relation->tableName || $prev->referenceField !== $relation->referenceField)
+
+					throw new IllegalStateException(
 				"Relation with name {$relation->getName()} already exist in table "
 				. "$this->tableName (in database: $this->dbTable).\n"
 				. "Existing relation: " . $this->relations[$relation->getName()] . PHP_EOL
 				. "Added relation: $relation"
 			);
+		} else {
+			$this->relations[$relation->getName()] = $relation;
 		}
-		$this->relations[$relation->getName()] = $relation;
 	}
 
 	private function mergeRelations() {
@@ -143,6 +151,7 @@ class TplTable implements ConfigConstants {
 				$this->addRelation($relation);
 			}
 		}
+//		if ($this->modelName === 'WebsitePage') dump($this->relations);
 
 		// TODO indirect relations
 //		foreach ($this->indirectRelations as $relation) {
