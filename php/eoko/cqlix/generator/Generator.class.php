@@ -613,14 +613,15 @@ class Generator extends Script {
 		}
 
 		$relations = $this->allRelations[$table];
-		$relations = $this->allRelations[$tableName];
 
 		// TODO
 		// removing dupplicates caused by mirror relations
-		if ($relations) foreach ($relations as $i => $rel) {
+		foreach ($relations as $i => $rel) {
 			foreach ($relations as $i2 => $rel2) {
 				if (($i !== $i2) && ($rel->getName() === $rel2->getName())) {
+					$yes = 1;
 					unset($relations[$i]);
+					break;
 				}
 			}
 		}
