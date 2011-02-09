@@ -44,7 +44,12 @@ eo.Window = Ext.extend(Ext.Window, {
 
 		var maskEl;
 		var win = this;
-		var WIN_CLASS = Oce.FormWindow;
+//		var WIN_CLASS = Oce.FormWindow;
+		var WIN_CLASS = Ext.Window;
+
+		var uber = eo.Window.superclass,
+			doHide = function() { uber.hide.apply(win, arguments) },
+			doShow = function() { uber.show.apply(win, arguments) };
 
 		if (rootWin) {
 			maskEl = rootWin && rootWin.items.first();
@@ -55,7 +60,7 @@ eo.Window = Ext.extend(Ext.Window, {
 				,beforehide: function() {
 					var v = !hidding;
 					hidding = true;
-					WIN_CLASS.prototype.hide.call(this);
+					doHide();
 					modal = v;
 				}
 				,show: function() {
@@ -71,19 +76,21 @@ eo.Window = Ext.extend(Ext.Window, {
 
 			if (hidding) return;
 
+			doShow();
+
 			var el = win.el,
 				x = el.getX(),
 				y = el.getY(),
 				h = 8, v = 6, d = .085;
+				
+			if (!el) return;
 
 			el.stopFx();
 
 			// OptionFX
 			var next = function() { return el && !hidding; };
-
-			if (next) WIN_CLASS.prototype.show.call(win);
-
-			if (next()) el.moveTo(x, y-v, {
+			
+			el.moveTo(x, y-v, {
 				duration: d
 				,callback: function() {
 					if (next()) el.moveTo(x,y+v/4, {
@@ -107,7 +114,7 @@ eo.Window = Ext.extend(Ext.Window, {
 				}
 			});
 
-			if (next()) win.el.frame(null, null, {
+			win.el.frame(null, null, {
 				duration: 3*d
 			});
 		}
@@ -115,20 +122,23 @@ eo.Window = Ext.extend(Ext.Window, {
 			onRootActivateFn.defer(50);
 		};
 
-		this.show = function() {
+		this.doShow = function() {
 
 			modal = true;
 
 			if (this.isVisible()) {
-				WIN_CLASS.prototype.show.apply(this, arguments);
+				doShow();
 				return;
 			}
 
-//			var bf = form.form;
-			var bf = this.form;
-			bf.clearInvalid();
-			Oce.FormWindow.prototype.show.apply(this, arguments);
-			bf.reset();
+			if (this.clearFormOnShow) {
+				var bf = this.form;
+				bf.clearInvalid();
+				doShow();
+				bf.reset();
+			} else {
+				doShow();
+			}
 
 			if (rootWin) {
 				if (rootWin.deactivateContent) {
@@ -140,7 +150,7 @@ eo.Window = Ext.extend(Ext.Window, {
 			hidding = false;
 		}
 
-		this.hide = function() {
+		this.doHide = function() {
 
 			modal = true;
 			hidding = true;
@@ -152,10 +162,26 @@ eo.Window = Ext.extend(Ext.Window, {
 					rootWin.activateContent();
 				}
 				rootWin.un('activate', onRootActivate);
-				WIN_CLASS.prototype.hide.apply(this, arguments);
+				doHide();
 				maskEl.unmask();
 			}
 		}
+	}
+
+	,doHide: function() {
+		eo.Window.superclass.hide.apply(this, arguments);
+	}
+
+	,doShow: function() {
+		eo.Window.superclass.show.apply(this, arguments);
+	}
+	
+	,hide: function() {
+		this.doHide();
+	}
+	
+	,show: function() {
+		this.doShow();
 	}
 
 	,addPlugins: function(config) {
