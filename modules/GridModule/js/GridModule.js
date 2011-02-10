@@ -857,8 +857,11 @@ Oce.GridModule = Ext.extend(Ext.Panel, {
 				win.close();
 			};
 			win.on({
-				destroy: function() {
-					delete this.editWindows[rowId]
+//				destroy: function() {
+				hide: function() {
+					// TODO... changed the event because of a bug
+					this.editWindows[rowId].destroy();
+					delete this.editWindows[rowId];
 				}
 				,beforerefresh: function(win) {
 					if (win.formPanel.isModified()) {
