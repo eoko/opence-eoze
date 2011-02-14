@@ -206,4 +206,11 @@ if (!defined('ADD_LOG_APPENDERS') || ADD_LOG_APPENDERS) {
 
 \eoko\util\file\FileTypes::getInstance();
 
-if ((!isset($test) || !$test) && (!isset($is_script) || !$is_script)) Router::getInstance()->route();
+if ((!isset($test) || !$test)
+		&& (!isset($is_script) || !$is_script)
+		&& (!defined('UNIT_TEST') || !UNIT_TEST)
+//		&& !interface_exists('PHPUnit_Framework_Test', false)
+) {
+
+	Router::getInstance()->route();
+}

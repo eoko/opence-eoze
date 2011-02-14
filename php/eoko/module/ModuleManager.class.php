@@ -32,11 +32,6 @@ class ModuleManager {
 
 	private $getModuleNamespaceRegex;
 
-	/**
-	 * @var FileFinder
-	 */
-	private $fileFinder = null;
-	
 	private function __construct() {
 
 		$this->getModuleNamespaceRegex = '/^' . preg_quote(GET_MODULE_NAMESPACE, '/') . '(.+)$/';
@@ -159,6 +154,14 @@ class ModuleManager {
 	 */
 	private static function createInstance() {
 		return self::$instance = new ModuleManager();
+	}
+
+	/**
+	 * @internal This method is used by tests...
+	 * @todo This should be made available for tests only...
+	 */
+	public static function destroy() {
+		self::$instance = null;
 	}
 	
 	/**
