@@ -202,10 +202,14 @@ function __autoload($class) {
 function tryAutoLoad($class, $suffix = '.class') {
 
 	$classPath = str_replace('\\', DS, $class);
+	$nsPath = str_replace('\\', DS, rtrim(get_namespace($class), '\\'));
 
 	global $includePaths;
 	foreach ($includePaths as $path) {
 		if (file_exists($filename = "$path$classPath$suffix.php")) {
+			require_once $filename;
+			return true;
+		} else if ($nsPath && file_exists($filename = "$path$nsPath.ns.php")) {
 			require_once $filename;
 			return true;
 		}
