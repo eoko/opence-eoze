@@ -1,0 +1,57 @@
+body.bg {
+	background : url(1080.jpg) no-repeat;
+}
+.app-img
+{
+	vertical-align: middle;
+	margin: 0px 20px 10px 0px;
+}	
+.app-msg
+{
+	font-size:small;
+}
+
+body {
+	font:11px tahoma,arial,helvetica,sans-serif;
+}
+
+.box-right {
+	float : right;
+}
+.box-left {
+	float : left;
+}
+.top_header {
+/* TODO rhodia: restore logo */
+/*	background : #DFE8F6 url('logo.png') no-repeat;*/
+	height : 64px;
+	padding-left : 215px;
+	padding-top : 10px;
+	padding-right : 40px;
+	color : #15428B;
+	
+}
+
+.top_header a {
+	text-decoration : underline;
+}
+
+.bottom {
+	padding : 0 10px;
+	color : #15428B;
+}
+
+.t_align_r {	
+	text-align : right;
+}
+
+/************* Module config ****************/
+/* Module Mail*/
+.mail_error {
+    color:#AA0033;
+    font-weight: bold;
+}
+.mail_alternate {
+    color:#15428B;
+    font-weight: bold;
+}
