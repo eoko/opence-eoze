@@ -1,6 +1,6 @@
 Ext.ns('Oce');
 
-Oce.GridModule = Ext.extend(Ext.Panel, {
+Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Panel, {
 
 	constructor: function() {
 

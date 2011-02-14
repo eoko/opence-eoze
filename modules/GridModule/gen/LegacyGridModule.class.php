@@ -52,6 +52,7 @@ class LegacyGridModule {
 
 		$tpl->merge($config->module);
 //		$tpl->controller .= '.grid';
+		$tpl->superclass = "Oce.Modules.$config->class.$config->class";
 
 		if (isset($config['uses'])) {
 			$tpl->uses = json_encode(

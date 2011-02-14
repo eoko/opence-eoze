@@ -825,6 +825,8 @@ MSG
 		$r = array();
 		if ($dir) {
 			$urlDir = str_replace('\\', '/', $dir) . '/';
+		} else {
+			$urlDir = '';
 		}
 		foreach (array_reverse($this->location->getLineActualLocations()) as $loc) {
 			$loc instanceof ModuleLocation;
@@ -834,7 +836,7 @@ MSG
 			foreach ($urls as &$url) $url = "$baseUrl$url";
 			$r = array_merge($r, $urls);
 		}
-		return $urls;
+		return $r;
 	}
 	
 	private function createTypeFinder($path, $url, $fallbackFinder) {
