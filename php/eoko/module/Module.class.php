@@ -12,6 +12,7 @@ use eoko\config\Application as ApplicationConfig;
 use eoko\config\Config;
 use eoko\template\PHPCompiler;
 use eoko\module\executor\Executor;
+use eoko\log\Logger;
 
 class Module implements file\Finder {
 	
@@ -44,14 +45,14 @@ class Module implements file\Finder {
 	protected $defaultInternalExecutor = self::DEFAULT_EXECUTOR;
 	private $executorClassNames = null;
 
-//REM	public function __construct($name, $basePath, $url, ModulesDirectory $baseLocation) {
 	public function __construct(ModuleLocation $location) {
 
-		// These 3 could be known without having to pass them as params
 		$this->name = $location->moduleName;
 		$this->basePath = $location->path;
 		$this->baseUrl = $location->url;
 
+		$this->location = $location;
+		
 		$this->namespace = get_namespace($this);
 
 		$lineage = $this->getParentNames(true);
@@ -62,18 +63,6 @@ class Module implements file\Finder {
 
 		$this->pathsUrl = $location->directory->getLineagePathsUrl($lineage);
 		$this->lineageLocations = $location->directory->getLineageLocations($lineage);
-		
-		$this->location = $location;
-
-//		dumpl(array(
-//			$name,
-//			$this->pathsUrl,
-////			$basePath,
-////			$baseLocation,
-////			$baseLocation->getParentPathsUrl($name),
-////			$this->basePath,
-//		));
-
 	}
 
 	private function getParentNames($includeSelf) {
@@ -87,31 +76,18 @@ class Module implements file\Finder {
 		return $parents;
 	}
 
-//REM	protected static function addPathsUrl(&$pathsUrl, $path, $url = null) {
-//		if ($pathsUrl === null) $pathsUrl = array();
-//		if (is_array($path)) {
-//			if ($url !== null) throw new IllegalArgumentException(
-//				'If the first argument is an array, then only one argument must be passed'
-//			);
-//			foreach ($path as $path => $url) {
-//				$pathsUrl[$path] = $url;
-//			}
-//		} else {
-//			$pathsUrl[$path] = $url;
-//		}
-//		return $pathsUrl;
-//	}
-	
 	public static function create($name, $path, $url) {
 		$class = get_called_class();
 		return new $class($name, $path, $url);
 	}
 	
 	public function setConfig($config) {
-		if (!($config instanceof \Config) && !(is_string($config) && file_exists($config))) {
-			$config = new Config();
-		}
-		$this->config = $config;
+		Logger::get($this)->warn(<<<MSG
+Module::setConfig() is not used anymore... Because the getConfig method has to
+load it anyway, in order to account for horizontal (lineage) inheritance.
+MSG
+		);
+		return;
 	}
 
 	/**
@@ -119,21 +95,17 @@ class Module implements file\Finder {
 	 */
 	public function getConfig() {
 		if ($this->config) {
-			if ($this->config instanceof \Config) {
-				return $this->config;
-			} else if (is_string($this->config)) {
-				$this->config = Config::load($this->config);
-				if (isset($this->config[$this->name])) {
-					$this->config = $this->config->node($this->name);
-				}
-				return $this->config;
-			} else {
-				throw new IllegalStateException('Invalid type for $this->config: ' 
-						. get_class($this->config));
-			}
-		} else {
-			throw new IllegalStateException(get_class($this) . ' module has no config');
+			return $this->config;
 		}
+
+		$locations = array_reverse($this->lineageLocations);
+		$config = array_shift($locations)->loadConfig();
+		foreach ($locations as $l) {
+			$c = $l->loadConfig();
+			if ($c) $config->apply($c);
+		}
+
+		return $this->config = $config;
 	}
 	
 	public function __toString() {
@@ -560,7 +532,7 @@ class Module implements file\Finder {
 			require_once $file;
 
 			$baseClass = $this->findExecutorClassName($type, $searchNS);
-			
+
 			if ($ns !== null) {
 				class_extend("$ns$myBaseClass", $baseClass);
 			} else {

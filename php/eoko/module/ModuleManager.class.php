@@ -311,7 +311,7 @@ class ModuleManager {
 
 			$module = null;
 			if (null !== $class = $location->searchModuleClass()) {
-				$module = new $class($location);
+				$module = $this->createModule($name, $class);
 			}
 
 			// try to create the module from the config file information
@@ -326,7 +326,7 @@ class ModuleManager {
 					$superclass = __NAMESPACE__ . '\\Module';
 				}
 				class_extend($class = "$location->namespace$name", $superclass);
-				$module = new $class($location);
+				$module = $this->createModule($name, $class);
 			}
 
 			// if the method has not returned yet, that means that the module
@@ -334,6 +334,10 @@ class ModuleManager {
 			$module->setConfig($config);
 			return $module;
 		}
+	}
+
+	private function createModule($name, $class) {
+		return new $class(new ModuleLocation($this->getTopLevelDirectory(), $name));
 	}
 
 	/**
@@ -362,7 +366,7 @@ class ModuleManager {
 		}
 		
 		// create an instance of the newly created class
-		$module = new $class($location);
+		$module = $this->createModule($location->moduleName, $class);
 		$module->setConfig($config);
 		return $module;
 	}
@@ -444,6 +448,10 @@ class ModuleLocation extends Location {
 		);
 	}
 
+	public function __toString() {
+		return "$this->moduleName << $this->directory";
+	}
+
 	/**
 	 * Finds the module's config file path. The directory parents are not
 	 * searched by this method.
@@ -480,7 +488,7 @@ class ModuleLocation extends Location {
 	
 	private function doLoadConfig() {
 		$r = null;
-		foreach ($this->getLocations() as $location) {
+		foreach (array_reverse($this->getLocations()) as $location) {
 			$config = $location->searchConfigFile();
 			if ($config) {
 				$config = Config::create($config);
@@ -691,7 +699,9 @@ class ModulesDirectory extends Location {
 	private function getLocations($moduleName) {
 		$locations = array();
 		if (file_exists($path = "$this->path$moduleName" . DS)) {
-			$locations[] = new ModuleLocation($this, $moduleName);
+			$locations[] = new ModuleLocation($this, $moduleName, $path);
+		} else if (file_exists($path = "$this->path{$moduleName}.yml")) {
+			$locations[] = new ModuleLocation($this, $moduleName, null);
 		}
 		if ($this->parent) {
 			$locations = array_merge($locations, $this->parent->getLocations($moduleName));
