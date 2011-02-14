@@ -616,7 +616,7 @@ class Generator extends Script {
 
 		// TODO
 		// removing dupplicates caused by mirror relations
-		foreach ($relations as $i => $rel) {
+		if ($relations) foreach ($relations as $i => $rel) {
 			foreach ($relations as $i2 => $rel2) {
 				if (($i !== $i2) && ($rel->getName() === $rel2->getName())) {
 					$yes = 1;
@@ -691,7 +691,7 @@ class Generator extends Script {
 
 		// TODO
 		// removing dupplicates caused by mirror relations
-		foreach ($relations as $i => $rel) {
+		if ($relations) foreach ($relations as $i => $rel) {
 			foreach ($relations as $i2 => $rel2) {
 				if (($i !== $i2) && ($rel->getName() === $rel2->getName())) {
 					unset($relations[$i]);
