@@ -8,6 +8,9 @@ use eoko\config\Config, eoko\config\ConfigManager;
 use eoko\php\generator\ClassGeneratorManager;
 use eoko\util\Files;
 
+use eoko\module\exceptions\MissingModuleException;
+use eoko\module\exceptions\InvalidModuleException;
+
 use IllegalStateException;
 use Logger;
 
@@ -367,20 +370,6 @@ class ModuleManager {
 		return $module;
 	}
 	
-}
-
-class MissingModuleException extends \SystemException {
-	
-	public function __construct($name, \Exception $previous = null) {
-		parent::__construct('Missing module: ' . $name, '', $previous);
-	}
-}
-
-class InvalidModuleException extends \SystemException {
-	
-	public function __construct($name, $cause, \Exception $previous = null) {
-		parent::__construct("Invalid module: $name ($cause)", '', $previous);
-	}
 }
 
 class Location {
