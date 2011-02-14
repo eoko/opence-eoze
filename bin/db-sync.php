@@ -19,7 +19,10 @@ else if ($arg === 'load') $fn = 'dbLoad';
 else dieUsage();
 
 $owd = getcwd();
-chdir(DATABASE_DUMP_PATH);
+if (!@chdir(DATABASE_DUMP_PATH)) {
+	throw new SystemException("Database Dump Abort: Directory does not exists: " . DATABASE_DUMP_PATH);
+}
+
 try {
 	$params = eoko\database\ConnectionManager::getParams();
 	$out = 'db.sql.gz';
