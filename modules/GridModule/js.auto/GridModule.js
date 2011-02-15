@@ -1148,9 +1148,15 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 		var cache = this.extraWinConfigCache = this.extraWinConfigCache || {};
 		if (!cache[action]) {
 			var extra = this.extra;
-			if (!this.extra) return config;
+			if (!this.extra) {
+				cache[action] = {};
+				return config;
+			}
 			var winConfig = extra.winConfig;
-			if (!winConfig) return config;
+			if (!winConfig) {
+				cache[action] = {};
+				return config;
+			}
 			var actionConfig = extra[action + 'WinConfig'];
 
 			cache[action] = Ext.apply(Ext.apply({}, winConfig), actionConfig);
@@ -1193,6 +1199,7 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 		var formConfig = Ext.apply({}, this.getAddFormConfig());
 		this.onConfigureAddFormPanel(formConfig);
 
+		debugger
 		return this.createFormWindow(
 			formConfig
 			,this.applyExtraWinConfig('add', {
@@ -1662,7 +1669,12 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 				this.my.editWinLayout = 'fit';
 			}
 		} else {
-			this.my.addWinLayout = this.my.editWinLayout = "fit";
+			// Removed on 15/02/11 14:01
+			// This caused window to not autosize on the contained form panel.
+			// Issue copb #7
+			// Was probably here for a reason, though :/
+			// this.my.addWinLayout = this.my.editWinLayout = "fit";
+			this.my.addWinLayout = this.my.editWinLayout = "auto";
 		}
 
 		//... Edit form
