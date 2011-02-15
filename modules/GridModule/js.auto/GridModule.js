@@ -137,7 +137,10 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 	
 	,getFields: function() {throw 'Abstract'}
 
-	,getTitle: function() {return this.my.title}
+	,getTitle: function() {
+		if (this.my.title) return this.my.title;
+		else return this.name;
+	}
 
 	,destroy: function() {
 		this.my.tab.hide();
@@ -460,6 +463,7 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 		}
 		formPanel.items.each(function(item) {
 			if (item instanceof Ext.TabPanel) return true;
+			return undefined;
 		});
 		return false;
 	}
@@ -953,6 +957,8 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 
 		var win = this.createEditWindow(rowId, fn);
 		if (win) fn(win);
+
+		return undefined;
 	}
 
 	,afterCreateEditWindow: function(win) {
@@ -1159,6 +1165,7 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 	/**
 	 * Creates the toolbar to be used by the edit window. This method is not
 	 * used internaly, it is intended as a helper for overriding methods.
+	 * @param handlers
 	 * @param opts see createFormWindowToolbar for accepted options
 	 */
 	,createEditWindowToolbar: function(handlers, opts) {
@@ -1349,11 +1356,6 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 		this.ajaxFileRequest(exportParams);
 	}
 
-	,getTitle: function() {
-		if ('title' in this.my) return this.my.title;
-		else return this.name;
-	}
-
 	,getToolbar: function() {
 		if (this.my.toolbar === undefined) {
 			var items = [];
@@ -1396,8 +1398,10 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 			this.my.toolbar.getItemForAction = function(actionId) {
 				var items = this.findBy(function(item){
 					if (item.actionId === actionId) return true;
+					return undefined;
 				});
 				if (items.length) return items[0];
+				return undefined;
 			}
 		}
 
@@ -1875,6 +1879,7 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 						} else {
 							throw new Error('Invalid item index: ' + index);
 						}
+						return undefined;
 					}
 				} else if (index.field) {
 					var i = index.field;
