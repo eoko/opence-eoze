@@ -1,6 +1,8 @@
 Ext.ns("Ext.ux.form.HtmlEditor");
 /**
  * @author Shea Frederick - http://www.vinylfox.com
+ * @author Éric "rix" Ortéga <eric@planysphere.fr>
+ *
  * @class Ext.ux.form.HtmlEditor.Image
  * @extends Ext.util.Observable
  * <p>A plugin that creates an image button in the HtmlEditor toolbar for
@@ -46,6 +48,8 @@ Ext.ux.form.HtmlEditor.Image = Ext.extend(Ext.util.Observable, {
     },
     onRender: function() {
 
+		if (!this.canSelectImage()) return;
+
 		var tb = this.cmp.getToolbar(),
 			i = tb.items.findIndexBy(function(i) { return i.itemId === "createlink"; }),
 			b = {
@@ -70,6 +74,16 @@ Ext.ux.form.HtmlEditor.Image = Ext.extend(Ext.util.Observable, {
 			+'='+img.Width+'&'+this.urlSizeVars[1]+'='+img.Height+'&id='+img.ID
 			+'" title="'+img.Name+'" alt="'+img.Name+'">');
     }
+
+	/**
+	 * @author rix
+	 * @return {Boolean} TRUE if an external source has provided an
+	 * implementation for the selectImage() method -- that is, has effectively
+	 * overriden it.
+	 */
+	,canSelectImage: function() {
+		return this.selectImage !== Ext.emptyFn;
+	}
 });
 
 Oce.deps.reg("Ext.ux.form.HtmlEditor.Image");
