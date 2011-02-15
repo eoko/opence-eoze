@@ -61,6 +61,10 @@
 		this.un("afterrender", arguments.callee);
 	}
 
+	/**
+	 * @cfg {Boolean} nowButton (default: false) add a button to set the fields
+	 * to the current date and time.
+	 */
 	eo.form.DateTimeField = Ext.extend(Ext.form.CompositeField, {
 
 		dateTimeSeparator: " "
@@ -91,9 +95,31 @@
 			if (!dateName) df.on("afterrender", removeFieldName);
 			if (!timeName) tf.on("afterrender", removeFieldName);
 
-			items.push(df, tf);
+			if (this.name && this.submitValue !== false) {
 
-			if (true || this.nowButton) {
+				var hidden = this.hiddenField = new Ext.form.Hidden({
+					name: this.name
+				});
+
+				var syncFn = this.updateFieldValue.createDelegate(this);
+				this.mon(df, "keyup", syncFn);
+				this.mon(df, "select", syncFn);
+				this.mon(tf, "keyup", syncFn);
+				this.mon(tf, "select", syncFn);
+				this.hiddenField.on("afterrender", function() {
+					this.un("afterrender", arguments.callee);
+					syncFn();
+				});
+
+				// If there is a hidden field in composite field, we don't want
+				// to have it as the first or the last item, or it will make
+				// the field improperly add a gutter space (ext3.3 15/02/11 17:19)
+				items.push(df, hidden, tf);
+			} else {
+				items.push(df, tf);
+			}
+
+			if (this.nowButton) {
 				items.push({
 					xtype: "button"
 					,width: 24
@@ -105,21 +131,6 @@
 						df.setValue(now);
 						tf.setValue(now);
 					}
-				});
-			}
-
-			if (this.name && this.submitValue !== false) {
-				items.push(this.hiddenField = new Ext.form.Hidden({
-					name: this.name
-				}));
-				var syncFn = this.updateFieldValue.createDelegate(this);
-				this.mon(df, "keyup", syncFn);
-				this.mon(df, "select", syncFn);
-				this.mon(tf, "keyup", syncFn);
-				this.mon(tf, "select", syncFn);
-				this.hiddenField.on("afterrender", function() {
-					this.un("afterrender", arguments.callee);
-					syncFn();
 				});
 			}
 
