@@ -88,3 +88,16 @@ Ext.ns('Oce.Modules.MediaManager').MediaManager = eo.Class({
 	}
 
 });
+
+Oce.deps.wait('Ext.ux.form.HtmlEditor.Image', function() {
+	Ext.override(Ext.ux.form.HtmlEditor.Image, {
+		selectImage: function() {
+			eo.MediaManager.selectImage(function(img) {
+				this.insertImage(img.data);
+			}, this);
+		}
+		,insertImage: function(img) {
+			this.cmp.insertAtCursor(String.format('<img src="{0}" alt="{1}" />', img.url, img.name));
+		}
+	});
+});
