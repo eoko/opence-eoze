@@ -1199,7 +1199,6 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 		var formConfig = Ext.apply({}, this.getAddFormConfig());
 		this.onConfigureAddFormPanel(formConfig);
 
-		debugger
 		return this.createFormWindow(
 			formConfig
 			,this.applyExtraWinConfig('add', {
