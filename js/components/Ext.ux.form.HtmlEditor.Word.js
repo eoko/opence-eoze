@@ -93,12 +93,13 @@ Ext.ux.form.HtmlEditor.Word = Ext.extend(Ext.util.Observable, {
 
 		this.cmp.suspendEvents();
 
-//		var newValue = this.cmp.getValue(),
+		var newValue = this.cmp.getValue();
 //			newLength = newValue.length,
 //			lastLength = lastValue.length;
 
 		this.cmp.execCmd("undo");
-//		this.cmp.insertAtCursor(this.fixWordPaste(newValue));
+		var oldValue = this.cmp.getValue();
+		this.cmp.insertAtCursor(this.fixWordPaste(newValue.substr(oldValue.length)));
 
 //		for (var diffAt=0; diffAt<newLength; diffAt++){
 //			if (lastValue[diffAt] != newValue[diffAt]){
