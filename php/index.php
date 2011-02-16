@@ -1,7 +1,7 @@
 <?php
 
 if (($_SERVER && realpath($_SERVER['SCRIPT_FILENAME']) === __FILE__)
-		|| !($_SERVER && php_sapi_name() !== 'cli')) {
+		|| (!$_SERVER && php_sapi_name() !== 'cli')) {
 
 	exit('Illegal entry point');
 }
