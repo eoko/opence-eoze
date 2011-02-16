@@ -36,7 +36,7 @@ class Cache {
 	public static function cachePhpFile($namespace, $filename, $code) {
 		$nsPath = self::createNamespaceDir($namespace);
 		if (!is_writeable($nsPath)) {
-			Logger::get('Cache')->warn('Cannot write cache: {}', $nsPath);
+			Logger::get(get_called_class())->warn('Cannot write cache: {}', $nsPath);
 			return false;
 		}
 		$path = "$nsPath$filename";
