@@ -525,32 +525,37 @@ class LoggerFileAppender implements LoggerAppender {
 	}
 
 	private function closeLogFile() {
-        if ($this->logFile !== null && $this->logFile !== false) {
+        	if ($this->logFile !== null && $this->logFile !== false) {
 			fclose($this->logFile);
 			$this->logFile = null;
-       	}
+	       	}
 	}
 
 	private function getLogFile() {
-		if ($this->failedOpenFile) return null;
+		if ($this->failedOpenFile) return false;
 		if ($this->logFile === null) {
 
 			if (file_exists($this->filename) && filesize($this->filename) > FileHelper::filesizeToBytes(self::MAX_LOG_FILE_SIZE)) {
 				unlink($this->filename); // why I am authorized to delete the file, but not open it for writting ???
 			}
 
-			@$this->logFile = fopen($this->filename, 'a');
+			// If a error handler is set to catch warnings as exceptions,
+			// and the file cannot be opened, we will lose the hand here,
+			// so we must bypass any custom error handler
+			$handler = restore_error_handler();
+			$this->logFile = @fopen($this->filename, 'a');
+			set_error_handler($handler);
 
 			if ($this->logFile === false) {
 				$this->failedOpenFile = true;
-				Logger::getLogger('Logger')->error('Cannot open log file for writting: {}' . $this->filename);
+				Logger::getLogger($this)->error('Cannot open log file for writting: {}', $this->filename);
 			}
 		}
 		return $this->logFile;
 	}
 
 	function process(LogEntry $entry) {
-		if ($this->getLogFile() != false) {
+		if ($this->getLogFile() !== false) {
 			fwrite($this->getLogFile(), $entry . PHP_EOL);
 		}
 	}
@@ -590,7 +595,7 @@ class LoggerFirePHPAppender implements LoggerAppender {
 		
 		$found = false;
 		foreach (explode(':', get_include_path()) as $dir) {
-			$filename = LIBS_PATH . '/FirePHPCore/FirePHP.class.php';
+			$filename = LIBS_PATH . 'FirePHPCore/FirePHP.class.php';
 			if (file_exists($filename)) {
 				require_once($filename);
 				$found = true;
