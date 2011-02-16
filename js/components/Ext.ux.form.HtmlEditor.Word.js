@@ -1,5 +1,6 @@
 /**
  * @author Shea Frederick - http://www.vinylfox.com
+ * @author Éric Ortéga <eric@planysphere.fr>
  * @class Ext.ux.form.HtmlEditor.Word
  * @extends Ext.util.Observable
  * <p>A plugin that creates a button on the HtmlEditor for pasting text from Word without all the jibberish html.</p>
