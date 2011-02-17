@@ -95,3 +95,10 @@ div.details div.details-info-image-ct {
     margin:10px;
 }
 
+.img-chooser-tree-folder {
+	background-image: url("../../images/default/tree/folder.gif") !important;
+}
+.img-chooser-tree-folder.open {
+	background-image: url("../../images/default/tree/folder-open.gif") !important;
+}
+
