@@ -20,7 +20,9 @@ class ExceptionHandler {
 	}
 
 	public function wrapError($errno, $errstr, $errfile, $errline) {
-	    $this->process(new Exception("$errstr ($errfile:$errline)", $errno));
+		if (error_reporting() !== 0) {
+			$this->process(new Exception("$errstr ($errfile:$errline)", $errno));
+		}
 	}
 
 	public static function processException($ex) {
