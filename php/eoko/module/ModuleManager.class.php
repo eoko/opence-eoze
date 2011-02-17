@@ -331,7 +331,8 @@ class ModuleManager {
 
 			// if the method has not returned yet, that means that the module
 			// has not been created from config: the config must be set!
-			$module->setConfig($config);
+			// 17/02/11 01:46 This has been deprecated...
+			// $module->setConfig($config);
 			return $module;
 		}
 	}
@@ -367,7 +368,8 @@ class ModuleManager {
 		
 		// create an instance of the newly created class
 		$module = $this->createModule($location->moduleName, $class);
-		$module->setConfig($config);
+		// 17/02/11 01:46 This has been deprecated
+		// $module->setConfig($config);
 		return $module;
 	}
 	
