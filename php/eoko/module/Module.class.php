@@ -108,6 +108,10 @@ MSG
 			}
 		}
 
+		if (!$config) {
+			$config = new Config();
+		}
+
 		return $this->config = $config;
 	}
 	
