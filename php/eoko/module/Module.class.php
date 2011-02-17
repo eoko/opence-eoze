@@ -102,7 +102,10 @@ MSG
 		$config = array_shift($locations)->loadConfig();
 		foreach ($locations as $l) {
 			$c = $l->loadConfig();
-			if ($c) $config->apply($c);
+			if ($c) {
+				if ($config) $config->apply($c);
+				else $config = $c;
+			}
 		}
 
 		return $this->config = $config;
