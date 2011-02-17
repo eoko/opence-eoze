@@ -293,7 +293,7 @@ Oce.FormWindow = Ext.extend(eo.Window, {
 //			})
 //		}
 
-		formPanel.setWindow(this);
+		if (formPanel.setWindow) formPanel.setWindow(this);
 		
 		// --- Shortcut accessors ---
 
