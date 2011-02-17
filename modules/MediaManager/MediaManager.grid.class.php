@@ -4,6 +4,7 @@ namespace eoko\modules\MediaManager;
 
 use DataStore;
 use eoko\util\Files;
+use eoko\file\FileType;
 
 use SecurityException;
 
@@ -49,6 +50,7 @@ class Grid extends GridBase {
 				'datetime' => date('d-m-Y H:i', filemtime($abs)),
 				'filemtime' => date('Y-m-d H:i', filemtime($abs)),
 				'extension' => Files::getExtension($rel),
+				'mime' => FileType::IMAGE()->testFilename($rel) ? 'image' : Files::getExtension($rel),
 			);
 
 		}
