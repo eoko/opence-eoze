@@ -539,12 +539,7 @@ class LoggerFileAppender implements LoggerAppender {
 				unlink($this->filename); // why I am authorized to delete the file, but not open it for writting ???
 			}
 
-			// If a error handler is set to catch warnings as exceptions,
-			// and the file cannot be opened, we will lose the hand here,
-			// so we must bypass any custom error handler
-			$handler = restore_error_handler();
 			$this->logFile = @fopen($this->filename, 'a');
-			set_error_handler($handler);
 
 			if ($this->logFile === false) {
 				$this->failedOpenFile = true;
