@@ -36,7 +36,7 @@ eo.MediaPanel = Ext.extend(Ext.Panel, {
 				,root: 'data'
 				,totalProperty: 'count'
 				,fields: [
-					"filename", "url", "size", "extension", "filemtime"
+					"filename", "url", "size", "extension", "filemtime", "mime"
 				]
 			})
 			,listeners: {
@@ -217,8 +217,14 @@ eo.MediaPanel.ImageView = Ext.extend(Ext.DataView, {
 		var tpl = new Ext.XTemplate(
 			'<tpl for=".">',
 				'<div class="thumb-wrap" id="{nodeId}">',
-				'<div class="thumb"><div class="ct"><img src="{url}" title="{filename}"></div></div>',
-				'<span>{shortName}</span></div>',
+					'<div class="thumb">',
+						'<div class="ct">',
+							'<img src="{url}" title="{filename}" class="{mime}" />',
+							'<span class="{mime}"></span>',
+						'</div>',
+					'</div>',
+					'<span>{shortName}</span>',
+				'</div>',
 			'</tpl>'
 		);
 		tpl.compile();
@@ -318,9 +324,9 @@ eo.MediaManager = {
 			,constrainHeader: true
 			,layout: "fit"
 			,items: mp
-			,title: "Sélectionnez une image"
+			,title: "Sélectionnez une image" // i18n
 			,buttons: [{
-				text: "Ok"
+				text: "Ok" // i18n
 				,handler: function() {
 					var r = mp.getSelectedRecord();
 					if (r) callback.call(scope || this, r);
@@ -328,7 +334,7 @@ eo.MediaManager = {
 				}
 				,scope: this
 			}, {
-				text: "Annuler"
+				text: "Annuler" // i18n
 				,handler: function() {
 					win.close();
 				}

@@ -50,12 +50,12 @@ div.details div.details-info-image-ct {
 /*    background: #dddddd;*/
     padding: 3px;
 	text-align: center;
-    height: 60px;
+    height: 64px;
     width: 80px;
 	position: relative;
 }
 .img-chooser-view .thumb img{
-    max-height: 60px;
+    max-height: 64px;
     max-width: 80px;
 }
 .img-chooser-view .thumb-wrap{
