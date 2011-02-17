@@ -239,14 +239,20 @@ eo.MediaPanel.TreePanel = Ext.extend(Ext.tree.TreePanel, {
 			,root: {
 				nodeType: 'node'
 				,text: 'Media'
-				,singleClickExpand: true
-				,expandable: true
+//				,singleClickExpand: true
+//				,expandable: true
 			}
 		});
 
 		eo.MediaPanel.TreePanel.superclass.constructor.call(this, config);
 
-		this.relayEvents(this.getSelectionModel(), ["selectionchange"]);
+		var sm = this.getSelectionModel();
+		this.relayEvents(sm, ["selectionchange"]);
+
+		sm.on("selectionchange", function(me, node, old) {
+			if (old && !old.isExpanded() && old.iconElement) old.iconElement.removeClass("open");
+			if (node && node.iconElement) node.iconElement.addClass("open");
+		});
 	}
 
 	,loadDirs: function(dirs, expand) {
@@ -256,9 +262,18 @@ eo.MediaPanel.TreePanel = Ext.extend(Ext.tree.TreePanel, {
 				var child = new Ext.tree.TreeNode({
 					text: dir.name
 					,path: dir.path
-					,expandable: true
-					,singleClickExpand: true
+					,iconCls: "img-chooser-tree-folder"
+//					,expandable: true
+//					,singleClickExpand: true
+					,listeners: {
+						beforecollapse: function() {this.iconElement.removeClass("open")}
+						,beforeexpand: function() {this.iconElement.addClass("open")}
+					}
 				});
+				child.getUI().render = child.getUI().render.createSequence(function() {
+					child.iconElement = new Ext.Element(this.getIconEl());
+				});
+
 				node.appendChild(child);
 				if (dir.children) {
 					pushDirs(child, dir.children);
