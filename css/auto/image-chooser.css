@@ -30,6 +30,7 @@
 	max-width: 90%;
 	max-height: 115px;
 }
+.img-chooser-view .thumb div.ct,
 div.details div.details-info-image-ct div.ct {
 	position: absolute;
 	bottom: 0;
@@ -51,6 +52,7 @@ div.details div.details-info-image-ct {
 	text-align: center;
     height: 60px;
     width: 80px;
+	position: relative;
 }
 .img-chooser-view .thumb img{
     max-height: 60px;
@@ -76,6 +78,7 @@ div.details div.details-info-image-ct {
     background: #DFEDFF;
     border: 1px solid #6593cf;
     padding: 4px;
+/*	padding-right: 8px;*/
 }
 .img-chooser-view .x-view-selected .thumb{
     background:transparent;

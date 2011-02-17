@@ -217,7 +217,7 @@ eo.MediaPanel.ImageView = Ext.extend(Ext.DataView, {
 		var tpl = new Ext.XTemplate(
 			'<tpl for=".">',
 				'<div class="thumb-wrap" id="{nodeId}">',
-				'<div class="thumb"><img src="{url}" title="{filename}"></div>',
+				'<div class="thumb"><div class="ct"><img src="{url}" title="{filename}"></div></div>',
 				'<span>{shortName}</span></div>',
 			'</tpl>'
 		);
