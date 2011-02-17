@@ -202,7 +202,7 @@ eo.MediaPanel.ImageView = Ext.extend(Ext.DataView, {
 			,prepareData: prepareData.createDelegate(this)
 		});
 
-		eo.MediaPanel.ImageView.superclass.constructor.call(config);
+		eo.MediaPanel.ImageView.superclass.constructor.call(this, config);
 
 		this.store.on({
 			scope: this
