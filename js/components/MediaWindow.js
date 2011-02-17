@@ -126,13 +126,19 @@ eo.MediaPanel = Ext.extend(Ext.Panel, {
 		this.detailsTemplate = new Ext.XTemplate(
 			'<div class="details">',
 				'<tpl for=".">',
-					'<img src="{url}"><div class="details-info">',
-					'<b>Fichier : </b>', // i18n
-					'<span>{filename}</span>',
-					'<b>Taille : </b>', // i18n
-					'<span>{size}</span>',
-					'<b>Dernière modification :</b>', // i18n
-					'<span>{dateString}</span></div>',
+					'<div class="details-info-image-ct">',
+						'<div class="ct">',
+							'<img src="{url}">',
+						'</div>',
+					'</div>',
+					'<div class="details-info">',
+						'<b>Fichier : </b>', // i18n
+						'<span>{filename}</span>',
+						'<b>Taille : </b>', // i18n
+						'<span>{size}</span>',
+						'<b>Dernière modification :</b>', // i18n
+						'<span>{dateString}</span>',
+					'</div>',
 				'</tpl>',
 			'</div>'
 		);
