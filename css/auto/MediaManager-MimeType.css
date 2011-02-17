@@ -2,6 +2,7 @@
 .img-chooser-view .thumb img.image {
 	display: inline;
 }
+.img-chooser-view .thumb img.pdf,
 .img-chooser-view .thumb img.csv {
 	display: none;
 }
@@ -14,6 +15,7 @@
 .img-chooser-view .thumb span.image {
 	display: none;
 }
+.img-chooser-view .thumb span.pdf,
 .img-chooser-view .thumb span.csv {
 	display: block;
 	background-image: url("images/mime/x-office-document-64.png") !important;
