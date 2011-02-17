@@ -53,6 +53,11 @@ eo.MediaPanel = Ext.extend(Ext.Panel, {
 					var menu1 = new Ext.menu.Menu({
 						items: [{
 							text: 'Delete'
+						}, {
+							text: "View"
+							,handler: function() {
+								eo.doc.view(view.getRecord(node));
+							}
 						}]
 					});
 					menu1.showAt([
