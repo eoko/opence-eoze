@@ -1,14 +1,8 @@
-//Oce.Modules.media.media = Ext.extend(Oce.Modules.media.mediaBase, {
-//
-//	createAddWindow: function(callback) {
-//		return new Ext.Window({
-//			width: 320
-//			,height: 160
-//			,constrainHeader: true
-//		});
-//	}
-//});
-Ext.ns('Oce.Modules.MediaManager').MediaManager = eo.Class({
+(function() {
+
+var NS = Ext.ns("Oce.Modules.MediaManager");
+
+NS.MediaManager = eo.Class({
 
 	open: function(destination) {
 		if (!destination) destination = Oce.mx.application.getMainDestination();
@@ -89,11 +83,115 @@ Ext.ns('Oce.Modules.MediaManager').MediaManager = eo.Class({
 
 });
 
+NS.MimeTypes = {
+	image: function(img) {
+		var newImg = new Image();
+		newImg.src = img.data.url;
+
+		var ratio = newImg.width / newImg.height;
+
+		var lockButton;
+
+		var fp = new Oce.FormPanel({
+			width: 300
+			,height: 200
+			,items: [{
+				xtype: "compositefield"
+				,fieldLabel: "Dimensions" // i18n
+				,items: [{
+					xtype: "numberfield"
+					,flex: 1
+					,name: "width"
+					,allowBlank: false
+					,value: newImg.width
+					,listeners: {
+						blur: function() {
+							if (lockButton.pressed) {
+								fp.form.findField("height").setValue(
+									parseInt(this.getValue() * ratio)
+								);
+							}
+						}
+					}
+				}, {
+					xtype: "displayfield"
+					,value: " x "
+				}, {
+					xtype: "numberfield"
+					,flex: 1
+					,name: "height"
+					,allowBlank: false
+					,value: newImg.height
+					,listeners: {
+						blur: function() {
+							if (lockButton.pressed) {
+								fp.form.findField("width").setValue(
+									parseInt(this.getValue() / ratio)
+								);
+							}
+						}
+					}
+				}, lockButton = new Ext.Button({
+					width: 24
+					,height: 24
+					,enableToggle: true
+					,tooltip: "Lock ratio" // i18n
+					,pressed: true
+				})]
+			}, {
+				xtype: "checkbox"
+				,name: "lightbox"
+				,checked: true
+				,fieldLabel: "Lightbox"
+			}]
+		});
+		var win = new Oce.FormWindow({
+			title: "Options" // i18n
+			,formPanel: fp
+			,buttons: [{
+				text: "Ok" // i18n
+				,handler: function() {
+					var form = fp.form;
+
+					if (!form.isValid()) return;
+
+					var w = form.findField("width").getValue(),
+						h = form.findField("height").getValue();
+	
+					this.cmp.insertAtCursor(String.format(
+						'<img src="{0}" alt="{1}" width="{2}" height="{3}"/>',
+						img.data.url, img.data.name, w, h
+					));
+
+					win.close();
+				}.createDelegate(this)
+			}, {
+				text: "Annuler" // i18n
+				,handler: function() { win.close() }
+			}]
+			,layout: "fit"
+		});
+		win.show();
+	}
+
+	,csv: function(record) {
+		this.cmp.insertAtCursor(String.format(
+			'<a href="{0}">{1}</a>',
+			record.data.url, record.data.filename
+		));
+	}
+}
+
 Oce.deps.wait('Ext.ux.form.HtmlEditor.Image', function() {
 	Ext.override(Ext.ux.form.HtmlEditor.Image, {
 		selectImage: function() {
 			eo.MediaManager.selectImage(function(img) {
-				this.insertImage(img.data);
+				var mimeFn = NS.MimeTypes[img.data.mime];
+				if (mimeFn) {
+					mimeFn.call(this, img);
+				} else {
+					this.insertImage(img.data);
+				}
 			}, this);
 		}
 		,insertImage: function(img) {
@@ -101,3 +199,5 @@ Oce.deps.wait('Ext.ux.form.HtmlEditor.Image', function() {
 		}
 	});
 });
+
+})(); // closure

@@ -48,6 +48,19 @@ eo.MediaPanel = Ext.extend(Ext.Panel, {
 				,dblclick: function(view, index, node, e) {
 					me.fireEvent("dblclick", me, view.getRecord(node));
 				}
+				,contextmenu: function(view, index, node, event) {
+					view.select(node, false);
+					var menu1 = new Ext.menu.Menu({
+						items: [{
+							text: 'Delete'
+						}]
+					});
+					menu1.showAt([
+		                event.browserEvent.clientX
+				        ,event.browserEvent.clientY
+					]);
+					event.preventDefault();
+				}
 			}
 		});
 
