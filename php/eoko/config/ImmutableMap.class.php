@@ -13,6 +13,8 @@ class ImmutableMap {
 	 */
 	const REQUIRE_KEYS = 1;
 	
+	const WRAP_CHILD_ARRAYS_OFF = 2;
+	
 	private $require = false;
 	private $wrapChildren = true;
 	
@@ -21,7 +23,7 @@ class ImmutableMap {
 	public function __construct(array &$array = null, $opts = null) {
 		$this->array = $array !== null ? $array : array();
 		$this->require = $opts & self::REQUIRE_KEYS;
-//		$this->wrapChildren = $opts & self::WRAP_CHILD_ARRAYS;
+		$this->wrapChildren = !($opts & self::WRAP_CHILD_ARRAYS_OFF);
 	}
 	
 	public function count() {
