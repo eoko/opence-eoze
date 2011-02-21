@@ -3,7 +3,7 @@
 namespace eoko\database\Adapter;
 
 use eoko\database\Adapter;
-use eoko\config\ConfigManager;
+use eoko\database\Database; // better to have a dependance on that rather than ConfigManager
 use eoko\util\collection\Map;
 
 use InvalidArgumentException;
@@ -27,7 +27,7 @@ abstract class AbstractAdapter implements Adapter {
 		if ($config !== null) {
 			$this->config = $config;
 		} else {
-			$this->config = ConfigManager::getConfigObject(relativeNamespace($this, '..'));
+			$this->config = Database::getDefaultConfig();
 		}
 		
 		// prefix
