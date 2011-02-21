@@ -5,6 +5,8 @@ namespace eoko\database;
 use eoko\util\collection\Map;
 
 interface Adapter {
+	
+	function __construct(Map $config);
 
 	/** @return PDO */
 	function getConnection();
