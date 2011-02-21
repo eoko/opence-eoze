@@ -193,7 +193,7 @@ function bcabs($n) {
  * @throws IllegalStateException if the given path resolves upper than the
  * namespace root
  */
-function resolveNamespacePath($ns, $path = null) {
+function relativeNamespace($ns, $path = null) {
 	if (is_object($ns)) $ns = get_namespace($ns);
 
 	$path = str_replace('\\', '/', $path);
@@ -235,11 +235,11 @@ function resolveNamespacePath($ns, $path = null) {
 }
 
 /**
- * This function is an alias for the function {@link resolveNamespacePath()}.
+ * This function is an alias for the function {@link relativeNamespace()}.
  * @return string
  */
-function resolve_namespace_path() {
-	return call_user_func_array('resolveNamespacePath', func_get_args());
+function relative_namespace() {
+	return call_user_func_array('relativeNamespace', func_get_args());
 }
 
 
