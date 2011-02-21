@@ -241,3 +241,21 @@ function resolveNamespacePath($ns, $path = null) {
 function resolve_namespace_path() {
 	return call_user_func_array('resolveNamespacePath', func_get_args());
 }
+
+
+function is_reference_to(&$a, &$b) {
+	if ($a !== $b)
+		return false;
+
+	$temp = $a;
+	$checkval = ($a === null) ? "" : null;
+	$a = $checkval;
+
+	if ($b === $checkval) {
+		$a = $temp;
+		return true;
+	} else {
+		$a = $temp;
+		return false;
+	}
+}
