@@ -7,6 +7,7 @@ use eoko\util\Arrays;
 use eoko\util\Files;
 use eoko\cache\Cache;
 use eoko\log\Logger;
+use eoko\util\collection\Map, eoko\util\collection\ImmutableMap;
 
 use IllegalArgumentException, IllegalStateException;
 
@@ -93,6 +94,18 @@ class ConfigManager {
 		} else {
 			return $node;
 		}
+	}
+
+	/**
+	 * Get the given config values as a Map object.
+	 * @param string|object $node
+	 * @param string $key
+	 * @param array $default
+	 * @return Map
+	 */
+	public static function getConfigObject($node, $key = null, $default = null) {
+		$a = self::get($node, $key, $default);
+		return new ImmutableMap($a);
 	}
 
 	public static function addPath($path) {
