@@ -1,8 +1,8 @@
 <?php
 
-namespace eoko\config;
+namespace eoko\util\collection;
 
-class ImmutableMap {
+class ImmutableMap implements Map {
 	
 	private $array;
 	
@@ -54,6 +54,3 @@ class ImmutableMap {
 	}
 }
 
-class InvalidOffsetException extends \SystemException {
-	
-}
