@@ -45,12 +45,16 @@ class ImmutableMap implements Map {
 			return null;
 		}
 	}
-
+	
 	/**
 	 * @return array
 	 */
 	public function toArray() {
 		return $this->array;
+	}
+	
+	public function isMutable() {
+		return false;
 	}
 }
 
