@@ -75,4 +75,8 @@ abstract class AbstractAdapter implements Adapter {
 		return $this->prefix . $internalTableName;
 	}
 	
+	public function getDumper() {
+		return null;
+	}
+	
 }
