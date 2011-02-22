@@ -47,6 +47,8 @@ class MysqlDumper implements Dumper {
 	
 	public function dump($filename) {
 		
+		$this->logger->info('Dumping database to {}', $filename);
+		
 		$dir = dirname($filename);
 		$filename = basename($filename);
 		
@@ -80,6 +82,9 @@ class MysqlDumper implements Dumper {
 	}
 	
 	public function load($filename) {
+		
+		$this->logger->info('Loading database from {}', $filename);
+		
 		if (!file_exists($filename)) {
 			throw new IllegalArgumentException('Missing dump file: ' . $filename);
 		}
