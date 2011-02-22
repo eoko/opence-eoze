@@ -7,7 +7,7 @@
  * @subpackage Query
  */
 
-use eoko\database\ConnectionManager;
+use eoko\database\Database;
 
 /**
  * Utility class to submit queries to the database
@@ -820,7 +820,7 @@ class Query {
 	 */
 	private function executeSql(&$pdo = null) {
 
-		$pdo = ConnectionManager::get();
+		$pdo = Database::getDefaultConnection();
 		$pdoStatement = $pdo->prepare($this->sql);
 
 		$this->getLogger()->debug("Executing query:\n{}", $this);
@@ -1178,7 +1178,7 @@ class Query {
 		
 		Logger::get('Query')->debug('Executing raw query: {}', $sql);
 		
-		$sth = ConnectionManager::get()->prepare($sql);
+		$sth = Database::getDefaultConnection()->prepare($sql);
 		
 		if ($sth->execute()) {
 			return $sth;
@@ -1678,7 +1678,7 @@ class SelectExecutor {
 
 	public function execute() {
 
-		$pdo = ConnectionManager::get();
+		$pdo = Database::getDefaultConnection();
 		$pdoStatement = $pdo->prepare($this->sql);
 
 		if (!$pdoStatement->execute($this->bindings)) {
