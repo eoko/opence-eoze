@@ -3,7 +3,7 @@
 namespace eoko\cqlix\generator;
 use eoko\script\Script;
 use eoko\database\Query;
-use eoko\database\ConnectionManager;
+use eoko\database\Database;
 use eoko\template\Template;
 use eoko\plugin\PluginManager;
 use eoko\config\ConfigManager;
@@ -115,7 +115,7 @@ class Generator extends Script {
 
 		$startTime = microtime();
 
-		$this->database = ConnectionManager::getDatabaseName();
+		$this->database = Database::getDefaultAdapter()->getDatabaseName();
 
 		// Reverse engineer the ModelTable and Model classes, to discover the
 		// proxy methods (protected methods prefixed with an underscore _) to
