@@ -2,6 +2,8 @@
 
 namespace eoko\database\Adapter;
 
+use eoko\database\Dumper\MysqlDumper;
+
 use InvalidConfigurationException;
 use PDO;
 
@@ -38,6 +40,10 @@ class MysqlAdapter extends AbstractAdapter {
 				"Both collation and characterSet must be set or left blank."
 			);
 		}
+	}
+	
+	public function getDumper() {
+		return new MysqlDumper($this->getConfig());
 	}
 
 }

@@ -40,4 +40,13 @@ interface Adapter {
 	 * @return Map
 	 */
 	function getConfig();
+	
+	/**
+	 * Get a {@link Dumper} that can create backups of the database, and load 
+	 * them back. Adapaters are allowed to return NULL, meaning they don't know 
+	 * of an appropriate implementation for the kind of database they address;
+	 * so using code should account for this case.
+	 * @return Dumper
+	 */
+	function getDumper();
 }
