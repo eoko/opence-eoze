@@ -1,4 +1,8 @@
 <?php
+/**
+ * @author Éric Ortéga <eric@planysphere.fr>
+ * @since 23/02/11 01:13
+ */
 
 namespace eoko\util\image;
 
