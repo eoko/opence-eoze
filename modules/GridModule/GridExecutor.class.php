@@ -744,45 +744,58 @@ MSG;
 ////					->select($fieldNames)
 ////					->execute();
 
-		$rowOrder = array();
-		$i = 0;
-		foreach ($fields as $field => &$name) {
-			$rowOrder["__col_$i"] = $name;
-			$name = "__col_$i";
-			$i++;
-		}
+//TODO		$rowOrder = array();
+//		$i = 0;
+//		foreach ($fields as $field => &$name) {
+//			$rowOrder["__col_$i"] = $name;
+//			$name = "__col_$i";
+//			$i++;
+//		}
+//
+//		$query = $this->table->createQuery($this->getLoadQueryContext());
+//
+//		$this->table->selectFields($fields, $query);
+//
+//		$this->createLoadQuery_sort($query);
+//
+//		$this->createLoadQuery_search($query);
+//
+//		$this->createLoadQuery_extra($query);
+//
+//		if ($this->request->has('filters', true)) {
+//			$filters = array();
+//			foreach ($this->request->getRaw('filters') as $filter) {
+//				$filters[$filter] = true;
+//			}
+////			$this->addLoadQueryFilters($query, $filters);
+//			if (!isset($filters['all']) || !$filters['all']) {
+//				$this->addLoadQueryFilters($query, $filters);
+//			}
+//		}
 
-		$query = $this->table->createQuery($this->getLoadQueryContext());
+		// tmp
+		$query = $this->createLoadQuery('grid');
 
-		$this->table->selectFields($fields, $query);
+		$start = $this->request->get('realstart', false, true);
+		if ($start === false) $start = $this->request->get('start', 0, true);
 
-		$this->createLoadQuery_sort($query);
-
-		$this->createLoadQuery_search($query);
-
-		$this->createLoadQuery_extra($query);
-
-		if ($this->request->has('filters', true)) {
-			$filters = array();
-			foreach ($this->request->getRaw('filters') as $filter) {
-				$filters[$filter] = true;
-			}
-//			$this->addLoadQueryFilters($query, $filters);
-			if (!isset($filters['all']) || !$filters['all']) {
-				$this->addLoadQueryFilters($query, $filters);
-			}
-		}
-
+		$query->limit(
+			$this->request->get('limit', 20),
+			$start
+//			$this->request->get('start', 0, true)
+		);
+		// /tmp
+		
 		$result = $query->execute();
 
-		// order
-		foreach ($result as &$row) {
-			$newRow = array();
-			foreach ($rowOrder as $alias => $name) {
-				$newRow[$name] = $row[$alias];
-			}
-			$row = $newRow;
-		}
+//RODO		// order
+//		foreach ($result as &$row) {
+//			$newRow = array();
+//			foreach ($rowOrder as $alias => $name) {
+//				$newRow[$name] = $row[$alias];
+//			}
+//			$row = $newRow;
+//		}
 
 		$exporter = new \Exporter($this->makeExportFilename());
 
