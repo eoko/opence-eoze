@@ -9,9 +9,7 @@
  * @author Éric Ortéga <eric@mail.com>
  */
 
-use eoko\php\generator\ClassGeneratorManager;
 use eoko\config\ConfigManager;
-use eoko\module\ModuleManager;
 
 $directAccess = false;
 date_default_timezone_set('Europe/London');
@@ -22,8 +20,6 @@ function defineIf($name, $value) {
 
 // Directories
 defineIf('DS', DIRECTORY_SEPARATOR);
-//defineIf('ROOT', realpath(dirname(__FILE__) . DS . '..') . DS);
-//defineIf('ROOT', realpath(dirname($_SERVER['SCRIPT_FILENAME'])) . DS);
 defineIf('ROOT', realpath(dirname(__FILE__) . DS . '..' . DS . '..') . DS);
 
 defineIf('SITE_BASE_URL', 'http://' .
@@ -83,22 +79,10 @@ defineIf('IMAGES_PATH', ROOT . 'images' . DS);
 defineIf('HTML_TPL_PATH', ROOT . 'tpl' . DS);
 defineIf('CSS_BASE_URL', 'css/');
 
-//defineIf('JSCORE_BASE_URL', 'js/');
-//defineIf('JSCORE_BASE_PATH', ROOT . 'js' . DS);
-//defineIf('EXTJS_BASE_URL', JSCORE_BASE_URL . 'ext/');
 defineIf('CSS_PATH', EOZE_PATH . 'css' . DS);
 defineIf('CSS_URL', EOZE_BASE_URL . 'css/');
 defineIf('JS_PATH', EOZE_PATH . 'js' . DS);
 defineIf('JS_URL', EOZE_BASE_URL . 'js/');
-
-//if (!defined(APP_JS_PATH) && is_dir($dir = ROOT . 'js')) {
-//	define('APP_JS_PATH', $dir . DS);
-//	define('APP_JS_URL', SITE_BASE_URL . 'js/');
-//}
-//if (!defined(APP_CSS_PATH) && is_dir($dir = ROOT . 'css')) {
-//	define('APP_CSS_PATH', $dir . DS);
-//	define('APP_CSS_URL', SITE_BASE_URL . 'css/');
-//}
 
 defineIf('MODEL_PATH', ROOT . 'models' . DS);
 defineIf('MODEL_BASE_PATH', MODEL_PATH . 'base' . DS);
@@ -122,7 +106,6 @@ defineIf('CONFIG_PATH', ROOT . 'config' . DS);
 defineIf('MODULES_BASE_URL', SITE_BASE_URL . MODULES_DIR . '/');
 if (defined('APP_MODULES_DIR')) {
 	defineIf('APP_MODULES_BASE_URL', SITE_BASE_URL . APP_MODULES_DIR . '/');
-//	defineIf('APP_MODULES_BASE_URL', APP_MODULES_DIR . '/');
 }
 
 defineIf('MODULES_NAMESPACE', 'eoko\\modules\\');
@@ -177,78 +160,21 @@ if ((!isset($test) || !$test) && (!isset($is_script) || !$is_script)) require_on
 
 // --- Class loader --
 // Autoload for helpers in /inc
+require_once PHP_PATH . 'eoko' . DS . 'php' . DS . 'ClassLoader.class.php';
+$classLoader = eoko\php\ClassLoader::register();
 
-$includePaths = array(
+$classLoader->addIncludePath(array(
 	PHP_PATH,
 	APP_PHP_PATH,
 	MODEL_PATH,
 	MODEL_PROXY_PATH
-);
+));
 
-if (USE_CONTROLLER_CACHE) $includePaths[CACHE_PATH . 'php'];
-
-//REM ModuleManager::addIncludePaths($includePaths);
+if (USE_CONTROLLER_CACHE) $classLoader->addIncludePath(CACHE_PATH . 'php');
 
 foreach ($phpSubDirs as $dir) {
-	$includePaths[] = PHP_PATH . $dir . DS;
-	$includePaths[] = APP_PHP_PATH . $dir . DS;
-}
-
-function __autoload($class) {
-	if (!tryAutoLoad($class)) {
-		tryAutoLoad($class, '');
-	}
-}
-function tryAutoLoad($class, $suffix = '.class') {
-
-	$classPath = str_replace('\\', DS, $class);
-
-	global $includePaths;
-	foreach ($includePaths as $path) {
-		if (file_exists($filename = "$path$classPath$suffix.php")) {
-			require_once $filename;
-			return true;
-		}
-	}
-
-//	if (substr($class, 0, strlen(MODULES_NAMESPACE)) === MODULES_NAMESPACE) {
-//		$classPath = substr($class, strlen(MODULES_NAMESPACE));
-//		$classPath = str_replace('\\', DS, $classPath);
-//		$classPath = MODULES_PATH . $classPath;
-//		if (file_exists($filename = "$classPath$suffix.php")) {
-//			require_once $filename;
-//			return true;
-//		}
-//	}
-	if (ModuleManager::autoLoad($class, $suffix)) return true;
-
-	if (ClassGeneratorManager::generate($class)) {
-		return true;
-	}
-
-	if (2 === count($parts = explode('_', $classPath, 2))) {
-		$classPath = $parts[0];
-		foreach ($includePaths as $path) {
-			if (file_exists($filename = "$path$classPath$suffix.php")) {
-				require_once $filename;
-				return true;
-			}
-		}
-	}
-	if (substr($classPath, -5) === 'Query') {
-		if (file_exists($filename = MODEL_QUERY_PATH . "$classPath$suffix.php")) {
-			require_once $filename;
-			return true;
-		}
-	}
-	if (substr($classPath, -5) === 'Proxy') {
-		if (file_exists($filename = MODEL_PROXY_PATH . "$classPath$suffix.php")) {
-			require_once $filename;
-			return true;
-		}
-	}
-
-	return false;
+	$classLoader->addIncludePath(PHP_PATH . $dir . DS);
+	$classLoader->addIncludePath(APP_PHP_PATH . $dir . DS);
 }
 
 
@@ -280,4 +206,11 @@ if (!defined('ADD_LOG_APPENDERS') || ADD_LOG_APPENDERS) {
 
 \eoko\util\file\FileTypes::getInstance();
 
-if ((!isset($test) || !$test) && (!isset($is_script) || !$is_script)) Router::getInstance()->route();
+if ((!isset($test) || !$test)
+		&& (!isset($is_script) || !$is_script)
+		&& (!defined('UNIT_TEST') || !UNIT_TEST)
+//		&& !interface_exists('PHPUnit_Framework_Test', false)
+) {
+
+	Router::getInstance()->route();
+}

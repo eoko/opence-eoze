@@ -3,7 +3,7 @@
 namespace eoko\cqlix\generator;
 use eoko\script\Script;
 use eoko\database\Query;
-use eoko\database\ConnectionManager;
+use eoko\database\Database;
 use eoko\template\Template;
 use eoko\plugin\PluginManager;
 use eoko\config\ConfigManager;
@@ -115,7 +115,7 @@ class Generator extends Script {
 
 		$startTime = microtime();
 
-		$this->database = ConnectionManager::getDatabaseName();
+		$this->database = Database::getDefaultAdapter()->getDatabaseName();
 
 		// Reverse engineer the ModelTable and Model classes, to discover the
 		// proxy methods (protected methods prefixed with an underscore _) to
@@ -616,7 +616,7 @@ class Generator extends Script {
 
 		// TODO
 		// removing dupplicates caused by mirror relations
-		foreach ($relations as $i => $rel) {
+		if ($relations) foreach ($relations as $i => $rel) {
 			foreach ($relations as $i2 => $rel2) {
 				if (($i !== $i2) && ($rel->getName() === $rel2->getName())) {
 					$yes = 1;
@@ -691,7 +691,7 @@ class Generator extends Script {
 
 		// TODO
 		// removing dupplicates caused by mirror relations
-		foreach ($relations as $i => $rel) {
+		if ($relations) foreach ($relations as $i => $rel) {
 			foreach ($relations as $i2 => $rel2) {
 				if (($i !== $i2) && ($rel->getName() === $rel2->getName())) {
 					unset($relations[$i]);
