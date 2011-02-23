@@ -87,7 +87,7 @@ class ClassLoader {
 
 		if (2 === count($parts = explode('_', $classPath, 2))) {
 			$classPath = $parts[0];
-			foreach ($includePaths as $path) {
+			foreach ($this->includePaths as $path) {
 				if (file_exists($filename = "$path$classPath$suffix.php")) {
 					require_once $filename;
 					return true;
