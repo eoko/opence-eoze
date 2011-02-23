@@ -510,8 +510,21 @@ MSG
 		} else {
 			$ns = $this->namespace;
 			$finalClassLoader = function() use($type, $ns) {
-				$type = ucfirst($type);
-				class_extend($type, "$ns{$type}Base", $ns);
+				// We must test that the class doesn't already exist, for the 
+				// case where the module itself has not been overriden at all. 
+				// 
+				// eg. if the module root is not overriden at all
+				// (ie. there is only one dir root in only one modules dir), then 
+				// $this->namespace will be the same as the original module,
+				// and the class will have already been loaded).
+				// 
+				// TODO: what if the module is just not present at the topmost
+				// level ?
+				//
+				if (!class_exists("$ns$type")) {
+					$type = ucfirst($type);
+					class_extend($type, "$ns{$type}Base", $ns);
+				}
 			};
 		}
 
