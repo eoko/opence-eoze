@@ -2,6 +2,8 @@
 
 require_once 'init.inc.php';
 
+use eoko\database\Database;
+
 function dieUsage() {
 	echo 'Usage: db-sync ACTION' . PHP_EOL . 'ACTION    dump|load' . PHP_EOL;
 	die;
@@ -14,14 +16,28 @@ if (isset($syncDbAction)) {
 	else $arg = $argv[1];
 }
 
-if ($arg === 'dump') $fn = 'dbDump';
-else if ($arg === 'load') $fn = 'dbLoad';
-else dieUsage();
+$dumper = Database::getDefaultAdapter()->getDumper();
 
+// Untested modifications...
+if ($arg === 'dump') {
+//	$fn = 'dbDump';
+	$dumper->dump(DATABASE_DUMP_PATH . 'db.sql.gz');
+} else if ($arg === 'load') {
+//	$fn = 'dbLoad';
+	$dumper->load(DATABASE_DUMP_PATH . 'db.sql.gz');
+} else {
+	dieUsage();
+}
+
+if (false) {
+	
 $owd = getcwd();
-chdir(DATABASE_DUMP_PATH);
+if (!@chdir(DATABASE_DUMP_PATH)) {
+	throw new SystemException("Database Dump Abort: Directory does not exists: " . DATABASE_DUMP_PATH);
+}
+
 try {
-	$params = eoko\database\ConnectionManager::getParams();
+	$params = eoko\database\Database::getDefaultAdapter()->getConfig();
 	$out = 'db.sql.gz';
 	$fn();
 } catch (Exception $ex) {
@@ -55,4 +71,6 @@ function dbLoad() {
 
 	$cmd = "gunzip < $out | mysql --user $params[user] --password=$params[password] $params[database]";
 	system($cmd);
+}
+
 }

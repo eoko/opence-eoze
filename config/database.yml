@@ -1,6 +1,10 @@
 config.node: eoko\database
 
+adapter: Mysql
 host: localhost
-database: oce_dev
+#database: eoze
 user: root
 password: root
+#prefix: espanki_
+characterSet: utf8
+collation: utf8_general_ci

@@ -179,3 +179,83 @@ function bcabs($n) {
 	if (substr($n, 0, 1) === '-') return substr($n, 1);
 	else return $n;
 }
+
+/**
+ * Resolves the given path in the given namespace (or from the namespace of the
+ * given class). .. and . can be used to navigate upper in the namesapce. Either
+ * / ou \ can be used as namespace separator. If the path starts with a
+ * namespace separator, it will be considered absolute (then, the given namespace
+ * will effectively be ignored).
+ *
+ * @param string|object $ns
+ * @param string $path
+ * @return string
+ * @throws IllegalStateException if the given path resolves upper than the
+ * namespace root
+ */
+function relativeNamespace($ns, $path = null) {
+	if (is_object($ns)) $ns = get_namespace($ns);
+
+	$path = str_replace('\\', '/', $path);
+
+	if (!$path || $path === '' || $path === '.') {
+		return $ns;
+	} else if ($path === '/') {
+		return '\\';
+	} else {
+		$pathParts = explode(
+			'/',
+			trim($path, '/')
+		);
+
+		if (substr($path, 0, 1) === '/') {
+			$parts = array();
+		} else {
+			$parts = explode('\\', trim($ns, '\\'));
+		}
+
+		foreach ($pathParts as $p) {
+			if (! ($p === '' || $p === '.' || $p === '\\')) {
+				if ($p === '..') {
+					if (count($parts) > 0) {
+						array_pop($parts);
+					} else {
+						throw new IllegalStateException(
+							"Path ($path) go upper than root on namespace: $ns"
+						);
+					}
+				} else {
+					$parts[] = $p;
+				}
+			}
+		}
+
+		return implode('\\', $parts) . '\\';
+	}
+}
+
+/**
+ * This function is an alias for the function {@link relativeNamespace()}.
+ * @return string
+ */
+function relative_namespace() {
+	return call_user_func_array('relativeNamespace', func_get_args());
+}
+
+
+function is_reference_to(&$a, &$b) {
+	if ($a !== $b)
+		return false;
+
+	$temp = $a;
+	$checkval = ($a === null) ? "" : null;
+	$a = $checkval;
+
+	if ($b === $checkval) {
+		$a = $temp;
+		return true;
+	} else {
+		$a = $temp;
+		return false;
+	}
+}
