@@ -353,7 +353,7 @@ class ModuleManager {
 	 */
 	public function createDefaultModule(ModuleLocation $location, $config) {
 
-		$config = Config::create($config);
+		$config = Config::createForNode($config, $location->moduleName);
 		if (isset($config[$location->moduleName])) $config = $config->node($location->moduleName, true);
 
 		if (!isset($config['class'])) {
@@ -485,7 +485,7 @@ class ModuleLocation extends Location {
 		foreach (array_reverse($this->getLocations()) as $location) {
 			$config = $location->searchConfigFile();
 			if ($config) {
-				$config = Config::create($config);
+				$config = Config::createForNode($config, $this->moduleName);
 				if ($r === null) {
 					$r = $config;
 				} else {
