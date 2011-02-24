@@ -700,6 +700,7 @@ abstract class Model {
 	 */
 	public function notifyDelete() {
 		if (!$this->deleted) {
+			$this->beforeDelete(false);
 			$this->deleted = true;
 			$this->onDeleteInternal();
 			$this->onDelete(false);
@@ -789,7 +790,7 @@ abstract class Model {
 	private $deletedFromDB = false;
 	
 	private function doDelete($isSaving) {
-
+		
 		if ($this->isNew()) {
 			throw new IllegalStateException('Cannot delete a new model');
 		}
