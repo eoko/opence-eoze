@@ -1,7 +1,10 @@
 Ext.namespace('Ext.ux.form');
 /**
- * <p>SuperBoxSelect is an extension of the ComboBox component that displays selected items as labelled boxes within the form field. As seen on facebook, hotmail and other sites.</p>
- * <p>The SuperBoxSelect component was inspired by the BoxSelect component found here: http://efattal.fr/en/extjs/extuxboxselect/</p>
+ * <p>SuperBoxSelect is an extension of the ComboBox component that displays 
+ * selected items as labelled boxes within the form field. As seen on facebook, 
+ * hotmail and other sites.</p>
+ * <p>The SuperBoxSelect component was inspired by the BoxSelect component 
+ * found here: http://efattal.fr/en/extjs/extuxboxselect/</p>
  * 
  * @author <a href="mailto:dan.humphrey@technomedia.co.uk">Dan Humphrey</a>
  * @class Ext.ux.form.SuperBoxSelect
