@@ -203,6 +203,24 @@ class Config implements ArrayAccess, IteratorAggregate {
 			throw new IllegalArgumentException();
 		}
 	}
+	
+	/**
+	 * Creates a Config object from the given $config param (see {@link
+	 * Config::create()} for accepted inputs), and returns the node $node if
+	 * it exists, or the root config if it doesn't.
+	 * @param mixed $config see {@link Config::create()}
+	 * @param string $node
+	 * @param int $opts    see {@link Config::create()}
+	 * @return Config
+	 */
+	public static function createForNode($config, $node, $opts = 7) {
+		$r = self::create($config, $opts);
+		if ($r->hasNode($node)) {
+			return $r->node($node);
+		} else {
+			return $r;
+		}
+	}
 
 	/**
 	 * Get whether this config contains a root node (or value) with the given $name.
