@@ -719,6 +719,13 @@ abstract class Model {
 	 */
 	protected function onDelete($isSaving) {}
 	
+	/**
+	 * Hooking method called when the model is marked for deletion, or when
+	 * it is actually in the process of being deleted.
+	 * @param boolean $isSaving TRUE if the model is actually being deleted,
+	 * FALSE if it is just marked for deletion (actual deletion will then
+	 * occur on the next call to the {@link save()} method of this model).
+	 */
 	protected function beforeDelete($isSaving) {}
 	
 	protected function onDeleteInternal() {
