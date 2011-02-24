@@ -3,6 +3,8 @@
 namespace eoko\database;
 
 use eoko\config\ConfigManager;
+use eoko\util\Arrays;
+use eoko\util\collection\ImmutableMap;
 
 class Database {
 
@@ -17,7 +19,30 @@ class Database {
 	 * @return eoko\util\collection\Map
 	 */
 	public static function getDefaultConfig() {
-		if (!self::$config) self::$config = ConfigManager::getConfigObject(__NAMESPACE__);
+		if (!self::$config) {
+			self::$config = ConfigManager::get(__NAMESPACE__);
+			$config =& self::$config;
+			
+			// Process server-conditional configuration
+			if (isset($config['servers'])) {
+				$servers = $config['servers'];
+				unset($config['servers']);
+				
+				$default = isset($servers['default']) ? $servers['default'] : array();
+				unset($servers['default']);
+				
+				$name = $_SERVER['SERVER_NAME'];
+				foreach ($servers as $test => $cfg) {
+					if (substr($name, -strlen($test) === $test)) {
+						Arrays::apply($defaults, $cfg);
+					}
+				}
+				
+				Arrays::apply($config, $defaults);
+			}
+			
+			self::$config = new \eoko\util\collection\ImmutableMap($config);
+		}
 		return self::$config;
 	}
 
