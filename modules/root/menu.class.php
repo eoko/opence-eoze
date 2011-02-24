@@ -5,6 +5,7 @@ namespace eoko\modules\root;
 use eoko\module\executor\html\BasicHtmlExecutor;
 use eoko\file\FileType;
 use eoko\util\YmlReader as YAML;
+use eoko\util\Arrays;
 
 use \ExtJSResponse;
 use \UserSession;
@@ -63,7 +64,19 @@ class menu extends BasicHtmlExecutor {
 		foreach ($this->getMenuGroup($menu) as $level => $items) {
 			if (UserSession::isAuthorized((int) $level)) {
 				foreach ($items as $item) {
-					if (!array_key_exists($item, $avMenuItems)) {
+					if (is_array($item)) {
+						$array = $item;
+						$conf = reset($array);
+						$item = key($array);
+						// account for syntax - { module: ..., ... }
+						if (count($array) > 1 || !is_string($item)) {
+							$item = $array['module'];
+							$conf = $array;
+							unset($conf['module']);
+						}
+						$avMenuItems[$item] = self::createDefaultMenuItem($item);
+						Arrays::apply($avMenuItems[$item], $conf);
+					} else if (!array_key_exists($item, $avMenuItems)) {
 						$avMenuItems[$item] = self::createDefaultMenuItem($item);
 					}
 					$menuItems[] = $avMenuItems[$item];
