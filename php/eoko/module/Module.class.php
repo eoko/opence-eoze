@@ -36,6 +36,11 @@ class Module implements file\Finder {
 
 	/** @var Config */
 	private $config = null;
+	/** 
+	 * @var Config this is used to allow injection of extra configuration,
+	 * when the configuration inheritance will take place.
+	 */
+	private $extraConfig = null;
 	
 	/** @var file\Finder */
 	private $fileFinder = null;
@@ -90,6 +95,10 @@ MSG
 		return;
 	}
 
+	public function setExtraConfig($config) {
+		$this->extraConfig = $config;
+	}
+	
 	/**
 	 * @return Config
 	 */
@@ -108,8 +117,16 @@ MSG
 			}
 		}
 
-		if (!$config) {
-			$config = new Config();
+		if ($this->extraConfig) {
+			if (!$config) {
+				$config = $this->extraConfig;
+			} else {
+				$config->apply($this->extraConfig);
+			}
+		} else {
+			if (!$config) {
+				$config = new Config();
+			}
 		}
 
 		return $this->config = $config;

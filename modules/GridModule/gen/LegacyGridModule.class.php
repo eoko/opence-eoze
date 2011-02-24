@@ -25,7 +25,7 @@ class LegacyGridModule {
 
 		$controllerName = $module->getName();
 		$config = $module->getConfig();
-
+		
 		$tplFile = dirname(__FILE__) . DS . 'tpl' . DS . 'gridmodule.js.php';
 
 		$parentConfig = self::loadParentConfig($config);
