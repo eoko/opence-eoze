@@ -159,7 +159,7 @@ require_once PHP_PATH . 'ModelRelationInfo.class.php';
 
 // --- Exception handler ---
 if ((!isset($test) || !$test) && (!isset($is_script) || !$is_script)) {
-//	require_once (PHP_PATH . 'ExceptionHandler.class.php');
+	require_once (PHP_PATH . 'ExceptionHandler.class.php');
 }
 
 // --- Class loader --
