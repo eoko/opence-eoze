@@ -1,0 +1,14 @@
+config.node: eoze\application
+
+directories:
+  eoze: eoze
+  models: models
+  modules: modules
+  databaseBackup: mysql
+# those 2 ones are not configurable
+#  config: config
+#  php: php
+  
+namespace: eoze\default_user_namespace
+name: Eoze Application
+title: Eoze Application

@@ -35,18 +35,20 @@ if (file_exists($filename = ROOT . '../config.php')
 defineIf('APP_NAME', 'Opence');
 defineIf('APP_TITLE', 'OpenCE!');
 
-$phpSubDirs = array(
-	'GridModule'
-);
+// removed on 2/26/11 2:27 PM
+//$phpSubDirs = array(
+//	'GridModule'
+//);
 
-if (!isset($dbConfig)) {
-	$dbConfig = array(
-		'user' => 'root'
-		,'host' => 'localhost'
-		,'database' => 'oce_dev'
-		,'password' => 'root'
-	);
-}
+// deprecated on 2/26/11 2:10 PM
+//if (!isset($dbConfig)) {
+//	$dbConfig = array(
+//		'user' => 'root'
+//		,'host' => 'localhost'
+//		,'database' => 'oce_dev'
+//		,'password' => 'root'
+//	);
+//}
 
 defineIf('USE_CONTROLLER_CACHE', false);
 
@@ -84,10 +86,10 @@ defineIf('CSS_URL', EOZE_BASE_URL . 'css/');
 defineIf('JS_PATH', EOZE_PATH . 'js' . DS);
 defineIf('JS_URL', EOZE_BASE_URL . 'js/');
 
-defineIf('MODEL_PATH', ROOT . 'models' . DS);
-defineIf('MODEL_BASE_PATH', MODEL_PATH . 'base' . DS);
-defineIf('MODEL_PROXY_PATH', MODEL_PATH . 'proxy' . DS);
-defineIf('MODEL_QUERY_PATH', MODEL_PATH . 'query' . DS);
+//defineIf('MODEL_PATH', ROOT . 'models' . DS);
+//defineIf('MODEL_BASE_PATH', MODEL_PATH . 'base' . DS);
+//defineIf('MODEL_PROXY_PATH', MODEL_PATH . 'proxy' . DS);
+//defineIf('MODEL_QUERY_PATH', MODEL_PATH . 'query' . DS);
 
 defineIf('LIB_BASE_URL', SITE_BASE_URL . LIB_DIR . '/');
 defineIf('LIB_IMAGES_BASE_URL', LIB_BASE_URL . 'images' . '/');
@@ -156,7 +158,9 @@ require_once PHP_PATH . 'ModelRelationInfo.class.php';
 //require_once PHP_PATH . str_replace('\\', DS, 'eoko/cqlix/Relation/RelationInfo') . '.classes.php';
 
 // --- Exception handler ---
-if ((!isset($test) || !$test) && (!isset($is_script) || !$is_script)) require_once (PHP_PATH . 'ExceptionHandler.class.php');
+if ((!isset($test) || !$test) && (!isset($is_script) || !$is_script)) {
+//	require_once (PHP_PATH . 'ExceptionHandler.class.php');
+}
 
 // --- Class loader --
 // Autoload for helpers in /inc
@@ -166,16 +170,15 @@ $classLoader = eoko\php\ClassLoader::register();
 $classLoader->addIncludePath(array(
 	PHP_PATH,
 	APP_PHP_PATH,
-	MODEL_PATH,
-	MODEL_PROXY_PATH
 ));
 
 if (USE_CONTROLLER_CACHE) $classLoader->addIncludePath(CACHE_PATH . 'php');
 
-foreach ($phpSubDirs as $dir) {
-	$classLoader->addIncludePath(PHP_PATH . $dir . DS);
-	$classLoader->addIncludePath(APP_PHP_PATH . $dir . DS);
-}
+// removed on 2/26/11 2:27 PM
+//foreach ($phpSubDirs as $dir) {
+//	$classLoader->addIncludePath(PHP_PATH . $dir . DS);
+//	$classLoader->addIncludePath(APP_PHP_PATH . $dir . DS);
+//}
 
 
 // === Configure Plugins ===
@@ -186,10 +189,32 @@ eoko\plugin\PluginManager::init();
 // === Configure application ===
 
 if (function_exists('configure_application')) {
-	$bootstrap = configure_application();
+	//$bootstrap = configure_application();
+	throw new Exception('deprecated on 2/26/11 2:29 PM');
 }
 if (!isset($bootstrap)) $bootstrap = new \eoko\application\BaseBootstrap();
 $bootstrap();
+
+
+// Load directories configuration (from eoze\application)
+function loadAppConfig($classLoader) {
+	$appConfig = ConfigManager::get('eoze\application');
+	if (isset($appConfig['directories'])) {
+		$dc = $appConfig['directories'];
+		if (isset($dc['models'])) {
+			define('MODEL_PATH', ROOT . $dc['models']);
+			define('MODEL_BASE_PATH', MODEL_PATH . 'base' . DS);
+			define('MODEL_PROXY_PATH', MODEL_PATH . 'proxy' . DS);
+			define('MODEL_QUERY_PATH', MODEL_PATH . 'query' . DS);
+			
+			$classLoader->addIncludePath(array(
+				MODEL_PATH, MODEL_PROXY_PATH
+			));
+		}
+	}
+}
+
+loadAppConfig($classLoader);
 
 // Finally, start the session (must be done after the autoloader has been set,
 // so that object stored in session (notably: UserSession) can be instantiated)
