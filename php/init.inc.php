@@ -189,8 +189,7 @@ eoko\plugin\PluginManager::init();
 // === Configure application ===
 
 if (function_exists('configure_application')) {
-	//$bootstrap = configure_application();
-	throw new Exception('deprecated on 2/26/11 2:29 PM');
+	$bootstrap = configure_application();
 }
 if (!isset($bootstrap)) $bootstrap = new \eoko\application\BaseBootstrap();
 $bootstrap();
@@ -202,11 +201,13 @@ function loadAppConfig($classLoader) {
 	if (isset($appConfig['directories'])) {
 		$dc = $appConfig['directories'];
 		if (isset($dc['models'])) {
-			define('MODEL_PATH', ROOT . $dc['models']);
+			$m = $dc['models'];
+			if (substr($m, -1) !== DS) $m .= DS;
+			define('MODEL_PATH', ROOT . $m);
 			define('MODEL_BASE_PATH', MODEL_PATH . 'base' . DS);
 			define('MODEL_PROXY_PATH', MODEL_PATH . 'proxy' . DS);
 			define('MODEL_QUERY_PATH', MODEL_PATH . 'query' . DS);
-			
+
 			$classLoader->addIncludePath(array(
 				MODEL_PATH, MODEL_PROXY_PATH
 			));
