@@ -63,7 +63,7 @@ Oce.Security = function() {
 		if (loginModule !== null) {
 			loginModule.start(modal, text);
 		} else {
-			Oce.ModuleManager.requireModuleByName('Oce.Modules.root.login',
+			Oce.ModuleManager.requireModuleByName('Oce.Modules.AccessControl.login',
 				function(loginModule) {
 					loginModule.on('login', function(infos) {
 						setIdentified(true, infos);
