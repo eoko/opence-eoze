@@ -26,7 +26,11 @@ class menu extends BasicHtmlExecutor {
 	}
 	
 	private function getMenuData() {
-		if (!$this->menuConfig) $this->menuConfig = YAML::load($this->findPath('menu.yml'));
+		$path = $this->searchPath('menu.yml');
+		if (!$path) return array(
+			'menu-items' => array(),
+		);
+		if (!$this->menuConfig) $this->menuConfig = YAML::load($path);
 		return $this->menuConfig;
 	}
 
