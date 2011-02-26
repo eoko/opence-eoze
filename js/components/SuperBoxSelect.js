@@ -1511,7 +1511,8 @@ Ext.ux.form.SuperBoxSelectItem = Ext.extend(Ext.ux.form.SuperBoxSelectItem,Ext.C
     enableElListeners : function() {
         this.el.on('click', this.onElClick, this, {stopEvent:true});
        
-        this.el.addClassOnOver('x-superboxselect-item x-superboxselect-item-hover');
+//        this.el.addClassOnOver('x-superboxselect-item x-superboxselect-item-hover');
+        this.el.addClassOnOver('x-superboxselect-item-hover');
     },
 
     enableLnkListeners : function() {
