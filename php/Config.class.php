@@ -152,8 +152,10 @@ class Config implements ArrayAccess, IteratorAggregate {
 	 * return \eoko\config\Config
 	 */
 	public static function loadString($contentString, $node = null, $require = true, $filename = null) {
+		$values = YAML::load(str_replace("\t", "  ", $contentString));
+		if (!is_array($values)) $values = array();
 		return self::fromArray(
-			YAML::load(str_replace("\t", "  ", $contentString)),
+			$values,
 			$node, $require, $filename
 		);
 	}
