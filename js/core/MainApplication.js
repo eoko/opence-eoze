@@ -205,16 +205,16 @@
 		,doCreateWestPanelMenus: function(menuPanelOpts) {
 
 			return {
-				bookmarks: new Ext.Panel(Ext.applyIf({
-					title: "Favoris"
-				}, menuPanelOpts))
-				,general: new Ext.Panel(Ext.applyIf({
-					title: "Général"
-					,collapsed: true
-				}, menuPanelOpts))
-				,admin: new Ext.Panel(Ext.applyIf({
-					title: "Administration"
-				}, menuPanelOpts))
+//				bookmarks: new Ext.Panel(Ext.applyIf({
+//					title: "Favoris"
+//				}, menuPanelOpts))
+//				,general: new Ext.Panel(Ext.applyIf({
+//					title: "Général"
+//					,collapsed: true
+//				}, menuPanelOpts))
+//				,admin: new Ext.Panel(Ext.applyIf({
+//					title: "Administration"
+//				}, menuPanelOpts))
 			};
 		}
 
