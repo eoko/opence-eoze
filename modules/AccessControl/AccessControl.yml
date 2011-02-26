@@ -1,2 +1,11 @@
-## YAML Template.
----
+model:
+  user: User
+  
+loginBox:
+  text: Bonjour, veuillez vous identifier pour accéder à la console d'administration.
+#  text: |
+#    OpenCE est un service proposé par le comité inter-entreprise de Rhodia. Ses
+#    services sont réservés aux membres du comité et à ses adhérents. <br /><br />
+#    Pour accéder à openCE il est nécessaire de s'identifier.
+  help: false
+  

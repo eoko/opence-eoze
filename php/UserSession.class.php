@@ -1,102 +1,119 @@
 <?php
 /**
- * @author Éric Ortéga <eric@mail.com>
+ * @author Éric Ortéga <eric@planysphere.fr>
  */
 
 class UserSession {
 
-	private static $SESSION_LENGTH = 3600; // in seconds
+//	private static $SESSION_LENGTH = 3600; // in seconds
+//
+//	/** @var UserSession */
+//	private static $instance;
+//
+//	private $loggedIn = false;
+//	private $ip = null;
+//	/** @var User */
+//	private $user = null;
+//	private $lastActivity;
+//
+//	const DEFAULT_REQ_DATA_NAME = 'sessionDataId';
+//	private $data = null;
 
-	/** @var UserSession */
-	private static $instance;
-
-	private $loggedIn = false;
-	private $ip = null;
-	/** @var User */
-	private $user = null;
-	private $lastActivity;
-
-	const DEFAULT_REQ_DATA_NAME = 'sessionDataId';
-	private $data = null;
-
-	private function __construct() {
-		$this->loggedIn = false;
-		$this->ip = getenv('REMOTE_ADDR');
-		$this->user = null;
-		$this->lastActivity = time();
-	}
-
+//	private function __construct() {
+//		$this->loggedIn = false;
+//		$this->ip = getenv('REMOTE_ADDR');
+//		$this->user = null;
+//		$this->lastActivity = time();
+//	}
+	
 	/**
-	 * @return UserSession
+	 * @return eoko\acl\SessionProvider
 	 */
-	protected static function getInstance() {
-
-		if (self::$instance !== null) return self::$instance;
-
-		if (self::$instance === null) {
-			if (isset($_SESSION['UserSession'])) {
-
-				$storedSession = $_SESSION['UserSession'];
-				Logger::getLogger('UserSession')->debug('Found stored user session');
-
-				if ($storedSession instanceof UserSession) {
-					if ($storedSession->ip === getenv('REMOTE_ADDR')) {
-						self::$instance = $storedSession;
-					} else {
-						Logger::getLogger('UserSession')->warn('Request IP {} not '
-								. 'matching stored IP {} of identified user',
-								getenv("REMOTE_ADDR"), $storedSession->ip);
-					}
-				} else {
-					Logger::getLogger('UserSession')->warn('Value found in $_SESSION["UserSession"'
-							. ' is not UserSession object');
-				}
-			}
-		}
-
-		if (self::$instance === null) {
-			Logger::getLogger('UserSession')->debug('No valid user session stored');
-			self::$instance = new UserSession();
-		}
-
-		if (self::$instance->isIdentified() && self::$instance->isExpired()) {
-			self::$instance->loggedIn = false;
-		}
-
-//		Logger::dbg('Session user is: {}', self::$instance->user);
-
-		return self::$instance;
+	private static function getAcl() {
+		return eoko\module\ModuleManager::getModule('AccessControl');
 	}
+	
+	/**
+	 * @return eoko\acl\Session
+	 */
+	private static function getSession() {
+		Logger::warn('Deprecated');
+		return self::getAcl()->getSession();
+	}
+
+//	/**
+//	 * @return UserSession
+//	 */
+//	protected static function getInstance() {
+//
+//		if (self::$instance !== null) return self::$instance;
+//
+//		if (self::$instance === null) {
+//			if (isset($_SESSION['UserSession'])) {
+//
+//				$storedSession = $_SESSION['UserSession'];
+//				Logger::getLogger('UserSession')->debug('Found stored user session');
+//
+//				if ($storedSession instanceof UserSession) {
+//					if ($storedSession->ip === getenv('REMOTE_ADDR')) {
+//						self::$instance = $storedSession;
+//					} else {
+//						Logger::getLogger('UserSession')->warn('Request IP {} not '
+//								. 'matching stored IP {} of identified user',
+//								getenv("REMOTE_ADDR"), $storedSession->ip);
+//					}
+//				} else {
+//					Logger::getLogger('UserSession')->warn('Value found in $_SESSION["UserSession"'
+//							. ' is not UserSession object');
+//				}
+//			}
+//		}
+//
+//		if (self::$instance === null) {
+//			Logger::getLogger('UserSession')->debug('No valid user session stored');
+//			self::$instance = new UserSession();
+//		}
+//
+//		if (self::$instance->isIdentified() && self::$instance->isExpired()) {
+//			self::$instance->loggedIn = false;
+//		}
+//
+////		Logger::dbg('Session user is: {}', self::$instance->user);
+//
+//		return self::$instance;
+//	}
 
 	private static function isExpired(&$now = null) {
-		$instance = self::getInstance();
-		if (!$instance->isIdentified()) {
-			throw new IllegalStateException();
-		}
-		if ($now === null) $now = time();
-		return $now - $instance->lastActivity >= self::$SESSION_LENGTH;
+		return self::getSession()->isExpired($now);
+//		$instance = self::getInstance();
+//		if (!$instance->isIdentified()) {
+//			throw new IllegalStateException();
+//		}
+//		if ($now === null) $now = time();
+//		return $now - $instance->lastActivity >= self::$SESSION_LENGTH;
 	}
 
 	public static function getExpirationDelay($now = null) {
-		if ($now === null) $now = time();
-		return self::getInstance()->lastActivity + self::$SESSION_LENGTH - $now;
+		return self::getSession()->getExpirationDelay($now);
+//		if ($now === null) $now = time();
+//		return self::getInstance()->lastActivity + self::$SESSION_LENGTH - $now;
 	}
 
-	private static function startIdentifiedSession(User $user, $loggedIn) {
-
-		$user->setPwd(null, true);
-
-		$instance = self::getInstance();
-		$instance->ip = getenv("REMOTE_ADDR");
-		$instance->loggedIn = $loggedIn;
-		$instance->user = $user;
-		$instance->lastActivity = time();
-		$instance->data = null;
-
-		Logger::getLogger('UserSession')->debug('Saving user session');
-
-		$_SESSION['UserSession'] = $instance;
-	}
+//	private static function startIdentifiedSession(User $user, $loggedIn) {
+//
+//		$user->setPwd(null, true);
+//
+//		$instance = self::getInstance();
+//		$instance->ip = getenv("REMOTE_ADDR");
+//		$instance->loggedIn = $loggedIn;
+//		$instance->user = $user;
+//		$instance->lastActivity = time();
+//		$instance->data = null;
+//
+//		Logger::getLogger('UserSession')->debug('Saving user session');
+//
+//		$_SESSION['UserSession'] = $instance;
+//	}
 
 	/**
 	 *
@@ -106,52 +123,53 @@ class UserSession {
 	 * log in is successful, or NULL if the login failed.
 	 */
 	public static function login($username, $password) {
-
-		try {
-//REM			$user = UserTable::findFirstWhere(
-			$user = UserTable::findOneWhere(
-				'username = ? AND pwd = ?',
-				array($username, Security::cryptPassword($password))
-			);
-
-			Logger::dbg('Authentification succeeded: {}', $user);
-
-			if ($user == null && (null === $user = self::tryMembreLogin($username, $password))) {
-				throw new LoginFailedException(lang('L\'identification a échoué. '
-						. 'Veuillez vérifier votre identifiant et/ou mot de passe.'));
-			}
-
-			if (!$user->isActif()) {
-				throw new LoginFailedException(lang('Votre compte a été désactivé. '
-						. '<br/>Veuillez contacter un responsable.'));
-			}
-
-			if ($user->isExpired()) {
-				$msg = lang('Votre compte est expiré depuis le %date%. '
-						. '<br/>Veuillez contacter un responsable.', $user->getEndUse(DateHelper::DATETIME_LOCALE));
-				throw new LoginFailedException($msg);
-			}
-
-			self::startIdentifiedSession($user, true);
-
-			ExtJSResponse::put('loginInfos', self::getLoginInfos());
-
-			return true;
-
-		} catch (MissingRequiredRequestParamException $ex) {
-			throw new LoginFailedException(lang('L\'identification a échoué.'));
-		}
+		return self::getSession()->login($username, $password);
+//
+//		try {
+//			$user = UserTable::findOneWhere(
+//				'username = ? AND pwd = ?',
+//				array($username, Security::cryptPassword($password))
+//			);
+//
+//			Logger::dbg('Authentification succeeded: {}', $user);
+//
+//			if ($user == null && (null === $user = self::tryMembreLogin($username, $password))) {
+//				throw new LoginFailedException(lang('L\'identification a échoué. '
+//						. 'Veuillez vérifier votre identifiant et/ou mot de passe.'));
+//			}
+//
+//			if (!$user->isActif()) {
+//				throw new LoginFailedException(lang('Votre compte a été désactivé. '
+//						. '<br/>Veuillez contacter un responsable.'));
+//			}
+//
+//			if ($user->isExpired()) {
+//				$msg = lang('Votre compte est expiré depuis le %date%. '
+//						. '<br/>Veuillez contacter un responsable.', $user->getEndUse(DateHelper::DATETIME_LOCALE));
+//				throw new LoginFailedException($msg);
+//			}
+//
+//			self::startIdentifiedSession($user, true);
+//
+//			ExtJSResponse::put('loginInfos', self::getLoginInfos());
+//
+//			return true;
+//
+//		} catch (MissingRequiredRequestParamException $ex) {
+//			throw new LoginFailedException(lang('L\'identification a échoué.'));
+//		}
 	}
 
 	public static function getLoginInfos($json = false) {
-		if ($json) {
-			return json_encode(self::getLoginInfos());
-		}
-		$infos = array(
-			'restricted' => !self::isAuthorized(100), // TODO security
-			'userId' => self::getUser()->id,
-		);
-		return ArrayHelper::apply($infos, self::getUser()->context);
+		return self::getAcl()->getLoginInfos($json);
+//		if ($json) {
+//			return json_encode(self::getLoginInfos());
+//		}
+//		$infos = array(
+//			'restricted' => !self::isAuthorized(100), // TODO security
+//			'userId' => self::getUser()->id,
+//		);
+//		return ArrayHelper::apply($infos, self::getUser()->context);
 	}
 
 	/**
@@ -198,13 +216,15 @@ class UserSession {
 	}
 
 	public static function logOut() {
-		session_destroy();
-		session_write_close();
+		return self::getSession()->logout();
+//		session_destroy();
+//		session_write_close();
 	}
 
 	public static function isIdentified() {
-//		self::startIdentifiedSession(User::load(84), true);
-		return self::getInstance()->loggedIn;
+		return self::getSession()->isLoggedIn();
+////		self::startIdentifiedSession(User::load(84), true);
+//		return self::getInstance()->loggedIn;
 	}
 
 	public static function isLoginRequestSet() {
@@ -217,7 +237,8 @@ class UserSession {
 	 * @return User
 	 */
 	public static function getUser() {
-		return self::getInstance()->user;
+		return self::getSession()->getUser();
+//		return self::getInstance()->user;
 	}
 
 	public static function isAuthorized($level) {
@@ -241,24 +262,26 @@ class UserSession {
 	}
 
 	public static function updateUserLastActivity() {
-		$instance = self::getInstance();
-		if (($now = time()) - $instance->lastActivity > self::$SESSION_LENGTH) {
-			if ($instance->isIdentified()) {
-				$instance->loggedIn = false;
-			}
-		} else {
-			$instance->lastActivity = $now;
-		}
+		return self::getSession()->updateLastActivity();
+//		$instance = self::getInstance();
+//		if (($now = time()) - $instance->lastActivity > self::$SESSION_LENGTH) {
+//			if ($instance->isIdentified()) {
+//				$instance->loggedIn = false;
+//			}
+//		} else {
+//			$instance->lastActivity = $now;
+//		}
 	}
 
 	public static function requireLoggedIn() {
-		$instance = self::getInstance();
-		if (!$instance->isIdentified()) throw new UserSessionTimeout(
-				null, null,
-				"Session timeout. Last acitivity: $instance->lastActivity, "
-				. "current time: " . ($now = time()) . " ; dif:"
-				. ($now - $instance->lastActivity) . " > " . self::$SESSION_LENGTH . "."
-		);
+		return self::getSession()->requireLoggedIn();
+//		$instance = self::getInstance();
+//		if (!$instance->isIdentified()) throw new UserSessionTimeout(
+//				null, null,
+//				"Session timeout. Last acitivity: $instance->lastActivity, "
+//				. "current time: " . ($now = time()) . " ; dif:"
+//				. ($now - $instance->lastActivity) . " > " . self::$SESSION_LENGTH . "."
+//		);
 	}
 
 	/**

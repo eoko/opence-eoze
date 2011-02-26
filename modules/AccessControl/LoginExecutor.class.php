@@ -15,6 +15,11 @@ use IllegalStateException;
  */
 class LoginExecutor extends JsonExecutor {
 	
+	/**
+	 * @var AccessControl
+	 */
+	public $module;
+	
 	public function index() {
 		return $this->forward('root.bootstrap', 'get_js', array('name' => 'login'));
 	}
@@ -23,33 +28,32 @@ class LoginExecutor extends JsonExecutor {
 		$username = $this->request->req('login-user', true);
 		$password = $this->request->req('login-pwd', true);
 		
-//		dump(array(
-//			$username, $password
-//		));
-
 		if (UserSession::logIn($username, $password)) {
+			$this->loginInfos = $this->module->getLoginInfos();
 			return true;
 		} else {
 			// The logIn() method should have already fired any needed exception...
 			throw new IllegalStateException('Unreachable code');
 		}
 	}
-
+	
 	public function logout() {
 		UserSession::logOut();
 		return true;
 	}
 	
 	protected function prepareLoginTemplate(Template $tpl) {
-
-		$tpl->help = false;
-
-//		$tpl->text = <<<'TXT'
-//OpenCE est un service proposé par le comité inter-entreprise de Rhodia. Ses
-//services sont réservés aux membres du comité et à ses adhérents. <br /><br />
-//Pour accéder à openCE il est nécessaire de s'identifier.
-//TXT;
-		$tpl->text = 'Bonjour, veuillez vous identifier pour accéder à la console d\'administration.';
+		$tpl->help = $this->module->getConfig()->loginBox['help'];
+		$tpl->text = $this->module->getConfig()->loginBox['text'];
+	}
+	
+	protected function getLoginBoxText() {
+		return 'Bonjour, veuillez vous identifier pour accéder à la console d\'administration.';
+		return <<<'TXT'
+OpenCE est un service proposé par le comité inter-entreprise de Rhodia. Ses
+services sont réservés aux membres du comité et à ses adhérents. <br /><br />
+Pour accéder à openCE il est nécessaire de s'identifier.
+TXT;
 	}
 	
 	public function get_module() {
