@@ -96,8 +96,8 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 				fieldLabel: 'Mot de passe',
 				inputType: 'password',
 				allowBlank: false,
-				minLength: 6,
-				maxLength: 32,
+				minLength: 4,
+				maxLength: 255,
 				listeners: {
 					specialkey: {
 						fn: function(field, el) {
