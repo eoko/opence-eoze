@@ -344,7 +344,8 @@ class ModuleManager {
 	}
 
 	private function createModule($name, $class) {
-		return new $class(new ModuleLocation($this->getTopLevelDirectory(), $name));
+//		return new $class(new ModuleLocation($this->getTopLevelDirectory(), $name));
+		return new $class(ModuleLocation::createTopLevelLocation($this->getTopLevelDirectory(), $name));
 	}
 
 	/**
@@ -452,6 +453,25 @@ class ModuleLocation extends Location {
 			$path !== null && $dir->url !== null ? "$dir->url$moduleName/" : null,
 			"$dir->namespace$moduleName\\"
 		);
+	}
+	
+	/**
+	 * Creates a new ModuleLocation object, starting from the top level 
+	 * directory, that is, the first directory in the parent hierarchy that
+	 * actually contains either a directory or a config file for the given
+	 * $moduleName.
+	 * @param ModulesDirectory $dir
+	 * @param type $moduleName
+	 * @return ModuleLocation 
+	 */
+	public static function createTopLevelLocation(ModulesDirectory $dir, $moduleName) {
+		$location = new ModuleLocation($dir, $moduleName);
+		while ($location->directory->parent 
+				&& !$location->isActual() && !$location->searchConfigFile()) {
+			
+			$location = new ModuleLocation($location->directory->parent, $moduleName);
+		}
+		return $location;
 	}
 
 	public function __toString() {
