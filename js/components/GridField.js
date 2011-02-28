@@ -191,7 +191,6 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 					if (!colConfig.renderer && colConfig.editor.createRenderer) {
 						colConfig.renderer = colConfig.editor.createRenderer('-');
 					}
-					colConfig = new Ext.grid.Column(colConfig);
 				} else {
 					// TODO: commented out to let pass an error with SM wizard
 					// but that will need a real fix...
