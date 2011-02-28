@@ -215,3 +215,45 @@ Ext.override(Ext.Component, {
 		}
 	});
 })();
+
+
+// Fix DateColumn rendering
+// 
+// There is a problem with editable DateColumns... The DateField value is
+// retrieved according to its format configuration. The DateColumn, though,
+// uses Ext.util.Format.dateRenderer(this.format) to set its renderer. That's
+// ok for display, since the DateColumn's this.format is effectively the format
+// intended for display; however, no input format can be set...
+// 
+// Ext.util.Format.dateRenderer will, in turn, use Ext.util.Format.date() to
+// convert the submitted value. If the value submitted to this function is
+// not a Date object, it will convert it to a Date using the _native_ 
+// Date.parse() method!!! This native function doesn't account for localisation
+// at all, and so produce akward value in many cases...
+// 
+// The solution implemented here uses an additionnal inputFormat for DateColumn,
+// or it parses submitted value with its display format configuration... That is
+// not perfect; the solution should probably take place at the level of the
+// communication between the form.Field used as editor and the DateColumn.
+// Unfortunatly, I do not have time to investigate any further :-/
+//
+Ext.grid.Column.types.datecolumn =
+	Ext.grid.DateColumn = Ext.extend(Ext.grid.Column, {
+
+	format : 'm/d/Y',
+	constructor: function(cfg){
+		Ext.grid.DateColumn.superclass.constructor.call(this, cfg);
+//		this.renderer = Ext.util.Format.dateRenderer(this.format);
+		var me = this;
+		this.renderer = function(v) {
+			var format = me.inputFormat || me.format || "d/m/Y";
+			if (!(v instanceof Date)) {
+				// instead of:
+				// Date.parse(v)
+				// which doesn't account for various possible formats
+				v = Date.parseDate(v, format);
+			}
+			return v.dateFormat(format);
+		}
+	}
+});
