@@ -566,8 +566,19 @@ NS.DateField = Ext.extend(NS.ModelField, {
 	,createReadOnlyField: function(config) {
 		return NS.DateField.superclass.createReadOnlyField.call(this, Ext.apply({
 			xtype: "datedisplayfield"
-			,format: this.format
+			// Format is set at a global level
+			//,format: this.format
 		}, config));
+	}
+	
+	,doCreateGridColumn: function(config) {
+		return Ext.apply(NS.DateField.superclass.doCreateGridColumn.call(this, config), {
+			xtype: "datecolumn"
+			,format: eo.locale.dateFormat
+			,storeFieldConfig: {
+				type: "date"
+			}
+		});
 	}
 });
 
