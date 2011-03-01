@@ -207,6 +207,11 @@ eo.Class = NS.create = function(members) {
 	if (members.constructor === Object) members.constructor = function() {};
 	var constructor = members.constructor;
 	constructor.prototype = members;
+	// add ExtJS class methods
+	constructor.override = function(o){
+		Ext.override(constructor, o);
+	};
+	constructor.extend = function(o){return Ext.extend(constructor, o);};
 	return constructor;
 };
 
@@ -348,14 +353,86 @@ eo.extendMultiple = function() {
  * the class' prototype to the class Function itself.
  * @param {Function} clazz	constructor of the class
  * @param {Array|String}	members
+ * @param {Boolean}			removeFromProto (default: FALSE) if set to TRUE, the
+ * member will be deleted from the class prototype
  * @return {Function}		the class constructor
  */
-eo.makeStatic = function(clazz, members) {
+eo.makeStatic = function(clazz, members, removeFromProto) {
+	
+	var reAliasAs = /^(.+) +as +(.+)$/,
+		reAliasEq = /^([^\s]+)\s*=\s*([^\s]+)$/;
 	var run = function(method) {
-		clazz[method] = clazz.prototype[method];
+		
+		var alias = method, m;
+		if ((m = reAliasAs.exec(method))) {
+			alias = m[2];
+			method = m[1];
+		} else if ((m = reAliasEq.exec(method))) {
+			alias = m[1];
+			method = [2];
+		}
+		
+		clazz[alias] = clazz.prototype[method];
+		
+		if (removeFromProto) {
+			delete clazz.prototype[method];
+		}
 	};
+	
 	if (Ext.isArray(members)) Ext.each(members, run);
 	else if (Ext.isString(members)) run(members);
 	else throw new Error("Invalid argument: must be Array or String");
+	
 	return clazz;
 }
+
+eo.moveStatic = function(clazz, members) {
+	return eo.makeStatic(clazz, members, true);
+}
+
+eo.extendAs = function(){
+	// inline overrides
+	var io = function(o){
+		for(var m in o){
+			this[m] = o[m];
+		}
+	};
+	var oc = Object.prototype.constructor;
+
+	return function(sp, name, overrides){
+		
+		if (!overrides) overrides = {};
+
+		var sb;
+		if (overrides.constructor != oc) {
+			eval(String.format("sb = function {0}(){overrides.constructor.apply(this, arguments);}", name));
+		} else {
+			eval(String.format("sb = function {0}(){sp.apply(this, arguments);}", name));
+		}
+		if (!sb.name) sb.name = name;
+		//sb = overrides.constructor != oc ? overrides.constructor : function(){sp.apply(this, arguments);};
+		
+		var F = function(){},
+			sbp,
+			spp = sp.prototype;
+
+		F.prototype = spp;
+		sbp = sb.prototype = new F();
+		sbp.constructor=sb;
+		sb.superclass=spp;
+		if(spp.constructor == oc){
+			spp.constructor=sp;
+		}
+		sb.override = function(o){
+			Ext.override(sb, o);
+		};
+		sbp.superclass = sbp.supr = (function(){
+			return spp;
+		});
+		sbp.override = io;
+		Ext.override(sb, overrides);
+		sb.extend = function(o){return Ext.extend(sb, o);};
+//		sb.extendAs = function(name, o){return eo.extendAs(sb, name, o);};
+		return sb;
+	};
+}();
