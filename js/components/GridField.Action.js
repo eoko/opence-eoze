@@ -372,6 +372,8 @@ ACTION.Cancel = Ext.extend(ACTION, {
 		this.gridField.clearDirty();
 	}
 
-})
+});
+
+Oce.deps.reg('eo.form.GridField.Action');
 
 }); // deps closure
