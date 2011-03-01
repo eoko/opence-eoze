@@ -338,7 +338,7 @@ eo.addAspect = function() {
 	for (var i=0,l=arguments.length; i<l; i++) {
 
 	}
-}
+};
 
 eo.extendMultiple = function() {
 	var r = Array.prototype.shift(arguments);
@@ -346,51 +346,65 @@ eo.extendMultiple = function() {
 		r = Ext.extend(r, arguments[i]);
 	}
 	return r;
-}
+};
 
-/**
- * Makes the specified methods of the given class static, by copying them from
- * the class' prototype to the class Function itself.
- * @param {Function} clazz	constructor of the class
- * @param {Array|String}	members
- * @param {Boolean}			removeFromProto (default: FALSE) if set to TRUE, the
- * member will be deleted from the class prototype
- * @return {Function}		the class constructor
- */
-eo.makeStatic = function(clazz, members, removeFromProto) {
-	
+// eo.makeStatic closure
+(function() {
+
 	var reAliasAs = /^(.+) +as +(.+)$/,
 		reAliasEq = /^([^\s]+)\s*=\s*([^\s]+)$/;
-	var run = function(method) {
+	
+	// c = clazz
+	// m = method
+	// rm = removeFromProto
+	var run = function(c, m, rm) {
 		
-		var alias = method, m;
-		if ((m = reAliasAs.exec(method))) {
-			alias = m[2];
-			method = m[1];
-		} else if ((m = reAliasEq.exec(method))) {
-			alias = m[1];
-			method = [2];
+		var alias = m, rem;
+		if ((rem = reAliasAs.exec(m))) {
+			alias = rem[2];
+			m = rem[1];
+		} else if ((rem = reAliasEq.exec(m))) {
+			alias = rem[1];
+			m = [2];
 		}
 		
-		clazz[alias] = clazz.prototype[method];
+		c[alias] = c.prototype[m];
 		
-		if (removeFromProto) {
-			delete clazz.prototype[method];
+		if (rm) {
+			delete c.prototype[m];
 		}
 	};
-	
-	if (Ext.isArray(members)) Ext.each(members, run);
-	else if (Ext.isString(members)) run(members);
-	else throw new Error("Invalid argument: must be Array or String");
-	
-	return clazz;
-}
 
+	/**
+	 * Makes the specified methods of the given class static, by copying them from
+	 * the class' prototype to the class Function itself.
+	 * @param {Function} clazz	constructor of the class
+	 * @param {Array|String}	members
+	 * @param {Boolean}			removeFromProto (default: FALSE) if set to TRUE, the
+	 * member will be deleted from the class prototype
+	 * @return {Function}		the class constructor
+	 */
+	eo.makeStatic = function(clazz, members, removeFromProto) {
+
+		if (Ext.isArray(members)) Ext.each(members, function(method) {
+			run(clazz, method, removeFromProto);
+		});
+		else if (Ext.isString(members)) run(members);
+		else throw new Error("Invalid argument: must be Array or String");
+
+		return clazz;
+	};
+
+}()); // eo.makeStatic
+
+/**
+ * Shortcut method for eo.makeStatic(clazz, members, true).
+ */
 eo.moveStatic = function(clazz, members) {
 	return eo.makeStatic(clazz, members, true);
-}
+};
 
-eo.extendAs = function(){
+eo.extendAs = function() {
 	// inline overrides
 	var io = function(o){
 		for(var m in o){
