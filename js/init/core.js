@@ -365,7 +365,7 @@ eo.extendMultiple = function() {
 			m = rem[1];
 		} else if ((rem = reAliasEq.exec(m))) {
 			alias = rem[1];
-			m = [2];
+			m = rem[2];
 		}
 		
 		c[alias] = c.prototype[m];
