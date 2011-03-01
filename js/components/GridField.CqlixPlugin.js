@@ -1,4 +1,4 @@
-Oce.deps.wait('eo.form.GridField', function() {
+Oce.deps.wait(['eo.form.GridField', 'eo.form.GridField.Action'], function() {
 
 var GRID_ACTION = eo.form.GridField.Action;
 
