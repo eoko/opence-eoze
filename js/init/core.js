@@ -389,7 +389,7 @@ eo.extendMultiple = function() {
 		if (Ext.isArray(members)) Ext.each(members, function(method) {
 			run(clazz, method, removeFromProto);
 		});
-		else if (Ext.isString(members)) run(members);
+		else if (Ext.isString(members)) run(clazz, members, removeFromProto);
 		else throw new Error("Invalid argument: must be Array or String");
 
 		return clazz;
