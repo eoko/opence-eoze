@@ -6,6 +6,7 @@ Oce.Security = function() {
 	var eventManager = new Oce.EventManager(this);
 	var pingTimeout;
 	var loginInfos;
+	var appLoaded;
 
 	function pingSession() {
 		if (identified) {
@@ -36,6 +37,7 @@ Oce.Security = function() {
 		}
 		
 		if (identified) {
+			appLoaded = true;
 			eventManager.fire('login');
 			loginInfos = args;
 			setTimeout(pingSession, sessionPingInterval);
@@ -60,15 +62,17 @@ Oce.Security = function() {
 
 	this.requestLogin = function(modal, text) {
 //		return; // TODO remove debug
+		var loginFn = appLoaded ? "showLoginWindow" : "start";
 		if (loginModule !== null) {
-			loginModule.start(modal, text);
+			loginModule[loginFn](modal, text);
 		} else {
 			Oce.ModuleManager.requireModuleByName('Oce.Modules.AccessControl.login',
-				function(loginModule) {
-					loginModule.on('login', function(infos) {
+				function(m) {
+					loginModule = m;
+					m.on('login', function(infos) {
 						setIdentified(true, infos);
 					});
-					loginModule.start(modal, text);
+					m[loginFn](modal, text);
 				}
 			)
 		}
@@ -83,6 +87,7 @@ Oce.Security = function() {
 		return Oce.Security;
 	}
 
+	appLoaded = Oce.Security.initIdentified;
 	setIdentified(Oce.Security.initIdentified, Oce.Security.loginInfos);
 
 	return this;
