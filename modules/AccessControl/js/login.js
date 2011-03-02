@@ -62,7 +62,7 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 			} else {
 				Ext.MessageBox.alert("Erreur","Les informations que vous avez fourni ne sont pas corrects.")
 			}
-		}
+		}.createDelegate(this);
 
 		loginForm.getForm().url = 'index.php';
 		loginForm.add([
