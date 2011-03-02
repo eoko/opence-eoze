@@ -13,7 +13,8 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 	}
 
 	,createLoginWindow: function(modal, text) {
-		this.loginForm = new Oce.DefaultFormPanel();
+		
+		var loginForm = new Oce.DefaultFormPanel();
 		
 		var loginWindow = new Oce.DefaultWin({
 			 title: 'Identification'
@@ -25,7 +26,7 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 
 		var submitForm = function() {
 
-			var login_form = this.loginForm.getForm();
+			var login_form = loginForm.getForm();
 
 			if (login_form.isValid()) {
 				login_form.submit({
@@ -63,8 +64,8 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 			}
 		}
 
-		this.loginForm.getForm().url = 'index.php';
-		this.loginForm.add([
+		loginForm.getForm().url = 'index.php';
+		loginForm.add([
 			{
 				xtype: 'box',
 				autoEl: {
@@ -110,7 +111,7 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 			}
 		]);
 
-		loginWindow.add([this.loginForm]);
+		loginWindow.add([loginForm]);
 	//	w_login.width = 300;
 		loginWindow.doLayout();
 
@@ -123,7 +124,7 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 			handler: loginWindow.collapse.createDelegate(loginWindow)
 //		}, {
 //			text: 'Réinitialiser',
-//			handler: this.loginForm.getForm().reset.createDelegate(this.loginForm)
+//			handler: loginForm.getForm().reset.createDelegate(loginForm)
 		}
 /*<?php if ($help): ?>*/
 		, {
