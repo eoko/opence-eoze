@@ -877,7 +877,7 @@ MSG
 		return $r;
 	}
 
-	public function listLineFilesUrl($pattern, $dir) {
+	public function listLineFilesUrl($pattern, $dir, $recursive = false) {
 		$r = array();
 		if ($dir) {
 			$urlDir = str_replace('\\', '/', $dir) . '/';
@@ -888,7 +888,7 @@ MSG
 			$loc instanceof ModuleLocation;
 			if (!$loc->url) continue;
 			$baseUrl = $loc->url . $urlDir;
-			$urls = Files::listFilesIfDirExists($loc->path . $dir, $pattern, false, false);
+			$urls = Files::listFilesIfDirExists($loc->path . $dir, $pattern, $recursive, false);
 			foreach ($urls as &$url) $url = "$baseUrl$url";
 			$r = array_merge($r, $urls);
 		}
