@@ -39,9 +39,10 @@ JS;
 			$module instanceof \eoko\module\Module;
 			$autoJsFiles = array_merge($autoJsFiles, $module->listLineFilesUrl('re:\.auto\d*\.js$', ''));
 			$autoJsFiles = array_merge($autoJsFiles, $module->listLineFilesUrl('re:\.auto\d*\.js$', 'js'));
-			$autoJsFiles = array_merge($autoJsFiles, $module->listLineFilesUrl('glob:*.js', 'js/auto'));
-			$autoJsFiles = array_merge($autoJsFiles, $module->listLineFilesUrl('glob:*.js', 'js.auto'));
+			$autoJsFiles = array_merge($autoJsFiles, $module->listLineFilesUrl('glob:*.js', 'js/auto', true));
+			$autoJsFiles = array_merge($autoJsFiles, $module->listLineFilesUrl('glob:*.js', 'js.auto', true));
 		}
+//		dump($autoJsFiles);
 		$urls = array();
 		foreach ($autoJsFiles as $url) {
 			$urls[$url] = preg_match('/\.auto(\d+)\.js$/', $url, $m) ? 10 + (int) $m[1] : null;
