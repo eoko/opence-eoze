@@ -14,7 +14,8 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 
 	,createLoginWindow: function(modal, text) {
 		this.loginForm = new Oce.DefaultFormPanel();
-		this.loginWindow = new Oce.DefaultWin({
+		
+		var loginWindow = new Oce.DefaultWin({
 			 title: 'Identification'
 			,closable: false
 			,maximizable: false
@@ -22,7 +23,7 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 			,modal: modal
 		});
 
-		this.submitForm = function() {
+		var submitForm = function() {
 
 			var login_form = this.loginForm.getForm();
 
@@ -39,7 +40,7 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 
 					success: function(form, action) {
 						var obj = Ext.util.JSON.decode(action.response.responseText);
-						this.loginWindow.close();
+						loginWindow.close();
 						this.fireEvent('login', obj.loginInfos);
 					}.createDelegate(this),
 
@@ -84,7 +85,7 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 					specialkey: {
 						fn: function(field, el) {
 							if (el.getKey() == Ext.EventObject.ENTER) {
-								this.submitForm();
+								submitForm();
 							}
 						}
 						,scope: this
@@ -101,7 +102,7 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 				listeners: {
 					specialkey: {
 						fn: function(field, el) {
-							if (el.getKey() == Ext.EventObject.ENTER) this.submitForm();
+							if (el.getKey() == Ext.EventObject.ENTER) submitForm();
 						}
 						,scope: this
 					}
@@ -109,17 +110,17 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 			}
 		]);
 
-		this.loginWindow.add([this.loginForm]);
+		loginWindow.add([this.loginForm]);
 	//	w_login.width = 300;
-		this.loginWindow.doLayout();
+		loginWindow.doLayout();
 
-		this.loginWindow.addButton([
+		loginWindow.addButton([
 		{
 			text: 'Ok'
-			,handler: this.submitForm.createDelegate(this)
+			,handler: submitForm.createDelegate(this)
 		}, {
 			text: 'Annuler',
-			handler: this.loginWindow.collapse.createDelegate(this.loginWindow)
+			handler: loginWindow.collapse.createDelegate(loginWindow)
 //		}, {
 //			text: 'Réinitialiser',
 //			handler: this.loginForm.getForm().reset.createDelegate(this.loginForm)
@@ -135,7 +136,7 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 /*<?php endif ?>*/
 		]);
 
-		return this.loginWindow;
+		return loginWindow;
 	}
 
 	,showHelp: function() {
@@ -244,6 +245,10 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 	,start: function(modal, text) {
 //		if (isset(mx.MainApplication)) mx.MainApplication.shutdown();
 		Ext.getBody().addClass('bg');
+		this.showLoginWindow(modal, text);
+	}
+	
+	,showLoginWindow: function(modal, text) {
 		this.createLoginWindow(modal, text).show();
 	}
 
