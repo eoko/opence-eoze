@@ -335,12 +335,12 @@ NS.BooleanField = eo.Object.extend(NS.EnumField, {
 
 		if (!config.items) config.items = [{
 			label: 'Oui', // i18n
-//			'default': getDefault() === true,
+			'default': config.hasDefault && config.defaultValue,
 			code: 'YES',
 			value: 1
 		}, {
 			label: 'Non', // i18n
-//			'default': getDefault() === false,
+			'default': config.hasDefault && !config.defaultValue,
 			code: 'NO',
 			value: 0
 		}];
