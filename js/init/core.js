@@ -450,3 +450,7 @@ eo.extendAs = function() {
 		return sb;
 	};
 }();
+
+Ext.isRegExp = Ext.isRegex = eo.isRegExp = eo.isRegex = function(o) {
+	return o instanceof RegExp;
+};
