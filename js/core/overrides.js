@@ -257,3 +257,50 @@ Ext.grid.Column.types.datecolumn =
 		}
 	}
 });
+
+(function() {
+	
+	var uber = Ext.form.CheckboxGroup.prototype.initComponent;
+	
+	var calcColumns = function() {
+		var cols, max;
+		
+		cols = this.rowColumns;
+		
+		if (Ext.isNumber(cols)) {
+			this.columns = cols;
+			return;
+		}
+		
+		max = 0;
+		Ext.each(cols, function(l) {
+			max = Math.max(max, l);
+		});
+		
+		this.columns = max;
+
+		var items = [], mi = this.items;
+		Ext.each(cols, function(l) {
+			items = items.concat(mi.splice(0, l));
+			if (mi.length) {
+				for (var i=0; i<max-l; i++) {
+					items.push({xtype:"container"}); // spacer
+				}
+			}
+		});
+		
+		this.items = items;
+	}
+
+	/**
+	 * @option {Array|Integer} rowColumns The number of items to be placed on
+	 * each row; spacers will be added at the end of rows that haven't the max
+	 * number of items.
+	 */
+	Ext.form.CheckboxGroup.prototype.initComponent = function() {
+		if (this.rowColumns) {
+			calcColumns.call(this);
+		}
+		uber.call(this);
+	};
+})();
