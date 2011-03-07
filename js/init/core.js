@@ -309,16 +309,20 @@ eo.hashToArray = function(hash, keyIndex, checkConflicts) {
 		return hash;
 	} else if (Ext.isObject(hash)) {
 		var r = [];
-		Ext.iterate(hash, function(k,v) {
-			v = Ext.apply({}, v);
-			if (keyIndex) {
+		if (keyIndex) {
+			Ext.iterate(hash, function(k,v) {
+				v = Ext.apply({}, v);
 				if (checkConflicts && v[keyIndex] !== undefined && v[keyIndex] !== k) {
 					throw new Error('Hash index conflicts with object property: ' + keyIndex);
 				}
 				v[keyIndex] = k;
-			}
-			r.push(v);
-		});
+				r.push(v);
+			});
+		} else {
+			Ext.iterate(hash, function(k, v) {
+				r.push(v);
+			});
+		}
 		return r;
 	} else {
 		throw new Error();
