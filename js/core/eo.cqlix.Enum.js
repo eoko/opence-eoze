@@ -33,8 +33,17 @@ NS.EnumValue = eo.Object.create({
 });
 
 NS.EnumField = NS.Enum = eo.Object.extend(NS.ModelField, {
+	
+	/**
+	 * @var {String} (default: " : ") the separator used between the checkbox 
+	 * label (boxLabel) and the radio buttons, when this enum is rendered as a 
+	 * checkbox:
+	 * 
+	 * [ ] boxLabel SEPARATOR ( ) radio1 ( ) radio2 ...
+	 */
+	labelSeparator: " : "
 
-	constructor: function(config) {
+	,constructor: function(config) {
 
 		config = config || {};
 
@@ -71,6 +80,22 @@ NS.EnumField = NS.Enum = eo.Object.extend(NS.ModelField, {
 		if (!e) return undefined;
 		return e.getLabel(type);
 	}
+	
+	/**
+	 * Get the index in the array this.values of the EnumValue with value equal
+	 * to the given value.
+	 */
+	,getValueIndex: function(value) {
+		var vv = this.values,
+			l = vv.length,
+			o = this.valueLookup[value];
+		
+		for (var i=0; i<l; i++) {
+			if (vv[i] === o) return i;
+		}
+		
+		throw new Error("Invalid value for enum: " + value);
+	}
 
 	,extractDisplayValue: function(value) {
 		return this.getValueLabel(value);
@@ -99,17 +124,17 @@ NS.EnumField = NS.Enum = eo.Object.extend(NS.ModelField, {
 		}
 	}
 
-	,createCheckboxGroupItems: function(create) {
+	,createCheckboxGroupItems: function(config) {
 		var r = [];
-		Ext.each(this.values, function(item) {
-			r.push({
-				boxLabel: item.label
-				,checked: item.isDefault()
-				,inputValue: item.value
-			})
+		Ext.each(this.values, function(ev) {
+			r.push(Ext.apply({
+				boxLabel: ev.label
+				,checked: ev.isDefault()
+				,inputValue: ev.value
+				,enumValue: ev
+			}, config))
 		});
-		if (create) return Ext.create(r);
-		else return r;
+		return r;
 	}
 
 	,createRadioGroup: function(config) {
@@ -117,9 +142,116 @@ NS.EnumField = NS.Enum = eo.Object.extend(NS.ModelField, {
 			xtype: "radiogroup"
 			,fieldLabel: this.label
 			,defaults: {name: this.name}
-			,items: this.createCheckboxGroupItems()
+			,items: (config ? config.items : false) || this.createCheckboxGroupItems()
 		}, config);
 	}
+	,createRadios: function(config) {
+		return this.createRadioGroup(config);
+	}
+	
+	,createCheckbox: function(config) {
+		
+		var findRG = function(i) { return i instanceof Ext.form.RadioGroup; };
+			
+		var findValueField = function(field, p) {
+			return p.items.find(function(i) { return i.name === field.name; });
+		};
+		
+		var sync = function(cb) {
+			
+			if (!cb.checked) return;
+			
+			var p = cb.findParentByType("compositefield"),
+				radios = p.items.find(findRG),
+				vField = findValueField(this, p);
+
+			radios.items.each(function(radio) {
+				if (radio !== cb) radio.setValue(false);
+			});
+				
+			vField.setValue(cb.enumValue.value);
+		};
+		
+		var checkHandler = function(cb, checked) {
+			var p = cb.findParentByType("compositefield"),
+				radios = p.items.find(findRG),
+				vField = findValueField(this, p);
+				
+			if (checked) {
+				var sel, first;
+				radios.items.each(function(radio) {
+					if (!first) first = radio;
+					radio.enable();
+					if (radio.getValue()) sel = radio;
+				});
+				// sync value field
+				if (!sel) first.setValue(true);
+				else vField.setValue(sel.enumValue.value);
+			} else {
+				radios.items.each(function(radio) { radio.disable() });
+				// sync value field
+				vField.setValue(0);
+			}
+		};
+		
+		return function(config) {
+			var zero = this.valueLookup[0];
+			if (!zero) {
+				throw new Error("Enum must have a zero-value to be created as checkbox");
+			}
+			
+			var zDef = zero.isDefault();
+
+			var radios = this.createRadioGroup(
+				Ext.apply({
+					items: this.createCheckboxGroupItems({
+						disabled: zDef
+						,handler: sync.createDelegate(this)
+						,name: ""
+					})
+				}, !config ? config : (config.radioGroup || config.radios))
+			);
+			var rItems = radios.items;
+			rItems.splice(this.getValueIndex(0), 1);
+
+			// initial value
+			var value = "";
+			if (zDef) {
+				value = 0;
+			} else {
+				Ext.each(rItems, function(radio) {
+					if (radio.checked) {
+						value = radio.enumValue.value;
+						return false;
+					}
+				});
+			}
+			
+			var r= Ext.apply({
+				xtype: "compositefield"
+				,items: [
+					{
+						xtype: "checkbox"
+						,boxLabel: this.label + this.labelSeparator
+						,checked: !zDef
+						,handler: checkHandler.createDelegate(this)
+					}
+					,{
+						xtype: "hidden"
+						,value: value
+						,name: this.name
+						,width: 50
+//						,setValue: function(v) {
+//							TODO
+//						}
+					}
+					,radios
+				]
+			}, config);
+
+			return Ext.create(r);
+		}
+	}()
 
 	,createComboBoxData: function() {
 		var r = {};
@@ -221,7 +353,8 @@ NS.BooleanField = eo.Object.extend(NS.EnumField, {
 		return Ext.apply({
 			xtype: "checkbox"
 			,name: this.name
-			,fieldLabel: this.label
+//			,fieldLabel: this.label
+			,boxLabel: this.label
 			,checked: this.defaultValue !== false && this.defaultValue !== 0
 //			,data: this.createComboBoxData()
 		}, config);
