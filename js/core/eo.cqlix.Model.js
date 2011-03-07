@@ -386,6 +386,14 @@ NS.ModelField = eo.Class({
 	 */
 	,onModelCreate: function(model) {}
 	
+	/**
+	 * Tests whether the given string or regex matches this field's name or
+	 * alias.
+	 * @param {String|Regex} name
+	 * @return Boolean TRUE if the name arugment is a String and it equals this 
+	 * field's name or alias, or if name is a RegExp and it matches this field's
+	 * name or alias; else return FALSE.
+	 */
 	,testName: function(name) {
 		if (eo.isRegex(name)) {
 			return name.test(this.name) || name.test(this.alias);
