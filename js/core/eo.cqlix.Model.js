@@ -54,6 +54,7 @@ NS.Model = eo.Object.create({
 		this.fields = fields;
 		this.nameLookup = nameLookup;
 		this.aliasLookup = aliasLookup;
+		this.form = new eo.cqlix.Model.form(this);
 
 		// Fields specials etc
 		fields.each(function(field) {
@@ -161,6 +162,38 @@ NS.Model = eo.Object.create({
 		throw new Error('No field: ' + name);
 	}
 
+	/**
+	 * Retrieves an array of fields.
+	 * @param {String|Array|RegExp} field
+	 */
+	,getFields: function(fields) {
+
+		if (Ext.isString(fields)) {
+			return this.getField(fields);
+		} else {
+			var r = [];
+
+			if (Ext.isArray(fields)) {
+				Ext.each(fields, function(field) {
+					r.push(this.getFields(field));
+				});
+			} else if (eo.isRegex(fields)) {
+				var h = {};
+				Ext.iterate(this.nameLookup, function(n, f) {
+					if (fields.test(n)) h[n] = f;
+				});
+				Ext.iterate(this.aliasLookup, function(n, f) {
+					if (fields.test(n)) h[f.name] = f;
+				});
+				r = eo.hashToArray(h);
+			} else {
+				throw new Error("Illegal Argument: " + (typeof fields));
+			}
+
+			return r;
+		}
+	}
+	
 	// Get a specified version of this model, as one of its subclass
 	// experimental, not tested, etc... do not use!!!
 	,as: function(subclass) {
@@ -327,7 +360,8 @@ NS.Model.createBunch = function(items) {
 	return r;
 }
 
-NS.ModelField = eo.Object.create({
+//NS.ModelField = eo.Object.create({
+NS.ModelField = eo.Class({
 
 	name: undefined
 	,label: undefined
@@ -345,12 +379,22 @@ NS.ModelField = eo.Object.create({
 
 		if (this.special) NS.SpecialFields[this.special](this);
 	}
-
+	
 	/**
 	 * Called when the model owning this field is constructed, to provide an
 	 * opportunity to configure the model...
 	 */
 	,onModelCreate: function(model) {}
+	
+	,testName: function(name) {
+		if (eo.isRegex(name)) {
+			return name.test(this.name) || name.test(this.alias);
+		} else if (Ext.isString(name)) {
+			return name === this.name || name === this.alias;
+		} else {
+			throw new Error("Illegal Argument");
+		}
+	}
 
 	,isPrimaryKey: function() {
 		return this.primaryKey;
@@ -449,7 +493,7 @@ NS.ModelField = eo.Object.create({
 
 	,createGridColumn: function(config) {
 //		if (this.internal === true) return null;
-		if (this.internal === true) return this.doCreateGridColumn(Ext.apply({ internal: true }, config));
+		if (this.internal === true) return this.doCreateGridColumn(Ext.apply({internal: true}, config));
 		else return this.doCreateGridColumn(config);
 	}
 
@@ -674,6 +718,7 @@ NS.ModelField.create = function(config) {
 /**
  * Known dependencies:
  * - GridField.CqlixPlugin overrides eo.cqlix.Model & eo.cqlix.ModelField on this
+ * - eo.cqlix.Model.form
  */
 Oce.deps.reg('eo.cqlix.Model');
 
