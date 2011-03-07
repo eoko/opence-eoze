@@ -247,6 +247,7 @@ NS.EnumField = NS.Enum = eo.Object.extend(NS.ModelField, {
 					}
 					,radios
 				]
+				,modelField: this
 			}, config);
 
 			return Ext.create(r);
@@ -357,6 +358,7 @@ NS.BooleanField = eo.Object.extend(NS.EnumField, {
 			,boxLabel: this.label
 			,checked: this.defaultValue !== false && this.defaultValue !== 0
 //			,data: this.createComboBoxData()
+			,modelField: this
 		}, config);
 	}
 
