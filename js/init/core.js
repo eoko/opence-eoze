@@ -458,3 +458,7 @@ eo.extendAs = function() {
 Ext.isRegExp = Ext.isRegex = eo.isRegExp = eo.isRegex = function(o) {
 	return o instanceof RegExp;
 };
+
+Ext.isInteger = eo.isInteger = function(o) {
+	return Ext.isNumber(o) && /^\d+$/.test(o);
+};
