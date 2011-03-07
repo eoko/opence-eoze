@@ -25,3 +25,5 @@ class TTest extends Test {
 
 $t = new TTEst;
 $t->run();
+
+phpinfo();
