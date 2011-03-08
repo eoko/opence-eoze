@@ -462,3 +462,7 @@ Ext.isRegExp = Ext.isRegex = eo.isRegExp = eo.isRegex = function(o) {
 Ext.isInteger = eo.isInteger = function(o) {
 	return Ext.isNumber(o) && /^\d+$/.test(o);
 };
+
+eo.trueFn = function() { return true; };
+eo.falseFn = function() { return false; };
+eo.nullFn = function() { return null; };
