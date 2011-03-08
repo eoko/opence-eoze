@@ -46,6 +46,11 @@ Ext.ns("eo.form").CheckableFieldSet = Ext.form.FieldSet.extend({
 		return this; 
 	}
 	
+	// TODO Maybe that's fast expedient, and the isValid method should try to
+	// integrate more gracefuly with Ext's validation process... A bit of
+	// investigation of form.Field isValid method could be useful.
+	,isValid: eo.trueFn
+	
 	,markInvalid: Ext.emptyFn
 	,clearInvalid: Ext.emptyFn
 	
