@@ -235,6 +235,7 @@ NS.EnumField = NS.Enum = eo.Object.extend(NS.ModelField, {
 						,boxLabel: this.label + this.labelSeparator
 						,checked: !zDef
 						,handler: checkHandler.createDelegate(this)
+						,submitValue: false
 					}
 					,{
 						xtype: "hidden"
