@@ -369,7 +369,8 @@ abstract class ModelRelationInfo implements ModelField {
 		}
 		$r = array(
 			'name' => $this->name,
-			'fieldType' => 'hasOne',
+//			'fieldType' => 'hasOne',
+			'fieldType' => $this instanceof ModelRelationInfoHasOne ? 'hasOne' : 'hasMany',
 			'type' => $this->getType(),
 			'allowNull' => $this->isNullable(),
 			'hasDefault' => $referenceField->hasDefault(),
@@ -983,11 +984,11 @@ abstract class ModelRelationInfoByAssoc extends ModelRelationInfo {
 		return $this->assocTable->getColumn($this->otherForeignKey);
 	}
 
-	public function createCqlixFieldConfig() {
-		$cfg = parent::createCqlixFieldConfig();
-		$cfg['fieldType'] = 'hasMany';
-		return $cfg;
-	}
+//	public function createCqlixFieldConfig() {
+//		$cfg = parent::createCqlixFieldConfig();
+//		$cfg['fieldType'] = 'hasMany';
+//		return $cfg;
+//	}
 }
 
 class ModelRelationInfoIndirectHasOne extends ModelRelationInfoByAssoc
