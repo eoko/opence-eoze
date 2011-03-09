@@ -1,8 +1,11 @@
 /*
- * @author Éric Ortéga <eric@mail.com>
+ * @author Éric Ortéga <eric@planysphere.fr>
  */
 
 /**
+ * @deprecated Planned for removal soon...
+ * @todo Refactor Module.js to remove usage of Oce.Object
+ *
  * Usage:
  *
  * either with an initialisation function:
@@ -190,29 +193,26 @@ echo('MyModule2.greats:');
 MyModule2.greats();
 */
 
+/**
+ * @deprecated eo.Object has been deprecated and will be removed soon...
+ */
 (function() {
 
 Ext.ns('eo.Object');
 
 var NS = eo.Object;
 
-/**
- * Creates a constructor with the given members as prototype. This method is a
- * syntactic sugar to allow the creation of an Object in only one call, while
- * preserving the efficiency of the prototypical inheritance.
- * @param {Object} members
- * @return the constructor of the new Object
- */
-eo.Class = NS.create = function(members) {
-	if (members.constructor === Object) members.constructor = function() {};
-	var constructor = members.constructor;
-	constructor.prototype = members;
-	// add ExtJS class methods
-	constructor.override = function(o){
-		Ext.override(constructor, o);
-	};
-	constructor.extend = function(o){return Ext.extend(constructor, o);};
-	return constructor;
+NS.create = eo.Class = function(members) {
+//	if (members.constructor === Object) members.constructor = function() {};
+//	var constructor = members.constructor;
+//	constructor.prototype = members;
+//	// add ExtJS class methods
+//	constructor.override = function(o){
+//		Ext.override(constructor, o);
+//	};
+//	constructor.extend = function(o){return Ext.extend(constructor, o);};
+//	return constructor;
+	return Ext.extend(eo.Class, members || {});
 };
 
 /**
@@ -256,8 +256,31 @@ NS.extend = function(baseConstructor, overrides) {
 	
 })(); // eo.Object closure
 
-eo.createIf = function(o) {
-	if (o instanceof Ext.Observable()) {
+/**
+ * Creates a constructor with the given members as prototype. This method is a
+ * syntactic sugar to allow the creation of a class in only one call, while
+ * preserving the efficiency of the prototypical inheritance.
+ * 
+ * The object instanciated from the created class will be instances of eo.Class
+ * (as well as any extending class). 
+ * 
+ * <p>Example:<code><br/>
+ * var MyClass = eo.Class({ doSomething: function() { alert("hello") });<br/>
+ * var myInstance = new eo.Class();<br/>
+ * myInstance instanceof eo.Class; // TRUE<br/>
+ * myInstance instanceof MyClass; // TRUE
+ * </code>
+ * 
+ * @param {Object} members
+ * @return the constructor of the new Object
+ */
+eo.Class = function(members) {
+	return Ext.extend(eo.Class, members || {});
+};
+
+// TODO unused, untested
+Ext.createIf = eo.createIf = function(o) {
+	if (o instanceof Ext.Observable || o instanceof eo.Class) {
 		return o;
 	} else {
 		return Ext.create(o);
