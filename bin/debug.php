@@ -5,23 +5,7 @@ Logger::addAppender(new LoggerOutputAppender(false));
 
 use eoko\util\YmlReader;
 
-class Test {
-	private function doRun() {
-		echo 'Test';
-	}
-	public function run() {
-		$this->doRun();
-	}
-}
+//$m = SmModule::load(38);
+//
+//dump($m->smModuleSaisons->toArray());
 
-class TTest extends Test {
-	private function doRun() {
-		echo 'T-Test';
-	}
-	public function run() {
-		$this->doRun();
-	}
-}
-
-$t = new TTEst;
-$t->run();
