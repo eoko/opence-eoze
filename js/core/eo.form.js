@@ -26,23 +26,7 @@ eo.form.createModelFormItems = function(opts) {
 
 eo.form.createModelForm = function(opts) {
 
-	if (!opts) throw new Error();
-	var model = opts.model;
-	if (!model) {
-		model = opts;
-		opts = {};
-	}
-	if (false == model instanceof eo.cqlix.Model) {
-		throw new Error('eo.form.createModelForm (1)');
-	}
-
-	var fields = [];
-	Ext.each(
-		model.fields.findBy(function(f) { return !f.internal || f.isPrimaryKey() })
-		,function (f) {
-			fields.push(f.createField());
-		}
-	);
+	var fields = this.createModelFormItems(opts);
 	
 	// formExtra
 	if (opts.fields) {
@@ -61,7 +45,7 @@ eo.form.createModelForm = function(opts) {
 //		debugger
 	}
 
-	if (opts.items) throw new Error('eo.form.createModelFormItems (2)');
+	if (opts.items) throw new Error('eo.form.createModelForm');
 
 	if (opts.formClass === false) {
 		return Ext.apply({
