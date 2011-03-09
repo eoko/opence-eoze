@@ -43,6 +43,23 @@ eo.form.createModelForm = function(opts) {
 			fields.push(f.createField());
 		}
 	);
+	
+	// formExtra
+	if (opts.fields) {
+		var fieldIndexes = {}, i = 0;
+		Ext.each(fields, function(f) {
+			fieldIndexes[f.name] = i++;
+		});
+		Ext.iterate(opts.fields, function(n, f) {
+			var i = fieldIndexes[n] || fields.length;
+			if (Ext.isFunction(f)) {
+				fields[i] = f();
+			} else {
+				fields[i] = f;
+			}
+		});
+//		debugger
+	}
 
 	if (opts.items) throw new Error('eo.form.createModelFormItems (2)');
 
@@ -56,5 +73,8 @@ eo.form.createModelForm = function(opts) {
 
 	return new cls(Ext.apply({
 		items: fields
+		,defaults: {
+			anchor: "0"
+		}
 	}, opts.formConfig));
 };

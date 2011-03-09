@@ -148,7 +148,7 @@ eo.form.GridField.ModelAction.Add = Ext.extend(ACTION, {
 
 	// hook
 	,createForm: function() {
-		return this.model.createForm();
+		return this.model.createForm(this.formExtra);
 	}
 
 	,createWin: function() {
