@@ -691,7 +691,10 @@ NS.RelationOneField = Ext.extend(NS.StringField, {
 NS.RelationManyField = Ext.extend(NS.ModelField, {
 	xtype: "gridfield"
 	,doCreateField: function(config) {
-		
+		// TODO
+	}
+	,doCreateGridColumn: function(config) {
+		// TODO
 	}
 })
 
