@@ -1,6 +1,6 @@
 Oce.deps.wait("eo.cqlix.Model", function() {
 	
-	eo.cqlix.Model.form = eo.Class({
+	eo.cqlix.Model.addAspect("form", eo.Class({
 		
 		constructor: function(model) {
 			this.model = model;
@@ -65,6 +65,6 @@ Oce.deps.wait("eo.cqlix.Model", function() {
 
 			return r;
 		}
-	});
+	}));
 	
 });

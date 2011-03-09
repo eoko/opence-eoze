@@ -54,7 +54,10 @@ NS.Model = eo.Object.create({
 		this.fields = fields;
 		this.nameLookup = nameLookup;
 		this.aliasLookup = aliasLookup;
-		this.form = new eo.cqlix.Model.form(this);
+		
+		if (NS.Model.aspects) Ext.iterate(NS.Model.aspects, function(n, a) {
+			this[n] = new a(this);
+		}, this);
 
 		// Fields specials etc
 		fields.each(function(field) {
@@ -303,6 +306,19 @@ NS.Model = eo.Object.create({
 		return o;
 	}
 }); // Model
+
+/**
+ * Adds an aspect to the Model. The aspect constructor will be called when a
+ * Model is instanciated, with the model instance as only argument. The 
+ * constructed object will be appended to the Model as its name member.
+ * @param {String} name This is the dude!
+ * @param {Function} constructor
+ * @author Éric Ortéga <eric@planysphere.fr>
+ * @since 09/03/11 01:31
+ */
+NS.Model.addAspect = function(name, constructor) {
+	NS.Model.aspects = (NS.Model.aspects || {})[name] = constructor;
+};
 
 //NS.Record = eo.Object.create({
 NS.Record = ({
