@@ -10,6 +10,16 @@ var CQLIX_PLUGIN = eo.form.GridField.CqlixPlugin = eo.Object.create({
 		
 		if (!this.model) throw new Error();
 		if (Ext.isFunction(this.model)) this.model = this.model.call(this.modelScope || this.scope || this);
+		
+		// This option (form) is used on a semi-experimental basis by 
+		// SMOption.Produits, to push its special Rules field...
+		if (this.form) {
+			this.addTitle = this.form.addTitle || this.addTitle || this.form.title;
+			this.editTitle = this.form.editTitle || this.editTitle || this.form.title;
+			var x = this.formExtra = Ext.apply({}, this.form);
+			delete x.addTitle;
+			delete x.editTitle;
+		}
 	}
 	
 	,configure: function(gridField) {
@@ -79,6 +89,7 @@ var CQLIX_PLUGIN = eo.form.GridField.CqlixPlugin = eo.Object.create({
 					model: this.model
 					,addWindow: true
 					,winTitle: this.addTitle
+					,formExtra: this.formExtra
 				})
 				,new GRID_ACTION.Remove({
 				})
@@ -90,46 +101,8 @@ var CQLIX_PLUGIN = eo.form.GridField.CqlixPlugin = eo.Object.create({
 //				})
 			]
 		});
-
-//		gridField.storeConfig = Ext.apply({
-//			proxy: new Ext.data.HttpProxy({
-//				url: 'index.php'
-//			})
-//			,writer: new Ext.data.JsonWriter({
-//				encode: false
-//				,writeAllFields: true
-//				,encodeDelete: true
-//			})
-//			,baseParams: {
-//				controller: this.controller + ".crud"
-//				,model: this.model.name
-//			}
-//			,autoLoad: true
-//			,autoSave: false
-//		}, gridField.storeConfig);
-
-//		gridField.onAdd = function() {
-//			debugger
-//		}
-		
-//		if (hasFieldConfig) {
-//			Ext.each(cm, function(c) {
-//				var cfg = fieldConfigs[c.dataIndex];
-//				if (cfg) Ext.apply(c, cfg);
-//			});
-//		}
 	}
-
-//REM	,buildDataIndexLookup: function(fields) {
-//		var r = {};
-//		Ext.each(fields, function(field) {
-//			var di = field.dataIndex;
-//			if (!di) throw new Error();
-//			r[di] = field;
-//		});
-//		return r;
-//	}
-});
+}); // CqlixPlugin
 
 Ext.reg("gridfield.cqlix", CQLIX_PLUGIN);
 
