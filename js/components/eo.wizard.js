@@ -1071,7 +1071,7 @@ eo.WizardPanel = eo.wizard.WizardPanel = function(config) { return Ext.extend(Ex
 	}
 	
 });
-};
+}();
 
 eo.wizard.Progress= Ext.extend(Ext.Panel, {
 
