@@ -317,7 +317,7 @@ NS.Model = eo.Object.create({
  * @since 09/03/11 01:31
  */
 NS.Model.addAspect = function(name, constructor) {
-	NS.Model.aspects = (NS.Model.aspects || {})[name] = constructor;
+	(NS.Model.aspects = NS.Model.aspects || {})[name] = constructor;
 };
 
 //NS.Record = eo.Object.create({
