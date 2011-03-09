@@ -12,9 +12,12 @@ if (!eo.wizard.WindowBase) {
 eo.wizard.Step = Ext.extend(Ext.util.Observable, {
 
 	constructor: function(config) {
-		eo.wizard.Step.superclass.constructor.call(this, config);
+		
+		this.addEvents("enter", "leave");
 		Ext.apply(this, config);
-
+		
+		eo.wizard.Step.superclass.constructor.call(this, config);
+		
 		if (!this.name) this.name = Ext.id();
 
 		if (false == this.panel instanceof Ext.Panel) {
@@ -150,6 +153,27 @@ eo.wizard.Step = Ext.extend(Ext.util.Observable, {
 		this.parent.wait.apply(this.parent, arguments);
 	}
 
+	/**
+	 * Must be called when the step is entered (i.e. becomes the active step).
+	 * Called automatically by the owner wizard.
+	 */
+	,enter: function() {
+		// This is required so that if the set step dynamically decide
+		// its next step, it is given the opportunity to update its
+		// dynamic next step previous step
+		// That is: step.next().prev = step, which is done in 
+		// testComplete...
+		if (this.testComplete) this.testComplete();
+		this.fireEvent("enter", this);
+	}
+	/**
+	 * Must be called when the step is left (i.e. stops being the active step).
+	 * Called automatically by the owner wizard.
+	 */
+	,leave: function() {
+		this.fireEvent("leave", this);
+	}
+	
 });
 
 eo.wizard.FormStep = Ext.extend(eo.wizard.Step, {
@@ -387,8 +411,7 @@ eo.wizard.texts = {
  * @author Éric Ortéga <eric@planysphere.fr>
  * @since before 09/03/11 20:06
  */
-eo.WizardPanel = eo.wizard.WizardPanel = function(config) { return Ext.extend(Ext.Panel, {
-		// this is wrapped in a dull function to hint the doc parser
+eo.WizardPanel = eo.wizard.WizardPanel = Ext.extend(Ext.Panel, {
 
 	texts: eo.wizard.texts
 
@@ -829,21 +852,22 @@ eo.WizardPanel = eo.wizard.WizardPanel = function(config) { return Ext.extend(Ex
 			if (step.getParent() !== this) {
 				step.getParent().setStep(step);
 			} else {
+				if (this.currentStep === step) return step;
+				
+				// notify step of the change
+				this.currentStep.leave();
+				step.enter();
+				
 				this.getLayout().setActiveItem(step.panelIndex);
 				this.currentStep = step;
 				if (this.parentStep) this.parentStep.parent.setStep(this.parentStep);
-				// This is required so that if the set step dynamically decide
-				// its next step, it is given the opportunity to update its
-				// dynamic next step previous step
-				// That is: step.next().prev = step, which is done in 
-				// testComplete...
-				if (step.testComplete) step.testComplete();
 			}
 		}
 		this.updateStep();
 		return step;
 	}
 
+	// private
 	,setActiveItem: function(index) {
 		this.getLayout().setActiveItem(index);
 	}
@@ -1071,7 +1095,6 @@ eo.WizardPanel = eo.wizard.WizardPanel = function(config) { return Ext.extend(Ex
 	}
 	
 });
-}();
 
 eo.wizard.Progress= Ext.extend(Ext.Panel, {
 
