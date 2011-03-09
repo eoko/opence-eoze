@@ -34,6 +34,7 @@ var CQLIX_PLUGIN = eo.form.GridField.CqlixPlugin = eo.Object.create({
 			model: this.model
 			,gridField: gridField
 			,winTitle: this.editTitle
+			,formExtra: this.formExtra // XP
 		});
 
 		// Orderable
@@ -89,7 +90,7 @@ var CQLIX_PLUGIN = eo.form.GridField.CqlixPlugin = eo.Object.create({
 					model: this.model
 					,addWindow: true
 					,winTitle: this.addTitle
-					,formExtra: this.formExtra
+					,formExtra: this.formExtra // XP
 				})
 				,new GRID_ACTION.Remove({
 				})

@@ -206,7 +206,7 @@ eo.form.GridField.ModelAction.Edit = Ext.extend(ACTION, {
 
 		var win;
 		var WIN_CLASS = Oce.FormWindow;
-		var formPanel = this.model.createForm();
+		var formPanel = this.model.createForm(this.formExtra);
 		var gf = this.gridField;
 
 		this.editWin = win = new WIN_CLASS({
