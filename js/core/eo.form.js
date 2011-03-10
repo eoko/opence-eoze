@@ -42,6 +42,12 @@ eo.form.createModelForm = function(opts) {
 				fields[i] = f;
 			}
 		});
+		// bellow is a hack to allow removing fields, use in Opence's SMParts.js
+		var tmp = [];
+		Ext.each(fields, function(f) {
+			if (f) tmp.push(f);
+		});
+		fields = tmp;
 //		debugger
 	}
 

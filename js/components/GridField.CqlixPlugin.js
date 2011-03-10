@@ -54,6 +54,8 @@ var CQLIX_PLUGIN = eo.form.GridField.CqlixPlugin = eo.Object.create({
 				autoExpandColumn: this.model.mainField.name
 			});
 		}
+		
+		var addExtraColumns = this.addExtraColumns;
 
 		// ColumnModel
 		var cm = gridField.fields = this.model.createGridFieldColumnModel({
@@ -62,6 +64,7 @@ var CQLIX_PLUGIN = eo.form.GridField.CqlixPlugin = eo.Object.create({
 			,editable: this.editable
 			,pkName: this.model.primaryKeyName
 			,addExtraColumns: function(cols) {
+				if (addExtraColumns) addExtraColumns(cols);
 				cols.push({
 					xtype: "actioncolumn"
 //					,header: "Supprimer"
@@ -80,7 +83,7 @@ var CQLIX_PLUGIN = eo.form.GridField.CqlixPlugin = eo.Object.create({
 						}
 						,getClass: function() {return "ico col ico_delete"}
 					}]
-				})
+				});
 			}
 		});
 
