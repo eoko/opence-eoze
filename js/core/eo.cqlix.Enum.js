@@ -355,8 +355,8 @@ NS.BooleanField = eo.Object.extend(NS.EnumField, {
 		return Ext.apply({
 			xtype: "checkbox"
 			,name: this.name
-//			,fieldLabel: this.label
-			,boxLabel: this.label
+			,fieldLabel: this.label
+//			,boxLabel: this.label
 			,checked: this.defaultValue !== false && this.defaultValue !== 0
 //			,data: this.createComboBoxData()
 			,modelField: this
