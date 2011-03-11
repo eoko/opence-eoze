@@ -128,7 +128,7 @@ NS.EnumField = NS.Enum = eo.Object.extend(NS.ModelField, {
 		var r = [];
 		Ext.each(this.values, function(ev) {
 			r.push(Ext.apply({
-				boxLabel: ev.label
+				boxLabel: this.getLabel(["formField", "form"])
 				,checked: ev.isDefault()
 				,inputValue: ev.value
 				,enumValue: ev
@@ -140,7 +140,7 @@ NS.EnumField = NS.Enum = eo.Object.extend(NS.ModelField, {
 	,createRadioGroup: function(config) {
 		return Ext.apply({
 			xtype: "radiogroup"
-			,fieldLabel: this.label
+			,fieldLabel: this.getLabel(["formField", "form"])
 			,defaults: {name: this.name}
 			,items: (config ? config.items : false) || this.createCheckboxGroupItems()
 		}, config);
@@ -232,7 +232,7 @@ NS.EnumField = NS.Enum = eo.Object.extend(NS.ModelField, {
 				,items: [
 					{
 						xtype: "checkbox"
-						,boxLabel: this.label + this.labelSeparator
+						,boxLabel: this.getLabel(["formField", "form"]) + this.labelSeparator
 						,checked: !zDef
 						,handler: checkHandler.createDelegate(this)
 						,submitValue: false
@@ -261,7 +261,7 @@ NS.EnumField = NS.Enum = eo.Object.extend(NS.ModelField, {
 			r['null'] = eo.Text.get(this.undefinedText, 'select') || "Non renseigné"; // i18n
 		}
 		Ext.each(this.values, function(item) {
-			r[item.value] = item.label
+			r[item.value] = this.getLabel(["formField", "form"])
 		});
 		return r;
 	}
@@ -270,7 +270,7 @@ NS.EnumField = NS.Enum = eo.Object.extend(NS.ModelField, {
 		return Ext.apply({
 			xtype: "oce.simplecombo"
 			,field: this.name
-			,fieldLabel: this.label
+			,fieldLabel: this.getLabel(["formField", "form"])
 			,data: this.createComboBoxData()
 		}, config);
 	}
@@ -355,11 +355,15 @@ NS.BooleanField = eo.Object.extend(NS.EnumField, {
 		return Ext.apply({
 			xtype: "checkbox"
 			,name: this.name
-			,fieldLabel: this.label
+			,fieldLabel: this.getLabel(["formField", "form"])
 //			,boxLabel: this.label
 			,checked: this.defaultValue !== false && this.defaultValue !== 0
 //			,data: this.createComboBoxData()
 			,modelField: this
+//			,setValue: function(v) {
+//				debugger
+//				Ext.form.Checkbox.prototype.apply(this, arguments);
+//			}
 		}, config);
 	}
 
@@ -380,7 +384,9 @@ NS.BooleanField = eo.Object.extend(NS.EnumField, {
 			// tried to be used somewhat, when creating a standard grid store...
 			,storeFieldConfig: {
 				convert: function(v) {
-					return v !== false;
+					return v !== false 
+						// in order to consider 0 or "0" as false...
+						&& parseInt(v) !== 0;
 				}
 			}
 		});
