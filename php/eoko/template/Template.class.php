@@ -23,6 +23,10 @@ class Template extends Renderer {
 	public function __unset($name) {
 		unset($this->vars[$name]);
 	}
+	
+	public function clearData() {
+		$this->vars = array();
+	}
 
 	/**
 	 * Set the Template's variable $name to the given $value.
