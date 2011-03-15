@@ -203,11 +203,13 @@ abstract class ModelRelationInfo implements ModelField {
 
 		if ($relationName === null) $relationName = $this->name;
 		if ($alias === null) $alias = $relationName;
-
+		
 		$this->parseSelectJoinAlias($relationName, $joinAlias, $leftAlias);
 
 //r		$alias = is_string($sqlAlias) ? $sqlAlias : $alias;
-
+		
+		// TODO getLabelSelectFormatString is app specific (implemented in
+		// myTable)
 		if (null !== $labelFormat = $this->targetTable->getLabelSelectFormatString()) {
 			$join = $query->join($this, $joinAlias, $leftAlias);
 			$join->selectFormatted($alias, $labelFormat);

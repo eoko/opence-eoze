@@ -329,22 +329,24 @@ class Config implements ArrayAccess, IteratorAggregate {
 	 * @throws MissingConfigurationException if the config doesn't contain a
 	 * node with the specified name
 	 */
-	public function node($path, $require = false) {
+	public function node($path, $require = false, $createIfNeeded = true) {
 		
 		if ($path === null) {
 			return $this;
 		} else if (is_string($path)) {
 			$pathElt = explode('/', $path);
 		}
-
+		
 		if (count($pathElt) == 1) {
 			if (isset($this->value[$path])) {
 				return new eoko\config\Config($this->value[$path], $path, $this->configName);
 			} else if ($require) {
 				MissingConfigurationException::throwFrom($this,
 						"Cannot resolve path: $path");
-			} else {
+			} else if ($createIfNeeded) {
 				return Config::createEmpty($path, $this->configName);
+			} else {
+				return null;
 			}
 		}
 
@@ -358,17 +360,23 @@ class Config implements ArrayAccess, IteratorAggregate {
 					MissingConfigurationException::throwFrom($this,
 							sprintf('Cannot resolve path: %s (missing node: %s)',
 									$path, implode('/', $resolving)));
-				} else {
+				} else if ($createIfNeeded) {
 					return Config::createEmpty($path, $this->configName);
+				} else {
+					return null;
 				}
 			} else {
 				$node = $node[$pathElt[$i]];
 			}
 		}
 
-		return new Config($node, $path, $this->configName);
+		if (is_array($node) || $node instanceof ArrayAccess) {
+			return new Config($node, $path, $this->configName);
+		} else {
+			return $node;
+		}
 	}
-
+	
 	/**
 	 * Apply the given $values to this config (ie. set the keys in this config
 	 * to their value in the array).
