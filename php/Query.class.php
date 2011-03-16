@@ -746,6 +746,7 @@ class Query {
 	 */
 	public function orderBy($order, $dir = 'ASC') {
 		$this->order = array();
+		if ($order === null) return;
 		return $this->thenOrderBy($order, $dir);
 	}
 
