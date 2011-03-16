@@ -52,7 +52,7 @@ class LegacyGridModule {
 
 		$tpl->merge($config->module);
 //		$tpl->controller .= '.grid';
-		if ($config->jsClass) {
+		if (isset($config['jsClass'])) {
 			if (preg_match('/.+\..+\..+\..+/', $config->jsClass))
 				$tpl->superclass = $config->jsClass;
 			else
