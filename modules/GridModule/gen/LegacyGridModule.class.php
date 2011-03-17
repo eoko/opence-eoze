@@ -25,7 +25,7 @@ class LegacyGridModule {
 
 		$controllerName = $module->getName();
 		$config = $module->getConfig();
-
+		
 		$tplFile = dirname(__FILE__) . DS . 'tpl' . DS . 'gridmodule.js.php';
 
 		$parentConfig = self::loadParentConfig($config);
@@ -52,7 +52,14 @@ class LegacyGridModule {
 
 		$tpl->merge($config->module);
 //		$tpl->controller .= '.grid';
-		$tpl->superclass = "Oce.Modules.$config->class.$config->class";
+		if (isset($config['jsClass'])) {
+			if (preg_match('/.+\..+\..+\..+/', $config->jsClass))
+				$tpl->superclass = $config->jsClass;
+			else
+				$tpl->superclass = "Oce.Modules.$config->jsClass.$config->jsClass";
+		} else {
+			$tpl->superclass = "Oce.Modules.$config->class.$config->class";
+		}
 
 		if (isset($config['uses'])) {
 			$tpl->uses = json_encode(
@@ -65,7 +72,7 @@ class LegacyGridModule {
 		$extra = $config->node('extra')
 				->applyIf($parentConfig->get('extra', null))
 				->toArray();
-
+		
 		// --- Forms ---
 		$forms = $config->node('forms')
 				->applyIf($parentConfig->get('forms', null))

@@ -14,6 +14,10 @@ class Maker {
 	
 	public static function getFor($controller, $action = null, $params = null, $anchor = null) {
 		
+		if ($controller instanceof \eoko\module\executor\Executor) {
+			$controller = "$controller->module.$controller";
+		}
+		
 		$parts = array();
 		
 		if (is_array($controller)) {

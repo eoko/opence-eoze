@@ -148,7 +148,7 @@ eo.form.GridField.ModelAction.Add = Ext.extend(ACTION, {
 
 	// hook
 	,createForm: function() {
-		return this.model.createForm();
+		return this.model.createForm(this.formExtra);
 	}
 
 	,createWin: function() {
@@ -206,7 +206,7 @@ eo.form.GridField.ModelAction.Edit = Ext.extend(ACTION, {
 
 		var win;
 		var WIN_CLASS = Oce.FormWindow;
-		var formPanel = this.model.createForm();
+		var formPanel = this.model.createForm(this.formExtra);
 		var gf = this.gridField;
 
 		this.editWin = win = new WIN_CLASS({
@@ -372,6 +372,8 @@ ACTION.Cancel = Ext.extend(ACTION, {
 		this.gridField.clearDirty();
 	}
 
-})
+});
+
+Oce.deps.reg('eo.form.GridField.Action');
 
 }); // deps closure

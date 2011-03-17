@@ -66,6 +66,8 @@ function relative_classname($class) {
 	} else {
 		if (substr($class, -1) === '\\') {
 			throw new IllegalArgumentException('Not a class name pattern: ' . $class);
+		} else {
+			return $class;
 		}
 	}
 }

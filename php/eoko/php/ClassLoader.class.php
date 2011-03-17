@@ -14,7 +14,7 @@ class ClassLoader {
 	private $includePaths = array();
 
 	private $allowedClassSuffix = array(
-		'.class', '',
+		'.class', '.interface', '',
 	);
 
 	private function __construct() {}
@@ -95,13 +95,15 @@ class ClassLoader {
 			}
 		}
 		if (substr($classPath, -5) === 'Query') {
-			if (file_exists($filename = MODEL_QUERY_PATH . "$classPath$suffix.php")) {
+			if (defined('MODEL_QUERY_PATH')
+					&& file_exists($filename = MODEL_QUERY_PATH . "$classPath$suffix.php")) {
 				require_once $filename;
 				return true;
 			}
 		}
 		if (substr($classPath, -5) === 'Proxy') {
-			if (file_exists($filename = MODEL_PROXY_PATH . "$classPath$suffix.php")) {
+			if (defined('MODEL_PROXY_PATH')
+					&& file_exists($filename = MODEL_PROXY_PATH . "$classPath$suffix.php")) {
 				require_once $filename;
 				return true;
 			}

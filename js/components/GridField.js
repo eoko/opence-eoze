@@ -191,14 +191,13 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 					if (!colConfig.renderer && colConfig.editor.createRenderer) {
 						colConfig.renderer = colConfig.editor.createRenderer('-');
 					}
-					colConfig = new Ext.grid.Column(colConfig);
 				} else {
 					// TODO: commented out to let pass an error with SM wizard
 					// but that will need a real fix...
 //					throw new Error('GridField Invalid Config');
 				}
 				if (colConfig) extraDataConfig = {
-					dataIndex: colConfig.dataIndex
+					dataIndex: colConfig.dataIndex || di
 					,name: colConfig.name || colConfig.dataIndex
 					,defaultValue: colConfig.defaultValue || null
 				}; else colConfig = {};
@@ -263,7 +262,6 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 			}, this.baseParams || {})
 			,pruneModifiedRecords: true
 			,root: 'data'
-//REM			,fields: dataIndexes
 			,fields: storeFields
 			,autoload: true
 			,sortInfo: this.sortInfo
@@ -278,7 +276,7 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 			xtype: "jsonstore"
 		}));
 
-		if (this.subset) this.store.baseParams.subset = this.subset;
+		if (this.subset) store.baseParams.subset = this.subset;
 
 		// Autoset name from subset
 		if (!this.name && this.subset) this.setName(this.subset);
