@@ -33,7 +33,7 @@ class Database {
 				
 				$name = $_SERVER['SERVER_NAME'];
 				foreach ($servers as $test => $cfg) {
-					if (substr($name, -strlen($test) === $test)) {
+					if (substr($name, -strlen($test)) === $test) {
 						Arrays::apply($defaults, $cfg);
 					}
 				}
