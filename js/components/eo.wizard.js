@@ -12,9 +12,12 @@ if (!eo.wizard.WindowBase) {
 eo.wizard.Step = Ext.extend(Ext.util.Observable, {
 
 	constructor: function(config) {
-		eo.wizard.Step.superclass.constructor.call(this, config);
+		
+		this.addEvents("enter", "leave");
 		Ext.apply(this, config);
-
+		
+		eo.wizard.Step.superclass.constructor.call(this, config);
+		
 		if (!this.name) this.name = Ext.id();
 
 		if (false == this.panel instanceof Ext.Panel) {
@@ -90,8 +93,12 @@ eo.wizard.Step = Ext.extend(Ext.util.Observable, {
 		} else if (n instanceof eo.wizard.Step) {
 			return n;
 		} else if (Ext.isFunction(n)) {
-			return n.call(this);
+			// we cannot require the step here, because this method is called
+			// during parent's construction, before parent.steps exists...
+			return this.parent.getStep(n.call(this), false);
 		} else if (Ext.isString(n)) {
+			// we cannot require the step here, because this method is called
+			// during parent's construction, before parent.steps exists...
 			return this.parent.getStep(n, false);
 		} else {
 			throw new Error('Invalid step property "' + prop + '": ' + n);
@@ -146,6 +153,27 @@ eo.wizard.Step = Ext.extend(Ext.util.Observable, {
 		this.parent.wait.apply(this.parent, arguments);
 	}
 
+	/**
+	 * Must be called when the step is entered (i.e. becomes the active step).
+	 * Called automatically by the owner wizard.
+	 */
+	,enter: function() {
+		// This is required so that if the set step dynamically decide
+		// its next step, it is given the opportunity to update its
+		// dynamic next step previous step
+		// That is: step.next().prev = step, which is done in 
+		// testComplete...
+		if (this.testComplete) this.testComplete();
+		this.fireEvent("enter", this);
+	}
+	/**
+	 * Must be called when the step is left (i.e. stops being the active step).
+	 * Called automatically by the owner wizard.
+	 */
+	,leave: function() {
+		this.fireEvent("leave", this);
+	}
+	
 });
 
 eo.wizard.FormStep = Ext.extend(eo.wizard.Step, {
@@ -298,9 +326,10 @@ eo.wizard.FormStep = Ext.extend(eo.wizard.Step, {
 			}
 		}
 
-		this.lastNext = this.hasNext();
+		this.lastHasNext = this.hasNext();
 		this.lastFinish = this.canFinish();
-		this.lastPrev = this.hasPrev();
+		this.lastHasPrev = this.hasPrev();
+		this.lastNext = this.getNext();
 	}
 
 	,setPrevIf: function(step) {
@@ -320,24 +349,29 @@ eo.wizard.FormStep = Ext.extend(eo.wizard.Step, {
 		}
 	}
 
-//REM?	,hasPrev: function() {
-//		return this.getPrev() ? true : false;
-//	}
-//	,hasNext: function() {
-//		return this.getNext() ? true : false;
-//	}
-
 	,testComplete: function() {
 		if (this.beforeTestComplete) this.beforeTestComplete();
 		
-		var next = this.hasNext(),
-			finish = this.canFinish(),
-			prev = this.hasPrev();
-
-		if (next !== this.lastNext || finish !== this.lastFinish || prev !== this.lastPrev) {
-			this.lastNext = next;
-			this.lastPrev = prev;
+		var hasNext = this.hasNext()
+			,finish = this.canFinish()
+			,hasPrev = this.hasPrev()
+			,next = this.getNext()
+			;
+			
+		if (hasNext !== this.lastHasNext 
+				|| finish !== this.lastFinish 
+				|| hasPrev !== this.lastHasPrev
+				|| next !== this.lastNext
+		) {
+			this.lastHasNext = hasNext;
+			this.lastHasPrev = hasPrev;
 			this.lastFinish = finish;
+			
+			if (this.lastNext !== next) {
+				this.lastNext = next;
+				next.prev = this;
+			}
+			
 			this.parent.updateStep();
 		}
 	}
@@ -356,6 +390,27 @@ eo.wizard.texts = {
 	,finish: "Finish"
 };
 
+/**
+ * <h1>General principles of the wizard</h1>
+ * 
+ * <h2>Dynamic steps</h2>
+ * For any step, the next step can be computed dynamically by overriding the 
+ * step's next() method.
+ * Previous steps, however, cannot be computed in the same way (by overridding
+ * the prev method), because prev steps are dynamically set internally according
+ * to the next step of each step. This is a technical limitation (to be able to
+ * predict the full step path -- previous steps as well as next steps -- from 
+ * the currently set step. However, this is consistant with an end-user 
+ * expectation that their actions in a step may have an influence on the steps 
+ * to come, but not on the steps they have already completed.
+ * 
+ * @param {Object} [config] Configuration of the wizard
+ * 
+ * @class
+ * @todo clean this doc block
+ * @author Éric Ortéga <eric@planysphere.fr>
+ * @since before 09/03/11 20:06
+ */
 eo.WizardPanel = eo.wizard.WizardPanel = Ext.extend(Ext.Panel, {
 
 	texts: eo.wizard.texts
@@ -600,31 +655,36 @@ eo.WizardPanel = eo.wizard.WizardPanel = Ext.extend(Ext.Panel, {
 
 	,getStep: function(name, require, searchChildren, searchRoot) {
 		
-		searchChildren = searchChildren !== false;
-		searchRoot = searchRoot !== false;
+		// getStep can be called during child steps construction, that is before
+		// the current step has finished its own construction, and so this.steps
+		// could be undefined...
+		if (this.steps) {
+			searchChildren = searchChildren !== false;
+			searchRoot = searchRoot !== false;
 
-		if (name instanceof eo.wizard.Step) {
-			return name;
-		} else if (name in this.steps) {
-			return this.steps[name];
-		}
+			if (name instanceof eo.wizard.Step) {
+				return name;
+			} else if (name in this.steps) {
+				return this.steps[name];
+			}
 
-		if (searchRoot) {
-			var root = this.getRootWizard();
-			if (root !== this) return root.getStep(name, require, searchChildren, false);
-		}
+			if (searchRoot) {
+				var root = this.getRootWizard();
+				if (root !== this) return root.getStep(name, require, searchChildren, false);
+			}
 
-		var r = false;
-		if (searchChildren) {
-			this.steps.each(function(step) {
-				if (!r && step.getStep) {
-					// the call of getStep() on the children must have
-					// searchParents set to false, to prevent infinite recursion
-					r = step.getStep(name, false, searchChildren, false);
-					if (r) return false;
-				}
-			});
-			if (r) return r;
+			var r = false;
+			if (searchChildren) {
+				this.steps.each(function(step) {
+					if (!r && step.getStep) {
+						// the call of getStep() on the children must have
+						// searchParents set to false, to prevent infinite recursion
+						r = step.getStep(name, false, searchChildren, false);
+						if (r) return false;
+					}
+				});
+				if (r) return r;
+			}
 		}
 
 		if (require === false) {
@@ -729,6 +789,9 @@ eo.WizardPanel = eo.wizard.WizardPanel = Ext.extend(Ext.Panel, {
 	}
 
 	,updateButtons: function() {
+		
+		if (!this.hasListener("updatebuttons")) return;
+		
 		var cfg = {prev:{},next:{},cancel:{}}
 			,cs = this.currentStep
 			;
@@ -765,12 +828,15 @@ eo.WizardPanel = eo.wizard.WizardPanel = Ext.extend(Ext.Panel, {
 	}
 
 	,updateProgress: function() {
-		this.fireEvent("updateprogress", this);
+		if (this.hasListener("updateprogress")) {
+			this.fireEvent("updateprogress", this);
+		}
 	}
 
 	,updateStep: function() {
-		if (this.hasListener("updatebuttons")) this.updateButtons();
-		if (this.hasListener("updateprogress")) this.updateProgress();
+		var w = this.getRootWizard();
+		w.updateButtons();
+		w.updateProgress();
 	}
 
 	,setStep: function(step) {
@@ -786,6 +852,12 @@ eo.WizardPanel = eo.wizard.WizardPanel = Ext.extend(Ext.Panel, {
 			if (step.getParent() !== this) {
 				step.getParent().setStep(step);
 			} else {
+				if (this.currentStep === step) return step;
+				
+				// notify step of the change
+				this.currentStep.leave();
+				step.enter();
+				
 				this.getLayout().setActiveItem(step.panelIndex);
 				this.currentStep = step;
 				if (this.parentStep) this.parentStep.parent.setStep(this.parentStep);
@@ -795,6 +867,7 @@ eo.WizardPanel = eo.wizard.WizardPanel = Ext.extend(Ext.Panel, {
 		return step;
 	}
 
+	// private
 	,setActiveItem: function(index) {
 		this.getLayout().setActiveItem(index);
 	}

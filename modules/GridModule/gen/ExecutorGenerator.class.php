@@ -50,7 +50,7 @@ class ExecutorGenerator extends GeneratorBase {
 //		else $tpl->modelName = Inflector::modelFromController($name);
 //
 //		$table = ModelTable::getModelTable($tpl->modelName);
-		$tpl->autocompleteDBTable = $this->table->getDBTable();
+//		$tpl->autocompleteDBTable = $this->table->getDBTable();
 
 		// --- Tabs Pages ---
 		$pages = array();
@@ -100,7 +100,7 @@ class ExecutorGenerator extends GeneratorBase {
 			$tpl->label = $this->config->label;
 		}
 
-		$tpl->primaryKeyName = $this->table->getPrimaryKeyName();
+//		$tpl->primaryKeyName = $this->table->getPrimaryKeyName();
 
 		return $tpl;
 ////		pre();

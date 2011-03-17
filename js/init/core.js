@@ -1,8 +1,11 @@
 /*
- * @author Éric Ortéga <eric@mail.com>
+ * @author Éric Ortéga <eric@planysphere.fr>
  */
 
 /**
+ * @deprecated Planned for removal soon...
+ * @todo Refactor Module.js to remove usage of Oce.Object
+ *
  * Usage:
  *
  * either with an initialisation function:
@@ -190,24 +193,26 @@ echo('MyModule2.greats:');
 MyModule2.greats();
 */
 
+/**
+ * @deprecated eo.Object has been deprecated and will be removed soon...
+ */
 (function() {
 
 Ext.ns('eo.Object');
 
 var NS = eo.Object;
 
-/**
- * Creates a constructor with the given members as prototype. This method is a
- * syntactic sugar to allow the creation of an Object in only one call, while
- * preserving the efficiency of the prototypical inheritance.
- * @param {Object} members
- * @return the constructor of the new Object
- */
-eo.Class = NS.create = function(members) {
-	if (members.constructor === Object) members.constructor = function() {};
-	var constructor = members.constructor;
-	constructor.prototype = members;
-	return constructor;
+NS.create = eo.Class = function(members) {
+//	if (members.constructor === Object) members.constructor = function() {};
+//	var constructor = members.constructor;
+//	constructor.prototype = members;
+//	// add ExtJS class methods
+//	constructor.override = function(o){
+//		Ext.override(constructor, o);
+//	};
+//	constructor.extend = function(o){return Ext.extend(constructor, o);};
+//	return constructor;
+	return Ext.extend(eo.Class, members || {});
 };
 
 /**
@@ -251,8 +256,31 @@ NS.extend = function(baseConstructor, overrides) {
 	
 })(); // eo.Object closure
 
-eo.createIf = function(o) {
-	if (o instanceof Ext.Observable()) {
+/**
+ * Creates a constructor with the given members as prototype. This method is a
+ * syntactic sugar to allow the creation of a class in only one call, while
+ * preserving the efficiency of the prototypical inheritance.
+ * 
+ * The object instanciated from the created class will be instances of eo.Class
+ * (as well as any extending class). 
+ * 
+ * <p>Example:<code><br/>
+ * var MyClass = eo.Class({ doSomething: function() { alert("hello") });<br/>
+ * var myInstance = new eo.Class();<br/>
+ * myInstance instanceof eo.Class; // TRUE<br/>
+ * myInstance instanceof MyClass; // TRUE
+ * </code>
+ * 
+ * @param {Object} members
+ * @return the constructor of the new Object
+ */
+eo.Class = function(members) {
+	return Ext.extend(eo.Class, members || {});
+};
+
+// TODO unused, untested
+Ext.createIf = eo.createIf = function(o) {
+	if (o instanceof Ext.Observable || o instanceof eo.Class) {
 		return o;
 	} else {
 		return Ext.create(o);
@@ -304,16 +332,20 @@ eo.hashToArray = function(hash, keyIndex, checkConflicts) {
 		return hash;
 	} else if (Ext.isObject(hash)) {
 		var r = [];
-		Ext.iterate(hash, function(k,v) {
-			v = Ext.apply({}, v);
-			if (keyIndex) {
+		if (keyIndex) {
+			Ext.iterate(hash, function(k,v) {
+				v = Ext.apply({}, v);
 				if (checkConflicts && v[keyIndex] !== undefined && v[keyIndex] !== k) {
 					throw new Error('Hash index conflicts with object property: ' + keyIndex);
 				}
 				v[keyIndex] = k;
-			}
-			r.push(v);
-		});
+				r.push(v);
+			});
+		} else {
+			Ext.iterate(hash, function(k, v) {
+				r.push(v);
+			});
+		}
 		return r;
 	} else {
 		throw new Error();
@@ -333,7 +365,7 @@ eo.addAspect = function() {
 	for (var i=0,l=arguments.length; i<l; i++) {
 
 	}
-}
+};
 
 eo.extendMultiple = function() {
 	var r = Array.prototype.shift(arguments);
@@ -341,21 +373,119 @@ eo.extendMultiple = function() {
 		r = Ext.extend(r, arguments[i]);
 	}
 	return r;
-}
+};
+
+// eo.makeStatic closure
+(function() {
+
+	var reAliasAs = /^(.+) +as +(.+)$/,
+		reAliasEq = /^([^\s]+)\s*=\s*([^\s]+)$/;
+	
+	// c = clazz
+	// m = method
+	// rm = removeFromProto
+	var run = function(c, m, rm) {
+		
+		var alias = m, rem;
+		if ((rem = reAliasAs.exec(m))) {
+			alias = rem[2];
+			m = rem[1];
+		} else if ((rem = reAliasEq.exec(m))) {
+			alias = rem[1];
+			m = rem[2];
+		}
+		
+		c[alias] = c.prototype[m];
+		
+		if (rm) {
+			delete c.prototype[m];
+		}
+	};
+
+	/**
+	 * Makes the specified methods of the given class static, by copying them from
+	 * the class' prototype to the class Function itself.
+	 * @param {Function} clazz	constructor of the class
+	 * @param {Array|String}	members
+	 * @param {Boolean}			removeFromProto (default: FALSE) if set to TRUE, the
+	 * member will be deleted from the class prototype
+	 * @return {Function}		the class constructor
+	 */
+	eo.makeStatic = function(clazz, members, removeFromProto) {
+
+		if (Ext.isArray(members)) Ext.each(members, function(method) {
+			run(clazz, method, removeFromProto);
+		});
+		else if (Ext.isString(members)) run(clazz, members, removeFromProto);
+		else throw new Error("Invalid argument: must be Array or String");
+
+		return clazz;
+	};
+
+}()); // eo.makeStatic
 
 /**
- * Makes the specified methods of the given class static, by copying them from
- * the class' prototype to the class Function itself.
- * @param {Function} clazz	constructor of the class
- * @param {Array|String}	members
- * @return {Function}		the class constructor
+ * Shortcut method for eo.makeStatic(clazz, members, true).
  */
-eo.makeStatic = function(clazz, members) {
-	var run = function(method) {
-		clazz[method] = clazz.prototype[method];
+eo.moveStatic = function(clazz, members) {
+	return eo.makeStatic(clazz, members, true);
+};
+
+eo.extendAs = function() {
+	// inline overrides
+	var io = function(o){
+		for(var m in o){
+			this[m] = o[m];
+		}
 	};
-	if (Ext.isArray(members)) Ext.each(members, run);
-	else if (Ext.isString(members)) run(members);
-	else throw new Error("Invalid argument: must be Array or String");
-	return clazz;
-}
+	var oc = Object.prototype.constructor;
+
+	return function(sp, name, overrides){
+		
+		if (!overrides) overrides = {};
+
+		var sb;
+		if (overrides.constructor != oc) {
+			eval(String.format("sb = function {0}(){overrides.constructor.apply(this, arguments);}", name));
+		} else {
+			eval(String.format("sb = function {0}(){sp.apply(this, arguments);}", name));
+		}
+		if (!sb.name) sb.name = name;
+		//sb = overrides.constructor != oc ? overrides.constructor : function(){sp.apply(this, arguments);};
+		
+		var F = function(){},
+			sbp,
+			spp = sp.prototype;
+
+		F.prototype = spp;
+		sbp = sb.prototype = new F();
+		sbp.constructor=sb;
+		sb.superclass=spp;
+		if(spp.constructor == oc){
+			spp.constructor=sp;
+		}
+		sb.override = function(o){
+			Ext.override(sb, o);
+		};
+		sbp.superclass = sbp.supr = (function(){
+			return spp;
+		});
+		sbp.override = io;
+		Ext.override(sb, overrides);
+		sb.extend = function(o){return Ext.extend(sb, o);};
+//		sb.extendAs = function(name, o){return eo.extendAs(sb, name, o);};
+		return sb;
+	};
+}();
+
+Ext.isRegExp = Ext.isRegex = eo.isRegExp = eo.isRegex = function(o) {
+	return o instanceof RegExp;
+};
+
+Ext.isInteger = eo.isInteger = function(o) {
+	return Ext.isNumber(o) && /^\d+$/.test(o);
+};
+
+eo.trueFn = function() { return true; };
+eo.falseFn = function() { return false; };
+eo.nullFn = function() { return null; };

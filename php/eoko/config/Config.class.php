@@ -26,8 +26,9 @@ class Config extends \Config {
 		if (array_key_exists($name, $this->value)) {
 			return $this->value[$name];
 		} else {
-			throw InvalidConfigKey::create('Undefined config key: ' . $name)
-					->addDocRef(get_class() . '::' . '__get()');
+			$ex = new InvalidConfigKey('Undefined config key: ' . $name);
+			$ex->addDocRef(get_class() . '::' . '__get()');
+			throw $ex;
 		}
 	}
 
@@ -35,8 +36,9 @@ class Config extends \Config {
 		if (array_key_exists($offset, $this->value)) {
 			return $this->value[$offset];
 		} else {
-			throw InvalidConfigKey::create('Undefined config key: ' . $offset)
-					->addDocRef(get_class() . '::' . '__get()');
+			$ex = new InvalidConfigKey('Undefined config key: ' . $offset);
+			$ex->addDocRef(get_class() . '::' . '__get()');
+			throw $ex;
 		}
 	}
 

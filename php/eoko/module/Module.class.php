@@ -25,6 +25,12 @@ class Module implements file\Finder {
 	protected $name;
 
 	protected $namespace;
+	/**
+	 * Base path for this module's top level actual directory. If this module
+	 * doesn't have a concrete directory in the top level location, $basePath 
+	 * will be NULL.
+	 * @var string
+	 */
 	protected $basePath;
 	protected $baseUrl;
 	
@@ -36,6 +42,13 @@ class Module implements file\Finder {
 
 	/** @var Config */
 	private $config = null;
+	/** 
+	 * @var Config this is used to allow injection of extra configuration,
+	 * when the configuration inheritance will take place. The extra config
+	 * will be the last config applied, that is, it will override every other
+	 * existing items with same names.
+	 */
+	private $extraConfig = null;
 	
 	/** @var file\Finder */
 	private $fileFinder = null;
@@ -90,6 +103,10 @@ MSG
 		return;
 	}
 
+	public function setExtraConfig($config) {
+		$this->extraConfig = $config;
+	}
+	
 	/**
 	 * @return Config
 	 */
@@ -97,7 +114,7 @@ MSG
 		if ($this->config) {
 			return $this->config;
 		}
-
+		
 		$locations = array_reverse($this->lineageLocations);
 		$config = array_shift($locations)->loadConfig();
 		foreach ($locations as $l) {
@@ -108,10 +125,18 @@ MSG
 			}
 		}
 
-		if (!$config) {
-			$config = new Config();
+		if ($this->extraConfig) {
+			if (!$config) {
+				$config = $this->extraConfig;
+			} else {
+				$config->apply($this->extraConfig);
+			}
+		} else {
+			if (!$config) {
+				$config = new Config();
+			}
 		}
-
+		
 		return $this->config = $config;
 	}
 	
@@ -502,8 +527,19 @@ MSG
 			array_shift($locations);
 		}
 
+		$basePath = $this->location->findTopLevelActualLocation()->path;
+		
 		// if there is a user-defined class in the top level module directory
-		if (null !== $classFile = $this->findExecutorClassFile($type, $this->basePath, $this->name)) {
+		//
+		// NB. We must not search if this file exist in $this->basePath, but
+		// in $basePath, which is the $path of the TopLevelActualLocation of
+		// this module.
+		// 
+		// In fact, I'm not sure for now that it is the right place to search
+		// but, for sure, $this->path is not, since it can easily be NULL when
+		// the Module is not overriden at the topmost level(s).
+		//
+		if (null !== $classFile = $this->findExecutorClassFile($type, $basePath, $this->name)) {
 			$finalClassLoader = function() use($classFile) {
 				require_once $classFile;
 			};
@@ -841,7 +877,7 @@ MSG
 		return $r;
 	}
 
-	public function listLineFilesUrl($pattern, $dir) {
+	public function listLineFilesUrl($pattern, $dir, $recursive = false) {
 		$r = array();
 		if ($dir) {
 			$urlDir = str_replace('\\', '/', $dir) . '/';
@@ -852,7 +888,7 @@ MSG
 			$loc instanceof ModuleLocation;
 			if (!$loc->url) continue;
 			$baseUrl = $loc->url . $urlDir;
-			$urls = Files::listFilesIfDirExists($loc->path . $dir, $pattern, false, false);
+			$urls = Files::listFilesIfDirExists($loc->path . $dir, $pattern, $recursive, false);
 			foreach ($urls as &$url) $url = "$baseUrl$url";
 			$r = array_merge($r, $urls);
 		}
