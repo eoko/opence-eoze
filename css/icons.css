@@ -134,6 +134,7 @@
 .ico_tick {
 	background-image:url(../images/icons/tick.png) !important;
 }
+.ico.cross,
 .ico_cross {
 	background-image:url(../images/icons/cross.png) !important;
 }

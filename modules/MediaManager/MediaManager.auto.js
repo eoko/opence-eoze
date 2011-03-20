@@ -12,11 +12,11 @@ NS.MediaManager = eo.Class({
 	}
 
 	,createMediaPanel: function() {
-		this.mediaPanel = new eo.MediaPanel({
+		var mediaPanel = this.mediaPanel = new eo.MediaPanel({
 			title: "Media Manager"
 			,closable: true
 			,tbar: new Ext.Toolbar({
-				items: this.uploadFormPanel = Ext.create({
+				items: [this.uploadFormPanel = Ext.create({
 					xtype: "form"
 					,fileUpload: true
 //					,padding: 0
@@ -29,13 +29,22 @@ NS.MediaManager = eo.Class({
 						xtype: "fileuploadfield"
 						,name: "image"
 						,buttonOnly: true
-						,buttonText: "Envoyer un fichier"
+//						,buttonText: "Envoyer un fichier"
+						,buttonCfg: {
+							text: "Envoyer un fichier"
+							,iconCls: "ico add"
+						}
 						,listeners: {
 							fileselected: this.uploadFile
 							,scope: this
 						}
 					})
-				})
+				}), "|", {
+					xtype: "button"
+					,text: "Supprimer"
+					,iconCls: "ico cross"
+					,handler: this.deleteSelected.createDelegate(this)
+				}]
 			})
 			,listeners: {
 				close: function() {
@@ -43,19 +52,38 @@ NS.MediaManager = eo.Class({
 				}
 				,scope: this
 			}
+			,onDelete: this.deleteSelected.createDelegate(this)
 		});
 		
 		this.uploadForm = this.uploadFormPanel.getForm();
 
 		return this.mediaPanel;
 	}
+	
+	,deleteSelected: function() {
+		var mp = this.mediaPanel,
+			sr = mp.getSelectedRecord();
+		if (!sr) return;
+		Oce.Ajax.request({
+			params: {
+				controller: "media.grid"
+				,action: "delete"
+				,path: mp.getDirectoryPath() || ""
+				,file: sr.data.filename
+			}
+			,success: function() {
+				mp.reload();
+			}
+		});
+	}
 
-	,uploadFile: function(fileSelector, v) {
+	,uploadFile: function(fileSelector, v, path) {
 		this.uploadForm.submit({
 			url: "index.php"
 			,params: {
-				controller: "media.grid"
+				controller: "media.grid" // TODO modularize
 				,action: "upload"
+				,path: this.mediaPanel.getDirectoryPath() || ""
 			}
 			,success: function(form, o) {
 				var obj = Ext.util.JSON.decode(o.response.responseText);

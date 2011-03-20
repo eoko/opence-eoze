@@ -104,10 +104,18 @@ class Grid extends GridBase {
 	public function upload() {
 		if (!isset($_FILES['image'])) return false;
 		$img = $_FILES['image'];
-		$path = $this->request->get('path', "");
+		$path = $this->request->get('path', '');
 		if ($path) $path .= DS;
 		move_uploaded_file($img['tmp_name'], MEDIA_PATH . $path . $img['name']);
 		return true;
+	}
+	
+	public function delete() {
+		$dir = $this->request->get('path', '');
+		$dir = str_replace('/', DS, $dir);
+		if ($dir && substr($dir, -1) !== DS) $dir .= DS;
+		$filename = MEDIA_PATH . $dir . $this->request->req('file');
+		return unlink($filename);;
 	}
 
 }
