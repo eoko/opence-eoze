@@ -3,6 +3,7 @@
 namespace eoko\url;
 
 use eoko\util\Arrays;
+use eoko\config\ConfigManager;
 
 const BASE_URL = \SITE_BASE_URL;
 
@@ -12,37 +13,73 @@ class Maker {
 	
 	private static $extra = null;
 	
-	public static function getFor($controller, $action = null, $params = null, $anchor = null) {
-		
-		if ($controller instanceof \eoko\module\executor\Executor) {
-			$controller = "$controller->module.$controller";
+	private static $config = null;
+	
+	private static function getConfig() {
+		if (!self::$config) {
+			self::$config = ConfigManager::get(__NAMESPACE__ . '\routes');
 		}
+		return self::$config;
+	}
+	
+	private static function makeControllerAction($controller, $action, &$base) {
+		
+		$config = self::getConfig();
+		
+		if (isset($config['static'])) {
+			foreach ($config['static'] as $alias => $cfg) {
+				if ((is_array($cfg['controller']) ? false !== array_search($controller, $cfg['controller']) 
+						: $cfg['controller'] === $controller)
+						&& $cfg['action'] === $action) {
+					
+					$base = $alias;
+					return array();
+				}
+			} 
+		}
+
+		$base = 'index.php';
 		
 		$parts = array();
-		
-		if (is_array($controller)) {
-			extract($controller);
-		}
 		
 		if ($controller !== null) {
 			$parts[] = "controller=$controller";
 		}
 		
 		if ($action !== null) $parts[] = "action=$action";
+		
+		return $parts;
+	}
+	
+	public static function getFor($controller, $action = null, $params = null, $anchor = null) {
+		
+		if ($controller instanceof \eoko\module\executor\Executor) {
+			$controller = "$controller->module.$controller";
+		}
+		
+		if (is_array($controller)) {
+			extract($controller);
+		}
+		
+//		$parts = array();
+		$parts = self::makeControllerAction($controller, $action, $base);
 
 		if ($params !== null) {
 			foreach ($params as $k => $v) $parts[] = "$k=$v";
 		}
 		
-		$parts = implode('&', $parts);
+		$base .= '?' . implode('&', $parts);
+		
+//		$parts = implode('&', $parts);
 		
 		if ($anchor !== null) {
-			$anchor = "#$anchor";
+			$base .= "#$anchor";
+//			$anchor = "#$anchor";
 		}
 		
 		return self::makeAbsolute(
 //			urlencode(
-				"index.php?$parts$anchor"
+				"$base$anchor"
 //			)
 		);
 	}
