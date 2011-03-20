@@ -72,7 +72,10 @@ Ext.ux.form.FileUploadField = Ext.extend(Ext.form.TextField,  {
         });
         this.button = new Ext.Button(Ext.apply(btnCfg, {
             renderTo: this.wrap,
-            cls: 'x-form-file-btn' + (btnCfg.iconCls ? ' x-btn-icon' : '')
+//            cls: 'x-form-file-btn' + (btnCfg.iconCls ? ' x-btn-icon' : '')
+            cls: 'x-form-file-btn' // rx: replaced previous line, that induced
+					// a bug with button'size... this fix seems to work both
+					// when an iconCls is defined and when it isn't
         }));
 
         if(this.buttonOnly){

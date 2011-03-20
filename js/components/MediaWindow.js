@@ -24,6 +24,7 @@ eo.MediaPanel = Ext.extend(Ext.Panel, {
 			}
 		});
 
+		var onDelete = config.onDelete || this.onDelete;
 		var store;
 		var view = this.view = new eo.MediaPanel.ImageView({
 			region: "center"
@@ -51,15 +52,26 @@ eo.MediaPanel = Ext.extend(Ext.Panel, {
 				,contextmenu: function(view, index, node, event) {
 					view.select(node, false);
 					var menu1 = new Ext.menu.Menu({
-						items: [{
-							text: 'Delete'
-						}, {
-							text: "View"
-							,handler: function() {
-								eo.doc.view(view.getRecord(node));
-							}
-						}]
+//						items: [{
+//							text: 'Delete'
+//							,handler: function() {
+//								debugger
+////								me.fireEvent("delete", me, view.getRecord(node));
+//							}
+////						}, {
+////							text: "View"
+////							,handler: function() {
+////								eo.doc.view(view.getRecord(node));
+////							}
+//						}]
 					});
+					if (onDelete) {
+						menu1.add({
+							text: "Supprimer"
+							,iconCls: "ico cross"
+							,handler: onDelete
+						})
+					}
 					menu1.showAt([
 		                event.browserEvent.clientX
 				        ,event.browserEvent.clientY
@@ -123,14 +135,32 @@ eo.MediaPanel = Ext.extend(Ext.Panel, {
 		dirTree.load({expand: true});
 	}
 
-	,reload: function() {
-		this.view.store.reload();
+	,reload: function(reloadDetails) {
+		var me = this,
+			cb = reloadDetails === false ? Ext.emptyFn 
+			: function(r, opts, success) {
+				if (success) me.showDetails();
+			};
+		
+		this.view.store.reload({
+			callback: cb
+		});
 	}
 
 	,getSelectedRecord: function() {
 		var records = this.view.getSelectedRecords();
 		if (!records.length) return null;
 		return records[0];
+	}
+	
+	,getDirectoryPath: function() {
+		var sm = this.dirTree.getSelectionModel(),
+			sn = sm.getSelectedNode();
+			
+		if (!sn) return null;
+
+		if (sn.attributes.path) return sn.attributes.path;
+		else return "";
 	}
 
 	,getSelectedItemUrl: function() {
@@ -146,7 +176,8 @@ eo.MediaPanel = Ext.extend(Ext.Panel, {
 				'<tpl for=".">',
 					'<div class="details-info-image-ct">',
 						'<div class="ct">',
-							'<img src="{url}">',
+							'<img src="{url}" class="{mime}" />',
+							'<span class="mimeIcon {mime}"></span>',
 						'</div>',
 					'</div>',
 					'<div class="details-info">',
@@ -172,6 +203,8 @@ eo.MediaPanel = Ext.extend(Ext.Panel, {
 			detailEl.hide();
 			this.detailsTemplate.overwrite(detailEl, data);
 			detailEl.slideIn('l', {stopFx: true, duration:.2});
+		} else {
+			detailEl.update("<br/>")
 		}
 	}
 
