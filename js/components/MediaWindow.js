@@ -53,11 +53,15 @@ eo.MediaPanel = Ext.extend(Ext.Panel, {
 					var menu1 = new Ext.menu.Menu({
 						items: [{
 							text: 'Delete'
-						}, {
-							text: "View"
 							,handler: function() {
-								eo.doc.view(view.getRecord(node));
+								debugger
+//								me.fireEvent("delete", me, view.getRecord(node));
 							}
+//						}, {
+//							text: "View"
+//							,handler: function() {
+//								eo.doc.view(view.getRecord(node));
+//							}
 						}]
 					});
 					menu1.showAt([
@@ -132,6 +136,16 @@ eo.MediaPanel = Ext.extend(Ext.Panel, {
 		if (!records.length) return null;
 		return records[0];
 	}
+	
+	,getDirectoryPath: function() {
+		var sm = this.dirTree.getSelectionModel(),
+			sn = sm.getSelectedNode();
+			
+		if (!sn) return null;
+
+		if (sn.attributes.path) return sn.attributes.path;
+		else return "";
+	}
 
 	,getSelectedItemUrl: function() {
 		var records = this.view.getSelectedRecords();
@@ -146,7 +160,8 @@ eo.MediaPanel = Ext.extend(Ext.Panel, {
 				'<tpl for=".">',
 					'<div class="details-info-image-ct">',
 						'<div class="ct">',
-							'<img src="{url}">',
+							'<img src="{url}" class="{mime}" />',
+							'<span class="mimeIcon {mime}"></span>',
 						'</div>',
 					'</div>',
 					'<div class="details-info">',
