@@ -23,9 +23,9 @@ class Grid extends GridBase {
 	/**
 	 * @return DataStore
 	 */
-	private function getStore($path, $url) {
-		if (self::$store === null) {
-			self::$store = DataStore::fromArray(self::getFileRows($path, $url));
+	private function getStore($dir, $path, $url) {
+		if (true || self::$store === null) {
+			self::$store = DataStore::fromArray(self::getFileRows($dir, $path, $url));
 			self::$store->putSortAlias('name', 'filename');
 			self::$store->putSortAlias('size', 'bytesize');
 			self::$store->setDefaultSortOrder('name');
@@ -33,13 +33,15 @@ class Grid extends GridBase {
 		return self::$store;
 	}
 
-	private static function getFileRows($path, $baseUrl) {
+	private static function getFileRows($dir, $path, $baseUrl) {
 		$rows = array();
 		$nextId = 1;
+		$urlPath = str_replace(DS, '/', $dir);
+		if (substr($dir, -1) !== '/') $urlPath .= '/';
 		foreach (Files::listFiles($path, '/^[^.]/', false, Files::LF_PATH_ABS_REL) as $entry) {
 			list($rel, $abs) = $entry;
 			//$url = $baseUrl . $rel;
-			$url = "media/$rel";
+			$url = "media/$urlPath$rel";
 			$rows[] = array(
 				'id' => $nextId++,
 				'name' => "<a href=\"$url\">$rel</a>",
@@ -59,10 +61,11 @@ class Grid extends GridBase {
 
 	public function load() {
 
+		$dir = '';
 		$path = self::$path;
 		$url = self::$baseUrl;
 		if ($this->request->has('path')) {
-			$path = $this->request->getRaw('path');
+			$dir = $path = $this->request->getRaw('path');
 			$url = self::$baseUrl . str_replace(DS, '/', $path) . '/';
 			$path = realpath(self::$path . $path) . DS;
 			// ensure the resulting path is a subdir of the media dir
@@ -71,7 +74,7 @@ class Grid extends GridBase {
 			}
 		}
 
-		$store = $this->getStore($path, $url);
+		$store = $this->getStore($dir, $path, $url);
 		$store->sortFromRequest($this->request);
 		$store->putInResponseFromRequest($this->request);
 		return true;
@@ -101,7 +104,9 @@ class Grid extends GridBase {
 	public function upload() {
 		if (!isset($_FILES['image'])) return false;
 		$img = $_FILES['image'];
-		move_uploaded_file($img['tmp_name'], MEDIA_PATH . $img['name']);
+		$path = $this->request->get('path', "");
+		if ($path) $path .= DS;
+		move_uploaded_file($img['tmp_name'], MEDIA_PATH . $path . $img['name']);
 		return true;
 	}
 
