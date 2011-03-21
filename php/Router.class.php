@@ -45,7 +45,12 @@ class Router {
 
 	private function __construct() {
 
-		$this->request = new Request($_REQUEST);
+		$request = $_REQUEST;
+		if (isset($request['route'])) {
+			\eoko\url\Maker::populateRouteRequest($request);
+		}
+		
+		$this->request = new Request($request);
 		$this->actionTimestamp = time();
 		Logger::getLogger($this)->info('Start action #{}', $this->actionTimestamp);
 
@@ -61,7 +66,7 @@ class Router {
 	 * @see Router
 	 */
 	public function route() {
-
+		
 		if (!$this->request->has('controller')) {
 			$this->request->override(
 				'controller',
