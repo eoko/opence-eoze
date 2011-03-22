@@ -149,6 +149,7 @@ eo.form.GridField.ModelAction.Add = Ext.extend(ACTION, {
 	toolbarItemConfig: {
 		iconCls: 'ico ico_add'
 		,text: "Ajouter" // i18n
+		,winCloseAction: "close"
 	}
 
 	// hook
@@ -166,9 +167,9 @@ eo.form.GridField.ModelAction.Add = Ext.extend(ACTION, {
 		this.addWin = win = new WIN_CLASS({
 			formPanel: form
 			,minimizable: false
-			,closeAction: 'hide'
+			,closeAction: this.winCloseAction || 'close'
+			,clearFormOnShow: false
 			,modalTo: this.getRootWindow()
-			,clearFormOnShow: true
 			,title: this.winTitle || 'Nouvel enregistrement' // i18n
 			,buttons: [{
 				text: 'Ok'
@@ -176,15 +177,20 @@ eo.form.GridField.ModelAction.Add = Ext.extend(ACTION, {
 					if (form.form.isValid()) {
 						var record = gf.addFormRecord(form);
 						record.markDirty();
-						win.hide();
+						win[win.closeAction]();
 					}
 				}
 			}, {
 				text: 'Annuler'
 				,handler: function() {
-					win.hide();
+					win[win.closeAction]();
 				}
 			}]
+			,listeners: {
+				close: function() {
+					delete this.addWin;
+				}.createDelegate(this)
+			}
 		});
 
 		this.wins.push(win);
@@ -205,6 +211,7 @@ eo.form.GridField.ModelAction.Edit = Ext.extend(ACTION, {
 	toolbarItemConfig: {
 		iconCls: 'ico ico_pencil'
 		,text: "Éditer" // i18n
+		,winCloseAction: "close"
 	}
 
 	,createWin: function() {
@@ -218,22 +225,26 @@ eo.form.GridField.ModelAction.Edit = Ext.extend(ACTION, {
 			formPanel: formPanel
 			,title: this.winTitle || 'Modifier l\'enregistrement' // i18n
 			,minimizable: false
-			,closeAction: 'hide'
+			,closeAction: this.winCloseAction || 'close'
 			,modalTo: this.getRootWindow()
 			,buttons: [{
 				text: 'Ok'
 				,handler: function() {
-//					var record = gf.addFormRecord(form);
-//					record.markDirty();
 					formPanel.form.updateRecord(win.record);
-					win.hide();
+					win[win.closeAction]();
 				}
 			}, {
 				text: 'Annuler'
 				,handler: function() {
-					win.hide();
+					win[win.closeAction]();
 				}
 			}]
+		
+			,listeners: {
+				close: function() {
+					delete this.editWin;
+				}.createDelegate(this)
+			}
 
 			,setRecord: function(record) {
 				this.record = record;
