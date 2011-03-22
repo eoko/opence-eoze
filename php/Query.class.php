@@ -746,6 +746,7 @@ class Query {
 	 */
 	public function orderBy($order, $dir = 'ASC') {
 		$this->order = array();
+		if ($order === null) return;
 		return $this->thenOrderBy($order, $dir);
 	}
 
@@ -958,7 +959,7 @@ class Query {
 	 *
 	 * @return array
 	 */
-	public function executeSelect() {
+	public function executeSelect($fetchStyle = PDO::FETCH_ASSOC, $columnIndex = null) {
 
 		self::getLogger()->debug('Executing select query');
 		
@@ -966,7 +967,11 @@ class Query {
 		$this->buildSelect();
 
 //		return new ResultSet($this->executeSql());
-		return $this->executeSql()->fetchAll(PDO::FETCH_ASSOC);
+		if ($columnIndex !== null) {
+			return $this->executeSql()->fetchAll($fetchStyle, $columnIndex);
+		} else {
+			return $this->executeSql()->fetchAll($fetchStyle);
+		}
 	}
 
 	public function count() {
