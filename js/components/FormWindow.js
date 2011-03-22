@@ -162,7 +162,7 @@ eo.Window = Ext.extend(Ext.Window, {
 					rootWin.activateContent();
 				}
 				rootWin.un('activate', onRootActivate);
-				doHide();
+				doHide.apply(this, arguments);
 				maskEl.unmask();
 			}
 		}
@@ -177,7 +177,7 @@ eo.Window = Ext.extend(Ext.Window, {
 	}
 	
 	,hide: function() {
-		this.doHide();
+		this.doHide.apply(this, arguments);
 	}
 	
 	,show: function() {
