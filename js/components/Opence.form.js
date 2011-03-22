@@ -154,7 +154,15 @@ Ext.reg('datedisplayfield', Oce.form.DateDisplayField);
 
 Ext.ns('Oce.form');
 
+/**
+ * @param {Ext.form.BasicForm} form
+ * @param {String} namePrefix
+ */
 Oce.form.getFormData = function(form, namePrefix) {
+	
+	// allow easy overriding of form data reading
+	if (form.getData) return form.getData(namePrefix);
+	
 	if (form instanceof Ext.form.BasicForm) form = form.el;
 	
 	var fElements = form.elements || (document.forms[form] || Ext.getDom(form)).elements,
