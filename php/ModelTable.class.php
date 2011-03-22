@@ -411,16 +411,23 @@ abstract class ModelTable extends ModelTableProxy {
 	abstract public static function hasName();
 
 	protected function _hasName() {
-		if ($this->hasColumn('name') || $this->hasColumn('nom'))
-				return true;
+		if (null === $name = $this->getNameFieldName(false)) {
+			return false;
+		} else {
+			return $this->hasColumn($name);
+		}
+//		return $this->hasColumn();
+//		if ($this->hasColumn('name') || $this->hasColumn('nom'))
+//				return true;
 	}
 
-	abstract public static function getNameFieldName();
+	abstract public static function getNameFieldName($require = true);
 
-	protected function _getNameFieldName() {
+	protected function _getNameFieldName($require = true) {
 		if ($this->hasColumn('name')) return 'name';
 		else if ($this->hasColumn('nom')) return 'nom';
-		else throw new IllegalStateException();
+		else if ($require) throw new IllegalStateException();
+		else return null;
 	}
 
 	const LOAD_NONE   = 0;

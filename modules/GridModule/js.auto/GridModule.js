@@ -1389,7 +1389,7 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 						groupItems.push(item);
 					}
 				});
-				items.push({
+				if (groupItems.length) items.push({
 					xtype: 'buttongroup',
 					title: name,
 					align: 'bottom',

@@ -56,28 +56,29 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
 
 		var keys = new Array();
 
-		if ('submitHandler' in config) {
-
-			var listener = function(field, el) {
-				if (el.getKey() == Ext.EventObject.ENTER) config.submitHandler();
-			}
-
-//			for (var i in config.items) {
-			Ext.each(config.items, function(item) {
-				if ((item.xtype !== undefined && !/combo/.test(item.xtype))
-					|| (item instanceof Ext.Component && !(item instanceof Ext.form.ComboBox))) {
-
-					if ('listeners' in item == false) item.listeners = {}
-					if (item.listeners.specialkey === undefined) {
-						item.listeners.specialkey = listener;
-					} else if (Ext.isArray(item.listeners.specialkey)) {
-						item.listeners.specialkey = item.listeners.specialkey.concat([listener]);
-					} else {
-						item.listeners.specialkey = [item.listeners.specialkey, listener]
-					}
-				}
-			});
-		}
+//		if ('submitHandler' in config) {
+//
+//			var listener = function(field, el) {
+//				if (el.getKey() == Ext.EventObject.ENTER) config.submitHandler();
+//			}
+//
+////			for (var i in config.items) {
+//			Ext.each(config.items, function(item) {
+//				if ((item.xtype !== undefined && !/combo/.test(item.xtype))
+//					|| (item instanceof Ext.Component && !(item instanceof Ext.form.ComboBox))) {
+//
+//					if (!item.listeners) item.listeners = {};
+//					
+//					if (!item.listeners.specialkey) {
+//						item.listeners.specialkey = listener;
+////					} else if (Ext.isArray(item.listeners.specialkey)) {
+////						item.listeners.specialkey = item.listeners.specialkey.concat([listener]);
+////					} else {
+////						item.listeners.specialkey = [item.listeners.specialkey, listener]
+//					}
+//				}
+//			});
+//		}
 
 //		if ('cancelButtonIndex' in config) {
 //			var cancelButtonHandler = config.buttons[config.cancelButtonIndex].handler;
@@ -116,6 +117,22 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
 		}, this)
 
 		this.modified = false;
+	}
+	
+	,initComponent: function() {
+		Oce.FormPanel.superclass.initComponent.apply(this, arguments);
+		
+		if (this.submitHandler) {
+			
+			var h = this.submitHandler,
+				l = function(field, el) {
+					if (el.getKey() == Ext.EventObject.ENTER) h();
+				};
+			
+			this.items.each(function(item) {
+				item.on("specialkey", l);
+			});
+		}
 	}
 	
 	,afterRender: function() {
@@ -176,6 +193,9 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
 			}
 			if (item instanceof Ext.form.CompositeField) {
 				item.items.each(addChangeListener);
+			}
+			if (item instanceof Ext.ux.form.SpinnerField) {
+				item.on('spin', changeListener);
 			}
 		};
 

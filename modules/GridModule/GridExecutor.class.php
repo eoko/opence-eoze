@@ -244,7 +244,7 @@ abstract class GridExecutor extends JsonExecutor {
 	}
 
 	protected function getAutoCompleteSelectString() {
-		return null;
+		return $this->module->getConfig()->node('extra/autoComplete', false, false);
 	}
 
 	protected function autoComplete_prepareQuery(Query $query) {}
