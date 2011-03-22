@@ -139,6 +139,11 @@ ACTION.Remove = Ext.extend(ACTION, {
 
 Ext.ns('eo.form.GridField.ModelAction');
 
+/**
+ * @cfg {Boolean} addWindow TRUE to use a add window
+ * @cfg {Boolean} editable TODO: This option is not implemented yet!!! TRUE 
+ *		to allow inline grid editing
+ */
 eo.form.GridField.ModelAction.Add = Ext.extend(ACTION, {
 
 	toolbarItemConfig: {
