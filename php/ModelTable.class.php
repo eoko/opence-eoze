@@ -571,6 +571,11 @@ abstract class ModelTable extends ModelTableProxy {
 
 	abstract public static function getRelationsInfo();
 
+	abstract public static function getRelationNames();
+	protected function _getRelationNames() {
+		return array_keys($this->getRelationsInfo());
+	}
+
 	abstract public static function hasField($name);
 
 	protected function _hasField($name) {

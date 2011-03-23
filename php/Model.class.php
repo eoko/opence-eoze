@@ -344,11 +344,45 @@ abstract class Model {
 		}
 	}
 
+	// TODO this should be documented & have unit tests
+	// it is known to be used twice in opence
 	public function getDataEx($relationNames, $aliasPrefix = null, $includeBaseData = true) {
 		$data = $includeBaseData ? $this->getData($aliasPrefix) : array();
-		foreach ($relationNames as $rName) {
+		
+		if ($relationNames === '*') {
+			$relationNames = $this->table->getRelationNames();
+		}
+		
+		foreach ($relationNames as $k => $rName) {
+			
+			if (is_string($k)) {
+				$params = $rName;
+				$rName = $k; // relation name
+			} else {
+				$params = null;
+			}
+			
 			if (null !== $foreignModel = $this->getForeignModel($rName)) {
-				$data = array_merge($data, $foreignModel->getData("$aliasPrefix{$rName}->"));
+				if ($foreignModel instanceof Model) {
+					if (!$params) {
+						$data = array_merge($data, $foreignModel->getData("$aliasPrefix{$rName}->"));
+					} else {
+						$data = array_merge($data, $foreignModel->getDataEx($params, "$aliasPrefix{$rName}->"));
+					}
+				} else if ($foreignModel instanceof ModelSet) {
+					// we have a HasMany relation here...
+					$hasManyData = array();
+					foreach ($foreignModel as $model) {
+						if ($params) {
+							$hasManyData[] = $model->getDataEx($params);
+						} else {
+							$hasManyData[] = $model->getData();
+						}
+					}
+					$data["$aliasPrefix$rName"] = $hasManyData;
+				} else {
+					throw new IllegalStateException();
+				}
 			}
 		}
 		return $data;
