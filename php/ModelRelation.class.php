@@ -84,7 +84,9 @@ abstract class ModelRelation {
 			}
 		}
 
-		if ($this instanceof ModelRelationInfoHasMany && !is_array($value)) {
+		if ($value !== null // explode(',', null) => array(0 => 0) => problem!
+				$this instanceof ModelRelationInfoHasMany
+				&& !is_array($value)) {
 			$value = explode(',', $value);
 			foreach ($value as &$v) {
 				$v = (int) trim($v);
@@ -576,7 +578,8 @@ class ModelRelationReferedByMany extends ModelRelationByReference implements Mod
 
 		$models = array();
 
-		foreach ($value as $m) {
+		// if $value === NULL, the intention is to empty the relation
+		if ($value) foreach ($value as $m) {
 			if (false == $m instanceof Model) {
 				$m = $this->targetTable->createModel($m, false, $this->parentModel->context);
 			}
@@ -678,7 +681,9 @@ class ModelRelationIndirectHasMany extends ModelRelationByAssoc
 		
 		$this->assocModels = array();
 
-		if (count($value) > 0) {
+		// REM if (count($value) > 0) {
+		// if ($value) excludes both count($value) == 0, and $value === NULL
+		if ($value) {
 			foreach ($value as $v) {
 				if (!is_array($v)) {
 					$v = array(
