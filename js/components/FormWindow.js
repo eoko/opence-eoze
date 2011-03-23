@@ -144,7 +144,8 @@ eo.Window = Ext.extend(Ext.Window, {
 				if (rootWin.deactivateContent) {
 					rootWin.deactivateContent();
 				}
-				if (maskEl) maskEl.mask();
+				//if (maskEl) maskEl.mask();
+				rootWin.disable();
 				rootWin.on('activate', onRootActivate);
 			}
 			hidding = false;
@@ -163,7 +164,8 @@ eo.Window = Ext.extend(Ext.Window, {
 				}
 				rootWin.un('activate', onRootActivate);
 				doHide.apply(this, arguments);
-				maskEl.unmask();
+				//maskEl.unmask();
+				rootWin.enable();
 			}
 		}
 	}
