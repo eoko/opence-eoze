@@ -352,19 +352,16 @@ NS.BooleanField = eo.Object.extend(NS.EnumField, {
 	}
 
 	,createCheckbox: function(config) {
-		return Ext.apply({
+		var r = Ext.apply({
 			xtype: "checkbox"
 			,name: this.name
-			,fieldLabel: this.getLabel(["formField", "form"])
-//			,boxLabel: this.label
 			,checked: this.defaultValue !== false && this.defaultValue !== 0
-//			,data: this.createComboBoxData()
 			,modelField: this
-//			,setValue: function(v) {
-//				debugger
-//				Ext.form.Checkbox.prototype.apply(this, arguments);
-//			}
 		}, config);
+
+		r[config && config.hideLabel ? "boxLabel" : "fieldLabel"] = this.getLabel(["formField", "form"]);
+		
+		return r;
 	}
 
 	,extractValue: function(value) {
