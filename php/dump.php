@@ -48,10 +48,14 @@ function dump($var, $maxDeep = 50, $die = true, $deep = 0) {
 	if ($die) die;
 }
 $dump_after_mark = false;
-function dump_after($var, $die = true, $maxDeep = 3, $deep = 0) {
+function dump_after($var, $die = true, $maxDeep = 50, $deep = 0) {
 	global $dump_after_mark;
 	if ($dump_after_mark)
 		dump ($var, $maxDeep, $die, $deep);
+}
+function dump_is_after() {
+	global $dump_after_mark;
+	return $dump_after_mark;
 }
 function dump_mark($n = null) {
 	static $count = null;
