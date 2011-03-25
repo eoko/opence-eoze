@@ -263,8 +263,9 @@ class ConfigManager {
 		$nodePath = $this->cleanNodePath($nodePath);
 		$node =& $this->getNode($nodePath, true);
 		
-		$node = ConfigReader::read($nodePath, $content);
+//		$node = ConfigReader::read($nodePath, $content);
 //		Arrays::apply($node, $content, false);
+		Arrays::apply($node, ConfigReader::read($nodePath, $content), false);
 	}
 
 	/**
