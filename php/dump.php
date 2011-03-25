@@ -3,7 +3,7 @@
 if (!isset($dumpPre)) { $dumpPre = '<pre>'; $endDumpPre = '</pre>'; }
 
 // Debug function
-function dump($var, $maxDeep = 3, $die = true, $deep = 0) {
+function dump($var, $maxDeep = 50, $die = true, $deep = 0) {
 	global $dumpPre, $endDumpPre;
 //	dump_trace(false);
 	$trace = debug_backtrace();
