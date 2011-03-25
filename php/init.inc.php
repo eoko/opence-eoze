@@ -221,13 +221,21 @@ loadAppConfig($classLoader);
 // so that object stored in session (notably: UserSession) can be instantiated)
 session_start();
 
-require_once 'debug.inc.php';
+//require_once 'debug.inc.php'; // there's nothing in there...
 
-// debug
-//Logger::addAppender(new LoggerOutputAppender(true));
+// == Logging ==
+if (ConfigManager::get('eoko/log/appenders/Output') || isset($_GET['olog'])) {
+	Logger::addAppender(new LoggerOutputAppender());
+}
+
+if (ConfigManager::get('eoko/log/appenders/FirePHP')) {
+	Logger::addAppender(new LoggerFirePHPAppender());
+}
 
 if (!defined('ADD_LOG_APPENDERS') || ADD_LOG_APPENDERS) {
-	Logger::addAppender(new LoggerFileAppender());
+	if (ConfigManager::get('eoko/log/appenders/File')) {
+		Logger::addAppender(new LoggerFileAppender());
+	}
 }
 
 \eoko\util\file\FileTypes::getInstance();
