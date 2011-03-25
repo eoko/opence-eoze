@@ -1,0 +1,22 @@
+config.node: eoko\module
+
+locations:
+
+  eoko:
+    path: %eoze%/modules
+    url: %eoze%/modules
+    namespace: eoko\modules
+
+#  eoko-defaults:
+#    path: %lib%/modules
+#    url: %lib%/modules
+#    namespace: eoko\modules
+
+used:
+
+  eoko:
+    - GridModule
+    - root
+    - MediaManager
+    - CrocodocViewer
+    - AccessControl

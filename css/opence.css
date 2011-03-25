@@ -1,0 +1,42 @@
+/*div.oce-form-info {
+	padding: 10px;
+}*/
+
+.x-form-display-field.ajax-loading,
+.ajax-loading-16x11 {
+	background: url(images/ajax-loader-16x11.gif) no-repeat 5px 50%;
+	min-height: 14px;
+	min-width: 16px;
+}
+
+/*
+ * Fix: displayFields are not correctly aligned with their label on (at least)
+ * mozilla unbuntu.
+ * @mtest NEEDED 11/15/10 3:53 PM: confirmation/correction on all browsers
+ */
+.ext-gecko .x-form-display-field {
+	padding-top: 3px;
+}
+
+.x-form-field-wrap .x-form-clock-trigger{
+    background-image: url(images/clock-trigger.png);
+}
+
+/**
+ * Fix: window width problem when entirely masked.
+ */
+.x-window.x-masked-relative {
+	position: absolute !important;
+}
+
+
+.no-margin {
+	margin: 0 !important;
+}
+
+.x-edit-image {
+	background: url(../images/icons/image_add.png) no-repeat 0 0 !important;
+}
+.x-edit-wordpaste {
+	background: url(../images/icons/paste_word.png) no-repeat 0 0 !important;
+}

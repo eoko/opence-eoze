@@ -1,0 +1,8 @@
+.ext-el-mask-msg.x-mask-cploading {
+	background: none;
+	border: 0;
+}
+.ext-el-mask-msg.x-mask-cploading div {
+    background: transparent url('../images/ajax-loader-16x11.gif') no-repeat center;
+	border: 0;
+}
