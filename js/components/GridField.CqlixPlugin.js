@@ -118,7 +118,7 @@ Oce.deps.wait('eo.cqlix.Model', function() {
 
 	Ext.override(eo.cqlix.Model, {
 		createGridFieldColumnModel: function(config) {
-			var tmp = this.fieldCreateGridColumnMethod;
+			var tmp = this.fieldCreateGridColumnMethodName;
 			this.fieldCreateGridColumnMethodName = "createGridFieldColumn";
 			var r = this.createColumnModel(config);
 			this.fieldCreateGridColumnMethodName = tmp;
