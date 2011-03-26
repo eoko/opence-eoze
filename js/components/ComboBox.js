@@ -347,7 +347,7 @@ Oce.deps.wait('Ext.ux.form.TwinComboBox', function() {
 			// if the combo is paginated, then we must ensure that the
 			// server will include data for the set row each time the
 			// value is changed, by specifying the initValue param.
-			// It is best not be set as a baseParam though, as this is
+			// It is best not to be set as a baseParam though, as this is
 			// not useful for all other load operations initiated
 			// internally by ext.
 			// It seems that is is use less to remove the aditional row
