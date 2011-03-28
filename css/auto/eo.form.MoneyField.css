@@ -12,3 +12,9 @@ span.x-input-money.symbol {
 	padding-right: 2px;
 	width: 10px;
 }
+
+input.x-input-money.readonly {
+	background: none;
+	border-color: transparent;
+	color: black;
+}
