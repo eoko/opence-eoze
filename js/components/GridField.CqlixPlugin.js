@@ -94,6 +94,7 @@ var CQLIX_PLUGIN = eo.form.GridField.CqlixPlugin = eo.Object.create({
 					,addWindow: true
 					,winTitle: this.addTitle
 					,formExtra: this.formExtra // XP
+					,buildForm: this.buildAddForm || this.buildForm
 				})
 				,new GRID_ACTION.Remove({
 				})
