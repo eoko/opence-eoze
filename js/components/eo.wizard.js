@@ -218,10 +218,8 @@ eo.wizard.FormStep = Ext.extend(eo.wizard.Step, {
 		this.form = form;
 
 		// --- Rewrite next if it is given as an array
-		if (this.conditions) {
+		if (this.conditions || this.testFormValid || this.testFormValidity) {
 			
-			var tests = Ext.isArray(this.conditions) ? this.conditions : [this.conditions];
-
 			var ff = function(field) {
 				if (field instanceof Ext.form.Field) return field;
 				if ((field = me.form.findField(field))) {
@@ -231,38 +229,51 @@ eo.wizard.FormStep = Ext.extend(eo.wizard.Step, {
 				}
 			}
 
-			var testFields = function(fields) {
-				if (!Ext.isArray(fields)) fields = [fields];
-				var field;
-				for (var i=0,l=fields.length; i<l; i++) {
-					field = ff(fields[i]);
-					if (!field.isValid(true) || !field.getValue()) return false;
-//					if (!field.getValue()) return false;
-				}
-				return true;
-			}
-
 			this.defaultActions = {
 				next: this.next
 				,prev: this.prev
 				,finish: this.finish
 			};
 
-			var getComplete = function() {
-				for (var i=0,l=tests.length; i<l; i++) {
-					if (testFields(tests[i].fields)) {
-						return tests[i];
-					}
+			var getComplete;
+			if (this.conditions === undefined || Ext.isBoolean(this.conditions)) {
+				getComplete = function() {
+					var r = true;
+					form.items.each(function(field) {
+						if (!field.isValid(true)) return r = false;
+						else return undefined;
+					});
+					return r;
 				}
-				return false;
-			};
+			} else {
+				var tests = Ext.isArray(this.conditions) ? this.conditions : [this.conditions];
+
+				var testFields = function(fields) {
+					if (!Ext.isArray(fields)) fields = [fields];
+					var field;
+					for (var i=0,l=fields.length; i<l; i++) {
+						field = ff(fields[i]);
+						if (!field.isValid(true) || !field.getValue()) return false;
+					}
+					return true;
+				}
+
+				getComplete = function() {
+					for (var i=0,l=tests.length; i<l; i++) {
+						if (testFields(tests[i].fields)) {
+							return tests[i];
+						}
+					}
+					return false;
+				};
+			}
 
 			(this.beforeTestComplete = function() {
 				var t = getComplete();
 				if (t) {
-					me.next = "next" in t && t.next !== true ? t.next : me.defaultActions.next;
-					me.prev = "prev" in t && t.next !== true ? t.prev : me.defaultActions.prev;
-					me.finish = "finish" in t && t.next !== true ? t.finish : me.defaultActions.finish;
+					me.next = me.defaultActions.next;
+					me.prev = me.defaultActions.prev;
+					me.finish = me.defaultActions.finish;
 				} else {
 					me.next = false;
 					me.finish = false;
