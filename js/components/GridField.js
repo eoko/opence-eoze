@@ -617,6 +617,13 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 			return record
 		}
 	}
+	
+	,addRecord: function(data) {
+		var record = this.createRecord(data);
+		this.store.add(record);
+		record.markDirty();
+		return record;
+	}
 
 	,addFormRecord: function(form) {
 		if (form instanceof Ext.FormPanel) form = form.form;
