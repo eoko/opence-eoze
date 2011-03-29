@@ -89,13 +89,13 @@ var CQLIX_PLUGIN = eo.form.GridField.CqlixPlugin = eo.Object.create({
 
 		if (this.toolbar !== false) gridField.toolbar = Ext.apply(gridField.toolbar || {}, {
 			actions: [
-				new eo.form.GridField.ModelAction.Add({
+				new eo.form.GridField.ModelAction.Add(Ext.apply({
 					model: this.model
 					,addWindow: true
 					,winTitle: this.addTitle
 					,formExtra: this.formExtra // XP
 					,buildForm: this.buildAddForm || this.buildForm
-				})
+				}, this.addAction))
 				,new GRID_ACTION.Remove({
 				})
 //				,'-'
