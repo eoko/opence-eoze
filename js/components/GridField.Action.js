@@ -151,6 +151,16 @@ eo.form.GridField.ModelAction.Add = Ext.extend(ACTION, {
 		,text: "Ajouter" // i18n
 		,winCloseAction: "close"
 	}
+	
+	,constructor: function(config) {
+		var tic;
+		if (config.toolbarItemConfig) {
+			 tic = Ext.apply(Ext.apply({}, this.toolbarItemConfig), config.toolbarItemConfig);
+		}
+		eo.form.GridField.ModelAction.Add.superclass.constructor.call(this, config);
+		
+		if (tic) this.toolbarItemConfig = tic;
+	}
 
 	// hook
 	,createForm: function() {
