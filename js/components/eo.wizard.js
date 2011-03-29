@@ -60,7 +60,7 @@ eo.wizard.Step = Ext.extend(Ext.util.Observable, {
 	}
 
 	,canFinish: function() {
-		if (this.finish) {
+		if (this.finish && !this.finishDisabled) {
 			if (Ext.isFunction(this.finish)) return this.finish();
 			else return this.finish;
 		} else {
@@ -229,14 +229,9 @@ eo.wizard.FormStep = Ext.extend(eo.wizard.Step, {
 				}
 			}
 
-			this.defaultActions = {
-				next: this.next
-				,prev: this.prev
-				,finish: this.finish
-			};
-
 			var getComplete;
 			if (this.conditions === undefined || Ext.isBoolean(this.conditions)) {
+				// test all fields
 				getComplete = function() {
 					var r = true;
 					form.items.each(function(field) {
@@ -268,18 +263,22 @@ eo.wizard.FormStep = Ext.extend(eo.wizard.Step, {
 				};
 			}
 
-			(this.beforeTestComplete = function() {
-				var t = getComplete();
-				if (t) {
-					me.next = me.defaultActions.next;
-					me.prev = me.defaultActions.prev;
-					me.finish = me.defaultActions.finish;
-				} else {
-					me.next = false;
-					me.finish = false;
-					me.prev = me.defaultActions.prev;
-				}
-			})();
+			// This cannot be run in this constructor, since next & prev wouldn't
+			// have been set by the parent wizard, if they need to be...
+			// That's why this method is called later, in setNext/PrevIf.
+			this.beforeTestComplete = function() {
+				var next = me.getNext(),
+//					prev = me.getPrev(),
+					t = getComplete();
+				
+				if (next) next.enabled = t;
+//				if (prev) prev.enabled = t;
+				
+				me.finishDisabled = !t;
+			};
+			// finishDisabled must be initialized, because canFinish will be called
+			// in this same constructor, a bit later, to init this.lastCanFinish
+			this.finishDisabled = !getComplete();
 		}
 
 		// --- Add events to fields required to complete a step
@@ -344,20 +343,12 @@ eo.wizard.FormStep = Ext.extend(eo.wizard.Step, {
 	}
 
 	,setPrevIf: function(step) {
-		if (this.defaultActions) {
-			if (this.defaultActions.prev === undefined) this.defaultActions.prev = step;
-			this.beforeTestComplete();
-		} else {
-			this.superclass.setPrevIf.call(this, step);
-		}
+		this.superclass.setPrevIf.call(this, step);
+		if (this.beforeTestComplete) this.beforeTestComplete();
 	}
 	,setNextIf: function(step) {
-		if (this.defaultActions) {
-			if (this.defaultActions.next === undefined) this.defaultActions.next = step;
-			this.beforeTestComplete();
-		} else {
-			this.superclass.setNextIf.call(this, step);
-		}
+		this.superclass.setNextIf.call(this, step);
+		if (this.beforeTestComplete) this.beforeTestComplete();
 	}
 
 	,testComplete: function() {
