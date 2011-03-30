@@ -259,7 +259,9 @@ Ext.grid.Column.types.datecolumn =
 				// instead of:
 				// Date.parse(v)
 				// which doesn't account for various possible formats
-				v = Date.parseDate(v, format);
+				var tmp = Date.parseDate(v, format);
+				if (tmp) v = tmp;
+				else v = new Date(Date.parse(v));
 			}
 			return v.dateFormat(format);
 		}
