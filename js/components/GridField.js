@@ -187,7 +187,8 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 					colConfig = Ext.apply({
 						dataIndex: config.dataIndex || di
 					}, config, this.columnDefaults);
-					colConfig.editor = Ext.create(config.editor);
+					colConfig.editor = config.editor instanceof Ext.Component ? 
+							config.editor : Ext.create(config.editor);
 					if (!colConfig.renderer && colConfig.editor.createRenderer) {
 						colConfig.renderer = colConfig.editor.createRenderer('-');
 					}
