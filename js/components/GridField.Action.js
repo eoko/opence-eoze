@@ -54,7 +54,7 @@ var ACTION = eo.form.GridField.Action = Ext.extend(Ext.util.Observable, {
 		return sm.getSelected();
 	}
 
-	,run: function() {}
+	,run: Ext.emptyFn
 
 	,getRootWindow: function() {
 		return this.gridField.findParentBy(function(e) {
@@ -216,6 +216,8 @@ eo.form.GridField.ModelAction.Add = Ext.extend(ACTION, {
 		if (this.addWindow) {
 			var win = this.addWin || this.createWin();
 			win.show();
+		} else {
+			this.gridField.addRecord();
 		}
 	}
 });
