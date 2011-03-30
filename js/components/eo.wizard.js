@@ -119,6 +119,42 @@ eo.wizard.Step = Ext.extend(Ext.util.Observable, {
 	,getPrev: function() {
 		return this.getNextOrPrev("prev");
 	}
+	
+	/**
+	 * Equivalent of the continueNext() method, except that the actual call is
+	 * deferred of the specified delay. The wizard navigation UI will be
+	 * disabled until the delay has passed, and a visual indicator will inform
+	 * the user of the interface state.
+	 * @param {Int} delay The delay, in ms.
+	 */
+	,deferContinueNext: function(delay) {
+		var wiz = this.parent.getRootWizard();
+		wiz.disableButtons();
+
+		// TODO the next button should probably be accessed indirectly, through
+		// an event, for coherence with the wizard method...
+		var win = wiz.findParentBy(function(p){return p instanceof Ext.Window}),
+			bt = win && win.buttons && win.buttons.next,
+			cls = "";
+		
+		if (bt) {
+			cls = bt.iconCls;
+			bt.setIconClass("ico loader button");
+		}
+		
+		(function() {
+			if (bt) bt.setIconClass(cls);
+			this.continueNext();
+		}).defer(delay, this);
+	}
+	/**
+	 * Create a delegate method for the {@link deferContinueNext()} method with
+	 * the specified delay. The returned callback can be called from any scope.
+	 * @param {Int} delay
+	 */
+	,getDeferedContinueNext: function(delay) {
+		return this.deferContinueNext.createDelegate(this, [delay]);
+	}
 
 	,continueFinish: function() {
 		this.parent.finish();
