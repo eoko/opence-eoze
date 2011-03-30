@@ -134,6 +134,11 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 	,initComponent: function() {
 
 		var me = this;
+		
+		this.gridConfig = Ext.applyIf(this.gridConfig || {}, {
+			title: this.title
+			,border: this.border
+		});
 
 		Oce.form.GridField.superclass.initComponent.apply(this, arguments);
 
