@@ -128,11 +128,12 @@ ACTION.Remove = Ext.extend(ACTION, {
 		var sels = sm.getSelections();
 
 		if (!sels || !sels.length) return;
-		var store = grid.store;
-
-		Ext.each(sels, function(row) {
-			store.remove(row);
-		});
+		grid.store.remove(sels);
+//		var store = grid.store;
+//
+//		Ext.each(sels, function(row) {
+//			store.remove(row);
+//		});
 	}
 
 });
