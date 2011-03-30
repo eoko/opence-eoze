@@ -6,3 +6,7 @@
     background: transparent url('../images/ajax-loader-16x11.gif') no-repeat center;
 	border: 0;
 }
+
+.ico.loader.button {
+	background-image:url(images/ajax-loader-button-16x16.gif) !important;
+}
