@@ -162,8 +162,8 @@ Oce.form.getFormData = function(form, namePrefix) {
 	
 	// allow easy overriding of form data reading
 	if (form.getData) {
-		var data = form.getData(namePrefix);
-		if (data) return data;
+		var d = form.getData(namePrefix);
+		if (d) return d;
 	}
 	
 	if (form instanceof Ext.form.BasicForm) form = form.el;
