@@ -161,7 +161,10 @@ Ext.ns('Oce.form');
 Oce.form.getFormData = function(form, namePrefix) {
 	
 	// allow easy overriding of form data reading
-	if (form.getData) return form.getData(namePrefix);
+	if (form.getData) {
+		var data = form.getData(namePrefix);
+		if (data) return data;
+	}
 	
 	if (form instanceof Ext.form.BasicForm) form = form.el;
 	
