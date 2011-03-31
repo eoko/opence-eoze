@@ -862,7 +862,10 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 					} else {
 						action.init(this);
 						var tbItem = action.createToolbarItem();
-						if (tbItem) tbarItems.push(tbItem);
+						if (tbItem) {
+							if (Ext.isArray(tbItem)) tbarItems = tbarItems.concat(tbItem);
+							else tbarItems.push(tbItem);
+						}
 					}
 				}, this)
 			}
