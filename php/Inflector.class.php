@@ -67,8 +67,9 @@ class Inflector {
 
 	public static function modelFromDB($dbTableName) {
 
-		if (substr($dbTableName, -2, 2) == 'ys') return self::camelCase($dbTableName, true);
-		else return self::camelCase(rtrim($dbTableName, 's'), true);
+//		if (substr($dbTableName, -2, 2) == 'ys') return self::camelCase($dbTableName, true);
+//		else return self::camelCase(rtrim($dbTableName, 's'), true);
+		return self::camelCase(rtrim($dbTableName, 's'), true);
 	}
 
 	public static function modelFromController($controller) {
