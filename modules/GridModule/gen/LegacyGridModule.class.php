@@ -227,6 +227,8 @@ class LegacyGridModule {
 	}
 
 	private static function toJSTemplate($array) {
+		
+		return json_encode($array);
 
 		if (!is_array($array)) return self::valueToJSTemplate($array);
 
