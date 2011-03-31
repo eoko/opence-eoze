@@ -39,6 +39,30 @@ eo.Window = Ext.extend(Ext.Window, {
 			this.setModalTo(this.modalTo);
 		}
 	}
+	
+	,deactivateContent: function() {
+		Ext.each(this.buttons, function(bt) {
+			if (!bt.disabled) {
+				bt.disable();
+				bt.wasEnabled = true;
+			}
+		});
+		// cannot use toolbar, 'cause the button container is a toolbar and it
+		// is quite ugly when masked ...
+		if (this.tbar) this.tbar.mask();
+		if (this.bbar) this.bbar.mask();
+	}
+	
+	,activateContent: function() {
+		Ext.each(this.buttons, function(bt) {
+			if (bt.wasEnabled) {
+				bt.enable();
+				delete bt.wasEnabled;
+			}
+		});
+		if (this.tbar) this.tbar.unmask();
+		if (this.bbar) this.bbar.unmask();
+	}
 
 	,setModalTo: function(rootWin) {
 
@@ -71,7 +95,7 @@ eo.Window = Ext.extend(Ext.Window, {
 
 		var hidding = false // this one's to prevent activate event from being process on win hide
 		,modal = false // used to control that when the rootWin is restored, the win
-		//is displayed only if it was visible when the rootWin was hidden
+				//is displayed only if it was visible when the rootWin was hidden
 		,onRootActivateFn = function() {
 
 			if (hidding) return;
@@ -141,11 +165,14 @@ eo.Window = Ext.extend(Ext.Window, {
 			}
 
 			if (rootWin) {
+				// win content
+				if (maskEl) maskEl.mask();
+				
 				if (rootWin.deactivateContent) {
 					rootWin.deactivateContent();
+				} else {
+					rootWin.disable();
 				}
-				//if (maskEl) maskEl.mask();
-				rootWin.disable();
 				rootWin.on('activate', onRootActivate);
 			}
 			hidding = false;
@@ -159,13 +186,18 @@ eo.Window = Ext.extend(Ext.Window, {
 			this.el.stopFx();
 
 			if (rootWin) {
+				// unmask win content
+				if (maskEl) maskEl.unmask();
+				
 				if (rootWin.activateContent) {
 					rootWin.activateContent();
+				} else {
+					rootWin.enable();
 				}
 				rootWin.un('activate', onRootActivate);
 				doHide.apply(this, arguments);
 				//maskEl.unmask();
-				rootWin.enable();
+				//rootWin.enable();
 			}
 		}
 	}
