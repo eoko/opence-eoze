@@ -285,17 +285,20 @@ eo.form.GridField.ModelAction.Edit = Ext.extend(ACTION, {
 		if (!record) return;
 		this.run(record);
 	}
-
-	,run: function(record) {
-
-		if (!record) {
-			record = this.getSelectedRecord();
-			if (!record) return;
-		}
-
+	
+	,editRecord: function(record) {
 		var win = this.editWin || this.createWin();
 		win.setRecord(record);
 		win.show();
+	}
+
+	,run: function(record) {
+		if (!record) {
+			record = this.getSelectedRecord();
+			if (!record) return;
+		} else {
+			this.editRecord(record);
+		}
 	}
 });
 
