@@ -5,6 +5,7 @@ var GRID_ACTION = eo.form.GridField.Action;
 var CQLIX_PLUGIN = eo.form.GridField.CqlixPlugin = eo.Object.create({
 
 	addActionClass: eo.form.GridField.ModelAction.Add
+	,editActionClass: eo.form.GridField.ModelAction.Edit
 
 	,constructor: function(config) {
 		Ext.apply(this, config);
@@ -32,12 +33,13 @@ var CQLIX_PLUGIN = eo.form.GridField.CqlixPlugin = eo.Object.create({
 			,controller: gridField.controller || this.controller
 		});
 
-		var editAction = new eo.form.GridField.ModelAction.Edit({
+		var c = Ext.isString(this.editActionClass) ? Ext.ns(this.editActionClass) : this.editActionClass;
+		var editAction = this.editAction || new c(Ext.apply({
 			model: this.model
 			,gridField: gridField
 			,winTitle: this.editTitle
 			,formExtra: this.formExtra // XP
-		});
+		}, this.editActionConfig));
 
 		// Orderable
 		if (this.model.orderable) {
@@ -91,7 +93,7 @@ var CQLIX_PLUGIN = eo.form.GridField.CqlixPlugin = eo.Object.create({
 
 		if (this.toolbar !== false) {
 			
-			var c = Ext.isString(this.addActionClass) ? Ext.ns(this.addActionClass)
+			c = Ext.isString(this.addActionClass) ? Ext.ns(this.addActionClass)
 				: this.addActionClass;
 			
 			var addAction = this.addAction 
