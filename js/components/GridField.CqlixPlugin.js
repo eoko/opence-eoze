@@ -74,7 +74,8 @@ var CQLIX_PLUGIN = eo.form.GridField.CqlixPlugin = eo.Object.create({
 //					,header: "Supprimer"
 					,editable: false
 					,width: 2*16+3*5
-					,resizable: false
+					//,resizable: false
+					,fixed: true
 					,items: [{
 						handler: function(grid, rowIndex, colIndex, item, e) {
 							editAction.editAt(rowIndex);
