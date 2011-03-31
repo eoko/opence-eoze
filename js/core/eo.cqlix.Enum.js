@@ -141,7 +141,9 @@ NS.EnumField = NS.Enum = eo.Object.extend(NS.ModelField, {
 		return Ext.apply({
 			xtype: "radiogroup"
 			,fieldLabel: this.getLabel(["formField", "form"])
+//			,defaults: config.asGroup ? undefined : {name: this.name}
 			,defaults: {name: this.name}
+			,name: config.asGroup ? this.name : undefined
 			,items: (config ? config.items : false) || this.createCheckboxGroupItems()
 		}, config);
 	}
