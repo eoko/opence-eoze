@@ -4,7 +4,9 @@ var GRID_ACTION = eo.form.GridField.Action;
 
 var CQLIX_PLUGIN = eo.form.GridField.CqlixPlugin = eo.Object.create({
 
-	constructor: function(config) {
+	addActionClass: eo.form.GridField.ModelAction.Add
+
+	,constructor: function(config) {
 		Ext.apply(this, config);
 		this.created = true;
 		
@@ -87,25 +89,34 @@ var CQLIX_PLUGIN = eo.form.GridField.CqlixPlugin = eo.Object.create({
 			}
 		});
 
-		if (this.toolbar !== false) gridField.toolbar = Ext.apply(gridField.toolbar || {}, {
-			actions: [
-				new eo.form.GridField.ModelAction.Add(Ext.apply({
+		if (this.toolbar !== false) {
+			
+			var c = Ext.isString(this.addActionClass) ? Ext.ns(this.addActionClass)
+				: this.addActionClass;
+			
+			var addAction = this.addAction 
+				|| new c(Ext.apply({
 					model: this.model
 					,addWindow: true
 					,winTitle: this.addTitle
 					,formExtra: this.formExtra // XP
 					,buildForm: this.buildAddForm || this.buildForm
-				}, this.addAction))
-				,new GRID_ACTION.Remove({
-				})
-//				,'-'
-//				,new GRID_ACTION.Save({
-//					model: this.model
-//				})
-//				,new GRID_ACTION.Cancel({
-//				})
-			]
-		});
+				}, this.addActionConfig));
+				
+			gridField.toolbar = Ext.apply(gridField.toolbar || {}, {
+				actions: [
+					addAction,
+					new GRID_ACTION.Remove({
+					})
+	//				,'-'
+	//				,new GRID_ACTION.Save({
+	//					model: this.model
+	//				})
+	//				,new GRID_ACTION.Cancel({
+	//				})
+				]
+			});
+		} 
 	}
 }); // CqlixPlugin
 
