@@ -175,14 +175,16 @@ eo.form.GridField.ModelAction.Add = Ext.extend(ACTION, {
 		}
 	}
 
-	,createWin: function(form) {
+	,createWin: function(config) {
 
-		var win;
-		var WIN_CLASS = Oce.FormWindow;
-		if (!form) form = this.createForm();
-		var gf = this.gridField;
+		config = config || {};
 
-		this.addWin = win = new WIN_CLASS({
+		var form = config.form || this.createForm(),
+			WIN_CLASS = Oce.FormWindow,
+			gf = this.gridField,
+			win;
+
+		this.addWin = win = new WIN_CLASS(Ext.apply({
 			formPanel: form
 			,minimizable: false
 			,closeAction: this.winCloseAction || 'close'
@@ -209,7 +211,7 @@ eo.form.GridField.ModelAction.Add = Ext.extend(ACTION, {
 					delete this.addWin;
 				}.createDelegate(this)
 			}
-		});
+		}, config));
 
 		this.wins.push(win);
 
@@ -234,14 +236,15 @@ eo.form.GridField.ModelAction.Edit = Ext.extend(ACTION, {
 		,winCloseAction: "close"
 	}
 
-	,createWin: function() {
+	,createWin: function(config) {
+		
+		config = config || {};
 
-		var win;
-		var WIN_CLASS = Oce.FormWindow;
-		var formPanel = this.model.createForm(this.formExtra);
-		var gf = this.gridField;
+		var formPanel = config.form || this.model.createForm(this.formExtra),
+			WIN_CLASS = Oce.FormWindow,
+			win;
 
-		this.editWin = win = new WIN_CLASS({
+		this.editWin = win = new WIN_CLASS(Ext.apply({
 			formPanel: formPanel
 			,title: this.winTitle || 'Modifier l\'enregistrement' // i18n
 			,minimizable: false
@@ -270,7 +273,7 @@ eo.form.GridField.ModelAction.Edit = Ext.extend(ACTION, {
 				this.record = record;
 				formPanel.form.loadRecord(record);
 			}
-		});
+		}, config));
 
 		this.wins.push(win);
 
