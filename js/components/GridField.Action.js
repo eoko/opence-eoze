@@ -80,18 +80,21 @@ var ACTION = eo.form.GridField.Action = Ext.extend(Ext.util.Observable, {
 	}
 
 	,createToolbarItem: function() {
-
-		var item = Ext.create(Ext.apply({
+		var item = this.doCreateToolbarItem();
+		this.tbItems.push(item);
+		return item;
+	}
+	
+	,doCreateToolbarItem: function() {
+		return Ext.create(Ext.apply({
 			text: '- Action -'
 			,xtype: "button"
 			,handler: this.handler
 			,scope: this.scope || this
 			//,iconCls: "ico ico_add"
-		}, this.toolbarItemConfig));
-		
-		this.tbItems.push(item);
-		return item;
+		}, this.toolbarItemConfig));		
 	}
+	
 });
 
 ACTION.Remove = Ext.extend(ACTION, {
@@ -172,11 +175,11 @@ eo.form.GridField.ModelAction.Add = Ext.extend(ACTION, {
 		}
 	}
 
-	,createWin: function() {
+	,createWin: function(form) {
 
 		var win;
 		var WIN_CLASS = Oce.FormWindow;
-		var form = this.createForm();
+		if (!form) form = this.createForm();
 		var gf = this.gridField;
 
 		this.addWin = win = new WIN_CLASS({
