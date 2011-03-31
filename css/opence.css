@@ -44,5 +44,14 @@
 p.form-caption {
 	font-style: italic;
 	color: #3F516E;
-	margin-bottom: 3.em;
+	margin-bottom: .4em;
+}
+
+/* Fixes items of checkboxgroup that can be slightly scrolled (although they
+ * should not ! */
+.x-form-check-wrap {
+	overflow: hidden;
+	/* ... and fix the rendering of the selected boxes border, also */
+	height: 20px;
+	padding-left: 2px
 }
