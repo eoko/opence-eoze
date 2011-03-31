@@ -386,6 +386,9 @@ NS.BooleanField = eo.Object.extend(NS.EnumField, {
 						&& parseInt(v) !== 0;
 				}
 			}
+			,renderer: function(v) {
+				return !!v ? "Oui" : "Non";
+			}
 		});
 	}
 });
