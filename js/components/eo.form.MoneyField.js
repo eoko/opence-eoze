@@ -20,12 +20,14 @@ eo.form.MoneyField = Ext.form.NumberField.extend({
 	}
 	
 	,setReadOnly: function(on) {
-		if (on) {
-			this.disable();
-			this.el.addClass("readonly");
-		} else {
-			this.enable();
-			this.el.removeClass("readonly");
+		if (this.el) {
+			if (on) {
+				this.disable();
+				this.el.addClass("readonly");
+			} else {
+				this.enable();
+				this.el.removeClass("readonly");
+			}
 		}
 	}
 	
@@ -36,6 +38,7 @@ eo.form.MoneyField = Ext.form.NumberField.extend({
 			wrap.createChild({tag:"span", cls:"x-input-money symbol euro", html: this.symbol})
 			this.resizeEl = this.positionEl = this.wrap;
 		}
+		this.setReadOnly(this.readOnly);
 	}
 	
 	,onResize: function(w, h) {
