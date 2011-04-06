@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @package PS-LOG-1
  * @author Éric Ortéga <eric@mail.com>
@@ -65,18 +64,14 @@ class Logger {
 	 */
 	public static function getLogger($context = null) {
 
-		if (self::$defaultLogger === null)
-			self::$defaultLogger = new \eoko\log\Logger();
+		if (self::$defaultLogger === null) self::$defaultLogger = new \eoko\log\Logger();
 
 		if ($context !== null) {
-			if (is_object($context))
-				$context = get_class($context);
-			if (preg_match('/\\\\([^\\\\]+)$/', $context, $m))
-				$context = $m[1];
+			if (is_object($context)) $context = get_class($context);
+			if (preg_match('/\\\\([^\\\\]+)$/', $context, $m)) $context = $m[1];
 			self::$defaultLogger->setContext($context);
 		}
-		else
-			self::$defaultLogger->setContext(self::$defaultContext);
+		else self::$defaultLogger->setContext(self::$defaultContext);
 
 		return self::$defaultLogger;
 	}
@@ -86,7 +81,7 @@ class Logger {
 	}
 
 	const ERROR = 0;
-	const WARNING = 5;
+	const WARNING  = 5;
 	const ASSERTION = 6;
 	const INFO = 7;
 	const DEBUG = 10;
@@ -110,9 +105,12 @@ class Logger {
 		self::INFO => 'INFO',
 		self::DEBUG => 'DEBUG'
 	);
+
 	protected $context = 'ROOT';
 	private $logLevel = self::ALL;
+
 	private static $appenders = array();
+
 	protected static $buffer = null;
 
 	public static function addAppender(LoggerAppender $appender) {
@@ -121,8 +119,7 @@ class Logger {
 
 	public static function removeAllAppender($class = null) {
 		foreach (self::$appenders as $i => $a) {
-			if ($class === null || get_class($a) === $class)
-				unset(self::$appenders[$i]);
+			if ($class === null || get_class($a) === $class) unset(self::$appenders[$i]);
 		}
 	}
 
@@ -131,8 +128,7 @@ class Logger {
 	}
 
 	public static function startBuffer() {
-		if (self::$buffer === null)
-			self::$buffer = array();
+		if(self::$buffer === null) self::$buffer = array();
 	}
 
 	public static function flush() {
@@ -168,8 +164,8 @@ class Logger {
 		} else {
 			return OpenceException::formatPhpException($ex);
 		}
-	}
-
+   	}
+	
 	private $replaceArgs = null;
 
 	function replaceCallback() {
@@ -188,7 +184,7 @@ class Logger {
 		}
 	}
 
-	protected function logImpl($level, $msg, $args = array()) {
+  	protected function logImpl($level, $msg, $args = array()) {
 
 		if ($this->isActive($level)) {
 
@@ -235,7 +231,7 @@ class Logger {
 
 			if ($exception !== null) {
 				$msg .= PHP_EOL . self::formatException($exception);
-			}
+           	}
 
 			$date = date('Y/m/d h:i:s');
 			$infoLine = $this->getTraceString();
@@ -304,34 +300,30 @@ class Logger {
 //		$logger = isset($this) && get_class($this) == __CLASS__ ? $this : Logger::getLogger();
 		$logger = isset($this) && $this instanceof Logger ? $this : Logger::getLogger();
 		if ($logger->isActive(self::DEBUG)) {
-			if (func_num_args() == 1 && !is_string($msg))
-				return $logger->debug('{}', $msg);
+			if (func_num_args() == 1 && !is_string($msg)) return $logger->debug('{}', $msg);
 			$args = func_get_args();
 			$logger->logImpl(self::DEBUG, $msg, array_slice($args, 1));
 		}
-	}
+   	}
 
 	public static function dbg($msg) {
 		$logger = Logger::getLogger();
 		if ($logger->isActive(self::DEBUG)) {
-			if (func_num_args() == 1 && !is_string($msg))
-				return $logger->debug('{}', $msg);
+			if (func_num_args() == 1 && !is_string($msg)) return $logger->debug('{}', $msg);
 			$args = func_get_args();
 			$logger->logImpl(self::DEBUG, $msg, array_slice($args, 1));
 		}
 	}
 
 	public static function tmp($msg) {
-		if (isset($this))
-			throw new IllegalStateException('Only use static call with this, to help cleaning afterward!');
+		if (isset($this)) throw new IllegalStateException('Only use static call with this, to help cleaning afterward!');
 		$logger = Logger::getLogger();
 		if ($logger->isActive(self::DEBUG)) {
-			if (func_num_args() == 1 && !is_string($msg))
-				return $logger->debug('{}', $msg);
+			if (func_num_args() == 1 && !is_string($msg)) return $logger->debug('{}', $msg);
 			$args = func_get_args();
 			$logger->logImpl(self::DEBUG, $msg, array_slice($args, 1));
 		}
-	}
+   	}
 
 	/**
 	 * Log the given message with the WARNING log level
@@ -461,9 +453,7 @@ class Logger {
 		}
 	}
 
-}
-
-// <!-- Logger
+} // <!-- Logger
 
 class LogEntry {
 
@@ -485,22 +475,24 @@ class LogEntry {
 		if (strstr($this->msg, PHP_EOL) !== false) {
 			// Multiple line message
 			$lines = explode(PHP_EOL, $this->msg);
-			if (substr($this->msg, -1) == PHP_EOL)
-				$lines[] = PHP_EOL;
+			if (substr($this->msg, -1) == PHP_EOL) $lines[] = PHP_EOL;
 			$msgLength = 95 - strlen($this->context);
-			$lines[0] = sprintf("[%-5s %s] %s: %-{$msgLength}s %s", self::getLevelName($this->level), $this->date, $this->context, $lines[0], $this->fileLine);
+			$lines[0] = sprintf("[%-5s %s] %s: %-{$msgLength}s %s",
+					self::getLevelName($this->level),
+					$this->date, $this->context, $lines[0], $this->fileLine);
 			return implode(PHP_EOL, $lines);
 		} else {
 			// Single line message
 			$msgLength = 95 - strlen($this->context);
-			return sprintf("[%-5s %s] %s: %-{$msgLength}s %s", self::getLevelName($this->level), $this->date, $this->context, $this->msg, $this->fileLine);
+			return sprintf("[%-5s %s] %s: %-{$msgLength}s %s", self::getLevelName($this->level),
+					$this->date, $this->context, $this->msg, $this->fileLine);
 		}
 	}
 
 	public function __toString() {
 		return $this->formatDefaultLine();
 	}
-
+	
 }
 
 /**
@@ -514,8 +506,9 @@ interface LoggerAppender {
  * Appender writting entries to a log file.
  */
 class LoggerFileAppender implements LoggerAppender {
-	const MAX_LOG_FILE_SIZE = '5MB';
 
+	const MAX_LOG_FILE_SIZE = '5MB';
+	
 	private $logFile = null;
 	private $filename;
 	private $failedOpenFile = false;
@@ -523,8 +516,7 @@ class LoggerFileAppender implements LoggerAppender {
 	function __construct($filename = 'log.txt', $directory = null) {
 
 		// Default directory
-		if ($directory === null)
-			$directory = LOG_PATH;
+		if ($directory === null) $directory = LOG_PATH;
 		$this->filename = $directory . $filename;
 	}
 
@@ -533,15 +525,14 @@ class LoggerFileAppender implements LoggerAppender {
 	}
 
 	private function closeLogFile() {
-		if ($this->logFile !== null && $this->logFile !== false) {
+        	if ($this->logFile !== null && $this->logFile !== false) {
 			fclose($this->logFile);
 			$this->logFile = null;
-		}
+	       	}
 	}
 
 	private function getLogFile() {
-		if ($this->failedOpenFile)
-			return false;
+		if ($this->failedOpenFile) return false;
 		if ($this->logFile === null) {
 
 			if (file_exists($this->filename) && filesize($this->filename) > FileHelper::filesizeToBytes(self::MAX_LOG_FILE_SIZE)) {
@@ -563,7 +554,6 @@ class LoggerFileAppender implements LoggerAppender {
 			fwrite($this->getLogFile(), $entry . PHP_EOL);
 		}
 	}
-
 }
 
 /**
@@ -572,48 +562,19 @@ class LoggerFileAppender implements LoggerAppender {
  */
 class LoggerOutputAppender implements LoggerAppender {
 
-	private static $FORMAT_VOID = 'VOID';
-	private static $FORMAT_HTML = 'HTML';
-	private static $FORMAT_SHELL = 'SHELL';
-	private $format = false;
-	private $shell;
+	private $formatHtml = true;
 
-	function __construct($format = 'SHELL',$shell = NULL) {
-		
-		if(isset($shell) && $shell != NULL){
-			$this->shell = $shell;
-		}
-		
-		switch ($format) {
-			case self::$FORMAT_VOID :
-				$this->format = self::$FORMAT_VOID;
-				break;
-			case self::$FORMAT_HTML :
-				$this->format = self::$FORMAT_HTML;
-				break;
-			case self::$FORMAT_SHELL :
-				$this->format = self::$FORMAT_SHELL;
-				break;
-			default:
-				$this->format = self::$FORMAT_VOID;
-				break;
-		}
+	function __construct($formatHtml = true) {
+		$this->formatHtml = $formatHtml;
 	}
 
 	function process(LogEntry $entry) {
-		if ($this->format == self::$FORMAT_HTML) {
+		if ($this->formatHtml) {
 			echo "<pre>$entry</pre>";
-		} elseif ($this->format == self::$FORMAT_SHELL) {
-			echo $this->shell->tag_string($entry, 'red');
 		} else {
 			echo $entry . PHP_EOL;
 		}
 	}
-
-	function shellAdvance() {
-		
-	}
-
 }
 
 /**
@@ -626,7 +587,7 @@ class LoggerFirePHPAppender implements LoggerAppender {
 	function __construct() {
 
 		ob_start();
-
+		
 		$found = false;
 		foreach (explode(':', get_include_path()) as $dir) {
 			$filename = LIBS_PATH . 'FirePHPCore/FirePHP.class.php';
@@ -650,19 +611,14 @@ class LoggerFirePHPAppender implements LoggerAppender {
 
 		switch ($entry->level) {
 			case Logger::INFO:
-				$this->firephp->info("{$entry->getLevelName()} {$entry->fileLine} -- {$entry->msg}");
-				break;
+				$this->firephp->info("{$entry->getLevelName()} {$entry->fileLine} -- {$entry->msg}"); break;
 			case Logger::WARNING:
-				$this->firephp->warn("{$entry->getLevelName()} {$entry->fileLine} -- {$entry->msg}");
-				break;
+				$this->firephp->warn("{$entry->getLevelName()} {$entry->fileLine} -- {$entry->msg}"); break;
 			case Logger::ASSERTION:
 			case Logger::ERROR:
-				$this->firephp->error("{$entry->getLevelName()} {$entry->fileLine} -- {$entry->msg}");
-				break;
+				$this->firephp->error("{$entry->getLevelName()} {$entry->fileLine} -- {$entry->msg}"); break;
 			default:
-				$this->firephp->log("{$entry->getLevelName()} {$entry->fileLine} -- {$entry->msg}");
-				break;
+				$this->firephp->log("{$entry->getLevelName()} {$entry->fileLine} -- {$entry->msg}"); break;
 		}
 	}
-
 }
