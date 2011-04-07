@@ -114,10 +114,7 @@ abstract class GridExecutor extends JsonExecutor {
 		$model = $this->table->createNewModel(
 			$setters
 			,false
-			// TODO eoze cleanout (rhodia leftover)
-			,array(
-				'year' => $this->request->get('year', null)
-			)
+			,$this->add_createContext($request, $setters)
 		);
 
 		$this->beforeSaveModel($model);
@@ -141,6 +138,13 @@ abstract class GridExecutor extends JsonExecutor {
 		}
 
 		return true;
+	}
+	
+	// TODO eoze cleanout (rhodia leftover)
+	protected function add_createContext(Request $form, $setters) {
+		return array(
+			'year' => $this->request->get('year', null)
+		);
 	}
 
 	protected function add_getField(Request $request, $col, &$setters, &$missingFields) {
