@@ -7,6 +7,9 @@
  * @license http://www.planysphere.fr/psopence.txt
  */
 
+use eoko\shell\ShellEoze;
+use \IllegalArgumentException;
+
 /**
  * Logging utility class.
  *
@@ -91,17 +94,6 @@ class Logger {
 	const INFO = 7;
 	const DEBUG = 10;
 	const ALL = 100;
-
-//REM	public static function isLogLevel($var) {
-//		return is_int($var) && (
-//				$var === self::ERROR
-//				|| $var === self::WARNING
-//				|| $var === self::INFO
-//				|| $var === self::DEBUG
-//				|| $var === self::ASSERTION
-//				|| $var === self::ALL
-//				);
-//	}
 
 	private static $levelNames = array(
 		self::ERROR => 'ERROR',
@@ -572,46 +564,34 @@ class LoggerFileAppender implements LoggerAppender {
  */
 class LoggerOutputAppender implements LoggerAppender {
 
-	private static $FORMAT_VOID = 'VOID';
-	private static $FORMAT_HTML = 'HTML';
-	private static $FORMAT_SHELL = 'SHELL';
-	private $format = false;
+	const FORMAT_VOID  = 0;
+	const FORMAT_HTML  = 1;
+	const FORMAT_SHELL = 2;
+	
+	private $format;
+	/** @var ShellEoze */
 	private $shell;
 
-	function __construct($format = 'SHELL',$shell = NULL) {
+	function __construct($format = self::FORMAT_HTML, ShellEoze $shell = null) {
+		$this->shell = $shell;
 		
-		if(isset($shell) && $shell != NULL){
-			$this->shell = $shell;
-		}
-		
-		switch ($format) {
-			case self::$FORMAT_VOID :
-				$this->format = self::$FORMAT_VOID;
-				break;
-			case self::$FORMAT_HTML :
-				$this->format = self::$FORMAT_HTML;
-				break;
-			case self::$FORMAT_SHELL :
-				$this->format = self::$FORMAT_SHELL;
-				break;
-			default:
-				$this->format = self::$FORMAT_VOID;
-				break;
+		if ($format >= 0 && $format <= 2) {
+			$this->format = $format;
+		} else {
+			throw new IllegalArgumentException(
+				"Illegal value for \$format: $format"
+			);
 		}
 	}
 
 	function process(LogEntry $entry) {
-		if ($this->format == self::$FORMAT_HTML) {
+		if ($this->format === self::FORMAT_HTML) {
 			echo "<pre>$entry</pre>";
-		} elseif ($this->format == self::$FORMAT_SHELL) {
+		} else if ($this->format === self::FORMAT_SHELL && $this->shell) {
 			echo $this->shell->tag_string($entry, 'red');
 		} else {
 			echo $entry . PHP_EOL;
 		}
-	}
-
-	function shellAdvance() {
-		
 	}
 
 }
