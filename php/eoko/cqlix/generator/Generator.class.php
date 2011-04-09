@@ -108,7 +108,14 @@ class Generator extends Script {
 		// superseeded by the new config implementation
 		$this->baseConfig = new Config();
 
-		$this->modelsConfig = ConfigManager::get(APP_NAMESPACE . '/cqlix/models');
+		if (defined('APP_NAMESPACE')) {
+			throw new DeprecatedException('Set the namespace in eoze/application/namespace');
+		}
+//		$ns = defined(APP_NAMESPACE) ? APP_NAMESPACE : ConfigManager::get($node, $key);
+		
+		$this->modelsConfig = ConfigManager::get(
+			ConfigManager::get('eoze/application/namespace') . '/cqlix/models'
+		);
 	}
 
 	protected function run() {
