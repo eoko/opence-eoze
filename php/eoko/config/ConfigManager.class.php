@@ -271,7 +271,7 @@ class ConfigManager {
 	/**
 	 * Get the config node for the given $path. 
 	 * @param string $path
-	 * @return array
+	 * @return mixed Can return an array or a primitive value.
 	 */
 	private function &getNode($path = null, $cleanedPath = false) {
 		$node =& $this->data;
@@ -281,11 +281,17 @@ class ConfigManager {
 			if (!is_string($path)) {
 				throw new IllegalArgumentException('$path must be a string');
 			}
+			$curPath = '';
 			foreach ($this->explodeNode($path, $cleanedPath) as $sub) {
 				if (!isset($node[$sub])) {
 					$node[$sub] = array();
+				} else if (!is_array($node)) {
+					throw new \ConfigurationException(null, $path,
+							"Cannot offset from the value node $curPath of type " 
+							. gettype($node));
 				}
 				$node =& $node[$sub];
+				$curPath .= self::$DELIMITERS[0] . $sub;
 			}
 		}
 
