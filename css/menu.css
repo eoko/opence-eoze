@@ -1,0 +1,52 @@
+
+#action-panel .x-panel-body li {
+	padding:6px;
+}
+#action-panel .x-panel-body li:hover {
+	background-color : white
+}
+#action-panel .x-panel-body li img {
+	width:16px;
+	height:16px;
+	vertical-align:middle;
+	margin-right:2px;
+	margin-bottom:2px;
+}
+#action-panel .x-panel-body li a {
+	text-decoration:none;
+	color:#666666;
+}
+#action-panel .x-plain-body {
+	background-color:#cad9ec;
+    padding:3px 0 0 5px;
+}
+
+#action-panel .x-panel-body li a:hover {
+	text-decoration:underline;
+	color:#15428b;
+}
+
+.x-btn-group-header {
+    color : #666666;
+}
+
+
+#action-panel .x-panel-bwrap {
+font:11px tahoma,arial,helvetica,sans-serif;
+}
+
+#action-panel .x-panel-body {
+	background-color:#EFEFEF;
+	/*padding:3px 0 0 5px;*/
+}
+
+.x-layout-split-west  {
+	background-color:#CAD9EC;
+	cursor:move;
+}
+
+#action-panel .x-panel {
+	margin-right:0;
+}
+
+

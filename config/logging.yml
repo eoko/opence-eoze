@@ -1,0 +1,6 @@
+config.node: eoko\log
+
+appenders:
+  File: true
+  FirePHP: true
+  Output: false

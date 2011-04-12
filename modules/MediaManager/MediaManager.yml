@@ -1,0 +1,16 @@
+class: GridModule
+model: User
+
+extra:
+  search: false
+  multisort: false
+
+module:
+  namespace: Oce.Modules
+  title: Médias
+
+columns:
+  id: id
+  name: {header: Nom}
+  size: {header: Taille}
+  datetime: {name: datetime, header: Date}
