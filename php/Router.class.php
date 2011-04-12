@@ -66,7 +66,7 @@ class Router {
 	 * @see Router
 	 */
 	public function route() {
-		
+        
 		if (!$this->request->has('controller')) {
 			$this->request->override(
 				'controller',
