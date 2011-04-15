@@ -135,6 +135,11 @@ class ArrayHelper {
 		}
 		return $r;
 	}
+	
+	public static function get($array, $key, $default = null) {
+		if (isset($array[$key])) return $array[$key];
+		else return $default;
+	}
 
 	public static function pick(&$obj, $key, $require = false, $unset = true) {
 		if (!isset($obj[$key])) {
