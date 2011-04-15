@@ -1,0 +1,24 @@
+config.node: eoze\application
+
+name: Eoze Application
+title: Eoze Application
+author: Eoko-lab
+description : This is an application based on eoze framework !
+licence : Licence - GNU/GPL v.3
+
+shell :
+  welcomeMessage: Welcome!
+  description: This shell can be used for some usefull stuff!
+  
+directories:
+  eoze: eoze
+  models: models
+  modules: modules
+  databaseBackup: mysql
+# those 2 ones are not configurable
+#  config: config
+#  php: php
+  
+namespace: eoze\default_user_namespace
+name: Eoze Application
+title: Eoze Application

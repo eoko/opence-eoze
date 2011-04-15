@@ -1,0 +1,20 @@
+input.x-input-money {
+	text-align: right;
+	font-family: monospace;
+}
+
+span.x-input-money.symbol {
+	text-align: right;
+	font-family: monospace;
+	display: block;
+	float: right;
+	padding-top: 5px;
+	padding-right: 2px;
+	width: 10px;
+}
+
+input.x-input-money.readonly {
+	background: none;
+	border-color: transparent;
+	color: black;
+}
