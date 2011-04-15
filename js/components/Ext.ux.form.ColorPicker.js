@@ -44,7 +44,7 @@ Ext.ux.form.ColorPicker = sp.extend({
 		this.menu = new Ext.menu.ColorMenu({
 			handler: this.onColorPick
 			,scope: this
-			
+			,defaultAlign: "tr-br"
 			,listeners: {
 				hide: function(menu) {
 					menu.justHidden = true;
