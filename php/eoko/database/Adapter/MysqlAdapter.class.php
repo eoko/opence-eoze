@@ -10,7 +10,6 @@ use PDO;
 class MysqlAdapter extends AbstractAdapter {
 
 	protected function createConnection() {
-
 		$this->connection = new PDO(
 			"mysql:dbname={$this->config->database};host={$this->config->host}",
 			$this->config->user,
