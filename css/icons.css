@@ -99,6 +99,10 @@
 	padding-right : 3px;
 }
 
+.x-window-header.ico {
+	width: auto;
+}
+
 .ico.col {
 	display: inline;
 }
@@ -109,6 +113,9 @@
 .ico.add,
 .ico_add {
 	background-image:url(../images/icons/add.png) !important;
+}
+.application_form_edit {
+	background-image:url(../images/icons/application_form_edit.png) !important;
 }
 .ico_undo, .ico.undo,
 .ico_arrow_undo {
