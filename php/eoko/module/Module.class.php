@@ -115,7 +115,11 @@ MSG
 			return $this->config;
 		}
 		
-		$locations = array_reverse($this->lineageLocations);
+		if (count($this->lineageLocations)) {
+			$locations = array_reverse($this->lineageLocations);
+		} else {
+			$locations = array($this->location);
+		}
 		$config = array_shift($locations)->loadConfig();
 		foreach ($locations as $l) {
 			$c = $l->loadConfig();
