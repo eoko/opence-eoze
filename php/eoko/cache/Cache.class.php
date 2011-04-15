@@ -53,6 +53,10 @@ class Cache {
 
 	public static function cacheData($class, $data, $version = null) {
 
+		if (is_array($class)) {
+			list($class, $key) = $class;
+		}
+		
 		if ($version === null) {
 			if (is_object($class) && isset($class->cacheVersion)) {
 				$version = $class->cacheVersion;
@@ -61,13 +65,28 @@ class Cache {
 			}
 		}
 
-		$cache = new Item($data, $version);
+//		$cache = new Item($data, $version);
 
 		self::cachePhpFile(
 			get_namespace($class), $class .
-			'DataCache',
-			$cache
+			'.DataCache' . (isset($key) ? ".$key" : '') . '.php',
+			'<?php return ' . var_export($data, true) . ';'
 		);
+	}
+	
+	public static function getCachedData($class) {
+		
+		if (is_array($class)) {
+			list($class, $key) = $class;
+		}
+		
+		$file = self::getPhpFilePath(
+			get_namespace($class), 
+			$class . '.DataCache' . (isset($key) ? ".$key" : '') . '.php'
+		);
+		
+		if (file_exists($file)) return require $file;
+		else return null;
 	}
 
 	private static function makeObjectCacheFilename($class, $version, $index) {
