@@ -520,11 +520,11 @@ MSG
 		$locations = $this->lineageLocations;
 
 		if (!$locations) {
-			return false;
-		}
-
-		if ($locations[0]->namespace === $this->namespace) {
-			array_shift($locations);
+			$locations = array();
+		} else {
+			if ($locations[0]->namespace === $this->namespace) {
+				array_shift($locations);
+			}
 		}
 
 		$basePath = $this->location->findTopLevelActualLocation()->path;
