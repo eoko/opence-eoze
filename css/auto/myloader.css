@@ -10,3 +10,9 @@
 .ico.loader.button {
 	background-image:url(images/ajax-loader-button-16x16.gif) !important;
 }
+
+.ajax-loader.x32 {
+	background-image: url(images/ajax-loader-32x32.gif) !important;
+	width: 32px;
+	height: 32px;
+}

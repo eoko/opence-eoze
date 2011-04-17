@@ -290,3 +290,7 @@ class UnimplementedYetException extends UnsupportedOperationException {
 		parent::__construct($msg, null);
 	}
 }
+
+class DeprecatedException extends SystemException {
+	
+}

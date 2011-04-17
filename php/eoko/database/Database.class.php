@@ -21,20 +21,28 @@ class Database {
 	public static function getDefaultConfig() {
 		if (!self::$config) {
 			self::$config = ConfigManager::get(__NAMESPACE__);
-			$config =& self::$config;
+			
+			$defaults = $config =& self::$config;
 			
 			// Process server-conditional configuration
 			if (isset($config['servers'])) {
 				$servers = $config['servers'];
 				unset($config['servers']);
 				
-				$default = isset($servers['default']) ? $servers['default'] : array();
+				if (isset($servers['default'])) {
+					$defaults =  $servers['default'];
+				} else {
+					$defaults = $config;
+					unset($defaults['servers']);
+				}
 				unset($servers['default']);
-				
-				$name = $_SERVER['SERVER_NAME'];
-				foreach ($servers as $test => $cfg) {
-					if (substr($name, -strlen($test)) === $test) {
-						Arrays::apply($defaults, $cfg);
+
+				if (isset($_SERVER['SERVER_NAME'])) {
+					$name = $_SERVER['SERVER_NAME'];
+					foreach ($servers as $test => $cfg) {
+						if (substr($name, -strlen($test)) === $test) {
+							Arrays::apply($defaults, $cfg);
+						}
 					}
 				}
 				
