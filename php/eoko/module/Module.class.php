@@ -102,6 +102,14 @@ MSG
 		);
 		return;
 	}
+	
+	public function isAbstract() {
+		return $this->getConfig()->get('abstract', false);
+	}
+	
+	public function isDisabled() {
+		return $this->location->isDisabled();
+	}
 
 	public function setExtraConfig($config) {
 		$this->extraConfig = $config;
@@ -117,16 +125,20 @@ MSG
 		
 		if (count($this->lineageLocations)) {
 			$locations = array_reverse($this->lineageLocations);
-		} else {
-			$locations = array($this->location);
-		}
-		$config = array_shift($locations)->loadConfig();
-		foreach ($locations as $l) {
-			$c = $l->loadConfig();
-			if ($c) {
-				if ($config) $config->apply($c);
-				else $config = $c;
+			$config = new Config();
+			foreach ($locations as $l) {
+				$c = $l->loadConfig();
+				if ($l->moduleName !== $this->name) {
+					unset($c['abstract']);
+					unset($c['line']);
+				}
+				if ($c) {
+					if ($config) $config->apply($c);
+					else $config = $c;
+				}
 			}
+		} else {
+			$config = $this->location->loadConfig();
 		}
 
 		if ($this->extraConfig) {
