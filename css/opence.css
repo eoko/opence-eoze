@@ -59,3 +59,9 @@ p.form-caption {
 .x-menu-item.main {
 	font-weight: bold;
 }
+
+
+label.x-form-composite-label {
+	padding: 3px 3px 3px 0;
+	display: block;
+}
