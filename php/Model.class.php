@@ -407,7 +407,7 @@ abstract class Model {
 						if ($return) {
 							return false;
 						} else {
-							throw new SystemException("{$this->getModelName()}.$col->name must be set");
+							throw new SystemException("{$this->getModelName()}.$col->name must be set in $this");
 						}
 					}
 				}
