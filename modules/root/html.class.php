@@ -35,23 +35,32 @@ JS;
 	protected function pushLayoutExtraJs(HtmlRootTemplate $layout) {
 		// Include js/*.auto[order].js and auto/*.js files
 		$autoJsFiles = array();
+		$autoCssFiles = array();
 		foreach (ModuleManager::listModules(false) as $module) {
 			$module instanceof \eoko\module\Module;
+			// js
 			$autoJsFiles = array_merge($autoJsFiles, $module->listLineFilesUrl('re:\.auto\d*\.js$', ''));
 			$autoJsFiles = array_merge($autoJsFiles, $module->listLineFilesUrl('re:\.auto\d*\.js$', 'js'));
 			$autoJsFiles = array_merge($autoJsFiles, $module->listLineFilesUrl('glob:*.js', 'js/auto', true));
 			$autoJsFiles = array_merge($autoJsFiles, $module->listLineFilesUrl('glob:*.js', 'js.auto', true));
+			// css
+			$autoCssFiles = array_merge($autoCssFiles, $module->listLineFilesUrl('re:\.auto\d*\.css$', ''));
+			$autoCssFiles = array_merge($autoCssFiles, $module->listLineFilesUrl('re:\.auto\d*\.css$', 'css'));
+			$autoCssFiles = array_merge($autoCssFiles, $module->listLineFilesUrl('glob:*.css', 'css/auto', true));
+			$autoCssFiles = array_merge($autoCssFiles, $module->listLineFilesUrl('glob:*.css', 'css.auto', true));
 		}
-//		dump($autoJsFiles);
+		
 		$urls = array();
 		foreach ($autoJsFiles as $url) {
 			$urls[$url] = preg_match('/\.auto(\d+)\.js$/', $url, $m) ? 10 + (int) $m[1] : null;
 		}
 		$layout->pushJs($urls);
-
-//		$layout->pushJs(
-//			ModuleManager::getModule('GridModule')->listFilesUrl('glob:*.js', null, FileType::JS), 10
-//		);
+		
+		$urls = array();
+		foreach ($autoCssFiles as $url) {
+			$urls[$url] = preg_match('/\.auto(\d+)\.css$/', $url, $m) ? 10 + (int) $m[1] : null;
+		}
+		$layout->pushCss($urls);
 	}
 
 	protected function beforeRender(HtmlTemplate &$tpl) {
