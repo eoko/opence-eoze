@@ -47,6 +47,10 @@ abstract class ModelRelation {
 		$info->getLocalTableProxy()->attach($this->localTable);
 		$info->getTargetTableProxy()->attach($this->targetTable);
 	}
+	
+	public function reset() {
+		$this->cache = new ModelRelationCache($this->parentModel->context);
+	}
 
 	public function __toString() {
 		return get_class($this) . '{' . $this->name . '}';
@@ -513,8 +517,11 @@ class ModelRelationReferedByMany extends ModelRelationByReference implements Mod
 	 * @return ModelResultSet
 	 */
 	public function get(array $overrideContext = null) {
+		
 		if (null !== $models =& $this->cache->get($overrideContext)) {
 			return $models;
+		} else if ($this->parentModel->isNew()) {
+			return $models = array();
 		}
 		
 		$context = $overrideContext !== null ? $overrideContext : $this->parentModel->context;
