@@ -187,7 +187,9 @@ Oce.Ajax = function() {
 			}
 
 			if (onFailure !== false) {
-				onFailure(errors, response, obj);
+				if (false === onFailure(errors, response, obj)) {
+					return;
+				}
 			}
 
 			if (message !== false) {
