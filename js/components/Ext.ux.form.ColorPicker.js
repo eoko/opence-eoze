@@ -120,6 +120,9 @@ Ext.ux.form.ColorPicker = sp.extend({
 	,setValue: function(v) {
 		var cb = this.colorBox,
 			menu = this.menu;
+		if (v === null || v === undefined) {
+			v = this.defaultColor || '000';
+		}
 		if (cb) cb.setStyle("background-color", v);
 		if (menu) menu.palette.select(v, true);
 		spp.setValue.call(this, v);
