@@ -614,10 +614,14 @@ class ModelRelationInfoIsRefered extends ModelRelationInfoByReference {
 	}
 
 	public function notifyDeleteToRefering($deletedValue) {
-		$this->findReciproque()->onTargetDelete(
-			$deletedValue instanceof Model ?
-				$deletedValue->getPrimaryKeyValue() : $deletedValue
-		);
+		if (null !== $reciproque = $this->findReciproque()) {
+			$reciproque->onTargetDelete(
+				$deletedValue instanceof Model ?
+					$deletedValue->getPrimaryKeyValue() : $deletedValue
+			);
+		} else {
+			Logger::get($this)->warn('Cannot find reciproque: ' . $this);
+		}
 	}
 
 	/**
