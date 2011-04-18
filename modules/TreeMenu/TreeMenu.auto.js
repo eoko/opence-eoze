@@ -350,6 +350,7 @@ eo.ui.TreeMenu = sp.extend({
 		
 		var win = new Oce.FormWindow(Ext.apply({
 			formPanel: formPanel
+			,width: 400
 			,buttons: [{
 				text: "Ok"
 				,handler: function() {
