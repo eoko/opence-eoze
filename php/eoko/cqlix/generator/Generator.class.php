@@ -109,7 +109,7 @@ class Generator extends Script {
 		$this->baseConfig = new Config();
 
 		if (defined('APP_NAMESPACE')) {
-			throw new DeprecatedException('Set the namespace in eoze/application/namespace');
+			throw new \DeprecatedException('Set the namespace in eoze/application/namespace');
 		}
 //		$ns = defined(APP_NAMESPACE) ? APP_NAMESPACE : ConfigManager::get($node, $key);
 		
