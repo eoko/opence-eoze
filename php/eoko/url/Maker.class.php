@@ -111,7 +111,8 @@ class Maker {
 		if ($action !== null) $parts[] = "action=$action";
 
 		if ($params !== null) {
-			foreach ($params as $k => $v) $parts[] = "$k=$v";
+//			foreach ($params as $k => $v) $parts[] = "$k=$v";
+			foreach ($params as $k => $v) $parts[] = urlencode($k) . '=' . urlencode($v);
 		}
 		
 		$parts = implode('&', $parts);
