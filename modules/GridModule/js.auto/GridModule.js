@@ -60,7 +60,7 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 			if (pg) {
 				this[name + "Plugin"] = new pg(this, config);
 			}
-		});
+		}, this);
 //		if (this.extra.iconCls) {
 //			this.iconClsPlugin = new Oce.GridModule.plugins.IconCls(this);
 //		}
