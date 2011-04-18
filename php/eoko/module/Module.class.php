@@ -579,11 +579,11 @@ MSG
 				}
 			};
 		}
-
+        
 		$prevNamespace = null;
 
 		$baseLoaders = array();
-
+        
 		foreach ($locations as $location) {
 			if (null !== $classFile = $this->findExecutorClassFile(
 					$type, $location->path, $location->moduleName)) {

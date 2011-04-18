@@ -1298,7 +1298,7 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 			var onSuccess = function(data, response) {
 				//location.href = data.url;
 				if (win) win.close();
-				if (Ext.isIE6 || Ext.isIE7 || (Ext.isMac && Ext.isGecko)) {
+				if (Ext.isIE6 || Ext.isIE7) {
 					Ext.Msg.alert(
                 'Fichier',
                 String.format(
