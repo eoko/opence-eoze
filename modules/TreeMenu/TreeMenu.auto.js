@@ -25,6 +25,8 @@ eo.ui.TreeMenu = sp.extend({
 		Ext.apply(this, {
 			title: "Navigation"
 			,border: false
+			
+			,autoScroll: true
 
 			,tools: [{
 				id: "gear"
@@ -83,7 +85,7 @@ eo.ui.TreeMenu = sp.extend({
 					xtype: "trigger"
 					,enableKeyEvents: true
 					,emptyText: "Filtrer"
-					,width: 100
+					,width: 110
 					,triggerClass : 'x-form-clear-trigger'
 					,onTriggerClick: function() {
 						this.setValue();
@@ -601,6 +603,7 @@ eo.ui.TreeMenu.prototype.TreeNode = Ext.tree.TreeNode.extend({
 
 			return fs.getById(this.data.action_family);
 		}
+		return undefined;
 	}
 
 	,configureIconCls: function() {
