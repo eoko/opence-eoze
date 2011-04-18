@@ -1291,20 +1291,25 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 				} else {
 					Ext.iterate(win.form.getValues(), function(k,v) {
 						requestParams[k] = v;
-					})
+					});
 				}
 			}
 
 			var onSuccess = function(data, response) {
 				//location.href = data.url;
-				if (Ext.isIE6 || Ext.isIE7) {
-					Ext.MessageBox.alert('Fichier', me.templates.download_popup({ // i18n
-						href: response.url
-					}));
+				if (win) win.close();
+				if (Ext.isIE6 || Ext.isIE7 || (Ext.isMac && Ext.isGecko)) {
+					Ext.Msg.alert(
+                'Fichier',
+                String.format(
+                    "Le fichier est disponible à l'adresse suivante : "
+                    + '<a href="{0}">{0}</a>.', 
+                    response.url
+                )
+            );
 				} else {
 					window.open(response.url);
 				}
-				if (win) win.close();
 			};
 
 			if (opts.onSuccess) {
