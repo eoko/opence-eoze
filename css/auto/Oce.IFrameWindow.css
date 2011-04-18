@@ -1,0 +1,7 @@
+.mini-browser-ajax-loader {
+	background: url(images/minibrowser-ajax-loader.gif) no-repeat right center;
+	margin: 0 8px;
+	height: 16px;
+	min-height: 16px;
+	padding-right: 20px !important;
+}

@@ -1,0 +1,200 @@
+# The self section is not inherited by child modules
+self:
+  include:
+    js:
+      dir: js
+      
+abstract: true
+
+module:
+  superclass: Oce.GridModule
+
+options:
+  formPropsFromDB: false
+
+extra:
+  search: true
+  multisort: true
+  year.enabled: false
+  year.selector: false
+  toolbar:
+    %title%: [add,remove]
+    Affichage: [columns]
+    # the following syntax is correct, but this dependance is already declared
+    # in default gridModule actions
+#    Boîte à outil: [pdf,csv,{item: help, depends: hasHelp}]
+    Boîte à outil: [pdf,csv,help]
+  help:
+    factory: eoko.help.IFrameFactory # useless for now, inheritage not implemented
+
+columns-defaults:
+  allowBlank: true
+  extra.search.select: false
+  extra.search.enabled: false
+  # hasardous change...
+#  grid: false
+#  form: false
+#  add: false
+#  edit: false
+
+columns-templates:
+  id:
+    header: "ID"
+    width: 40
+    form: {stick:'top'}
+    hidden: true
+    grid: false
+    load: true
+    edit.hidden: true
+    add: false
+    readOnly: true
+
+  usr_mod:
+    width: 200
+    header: "Modifié par"
+    hidden: true
+    readOnly: true
+    # field visibility, set to true for debug
+    grid: false
+    add: false
+    edit: false
+    form:
+      stick: top
+    type: displayfield
+
+  date:
+    type: datefield
+    form: {format: 'd/m/Y'}
+    renderer: Oce.Format.dateRenderer('d/m/Y')
+
+  date_ex:
+    type: datefield
+    form: {format: 'd/m/Y'}
+    renderer: Oce.Format.dateRenderer('l d F Y')
+
+  date_add:
+    template: date
+    name: 'date_add'
+    header: "Ajouté le"
+#      form: {stick:'top'}
+    hidden: true
+    readOnly: true
+    # field visibility, set to true for debug
+    grid: false
+    type: datedisplayfield
+    add: false
+    edit: false
+    form:
+      stick: top
+      format: d/m/Y H:i:s
+
+  date_mod:
+    template: date
+    name: date_mod
+    header: Modifié le
+    hidden: true
+    add: false
+    readOnly: true
+    type: datedisplayfield
+    # field visibility, set to true for debug
+    grid: false
+    add: false
+    edit: false
+    form:
+      stick: top
+      format: d/m/Y H:i:s
+
+  checkbox:
+    width: 42
+    renderer: Oce.ext.Renderer.actif
+    type: checkbox
+
+  checkbox_TickCross:
+    width: 42
+    renderer: Oce.ext.Renderer.actif
+    type: checkbox
+
+  checkbox_YesNo:
+    tpl: checkbox
+    renderer: Oce.ext.Renderer.yesNo
+
+  checkbox_YesNoStrict:
+    tpl: checkbox
+    renderer: Oce.ext.Renderer.yesNoStrict
+
+  actif:
+    tpl: checkbox
+    name: actif
+#      width: 42
+    header: Actif
+    add.checked: true
+    extra.search.enabled: false
+#      renderer : Oce.ext.Renderer.actif
+#      type: checkbox
+
+  email: {name: 'email', header: 'Email'}
+
+  name:
+    header: Nom
+    extra:
+      search: {select: true}
+
+  firstname:
+    header: Prenom
+    extra.search.select: true
+
+  year:
+    header: Exercice
+    readOnly: true
+    form:
+      readOnly: true
+      stick: top
+    edit:
+#        xtype: hidden
+      hidden: true
+#        readOnly: true
+#      add:
+#        xtype: hidden
+
+  Level:
+    header: Droits d'accès
+    formField: { xtype: 'oce.foreigncombo', column: 'levels_id', controller: 'levels' }
+
+  _comment:
+#    type: htmleditor
+    type: textarea
+    header: Commentaire
+    grid: false
+    add: false
+#      width: 350
+    form: { anchor: 96%, autoScroll: true, maxLength: 300, height: 70}#, width: 150 }
+
+  description:
+    type: htmleditor
+    header: Description
+    grid: false
+    form: { anchor: 96%, autoScroll: true, maxLength: 300, height: 70}#, width: 150 }
+
+  password:
+    width: 100
+    header: Mot de passe #i18n
+    grid: false
+    form:
+      inputType: password
+      minLength: 6
+      maxLength: 15
+    add.allowBlank: false
+    edit.allowBlank: true
+
+  password2:
+    tpl: password
+    header: Confirmation mot de passe #i18n
+    form:
+      vtype: password
+      initialPassFieldName: password
+
+  email:
+    header: Email
+    form:
+      vtype: email
+
