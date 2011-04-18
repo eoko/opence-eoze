@@ -1,5 +1,18 @@
 Ext.ns('Oce');
 
+/**
+ *
+ * beforeCreateWindow(windowConfig, action): must be called before a window
+ * is created, with the config object as argument. This is an opportunity for
+ * customizing components to modify the configuration of any window (to set icon,
+ * for example).
+ *
+ * @todo IMPORTANT the configuration objects for windows are shared between all
+ * GridModule instances. This is very problematic, since that prevent
+ * functionnality providers (plugins) to easily and efficiently customize a
+ * window before its creation.
+ *
+ */
 Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Panel, {
 
 	constructor: function() {
@@ -8,8 +21,6 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 			selectAllText: "Tout sélectionner"
 			,showAllColsText: "Toutes"
 			,tab: null
-//rem			,addWinLayout: 'auto'
-//			,editWinLayout: 'auto'
 		}, this.my || {})
 
 		Ext.apply(this, this.my);
@@ -42,9 +53,19 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 		this.initYearPlugin();
 		this.initFilterPlugin();
 
-		this.initConfiguration();
+		Ext.iterate(this.extra, function(name, config) {
+			var pg = Oce.GridModule.plugins[
+				name.substr(0,1).toUpperCase() + name.substr(1)
+			];
+			if (pg) {
+				this[name + "Plugin"] = new pg(this, config);
+			}
+		});
+//		if (this.extra.iconCls) {
+//			this.iconClsPlugin = new Oce.GridModule.plugins.IconCls(this);
+//		}
 
-//		Oce.GridModule.superclass.constructor.apply(this, arguments);
+		this.initConfiguration();
 	}
 
 	,getExtraModels: function(names, cb) {
@@ -965,6 +986,8 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 		this.parseContextHelpItems(win);
 	}
 
+	,beforeCreateWindow: function(config, action) {}
+
 	,parseContextHelpItems: function(win) {
 		if (!this.hasHelp()) return;
 		var tbar = win.actionToolbar;
@@ -1128,14 +1151,19 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 	 * the same record for edit
 	 */
 	,createEditWindow: function(recordId, cb) {
+		
+		var winConfig = Ext.apply({}, this.applyExtraWinConfig('edit', {
+			 title: this.my.editWindowTitle || (this.title + " : Modifier") // i18n
+			,id: this.editWinId(recordId)
+			,layout: this.my.editWinLayout
+			,refreshable: true
+		}));
+		
+		this.beforeCreateWindow(winConfig, "edit");
+
 		return this.createFormWindow(
 			this.getEditFormConfig(),
-			this.applyExtraWinConfig('edit', {
-				 title: this.my.editWindowTitle || (this.title + " : Modifier") // i18n
-				,id: this.editWinId(recordId)
-				,layout: this.my.editWinLayout
-				,refreshable: true
-			}),
+			winConfig,
 			this.saveEdit,
 			this.editWindowToolbarAddExtra.createDelegate(this),
 			{
@@ -1199,13 +1227,17 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 		var formConfig = Ext.apply({}, this.getAddFormConfig());
 		this.onConfigureAddFormPanel(formConfig);
 
+		var winConfig = Ext.apply({}, this.applyExtraWinConfig('add', {
+			 title: this.my.addWindowTitle || ("Ajouter : " + this.title) // i18n
+			,layout: this.my.addWinLayout
+			,id: this.nextAddWinId()
+		}));
+
+		this.beforeCreateWindow(winConfig, "add");
+
 		return this.createFormWindow(
 			formConfig
-			,this.applyExtraWinConfig('add', {
-				 title: this.my.addWindowTitle || ("Ajouter : " + this.title) // i18n
-				,layout: this.my.addWinLayout
-				,id: this.nextAddWinId()
-			})
+			,winConfig
 			,function(win) {
 				this.saveNew.call(this, win, callback, win.loadModelData);
 			}, this.addWindowToolbarAddExtra.createDelegate(this)
@@ -1806,9 +1838,7 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 			}
 		};
 
-		if (this.extra.toolbar !== false) {
-			tabPanelConfig.tbar = this.getToolbar();
-		}
+		this.beforeCreateTabPanel(tabPanelConfig);
 
 		var tab = new Ext.Panel(tabPanelConfig);
 
@@ -1817,6 +1847,13 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 		(function() {me.doFirstLoad();}).defer(500);
 
 		return tab;
+	}
+
+	,beforeCreateTabPanel: function(config) {
+		// toolbar plugin
+		if (this.extra.toolbar !== false) {
+			config.tbar = this.getToolbar();
+		}
 	}
 
 	,afterInitGrid: function() {}
@@ -2877,5 +2914,52 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 	}
 
 });
+
+Oce.GridModule.plugins = {
+
+	IconCls: eo.Class({
+		constructor: function(gm) {
+			this.gm = gm;
+
+			if (!gm.extra.iconCls) return;
+
+			Ext.apply(gm, {
+
+				beforeCreateWindow: gm.beforeCreateWindow.createSequence(
+					function(config, action) {
+						this.configWindowIcon(config, action);
+					}
+				)
+
+				,beforeCreateTabPanel: gm.beforeCreateTabPanel.createSequence(function(config) {
+					// icon plugin
+					if (this.extra.iconCls) {
+						config.iconCls = this.extra.iconCls;
+					}
+				})
+
+				,getIconCls: function(action) {
+					if (!this.extra.iconCls) {
+						return action || "";
+					} else {
+						return this.extra.iconCls.replace("%action%", action || "");
+					}
+				}
+
+				// functionnality: icon
+				,configWindowIcon: function(config, action) {
+					var ic = this.getIconCls(action),
+						current = config.iconCls;
+					if (current) {
+						config.iconCls = current + " " + ic;
+					} else {
+						config.iconCls = ic;
+					}
+				}
+
+			});
+		}
+	})
+}
 
 Oce.deps.reg('Oce.GridModule');

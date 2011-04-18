@@ -135,6 +135,7 @@
 .ico_building {
 	background-image:url(../images/icons/building.png) !important;
 }
+.ico.user,
 .ico_user {
 	background-image:url(../images/icons/user.png) !important;
 }
@@ -202,6 +203,15 @@
 }
 .ico_telephone {
 	background-image:url(../images/icons/telephone.png) !important;
+}
+.ico.vcard {
+	background-image:url(../images/icons/vcard.png) !important;
+}
+.ico.vcard.add {
+	background-image:url(../images/icons/vcard_add.png) !important;
+}
+.ico.vcard.edit {
+	background-image:url(../images/icons/vcard_edit.png) !important;
 }
 .ico.wrench, .ico_wrench {
 	background-image:url(../images/icons/wrench.png) !important;
