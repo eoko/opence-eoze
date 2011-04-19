@@ -161,6 +161,9 @@
 .ico_help {
 	background-image:url(../images/icons/help.png) !important;
 }
+.ico.layout_content {
+	background-image:url(../images/icons/layout_content.png) !important;
+}
 .ico_male {
 	background-image:url(../images/icons/male.png) !important;
 }
