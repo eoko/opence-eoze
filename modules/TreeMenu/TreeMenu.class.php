@@ -12,9 +12,9 @@ use eoko\cache\Cache;
 use eoko\util\Arrays;
 use eoko\log\Logger;
 
-use rhodia\menu\HasMenuActions;
-use rhodia\menu\MenuAction;
-use rhodia\menu\MenuFamily;
+use eoko\modules\TreeMenu\HasMenuActions;
+use eoko\modules\TreeMenu\MenuAction;
+use eoko\modules\TreeMenu\MenuFamily;
 
 use UserSession;
 use IllegalStateException;

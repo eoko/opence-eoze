@@ -6,7 +6,7 @@
 
 /* Tree menu: makes leaf have a leaf icon, even when collapsed */
 .x-tree-node-collapsed.x-tree-node-leaf .x-tree-node-icon {
-    background-image: url("../images/default/tree/leaf.gif");
+    background-image: url(images/default/tree/leaf.gif);
 }
 
 div.menu-message {
@@ -34,9 +34,10 @@ div.loading-indicator {
 }
 
 .menu.icon-expand-all {
-	background-image: url(../images/icons/ext-tree-expand-all.gif) !important;
+/*	background-image: url(images/icons/ext-tree-expand-all.gif) !important;*/
+	background-image: url(images/ext-tree-expand-all.gif) !important;
 }
 
 .menu.icon-collapse-all {
-	background-image: url(../images/icons/ext-tree-collapse-all.gif) !important;
+	background-image: url(images/ext-tree-collapse-all.gif) !important;
 }

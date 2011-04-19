@@ -107,8 +107,19 @@ class ModuleManager {
 
 				$classPath = substr($class, strlen($location->namespace));
 				$classPath = $location->path . str_replace('\\', DS, $classPath);
-
-				if (file_exists($path = "$classPath$suffix.php")) {
+				
+				$cp2 = $location->path . 'php' . DS . $classPath;
+				$cp2 = substr($class, strlen($location->namespace));
+				$cp2 = str_replace('\\', '/', $cp2);
+				if (preg_match('@^([^/]+)/(.*)$@', $cp2, $m)) {
+					$cp2 = implode(DS, array($m[1], 'php', $m[2]));
+					$cp2 = $location->path . str_replace('/', DS, $cp2);
+				} else {
+					$cp2 = false;
+				}
+				
+				if (file_exists($path = "$classPath$suffix.php")
+						|| $cp2 && file_exists($path = "$cp2$suffix.php")) {
 					require_once $path;
 					return true;
 				}
