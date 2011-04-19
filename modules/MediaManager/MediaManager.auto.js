@@ -85,8 +85,8 @@ NS.MediaManager = eo.Class({
 	,downloadSelected: function() {
 		var mp = this.mediaPanel,
 			sr = mp.getSelectedRecord();
-		debugger
 		if (!sr) return;
+		window.open(sr.json.url);
 	}
 
 	,uploadFile: function(fileSelector, v, path) {
