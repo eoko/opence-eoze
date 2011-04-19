@@ -24,8 +24,9 @@ class TreeMenu extends Module {
 	protected $defaultExecutor = 'json';
 
 	public function getMenuFamilies() {
-		
-		if (null !== $r = Cache::getCachedData(array($this, 'families'))) {
+
+		if ($this->getConfig()->get('useCache', true)
+				&& null !== $r = Cache::getCachedData(array($this, 'families'))) {
 			return $r;
 		}
 		
