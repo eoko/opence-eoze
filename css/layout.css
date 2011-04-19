@@ -23,9 +23,9 @@ body {
 }
 .top_header {
 /* TODO rhodia: restore logo */
-/*	background : #DFE8F6 url('logo.png') no-repeat;*/
+	background : #DFE8F6 url('logo.png') 10px 10px no-repeat;
 	height : 64px;
-	padding-left : 215px;
+	padding-left : 5px;
 	padding-top : 10px;
 	padding-right : 40px;
 	color : #15428B;

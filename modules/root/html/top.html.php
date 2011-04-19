@@ -1,3 +1,5 @@
+<div class="box-left">
+</div>
 <div class="box-right">
     <?php if ($user): ?>
         <h1><?php _('Bonjour %firstname% %lastname%', $user->getPrenom(), $user->getNom()) ?></h1>
