@@ -2936,7 +2936,7 @@ Oce.GridModule.plugins = {
 				,beforeCreateTabPanel: gm.beforeCreateTabPanel.createSequence(function(config) {
 					// icon plugin
 					if (this.extra.iconCls) {
-						config.iconCls = this.extra.iconCls;
+						config.iconCls = this.getIconCls();
 					}
 				})
 
