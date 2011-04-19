@@ -18,7 +18,7 @@ Oce.deps.wait('Oce.GridModule', function() {
 			}
 		})
 
-		,initExtra: Oce.GridModule.prototype.initExtra.createSequence(function() {
+		,initPlugins: Oce.GridModule.prototype.initPlugins.createSequence(function() {
 			if (this.extra.mergeDoublons) {
 				Ext.applyIf(this.extra.mergeDoublons, {
 					itemName: 'enregistrement'
@@ -88,8 +88,7 @@ Oce.deps.wait('Oce.GridModule', function() {
 				}
 			}
 
-//			win = this.mergeDoublonsWin = new Oce.FormWindow({
-			win = this.mergeDoublonsWin = new eo.Window({
+			win = this.mergeDoublonsWin = new Oce.FormWindow({
 				title: 'Fusionner des ' + itemNamePlural // i18n
 				,formPanel: {
 					xtype: 'oce.form'
