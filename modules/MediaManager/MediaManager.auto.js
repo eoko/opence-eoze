@@ -39,11 +39,16 @@ NS.MediaManager = eo.Class({
 							,scope: this
 						}
 					})
-				}), "|", {
+				}), "-", {
 					xtype: "button"
 					,text: "Supprimer"
 					,iconCls: "ico cross"
 					,handler: this.deleteSelected.createDelegate(this)
+				}, "-", {
+					xtype: "button"
+					,text: "Télécharger"
+					,iconCls: "ico download"
+					,handler: this.downloadSelected.createDelegate(this)
 				}]
 			})
 			,listeners: {
@@ -75,6 +80,13 @@ NS.MediaManager = eo.Class({
 				mp.reload();
 			}
 		});
+	}
+	
+	,downloadSelected: function() {
+		var mp = this.mediaPanel,
+			sr = mp.getSelectedRecord();
+		debugger
+		if (!sr) return;
 	}
 
 	,uploadFile: function(fileSelector, v, path) {

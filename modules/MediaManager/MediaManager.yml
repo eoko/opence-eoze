@@ -3,6 +3,9 @@ abstract: true
 class: GridModule
 model: User
 
+basePath: medias
+baseUrl: medias
+
 extra:
   search: false
   multisort: false

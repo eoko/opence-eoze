@@ -76,7 +76,11 @@ class Module implements file\Finder {
 
 		$this->pathsUrl = $location->directory->getLineagePathsUrl($lineage);
 		$this->lineageLocations = $location->directory->getLineageLocations($lineage);
+		
+		$this->construct();
 	}
+	
+	protected function construct() {}
 
 	private function getParentNames($includeSelf) {
 		$parents = array();
