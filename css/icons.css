@@ -204,6 +204,9 @@
 .ico_arrow_inout {
 	background-image:url(../images/icons/arrow_inout.png) !important;
 }
+.ico.star {
+	background-image:url(../images/icons/star.png) !important;
+}
 .ico_telephone {
 	background-image:url(../images/icons/telephone.png) !important;
 }

@@ -41,3 +41,11 @@ div.loading-indicator {
 .menu.icon-collapse-all {
 	background-image: url(images/ext-tree-collapse-all.gif) !important;
 }
+
+/** Combo Icon */
+.x-icon-combo-icon {
+    background-repeat: no-repeat;
+    background-position: 0 50%;
+    width: 16px;
+    height: 16px;
+}

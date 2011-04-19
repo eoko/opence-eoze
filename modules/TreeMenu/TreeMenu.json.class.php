@@ -97,4 +97,17 @@ class Json extends JsonExecutor {
 
 		return $node->id;
 	}
+	
+	public function listIcons() {
+		$this->data = array(array(
+			'id' => 1,
+			'class' => 'ico star',
+			'label' => 'Étoile',
+		), array(
+			'id' => 2,
+			'class' => 'ico user',
+			'label' => 'Utilisateur',
+		));
+		return true;
+	}
 }

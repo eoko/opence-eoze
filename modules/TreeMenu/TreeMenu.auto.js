@@ -11,7 +11,7 @@ eo.ui.TreeMenu = sp.extend({
 	,filter: true
 	
 	,initEvents: function() {
-		this.addEvents(["actionsloaded"]);
+		this.addEvents(["actionsloaded", "ready"]);
 		spp.initEvents.apply(this, arguments);
 	}
 	
@@ -260,6 +260,16 @@ eo.ui.TreeMenu = sp.extend({
 			fields: ["id", "label", "color", "command", "expanded"]
 		});
 		
+		var iconStore = new Ext.data.JsonStore({
+			fields: ["id", "class", "label"]
+			,url: "index.php"
+			,root: "data"
+			,baseParams: {
+				controller: this.controller
+				,action: "listIcons"
+			}
+		});
+		
 		if (!!data.action_family) {
 			var fam = this.availableActions[data.action_family];
 			if (fam) {
@@ -337,6 +347,18 @@ eo.ui.TreeMenu = sp.extend({
 				,fieldLabel: "command"
 				,value: data.command
 			},{
+//				xtype: "iconcombo"
+//				,name: "icon"
+//				,fieldLabel: "Icône"
+//				,triggerAction: "all"
+//				,store: iconStore
+//				,mode: "remote"
+//				,displayField: "label"
+//				,valueField: "class"
+//				,value: data.icon
+//				,pageSize: 10
+//				,iconClsField: "class"
+//			},{
 				xtype: "colorpicker"
 				,name: "color"
 				,fieldLabel: "Couleur"
@@ -411,6 +433,21 @@ eo.ui.TreeMenu = sp.extend({
 		if (this.hasLoadingMask) this.setLoadingMask(true);
 	}
 	
+	,loadingLatch: 0
+	
+	,addLoading: function() {
+		if (++this.loadingLatch) {
+			this.setLoadingMask(true);
+		}
+	}
+	
+	,removeLoading: function() {
+		if (!--this.loadingLatch) {
+			this.setLoadingMask(false);
+			this.setReady();
+		}
+	}
+	
 	,setLoadingMask: function(set) {
 		var el = this.body;
 		if (set) {
@@ -435,9 +472,24 @@ eo.ui.TreeMenu = sp.extend({
 		}
 	}
 	
+	,whenReady: function(fn, scope) {
+		if (this.ready) {
+			fn.call(scope || this);
+		} else {
+			this.on("ready", fn, scope, { single: true });
+		}
+	}
+	
+	,setReady: function() {
+		if (!this.ready) {
+			this.ready = true;
+			this.fireEvent("ready");
+		}
+	}
+	
 	,load: function() {
 
-		this.setLoadingMask(true);
+		this.addLoading();
 		
 		Oce.Ajax.request({
 			params: {
@@ -445,11 +497,13 @@ eo.ui.TreeMenu = sp.extend({
 				,action: "loadUserMenu"
 			}
 			,onSuccess: function(data) {
-				this.setLoadingMask(false);
-				this.loadNodeData(data);
+				this.removeLoading();
+				this.whenReady(function() {
+					this.loadNodeData(data);
+				});
 			}.createDelegate(this)
 			,onFailure: function() {
-				this.setLoadingMask(false);
+				this.removeLoading();
 				var a = Ext.get(Ext.DomHelper.createDom({
 					tag: "a"
 					,html: "Réessayer"
@@ -484,6 +538,7 @@ eo.ui.TreeMenu = sp.extend({
 		
 		var me = this;
 		
+		this.addLoading();
 		Oce.Ajax.request({
 			params: {
 				controller: this.controller
@@ -492,9 +547,11 @@ eo.ui.TreeMenu = sp.extend({
 			,onSuccess: function(data) {
 				me.availableActions = data.families;
 				me.createActionStores();
+				me.removeLoading();
 				me.fireEvent("actionsloaded", me, me.availableActions);
 			}
 			,onFaillure: function() {
+				me.removeLoading();
 				delete me.availableActions;
 			}
 		});
