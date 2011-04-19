@@ -18,7 +18,7 @@ Oce.deps.wait('Oce.GridModule', function() {
 			}
 		})
 
-		,initExtra: Oce.GridModule.prototype.initExtra.createSequence(function() {
+		,initPlugins: Oce.GridModule.prototype.initPlugins.createSequence(function() {
 			if (this.extra.mergeMembers) {
 				Ext.applyIf(this.extra.mergeMembers, {
 					itemName: 'enregistrement'

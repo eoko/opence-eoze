@@ -147,7 +147,7 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 
 	// TODO REM
 	,initExtra: function() {
-		throw new Error('DEPRECATED');
+		throw new Error('DEPRECATED (use initPlugins)');
 	}
 
 //	,activeAddWindows: {}

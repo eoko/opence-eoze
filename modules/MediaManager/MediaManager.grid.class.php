@@ -10,12 +10,32 @@ use SecurityException;
 
 class Grid extends GridBase {
 
-	private static $path = MEDIA_PATH;
-	private static $baseUrl = MEDIA_BASE_URL;
+	private static $path;
+	private static $baseUrl;
 
 	/** @var DataStore */
 	private static $store = null;
 
+	protected function construct() {
+		parent::construct();
+		if (null !== $path = $this->getConfig()->get('basePath')) {
+			self::$path = ROOT . $path . DS;
+		} else if (defined(MEDIA_PATH)) {
+			Logger::get($this)->error('Deprecated feature flagged for imminent removal');
+			self::$path = MEDIA_PATH;
+		}
+		if (null !== $url = $this->getConfig()->get('baseUrl')) {
+			self::$baseUrl = SITE_BASE_URL . $url . '/';
+		} else if (defined(MEDIA_BASE_URL)) {
+			Logger::get($this)->error('Deprecated feature flagged for imminent removal');
+			self::$baseUrl = MEDIA_BASE_URL;
+		}
+	}
+	
+	private function getConfig() {
+		return $this->getModule()->getConfig();
+	}
+	
 	protected static function getModelName() {
 		return null;
 	}
@@ -41,7 +61,7 @@ class Grid extends GridBase {
 		foreach (Files::listFiles($path, '/^[^.]/', false, Files::LF_PATH_ABS_REL) as $entry) {
 			list($rel, $abs) = $entry;
 			//$url = $baseUrl . $rel;
-			$url = "media/$urlPath$rel";
+			$url = self::$baseUrl . "/$urlPath$rel";
 			$rows[] = array(
 				'id' => $nextId++,
 				'name' => "<a href=\"$url\">$rel</a>",
