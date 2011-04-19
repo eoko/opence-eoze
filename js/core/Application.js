@@ -25,10 +25,10 @@ Oce.MainApplication = {
 		} else {
 			var me = this;
 			var previousCursor = Ext.getBody().getStyle("cursor");
-			Ext.getBody().setStyle("cursor", "wait");
+//			Ext.getBody().setStyle("cursor", "wait");
 			Oce.getModuleByName(moduleName,
 				function(module) {
-					Ext.getBody().setStyle("cursor", previousCursor);
+//					Ext.getBody().setStyle("cursor", previousCursor);
 					if (callback) {
 						try {
 							callback(
