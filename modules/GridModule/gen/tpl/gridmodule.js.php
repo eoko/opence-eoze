@@ -79,7 +79,7 @@ return moduleClass;
 <?php endif ?>
 <?php foreach ($renderer['values'] as $k => $v): ?>
 <?php echo $sep; $sep = ",\n" ?>
-				[<?php echo $k ?>, "<?php echo $v['text'] ?>"]<?php ?>
+				[<?php echo $k ?>, "<?php echo isset($v['text']) ? $v['text'] : '' ?>"]<?php ?>
 <?php endforeach ?>
 
 			];
