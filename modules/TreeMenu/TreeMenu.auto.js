@@ -347,18 +347,18 @@ eo.ui.TreeMenu = sp.extend({
 				,fieldLabel: "command"
 				,value: data.command
 			},{
-//				xtype: "iconcombo"
-//				,name: "icon"
-//				,fieldLabel: "Icône"
-//				,triggerAction: "all"
-//				,store: iconStore
-//				,mode: "remote"
-//				,displayField: "label"
-//				,valueField: "class"
-//				,value: data.icon
-//				,pageSize: 10
-//				,iconClsField: "class"
-//			},{
+				xtype: "iconcombo"
+				,name: "iconCls"
+				,fieldLabel: "Icône"
+				,triggerAction: "all"
+				,store: iconStore
+				,mode: "remote"
+				,displayField: "label"
+				,valueField: "class"
+				,value: data.iconCls
+				,pageSize: 10
+				,iconClsField: "class"
+			},{
 				xtype: "colorpicker"
 				,name: "color"
 				,fieldLabel: "Couleur"
@@ -611,7 +611,7 @@ eo.ui.TreeMenu.prototype.TreeNode = Ext.tree.TreeNode.extend({
 			,draggable: true
 		};
 
-		this.configureIconCls();
+		this.configureIconCls(d.iconCls);
 		cfg.iconCls = this.iconCls;
 		
 		this.spp.constructor.call(this, Ext.apply(cfg, config));
@@ -663,9 +663,9 @@ eo.ui.TreeMenu.prototype.TreeNode = Ext.tree.TreeNode.extend({
 		return undefined;
 	}
 
-	,configureIconCls: function() {
+	,configureIconCls: function(myic) {
 		var fam = this.getActionFamily(arguments.callee.createDelegate(this)),
-			fic = fam && fam.get("iconCls");
+			fic = myic || fam && fam.get("iconCls");
 		if (fic) {
 			var ic = ic = this.iconCls || "" + " "
 				+ fic.replace('%action%', this.data.action || "");
@@ -723,10 +723,19 @@ eo.ui.TreeMenu.prototype.TreeNode = Ext.tree.TreeNode.extend({
 		}
 	}
 	
+	,setItemIconCls: function(iconCls) {
+		debugger
+		if (iconCls !== this.data.iconCls) {
+			this.data.iconCls = iconCls;
+			this.setIconCls(iconCls);
+		}
+	}
+	
 	,update: function(data) {
 		this.setLabel(data.label);
 		this.setColor(data.color);
 		this.setCommand(data.command);
+		this.setItemIconCls(data.iconCls);
 		Ext.apply(this.data, {
 			action_family: data.action_family
 			,action: data.action
