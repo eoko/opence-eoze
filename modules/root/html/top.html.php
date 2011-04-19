@@ -13,3 +13,16 @@
         <h1><?php _("Problème d'identification") ?></h1>
     <?php endif ?>
 </div>
+<script type="text/javascript">
+	Ext.onReady(function() {
+		Ext.get("l_disco").addListener("click", function() {
+			Oce.Ajax.request({
+				waitMsg: true,
+				params: {action: 'logout'},
+				onSuccess: function() {
+					window.location = 'index.php'
+				}
+			});
+		})
+	});
+</script>
