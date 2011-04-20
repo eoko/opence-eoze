@@ -724,8 +724,11 @@ eo.ui.TreeMenu.prototype.TreeNode = Ext.tree.TreeNode.extend({
 	}
 	
 	,setItemIconCls: function(iconCls) {
-		debugger
 		if (iconCls !== this.data.iconCls) {
+			var el = Ext.get(this.getUI().getIconEl());
+			if (el) {
+				el.removeClass(this.data.iconCls.split(" "));
+			}
 			this.data.iconCls = iconCls;
 			this.setIconCls(iconCls);
 		}
