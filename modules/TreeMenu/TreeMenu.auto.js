@@ -75,6 +75,61 @@ eo.ui.TreeMenu = sp.extend({
 					,iconCls: "ico delete"
 				}]
 			})
+			
+			,iconStore: new Ext.ux.data.PagingStore({
+				url: "index.php"
+				,autoLoad: false
+				,baseParams: {
+					controller: this.controller
+					,action: "listIcons"
+				}
+				
+				,reader: new Ext.data.JsonReader({
+					fields: ["id", "class", "label"]
+					,root: "data"
+				})
+				
+				,whenLoaded: function(cb, scope) {
+					if (this.firstLoadDone) {
+						cb.call(scope || this, this);
+					} else {
+						this.addLoadingWaiter(cb, scope);
+						
+						if (!this.loading) {
+							this.loading = true
+							this.on({
+								load: {
+									fn: function(store) {
+										store.firstLoadDone = true;
+										store.onFirstLoad();
+									}
+									,single: true
+								}
+							});
+							this.load();
+						}
+					}
+				}
+				
+				// private
+				,addLoadingWaiter: function(cb, scope) {
+					var list = this.loadingWaiters = this.loadingWaiters || [];
+					if (scope) cb = cb.createDelegate(scope);
+					list.push(cb);
+				}
+				
+				// private
+				,onFirstLoad: function() {
+					this.loading = false;
+					this.firstLoadDone = true;
+					var wl = this.loadingWaiters; // waiting list
+					if (wl) {
+						Ext.each(wl, function(w) {
+							w.call(this, this);
+						}, this);
+					}
+				}
+			})
 		});
 
 		// search
@@ -260,16 +315,6 @@ eo.ui.TreeMenu = sp.extend({
 			fields: ["id", "label", "color", "command", "expanded"]
 		});
 		
-		var iconStore = new Ext.data.JsonStore({
-			fields: ["id", "class", "label"]
-			,url: "index.php"
-			,root: "data"
-			,baseParams: {
-				controller: this.controller
-				,action: "listIcons"
-			}
-		});
-		
 		if (!!data.action_family) {
 			var fam = this.availableActions[data.action_family];
 			if (fam) {
@@ -338,9 +383,6 @@ eo.ui.TreeMenu = sp.extend({
 				,fieldLabel: "Label"
 				,allowBlank: false
 				,value: data.label
-//			},{
-//				xtype: "oce.foreigncombo"
-//				,fieldLabel: "Icône"
 			},{
 				xtype: "hidden"
 				,name: "command"
@@ -353,14 +395,24 @@ eo.ui.TreeMenu = sp.extend({
 					xtype: "iconcombo"
 					,name: "iconCls"
 					,triggerAction: "all"
-					,store: iconStore
-					,mode: "remote"
+					,store: this.iconStore
+					,mode: "local"
 					,displayField: "label"
 					,valueField: "class"
-					,value: data.iconCls
+//					,value: data.iconCls
 					,pageSize: 10
 					,iconClsField: "class"
 					,flex: 1
+					,listeners: {
+						beforerender: function(f) {
+							if (data.iconCls) {
+								this.iconStore.whenLoaded(function() {
+									f.setValue(data.iconCls);
+								});
+							}
+						}
+						,scope: this
+					}
 				},{
 					xtype: "button"
 					,iconCls: "ico cross"
