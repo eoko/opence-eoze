@@ -347,17 +347,28 @@ eo.ui.TreeMenu = sp.extend({
 				,fieldLabel: "command"
 				,value: data.command
 			},{
-				xtype: "iconcombo"
-				,name: "iconCls"
+				xtype: "compositefield"
 				,fieldLabel: "Icône"
-				,triggerAction: "all"
-				,store: iconStore
-				,mode: "remote"
-				,displayField: "label"
-				,valueField: "class"
-				,value: data.iconCls
-				,pageSize: 10
-				,iconClsField: "class"
+				,items: [{
+					xtype: "iconcombo"
+					,name: "iconCls"
+					,triggerAction: "all"
+					,store: iconStore
+					,mode: "remote"
+					,displayField: "label"
+					,valueField: "class"
+					,value: data.iconCls
+					,pageSize: 10
+					,iconClsField: "class"
+					,flex: 1
+				},{
+					xtype: "button"
+					,iconCls: "ico cross"
+					,handler: function() {
+						var f = formPanel.form;
+						f.findField("iconCls").setValue();
+					}
+				}]
 			},{
 				xtype: "colorpicker"
 				,name: "color"
@@ -383,6 +394,7 @@ eo.ui.TreeMenu = sp.extend({
 						node.update(Ext.apply(form.getFieldValues(), {
 							action_family: form.findField("action_family").getValue()
 							,action: form.findField("action").getValue()
+							,iconCls: form.findField("iconCls").getValue() || null
 						}));
 						node.save();
 						win.close();
@@ -725,12 +737,20 @@ eo.ui.TreeMenu.prototype.TreeNode = Ext.tree.TreeNode.extend({
 	
 	,setItemIconCls: function(iconCls) {
 		if (iconCls !== this.data.iconCls) {
+			// Remove class in the node element
 			var el = Ext.get(this.getUI().getIconEl());
-			if (el) {
-				el.removeClass(this.data.iconCls.split(" "));
+			Ext.each([this.data.iconCls, this.iconCls], function(previous) {
+				if (previous && el) el.removeClass(previous.split(" "));
+			}, this);
+			// Update with the new iconCls. If a blank value is submitted, then
+			// we try to restore the default action icon.
+			this.data.iconCls = iconCls || null;
+			if (iconCls === undefined || iconCls === null) {
+				delete this.iconCls;
+				this.configureIconCls();
+			} else {
+				this.setIconCls(iconCls);
 			}
-			this.data.iconCls = iconCls;
-			this.setIconCls(iconCls);
 		}
 	}
 	
