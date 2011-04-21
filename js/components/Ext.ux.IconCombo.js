@@ -5,7 +5,8 @@ Ext.namespace('Ext.ux.form');
   * Ext.ux.form.IconCombo Extension Class
   *
   * @author  Jozef Sakalos
-  * @version 1.0
+  * @author  Éric Ortéga <eric@planysphere.fr>
+  * @version 1.0.1
   *
   * @class Ext.ux.form.IconCombo
   * @extends Ext.form.ComboBox
@@ -35,6 +36,11 @@ Ext.ux.form.IconCombo = function(config) {
             this.flag = Ext.DomHelper.append(wrap, {
                 tag: 'div', style:'position:absolute'
             });
+			var fcn = this.onRenderFlagClassName;
+			if (fcn) {
+				this.flag.className = fcn;
+				delete this.onRenderFlagClassName;
+			}
         }}
     });
 } // end of Ext.ux.form.IconCombo constructor
@@ -45,7 +51,13 @@ Ext.extend(Ext.ux.form.IconCombo, Ext.form.ComboBox, {
     setIconCls: function() {
         var rec = this.store.query(this.valueField, this.getValue()).itemAt(0);
         if(rec) {
-            this.flag.className = 'x-icon-combo-icon ' + rec.get(this.iconClsField);
+			var flag = this.flag,
+				c = 'x-icon-combo-icon ' + rec.get(this.iconClsField);
+			if (flag) {
+				flag.className = c;
+			} else {
+				this.onRenderFlagClassName = c;
+			}
         }
     },
  
