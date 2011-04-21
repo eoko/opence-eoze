@@ -91,9 +91,9 @@ eo.ui.TreeMenu = sp.extend({
 				
 				,whenLoaded: function(cb, scope) {
 					if (this.firstLoadDone) {
-						cb.call(scope || this, this);
+						if (cb) cb.call(scope || this, this);
 					} else {
-						this.addLoadingWaiter(cb, scope);
+						if (cb) this.addLoadingWaiter(cb, scope);
 						
 						if (!this.loading) {
 							this.loading = true
