@@ -405,11 +405,11 @@ eo.ui.TreeMenu = sp.extend({
 					,flex: 1
 					,listeners: {
 						beforerender: function(f) {
+							var cb;
 							if (data.iconCls) {
-								this.iconStore.whenLoaded(function() {
-									f.setValue(data.iconCls);
-								});
+								cb = function() { f.setValue(data.iconCls); }
 							}
+							this.iconStore.whenLoaded(cb);
 						}
 						,scope: this
 					}

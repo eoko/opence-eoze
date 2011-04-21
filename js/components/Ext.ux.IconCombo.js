@@ -48,17 +48,34 @@ Ext.ux.form.IconCombo = function(config) {
 // extend
 Ext.extend(Ext.ux.form.IconCombo, Ext.form.ComboBox, {
  
+//    setIconCls: function() {
+//        var rec = this.store.query(this.valueField, this.getValue()).itemAt(0);
+//        if(rec) {
+//			var flag = this.flag,
+//				c = 'x-icon-combo-icon ' + rec.get(this.iconClsField);
+//			if (flag) {
+//				flag.className = c;
+//			} else {
+//				this.onRenderFlagClassName = c;
+//			}
+//        }
+//    },
     setIconCls: function() {
-        var rec = this.store.query(this.valueField, this.getValue()).itemAt(0);
-        if(rec) {
-			var flag = this.flag,
-				c = 'x-icon-combo-icon ' + rec.get(this.iconClsField);
-			if (flag) {
-				flag.className = c;
-			} else {
-				this.onRenderFlagClassName = c;
-			}
-        }
+		var v = this.getValue(),
+			flag = this.flag,
+			c;
+		
+		if (v) {
+			var rec = this.store.query(this.valueField, this.getValue()).itemAt(0);
+			c = 'x-icon-combo-icon ' + (rec ? rec.get(this.iconClsField) : "");
+		} else {
+			c = "";
+		}
+		if (flag) {
+			flag.className = c;
+		} else {
+			this.onRenderFlagClassName = c;
+		}
     },
  
     setValue: function(value) {
