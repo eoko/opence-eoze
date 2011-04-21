@@ -21,3 +21,4 @@ used:
     - CrocodocViewer
     - AccessControl
     - TreeMenu
+    - IconProvider
