@@ -1,0 +1,8 @@
+wrapper: wrapper.js.php
+main: %module%.main.js
+
+jsNamespace: Oce.Modules
+moduleJsVarName: MODULE
+
+extra:
+  iconCls: ico %module% %action%
