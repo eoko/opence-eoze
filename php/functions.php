@@ -166,7 +166,8 @@ function class_extend($newClassName, $baseClassName, $namespace = null, $execute
 
 	if ($execute) {
 		if (false === eval($code)) {
-		 dump_trace();
+//DBG			echo 'class_extend code failed: ' . $code;
+//			dump_trace();
 			throw new IllegalStateException('class_extend code failed: ' . $code);
 		}
 	}
