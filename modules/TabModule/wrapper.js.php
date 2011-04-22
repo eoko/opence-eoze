@@ -2,9 +2,10 @@
 
 var <?php echo $var ?> = eo.Class({
 
-	open: function() {
+	open: function(destination) {
 		if (!this.tab) {
-			Oce.mx.application.getMainDestination().add(this.createTab());
+			destination = destination || Oce.mx.application.getMainDestination();
+			destination.add(this.createTab());
 		}
 		this.tab.show();
 	}
