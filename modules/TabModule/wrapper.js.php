@@ -18,6 +18,7 @@ var <?php echo $var ?> = eo.Class({
 	,createTab: function() {
 		var tab = this.tab = Ext.create(this.createTabConfig());
 		tab.on('close', function() {
+		debugger
 			delete this.tab;
 		}, this);
 		return tab;
