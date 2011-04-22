@@ -38,7 +38,7 @@ class TreeMenu extends Module {
 				
 				$family = $module->getFamily();
 				
-				if ($family !== null) {
+				if ($family !== null && $family !== false) {
 					$r[$family->getId()] = $family;
 				}
 			}
