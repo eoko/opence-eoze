@@ -22,3 +22,4 @@ used:
     - AccessControl
     - TreeMenu
     - IconProvider
+    - TabModule
