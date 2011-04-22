@@ -151,4 +151,3 @@ class ShellEoze extends ShellCore {
 ////var_dump($s);
 //
 //echo $msg->get_arg('name');
-?>  

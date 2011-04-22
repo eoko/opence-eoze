@@ -584,4 +584,3 @@ class ShellCore extends ShellLib {
 
 $a = new ShellCore();
 
-?>
