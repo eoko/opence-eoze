@@ -1,6 +1,10 @@
 /*
- * PagingStore for Ext 3.2 - v0.5
+ * PagingStore for Ext 3.2 - v0.5.1-rx
  * http://www.sencha.com/forum/showthread.php?71532-Ext.ux.data.PagingStore-v0.5
+ * 
+ * rx 25/04/11 16:48: fixed overriding of prototype's constructors (the way
+ * base classes where extented made Ext.extend replace the superclass of
+ * Ext.data.JsonStore, etc.)
  */
 Ext.ns('Ext.ux.data');
 Ext.ux.data.PagingStore = Ext.extend(Ext.data.Store, {
@@ -409,22 +413,30 @@ Ext.ux.data.PagingStore = Ext.extend(Ext.data.Store, {
 });
 
 Ext.ux.data.PagingDirectStore = Ext.extend(Ext.ux.data.PagingStore, {
-    constructor: Ext.data.DirectStore.prototype.constructor
+    constructor: function() {
+		Ext.data.DirectStore.prototype.constructor.apply(this, arguments);
+	}
 });
 Ext.reg('pagingdirectstore', Ext.ux.data.PagingDirectStore);
 
 Ext.ux.data.PagingJsonStore = Ext.extend(Ext.ux.data.PagingStore, {
-    constructor: Ext.data.JsonStore.prototype.constructor
+    constructor: function() {
+		Ext.data.JsonStore.prototype.constructor.apply(this, arguments);
+	}
 });
 Ext.reg('pagingjsonstore', Ext.ux.data.PagingJsonStore);
 
 Ext.ux.data.PagingXmlStore = Ext.extend(Ext.ux.data.PagingStore, {
-    constructor: Ext.data.XmlStore.prototype.constructor
+    constructor: function() {
+		Ext.data.XmlStore.prototype.constructor.apply(this, arguments);
+	}
 });
 Ext.reg('pagingxmlstore', Ext.ux.data.PagingXmlStore);
 
 Ext.ux.data.PagingArrayStore = Ext.extend(Ext.ux.data.PagingStore, {
-    constructor: Ext.data.ArrayStore.prototype.constructor,
+    constructor: function() {
+		Ext.data.ArrayStore.prototype.constructor.apply(this, arguments);
+	},
     loadData: function (data, append) {
         if (this.expandData === true) {
             var r = [];
