@@ -803,7 +803,7 @@ eo.ui.TreeMenu.prototype.TreeNode = Ext.tree.TreeNode.extend({
 	}
 	
 	,setItemIconCls: function(iconCls) {
-		if (iconCls !== this.data.iconCls) {
+		if (iconCls !== this.data.iconCls || this.isNew()) {
 			// Remove class in the node element
 			var el = Ext.get(this.getUI().getIconEl());
 			Ext.each([this.data.iconCls, this.iconCls], function(previous) {
@@ -822,15 +822,17 @@ eo.ui.TreeMenu.prototype.TreeNode = Ext.tree.TreeNode.extend({
 	}
 	
 	,update: function(data) {
-		this.setLabel(data.label);
-		this.setColor(data.color);
-		this.setCommand(data.command);
-		this.setItemIconCls(data.iconCls);
 		Ext.apply(this.data, {
 			action_family: data.action_family
 			,action: data.action
 			,expanded: !!data.expanded
 		});
+		this.setLabel(data.label);
+		this.setColor(data.color);
+		this.setCommand(data.command);
+		// action family is used to set iconCls, so the next call must be
+		// done after having set data.action_family
+		this.setItemIconCls(data.iconCls);
 	}
 
 	,isNew: function() {
