@@ -311,7 +311,6 @@ eo.ui.TreeMenu = sp.extend({
 		// parentNode is set only when it is an add window
 		if (config.parentNode) {
 			node.setCreationParent(config.parentNode)
-			node.phantom = true;
 		}
 		
 		var actionStore = new Ext.data.JsonStore({
@@ -777,6 +776,7 @@ eo.ui.TreeMenu.prototype.TreeNode = Ext.tree.TreeNode.extend({
 		});
 
 		this.futureParentNode = node;
+		this.phantom = true;
 	}
 	
 	,render: function() {
@@ -893,6 +893,11 @@ eo.ui.TreeMenu.prototype.TreeNode = Ext.tree.TreeNode.extend({
 				if (cb) cb();
 			}
 		});
+	}
+	
+	,setId: function(id) {
+		this.spp.setId.call(this, id);
+		this.data.id = id;
 	}
 	
 	,save: function() {
