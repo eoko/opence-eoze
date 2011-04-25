@@ -73,6 +73,8 @@ eo.ui.TreeMenu = sp.extend({
 				},{
 					text: "Supprimer"
 					,iconCls: "ico delete"
+					,handler: this.onNodeRemove
+					,scope: this
 				}]
 			})
 			
@@ -309,6 +311,7 @@ eo.ui.TreeMenu = sp.extend({
 		// parentNode is set only when it is an add window
 		if (config.parentNode) {
 			node.setCreationParent(config.parentNode)
+			node.phantom = true;
 		}
 		
 		var actionStore = new Ext.data.JsonStore({
@@ -321,6 +324,7 @@ eo.ui.TreeMenu = sp.extend({
 				actionStore.loadData(eo.hashToArray(fam.actions));
 			} else {
 				Ext.Msg.alert("Le module utilisé par cette action n'existe pas (ou plus).");
+				return null;
 			}
 		}
 		
@@ -469,7 +473,8 @@ eo.ui.TreeMenu = sp.extend({
 			,title: "Édition du menu"
 			,iconCls: "ico application_form_edit"
 		});
-		win.show();
+		// if an error has occured, no win is returned
+		if (win) win.show();
 	}
 	
 	// private
@@ -480,7 +485,17 @@ eo.ui.TreeMenu = sp.extend({
 			,iconCls: "ico add"
 			,parentNode: this.contextMenu.node
 		});
-		win.show();
+		// if an error has occured, no win is returned
+		if (win) win.show();
+	}
+	
+	// private
+	,onNodeRemove: function() {
+		var n = this.contextMenu.node;
+		if (n) {
+			n.remove();
+			this.contextMenu.node = null;
+		}
 	}
 	
 	// private
@@ -819,7 +834,7 @@ eo.ui.TreeMenu.prototype.TreeNode = Ext.tree.TreeNode.extend({
 	}
 
 	,isNew: function() {
-		return !!this.futureParentNode;
+		return !!this.phantom;
 	}
 
 	/**
@@ -869,8 +884,11 @@ eo.ui.TreeMenu.prototype.TreeNode = Ext.tree.TreeNode.extend({
 					throw new Error("Desynchro :(");
 				}
 				me.setId(o.id);
+				delete me.phantom;
 				for (var i=0,l=childNodes.length; i<l; i++) {
-					childNodes[i].setId(o.childrenIds[i]);
+					var cn = childNodes[i]
+					cn.setId(o.childrenIds[i]);
+					delete cn.phantom;
 				}
 				if (cb) cb();
 			}
@@ -898,7 +916,24 @@ eo.ui.TreeMenu.prototype.TreeNode = Ext.tree.TreeNode.extend({
 						})
 					)
 				}
+				,onSuccess: function() {
+					delete this.phantom;
+				}.createDelegate(this)
 			});
+		}
+	}
+	
+	,remove: function() {
+		this.spp.remove.apply(this, arguments);
+		// to server
+		if (!this.isNew()) {
+			Oce.Ajax.request({
+				params: {
+					controller: this.ownerTreeMenu.controller
+					,action: "deleteNode"
+					,nodeId: this.data.id
+				}
+			})
 		}
 	}
 });
