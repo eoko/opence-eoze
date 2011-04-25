@@ -37,7 +37,7 @@ class Json extends JsonExecutor {
 		foreach ($this->getModule()->getMenuFamilies() as $family) {
 			$families[$family->getId()] = $family->toArray(false);
 		}
-		usort($families, function($f1, $f2) {
+		uasort($families, function($f1, $f2) {
 			$l1 = isset($f1['label']) ? $f1['label'] : null;
 			$l2 = isset($f2['label']) ? $f2['label'] : null;
 			return strnatcasecmp($l1, $l2);
@@ -113,5 +113,9 @@ class Json extends JsonExecutor {
 			throw new \MissingConfigurationException(get_class($this), 'iconProvider');
 		}
 		$this->forward("$iconProvider.json", 'getIconList');
+	}
+	
+	public function deleteNode() {
+		return MenuNodeTable::delete($this->request->req('nodeId'));
 	}
 }
