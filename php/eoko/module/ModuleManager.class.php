@@ -142,7 +142,6 @@ class ModuleManager {
 		$self = self::getInstance();
 		$config = ConfigManager::get(__NAMESPACE__);
 		
-//		dump($config);
 		$r = array();
 
 		foreach (self::$modulesDirectories as $modulesDir) {
@@ -150,6 +149,13 @@ class ModuleManager {
 			$usedModules = isset($config['used'][$modulesDir->name]) ? $config['used'][$modulesDir->name] : null;
 			foreach($modulesDir->listModules($usedModules, $onlyWithDir) as $module) {
 				$r[$module->getName()] = $module;
+			}
+		}
+		
+		// Children modules
+		foreach ($r as $module) {
+			if ($module instanceof HasChildrenModules) {
+				$r = array_merge($r, $module->listChildrenModules());
 			}
 		}
 
