@@ -232,6 +232,10 @@ if (ConfigManager::get('eoko/log/appenders/FirePHP')) {
 	Logger::addAppender(new LoggerFirePHPAppender());
 }
 
+if (null !== $level = ConfigManager::get('eoko/log', 'level', null)) {
+	Logger::getLogger()->setLevel(constant("Logger::$level"));
+}
+
 if (!defined('ADD_LOG_APPENDERS') || ADD_LOG_APPENDERS) {
 	if (ConfigManager::get('eoko/log/appenders/File')) {
 		Logger::addAppender(new LoggerFileAppender());
