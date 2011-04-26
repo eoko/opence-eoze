@@ -22,6 +22,10 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 			,maximizable: false
 			,width: 380
 			,modal: modal
+			,minimizable: false
+			,collapsible: false
+			,draggable: false
+			,resizable: false
 		});
 
 		var submitForm = function() {
