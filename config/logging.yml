@@ -4,3 +4,5 @@ appenders:
   File: true
   FirePHP: true
   Output: false
+  
+level: ALL
