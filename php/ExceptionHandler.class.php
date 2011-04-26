@@ -61,6 +61,10 @@ class ExceptionHandler {
 
 			// Log exception
 			Logger::getLogger()->error('Uncaught exception', $ex);
+			
+			// DBG: trying to catch the output of some mystic errors that are
+			// not correctly pushed to the logs :(
+			dump($ex);
 		}
 
 //		dump($ex);
