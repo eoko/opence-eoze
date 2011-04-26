@@ -64,10 +64,9 @@ class ExceptionHandler {
 			
 			// DBG: trying to catch the output of some mystic errors that are
 			// not correctly pushed to the logs :(
-			dump($ex);
+			error_log($ex->__toString());
 		}
 
-//		dump($ex);
 		if ($answer) {
 			ExtJSResponse::failure($reason, $systemError, $errorTitle, true, false,
 				$includeTimestamp);
