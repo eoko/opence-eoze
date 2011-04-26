@@ -1,49 +1,32 @@
 <?php
 
 require_once 'init.inc.php';
-Logger::addAppender(new LoggerOutputAppender(false));
+//Logger::addAppender(new LoggerOutputAppender(false));
+
+Logger::getLogger()->setLevel(Logger::ERROR);
 
 use eoko\util\YmlReader;
 
-//$m = SmModule::load(38);
-//
-//dump($m->smModuleSaisons->toArray());
+$pwd = '';
+UserSession::login('eric', $pwd);
 
-
-$id = 12799; // non membre
-$id = 2; // non membre
-$id = 1; // Abel Anthony
-$id = 2148; // Abdrone Françoise
-$id = 1061; // Abdelouhab
-
-$context = array(
-	'year' => 2010
-);
-$c = Contact::load($id, $context);
-$c2 = Contact::load(1, $context);
-
-dump(array(
-	$c,
-	$c2,
-	$c2->isChildOf($c),
+$_REQUEST = array_merge($_REQUEST, array(
+	'controller' => 'menu',
+	'action' => 'loadUserMenu',
 ));
 
-//dump($c->getRelation('Enfant')->get());
-//dump('' . $c->getEnfant()->getParent());
+$crashed = false;
+$n = 0;
+do {
+	try {
+		ob_start();
+		Router::getInstance()->route();
+		ob_end_clean();
+		echo "$n\n";
+		$n++;
+	} catch (Exception $ex) {
+		$crached = $ex;
+	}
+} while (!$crashed && $n < 200);
 
-$types = $c->getTypes();
-
-foreach ($types as &$type) {
-	$type = $type->name();
-}
-
-dump(array(
-	$types,
-	$c->getConjoint()
-));
-
-//dump("$c");
-
-$m = $c->membre;
-
-dump($m);
+if ($crashed) echo $crashed;
