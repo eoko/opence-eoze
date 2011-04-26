@@ -236,6 +236,10 @@ if (null !== $level = ConfigManager::get('eoko/log', 'level', null)) {
 	Logger::getLogger()->setLevel(constant("Logger::$level"));
 }
 
+if (($levels = ConfigManager::get('eoko/log/levels'))) {
+	Logger::setLevels($levels);
+}
+
 if (!defined('ADD_LOG_APPENDERS') || ADD_LOG_APPENDERS) {
 	if (ConfigManager::get('eoko/log/appenders/File')) {
 		Logger::addAppender(new LoggerFileAppender());

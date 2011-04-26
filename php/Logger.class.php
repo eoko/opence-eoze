@@ -146,6 +146,13 @@ class Logger {
 	public function setLevel($level) {
 		$this->logLevel[$this->context] = $level;
 	}
+	
+	public static function setLevels($levels) {
+		$logger =& self::getLogger();
+		foreach ($levels as $context => $level) {
+			$logger->logLevel[$context] = constant("Logger::$level");
+		}
+	}
 
 	public function isActive($level) {
 		if (isset($this->logLevel[$this->context])) {
@@ -157,7 +164,8 @@ class Logger {
 	}
 
 	private function setContext($context) {
-		$this->context = strtoupper($context);
+		//$this->context = strtoupper($context);
+		$this->context = $context;
 	}
 
 	private static function isLogSomewhere() {
