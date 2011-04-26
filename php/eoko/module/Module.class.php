@@ -249,117 +249,6 @@ MSG
 		return $this->createExecutor($type, $action, $opts, true);
 	}
 
-// <editor-fold defaultstate="collapsed" desc="REM">
-	/**
-	 * Get this Module's {@link Executor} as specified by its $type.
-	 * 
-	 * An empty string or NULL for the $executorClass means the default
-	 * Executor; '_' for the $executorClass means the default 
-	 * {@link InternalExecutor}.
-	 * 
-	 * @param string $type            the class of the Executor to get.
-	 * NULL or an empty string means this Module's default Executor (that is 
-	 * the html executor, in the base Module implementation).
-	 * 
-	 * @param boolean $fallbackExecutor        name of the Executor to fall back
-	 * on, if a declared Executor for the given $executorClass is not found. 
-	 * Set to FALSE to disable the fallback mecanism and require the specified
-	 * $executorClass (a MissingExecutorException will be thrown if the 
-	 * specified executor doesn't exist).
-	 * 
-	 * This parameter doesn't have any effect if the default Executor or the
-	 * default internal Executor is required by setting $executorClass to 
-	 * {@link self::DEFAULT_EXECUTOR} {@internal (or NULL)} or 
-	 * {@link self::DEFAULT_INTERNAL_EXECUTOR}
-	 * 
-	 * @return Executor
-	 */
-//	private function doGetExecutor($type, $internal, $action, Request $request = null, $fallbackExecutor = false) {
-//
-//		if ($type === null) $type = self::DEFAULT_EXECUTOR;
-//		else if ($type instanceof Executor) $type = $type->getName(); // we're creating a new executor
-//
-//		if (isset($this->executorClassNames[$type])) {
-//			if ($type === self::DEFAULT_EXECUTOR && $this->defaultExecutor) {
-//				$type = $this->defaultExecutor;
-//			} else if ($type === self::DEFAULT_INTERNAL_EXECUTOR && $this->defaultInternalExecutor) {
-//				$type = $this->defaultInternalExecutor;
-//			}
-//			// already loaded
-//			return $this->createExecutor($type, $internal, $action, $request);
-//
-//		} else if ($type === self::DEFAULT_EXECUTOR) {
-//			// redirect (we cannot find a file with the type)
-//			return $this->getDefaultExecutor($internal, $action, $request);
-//
-//		} else if ($type === self::DEFAULT_INTERNAL_EXECUTOR) {
-//			// redirect (we cannot find a file with the type)
-//			return $this->getDefaultInternalExecutor($internal, $action, $request);
-//
-//		} else if ($this->loadExecutorClass($type)) {
-//			// bingo!
-//			return $this->createExecutor($type, $internal, $action, $request);
-//
-//		} else if ($fallbackExecutor !== false) {
-//			// fallback
-//			throw new Exception('Deprecated!!!');
-//			return $this->getExecutor($fallbackExecutor, false);
-//
-//		} else {
-//			throw new MissingExecutorException($this, $type);
-//		}
-//	}
-//
-//	protected function generateDefaultExecutorClass($type, $config) {
-//		$type = ucfirst($type);
-//		if (method_exists($this, $m = "generateDefault{$type}ExecutorClass")) {
-//			return $this->$m($config);
-//		} else {
-//			return false;
-//		}
-//	}
-//
-//	/**
-//	 * Create the default executor for this controller.
-//	 *
-//	 * The following applies to the base Module implementation, this behaviour
-//	 * may be overridden by Module subclasses:
-//	 *
-//	 * The default executor that is the Module's html Executor. If no such
-//	 * executor is declared by this Module, a default BasicHtmlExecutor will be
-//	 * instanciated and returned.
-//	 *
-//	 * @return Executor
-//	 */
-//	protected function getDefaultExecutor($internal, $action, Request $request = null) {
-//
-//		if (null !== $type = $this->defaultExecutor) {
-//
-//			$this->executorClassNames[self::DEFAULT_EXECUTOR] =&
-//					$this->executorClassNames[$type];
-//
-//			return $this->doGetExecutor($type, $internal, $action, $request, false);
-//		} else {
-//			throw new MissingExecutorException($this, self::DEFAULT_EXECUTOR);
-//		}
-//	}
-//
-//	/**
-//	 * @return Executor
-//	 */
-//	protected function getDefaultInternalExecutor($internal, $action, Request $request) {
-//		if (null !== $type = $this->defaultInternalExecutor) {
-//
-//			$this->executorClassNames[self::DEFAULT_INTERNAL_EXECUTOR] =&
-//					$this->executorClassNames[$type];
-//
-//			return $this->doGetExecutor($type, $internal, $action, $request, false);
-//		} else {
-//			throw new MissingExecutorException($this, self::DEFAULT_INTERNAL_EXECUTOR);
-//		}
-//	}
-// </editor-fold>
-
 	/**
 	 * Tries to find the class file/code for the Executor of the given $type at this
 	 * Module own level in its lineage. That is, this method should not try to
@@ -529,11 +418,16 @@ MSG
 	 * @return string the fully qualified class name
 	 */
 	private function loadExecutorTopLevelClass($type) {
-
+		
 		if (isset($this->executorClassNames[$type])) {
 			// The class has already been loaded
 			return $this->executorClassNames[$type];
+		} else {
+			return $this->executorClassNames[$type] = $this->doLoadExecutorTopLevelClass($type);
 		}
+	}
+	
+	private function doLoadExecutorTopLevelClass($type) {
 
 		$type = self::sanitizeExecutorName($type);
 
@@ -622,83 +516,7 @@ MSG
 		$finalClassLoader();
 
 		return $this->findExecutorClassName($type, $this->namespace);
-
-		
-		if (null !== $classCode = $this->loadExecutorClass($type)) {
-			$this->registerExecutorBaseClassLoader($type, $class);
-
-			$this->executorClassNames[$type] = $class = $this->findExecutorClassName($type);
-			return $class;
-		} else {
-			throw new MissingExecutorException($this, $type);
-		}
-
-//		$parents = array($prev = get_class($this));
-//		$parents[] = $prev = get_parent_class($prev);
-//		$parents[] = $prev = get_parent_class($prev);
-//
-//		dump(array(
-//			$parents,
-//			self::each($parents, function($name) {
-//				return class_exists($name, false);
-//			}),
-//		));
-
-////		dump($this->location);
-//
-//		if (($filename = $this->searchPath($possibleClassFiles, FileType::PHP))) {
-//			require_once $filename;
-//			return true;
-//		}
-//		// If a parent superclass exists, a filename must be found. That would
-//		// indeed be the case if either the parent or the child module declares
-//		// a file matching the executor $type.
-//
-//		// TODO this doesn't seem like a good idea
-//		return class_exists($this->namespace . $type);
-//
-//		return false;
 	}
-
-//	/**
-//	 * Creates the executor of the specified $type for this controller.
-//	 * @param string $type
-//	 * @return Executor
-//	 */
-//	protected final function doCreateExecutor($type, $internal, $action, Request $request = null) {
-//
-//		if ((isset($this->executorClassNames[$type]))) {
-//			$class = $this->executorClassNames[$type];
-//			return new $class($this, $type, $internal, $action, $request);
-//		}
-//
-//		foreach ($this->getAllowedExecutorClassNames() as $class) {
-//			if (class_exists($class, false)) {
-//				$this->executorClassNames[$type] = $class;
-//				return new $class($this, $type, $internal, $action, $request);
-//			}
-//		}
-//
-//		// Alias the parent class
-//		if ($this->namespace !== MODULES_NAMESPACE && (
-//				class_exists($class = MODULES_NAMESPACE . "$this->name\\$type")
-//				|| class_exists($class = MODULES_NAMESPACE . "$this->name\\{$type}Executor")
-//		)) {
-//
-//			$ns = rtrim($this->namespace, '\\');
-//			// do not use class_alias, to be able to set the namespace
-//			// eval("namespace $ns; class $type extends \\$class {}");
-//			class_extend($type, $class, $ns);
-//
-//			$class = "$ns\\$type";
-//			return new $class($this, $type, $internal, $action, $request);
-//		}
-//
-//		throw new SystemException(
-//			"Missing class for executor: $this->name.$type "
-//			. "(expected name: $this->namespace " . implode('|', $this->getAllowedExecutorClassNames()) . ')'
-//		);
-//	}
 	
 	protected function doGenerateModuleClass($class, $config) {
 		return class_extend($class, get_class($this));
@@ -712,17 +530,7 @@ MSG
 	 */
 	public final function generateDefaultModuleClass($class, $config) {
 		$this->doGenerateModuleClass($class, $config);
-		// TODO cache the returned code
-
-//		class_extend($class, get_class($this));
-//		$namespace = get_namespace($class, $class, \GET_NAMESPACE_RTRIM);
-//		$r = $this->doGenerateModuleClass($class, $namespace, $config);
-//		if ($r instanceof PHPCompiler) {
-//			$r->compile();
-//			return true;
-//		} else {
-//			return $r;
-//		}
+		// TODO cache the returned code in file
 	}
 	
 	/**
@@ -776,14 +584,6 @@ MSG
 		else return $module;
 	}
 	
-//	/**
-//	 * @param string $controller
-//	 * @param boolean|string|Executor $defaultExecutor   FALSE to not try to
-//	 * get a default Executor.
-//	 * @param boolean $require
-//	 * @return Executor
-//	 */
-//	public static function parseAction($controller, $action, $request, $defaultExecutor = Module::DEFAULT_EXECUTOR, $require = true) {
 	/**
 	 * Creates the executor to serve the given $request, forcing the $controller
 	 * (ie. Module and Executor type) and $action to be the ones specified.
@@ -840,7 +640,7 @@ MSG
 			$module = ModuleManager::getModule($module);
 		}
 		
-		dump("Not yet implemented");
+		throw new IllegalStateException('Not implemented yet');
 		
 //		$module->getInternalExecutor($executor, $action, $opts, $fallbackExecutor)
 	}
