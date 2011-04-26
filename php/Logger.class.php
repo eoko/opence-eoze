@@ -536,15 +536,19 @@ class LoggerFileAppender implements LoggerAppender {
 			return false;
 		if ($this->logFile === null) {
 
-			if (file_exists($this->filename) && filesize($this->filename) > FileHelper::filesizeToBytes(self::MAX_LOG_FILE_SIZE)) {
-				unlink($this->filename); // why I am authorized to delete the file, but not open it for writting ???
+			if (file_exists($this->filename) && filesize($this->filename) 
+					> FileHelper::filesizeToBytes(self::MAX_LOG_FILE_SIZE)) {
+				// why I am authorized to delete the file, but not open it for 
+				// writting ???
+				@unlink($this->filename);
 			}
 
 			$this->logFile = @fopen($this->filename, 'a');
 
 			if ($this->logFile === false) {
 				$this->failedOpenFile = true;
-				Logger::getLogger($this)->error('Cannot open log file for writting: {}', $this->filename);
+				Logger::getLogger($this)->error(
+						'Cannot open log file for writting: {}', $this->filename);
 			}
 		}
 		return $this->logFile;
