@@ -47,7 +47,7 @@ class Logger {
 	 */
 	private static $defaultLogger = null;
 	private static $defaultContext = 'ROOT';
-
+	
 	/**
 	 * Shortcut for {@link Logger::getLogger()}
 	 * 
@@ -67,7 +67,7 @@ class Logger {
 	 * @return Logger
 	 */
 	public static function getLogger($context = null) {
-
+		
 		if (self::$defaultLogger === null)
 			self::$defaultLogger = new \eoko\log\Logger();
 
@@ -85,7 +85,10 @@ class Logger {
 	}
 
 	public static function setDefaultContext($context) {
+		$old = self::$defaultContext;
 		self::$defaultContext = $context;
+		$this->logLevel[self::$defaultContext] = $this->logLevel[$old];
+		unset($this->logLevel[$old]);
 	}
 
 	const ERROR = 0;
@@ -103,7 +106,9 @@ class Logger {
 		self::DEBUG => 'DEBUG'
 	);
 	protected $context = 'ROOT';
-	private $logLevel = self::ALL;
+	private $logLevel = array(
+		'ROOT' => self::ALL
+	);
 	private static $appenders = array();
 	protected static $buffer = null;
 
@@ -139,11 +144,16 @@ class Logger {
 	}
 
 	public function setLevel($level) {
-		$this->logLevel = $level;
+		$this->logLevel[$this->context] = $level;
 	}
 
 	public function isActive($level) {
-		return $level <= $this->logLevel && self::isLogSomewhere();
+		if (isset($this->logLevel[$this->context])) {
+			$logLevel = $this->logLevel[$this->context];
+		} else {
+			$logLevel = $this->logLevel[self::$defaultContext];
+		}
+		return $level <= $logLevel && self::isLogSomewhere();
 	}
 
 	private function setContext($context) {
