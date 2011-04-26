@@ -40,7 +40,9 @@ class Cache {
 			return false;
 		}
 		$path = "$nsPath$filename";
-		if (file_exists($path)) unlink($path);
+		if (file_exists($path)) {
+			@unlink($path);
+		}
 		if (substr($filename, -4) !== '.php') $filename .= '.php';
 		return file_put_contents($path, $code);
 	}
