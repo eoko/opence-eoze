@@ -1,6 +1,11 @@
-input.x-input-money {
+.x-input-money {
 	text-align: right;
 	font-family: monospace;
+}
+
+div.x-input-money {
+	padding: 3px 3px 3px 0;
+	height: 16px;
 }
 
 span.x-input-money.symbol {
@@ -13,8 +18,6 @@ span.x-input-money.symbol {
 	width: 10px;
 }
 
-input.x-input-money.readonly {
-	background: none;
-	border-color: transparent;
-	color: black;
+.x-input-money-wrap.readonly span.x-input-money.symbol {
+	padding-top: 3px;
 }
