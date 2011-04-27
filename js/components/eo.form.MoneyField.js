@@ -35,7 +35,8 @@ eo.form.MoneyField = Ext.form.NumberField.extend({
 		eo.form.MoneyField.superclass.onRender.apply(this, arguments);
 		if (!this.wrap) {
 			var wrap = this.wrap = this.el.wrap();
-			wrap.createChild({tag:"span", cls:"x-input-money symbol euro", html: this.symbol})
+			var c = wrap.createChild({tag:"span", cls:"x-input-money symbol euro", html: this.symbol})
+			wrap.insertFirst(c);
 			this.resizeEl = this.positionEl = this.wrap;
 		}
 		this.setReadOnly(this.readOnly);
