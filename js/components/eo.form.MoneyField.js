@@ -13,30 +13,35 @@ eo.form.MoneyField = Ext.form.NumberField.extend({
 	
 	,setValue: function(v) {
 		v = parseFloat(v);
-		Ext.form.TextField.prototype.setValue.call(
-			this, 
-			Ext.isNumber(v) ? v.toFixed(this.precision) : ""
-		);
+		v = Ext.isNumber(v) ? v.toFixed(this.precision) : "";
+		if (this.displayEl) this.displayEl.update(v);
+		Ext.form.TextField.prototype.setValue.call(this, v);
 	}
 	
 	,setReadOnly: function(on) {
-		if (this.el) {
+		if (this.el && this.wrap) {
 			if (on) {
-				this.disable();
-				this.el.addClass("readonly");
+				this.wrap.addClass("readonly");
+				this.el.addClass("x-hidden");
+				this.displayEl.removeClass("x-hidden");
 			} else {
-				this.enable();
-				this.el.removeClass("readonly");
+				this.wrap.removeClass("readonly");
+				this.displayEl.addClass("x-hidden");
+				this.el.removeClass("x-hidden");
 			}
 		}
 	}
 	
 	,onRender: function(ct, position) {
 		eo.form.MoneyField.superclass.onRender.apply(this, arguments);
+		if (this.submit === false) {
+			delete this.el.name;
+		}
 		if (!this.wrap) {
-			var wrap = this.wrap = this.el.wrap();
-			var c = wrap.createChild({tag:"span", cls:"x-input-money symbol euro", html: this.symbol})
+			var wrap = this.wrap = this.el.wrap({cls: "x-input-money-wrap"});
+			var c = wrap.createChild({tag:"span", cls:"x-input-money symbol euro", html: this.symbol});
 			wrap.insertFirst(c);
+			this.displayEl = wrap.createChild({tag:"div", cls:"x-input-money x-hidden"});
 			this.resizeEl = this.positionEl = this.wrap;
 		}
 		this.setReadOnly(this.readOnly);
@@ -45,6 +50,7 @@ eo.form.MoneyField = Ext.form.NumberField.extend({
 	,onResize: function(w, h) {
 		eo.form.MoneyField.superclass.onResize.apply(this, arguments);
 		this.el.setWidth(w-13);
+		this.displayEl.setWidth(w-13);
 	}
 	
 });
