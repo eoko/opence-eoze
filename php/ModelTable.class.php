@@ -925,7 +925,7 @@ abstract class ModelTable extends ModelTableProxy {
 		if (count($data) === 1) {
 			return $this->createModel($data[0], true, $context);
 		} else if (1 < $n = count($data)) {
-			$conditions = StringHelper::replaceSuccessively('?', $inputs, $conditions);
+			$condition = StringHelper::replaceSuccessively('?', $inputs, $condition);
 			throw new IllegalStateException(<<<EX
 Data corruption: there should be only 1 ($n found) $this->modelName 
 for condition: $condition.
