@@ -345,11 +345,13 @@ eo.ui.TreeMenu = sp.extend({
 					,triggerAction: "all"
 					,minChars: 1
 					,value: data.action_family
+					,selectOnFocus: true
 					,flex: 1
 					,listeners: {
 						select: function(combo, familyRecord) {
 							var actions = eo.hashToArray(familyRecord.get("actions"));
 							actionStore.loadData(actions);
+							formPanel.form.findField("action").reset();
 						}
 					}
 				},{
@@ -363,6 +365,7 @@ eo.ui.TreeMenu = sp.extend({
 					,displayField: "label"
 					,valueField: "id"
 					,value: data.action
+					,selectOnFocus: true
 					,listeners: {
 						select: function(combo, record) {
 							var form = formPanel.getForm();
