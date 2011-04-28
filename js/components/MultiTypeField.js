@@ -67,4 +67,4 @@ Ext.ux.form.MultiTypeField = Ext.Container.extend({
 	}
 });
 
-Ext.reg("multitypefield", MultiTypeField);
+Ext.reg("multitypefield", Ext.ux.form.MultiTypeField);
