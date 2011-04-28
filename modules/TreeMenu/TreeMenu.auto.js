@@ -351,7 +351,7 @@ eo.ui.TreeMenu = sp.extend({
 						select: function(combo, familyRecord) {
 							var actions = eo.hashToArray(familyRecord.get("actions"));
 							actionStore.loadData(actions);
-							formPanel.form.findField("action").reset();
+							formPanel.form.findField("action").setValue();
 						}
 					}
 				},{
