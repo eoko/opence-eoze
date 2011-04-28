@@ -121,17 +121,24 @@ Oce.Format.dateRenderer = function(format) {
 Oce.form.SubmitDisplayField = Ext.extend(Ext.form.DisplayField, {
 	onRender: function(ct) {
 		Oce.form.SubmitDisplayField.superclass.onRender.apply(this, arguments);
-		if (this.el) {
-			var hiddenField = new Ext.form.Hidden({
-				'name': this.el.dom.getAttribute('name')
-			})
-			this.ownerCt.add(hiddenField);
-			this.mon(this, 'change', function(e, value) {
-				hiddenField.setValue(value)
-			}, this)
-			this.mon(this, 'afterrender', function() {
-				hiddenField.setValue(this.value)
-			}, this)
+		if (!this.wrap) {
+			this.wrap = this.el.wrap();
+			this.valueInput = this.wrap.createChild({tag:"input", type:"hidden", name: this.name});
+			this.resizeEl = this.positionEl = this.wrap;
+			this.setValue(this.value);
+		}
+	}
+	
+	,setValue: function(v) {
+		Oce.form.SubmitDisplayField.superclass.setValue.apply(this, arguments);
+		if (this.valueInput) this.valueInput.dom.value = v;
+	}
+	
+	,onDestroy: function() {
+		Oce.form.SubmitDisplayField.superclass.onDestroy.call(this);
+		if (this.wrap) {
+			this.wrap.remove();
+			delete this.wrap;
 		}
 	}
 })
