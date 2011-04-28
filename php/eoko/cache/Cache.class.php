@@ -90,6 +90,21 @@ class Cache {
 		if (file_exists($file)) return require $file;
 		else return null;
 	}
+	
+	public static function clearCachedData($class) {
+		if (is_array($class)) {
+			list($class, $key) = $class;
+		}
+		
+		$file = self::getPhpFilePath(
+			get_namespace($class),
+			$class . '.DataCache' . (isset($key) ? ".$key" : '') . '.php'
+		);
+		
+		if (file_exists($file)) {
+			@unlink($file);
+		}
+	}
 
 	private static function makeObjectCacheFilename($class, $version, $index) {
 		return "{$class}__{$version}__{$index}.cache.php";
