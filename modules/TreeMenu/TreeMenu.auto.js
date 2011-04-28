@@ -575,7 +575,6 @@ eo.ui.TreeMenu = sp.extend({
 	
 	,load: function() {
 
-		this.getRootNode().removeAll();
 		this.addLoading();
 		
 		Oce.Ajax.request({
@@ -617,6 +616,22 @@ eo.ui.TreeMenu = sp.extend({
 		}
 	}
 	
+	,reloadActions: function(delay) {
+		if (delay) {
+			var me = this;
+			this.getRootNode().removeAll();
+			this.addLoading();
+			setTimeout(function() {
+				me.reloadActions(false);
+				me.removeLoading();
+			}, delay);
+		} else {
+			delete this.availableActions;
+			this.getRootNode().removeAll();
+			this.load();
+		}
+	}
+	
 	,loadActions: function(cb) {
 		
 		if (this.availableActions === false) return;
@@ -646,10 +661,15 @@ eo.ui.TreeMenu = sp.extend({
 	
 	// private
 	,createActionStores: function() {
-		this.actionFamiliesStore = new Ext.data.JsonStore({
-			fields: ["id","label","actions","iconCls"]
-			,data: eo.hashToArray(this.availableActions)
-		});
+		
+		if (this.actionFamiliesStore) {
+			this.actionFamiliesStore.loadData(eo.hashToArray(this.availableActions));
+		} else {
+			this.actionFamiliesStore = new Ext.data.JsonStore({
+				fields: ["id","label","actions","iconCls"]
+				,data: eo.hashToArray(this.availableActions)
+			});
+		}
 
 		var waitingList = this.waitingFamiliesStore;
 		if (waitingList) {
