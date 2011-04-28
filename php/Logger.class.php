@@ -87,8 +87,9 @@ class Logger {
 	public static function setDefaultContext($context) {
 		$old = self::$defaultContext;
 		self::$defaultContext = $context;
-		$this->logLevel[self::$defaultContext] = $this->logLevel[$old];
-		unset($this->logLevel[$old]);
+		$logger = self::getLogger();
+		$logger->logLevel[self::$defaultContext] = $logger->logLevel[$old];
+		unset($logger->logLevel[$old]);
 	}
 
 	const ERROR = 0;
