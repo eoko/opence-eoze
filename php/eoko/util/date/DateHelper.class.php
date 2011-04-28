@@ -17,7 +17,7 @@ class DateHelper {
 	private $timeZone;
 	private $format;
 	
-	private $defaultHelper = null;
+	private static $defaultHelper = null;
 	
 	private function __construct($dateFormat = null, $timeZone = null) {
 		// time zone
@@ -45,8 +45,8 @@ class DateHelper {
 	 * @return DateHelper 
 	 */
 	public function getHelper() {
-		if (isset($this)) return $this;
-		else return self::getDefaultHelper();
+//		if (isset($this)) return $this;
+		return self::getDefaultHelper();
 	}
 
 	/**
@@ -71,6 +71,7 @@ class DateHelper {
 	 * @return DateTime
 	 */
 	public function parseDateTime($date) {
+		if (func_num_args() > 1) $date = func_get_args();
 		if (isset($this)) {
 			return self::doParseDateTime($date, $this->format, $this->timeZone);
 		} else {
@@ -82,9 +83,9 @@ class DateHelper {
 		$timeZone = self::parseDateTimeZone($timeZone);
 		if ($format === null) $format = self::$defaultFormat;
 		// (...)
-		if (func_num_args() > 1) {
+		if (is_array($date)) {
 			$r = array();
-			foreach (func_get_args() as $date) {
+			foreach ($date as $date) {
 				$r[] = self::doParseDateTime($date, $format, $timeZone);
 			}
 			return $r;
@@ -115,7 +116,7 @@ class DateHelper {
 					&& $diff->m === 0
 					&& $diff->d === 0;
 		} else {
-			$days = $this->days === 0;
+			$days = $diff->days === 0;
 		}
 		return $days
 				&& $diff->h === 0
@@ -138,11 +139,10 @@ class DateHelper {
 	}
 	
 	public function lessThanOrEquals($d1, $d2) {
-		$me = isset($this) ? $this : $this->getDefaultHelper();
-		list($d1, $d2) = $me->parseDateTime($d1, $d2);
+		list($d1, $d2) = $this->parseDateTime($d1, $d2);
 		$diff = $d1->diff($d2);
 		return $diff->invert === 1
-				|| ($me->dateEquals($d1, $d2));
+				|| ($this->equals($d1, $d2));
 	}
 	
 	public function lessThan($d1, $d2) {
@@ -153,14 +153,13 @@ class DateHelper {
 	}
 	
 	public function compare($d1, $d2, $operator = Operator::EQUAL) {
-		$me = isset($this) ? $this : $this->getDefaultHelper();
 		switch ($operator) {
-			case Operator::EQUAL: return $me->equals($d1, $d2);
-			case Operator::MORE: return $me->moreThan($d1, $d2);
-			case Operator::MORE_OR_EQUAL: return $me->moreThanOrEquals($d1, $d2);
-			case Operator::LESS: return $me->lessThan($d1, $d2);
-			case Operator::LESS_OR_EQUAL: $me->lessThanOrEquals($d1, $d2);
-			default: throw new \IllegalArgumentException('$operator');
+			case Operator::EQUAL: return $this->equals($d1, $d2);
+			case Operator::MORE: return $this->moreThan($d1, $d2);
+			case Operator::MORE_OR_EQUAL: return $this->moreThanOrEquals($d1, $d2);
+			case Operator::LESS: return $this->lessThan($d1, $d2);
+			case Operator::LESS_OR_EQUAL: return $this->lessThanOrEquals($d1, $d2);
+			default: throw new \IllegalArgumentException('$operator: ' . $operator);
 		}
 	}
 	
