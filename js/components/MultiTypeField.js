@@ -7,27 +7,52 @@ Ext.ns("Ext.ux.form");
  * liberally decide to add the input Component to its BasicForm, without
  * taking any action to monitor its desctruction, to remove it...
  */
-Ext.ux.form.MultiTypeField = Ext.Container.extend({
+Ext.ux.form.MultiTypeField = Ext.form.Field.extend({
 
 	isFormField: true
-
 	,defaultField: {xtype:"textfield", disabled: true}
+	,autoCreate: {tag: "div"}
 
 	,initComponent: function() {
-		this.layout = "fit";
+//		this.layout = "fit";
 		Ext.ux.form.MultiTypeField.superclass.initComponent.call(this);
 		this.setField(this.defaultField);
 	}
+	
+	,onRender: function() {
+		Ext.ux.form.MultiTypeField.superclass.onRender.apply(this, arguments);
+		if (!this.fieldCt) {
+			this.fieldCt = new Ext.Container({
+				renderTo: this.el
+				,layout: "fit"
+			})
+//			this.resizeEl = this.positionEl = this.fieldCt.el;
+			this.setField(this.field);
+		}
+	}
+	
+	,onResize: function(w, h) {
+		Ext.ux.form.MultiTypeField.superclass.onResize.apply(this, arguments);
+//		this.el.setSize(w, h);
+		this.fieldCt.setSize(w, h);
+		this.fieldCt.doLayout();
+	}
 
 	,setField: function(field) {
+		var ct = this.fieldCt;
+		if (!ct) return;
 		if (!field) field = this.defaultField;
-		if (this.field) this.remove(this.field);
-		this.field = this.add(field);
+		//if (this.field) ct.remove(this.field);
+		ct.removeAll();
+		this.field = ct.add(Ext.apply({
+			name: this.name
+			,allowBlank: this.allowBlank
+		}, field));
 		if (this.value) {
 			this.field.setValue(this.value);
 			delete this.value;
 		}
-		this.doLayout();
+		ct.doLayout();
 	}
 
 	,fireEvent: function(e) {
