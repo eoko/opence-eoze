@@ -125,31 +125,31 @@ class DateHelper {
 	}
 	
 	public function moreThan($d1, $d2) {
-		$me = isset($this) ? $this : $this->getDefaultHelper();
-		list($d1, $d2) = $me->parseDateTime($d1, $d2);
-		return !!$me->moreThanOrEquals($d1, $d2)
-				&& !$me->equals($d1, $d2);
+		list($d1, $d2) = $this->parseDateTime($d1, $d2);
+		$diff = $d1->diff($d2);
+		return $diff->invert === 1;
 	}
 	
 	public function moreThanOrEquals($d1, $d2) {
 		list($d1, $d2) = isset($this) ? $this->parseDateTime($d1, $d2)
 				: self::parseDateTime($d1, $d2);
 		$diff = $d1->diff($d2);
-		return $diff->invert === 0;
+		return $diff->invert === 1
+				|| $this->equals($d1, $d2);
 	}
 	
 	public function lessThanOrEquals($d1, $d2) {
 		list($d1, $d2) = $this->parseDateTime($d1, $d2);
 		$diff = $d1->diff($d2);
-		return $diff->invert === 1
-				|| ($this->equals($d1, $d2));
+		return $diff->invert === 0;
 	}
 	
 	public function lessThan($d1, $d2) {
 		list($d1, $d2) = isset($this) ? $this->parseDateTime($d1, $d2)
 				: self::parseDateTime($d1, $d2);
 		$diff = $d1->diff($d2);
-		return $diff->invert === 1;
+		return $diff->invert === 0
+				&& !$this->equals($d1, $d2);
 	}
 	
 	public function compare($d1, $d2, $operator = Operator::EQUAL) {
