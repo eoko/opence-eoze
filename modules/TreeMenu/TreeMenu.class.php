@@ -49,6 +49,10 @@ class TreeMenu extends Module {
 		return $r;
 	}
 	
+	public function invalidateCache() {
+		Cache::clearCachedData(array($this, 'families'));
+	}
+	
 	/**
 	 * @param string $id
 	 * @return MenuFamily
