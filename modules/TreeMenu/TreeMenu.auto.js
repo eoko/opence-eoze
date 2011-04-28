@@ -343,6 +343,7 @@ eo.ui.TreeMenu = sp.extend({
 					,displayField: "label"
 					,valueField: "id"
 					,triggerAction: "all"
+					,minChars: 1
 					,value: data.action_family
 					,flex: 1
 					,listeners: {
@@ -357,6 +358,7 @@ eo.ui.TreeMenu = sp.extend({
 					,flex: 1
 					,triggerAction: "all"
 					,store: actionStore
+					,minChars: 1
 					,mode: "local"
 					,displayField: "label"
 					,valueField: "id"
@@ -573,6 +575,7 @@ eo.ui.TreeMenu = sp.extend({
 	
 	,load: function() {
 
+		this.getRootNode().removeAll();
 		this.addLoading();
 		
 		Oce.Ajax.request({
