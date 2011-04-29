@@ -408,7 +408,25 @@ Ext.ux.data.PagingStore = Ext.extend(Ext.data.Store, {
             this.allData = allData;
             this.data = data;
         }
-    }
+    },
+	// <rx+>
+	findInAll: function(property, value, start, anyMatch, caseSensitive) {
+		var currentData = this.data;
+		this.data = this.allData || this.data;
+        var fn = this.createFilterFn(property, value, anyMatch, caseSensitive);
+        var r = fn ? this.data.findIndexBy(fn, null, start) : -1;
+		this.data = currentData;
+		return r;
+	},
+	findRecordInAll: function(property, value, start, anyMatch, caseSensitive) {
+		var i = this.findInAll(property, value, start, anyMatch, caseSensitive);
+		if (i >= 0) {
+			return (this.allData || this.data).itemAt(i);
+		} else {
+			return undefined;
+		}
+	}
+	// <rx+>
     // *** end ***
 });
 
