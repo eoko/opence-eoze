@@ -72,8 +72,8 @@ eo.Window = Ext.extend(Ext.Window, {
 		var WIN_CLASS = Ext.Window;
 
 		var uber = eo.Window.superclass,
-			doHide = function() { uber.hide.apply(win, arguments) },
-			doShow = function() { uber.show.apply(win, arguments) };
+			doHide = function() {uber.hide.apply(win, arguments)},
+			doShow = function() {uber.show.apply(win, arguments)};
 
 		if (rootWin) {
 			maskEl = rootWin && rootWin.items.first();
@@ -112,7 +112,7 @@ eo.Window = Ext.extend(Ext.Window, {
 			el.stopFx();
 
 			// OptionFX
-			var next = function() { return el && !hidding; };
+			var next = function() {return el && !hidding;};
 			
 			el.moveTo(x, y-v, {
 				duration: d
@@ -261,8 +261,6 @@ Oce.FormWindow = Ext.extend(eo.Window, {
 			config.items = [formPanel];
 		}
 
-//REM (must be done after the window exists!!!)		formPanel.setWindow(this);
-
 		// --- Reload tool ---
 		// Refresh gear button
 
@@ -333,6 +331,52 @@ Oce.FormWindow = Ext.extend(eo.Window, {
 
 		this.formPanel = formPanel;
 		this.form = this.formPanel.form;
+	}
+	
+	,afterRender: function() {
+		Oce.FormWindow.superclass.afterRender.apply(this, arguments);
+		
+		var sb = this.getSubmitButton();
+		if (sb) {
+			sb.addClass("default");
+		}
+	}
+	
+	,initEvents: function() {
+		Oce.FormWindow.superclass.initEvents.call(this);
+		
+		// Handle default (submit) button on ENTER key press
+		var sh, scope;
+		if (this.submitHandler) {
+			sh = this.submitHandler;
+			scope = this.scope || this;
+		} else {
+			var sb = this.getSubmitButton();
+			if (sb) {
+				sh = sb.handler;
+				scope = sb.scope || sb;
+			}
+		}
+		
+		if (sh) {
+			var km = this.getKeyMap();
+			km.on(13, sh, scope);
+			km.disable();
+		}
+	}
+	
+	,getSubmitButton: function() {
+		var sb = this.submitButton;
+        if(Ext.isDefined(sb)){
+            if(Ext.isNumber(sb) && this.fbar){
+                return this.fbar.items.get(sb);
+            }else if(Ext.isString(sb)){
+                return Ext.getCmp(sb);
+            }else{
+                return sb;
+            }
+        }
+		return null;
 	}
 
 	,disable: function() {

@@ -65,3 +65,8 @@ label.x-form-composite-label {
 	padding: 3px 3px 3px 0;
 	display: block;
 }
+
+/* Oce.Window default button */
+.x-btn.default button {
+	font-weight: bold;
+}
