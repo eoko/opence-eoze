@@ -4,7 +4,7 @@ Ext.ns('eo.ui.modules');
 
 var sp = Ext.tree.TreePanel,
 	spp = sp.prototype;
-
+	
 eo.ui.TreeMenu = sp.extend({
 	
 	controller: "menu"
@@ -18,6 +18,8 @@ eo.ui.TreeMenu = sp.extend({
 	,initComponent: function() {
 		
 		var me = this;
+		
+		this.sjax = new eo.Sjax;
 
 		// customizing the prototype's TreeNode class with this menu's config
 		this.TreeNode = this.createTreeNodeClass();
@@ -185,14 +187,31 @@ eo.ui.TreeMenu = sp.extend({
 			,movenode: this.onNodeDrop
 		});
 		
-		if (this.userId) this.load();
-	}
+		if (this.userId) this.load(this.executeDefaultCommands, this);
+	} // initComponent
+	
+	// private
+	,executeDefaultCommands: function() {
+		
+		var walk = function(node) {
+			if (node.data.open && node.cmd) {
+				node.cmd();
+			}
+			node.eachChild(walk);
+		};
+		
+		return function() {
+			walk(this.getRootNode());
+		};
+	}()
 
 	// private
 	,createTreeNodeClass: function() {
 		var me = this;
 		return eo.ui.TreeMenu.prototype.TreeNode.extend({
 			ownerTreeMenu: this
+			
+			,sjax: this.sjax
 
 			,getFamilyStore: function(cb) {
 				if (!me.actionFamiliesStore) {
@@ -273,7 +292,7 @@ eo.ui.TreeMenu = sp.extend({
 			+ "vous sûr de vouloir continuer ?",
 			function(btn) {
 				if (btn === 'yes') {
-					Oce.Ajax.request({
+					me.sjax.request({
 						params: {
 							controller: me.controller
 							,action: "resetFactoryDefaults"
@@ -293,7 +312,6 @@ eo.ui.TreeMenu = sp.extend({
 	,onNodeClick: function(node, e) {}
 	
 	,onNodeDrop: function(tree, node, oldParent, newParent) {
-		// TODO account for root node not being savable!!!
 		if (oldParent !== newParent) {
 			oldParent.saveFullNode(function() {
 				newParent.saveFullNode();
@@ -314,7 +332,7 @@ eo.ui.TreeMenu = sp.extend({
 		}
 		
 		var actionStore = new Ext.data.JsonStore({
-			fields: ["id", "label", "color", "command", "expanded"]
+			fields: ["id", "label", "color", "command", "expanded", "open"]
 		});
 		
 		if (!!data.action_family) {
@@ -436,10 +454,20 @@ eo.ui.TreeMenu = sp.extend({
 				,value: data.color || this.TreeNode.prototype.defaultColor
 				,defaultColor: data.color || this.TreeNode.prototype.defaultColor
 			},{
-				xtype: "checkbox"
-				,name: "expanded"
-				,fieldLabel: "Développé par défaut"
-				,checked: !!data.expanded
+				xtype: "container"
+				,layout: "form"
+				,labelWidth: 130
+				,items: [{
+					xtype: "checkbox"
+					,name: "expanded"
+					,fieldLabel: "Développé par défaut"
+					,checked: !!data.expanded
+				},{
+					xtype: "checkbox"
+					,name: "open"
+					,fieldLabel: "Exécuter au démarrage"
+					,checked: !!data.open
+				}]
 			}]
 		});
 		
@@ -447,10 +475,10 @@ eo.ui.TreeMenu = sp.extend({
 			formPanel: formPanel
 			,width: 400
 			
-			,draggable: false
-			,closable: false
 			,maximizable: false
 			,minimizable: false
+			
+			,submitButton: 0
 			
 			,buttons: [{
 				text: "Ok"
@@ -576,11 +604,11 @@ eo.ui.TreeMenu = sp.extend({
 		}
 	}
 	
-	,load: function() {
+	,load: function(callback, scope) {
 
 		this.addLoading();
 		
-		Oce.Ajax.request({
+		this.sjax.request({
 			params: {
 				controller: this.controller
 				,action: "loadUserMenu"
@@ -589,6 +617,7 @@ eo.ui.TreeMenu = sp.extend({
 				this.removeLoading();
 				this.whenReady(function() {
 					this.loadNodeData(data);
+					if (callback) callback.call(scope || this);
 				});
 			}.createDelegate(this)
 			,onFailure: function() {
@@ -619,6 +648,7 @@ eo.ui.TreeMenu = sp.extend({
 		}
 	}
 	
+	// TODO this is probably slightly buggy...
 	,reloadActions: function(delay) {
 		if (delay) {
 			var me = this;
@@ -644,7 +674,7 @@ eo.ui.TreeMenu = sp.extend({
 		var me = this;
 		
 		this.addLoading();
-		Oce.Ajax.request({
+		this.sjax.request({
 			params: {
 				controller: this.controller
 				,action: "getAvailableActions"
@@ -713,11 +743,13 @@ eo.ui.TreeMenu.prototype.TreeNode = Ext.tree.TreeNode.extend({
 		var d = this.data = config && config.data || {};
 		
 		d.expanded = !!parseInt(d.expanded);
+		d.open = !!parseInt(d.open);
 		
 		var cfg = {
 			text: d.label
 			,id: d.id
 			,expanded: d.expanded
+			,open: d.open
 			,draggable: true
 		};
 
@@ -858,6 +890,7 @@ eo.ui.TreeMenu.prototype.TreeNode = Ext.tree.TreeNode.extend({
 			action_family: data.action_family
 			,action: data.action
 			,expanded: !!data.expanded
+			,open: !!data.open
 		});
 		this.setLabel(data.label);
 		this.setColor(data.color);
@@ -907,7 +940,7 @@ eo.ui.TreeMenu.prototype.TreeNode = Ext.tree.TreeNode.extend({
 		});
 
 		var me = this;
-		Oce.Ajax.request({
+		this.sjax.request({
 			params: {
 				controller: this.ownerTreeMenu.controller
 				,action: "saveNode"
@@ -943,7 +976,7 @@ eo.ui.TreeMenu.prototype.TreeNode = Ext.tree.TreeNode.extend({
 			newParent.saveFullNode();
 			delete this.futureParentNode;
 		} else {
-			Oce.Ajax.request({
+			this.sjax.request({
 				params: {
 					controller: this.ownerTreeMenu.controller
 					,action: "saveNode"
@@ -966,7 +999,7 @@ eo.ui.TreeMenu.prototype.TreeNode = Ext.tree.TreeNode.extend({
 		this.spp.remove.apply(this, arguments);
 		// to server
 		if (!this.isNew()) {
-			Oce.Ajax.request({
+			this.sjax.request({
 				params: {
 					controller: this.ownerTreeMenu.controller
 					,action: "deleteNode"
