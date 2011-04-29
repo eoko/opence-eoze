@@ -24,6 +24,10 @@ class Json extends JsonExecutor {
 		}
 		
 		$this->data = $data;
+
+		uasort($data, function($o1, $o2) {
+			return natcasesort($o1['label'], $o2['label']);
+		});
 		
 		return true;
 	}
