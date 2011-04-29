@@ -67,8 +67,7 @@ Ext.extend(Ext.ux.form.IconCombo, Ext.form.ComboBox, {
 		
 		if (v) {
 			//var rec = this.store.query(this.valueField, this.getValue()).itemAt(0);
-			var s = this.store,
-				rec = s.getAt(s.find(this.valueField, this.getValue()));
+			var rec = this.findRecord(this.valueField, this.getValue());
 			c = 'x-icon-combo-icon ' + (rec ? rec.get(this.iconClsField) : "");
 		} else {
 			c = "";
@@ -79,6 +78,15 @@ Ext.extend(Ext.ux.form.IconCombo, Ext.form.ComboBox, {
 			this.onRenderFlagClassName = c;
 		}
     },
+	
+	findRecord: function(prop, value) {
+		var s = this.store;
+		if (s.findRecordInAll) {
+			return s.findRecordInAll(prop, value);
+		} else {
+			return Ext.ux.IconCombo.superclass.findRecord.apply(this, arguments);
+		}
+	},
  
     setValue: function(value) {
         Ext.ux.form.IconCombo.superclass.setValue.call(this, value);
