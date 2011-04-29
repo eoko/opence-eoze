@@ -66,7 +66,9 @@ Ext.extend(Ext.ux.form.IconCombo, Ext.form.ComboBox, {
 			c;
 		
 		if (v) {
-			var rec = this.store.query(this.valueField, this.getValue()).itemAt(0);
+			//var rec = this.store.query(this.valueField, this.getValue()).itemAt(0);
+			var s = this.store,
+				rec = s.getAt(s.find(this.valueField, this.getValue()));
 			c = 'x-icon-combo-icon ' + (rec ? rec.get(this.iconClsField) : "");
 		} else {
 			c = "";
