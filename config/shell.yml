@@ -1,0 +1,4 @@
+config.node: eoze\application\shell
+
+welcomeMessage: Welcome!
+description: This shell can be used for some usefull stuff!

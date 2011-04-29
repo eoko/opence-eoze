@@ -1,0 +1,51 @@
+/* 
+    Document   : menu.auto
+    Created on : 17 avr. 2011, 17:22:47
+    Author     : Éric Ortéga <eric@planysphere.fr>
+*/
+
+/* Tree menu: makes leaf have a leaf icon, even when collapsed */
+.x-tree-node-collapsed.x-tree-node-leaf .x-tree-node-icon {
+    background-image: url(images/default/tree/leaf.gif);
+}
+
+div.menu-message {
+	text-align: center;
+	padding: 10px;
+}
+
+div.menu-message p {
+	margin: 10px 0;
+}
+
+div.menu-message a {
+	color: blue;
+	cursor: pointer;
+}
+
+div.loading-indicator {
+	margin: 15px auto;
+	width: 130px;
+	text-align: center;
+}
+
+.x-tree-node-icon.ico {
+	display: inline;
+}
+
+.menu.icon-expand-all {
+/*	background-image: url(images/icons/ext-tree-expand-all.gif) !important;*/
+	background-image: url(images/ext-tree-expand-all.gif) !important;
+}
+
+.menu.icon-collapse-all {
+	background-image: url(images/ext-tree-collapse-all.gif) !important;
+}
+
+/** Combo Icon */
+.x-icon-combo-icon {
+    background-repeat: no-repeat;
+    background-position: 0 50%;
+    width: 16px;
+    height: 16px;
+}

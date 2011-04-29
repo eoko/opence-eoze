@@ -1,0 +1,4 @@
+RewriteEngine On
+
+RewriteRule .yml$                                   php/error404.php
+RewriteRule .sql$                                   php/error404.php
