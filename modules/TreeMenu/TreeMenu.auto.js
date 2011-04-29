@@ -429,16 +429,29 @@ eo.ui.TreeMenu = sp.extend({
 					,pageSize: 10
 					,iconClsField: "class"
 					,flex: 1
+					,pagingToolbarXtype: "ux.paging"
+					,minListWidth: 235
+					// we want the paging toolbar (hence the list) to be created
+					// before the afterrender event
+					,lazyInit: false
 					,listeners: {
-						beforerender: function(f) {
-							var cb;
-							if (data.iconCls) {
-								cb = function() { f.setValue(data.iconCls); }
-							}
-							this.iconStore.whenLoaded(cb);
+						afterrender: function(f) {
+							this.iconStore.whenLoaded(function() {
+								var tb = f.pageTb;
+								if (data.iconCls) {
+									var s = f.store,
+										i = s.find("class", data.iconCls),
+										p = i / tb.pageSize + (i % tb.pageSize > 0 ? 1 : 0);
+									f.setValue(data.iconCls);
+									tb.changePage(p + 1); // counting from 1...
+								} else {
+									tb.doRefresh();
+								}
+							});
 						}
 						,scope: this
 					}
+ 
 				},{
 					xtype: "button"
 					,iconCls: "ico cross"
