@@ -1,6 +1,11 @@
 /*  
 // Icon Classes */
-.export_pdf {
+
+/* 
+ * TODO: clean that, that's some very ugly namespace polution!!!
+ */
+
+/*.export_pdf {
 	background-image:url(../images/opence/32x32/export_pdf.png) !important;
 }
 .export_excel {
@@ -47,7 +52,8 @@
 }
 .user_child {
 	background-image:url(../images/opence/32x32/user_child.png) !important;
-}
+}*/
+
 .b_ico_earth {
 	background-image:url(../images/opence/32x32/earth.png) !important;
 }
