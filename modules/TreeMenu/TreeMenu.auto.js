@@ -52,10 +52,6 @@ eo.ui.TreeMenu = sp.extend({
 		
 			,rootVisible: false
 			
-//			,root: new Ext.tree.TreeNode({
-//				text: 'root'
-//				,id: 'root'
-//			})
 			,root: new this.TreeNode({
 				text: 'root'
 				,id: 'root'
@@ -144,12 +140,10 @@ eo.ui.TreeMenu = sp.extend({
 					,align: "middle"
 				}
 				,items: [{
-//					xtype: "textfield"
 					xtype: "trigger"
 					,flex: 1
 					,enableKeyEvents: true
 					,emptyText: "Filtrer"
-//					,width: 110
 					,triggerClass : 'x-form-clear-trigger'
 					,onTriggerClick: function() {
 						this.setValue();
@@ -170,7 +164,6 @@ eo.ui.TreeMenu = sp.extend({
 						}
 						,scope: this
 					}
-//				},"->",{
 				}
 				,new Ext.Toolbar.Separator({
 					width: 10
@@ -180,7 +173,6 @@ eo.ui.TreeMenu = sp.extend({
 					,handler: function() {this.root.expand(true)}
 					,scope: this
 				},{
-//				},"-",{
 					iconCls: "menu icon-collapse-all"
 					,tooltip: "Réduire tout"
 					,handler: function() {this.root.collapse(true)}
@@ -424,7 +416,7 @@ eo.ui.TreeMenu = sp.extend({
 					,mode: "local"
 					,displayField: "label"
 					,valueField: "class"
-//					,value: data.iconCls
+					//,value: data.iconCls
 					,pageSize: 10
 					,iconClsField: "class"
 					,flex: 1
@@ -765,7 +757,9 @@ eo.ui.TreeMenu.prototype.TreeNode = Ext.tree.TreeNode.extend({
 		var cfg = {
 			text: d.label
 			,id: d.id
-//			,expanded: d.expanded
+			// We want all nodes expanded at creation time, so that they are
+			// all rendered
+			//,expanded: d.expanded
 			,expanded: true
 			,open: d.open
 			,draggable: true
