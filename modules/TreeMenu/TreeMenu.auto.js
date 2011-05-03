@@ -194,6 +194,7 @@ eo.ui.TreeMenu = sp.extend({
 		this.on({
 			scope: this
 			,contextmenu: this.onNodeRightClick
+			,containercontextmenu: this.onNodeRightClick
 			,movenode: this.onNodeDrop
 		});
 		
@@ -238,21 +239,9 @@ eo.ui.TreeMenu = sp.extend({
 
 	// private
 	,resetCollapse: function() {
+		this.getRootNode().resetCollapse();
+	}
 
-		var expandIf = function(n) {
-			if (n.data.expanded && !!parseInt(n.data.expanded)) {
-				n.expand();
-				if (n.hasChildNodes()) {
-					n.eachChild(expandIf);
-				}
-			}
-		};
-
-		return function() {
-			this.collapseAll();
-			this.root.eachChild(expandIf);
-		}
-	}()
 	// private
 	,filterTree: function(t) {
 
@@ -561,6 +550,9 @@ eo.ui.TreeMenu = sp.extend({
 	
 	// private
 	,onNodeRightClick: function(node, e) {
+		if (node instanceof Ext.tree.TreePanel) {
+			node = node.getRootNode();
+		}
 		node.select();
 		var menu = node.getOwnerTree().contextMenu;
 		menu.node = node;
@@ -751,6 +743,8 @@ eo.ui.TreeMenu = sp.extend({
 				})
 			);
 		}, this);
+		
+		this.resetCollapse();
 	}
 });
 
@@ -771,11 +765,12 @@ eo.ui.TreeMenu.prototype.TreeNode = Ext.tree.TreeNode.extend({
 		var cfg = {
 			text: d.label
 			,id: d.id
-			,expanded: d.expanded
+//			,expanded: d.expanded
+			,expanded: true
 			,open: d.open
 			,draggable: true
 		};
-
+		
 		this.configureIconCls(d.iconCls);
 		cfg.iconCls = this.iconCls;
 		
@@ -798,6 +793,17 @@ eo.ui.TreeMenu.prototype.TreeNode = Ext.tree.TreeNode.extend({
 		}, this);
 		
 		this.on("click", this.onClick);
+	}
+	
+	,resetCollapse: function() {
+		if (this.data.expanded) {
+			this.expand();
+		} else {
+			this.collapse();
+		}
+		this.eachChild(function(child) {
+			child.resetCollapse();
+		});
 	}
 	
 	,onClick: function() {
