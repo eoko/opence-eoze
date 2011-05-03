@@ -5,14 +5,18 @@ Oce.MainApplication = {
 	moduleInstances: {}
 
 	,start: function(){
-		Oce.ClassLoader.require('root', 'ApplicationBootstrap', function(success) {
-			if (success) eo.root.MainApplication.start();
-		});
-//		Oce.ClassLoader.require('root', 'MainApplication.mod', function(success){
-//			if (success) {
-//				Ext.getBody().removeClass('bg')
-//			}
-//		});
+		var env = Oce.Context.environment;
+		if (env) {
+			if (!Oce.Environments) {
+				alert('Oce.Environments is undefined');
+			} else {
+				Oce.Environments[env]();
+			}
+		} else {
+			Oce.ClassLoader.require('root', 'ApplicationBootstrap', function(success) {
+				if (success) eo.root.MainApplication.start();
+			});
+		}
 	}
 
 	,defaultModuleLoadingErrorCallback: function(error) {
