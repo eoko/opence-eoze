@@ -139,12 +139,17 @@ eo.ui.TreeMenu = sp.extend({
 		// search
 		if (this.filter) {
 			this.tbar = new Ext.Toolbar({
-				items: [{
+				layout: {
+					type: "hbox"
+					,align: "middle"
+				}
+				,items: [{
 //					xtype: "textfield"
 					xtype: "trigger"
+					,flex: 1
 					,enableKeyEvents: true
 					,emptyText: "Filtrer"
-					,width: 110
+//					,width: 110
 					,triggerClass : 'x-form-clear-trigger'
 					,onTriggerClick: function() {
 						this.setValue();
@@ -165,15 +170,20 @@ eo.ui.TreeMenu = sp.extend({
 						}
 						,scope: this
 					}
-				},"->",{
+//				},"->",{
+				}
+				,new Ext.Toolbar.Separator({
+					width: 10
+				}), {
 					iconCls: "menu icon-expand-all"
 					,tooltip: "Développer tout"
-					,handler: function() { this.root.expand(true) }
+					,handler: function() {this.root.expand(true)}
 					,scope: this
-				},"-",{
+				},{
+//				},"-",{
 					iconCls: "menu icon-collapse-all"
 					,tooltip: "Réduire tout"
-					,handler: function() { this.root.collapse(true) }
+					,handler: function() {this.root.collapse(true)}
 					,scope: this
 				}]
 			})
@@ -606,7 +616,7 @@ eo.ui.TreeMenu = sp.extend({
 		if (this.ready) {
 			fn.call(scope || this);
 		} else {
-			this.on("ready", fn, scope, { single: true });
+			this.on("ready", fn, scope, {single: true});
 		}
 	}
 	
@@ -811,7 +821,7 @@ eo.ui.TreeMenu.prototype.TreeNode = Ext.tree.TreeNode.extend({
 		if (af) {
 			wl = this.getActionFamily_waitingList;
 			delete this.getActionFamily_waitingList;
-			if (wl) Ext.each(wl, function(cb) { cb() });
+			if (wl) Ext.each(wl, function(cb) {cb()});
 
 			return fs.getById(this.data.action_family);
 		}
