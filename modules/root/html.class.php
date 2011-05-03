@@ -29,7 +29,14 @@ class Html extends BasicHtmlExecutor {
 </script>
 JS;
 		$layout->head->set('beforeJs', $js, false);
-		$layout->head->extra = $this->createTemplate('head_extra_script');
+		$extra = $layout->head->extra = $this->createTemplate('head_extra_script');
+		
+		if (null !== $env = $this->request->get('env')) {
+			$extra->context = json_encode(array(
+				'environment' => $env,
+				'target' => $this->request->get('target'),
+			));
+		}
 	}
 
 	protected function pushLayoutExtraJs(HtmlRootTemplate $layout) {
