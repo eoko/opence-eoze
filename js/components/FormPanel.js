@@ -16,7 +16,7 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
 
 		config = Ext.applyIf(config || {}, {
 			 url:'index.php'
-			,bodyStyle: 'padding:25px; background:transparent'
+			,bodyStyle: 'padding:15px; background:transparent'
 			,border: false
 			,waitMsg: 'Chargement des données'
 			,waitTitle: 'Veuillez patientez'
