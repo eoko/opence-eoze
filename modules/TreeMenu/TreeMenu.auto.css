@@ -6,7 +6,7 @@
 
 /* Tree menu: makes leaf have a leaf icon, even when collapsed */
 .x-tree-node-collapsed.x-tree-node-leaf .x-tree-node-icon {
-    background-image: url(images/default/tree/leaf.gif);
+    background-image: url(_images/default/tree/leaf.gif);
 }
 
 div.menu-message {
