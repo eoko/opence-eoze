@@ -254,6 +254,10 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 
 		var storeFields = [].concat(dataIndexes);
 		if (this.storeExtraFields) storeFields = storeFields.concat(this.storeExtraFields);
+		
+		if (!this.createReader && this.storeConfig && this.storeConfig.xtype === 'groupingstore') {
+			this.createReader = this.createGroupingStoreJsonReader;
+		}
 
 //		var store = this.store = new Ext.data.JsonStore(Ext.apply({
 		var store = this.store = Ext.create(Ext.apply({
@@ -440,6 +444,11 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 				"Invalid order field (name is missing): " + this.orderField
 			);
 		}
+	}
+	
+	// private
+	,createGroupingStoreJsonReader: function(config) {
+		return new Ext.data.JsonReader(config);
 	}
 
 	,value: ''
