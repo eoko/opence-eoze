@@ -191,6 +191,7 @@ eo.form.GridField.ModelAction.Add = Ext.extend(ACTION, {
 			,clearFormOnShow: false
 			,modalTo: this.getRootWindow()
 			,title: this.winTitle || 'Nouvel enregistrement' // i18n
+			,submitButton: 0
 			,buttons: [{
 				text: 'Ok'
 				,handler: function() {
@@ -250,6 +251,7 @@ eo.form.GridField.ModelAction.Edit = Ext.extend(ACTION, {
 			,minimizable: false
 			,closeAction: this.winCloseAction || 'close'
 			,modalTo: this.getRootWindow()
+			,submitButton: 0
 			,buttons: [{
 				text: 'Ok'
 				,handler: function() {
