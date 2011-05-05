@@ -54,6 +54,10 @@ eo.form.MoneyField = Ext.form.NumberField.extend({
 		this.displayEl.setWidth(w-13);
 	}
 	
+	,onDestroy: function() {
+		this.wrap.remove();
+	}
+	
 });
 
 Ext.reg("moneyfield", eo.form.MoneyField);
