@@ -117,6 +117,45 @@ Ext.ns("eo.form").CheckableFieldSet = Ext.form.FieldSet.extend({
 			this.setValue(this.checkbox.dom.checked);
 		}
 	}
+	
+	,onCollapse: function() {
+		this.spp.onCollapse.apply(this, arguments);
+		this.fixOwnerCt();
+	}
+	
+	,onExpand: function() {
+		this.spp.onExpand.apply(this, arguments);
+		this.fixOwnerCt();
+	}
+	
+	// private
+	,fixOwnerCt: function() {
+		var ct;
+		this.doLayout();
+		// fix vbox layout
+		var vboxCt = this.findParentBy(function(c) {
+			return c.layout instanceof Ext.layout.VBoxLayout
+		});
+		if (vboxCt) {
+			ct = this.ownerCt;
+			if (ct && ct.syncSize) ct.syncSize();
+			vboxCt.doLayout();
+		}
+		// fix shadow if in window
+		ct = this.findRootCt();
+		if (ct && ct.syncShadow) ct.syncShadow();
+	}
+	
+	,findRootCt: function() {
+		
+		var finder = function(c) {
+			return !c.ownerCt;
+		};
+		
+		return function() {
+			return this.findParentBy(finder);
+		};
+	}()
 });
 
 Ext.reg("checkfieldset", eo.form.CheckableFieldSet);
