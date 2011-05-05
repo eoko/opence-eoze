@@ -629,6 +629,16 @@ Ext.ux.form.SuperBoxSelect = Ext.extend(Ext.ux.form.SuperBoxSelect,Ext.form.Comb
         if (this.isExpanded() || !this.hasFocus) {
             return;
         }
+		// <rx+>
+		// bufferSize is the desired width of the list, saved by ComboBox's
+		// doResize method when it is called before the field is rendered and
+		// visible. In ComboBox, it is tested before expanded the list, as it
+		// should be here (since the superclass's method is not called)...
+		if (this.bufferSize) {
+			this.doResize(this.bufferSize);
+			delete this.bufferSize;
+		}
+		// </rx+>
         this.list.alignTo(this.outerWrapEl, this.listAlign).show();
         this.innerList.setOverflow('auto'); // necessary for FF 2.0/Mac
         Ext.getDoc().on({
