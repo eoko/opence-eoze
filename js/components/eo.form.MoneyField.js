@@ -6,6 +6,7 @@ eo.form.MoneyField = Ext.form.NumberField.extend({
 	,symbol: "\u20ac" // euro
 	
 	,initComponent: function() {
+		if (this.width === undefined) this.width = 200;
 		this.cls = (this.cls + " " || "") + "x-input-money euro";
 		eo.form.MoneyField.superclass.initComponent.call(this);
 		if (this.readOnly) this.setReadOnly(true);
