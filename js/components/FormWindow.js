@@ -304,7 +304,7 @@ Oce.FormWindow = Ext.extend(eo.Window, {
 //			,constrainHeader: true
 //			,bodyStyle: 'padding:0'
 			,maximizable: true
-//			,layout:'fit'
+			,layout:'fit'
 //			,closeAction: 'hide'
 		})
 
