@@ -612,7 +612,7 @@ MSG;
 //		array(
 //			'year' => $this->request->req('year')
 //		));
-		dump($setters, 50);
+//		dump($setters, 50);
 //		dump($model);
 //		dump($model->getInternal()->fields);
 		$model->setFields($setters);
