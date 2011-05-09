@@ -365,15 +365,42 @@ Oce.FormWindow = Ext.extend(eo.Window, {
 		}
 	}
 	
+	,onEsc: function() {
+		var h, scope;
+		if (this.cancelHandler) {
+			h = this.cancelHandler;
+			scope = this.scope || this;
+		} else {
+			var b = this.getCancelButton();
+			if (b) {
+				h = b.handler;
+				scope = b.scope || b;
+			}
+		}
+		if (h) {
+			h.call(scope);
+		} else {
+			Oce.FormWindow.superclass.onEsc.apply(this, arguments);
+		}
+	}
+	
+	,getCancelButton: function() {
+		return this.getPropertyButton(this.cancelButton);
+	}
+	
 	,getSubmitButton: function() {
-		var sb = this.submitButton;
-        if(Ext.isDefined(sb)){
-            if(Ext.isNumber(sb) && this.fbar){
-                return this.fbar.items.get(sb);
-            }else if(Ext.isString(sb)){
-                return Ext.getCmp(sb);
+		return this.getPropertyButton(this.submitButton);
+	}
+		
+	// private
+	,getPropertyButton: function(p) {
+        if(Ext.isDefined(p)){
+            if(Ext.isNumber(p) && this.fbar){
+                return this.fbar.items.get(p);
+            }else if(Ext.isString(p)){
+                return Ext.getCmp(p);
             }else{
-                return sb;
+                return p;
             }
         }
 		return null;
