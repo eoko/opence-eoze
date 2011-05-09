@@ -1,6 +1,6 @@
 Ext.ns('eo.form');
 
-eo.form.MoneyField = Ext.form.NumberField.extend({
+eo.form.MoneyField = Ext.extend(Ext.form.NumberField, {
 	
 	precision: 2
 	,symbol: "\u20ac" // euro
