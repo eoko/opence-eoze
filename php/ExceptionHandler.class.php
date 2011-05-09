@@ -68,6 +68,7 @@ class ExceptionHandler {
 		}
 
 		if ($answer) {
+			header('HTTP/1.1 500 Internal Server Error');
 			ExtJSResponse::failure($reason, $systemError, $errorTitle, true, false,
 				$includeTimestamp);
 		}
