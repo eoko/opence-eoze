@@ -130,6 +130,11 @@ Ext.ns("eo.form").CheckableFieldSet = Ext.form.FieldSet.extend({
 	
 	// private
 	,fixOwnerCt: function() {
+		// might be called when setting form values, that is before the form
+		// is really rendered (but rendered has already been set to true...
+		// va savoir pourquoi)
+		if (!Ext.isObject(this.layout)) return;
+		
 		var ct;
 		this.doLayout();
 		// fix vbox layout
