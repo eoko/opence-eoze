@@ -330,12 +330,6 @@ Oce.deps.wait('Ext.ux.form.TwinComboBox', function() {
 			
 			if (this.remoteOnce) this.mode = 'local';
 
-			this.fireEvent('storefirstloaded');
-			this.fireEvent('afterfirstload');
-			if (this.storeLoadingListeners) {
-				Ext.each(this.storeLoadingListeners, function(l) {l()});
-			}
-
 			// init setValue
 			var me = this;
 			// restore initial preventMark config option
@@ -383,16 +377,30 @@ Oce.deps.wait('Ext.ux.form.TwinComboBox', function() {
 			} else {
 				me.setValue = Oce.form.ForeignComboBox.superclass.setValue;
 			}
+			
+			// initialisation value callback
+			if (this.initialisationValueCallback) {
+				this.initialisationValueCallback.call(
+				this.initialisationValueCallbackScope || this, this);
+			}
+
+			this.fireEvent('storefirstloaded', this);
+			this.fireEvent('afterfirstload', this);
+			if (this.storeLoadingListeners) {
+				Ext.each(this.storeLoadingListeners, function(l) {l()});
+			}
 		}
 
 		,initialisationValue: undefined
 
-		,setValue: function(v, cb) {
+		,setValue: function(v, cb, scope) {
 			var me = this;
 			// prevent mark while we are waiting for the first load before
 			// setting the value
 			this.preventMark = true;
 			this.initialisationValue = v;
+			this.initialisationValueCallback = cb;
+			this.initialisationValueCallbackScope = scope;
 		}
 
 		// Overidden, so that the store is not reloaded when a selection is
