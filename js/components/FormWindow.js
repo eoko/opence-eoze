@@ -29,9 +29,12 @@ eo.Window = Ext.extend(Ext.Window, {
 		eo.Window.superclass.constructor.call(this, config);
 
 		if (Ext.isChrome) {
-			this.on('afterrender', function() {
-				me.setWidth(me.getWidth());
-			})
+			this.on({
+				scope: this
+				,afterrender: function() {
+					this.setWidth(this.getWidth());
+				}
+			});
 		}
 //		eo.Window.superclass.constructor.call(this, config);
 
@@ -233,32 +236,30 @@ Oce.FormWindow = Ext.extend(eo.Window, {
 	formRefreshers: []
 	,formPages: null // wait events
 	,pkName: 'id'
-
-	,constructor: function(config) {
-
-		var me = this;
+	
+	,initComponent: function() {
 
 		// --- Items default ---
 		var formPanel;
-		if (config.formPanel) {
-			if (config.formPanel instanceof Ext.Component) {
-				formPanel = config.formPanel;
+		if (this.formPanel) {
+			if (this.formPanel instanceof Ext.Component) {
+				formPanel = this.formPanel;
 				if (formPanel.initialConfig.autoScroll === undefined) {
 					formPanel.setAutoScroll(true);
 				}
 			} else {
-//				Ext.applyIf(config.formPanel, {
+//				Ext.applyIf(this.formPanel, {
 //					autoScroll: true
 //				});
-//				formPanel = Ext.create(config.formPanel);
+//				formPanel = Ext.create(this.formPanel);
 				formPanel = Ext.create(
-					Ext.applyIf(config.formPanel, {
+					Ext.applyIf(this.formPanel, {
 						autoScroll: true
 					})
 				);
 			}
 
-			config.items = [formPanel];
+			this.items = [formPanel];
 		}
 
 		// --- Reload tool ---
@@ -287,9 +288,9 @@ Oce.FormWindow = Ext.extend(eo.Window, {
 //				,handler: this.refresh.createDelegate(this)
 //			}];
 //		}
-		config.tools = config.tools || [];
-		if (config.refreshable) {
-			config.tools.push({
+		this.tools = this.tools || [];
+		if (this.refreshable) {
+			this.tools.push({
 				id: 'refresh'
 				,handler: this.refresh.createDelegate(this)
 			});
@@ -297,7 +298,7 @@ Oce.FormWindow = Ext.extend(eo.Window, {
 
 		// --- Default config ---
 
-		Ext.applyIf(config, {
+		Ext.applyIf(this, {
 			 closable: true
 			,collapsible: false
 			,loadMask: true
@@ -317,7 +318,7 @@ Oce.FormWindow = Ext.extend(eo.Window, {
 //			});
 //		}
 //
-		Oce.FormWindow.superclass.constructor.call(this, config)
+		Oce.FormWindow.superclass.initComponent.call(this);
 //
 //		if (Ext.isChrome) {
 //			this.on('afterrender', function() {
