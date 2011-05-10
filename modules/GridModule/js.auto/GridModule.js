@@ -2164,7 +2164,6 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 	,createFilterMenu: function(filters) {
 
 		var me = this
-			,menu
 			,blockCheckHandler = false
 			;
 
@@ -2186,7 +2185,7 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 		});
 
 		var lastFilters = {};
-		var searchHandler = function() {
+		var searchHandler = function(menu) {
 
 			if (!me.store) return;
 
@@ -2208,9 +2207,11 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 				me.store.baseParams.json_filters = encodeURIComponent(Ext.encode(activeFilters));
 				me.reload();
 			}
-		}.createDelegate(this);
+		};
 
-		var checkHandler = function() {
+		var checkHandler = function(menuItem) {
+			var menu = menuItem.parentMenu;
+			if (!menu) return;
 			if (blockCheckHandler) return;
 			var all = true;
 			menu.items.each(function(item) {
@@ -2218,7 +2219,7 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 					&& !item.isOption) all = false;
 			});
 			checkAllItem.setChecked(all);
-		}
+		};
 
 		var items = [
 			checkAllItem
@@ -2232,7 +2233,7 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 				items.push(Ext.applyIf(f, {
 					checked: true
 					,hideOnClick: false
-					,'checkHandler':checkHandler
+					,checkHandler: checkHandler
 				}))
 			}
 		});
@@ -2241,28 +2242,36 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 		items.push({
 			 text: 'Appliquer'
 			,iconCls : 'refresh'
-			,hideOnClick:false
-			,handler: function() {
-				searchHandler();
-				menu.hide();
+			
+			,scope: this
+			,handler: function(menuItem) {
+				var menu = menuItem.parentMenu;
+				if (menu) {
+					searchHandler.call(this, menu);
+					menu.hide();
+				}
 			}
 		});
 
-		menu = new Ext.menu.Menu({
+		return {
 			items: items
-		});
-
-		checkHandler();
-
-		menu.on('beforehide', searchHandler);
-
-		if (this.store) {
-			searchHandler();
-		} else {
-			this.afterInitStore = this.afterInitStore.createSequence(searchHandler);
-		}
-
-		return menu;
+			,listeners: {
+				scope: this
+				,beforehide: searchHandler
+				,afterrender: function(menu) {
+					checkHandler.call(this, {
+						parentMenu: menu
+					});
+					if (this.store) {
+						searchHandler.call(this, menu);
+					} else {
+						this.afterInitStore = this.afterInitStore.createSequence(function() {
+							searchHandler.call(me, menu);
+						});
+					}
+				}
+			}
+		};
 	}
 
 	,initSearchPlugin: function() {
@@ -2704,6 +2713,113 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 			}
 		}
 	}
+	
+	// private
+	,columnMenu_onBeforeShow: function(colMenu) {
+		var cm = this.grid.getColumnModel();
+		var colCount = cm.getColumnCount();
+		colMenu.removeAll();
+		// --- Select all ---
+		var checkAllItem = new Ext.menu.CheckItem({
+			 text:this.my.showAllColsText
+			,checked:!(this.checkIndexes instanceof Array)
+			,hideOnClick:false
+			,handler:function(item) {
+				var checked = ! item.checked;
+				apply(function() {
+					item.parentMenu.items.each(function(i) {
+						if(item !== i && i.setChecked && !i.disabled) {
+							i.setChecked(checked);
+						}
+					});
+				});
+			}
+		});
+		colMenu.add(checkAllItem,'-');
+		// --- Items ---
+		var checkAllSelected = false;
+
+		var groups = {}, groupMenus;
+		if (this.extra.columnGroups) {
+			groupMenus = [];
+			Ext.iterate(this.extra.columnGroups.items, function(title,items) {
+				var menu = new Ext.menu.Menu();
+
+				groupMenus.push(menu);
+
+				colMenu.add(new Ext.menu.CheckItem({
+					hideOnClick: false
+					,text: title
+					,menu: menu
+					,checkHandler: function(cb, check) {
+						if (!cb.initiated) return;
+						if (menu.items) {
+							apply(function() {
+								menu.items.each(function(item) {
+									item.setChecked(check);
+								});
+							})
+						}
+					}
+				}));
+
+				Ext.each(items, function(item) {
+					groups[item] = menu;
+				});
+			});
+			colMenu.add('-');
+		}
+
+		for(var i = 0; i < colCount; i++){
+			if(cm.config[i].hideable !== false){
+				checkAllSelected = checkAllSelected || !cm.isHidden(i);
+				(groups[cm.config[i].dataIndex] || colMenu).add(new Ext.menu.CheckItem({
+					itemId: 'col-'+cm.getColumnId(i),
+					text: cm.getColumnHeader(i),
+					checked: !cm.isHidden(i),
+					hideOnClick:false,
+					disabled: cm.config[i].hideable === false,
+					checkHandler: function(item, checked, cm) {
+						var index = cm.getIndexById(item.itemId.substr(4));
+						if(index != -1){
+							apply(function() {
+								// We don't want to use the normal setHidden
+								// method here, because it triggers an overly
+								// long to process "hiddenchange" event.
+								// We need however to clean the ColumnModel's
+								// totalWidth to avoid the columns rendering
+								// to become all fucked up (see
+								// ColumnModel.setHidden source).
+								cm.totalWidth = null;
+								cm.config[index].hidden = !checked;
+								// cm.setHidden(index, !checked);
+							});
+						}
+					}.createDelegate(this, [cm], 2)
+				}));
+			}
+		}
+
+		checkAllItem.setChecked(checkAllSelected);
+
+		// Finish group menus -- determine checked statut from items
+		if (groupMenus) {
+			Ext.each(groupMenus, function(menu) {
+				var checked = false,
+					cb = menu.ownerCt;
+				if (menu.items) {
+					menu.items.each(function(item) {
+						if (item.checked) checked = true;
+					});
+				} else {
+					cb.disable();
+				}
+				cb.setChecked(checked);
+				cb.initiated = true;
+			});
+		}
+
+	}
 
 	,initActions: function() {
 
@@ -2735,7 +2851,7 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 //		}.createDelegate(this);
 
 		// --- Columns Menu Items ---
-		var colMenu = new Ext.menu.Menu();
+		var colMenuItems = [];
 
 		var me = this;
 		var applying = 0;
@@ -2758,115 +2874,6 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 				run();
 			}
 		}
-
-		this.initGrid = this.initGrid.createSequence(function() {
-	//		this.$prototype.afterInitGrid.apply(this, arguments);
-			colMenu.on('beforeshow', function(colMenu) {
-				var cm = this.grid.getColumnModel();
-				var colCount = cm.getColumnCount();
-				colMenu.removeAll();
-				// --- Select all ---
-				var checkAllItem = new Ext.menu.CheckItem({
-					 text:this.my.showAllColsText
-					,checked:!(this.checkIndexes instanceof Array)
-					,hideOnClick:false
-					,handler:function(item) {
-						var checked = ! item.checked;
-						apply(function() {
-							item.parentMenu.items.each(function(i) {
-								if(item !== i && i.setChecked && !i.disabled) {
-									i.setChecked(checked);
-								}
-							});
-						});
-					}
-				});
-				colMenu.add(checkAllItem,'-');
-				// --- Items ---
-				var checkAllSelected = false;
-				
-				var groups = {}, groupMenus;
-				if (this.extra.columnGroups) {
-					groupMenus = [];
-					Ext.iterate(this.extra.columnGroups.items, function(title,items) {
-						var menu = new Ext.menu.Menu();
-						
-						groupMenus.push(menu);
-						
-						colMenu.add(new Ext.menu.CheckItem({
-							hideOnClick: false
-							,text: title
-							,menu: menu
-							,checkHandler: function(cb, check) {
-								if (!cb.initiated) return;
-								if (menu.items) {
-									apply(function() {
-										menu.items.each(function(item) {
-											item.setChecked(check);
-										});
-									})
-								}
-							}
-						}));
-						
-						Ext.each(items, function(item) {
-							groups[item] = menu;
-						});
-					});
-					colMenu.add('-');
-				}
-				
-				for(var i = 0; i < colCount; i++){
-					if(cm.config[i].hideable !== false){
-						checkAllSelected = checkAllSelected || !cm.isHidden(i);
-						(groups[cm.config[i].dataIndex] || colMenu).add(new Ext.menu.CheckItem({
-							itemId: 'col-'+cm.getColumnId(i),
-							text: cm.getColumnHeader(i),
-							checked: !cm.isHidden(i),
-							hideOnClick:false,
-							disabled: cm.config[i].hideable === false,
-							checkHandler: function(item, checked, cm) {
-								var index = cm.getIndexById(item.itemId.substr(4));
-								if(index != -1){
-									apply(function() {
-										// We don't want to use the normal setHidden
-										// method here, because it triggers an overly
-										// long to process "hiddenchange" event.
-										// We need however to clean the ColumnModel's
-										// totalWidth to avoid the columns rendering
-										// to become all fucked up (see
-										// ColumnModel.setHidden source).
-										cm.totalWidth = null;
-										cm.config[index].hidden = !checked;
-										// cm.setHidden(index, !checked);
-									});
-								}
-							}.createDelegate(this, [cm], 2)
-						}));
-					}
-				}
-				
-				checkAllItem.setChecked(checkAllSelected);
-				
-				// Finish group menus -- determine checked statut from items
-				if (groupMenus) {
-					Ext.each(groupMenus, function(menu) {
-						var checked = false,
-							cb = menu.ownerCt;
-						if (menu.items) {
-							menu.items.each(function(item) {
-								if (item.checked) checked = true;
-							});
-						} else {
-							cb.disable();
-						}
-						cb.setChecked(checked);
-						cb.initiated = true;
-					});
-				}
-				
-			}.createDelegate(this))
-		})
 
 		var actions = {
 			add: {
@@ -2891,7 +2898,12 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 				 xtype: 'oce.rbbutton'
 				,text: 'Colonnes'
 		//		,iconCls : 'b_ico_column'
-				,menu: colMenu
+				,menu: {
+					listeners: {
+						scope: this
+						,beforeshow: this.columnMenu_onBeforeShow
+					}
+				}
 			}
 
 			,pdf: {
