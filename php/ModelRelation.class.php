@@ -387,7 +387,14 @@ class ModelRelationReferedByOne extends ModelRelationByReference
 	}
 	
 	public function doGetAsModel($createIfNone = false, array $overrideContext = null) {
+		return $this->getModelReference($createIfNone, $overrideContext);
+	}
 
+	/**
+	 * @return Model
+	 */
+	private function &getModelReference($createIfNone = false, array $overrideContext = null) {
+		
 		if (null !== $model =& $this->cache->get($overrideContext)) {
 			return $model;
 		}
@@ -406,6 +413,15 @@ class ModelRelationReferedByOne extends ModelRelationByReference
 //		}
 
 		return $model;
+	}
+	
+	public function doSet($value, $forceAcceptNull = false) {
+		if (is_array($value)) {
+			$model =& $this->getModelReference(true);
+			$model->setFields($value, $forceAcceptNull);
+		} else {
+			parent::doSet($value, $forceAcceptNull);
+		}
 	}
 
 	public function setFromModel(Model $model) {
