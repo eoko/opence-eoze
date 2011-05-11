@@ -661,11 +661,13 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 						 text: 'Enregistrer'
 						 //,iconCls: 'ico_tick'
 						 ,iconCls: 'ico_disk'
+						 ,isSaveButton: true
 						 ,handler: handlers.save
 					 })
 					 ,cancelButton = new Ext.Button({
 						 text: 'Annuler'
 						 ,iconCls: 'ico_cross'
+						 ,isCloseButton: true
 						 ,handler: handlers.forceClose
 						 ,hidden: true
 					 })
