@@ -683,9 +683,13 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 
 		if ((this.firstLoadDone || this.phantom) && !this.dirty) {
 			this.dirty = true;
-			this.fireEvent('modified');
+			this.fireModifiedEvent();
 			this.fireEvent('dirtychanged', true);
 		}
+	}
+	
+	,fireModifiedEvent: function() {
+		this.fireEvent('modified');
 	}
 
 	,removeById: function(id) {
