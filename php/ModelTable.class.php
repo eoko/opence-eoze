@@ -424,7 +424,8 @@ abstract class ModelTable extends ModelTableProxy {
 	abstract public static function getNameFieldName($require = true);
 
 	protected function _getNameFieldName($require = true) {
-		if ($this->hasColumn('name')) return 'name';
+		if ($this->hasColumn('label')) return 'label';
+		else if ($this->hasColumn('name')) return 'name';
 		else if ($this->hasColumn('nom')) return 'nom';
 		else if ($require) throw new IllegalStateException();
 		else return null;

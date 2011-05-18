@@ -254,6 +254,7 @@ Ext.grid.Column.types.datecolumn =
 //		this.renderer = Ext.util.Format.dateRenderer(this.format);
 		var me = this;
 		this.renderer = function(v) {
+			if (!v) return "";
 			var format = me.inputFormat || me.format || "d/m/Y";
 			if (!(v instanceof Date)) {
 				// instead of:
