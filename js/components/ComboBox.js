@@ -19,6 +19,12 @@ Oce.deps.wait('Ext.ux.form.TwinComboBox', function() {
 		}
 
 		,constructor: function(cfg) {
+			
+			if (!cfg.data) {
+				cfg = Ext.apply({
+					data: []
+				}, cfg);
+			}
 
 			var data;
 			if (Ext.isObject(cfg.data)) {
