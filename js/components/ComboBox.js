@@ -18,6 +18,8 @@ Oce.deps.wait('Ext.ux.form.TwinComboBox', function() {
 
 		,constructor: function(cfg) {
 			
+			if (!cfg) cfg = {};
+			
 			if (!cfg.data) {
 				cfg = Ext.apply({
 					data: []
@@ -324,6 +326,20 @@ Oce.deps.wait('Ext.ux.form.TwinComboBox', function() {
 			this.store.load();
 			// Trying to force theading... doesn't seem to work
 //			this.store.load.createDelegate(this.store).defer(50);
+		}
+
+		,createRenderer: function(defaultLabel) {
+			defaultLabel = defaultLabel || "-";
+			return function(v) {
+				if (!v) return defaultLabel;
+				var i = this.store.find(this.valueField, v);
+				if (i !== -1) {
+					var row = this.store.getAt(i),
+						label = row.get(this.displayField);
+					if (label) return label;
+				}
+				return String.format("#{0} (Label Error)", v);
+			}.createDelegate(this);
 		}
 
 		,expand: function() {
