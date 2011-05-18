@@ -7,9 +7,7 @@ Oce.deps.wait('Ext.ux.form.TwinComboBox', function() {
 
 	Oce.form.SimpleComboBox = Ext.extend(Ext.ux.form.TwinComboBox, {
 
-		oData: {}
-
-		,createRenderer: function(defaultLabel) {
+		createRenderer: function(defaultLabel) {
 			var me = this;
 			return function(v) {
 				if (me.oData[v]) return me.oData[v];
@@ -25,6 +23,8 @@ Oce.deps.wait('Ext.ux.form.TwinComboBox', function() {
 					data: []
 				}, cfg);
 			}
+			
+			this.oData = {};
 
 			var data;
 			if (Ext.isObject(cfg.data)) {
