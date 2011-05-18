@@ -970,6 +970,26 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
             this.setSize(sz.width, this.height || sz.height);
         }
         this.resizeEl = this.positionEl = this.wrap;
+		
+		// This is needed for GridField to behave as expected in TabPanel, when
+		// it is set as a tab's only component. More generaly, this is probably
+		// needed to have the hide() method works correctly.
+		//
+		// Ext.Component:
+		//  
+		//	onHide : function(){
+		//		this.getVisibilityEl().addClass('x-hide-' + this.hideMode);
+		//	}
+		//
+		//	getVisibilityEl : function(){
+		//		return this.hideParent ? this.container : this.getActionEl();
+		//	}
+		//	
+		//	getActionEl : function(){
+		//		return this[this.actionMode];
+		//	}
+		// 
+		this.actionMode = "wrap";
 
 		// This is necessary to make the component compatible with
 		// the FieldLabeler plugin
