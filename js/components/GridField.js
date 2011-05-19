@@ -649,6 +649,11 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 		this.store.add(record);
 		return record;
 	}
+	
+	// private
+	,eachSubmitableRecord: function(cb, scope) {
+		this.store.each(cb, scope);
+	}
 
 	// private
 	,syncValue: function() {
@@ -656,7 +661,8 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 		var ids = [];
 		var extraData = [];
 		var i = this.orderStartIndex;
-		this.store.each(function(reccord) {
+//		this.store.each(function(reccord) {
+		this.eachSubmitableRecord(function(reccord) {
 			var id = reccord.data[this.pkName],
 				xData = {};
 			
