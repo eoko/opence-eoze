@@ -535,12 +535,31 @@ Ext.form.ComboBox.override({
 
 // Fix Ext.Element.getValue, that can crash because of a delayed event, that is
 // the dom element value can be required after the DOM element has been deleted...
+(function() {
+	var spp = Ext.Element.prototype,
+		hasClass = spp.hasClass,
+		addClass = spp.addClass;
 Ext.override(Ext.Element, {
 	
 	getValue: function(asNumber) {
 		var d = this.dom;
-		if (!d) return undefined;
+		if (!d) return asNumber ? parseInt("") : "";
 		var val = d.value;
 		return asNumber ? parseInt(val, 10) : val;
 	}
+	
+	,addClass: function() {
+		if (!this.dom) {
+			return this;
+		}
+		return addClass.apply(this, arguments);
+	}
+	
+	,hasClass: function() {
+		if (!this.dom) {
+			return false;
+		}
+		return hasClass.apply(this, arguments);
+	}
 });
+})(); // closure
