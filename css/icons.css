@@ -5,12 +5,13 @@
  * TODO: clean that, that's some very ugly namespace polution!!!
  */
 
-/*.export_pdf {
+.x-btn-text.export_pdf {
 	background-image:url(../images/opence/32x32/export_pdf.png) !important;
 }
-.export_excel {
+.x-btn-text.export_excel {
 	background-image:url(../images/opence/32x32/export_excel.png) !important;
 }
+/*
 .printer {
 	background-image:url(../images/opence/32x32/printer.png) !important;
 }
