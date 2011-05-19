@@ -177,9 +177,29 @@ Ext.override(Ext.Panel, {
 
 
 // Add setEnabled && setVisible function to ext components
+(function() {
+var spp = Ext.Component.prototype,
+	enable = spp.enable,
+	disable = spp.disable;
 Ext.override(Ext.Component, {
 
-	setEnabled: function(enabled) {
+	enable: function() {
+		// fixes a bug that might happen if the component has already been destroyed
+		var rendered = this.rendered;
+		this.rendered = !!this.el && !!this.el.dom;
+		enable.apply(this, arguments);
+		this.rendered = rendered;
+	}
+	
+	,disable: function() {
+		// fixes a bug that might happen if the component has already been destroyed
+		var rendered = this.rendered;
+		this.rendered = !!this.el && !!this.el.dom;
+		disable.apply(this, arguments);
+		this.rendered = rendered;
+	}
+	
+	,setEnabled: function(enabled) {
 		if (enabled) {
 			this.enable();
 		} else {
@@ -195,6 +215,7 @@ Ext.override(Ext.Component, {
 		}
 	}
 });
+})(); // closure
 
 
 // Add a change event to HtmlEditor
