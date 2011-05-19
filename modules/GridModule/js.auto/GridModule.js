@@ -1403,6 +1403,7 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 			var items = [];
 			var me = this;
 			Ext.iterate(this.extra.toolbar, function(name, menuItems) {
+				if (menuItems === false) return;
 				name = name.replace(/\%title\%/, me.getTitle());
 				var groupItems = [];
 				Ext.each(menuItems, function(item) {
