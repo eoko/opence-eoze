@@ -54,6 +54,10 @@
 .user_child {
 	background-image:url(../images/opence/32x32/user_child.png) !important;
 }*/
+	
+.ico32.green_ball {
+	background-image:url(../images/opence/32x32/green_ball.png) !important;
+}
 
 .b_ico_earth {
 	background-image:url(../images/opence/32x32/earth.png) !important;
@@ -120,6 +124,9 @@
 .ico.add,
 .ico_add {
 	background-image:url(../images/icons/add.png) !important;
+}
+.ico.arrow_down {
+	background-image:url(../images/icons/arrow_down.png) !important;
 }
 .application_form_edit {
 	background-image:url(../images/icons/application_form_edit.png) !important;
@@ -201,6 +208,9 @@
 }
 .ico_tick {
 	background-image:url(../images/icons/tick.png) !important;
+}
+.ico.report {
+	background-image:url(../images/icons/report.png) !important;
 }
 .ico_stop {
 	background-image:url(../images/icons/stop.png) !important;
