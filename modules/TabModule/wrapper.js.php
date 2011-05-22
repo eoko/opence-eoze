@@ -2,7 +2,13 @@
 
 var <?php echo $var ?> = eo.Class({
 
-	open: function(destination) {
+	constructor: function() {
+		this.doConstruct();
+	}
+	
+	,doConstruct: function() {}
+
+	,open: function(destination) {
 		if (!this.tab) {
 			destination = destination || Oce.mx.application.getMainDestination();
 			destination.add(this.createTab());
