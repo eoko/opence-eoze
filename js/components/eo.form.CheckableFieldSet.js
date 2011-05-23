@@ -61,6 +61,15 @@ Ext.ns("eo.form").CheckableFieldSet = Ext.form.FieldSet.extend({
 		return this.name || this.checkboxName;
 	}
 	
+	,initValue: function() {
+		this.originalValue = this.getValue();
+	}
+	
+	,reset: function() {
+		this.setValue(this.originalValue);
+		this.clearInvalid();
+	}
+	
 	,getValue: function() {
 		if (this.rendered) {
 			return this.checkbox.dom.checked;
