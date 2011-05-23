@@ -149,6 +149,7 @@ Ext.ns("eo.form").CheckableFieldSet = Ext.form.FieldSet.extend({
 		// fix vbox layout
 		var vboxCt = this.findParentBy(function(c) {
 			return c.layout instanceof Ext.layout.VBoxLayout
+					|| (c.layout && (c.layout === "vbox" || c.layout.type === "vbox"));
 		});
 		if (vboxCt) {
 			ct = this.ownerCt;
