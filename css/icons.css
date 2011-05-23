@@ -187,6 +187,7 @@
 .ico_send_mail {
 	background-image:url(../images/icons/email_go.png) !important;
 }
+.ico.pdf,
 .ico_pdf {
 	background-image:url(../images/icons/page_white_acrobat.png) !important;
 }
