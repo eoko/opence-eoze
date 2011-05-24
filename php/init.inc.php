@@ -12,7 +12,8 @@
 use eoko\config\ConfigManager;
 
 $directAccess = false;
-date_default_timezone_set('Europe/London');
+date_default_timezone_set('Europe/Paris');
+bcscale(2);
 
 function defineIf($name, $value) {
 	if (!defined($name)) define($name, $value);
