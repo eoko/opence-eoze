@@ -175,6 +175,18 @@
 .ico_help {
 	background-image:url(../images/icons/help.png) !important;
 }
+.ico.lock {
+	background-image:url(../images/icons/lock.png) !important;
+}
+.ico.lock_open {
+	background-image:url(../images/icons/lock_open.png) !important;
+}
+.ico.lock_openable {
+	background-image:url(../images/icons/lock.png) !important;
+}
+.ico.lock_openable:hover {
+	background-image:url(../images/icons/lock_open.png) !important;
+}
 .ico.layout_content {
 	background-image:url(../images/icons/layout_content.png) !important;
 }
