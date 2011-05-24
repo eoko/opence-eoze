@@ -13,7 +13,7 @@ Oce.grid.CheckColumn = Ext.extend(Ext.util.Observable, {
 		Oce.grid.CheckColumn.superclass.constructor.apply(this, arguments);
 		this.renderer = this.renderer.createDelegate(this);
 //		this.onEvents('changed');
-		this.addEvents('changed');
+		this.addEvents("changed", "storecreated");
 	}
 
 	,init : function(grid){
@@ -281,6 +281,15 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 		if (!this.createReader && this.storeConfig && this.storeConfig.xtype === 'groupingstore') {
 			this.createReader = this.createGroupingStoreJsonReader;
 		}
+		
+		if (this.recordType) {
+			if (!Ext.isFunction(this.recordType)) {
+				storeFields = Ext.extend(
+						Ext.data.Record.create(storeFields), this.recordType);
+			} else {
+				throw new Error("Illegal State");
+			}
+		}
 
 //		var store = this.store = new Ext.data.JsonStore(Ext.apply({
 		var store = this.store = Ext.create(Ext.apply({
@@ -308,6 +317,9 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 
 			xtype: "jsonstore"
 		}));
+		
+		this.afterStoreCreated();
+		this.fireEvent("storecreated", this, store);
 
 		if (this.subset) store.baseParams.subset = this.subset;
 
@@ -413,7 +425,8 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 					me.newRecord = null;
 					// Select the row that was being edited or the the previous row
 					// (the just edited row may have been removed in the canceledit event)
-					me.grid.getSelectionModel().selectRow(editor.rowIndex-1, false);
+					var sm = me.grid.getSelectionModel();
+					if (sm) sm.selectRow(editor.rowIndex-1, false);
 				}
 			});
 			this.rowEditor.on('afteredit', function(editor) {
@@ -421,7 +434,8 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 					me.newRecord = null;
 					if (editor.repeat) this.onAddEditor();
 				}
-				me.grid.getSelectionModel().selectRow(editor.rowIndex, false);
+				var sm = me.grid.getSelectionModel();
+				if (sm) sm.selectRow(editor.rowIndex, false);
 			}.createDelegate(this));
 		}
 
@@ -467,6 +481,11 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 				"Invalid order field (name is missing): " + this.orderField
 			);
 		}
+	}
+	
+	// protected
+	,afterStoreCreated: function() {
+		// I am a hook
 	}
 	
 	// private
@@ -1063,6 +1082,13 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 	}
 
 	,createGrid: function() {
+		
+		var sm;
+		if (this.checkboxSel) {
+			sm = this.checkboxSel;
+		} else if (!this.gridConfig || !this.gridConfig.disableSelection) {
+			sm = new Ext.grid.RowSelectionModel();
+		}
 
 		var me = this
 
@@ -1070,7 +1096,7 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 //			columns: this.checkboxSel ? [this.checkboxSel].concat(this.gridColumns) : this.gridColumns
 			cm: new Ext.grid.ColumnModel(this.checkboxSel ? [this.checkboxSel].concat(this.gridColumns) : this.gridColumns)
 	        ,clicksToEdit: 1
-			,selModel: this.checkboxSel ? this.checkboxSel : new Ext.grid.RowSelectionModel()
+			,selModel: sm
 			,store: this.store
 			,plugins: this.gridPlugins
 			,enableColumnHide: false
@@ -1169,6 +1195,12 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 				ddGroup : this.gridDDGroup
 				,notifyDrop : function(dd, e, data){
 					var sm = grid.getSelectionModel();
+					if (!sm) {
+						if (console && console.warn) {
+							console.warn("Cannot use drag drop with no selection model!");
+						}
+						return;
+					}
 					var rows = sm.getSelections();
 					var cindex = dd.getDragData(e).rowIndex;
 					if (sm.hasSelection()) {
