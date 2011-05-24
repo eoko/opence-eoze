@@ -180,6 +180,29 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 
 			// Editable columns
 			} else if (config.editor) {
+				
+				if (config.editor.name) {
+					// Having a name set for a grid editor can be the cause of
+					// great annoyance. When the editor is used at least once,
+					// it will be rendered (if it has not been passed already
+					// rendered). Then, when the form is submitted, the editor's
+					// element will be taken into account, and its value will be
+					// serialized in the form values. That is most probably not
+					// what is intended, since the editor is supposed to be used
+					// to edit the value of the grid's cell. For example, if the
+					// editor has the name "id" set, then it will most probably
+					// overwritte the record's own id value... So, you should
+					// double check that something wrong hasn't occured that
+					// leads use here! (Thanks for attention)
+					if (console) {
+						var msg = 'Warning!!! A grid editor has a name set: '
+								+ config.editor.name;
+						if (console.warn) console.warn(msg);
+						else if (console.log) console.log(msg);
+						debugger
+					}
+				}
+				
 				if (config.editor == 'checkbox') {
 					colConfig = new Oce.grid.CheckColumn(
 						Ext.apply({
