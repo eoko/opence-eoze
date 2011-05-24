@@ -1336,14 +1336,14 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 					,items: opts.form
 				};
 
-				win = new Oce.FormWindow({
+				win = new Oce.FormWindow(Ext.apply({
 					title: opts.winTitle || 'Options'
 					,formPanel: form
 					,buttons: [
 						{text: 'Ok', handler: doRequest} // i18n
 						,{text: 'Annuler', handler: function() {win.close()}} // i18n
 					]
-				});
+				}, opts.winConfig));
 			}
 		}
 
