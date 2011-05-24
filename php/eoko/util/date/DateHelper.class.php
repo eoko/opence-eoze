@@ -34,7 +34,7 @@ class DateHelper {
 	/**
 	 * @return DateHelper 
 	 */
-	private static function getDefaultHelper() {
+	public static function getDefaultHelper() {
 		if (!self::$defaultHelper) {
 			self::$defaultHelper = new DateHelper();
 		}
