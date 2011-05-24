@@ -1,3 +1,5 @@
+// rx: Éric Ortéga <eric@planysphere.fr>
+
 Ext.ns('Ext.ux.grid');
 
 Ext.ux.grid.GridSummary = function(config) {
@@ -65,9 +67,12 @@ Ext.extend(Ext.ux.grid.GridSummary, Ext.util.Observable, {
             data[cname] = 0;
 
             if (cf.summaryType) {
+				var fn = Ext.isFunction(cf.summaryType) ? cf.summaryType : // rx+
+						Ext.ux.grid.GridSummary.Calculations[cf.summaryType]; // rx+
                 for (var j = 0, jlen = rs.length; j < jlen; j++) {
                     var r = rs[j]; // get a single Record
-                    data[cname] = Ext.ux.grid.GridSummary.Calculations[cf.summaryType](r.get(cname), r, cname, data, j);
+//rx-                    data[cname] = Ext.ux.grid.GridSummary.Calculations[cf.summaryType](r.get(cname), r, cname, data, j);
+                    data[cname] = fn(r.get(cname), r, cname, data, j); // rx+
                 }
             }
         }
