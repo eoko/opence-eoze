@@ -308,7 +308,8 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 			,autoload: true
 			,sortInfo: this.sortInfo
 			,reader: !this.createReader ? undefined : this.createReader({
-				fields: dataIndexes
+				// must account for storeFields possibly being a recordType constructor
+				fields: Ext.isFunction(storeFields) ? storeFields : dataIndexes
 				,root: 'data'
 				,totalProperty: 'count'
 				,idProperty: this.pkName
