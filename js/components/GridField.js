@@ -324,9 +324,9 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 			})
 		}
 
-		store.on('add', this.syncValue, this);
-		store.on('remove', this.syncValue, this);
-		store.on('update', this.syncValue, this);
+		store.on('add', this.onSyncValue, this);
+		store.on('remove', this.onSyncValue, this);
+		store.on('update', this.onSyncValue, this);
 		
 		if (this.rowId !== undefined) {
 			store.baseParams[this.pkRowId] = this.rowId;
@@ -555,6 +555,7 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 					me.fireEvent('loaded', me);
 					me.firstLoadDone = true;
 					me.dirty = false; // get my virginity back, for the modified evt
+					me.initialValue = me.syncValue(true);
 				}
 			});
 		}
@@ -677,10 +678,14 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 	,eachSubmitableRecord: function(cb, scope) {
 		this.store.each(cb, scope);
 	}
+	
+	// private
+	,onSyncValue: function() {
+		this.syncValue();
+	}
 
 	// private
-	,syncValue: function() {
-		if (!this.el) return;
+	,syncValue: function(supressEvent) {
 		var ids = [];
 		var extraData = [];
 		var i = this.orderStartIndex;
@@ -704,17 +709,33 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 
 			extraData.push(xData);
 		}, this)
-
-		if (!this.el.dom) return;
-		this.el.dom.value = !this.extraData || this.extraData.length == 0 ?
-			Ext.encode(ids)
-			: Ext.encode(extraData);
-
-		if ((this.firstLoadDone || this.phantom) && !this.dirty) {
-			this.dirty = true;
-			this.fireModifiedEvent();
-			this.fireEvent('dirtychanged', true);
+		
+		// save value
+		var v = !this.extraData || this.extraData.length == 0 ?
+				Ext.encode(ids) : Ext.encode(extraData),
+			el = this.el,
+			dom = el && el.dom;
+		
+		if (dom) {
+			dom.value = v;
 		}
+		
+		if (!supressEvent && (this.firstLoadDone || this.phantom)) {
+			if (v !== this.initialValue) {
+				if (!this.dirty) {
+					this.dirty = true;
+					this.fireModifiedEvent();
+					this.fireEvent('dirtychanged', true);
+				}
+			} else {
+				if (this.dirty) {
+					this.dirty = false;
+					this.fireEvent('dirtychanged', false);
+				}
+			}
+		}
+		
+		return v;
 	}
 	
 	,fireModifiedEvent: function() {
@@ -773,11 +794,11 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 			}, this)
 		}
 	}
-
-	,setValue: function(v) {
-//		Oce.form.GridField.superclass.setValue.apply(this, arguments);
-//		if (this.el) this.syncValue(this.store);
-	}
+//
+//	,setValue: function(v) {
+////		Oce.form.GridField.superclass.setValue.apply(this, arguments);
+////		if (this.el) this.syncValue(this.store);
+//	}
 
 	,onCreate: function() {
 		var me = this;
@@ -876,7 +897,7 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 
 		var phantom = this.phantom; // prevent the modified event from firing for new records
 		this.phantom = false;
-		this.syncValue();
+		this.syncValue(true);
 		this.phantom = phantom;
 
 		this.wrap = this.el.wrap({
@@ -1120,7 +1141,7 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 		this.initDragDrop(gridConfig);
 
 		this.grid = new Ext.grid.EditorGridPanel(gridConfig);
-		this.grid.on('afteredit', this.syncValue.createDelegate(this));
+		this.grid.on('afteredit', this.onSyncValue.createDelegate(this));
 
 		this.initDropTarget(this.grid);
 	}
