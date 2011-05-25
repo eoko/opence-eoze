@@ -5,7 +5,7 @@ Ext.ns('eo.ui.modules');
 var sp = Ext.tree.TreePanel,
 	spp = sp.prototype;
 	
-eo.ui.TreeMenu = sp.extend({
+eo.ui.TreeMenu = Ext.extend(sp, {
 	
 	controller: "menu"
 	,filter: true
@@ -182,6 +182,8 @@ eo.ui.TreeMenu = sp.extend({
 		}
 		
 		spp.initComponent.call(this);
+		
+		this.addClass("eozeTreeMenu");
 		
 		this.on({
 			scope: this
@@ -832,9 +834,11 @@ eo.ui.TreeMenu.prototype.TreeNode = Ext.extend(Ext.tree.TreeNode, {
 	}
 	
 	,setLoading: function(loading) {
-		loading = loading !== false;
-		// TODO OCE-81
-		if (console && console.log) console.log("Node loading: " + loading);
+		if (loading !== false) {
+			this.getUI().addClass("loading");
+		} else {
+			this.getUI().removeClass("loading");
+		}
 	}
 
 	,getActionFamily: function(cb) {

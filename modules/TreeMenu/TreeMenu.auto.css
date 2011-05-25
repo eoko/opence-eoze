@@ -4,9 +4,20 @@
     Author     : Éric Ortéga <eric@planysphere.fr>
 */
 
+.eozeTreeMenu a:hover, 
+.eozeTreeMenu a:focus, 
+.eozeTreeMenu a:active,
+.eozeTreeMenu a {
+	text-decoration: none !important;
+}
+
 /* Tree menu: makes leaf have a leaf icon, even when collapsed */
 .x-tree-node-collapsed.x-tree-node-leaf .x-tree-node-icon {
     background-image: url(_images/default/tree/leaf.gif);
+}
+
+.x-tree-node-leaf.loading img.x-tree-node-icon {
+	background-image: url(_images/default/grid/loading.gif) !important;
 }
 
 div.menu-message {
