@@ -618,6 +618,11 @@ MSG;
 		// TODO rx add a where constraint to loadModel
 		// $table->loadModel($id, QueryWhere::create('year = ?', 2008)
 		$model = $this->table->loadModel($id, $this->load_one_createContext());
+		
+		if ($model === null) {
+			throw new SystemException('Cannot load model with id: ' . $id);
+		}
+		
 //		array(
 //			'year' => $this->request->req('year')
 //		));
