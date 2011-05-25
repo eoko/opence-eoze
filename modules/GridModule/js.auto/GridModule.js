@@ -13,9 +13,15 @@ Ext.ns('Oce');
  * window before its creation.
  *
  */
-Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Panel, {
+//Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Panel, {
+Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.util.Observable, {
 
-	constructor: function() {
+	spp: Ext.Panel.prototype
+	
+	,openEvent: true
+	,opened: false
+
+	,constructor: function() {
 
 		this.my = Ext.applyIf({
 			selectAllText: "Tout sélectionner"
@@ -34,6 +40,8 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 
 		Oce.GridModule.superclass.constructor.apply(this, arguments);
 
+		this.addEvents("open", "close");
+		
 		this.model.initRelations(this.modelRelations);
 
 		// Init plugins
@@ -64,7 +72,7 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 
 		this.initConfiguration();
 	}
-
+	
 	,getExtraModels: function(names, cb) {
 		var xm = this.extraModels;
 		var m = true;
@@ -1815,7 +1823,7 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 			this.initStore();
 		}
 	}
-
+	
 	,create: function() {
 
 		var me = this;
@@ -1833,13 +1841,21 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 	//		,
 	//		bbar: true
 			,items: [this.grid]
+			
 			,listeners: {
-				close: function() {
+				scope: this
+				,close: function() {
 					if (tab !== null) {
 						this.destroy();
 					}
-				}.createDelegate(this),
-				activate: function() {tab.doLayout()}
+					if (this.opened) {
+						this.opened = false;
+						this.fireEvent("close", this);
+					}
+				}
+				,activate: function() {
+					tab.doLayout();
+				}
 			}
 		};
 
@@ -2661,6 +2677,9 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 		this.my.tab.show();
 
 		if (this.my.toolbar) this.my.toolbar.doLayout();
+		
+		this.opened = true;
+		this.fireEvent("open", this);
 	}
 	
 	,firstLoad: false
