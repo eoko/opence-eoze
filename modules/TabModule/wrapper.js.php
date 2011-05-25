@@ -1,12 +1,27 @@
 (function() {
 
-var <?php echo $var ?> = eo.Class({
+var <?php echo $var ?> = Ext.extend(Ext.util.Observable, {
 
-	constructor: function() {
+	constructor: function(config) {
+		Ext.util.Observable.prototype.constructor.call(this, config);
+		this.addEvents("open", "close");
 		this.doConstruct();
 	}
 	
 	,doConstruct: function() {}
+	
+	/**
+	 * True if this component fires an "open" event. Read-only.
+	 * @type Boolean
+	 * @property openEvent
+	 */
+	,openEvent: true
+	/**
+	 * True if this component is opened. Read-only.
+	 * @type Boolean
+	 * @property opened
+	 */
+	,opened: false
 
 	,open: function(destination) {
 		if (!this.tab) {
@@ -14,6 +29,17 @@ var <?php echo $var ?> = eo.Class({
 			destination.add(this.createTab());
 		}
 		this.tab.show();
+		this.afterOpen();
+	}
+	
+	/**
+	 * Protected method. Must be called when the module is opened by children
+	 * classes, <b>only</b> if they completly replace the open() method (that
+	 * is, override id and do not call the superclass open() method).
+	 */
+	,afterOpen: function() {
+		this.opened = true;
+		this.fireEvent("open", this);
 	}
 
 <?php if (isset($config)): ?>
@@ -23,10 +49,17 @@ var <?php echo $var ?> = eo.Class({
 
 	,createTab: function() {
 		var tab = this.tab = Ext.create(this.createTabConfig());
-		tab.on('close', function() {
-			delete this.tab;
-		}, this);
+		tab.on('close', this.onClose, this);
 		return tab;
+	}
+
+	// private
+	,onClose: function() {
+		delete this.tab;
+		if (this.opened) {
+			this.opened = false;
+			this.fireEvent("close", this);
+		}
 	}
 
 	,createTabConfig: function() {
