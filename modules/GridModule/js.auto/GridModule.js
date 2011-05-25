@@ -553,25 +553,7 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 	,deleteSelectedRecords: function() {
 		var ids = this.getSelectedRowsId.call(this);
 		if (ids.length > 0) {
-			Ext.MessageBox.confirm('Veuillez confirmer',
-				'Vous êtes sur le point de supprimer ' + ids.length +
-					' enregistrement' + (ids.length > 1 ? 's' : '') +
-					'. Êtes-vous sûr de vouloir continuer ?', // i18n
-				function(btn){
-					if (btn == 'yes') {
-						// TODO possible nameclash 'controller' or 'action' vs primaryKeyName
-						var params = {'controller':this.controller, action:'delete_multiple'};
-						params.json = encodeURIComponent(Ext.util.JSON.encode({'ids': ids}));
-						Oce.Ajax.request({
-							 'params': params
-							,onSuccess: function() {
-								this.reload();
-							}.createDelegate(this)
-//							,onComplete: closeWindow
-						});
-					}
-				}.createDelegate(this)
-			);
+			this.deleteRecord(ids);
 		}
 	}
 
@@ -582,6 +564,10 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 		var me = this;
 
 		var fn = function() {
+			var grid = me.grid;
+			if (grid && grid.el) {
+				grid.el.mask("Suppression en cours", "x-mask-loading");
+			}
 			Oce.Ajax.request(Ext.apply({
 				params: {
 					json_ids: encodeURIComponent(Ext.util.JSON.encode(ids))
@@ -589,8 +575,13 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 					,action: "delete_multiple"
 				}
 				,onSuccess: function() {
-					me.reload();
-					if (callback) callback();
+					if (grid && grid.el) grid.el.unmask();
+					me.reload(function() {
+						if (callback) callback();
+					}, me);
+				}
+				,onFailure: function() {
+					if (grid && grid.el) grid.el.unmask();
 				}
 			}, ajaxOpts))
 		};
@@ -614,7 +605,7 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 	,deleteRecords: function() {
 		this.deleteRecord.apply(this, arguments);
 	}
-
+	
 	,addWindowToolbarAddExtra: function(btnGroups, getWindowFn, handlers) {
 
 	}
@@ -2711,13 +2702,31 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 		this.reloadLatch--;
 	}
 
-	,reload: function() {
+	/**
+	 * @param {Function|Object} callback (Optional) A callback or a config 
+	 * object to be passed to the store.reload() function.
+	 * @param {Object} scope (Optional) Scope with which to call the callback 
+	 * (defaults to the GridModule object). This argument is ignored if a config
+	 * Object is given for callback, instead of a function.
+	 */
+	,reload: function(callback, scope) {
 		if (this.reloadLatch > 0) {
 			this.reloadLatch--;
 		} else {
+			var o;
+			if (callback) {
+				if (Ext.isFunction(callback)) {
+					o = {
+						callback: callback
+						,scope: scope || this
+					}
+				} else {
+					o = callback;
+				}
+			}
 			if (this.firstLoad) {
 				this.reloadLatch = 0;
-				this.store.reload();
+				this.store.reload(o);
 			}
 		}
 	}
