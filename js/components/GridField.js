@@ -1087,7 +1087,7 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 		var sm;
 		if (this.checkboxSel) {
 			sm = this.checkboxSel;
-		} else if (this.disableSelection && (!this.gridConfig || !this.gridConfig.disableSelection)) {
+		} else if (!this.disableSelection && (!this.gridConfig || !this.gridConfig.disableSelection)) {
 			sm = new Ext.grid.RowSelectionModel();
 		}
 
