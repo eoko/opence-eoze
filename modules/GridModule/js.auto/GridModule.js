@@ -626,14 +626,10 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 				'Êtes-vous sûr de vouloir supprimer cet enregistrement ?',
 				function(btn){
 					if (btn == 'yes') {
-						// TODO possible nameclash 'controller' or 'action' vs primaryKeyName
-						var params = {'controller':this.controller, action:'delete_one'};
-						params[this.primaryKeyName] = getWindowFn().idValue;
-						Oce.Ajax.request({
-							 'params': params
-							,onSuccess: handlers.reload
-							,onComplete: handlers.close
-						});
+						var win = getWindowFn();
+						win.forceClosing = true;
+						win.close();
+						this.deleteRecord(win.idValue, null, false);
 					}
 				}.createDelegate(this)
 			);
@@ -907,16 +903,6 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 				}
 				,beforerefresh: function(win) {
 					if (win.formPanel.isModified()) {
-//						Ext.MessageBox.confirm(
-//							"Confirmer le rechargement",
-//							"Cette fenêtre comporte des modifications qui n'ont pas été "
-//							+ "enregistrées. Si elle est rechargées maintenant, ces "
-//							+ "modifications seront perdues. Vous-vous vraiment recharger "
-//							+ "la fenêtre maintenant ?",
-//							function(btn) {
-//								if (btn === 'yes') win.refresh(true);
-//							}
-//						);
 						Ext.Msg.show({
 							// i18n
 							title: "Confirmer le rechargement"
@@ -973,16 +959,6 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 								}
 							}
 						});
-//						Ext.MessageBox.confirm(
-//							"Confirmer la fermeture",
-//							"Cette fenêtre comporte des modifications qui n'ont pas été "
-//							+ "enregistrées. Voulez-vous vraiment la fermer et abandonner "
-//							+ "ces modifications ?",
-//							function(btn) {
-//								if (btn === 'yes') win.close();
-//								else win.forceClosing = false;
-//							}
-//						);
 						return false;
 					}
 					return true;
