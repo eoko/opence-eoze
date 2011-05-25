@@ -197,8 +197,8 @@ eo.ui.TreeMenu = sp.extend({
 	,executeDefaultCommands: function() {
 		
 		var walk = function(node) {
-			if (node.data.open && node.cmd) {
-				node.cmd();
+			if (node.data.open) {
+				node.run();
 			}
 			node.eachChild(walk);
 		};
@@ -740,7 +740,7 @@ eo.ui.TreeMenu = sp.extend({
 	}
 });
 
-eo.ui.TreeMenu.prototype.TreeNode = Ext.tree.TreeNode.extend({
+eo.ui.TreeMenu.prototype.TreeNode = Ext.extend(Ext.tree.TreeNode, {
 	
 	spp: Ext.tree.TreeNode.prototype
 	
@@ -802,10 +802,39 @@ eo.ui.TreeMenu.prototype.TreeNode = Ext.tree.TreeNode.extend({
 	
 	,onClick: function() {
 		if (this.cmd) {
-			this.cmd();
+			this.run();
 		} else {
 			this.toggle();
 		}
+	}
+	
+	,run: function() {
+		if (this.cmd) {
+			var me = this;
+			this.setLoading();
+			this.cmd(function(module) {
+				if (module.openEvent) {
+					if (module.opened) {
+						me.setLoading(false);
+					} else {
+						module.on({
+							open: function() {
+								me.setLoading(false);
+							}
+							,single: true
+						});
+					}
+				} else {
+					me.setLoading(false);
+				}
+			});
+		}
+	}
+	
+	,setLoading: function(loading) {
+		loading = loading !== false;
+		// TODO OCE-81
+		if (console && console.log) console.log("Node loading: " + loading);
 	}
 
 	,getActionFamily: function(cb) {
