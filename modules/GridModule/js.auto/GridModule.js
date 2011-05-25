@@ -18,7 +18,17 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 
 	spp: Ext.Panel.prototype
 	
+	/**
+	 * True if this component fires an "open" event. Read-only.
+	 * @type Boolean
+	 * @property openEvent
+	 */
 	,openEvent: true
+	/**
+	 * True if this component is opened. Read-only.
+	 * @type Boolean
+	 * @property opened
+	 */
 	,opened: false
 
 	,constructor: function() {
