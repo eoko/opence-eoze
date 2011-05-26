@@ -34,9 +34,7 @@ class Js extends \eoko\module\executor\ExecutorBase {
 					$this->getName() . '.yml', 'wrapper');
 		}
 		
-		$wrapper = str_replace('%module%', $moduleName, $wrapper);
-		$wrapper = $this->findPath($wrapper);
-		$tpl = Template::create()->setFile($wrapper);
+		$tpl = Template::create()->setFile($this->findFilenameInLineage($wrapper));
 		
 		$tpl->namespace = $config->get('jsNamespace');
 		$tpl->module = $moduleName;
@@ -49,11 +47,22 @@ class Js extends \eoko\module\executor\ExecutorBase {
 		}
 		
 		if ($main) {
-			$main = str_replace('%module%', $moduleName, $main);
-			$main = $this->findPath($main);
-			$tpl->main = file_get_contents($main);
+			$tpl->main = file_get_contents($this->findFilenameInLineage($main));
+		}
+		
+		if (!headers_sent()) {
+			header('Content-type: application/javascript');
 		}
 		
 		return $tpl;
+	}
+	
+	private function findFilenameInLineage($pattern) {
+		foreach ($this->getModule()->getParentNames(true) as $name) {
+			if (null !== $r = $this->searchPath(str_replace('%module%', $name, $pattern))) {
+				return $r;
+			}
+		}
+		throw new \eoko\file\CannotFindFileException($pattern);
 	}
 }
