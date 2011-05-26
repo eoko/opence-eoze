@@ -112,6 +112,7 @@ var o = {
 		
 		return Ext.apply(config, {
 			xtype: "tabpanel"
+			,activeTab: items.length ? 0 : undefined
 			,items: items
 		});
 	}
