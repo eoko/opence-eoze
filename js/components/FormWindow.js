@@ -354,7 +354,11 @@ Oce.FormWindow = Ext.extend(eo.Window, {
 		} else {
 			var sb = this.getSubmitButton();
 			if (sb) {
-				sh = sb.handler;
+				sh = function() {
+					if (sb && !sb.disabled) {
+						sb.handler.call(this);
+					}
+				}
 				scope = sb.scope || sb;
 			}
 		}
