@@ -82,7 +82,7 @@ class Module implements file\Finder {
 	
 	protected function construct() {}
 
-	private function getParentNames($includeSelf) {
+	public function getParentNames($includeSelf) {
 		$parents = array();
 		if ($includeSelf) $parents[] = get_relative_classname($this);
 		$last = $this;
