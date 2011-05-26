@@ -1804,7 +1804,7 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 		}
 	}
 	
-	,create: function() {
+	,create: function(config) {
 
 		var me = this;
 		
@@ -1813,10 +1813,11 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 
 		// --- Main Panel ----------------------------------------------------------
 
-		var tabPanelConfig = {
-			'title': this.my.title,
-			closable : true,
-			layout: 'fit'
+		var tabPanelConfig = Ext.apply({
+			title: this.my.title
+			,header: false
+			,closable : true
+			,layout: 'fit'
 			,cls: this.my.name
 	//		,
 	//		bbar: true
@@ -1837,7 +1838,7 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 					tab.doLayout();
 				}
 			}
-		};
+		}, config);
 
 		this.beforeCreateTabPanel(tabPanelConfig);
 
@@ -2645,12 +2646,12 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 		}, this)
 	}
 
-	,open: function(destination) {
+	,open: function(destination, config) {
 		
 		if (!destination) destination = Oce.mx.application.getMainDestination();
 
 		if (this.my.tab === null) {
-			this.my.tab = this.create();
+			this.my.tab = this.create(config);
 			destination.add(this.my.tab);
 		}
 		
