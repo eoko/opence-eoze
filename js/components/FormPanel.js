@@ -332,7 +332,7 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
 	// Overridden to allow for JsonForm
 	,createForm: function() {
         var config = Ext.applyIf({listeners: {}}, this.initialConfig);
-		if (config.jsonFormParam) {
+		if (config.jsonFormParam || config.serializeForm) {
 			return new Oce.form.JsonForm(null, config);
 		} else {
 			return new Ext.form.BasicForm(null, config);

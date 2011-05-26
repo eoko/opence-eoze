@@ -78,7 +78,8 @@ Ext.form.Action.ACTION_TYPES['jsonsubmit'] = Ext.extend(Ext.form.Action.Submit, 
 			
 			Oce.Ajax.request(Ext.apply(this.createCallback(o), {
 				form:this.form.el.dom,
-				jsonFormParam: o.jsonFormParam || undefined,
+				jsonFormParam: o.jsonFormParam,
+				serializeForm: o.serializeForm,
 				url:this.getUrl(isGet),
 				method: method,
 				headers: o.headers,
@@ -117,10 +118,11 @@ Oce.form.JsonForm = Ext.extend(Ext.form.BasicForm, {
 //        var submitAction = String.format('{0}submit', this.api ? 'direct' : '');
 //        this.doAction(submitAction, options);
         if (this.jsonFormParam) options.jsonFormParam = this.jsonFormParam;
+		if (this.serializeForm) options.serializeForm = this.serializeForm;
 		this.doAction('jsonsubmit', options);
         return this;
     }
-})
+});
 
 Oce.form.DateDisplayField = Ext.extend(Ext.form.DisplayField, {
 
