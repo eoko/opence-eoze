@@ -824,9 +824,10 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 			,winConfig: Ext.apply({
 				 title: "Enregistrement" // i18n
 				,layout: this.my.editWinLayout
-				,'tbar': tbar
+				,tbar: tbar
 				,actionToolbar: tbar
 				,tools: [this.createEditWindowGearTool(tbar, winConfig)]
+				,submitHandler: handlers.save
 			}, winConfig)
 			
 		});
@@ -1324,6 +1325,8 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 				win = new Oce.FormWindow(Ext.apply({
 					title: opts.winTitle || 'Options'
 					,formPanel: form
+					,submitButton: 0
+					,cancelButton: 1
 					,buttons: [
 						{text: 'Ok', handler: doRequest} // i18n
 						,{text: 'Annuler', handler: function() {win.close()}} // i18n
