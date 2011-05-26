@@ -110,7 +110,7 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
 		if (this.formListeners) {
 			this.form.on(this.formListeners);
 		}
-
+		
 		this.tabsByName = {};
 		Ext.each(this.findByType('panel'), function(item) {
 			if (item.tabName) this.tabsByName[item.tabName] = item;
@@ -196,6 +196,37 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
 			}
 			if (item instanceof Ext.ux.form.SpinnerField) {
 				item.on('spin', changeListener);
+			}
+			if (item instanceof Ext.form.RadioGroup) {
+				// we've got a problem here... RadioGroup will bufferize the
+				// events of its children for 10ms before firing its own change
+				// event; as a consequences, this event won't be in the same
+				// thread as the one launching the loading action of the 
+				// underlying form, and so it won't be blocked here. However, it
+				// needs to be, in order to prevent the initial value setting of
+				// the form, when it's loaded, to intenpestively trigger this
+				// FormPanel's own modification event...
+
+				// ... so, first, let's remove the faulty event listener
+				item.un("change", changeListener);
+				
+				// ... and listen on the source instead!
+				// (to make it even funnier, the eachItem method only works when 
+				// items have already been constructed)
+				if (item.items && item.items.each) {
+					item.eachItem(function(item) {
+						item.on("check", changeListener);
+					});
+				} else {
+					item.on({
+						single: true
+						,afterrender: function(item) {
+							item.eachItem(function(item) {
+								item.on("check", changeListener);
+							});
+						}
+					});
+				}
 			}
 		};
 
