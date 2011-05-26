@@ -47,7 +47,9 @@ class Js extends \eoko\module\executor\ExecutorBase {
 		}
 		
 		if ($main) {
-			$tpl->main = file_get_contents($this->findFilenameInLineage($main));
+			$tpl->main = Template::create()->setFile($this->findFilenameInLineage($main, array(
+				'js', 'js.php'
+			)));
 		}
 		
 		if (!headers_sent()) {
@@ -57,9 +59,10 @@ class Js extends \eoko\module\executor\ExecutorBase {
 		return $tpl;
 	}
 	
-	private function findFilenameInLineage($pattern) {
+	private function findFilenameInLineage($pattern, $type = null) {
 		foreach ($this->getModule()->getParentNames(true) as $name) {
-			if (null !== $r = $this->searchPath(str_replace('%module%', $name, $pattern))) {
+			$r = $this->searchPath(str_replace('%module%', $name, $pattern), $type);
+			if (null !== $r) {
 				return $r;
 			}
 		}
