@@ -48,7 +48,11 @@ var <?php echo $var ?> = Ext.extend(Ext.util.Observable, {
 <?php endif ?>
 
 	,createTab: function() {
-		var tab = this.tab = Ext.create(this.createTabConfig());
+		var tab = this.createTabConfig();
+		if (!(tab instanceof Ext.Component)) {
+			tab = Ext.create(tab);
+		}
+		this.tab = tab;
 		tab.on('close', this.onClose, this);
 		return tab;
 	}
