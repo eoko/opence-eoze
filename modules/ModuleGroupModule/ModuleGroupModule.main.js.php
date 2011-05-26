@@ -60,14 +60,36 @@ var o = {
 	]
 	
 	,doConstruct: function() {
+		var latch = this.modules.length,
+			me = this;
+		
+		var releaseLatch = function() {
+			if (--latch === 0) {
+				me.ready = true;
+				if (me.whenReady) {
+					me.whenReady();
+					delete me.whenReady();
+				}
+			}
+		};
+		
 		Ext.each(this.modules, function(m) {
 			var cmd = m.cmd;
 			if (Ext.isString(cmd)) {
 				cmd = m.cmd = Oce.cmd(cmd);
 			}
 			// preload module code
-			cmd();
+			cmd(releaseLatch);
 		});
+	}
+	
+	,open: function() {
+		var args = arguments;
+		if (this.ready) {
+			spp.open.apply(this, arguments);
+		} else {
+			this.whenReady = this.open.createDelegate(this, args);
+		}
 	}
 	
 //	,createTab: function() {
