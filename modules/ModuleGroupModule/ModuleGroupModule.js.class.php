@@ -16,7 +16,11 @@ class Js extends JsBase {
 		foreach ($config['modules'] as $module) {
 			$module = ModuleManager::getModule($module);
 			$moduleName = $module->getName();
-			if (method_exists($module, 'getTitle')) {
+			// first try to see if a special title has been prepared for us
+			$extra = $module->getConfig()->get('extra');
+			if (isset($extra['groupModuleTitle'])) {
+				$title = $extra['groupModuleTitle'];
+			} else if (method_exists($module, 'getTitle')) {
 				$title = $module->getTitle();
 			} else {
 				$title = $moduleName;
