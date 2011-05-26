@@ -41,4 +41,13 @@ class GridModule extends Module {
 		return $tpl;
 	}
 	
+	public function getTitle() {
+		$config = $this->getConfig()->module;
+		if (isset($config['title'])) {
+			return $config['title'];
+		} else {
+			return null;
+		}
+	}
+	
 }
