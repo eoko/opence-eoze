@@ -1,7 +1,7 @@
 abstract: true
 
 wrapper: wrapper.js.php
-main: %module%.main.js
+main: %module%.main
 
 jsNamespace: Oce.Modules
 moduleJsVarName: MODULE
