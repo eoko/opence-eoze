@@ -827,7 +827,7 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 				,tbar: tbar
 				,actionToolbar: tbar
 				,tools: [this.createEditWindowGearTool(tbar, winConfig)]
-				,submitHandler: handlers.save
+				,submitButton: tbar.saveButton
 			}, winConfig)
 			
 		});
