@@ -1,3 +1,5 @@
+abstract: true
+
 wrapper: wrapper.js.php
 main: %module%.main.js
 
