@@ -2,6 +2,9 @@
 
 namespace eoko\modules\TreeMenu;
 
+use eoko\modules\TreeMenu\MenuAction;
+use eoko\modules\TreeMenu\MenuFamily;
+
 interface ActionProvider {
 	
 	/**
