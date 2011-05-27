@@ -3,6 +3,7 @@
 namespace eoko\modules\GridModule;
 
 use eoko\module\Module;
+use eoko\module\HasTitle;
 use eoko\module\ModulesLocation;
 use eoko\template\PHPCompiler;
 use eoko\php\generator\ClassGeneratorManager;
@@ -15,7 +16,7 @@ use \ModelTable;
 
 //dump_trace();
 
-class GridModule extends Module {
+class GridModule extends Module implements HasTitle {
 	
 	private $codeTemplatePath = 'php-template/';
 	
