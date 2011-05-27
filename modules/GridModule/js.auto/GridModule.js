@@ -2645,8 +2645,10 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 			})
 		}, this)
 	}
-
+	
 	,open: function(destination, config) {
+		
+		this.opening = true;
 		
 		if (!destination) destination = Oce.mx.application.getMainDestination();
 
@@ -2659,8 +2661,38 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 
 		if (this.my.toolbar) this.my.toolbar.doLayout();
 		
+		this.opening = false;
 		this.opened = true;
 		this.fireEvent("open", this);
+	}
+	
+	,moduleActions: {
+		open: function(cb, scope, args) {
+			this.on({
+				single: true
+				,open: cb
+				,scope: scope
+			});
+			return this.open.apply(this, args);
+		}
+		,addRecord: function(cb, scope, args) {
+			this.addRecord.apply(this, args);
+			cb.call(scope || this, this);
+		}
+	}
+	
+	,executeAction: function(name, callback, scope, args) {
+		if (Ext.isObject(name)) {
+			callback = name.callback || name.fn;
+			scope = name.scope || this;
+			args = name.args;
+			name = name.action || name.name;
+		}
+		return this.moduleActions[name].call(this, callback, scope, args);
+	}
+	
+	,getAction: function(name) {
+		return this.actions[name].createDelegate(this);
 	}
 	
 	,firstLoad: false
