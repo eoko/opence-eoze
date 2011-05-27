@@ -3,113 +3,30 @@
 namespace eoko\modules\TabModule;
 
 use eoko\module\Module;
-
-use eoko\util\Arrays;
-
+use eoko\module\HasTitle;
 use eoko\modules\TreeMenu\HasMenuActions;
-use eoko\modules\TreeMenu\MenuFamily;
-use eoko\modules\TreeMenu\MenuAction;
+use eoko\modules\TreeMenu\ActionProvider\ModuleProvider;
 
-class TabModule extends Module implements HasMenuActions {
+class TabModule extends Module implements HasTitle, HasMenuActions {
 	
 	protected $defaultExecutor = 'js';
 	
-	private $iconClass = null;
-	private $menuFamily = null;
-	private $menuActions = null;
+	private $actionProvider;
 	
-	private function getPluginsConfig($key = null) {
-		if (($config = $this->getConfig()->get('extra'))
-				|| ($config = $this->getConfig()->get('plugins'))) {
-			if ($key) {
-				if (isset($config[$key])) return $config[$key];
-				else return null;
-			} else {
-				return $config;
-			}
+	public function getActionProvider() {
+		if (!$this->actionProvider) {
+			$this->actionProvider = new ModuleProvider($this);
 		}
-		return null;
+		return $this->actionProvider;
 	}
 	
-	public function getIconCls($action = null) {
-		if (null !== $iconCls = $this->getPluginsConfig('iconCls')) {
-			$iconCls = str_replace('%module%', $this->getName(), $iconCls);
-			if ($action !== null) {
-				if ($action === false) $action = '';
-				$iconCls = str_replace('%action%', $action, $iconCls);
-			}
-			return $iconCls;
-		}
-	}
-
-	/**
-	 * @return array
-	 */
-	private function getMenuConfig() {
-		if (null !== $config = $this->getPluginsConfig('menu')) {
-			return $config;
-		}
-	}
-	
-	private function buildMenuActions() {
-		// set cache to prevent recomputing
-		$this->menuActions = array();
-		if (null !== $config = $this->getMenuConfig()) {
-			if (isset($config['actions'])) {
-				$familyId = $this->getMenuFamilyId();
-				$defaults = array(
-					'family' => $familyId,
-				);
-				foreach ($config['actions'] as $action) {
-					$this->menuActions[] = MenuAction::fromArray(
-						Arrays::apply($defaults, $action)
-					);
-				}
-			}
-		}
-		return $this->menuActions;
-	}
-	
-	public function getAvailableActions() {
-		if ($this->menuActions) return $this->menuActions;
-		else return $this->buildMenuActions();
-	}
-	
-	private function getMenuFamilyId() {
-		if (null !== $config = $this->getMenuConfig()
-				&& isset($config['family']['id'])) {
-			return $config['family']['id'];
+	public function getTitle() {
+		$config = $this->getConfig()->get('module');
+		if (isset($config['title'])) {
+			return $config['title'];
 		} else {
-			return $this->getName();
+			return null;
 		}
-	}
-	
-	private function buildMenuFamily() {
-		if (null !== $config = $this->getMenuConfig()) {
-			$defaults = array(
-				'id' => $this->getName(),
-				'label' => $this->getName(),
-				'actions' => $this->getAvailableActions(),
-			);
-			// iconCls
-			if (($iconCls = $this->getIconCls())) {
-				$defaults['iconCls'] = $iconCls;
-			}
-			if (isset($config['family'])) {
-				return $this->menuFamily = MenuFamily::fromArray(
-					Arrays::apply($defaults, $config['family'])
-				);
-			} else if ($config !== null) {
-				return $this->menuFamily = MenuFamily::fromArray($defaults);
-			}
-		} else {
-			return false;
-		}
-	}
-
-	public function getFamily() {
-		if ($this->menuFamily) return $this->menuFamily;
-		else return $this->buildMenuFamily();
 	}
 	
 }
