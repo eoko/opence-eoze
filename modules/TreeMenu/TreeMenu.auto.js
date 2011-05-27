@@ -835,9 +835,13 @@ eo.ui.TreeMenu.prototype.TreeNode = Ext.extend(Ext.tree.TreeNode, {
 	,runAction: function() {
 		this.setLoading(true);
 		var me = this,
-			action = this.action;
+			action = this.action,
+			module = this.action.module;
+		if (module.substr(0,12) !== "Oce.Modules.") {
+			module = String.format("Oce.Modules.{0}.{0}", this.action.module);
+		}
 		Oce.mx.application.getModuleInstance(
-			String.format("Oce.Modules.{0}.{0}", this.action.module),
+			module,
 			function(module) {
 				module.executeAction({
 					action: action.method
