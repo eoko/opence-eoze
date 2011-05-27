@@ -17,6 +17,7 @@ class MenuAction {
 	private $color = null;
 	private $icon = null;
 	private $expanded = null;
+	private $accessLevel = null;
 	
 	function __construct($id, $label) {
 		$this->id = $id;
@@ -47,7 +48,11 @@ class MenuAction {
 	public function getLabel() {
 		return $this->label;
 	}
-
+	
+	public function getAccessLevel() {
+		return $this->accessLevel;
+	}
+	
 	public function toArray($config = null) {
 		$r = array();
 		foreach ($this as $k => $v) $r[$k] = $v;

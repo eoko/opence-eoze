@@ -19,7 +19,7 @@ use eoko\modules\TreeMenu\MenuFamily;
 use UserSession;
 use IllegalStateException;
 
-class TreeMenu extends Module {
+class TreeMenu extends Module implements HasMenuActions {
 
 	protected $defaultExecutor = 'json';
 
@@ -171,4 +171,13 @@ class TreeMenu extends Module {
 		
 		throw new \IllegalStateException('Invalid configuration item in menu.yml');
 	}
+	
+	public function isAuthorized(MenuAction $action) {
+		return true;
+	}
+	
+	public function getActionProvider() {
+		return new MenuActionProvider\ConfigProvider($this->getConfig());
+	}
+
 }

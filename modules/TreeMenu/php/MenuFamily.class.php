@@ -12,6 +12,8 @@ class MenuFamily {
 
 	private $iconCls;
 	
+	private $accessLevel = null;
+	
 	function __construct($id, $label, $actions) {
 		$this->id = $id;
 		$this->label = $label;
@@ -34,18 +36,24 @@ class MenuFamily {
 	public function getId() { return $this->id; }
 	public function getLabel() { return $this->label; }
 	
-	public function toArray($associative = true) {
+	public function toArray($associative = true, TreeMenu $module = null) {
 		$r = array();
 		foreach ($this as $k => $v) {
 			$r[$k] = $v;
 		}
 		$r['actions'] = array();
 		foreach ($this->actions as $action) {
+			if ($module && !$module->isAuthorized($action)) {
+				continue;
+			}
 			if ($associative) {
 				$r['actions'][$action->getId()] = $action->toArray();
 			} else {
 				$r['actions'][] = $action->toArray();
 			}
+		}
+		if (!count($r['actions'])) {
+			return null;
 		}
 		return $r;
 	}

@@ -7,7 +7,7 @@ use MenuNode, MenuNodeTable;
 use UserSession;
 
 class Json extends JsonExecutor {
-
+	
 	public function loadUserMenu() {
 		
 		$finder = MenuNodeTable::find('`users_id`=?', $this->getUserId());
@@ -33,9 +33,12 @@ class Json extends JsonExecutor {
 	}
 	
 	public function getAvailableActions() {
+		$module = $this->getModule();
 		$families = array();
 		foreach ($this->getModule()->getMenuFamilies() as $family) {
-			$families[$family->getId()] = $family->toArray(false);
+			if (null !== $data = $family->toArray(false, $module)) {
+				$families[$family->getId()] = $data;
+			}
 		}
 		uasort($families, function($f1, $f2) {
 			$l1 = isset($f1['label']) ? $f1['label'] : null;
@@ -117,5 +120,9 @@ class Json extends JsonExecutor {
 	
 	public function deleteNode() {
 		return MenuNodeTable::delete($this->request->req('nodeId'));
+	}
+	
+	public function clearCache() {
+		$this->getModule()->invalidateCache();
 	}
 }

@@ -3,14 +3,9 @@
 namespace eoko\modules\TreeMenu;
 
 interface HasMenuActions {
-
+	
 	/**
-	 * @return array[MenuAction]
+	 * @return MenuActionProvider
 	 */
-	function getAvailableActions();
-
-	/**
-	 * @return MenuFamily
-	 */
-	function getFamily();
+	function getActionProvider();
 }
