@@ -3,26 +3,52 @@
 namespace eoko\modules\TreeMenu\ActionProvider;
 
 use eoko\modules\TreeMenu\ActionProvider;
+use eoko\modules\TreeMenu\MenuAction;
+use eoko\modules\TreeMenu\MenuFamily;
+use eoko\module\Module;
+use eoko\module\HasTitle;
 use eoko\config\Config;
+use eoko\util\Arrays;
 
-class ConfigProvider implements ActionProvider {
+class ModuleProvider implements ActionProvider {
 	
 	private $menuFamily = null;
 	private $menuActions = null;
+
+	/** @var Module */
+	private $module = null;
 	
-	private $config = null;
-	
-	public function __construct(Config $config) {
-		$this->config = $config;
+	public function __construct(Module $module) {
+		$this->module = $module;
 	}
 	
-	private function getConfig() {
-		return $this->config;
+	private function getModuleConfig() {
+		return $this->module->getConfig();
+	}
+	
+	private function getModuleTitle() {
+		if ($this->module instanceof HasTitle) {
+			return $this->module->getTitle();
+		} else {
+			return null;
+		}
+	}
+	
+	private function getModuleName() {
+		return $this->module->getName();
+	}
+	
+	private function getModuleTitleOrName() {
+		if (null !== $r = $this->getModuleTitle()) {
+			return $r;
+		} else {
+			return $this->getModuleName();
+		}
 	}
 	
 	private function getPluginsConfig($key = null) {
-		if (($config = $this->getConfig()->get('extra'))
-				|| ($config = $this->getConfig()->get('plugins'))) {
+		if (($config = $this->getModuleConfig()->get('extra'))
+				|| ($config = $this->getModuleConfig()->get('plugins'))) {
 			if ($key) {
 				if (isset($config[$key])) return $config[$key];
 				else return null;
@@ -35,7 +61,7 @@ class ConfigProvider implements ActionProvider {
 	
 	public function getIconCls($action = null) {
 		if (null !== $iconCls = $this->getPluginsConfig('iconCls')) {
-			$iconCls = str_replace('%module%', $this->getName(), $iconCls);
+			$iconCls = str_replace('%module%', $this->getModuleName(), $iconCls);
 			if ($action !== null) {
 				if ($action === false) $action = '';
 				$iconCls = str_replace('%action%', $action, $iconCls);
@@ -56,11 +82,13 @@ class ConfigProvider implements ActionProvider {
 	private function replacePlaceHolders(&$in) {
 		if (is_array($in)) {
 			foreach ($in as &$v) {
-				$v = $this->replacePlaceHolders($in);
+				$v = $this->replacePlaceHolders($v);
 			}
-			return $v;
-		} else {
-			return $v = str_replace('%module%', $this->getName(), $v);
+			return $in;
+		} else if (is_string($in)) {
+			$in = str_replace('%module%', $this->getModuleName(), $in);
+			$in = str_replace('%title%', $this->getModuleTitle(), $in);
+			return $in;
 		}
 	}
 	
@@ -74,6 +102,10 @@ class ConfigProvider implements ActionProvider {
 					'family' => $familyId,
 				);
 				foreach ($config['actions'] as $action) {
+					if (!is_array($action)) {
+						dump_trace(false);
+						dump($action);
+					}
 					$action = Arrays::applyIf($action, $defaults);
 					$action = $this->replacePlaceHolders($action);
 					$this->menuActions[] = MenuAction::fromArray($action);
@@ -93,15 +125,15 @@ class ConfigProvider implements ActionProvider {
 				&& isset($config['family']['id'])) {
 			return $config['family']['id'];
 		} else {
-			return $this->getName();
+			return $this->getModuleName();
 		}
 	}
 	
 	private function buildMenuFamily() {
 		if (null !== $config = $this->getMenuConfig()) {
 			$defaults = array(
-				'id' => $this->getName(),
-				'label' => $this->getName(),
+				'id' => $this->getModuleName(),
+				'label' => $this->getModuleTitleOrName(),
 				'actions' => $this->getAvailableActions(),
 			);
 			// iconCls
@@ -109,12 +141,10 @@ class ConfigProvider implements ActionProvider {
 				$defaults['iconCls'] = $iconCls;
 			}
 			if (isset($config['family'])) {
-				$config = Arrays::apply($defaults, $config['family']);
-				$config = $this->replacePlaceHolders($config);
-			} else if ($config !== null) {
-				$config = $this->replacePlaceHolders($defaults);
+				$defaults = Arrays::apply($defaults, 
+						$this->replacePlaceHolders($config['family']));
 			}
-			return $this->menuFamily = MenuFamily::fromArray($config);
+			return $this->menuFamily = MenuFamily::fromArray($defaults);
 		} else {
 			return false;
 		}
