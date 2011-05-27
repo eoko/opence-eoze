@@ -1,9 +1,12 @@
 (function() {
 
-var <?php echo $var ?> = Ext.extend(Ext.util.Observable, {
+var sp = Oce.BaseModule,
+	sppp = sp.prototype;
+
+var <?php echo $var ?> = Ext.extend(sp, {
 
 	constructor: function(config) {
-		Ext.util.Observable.prototype.constructor.call(this, config);
+		sppp.constructor.call(this, config);
 		this.addEvents("open", "close");
 		this.doConstruct();
 	}
@@ -31,6 +34,20 @@ var <?php echo $var ?> = Ext.extend(Ext.util.Observable, {
 		this.tab.show();
 		this.afterOpen();
 	}
+	
+	,baseModuleActions: {
+		open: function(cb, scope, args) {
+		debugger
+			this.on({
+				single: true
+				,open: cb
+				,scope: scope
+			});
+			return this.open.apply(this, args);
+		}
+	}
+	
+	,moduleActions: ["open"]
 	
 	/**
 	 * Protected method. Must be called when the module is opened by children

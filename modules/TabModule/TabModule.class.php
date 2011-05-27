@@ -29,4 +29,7 @@ class TabModule extends Module implements HasTitle, HasMenuActions {
 		}
 	}
 	
+	public function getIconCls($action = null) {
+		return $this->getActionProvider()->getIconCls($action);
+	}
 }
