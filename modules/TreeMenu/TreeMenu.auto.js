@@ -195,6 +195,19 @@ eo.ui.TreeMenu = Ext.extend(sp, {
 		if (this.userId) this.load(this.executeDefaultCommands, this);
 	} // initComponent
 	
+//	// private
+//	,clearCache: function() {
+//		Oce.Ajax.request({
+//			params: {
+//				controller: this.config.controller
+//				,action: "clearCache"
+//			}
+//			,onFailure: function() {
+//				Ext.Msg.alert("La requête a échoué.", "Échec");
+//			}
+//		});
+//	}
+	
 	// private
 	,executeDefaultCommands: function() {
 		
@@ -803,7 +816,7 @@ eo.ui.TreeMenu.prototype.TreeNode = Ext.extend(Ext.tree.TreeNode, {
 	}
 	
 	,onClick: function() {
-		if (this.cmd) {
+		if (this.cmd || this.action) {
 			this.run();
 		} else {
 			this.toggle();
@@ -811,26 +824,62 @@ eo.ui.TreeMenu.prototype.TreeNode = Ext.extend(Ext.tree.TreeNode, {
 	}
 	
 	,run: function() {
-		if (this.cmd) {
-			var me = this;
-			this.setLoading();
-			this.cmd(function(module) {
-				if (module.openEvent) {
-					if (module.opened) {
-						me.setLoading(false);
-					} else {
-						module.on({
-							open: function() {
-								me.setLoading(false);
-							}
-							,single: true
-						});
-					}
-				} else {
-					me.setLoading(false);
-				}
-			});
+		if (this.action) {
+			this.runAction();
+		} else if (this.cmd) {
+			this.runCmd();
 		}
+	}
+	
+	// private
+	,runAction: function() {
+		this.setLoading(true);
+		var me = this,
+			action = this.action;
+		Oce.mx.application.getModuleInstance(
+			String.format("Oce.Modules.{0}.{0}", this.action.module),
+			function(module) {
+				module.executeAction({
+					action: action.method
+					,args: action.args
+					,callback: function() { this.setLoading(false); }
+					,scope: me
+				});
+			},
+			function() {
+				me.setLoading(false);
+				Ext.Msg.alert("Échec de l'action", 
+						"Le module visé pas l'action n'est pas accessible.");
+			}
+		);
+	}
+	
+	// private
+	,runCmd: function() {
+		this.setLoading();
+		this.cmd();
+		this.setLoading(false);
+//		var me = this;
+//		this.setLoading();
+//		this.cmd(function(module) {
+//			// and what if the cmd isn't 'open' :/ ?
+////				if (module.openEvent) {
+//			if (module.opening) {
+////				if (module.openEvent && /#open(?:\([^)]+\)|$)$/.test()) {
+//				if (module.opened) {
+//					me.setLoading(false);
+//				} else {
+//					module.on({
+//						open: function() {
+//							me.setLoading(false);
+//						}
+//						,single: true
+//					});
+//				}
+//			} else {
+//				me.setLoading(false);
+//			}
+//		});
 	}
 	
 	,setLoading: function(loading) {
@@ -875,14 +924,42 @@ eo.ui.TreeMenu.prototype.TreeNode = Ext.extend(Ext.tree.TreeNode, {
 		}
 	}
 	
+	,parseActionRegex: /^@(.+)#(.+?)(?:\((.+)\))?$/
+	
 	,setCommand: function(command, force) {
 		if (command !== this.data.command || force) {
 			this.data.command = command;
+			
+			delete this.cmd;
+			delete this.action;
+			
 			if (command) {
-				this.cmd = Oce.cmd(command);
+				if (command.substr(0,1) === '@') {
+					var parts = this.parseActionRegex.exec(command);
+					parts.shift();
+					var module = parts.shift(),
+						method = parts.shift(),
+						args = parts.shift();
+					if (!method) {
+						this.cmd = Ext.emptyFn;
+						return;
+					}
+					if (args) {
+						args = args.split(',');
+						for (var i=0,l=args.length; i<l; i++) {
+							args[i] = args[i].trim();
+						}
+					}
+					this.action = {
+						module: module
+						,method: method
+						,args: args
+					};
+				} else {
+					this.cmd = Oce.cmd(command);
+				}
 				this.setCls("x-tree-node-leaf");
 			} else {
-				delete this.cmd;
 				if (this.el) this.el.removeClass("x-tree-node-leaf");
 			}
 		}
