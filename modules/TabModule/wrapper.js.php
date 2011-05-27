@@ -37,7 +37,6 @@ var <?php echo $var ?> = Ext.extend(sp, {
 	
 	,baseModuleActions: {
 		open: function(cb, scope, args) {
-		debugger
 			this.on({
 				single: true
 				,open: cb
