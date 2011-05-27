@@ -102,10 +102,6 @@ class ModuleProvider implements ActionProvider {
 					'family' => $familyId,
 				);
 				foreach ($config['actions'] as $action) {
-					if (!is_array($action)) {
-						dump_trace(false);
-						dump($action);
-					}
 					$action = Arrays::applyIf($action, $defaults);
 					$action = $this->replacePlaceHolders($action);
 					$this->menuActions[] = MenuAction::fromArray($action);
