@@ -36,7 +36,7 @@ class TreeMenu extends Module implements HasMenuActions {
 					&& !$module->isAbstract()
 					&& !$module->isDisabled()) {
 				
-				$family = $module->getFamily();
+				$family = $module->getActionProvider()->getFamily();
 				
 				if ($family !== null && $family !== false) {
 					$r[$family->getId()] = $family;
@@ -179,7 +179,7 @@ class TreeMenu extends Module implements HasMenuActions {
 	private $actionProvider;
 	public function getActionProvider() {
 		if (!$this->actionProvider) {
-			$this->actionProvider = new MenuActionProvider\ConfigProvider($this->getConfig());
+			$this->actionProvider = new ActionProvider\ModuleProvider($this);
 		}
 		return $this->actionProvider;
 	}
