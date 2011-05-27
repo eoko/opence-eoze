@@ -859,27 +859,6 @@ eo.ui.TreeMenu.prototype.TreeNode = Ext.extend(Ext.tree.TreeNode, {
 		this.setLoading();
 		this.cmd();
 		this.setLoading(false);
-//		var me = this;
-//		this.setLoading();
-//		this.cmd(function(module) {
-//			// and what if the cmd isn't 'open' :/ ?
-////				if (module.openEvent) {
-//			if (module.opening) {
-////				if (module.openEvent && /#open(?:\([^)]+\)|$)$/.test()) {
-//				if (module.opened) {
-//					me.setLoading(false);
-//				} else {
-//					module.on({
-//						open: function() {
-//							me.setLoading(false);
-//						}
-//						,single: true
-//					});
-//				}
-//			} else {
-//				me.setLoading(false);
-//			}
-//		});
 	}
 	
 	,setLoading: function(loading) {
