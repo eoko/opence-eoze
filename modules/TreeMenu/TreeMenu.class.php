@@ -176,8 +176,12 @@ class TreeMenu extends Module implements HasMenuActions {
 		return true;
 	}
 	
+	private $actionProvider;
 	public function getActionProvider() {
-		return new MenuActionProvider\ConfigProvider($this->getConfig());
+		if (!$this->actionProvider) {
+			$this->actionProvider = new MenuActionProvider\ConfigProvider($this->getConfig());
+		}
+		return $this->actionProvider;
 	}
 
 }
