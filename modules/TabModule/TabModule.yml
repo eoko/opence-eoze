@@ -1,4 +1,5 @@
 abstract: true
+class: BaseModule
 
 wrapper: wrapper.js.php
 main: %module%.main

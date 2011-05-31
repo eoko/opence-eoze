@@ -22,11 +22,23 @@ use IllegalStateException;
 class TreeMenu extends Module implements HasMenuActions {
 
 	protected $defaultExecutor = 'json';
-
+	
+	private $actionProvider;
+	
+	protected function setPrivateState(&$vals) {
+		$this->actionProvider = $vals['actionProvider'];
+		unset($vals['actionProvider']);
+		parent::setPrivateState($vals);
+	}
+	
 	public function getMenuFamilies() {
+		
+		$cacheKey = array($this, 'families');
+		
+		$useCache = $this->getConfig()->get('useCache', true);
 
-		if ($this->getConfig()->get('useCache', true)
-				&& null !== $r = Cache::getCachedData(array($this, 'families'))) {
+		if ($useCache 
+				&& null !== $r = Cache::getCachedData($cacheKey)) {
 			return $r;
 		}
 		
@@ -43,14 +55,17 @@ class TreeMenu extends Module implements HasMenuActions {
 				}
 			}
 		}
-		
-		Cache::cacheData(array($this, 'families'), $r);
+
+		// don't lose time caching for nada...
+		if ($useCache) {
+			Cache::cacheData($cacheKey, $r);
+		}
 		
 		return $r;
 	}
 	
 	public function invalidateCache() {
-		Cache::clearCachedData(array($this, 'families'));
+		Cache::clearCachedData($this->getCacheKey());
 	}
 	
 	/**
@@ -176,7 +191,6 @@ class TreeMenu extends Module implements HasMenuActions {
 		return true;
 	}
 	
-	private $actionProvider;
 	public function getActionProvider() {
 		if (!$this->actionProvider) {
 			$this->actionProvider = new ActionProvider\ModuleProvider($this);
