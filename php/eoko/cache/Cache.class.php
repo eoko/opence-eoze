@@ -52,13 +52,27 @@ class Cache {
 		if (file_exists($path)) return $path;
 		else return false;
 	}
-
-	public static function cacheData($class, $data, $version = null) {
-
+	
+	private static function parseClassAndKey(&$class, &$namespace, &$key) {
 		if (is_array($class)) {
 			list($class, $key) = $class;
 		}
+		if (is_object($class)) {
+			$class = get_class($class);
+			$namespace = get_namespace($class);
+		}
+		if (preg_match('/^(.+)\\\\([^\\\\]+)$/', $class, $m)) {
+			$class = $m[2];
+			$namespace = $m[1];
+		} else {
+			$namespace = null;
+		}
+	}
+
+	public static function cacheData($class, $data, $version = null, $requires = null) {
 		
+		self::parseClassAndKey($class, $namespace, $key);
+
 		if ($version === null) {
 			if (is_object($class) && isset($class->cacheVersion)) {
 				$version = $class->cacheVersion;
@@ -70,20 +84,58 @@ class Cache {
 //		$cache = new Item($data, $version);
 
 		self::cachePhpFile(
-			get_namespace($class), $class .
+			$namespace, $class .
 			'.DataCache' . (isset($key) ? ".$key" : '') . '.php',
 			'<?php return ' . var_export($data, true) . ';'
 		);
 	}
 	
-	public static function getCachedData($class) {
+	public static function cacheDataRaw($class, $code, $extraCode) {
 		
-		if (is_array($class)) {
-			list($class, $key) = $class;
+		self::parseClassAndKey($class, $namespace, $key);
+		
+		$filenameBase = "$class.DataCache" . (isset($key) ? ".$key" : '');
+		
+//		$code = 'return ' . var_export($data, true) . ';';
+		
+		if ($extraCode) {
+			$depFileName = "$filenameBase.inc.php";
+			// cache dep file
+			if (is_array($extraCode)) {
+				$tmp = '';
+				foreach ($extraCode as $xc) {
+					$tmp .= PHP_EOL . $xc;
+				}
+				$extraCode = $tmp;
+			}
+			self::cachePhpFile(
+				$namespace, 
+				$depFileName, 
+				"<?php $extraCode"
+			);
+
+			// add the require to the base code
+			$code = PHP_EOL . "require dirname(__FILE__) . DS . '$depFileName';" 
+				. PHP_EOL . $code;
 		}
 		
+		self::cachePhpFile(
+			$namespace,
+			"$filenameBase.php",
+			"<?php $code"
+		);
+	}
+	
+	public static function cacheDataEx($class, $data, $extraCode) {
+		self::cacheDataRaw($class, 'return ' . var_export($data, true) . ';', $extraCode);
+	}
+	
+	public static function getCachedData($class) {
+		
+		self::parseClassAndKey($class, $namespace, $key);
+		
 		$file = self::getPhpFilePath(
-			get_namespace($class), 
+			$namespace, 
 			$class . '.DataCache' . (isset($key) ? ".$key" : '') . '.php'
 		);
 		

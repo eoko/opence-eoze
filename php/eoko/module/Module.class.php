@@ -58,8 +58,8 @@ class Module implements file\Finder {
 	protected $defaultInternalExecutor = self::DEFAULT_EXECUTOR;
 	private $executorClassNames = null;
 
-	public function __construct(ModuleLocation $location) {
-
+	public final function __construct(ModuleLocation $location) {
+		
 		$this->name = $location->moduleName;
 		$this->basePath = $location->path;
 		$this->baseUrl = $location->url;
@@ -77,10 +77,24 @@ class Module implements file\Finder {
 		$this->pathsUrl = $location->directory->getLineagePathsUrl($lineage);
 		$this->lineageLocations = $location->directory->getLineageLocations($lineage);
 		
-		$this->construct();
+		$this->construct($location);
 	}
 	
-	protected function construct() {}
+	public static function __set_state($vals) {
+		$class = get_called_class();
+		$o = new $class($vals['location']);
+		$o->setPrivateState($vals);
+		if (is_array($vals)) {
+			foreach ($vals as $k => $v) {
+				$o->$k = $v;
+			}
+		}
+		return $o;
+	}
+	
+	protected function setPrivateState(&$vals) {}
+	
+	protected function construct(ModuleLocation $location) {}
 
 	public function getParentNames($includeSelf) {
 		$parents = array();
@@ -428,7 +442,7 @@ MSG
 	}
 	
 	private function doLoadExecutorTopLevelClass($type) {
-
+		
 		$type = self::sanitizeExecutorName($type);
 
 		$locations = $this->lineageLocations;
@@ -529,7 +543,7 @@ MSG
 	 * @return void
 	 */
 	public final function generateDefaultModuleClass($class, $config) {
-		$this->doGenerateModuleClass($class, $config);
+		return $this->doGenerateModuleClass($class, $config);
 		// TODO cache the returned code in file
 	}
 	
@@ -628,7 +642,7 @@ MSG
 		if (!($module instanceof Module)) {
 			$module = ModuleManager::getModule($module);
 		}
-
+		
 		return $module->createRequestExecutor($request, $executor);
 	}
 	
