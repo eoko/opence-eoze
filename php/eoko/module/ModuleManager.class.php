@@ -620,8 +620,7 @@ class ModuleLocation extends Location {
 	 */
 	public function isDisabled() {
 		return $this->path === null ? 
-//				($this->directory->path === null || !file_exists("{$this->directory->path}$this->moduleName.yml"))
-				($this->directory->path === null || !$this->loadConfig())
+				($this->directory->path === null || !$this->searchConfigFile())
 				: file_exists($this->path . 'disabled');
 	}
 	
