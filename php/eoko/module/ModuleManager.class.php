@@ -247,13 +247,27 @@ class ModuleManager {
 	 * @return Module
 	 */
 	public static function getModule($name, $required = true) {
+		
+		$me = self::getInstance();
+		
 		if ($name instanceof Module) {
-			return $name;
+			$module = $name;
 		} else if (isset(self::$modules[$name])) {
-			return self::$modules[$name];
+			$module = self::$modules[$name];
 		} else {
-			return self::$modules[$name] = self::getInstance()->doGetModule($name, $required);
+			$module = self::$modules[$name] = $me->doGetModule($name, $required);
 		}
+		
+		// save in cache dependancy pile, if needed
+		if ($me->cachePile !== null
+			&& $module 
+			&& $me->useCache()
+			&& (null !== $cacheFile = Cache::getCacheFile($me->makeCacheKey($name)))
+		) {
+			$me->cachePile[] = $cacheFile;
+		}
+		
+		return $module;
 	}
 	
 	private function useCache() {
@@ -291,10 +305,8 @@ class ModuleManager {
 		if ($module && $this->useCache() && $deps !== false) {
 			$module->setCacheDepencies($this->cachePile);
 			$monitors = array_merge($this->cachePile, $module->getCacheMonitorFiles(true));
+			Cache::cacheObject($cacheKey, $module, $deps);
 			Cache::monitorFiles($cacheKey, $monitors);
-			if (null !== $cacheFile = Cache::cacheObject($cacheKey, $module, $deps)) {
-				$this->cachePile[] = $cacheFile;
-			}
 		}
 		
 		if ($rootCall) {
@@ -308,12 +320,6 @@ class ModuleManager {
 
 		if (strstr($name, '\\')) {
 			throw new \Exception('DEPRECATED');
-//REM			$ns = get_namespace($name, $relName);
-//			try {
-//				return $this->getModuleInNamespace($relName, $ns);
-//			} catch (MissingModuleException $ex) {
-//				throw new MissingModuleException($name, $ex);
-//			}
 		}
 		
 		// try to delegate
@@ -338,29 +344,6 @@ class ModuleManager {
 	public function listModuleDirectories() {
 		return self::$modulesDirectories;
 	}
-
-//REM	private function getModuleInNamespace($name, $ns) {
-//
-//		throw new \Exception('DEPRECATED');
-//			
-//		Logger::get($this)->warn(
-//			'GetModule used to retrieve absolute class: {}. This is wrong. '
-//			. 'Do not do that!',
-//			$name
-//		);
-//		
-//		foreach (self::$modulesDirectories as $location) {
-//			$location instanceof ModulesDirectory;
-//			if ($location->testNamespace($ns)) {
-//				$module = $this->tryGetModule($name, $location);
-//				if ($module) {
-//					return $module;
-//				}
-//			}
-//		}
-//		
-//		throw new MissingModuleException($name);
-//	}
 
 	/**
 	 *
