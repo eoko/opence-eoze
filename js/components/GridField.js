@@ -318,7 +318,19 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 
 			xtype: "jsonstore"
 		}));
-		
+	
+		// override loadData
+		(function() {
+			var uber = store.loadData;
+			store.loadData = function() {
+				uber.apply(this, arguments);
+				me.fireEvent('loaded', me);
+				me.firstLoadDone = true;
+				me.dirty = false; // get my virginity back, for the modified evt
+				me.initialValue = me.syncValue(true);
+			};
+		})();
+			
 		this.afterStoreCreated();
 		this.fireEvent("storecreated", this, store);
 
