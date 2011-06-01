@@ -99,12 +99,15 @@ class ModuleProvider implements ActionProvider {
 			if (isset($config['actions'])) {
 				$familyId = $this->getMenuFamilyId();
 				$defaults = array(
-					'family' => $familyId,
+					'action_family' => $familyId,
 				);
-				foreach ($config['actions'] as $action) {
+				foreach ($config['actions'] as $name => $action) {
 					$action = Arrays::applyIf($action, $defaults);
 					$action = $this->replacePlaceHolders($action);
-					$this->menuActions[] = MenuAction::fromArray($action);
+					if (!isset($action['id']) && is_string($name)) {
+						$action['id'] = $name;
+					}
+					$this->menuActions[$action['id']] = MenuAction::fromArray($action);
 				}
 			}
 		}
@@ -117,7 +120,7 @@ class ModuleProvider implements ActionProvider {
 	}
 	
 	private function getMenuFamilyId() {
-		if (null !== $config = $this->getMenuConfig()
+		if ((null !== $config = $this->getMenuConfig())
 				&& isset($config['family']['id'])) {
 			return $config['family']['id'];
 		} else {
