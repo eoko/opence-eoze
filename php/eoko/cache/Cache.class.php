@@ -217,8 +217,6 @@ class Cache {
 					Logger::get(get_called_class())->debug(
 						'Cache invalidated for: {}.{}', $class, $key
 					);
-					@unlink($file); // TODO all unlink job should be deported 
-					// in clearCachedData
 					self::clearCachedData($class);
 					return null;
 				}
@@ -239,13 +237,20 @@ class Cache {
 			list($class, $key) = $class;
 		}
 		
-		$file = self::getPhpFilePath(
-			get_namespace($class),
-			$class . '.DataCache' . (isset($key) ? ".$key" : '') . '.php'
-		);
+		$base = $class . '.DataCache' . (isset($key) ? ".$key" : '');
 		
-		if ($file) {
-			@unlink($file);
+		foreach (array(
+			'',
+			'.inc',
+			'.validity',
+		) as $ext) {
+			$file = self::getPhpFilePath(
+				get_namespace($class),
+				"$base$ext.php"
+			);
+			if ($file) {
+				@unlink($file);
+			}
 		}
 	}
 
