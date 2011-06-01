@@ -263,9 +263,13 @@ class ModuleManager {
 	
 	private $cachePile = null;
 	
+	public function makeCacheKey($moduleName) {
+		return array($this, "cachedModule_$moduleName");
+	}
+	
 	private function doGetModule($name, $required) {
 		
-		$cacheKey = array($this, "cachedModule_$name");
+		$cacheKey = $this->makeCacheKey($name);
 		
 		// try the cache
 		if ($this->useCache()
