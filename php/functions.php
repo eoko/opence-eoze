@@ -262,3 +262,64 @@ function is_reference_to(&$a, &$b) {
 		return false;
 	}
 }
+
+
+/**
+ * An alternative to print_r that unlike the original does not use output buffering with
+ * the return parameter set to true. Thus, Fatal errors that would be the result of print_r
+ * in return-mode within ob handlers can be avoided.
+ *
+ * Comes with an extra parameter to be able to generate html code. If you need a
+ * human readable DHTML-based print_r alternative, see http://krumo.sourceforge.net/
+ *
+ * Support for printing of objects as well as the $return parameter functionality
+ * added by Fredrik Wollsén (fredrik dot motin at gmail), to make it work as a drop-in
+ * replacement for print_r (Except for that this function does not output 
+ * paranthesises around element groups... ;) )
+ *
+ * Based on return_array() By Matthew Ruivo (mruivo at gmail)
+ * (http://se2.php.net/manual/en/function.print-r.php#73436)
+ */
+function obsafe_print_r($var, $return = false, $html = false, $level = 0) {
+	$spaces = "";
+	$space = $html ? "&nbsp;" : " ";
+	$nl = $html ? "<br />" : "\n";
+	for ($i = 1; $i <= 6; $i++) {
+		$spaces .= $space;
+	}
+	$tabs = $spaces;
+	for ($i = 1; $i <= $level; $i++) {
+		$tabs .= $spaces;
+	}
+	if (is_array($var)) {
+		$title = 'Array';
+	} elseif (is_object($var)) {
+		$title = get_class($var) . " Object$nl(";
+		$footer = ')';
+		$o = $var;
+		$var = array();
+		$ro = new ReflectionObject($o);
+		foreach ($ro->getProperties() as $p) {
+			$p->setAccessible(true);
+			$var[$p->getName()] = $p->getValue($o);
+		}
+		foreach ($ro->getStaticProperties() as $p) {
+			$p->setAccessible(true);
+			$var['parent::' . $p->getName()] = $p->getValue($o);
+		}
+	}
+	$output = $title . $nl;
+	foreach ($var as $key => $value) {
+		if (is_array($value) || is_object($value)) {
+			$level++;
+			$value = obsafe_print_r($value, true, $html, $level);
+			$level--;
+		}
+		$output .= $tabs . "[" . $key . "] => " . $value . $nl;
+	}
+	if (isset($footer)) $output .= $footer;
+	if ($return)
+		return $output;
+	else
+		echo $output;
+}
