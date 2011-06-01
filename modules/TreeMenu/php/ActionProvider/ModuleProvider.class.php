@@ -120,18 +120,20 @@ class ModuleProvider implements ActionProvider {
 	}
 	
 	private function getMenuFamilyId() {
-		if ((null !== $config = $this->getMenuConfig())
-				&& isset($config['family']['id'])) {
-			return $config['family']['id'];
-		} else {
-			return $this->getModuleName();
+		if (null !== $config = $this->getMenuConfig()) {
+			if (isset($config['family']['id'])) {
+				return $config['family']['id'];
+			} else if (isset($config['familyId'])) {
+				return $config['familyId'];
+			}
 		}
+		return $this->getModuleName();
 	}
 	
 	private function buildMenuFamily() {
 		if (null !== $config = $this->getMenuConfig()) {
 			$defaults = array(
-				'id' => $this->getModuleName(),
+				'id' => $this->getMenuFamilyId(),
 				'label' => $this->getModuleTitleOrName(),
 				'actions' => $this->getAvailableActions(),
 			);
