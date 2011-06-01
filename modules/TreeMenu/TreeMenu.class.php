@@ -17,7 +17,7 @@ use eoko\modules\TreeMenu\MenuAction;
 use eoko\modules\TreeMenu\MenuFamily;
 
 use UserSession;
-use IllegalStateException;
+use IllegalStateException, IllegalArgumentException;
 
 class TreeMenu extends Module implements HasMenuActions {
 
@@ -35,7 +35,7 @@ class TreeMenu extends Module implements HasMenuActions {
 		
 		$cacheKey = array($this, 'families');
 		
-		$useCache = $this->getConfig()->get('useCache', true);
+		$useCache = $this->getConfig()->get('useCache', false);
 
 		if ($useCache 
 				&& null !== $r = Cache::getCachedData($cacheKey)) {
@@ -71,11 +71,12 @@ class TreeMenu extends Module implements HasMenuActions {
 	/**
 	 * @param string $id
 	 * @return MenuFamily
+	 * @throws MissingMenuFamilyException
 	 */
 	public function getMenuFamily($id) {
 		$families = $this->getMenuFamilies();
 		if (!isset($families[$id])) {
-			throw new IllegalStateException("Familiy $id doesn't exist");
+			throw new MissingMenuFamilyException("Familiy $id doesn't exist");
 		}
 		return $families[$id];
 	}
@@ -83,16 +84,18 @@ class TreeMenu extends Module implements HasMenuActions {
 	/**
 	 * @param string $action
 	 * @return MenuAction
+	 * @throws IllegalArgumentException
+	 * @throws MissingMenuActionException
 	 */
 	public function getMenuAction($action) {
 		if (count($parts = explode('.', $action)) !== 2) {
-			throw new \IllegalArgumentException('Should be FAMILY.ACTION: ' . $action);
+			throw new IllegalArgumentException('Should be FAMILY.ACTION: ' . $action);
 		}
 		list($family, $action) = $parts;
 		if (null !== $r = $this->getMenuFamily($family)->getAction($action)) {
 			return $r;
 		} else {
-			throw new IllegalStateException("Family $family has no action $action");
+			throw new MissingMenuActionException("Family $family has no action $action");
 		}
 	}
 	
@@ -198,4 +201,16 @@ class TreeMenu extends Module implements HasMenuActions {
 		return $this->actionProvider;
 	}
 
+}
+
+class MissingMenuElementException extends \SystemException {
+	
+}
+
+class MissingMenuFamilyException extends MissingMenuElementException {
+	
+}
+
+class MissingMenuActionException extends MissingMenuElementException {
+	
 }
