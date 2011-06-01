@@ -208,8 +208,11 @@ abstract class Model {
 
 	public function __set($fieldName, $value) {
 		Logger::dbg('Setting {} => {}', $fieldName, $value);
-		if ($this->getTable()->getColumn($fieldName)->isPrimary()) $this->setPrimaryKeyValueImpl($fieldName, $value);
-		else $this->setField($fieldName, $value, false);
+		if ($this->getTable()->getColumn($fieldName)->isPrimary()) {
+			$this->setPrimaryKeyValueImpl($fieldName, $value);
+		} else {
+			$this->setField($fieldName, $value, false);
+		}
 	}
 
 	public function echoIf($field, $defaultValue = '-', $exludeEmptyString = true, $render = true) {
@@ -953,7 +956,7 @@ abstract class Model {
 	abstract function setPrimaryKeyValue($value);
 
 	protected function setPrimaryKeyValueImpl($primaryKeyName, $value, $forceAcceptNull = false) {
-		$this->getLogger()->warn('Deprecated');
+		// $this->getLogger()->warn('Deprecated'); // why ???
 		$this->setColumn($primaryKeyName, $value, $forceAcceptNull);
 		// $this->setField($primaryKeyName, $value, $forceAcceptNull);
 	}
