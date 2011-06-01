@@ -76,7 +76,7 @@ class TreeMenu extends Module implements HasMenuActions {
 	public function getMenuFamily($id) {
 		$families = $this->getMenuFamilies();
 		if (!isset($families[$id])) {
-			throw new MissingMenuFamilyException("Familiy $id doesn't exist");
+			throw new MissingMenuFamilyException("Familiy '$id' doesn't exist");
 		}
 		return $families[$id];
 	}
@@ -86,6 +86,7 @@ class TreeMenu extends Module implements HasMenuActions {
 	 * @return MenuAction
 	 * @throws IllegalArgumentException
 	 * @throws MissingMenuActionException
+	 * @throws MissingMenuFamilyException
 	 */
 	public function getMenuAction($action) {
 		if (count($parts = explode('.', $action)) !== 2) {
@@ -95,7 +96,7 @@ class TreeMenu extends Module implements HasMenuActions {
 		if (null !== $r = $this->getMenuFamily($family)->getAction($action)) {
 			return $r;
 		} else {
-			throw new MissingMenuActionException("Family $family has no action $action");
+			throw new MissingMenuActionException("Family '$family' has no action '$action'");
 		}
 	}
 	
@@ -137,16 +138,25 @@ class TreeMenu extends Module implements HasMenuActions {
 			));
 			
 			if (isset($config['action'])) {
-				return $this->getMenuAction($config['action'])->createMenuNode($overrides);
+				try {
+					return $this->getMenuAction($config['action'])->createMenuNode($overrides);
+				} catch (MissingMenuElementException $ex) {
+					Logger::get($this)->warn('Missing menu item is ignored: {}', $ex->getMessage());
+					return MenuNode::create($overrides);
+				}
 			} else {
 				return MenuNode::create($overrides);
 			}
 		
 		} else if (is_string($config)) {
-			return $this->getMenuAction($config)->createMenuNode(array(
-				'id' => null,
-				'users_id' => $userId,
-			));
+			try {
+				return $this->getMenuAction($config)->createMenuNode(array(
+					'id' => null,
+					'users_id' => $userId,
+				));
+			} catch (MissingMenuElementException $ex) {
+				Logger::warn('Missing menu item is ignored: {}', $ex->getMessage());
+			}
 		
 		} else if ($config === null) {
 			if (!$name) {
@@ -203,7 +213,7 @@ class TreeMenu extends Module implements HasMenuActions {
 
 }
 
-class MissingMenuElementException extends \SystemException {
+class MissingMenuElementException extends \Exception {
 	
 }
 
