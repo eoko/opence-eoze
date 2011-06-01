@@ -579,6 +579,7 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 					me.reload(function() {
 						if (callback) callback();
 					}, me);
+					me.afterDelete(ids);
 				}
 				,onFailure: function() {
 					if (grid && grid.el) grid.el.unmask();
@@ -601,6 +602,8 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 			fn();
 		}
 	}
+	
+	,afterDelete: function() {}
 
 	,deleteRecords: function() {
 		this.deleteRecord.apply(this, arguments);
