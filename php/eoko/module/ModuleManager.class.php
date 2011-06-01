@@ -256,28 +256,51 @@ class ModuleManager {
 		}
 	}
 	
+	private function useCache() {
+		return true;
+//		return false;
+	}
+	
+	private $cachePile = null;
+	
 	private function doGetModule($name, $required) {
 		
 		$cacheKey = array($this, "cachedModule_$name");
 		
 		// try the cache
-		if (null !== $module = Cache::getCachedData($cacheKey)) {
+		if ($this->useCache()
+				&& (null !== $module = Cache::getCachedData($cacheKey))) {
 			return $module;
+		}
+		
+		if ($this->useCache() && $this->cachePile === null) {
+			$this->cachePile = array();
+			$rootCall = true;
+		} else {
+			$rootCall = false;
 		}
 
 		$deps = array();
 		$module = $this->doInstantiateModule($name, $required, $deps);
 		
 		// module that don't support caching will set cacheDeps to FALSE
-		if ($deps !== false) {
-			Cache::cacheDataRaw(
-				$cacheKey, 
-				'return unserialize(\'' 
-					. str_replace('\'', '\\\'', serialize($module))
-					. '\');', 
-				$deps
-			);
-//			Cache::cacheDataEx($cacheKey, $module, $deps);
+		if ($this->useCache() && $deps !== false) {
+			if ($module) {
+				$module->setCacheDepencies($this->cachePile);
+				$monitors = array_merge($this->cachePile, $module->getCacheMonitorFiles(true));
+				Cache::monitorFiles($cacheKey, $monitors);
+			} else {
+				if ($this->cachePile) {
+					Cache::monitorFiles($cacheKey, $this->cachePile);
+				}
+			}
+			if (null !== $cacheFile = Cache::cacheObject($cacheKey, $module, $deps)) {
+				$this->cachePile[] = $cacheFile;
+			}
+		}
+		
+		if ($rootCall) {
+			$this->cachePile = null;
 		}
 
 		return $module;
@@ -286,12 +309,13 @@ class ModuleManager {
 	private function doInstantiateModule($name, $required, &$cacheDeps) {
 
 		if (strstr($name, '\\')) {
-			$ns = get_namespace($name, $relName);
-			try {
-				return $this->getModuleInNamespace($relName, $ns);
-			} catch (MissingModuleException $ex) {
-				throw new MissingModuleException($name, $ex);
-			}
+			throw new \Exception('DEPRECATED');
+//REM			$ns = get_namespace($name, $relName);
+//			try {
+//				return $this->getModuleInNamespace($relName, $ns);
+//			} catch (MissingModuleException $ex) {
+//				throw new MissingModuleException($name, $ex);
+//			}
 		}
 		
 		// try to delegate
@@ -312,29 +336,33 @@ class ModuleManager {
 		if ($required) throw new MissingModuleException($name);
 		else return null;
 	}
-
-	private function getModuleInNamespace($name, $ns) {
-
-		throw new \Exception('DEPRECATED');
-			
-		Logger::get($this)->warn(
-			'GetModule used to retrieve absolute class: {}. This is wrong. '
-			. 'Do not do that!',
-			$name
-		);
-		
-		foreach (self::$modulesDirectories as $location) {
-			$location instanceof ModulesDirectory;
-			if ($location->testNamespace($ns)) {
-				$module = $this->tryGetModule($name, $location);
-				if ($module) {
-					return $module;
-				}
-			}
-		}
-		
-		throw new MissingModuleException($name);
+	
+	public function listModuleDirectories() {
+		return self::$modulesDirectories;
 	}
+
+//REM	private function getModuleInNamespace($name, $ns) {
+//
+//		throw new \Exception('DEPRECATED');
+//			
+//		Logger::get($this)->warn(
+//			'GetModule used to retrieve absolute class: {}. This is wrong. '
+//			. 'Do not do that!',
+//			$name
+//		);
+//		
+//		foreach (self::$modulesDirectories as $location) {
+//			$location instanceof ModulesDirectory;
+//			if ($location->testNamespace($ns)) {
+//				$module = $this->tryGetModule($name, $location);
+//				if ($module) {
+//					return $module;
+//				}
+//			}
+//		}
+//		
+//		throw new MissingModuleException($name);
+//	}
 
 	/**
 	 *
