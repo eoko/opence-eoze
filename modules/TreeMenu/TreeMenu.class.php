@@ -65,7 +65,7 @@ class TreeMenu extends Module implements HasMenuActions {
 	}
 	
 	public function invalidateCache() {
-		Cache::clearCachedData($this->getCacheKey());
+		Cache::clearCachedData(array($this, 'families'));
 	}
 	
 	/**
