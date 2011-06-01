@@ -255,7 +255,9 @@ class ModuleManager {
 		} else if (isset(self::$modules[$name])) {
 			$module = self::$modules[$name];
 		} else {
-			$module = self::$modules[$name] = $me->doGetModule($name, $required);
+			// this one must return, because doGetModule is filling in the
+			// dependancy pile by itself
+			return self::$modules[$name] = $me->doGetModule($name, $required);
 		}
 		
 		// save in cache dependancy pile, if needed
@@ -303,10 +305,18 @@ class ModuleManager {
 		
 		// module that don't support caching will set cacheDeps to FALSE
 		if ($module && $this->useCache() && $deps !== false) {
-			$module->setCacheDepencies($this->cachePile);
 			$monitors = array_merge($this->cachePile, $module->getCacheMonitorFiles(true));
-			Cache::cacheObject($cacheKey, $module, $deps);
+//			Cache::cacheObject($cacheKey, $module, $deps);
+//			Cache::monitorFiles($cacheKey, $monitors);
+			
 			Cache::monitorFiles($cacheKey, $monitors);
+			if (null !== $cacheFile = Cache::cacheObject($cacheKey, $module, $deps)) {
+				$this->cachePile[] = $cacheFile;
+			}
+			// set dependancy *after* the current module has been added to the
+			// cache pile, so that the config cache will be dependant on the
+			// module cache file itself
+			$module->setCacheDepencies($this->cachePile);
 		}
 		
 		if ($rootCall) {
