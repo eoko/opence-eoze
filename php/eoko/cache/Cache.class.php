@@ -12,8 +12,15 @@ const PATH = CACHE_PATH;
 class Cache {
 
 	public static $mode = 0777;
+	public static $debugInfo = false;
+	
+	private static $useValidityMonitors = true;
 
 	private function __construct() {}
+	
+	public static function getClassName() {
+		return get_called_class();
+	}
 
 	public static function cachePhpClass($class, $code) {
 		return self::cachePhpFile(
@@ -44,12 +51,13 @@ class Cache {
 			@unlink($path);
 		}
 		if (substr($filename, -4) !== '.php') $filename .= '.php';
-		return file_put_contents($path, $code);
+		file_put_contents($path, $code);
+		return $path;
 	}
 
-	public static function getPhpFilePath($namespace, $filename) {
+	public static function getPhpFilePath($namespace, $filename, $onlyIfExists = true) {
 		$path = self::getNamespacePath($namespace) . DS . $filename;
-		if (file_exists($path)) return $path;
+		if ($onlyIfExists && file_exists($path)) return $path;
 		else return false;
 	}
 	
@@ -66,6 +74,37 @@ class Cache {
 			$namespace = $m[1];
 		} else {
 			$namespace = null;
+		}
+	}
+
+	/**
+	 * Removes any reference to an instanciated object in the given cache key,
+	 * replacing then with the full class name string. This is useful to avoid
+	 * storing uselessly whole object, when storing a cache key.
+	 * @param object|class|string $key
+	 * @return mixed
+	 */
+	public static function flattenKey(&$key) {
+		if ($key) {
+			if (is_array($key)) {
+				$key[0] = self::flattenKey($key[0]);
+			} else if (is_object($key)) {
+				$key = get_class($key);
+			}
+		}
+		return $key;
+	}
+	
+	private static function appendKey(&$class, $key) {
+		if (is_array($class)) {
+			$class = array(
+				$class[0],
+				$class[1] . ".$key",
+			);
+		} else {
+			return array(
+				$class, $key
+			);
 		}
 	}
 
@@ -90,13 +129,30 @@ class Cache {
 		);
 	}
 	
-	public static function cacheDataRaw($class, $code, $extraCode) {
+	public static function cacheObject($class, $object, $extraCode = null) {
+		
+		$debug = '';
+		
+		if (Logger::get(get_called_class())->isActive(Logger::DEBUG)) {
+			$debug = print_r($object, true);
+			$debug = "\n\n/* === Debug Informations ===\n\n$debug\n*/";
+		}
+		
+		return self::cacheDataRaw(
+			$class,
+			'return unserialize(\'' 
+				. str_replace('\'', '\\\'', serialize($object))
+				. '\');'
+				. $debug,
+			$extraCode
+		);
+	}
+	
+	public static function cacheDataRaw($class, $code, $extraCode = null) {
 		
 		self::parseClassAndKey($class, $namespace, $key);
 		
 		$filenameBase = "$class.DataCache" . (isset($key) ? ".$key" : '');
-		
-//		$code = 'return ' . var_export($data, true) . ';';
 		
 		if ($extraCode) {
 			$depFileName = "$filenameBase.inc.php";
@@ -119,7 +175,7 @@ class Cache {
 				. PHP_EOL . $code;
 		}
 		
-		self::cachePhpFile(
+		return self::cachePhpFile(
 			$namespace,
 			"$filenameBase.php",
 			"<?php $code"
@@ -130,16 +186,51 @@ class Cache {
 		self::cacheDataRaw($class, 'return ' . var_export($data, true) . ';', $extraCode);
 	}
 	
+	/**
+	 * Set the validity of the cache node specified by $class dependant on
+	 * modifications of the files in $files.
+	 * @param mixed $class
+	 * @param array[string] $files 
+	 */
+	public static function monitorFiles($class, $files) {
+		if (self::$useValidityMonitors) {
+			self::appendKey($class, 'validity');
+			$validator = new FileValidator($files);
+			self::cacheObject($class, $validator);
+		}
+	}
+	
 	public static function getCachedData($class) {
 		
 		self::parseClassAndKey($class, $namespace, $key);
+		$baseFilename = $class . '.DataCache' . (isset($key) ? ".$key" : '');
+		
+		if (self::$useValidityMonitors) {
+			$file = self::getPhpFilePath(
+				$namespace, 
+				"$baseFilename.validity.php"
+			);
+			if ($file) {
+				$validator = require $file;
+//				dump($validator);
+				if (!$validator->test()) {
+					Logger::get(get_called_class())->debug(
+						'Cache invalidated for: {}.{}', $class, $key
+					);
+					@unlink($file); // TODO all unlink job should be deported 
+					// in clearCachedData
+					self::clearCachedData($class);
+					return null;
+				}
+			}
+		}
 		
 		$file = self::getPhpFilePath(
 			$namespace, 
-			$class . '.DataCache' . (isset($key) ? ".$key" : '') . '.php'
+			$baseFilename . '.php'
 		);
 		
-		if (file_exists($file)) return require $file;
+		if ($file) return require $file;
 		else return null;
 	}
 	
@@ -153,7 +244,7 @@ class Cache {
 			$class . '.DataCache' . (isset($key) ? ".$key" : '') . '.php'
 		);
 		
-		if (file_exists($file)) {
+		if ($file) {
 			@unlink($file);
 		}
 	}
@@ -187,3 +278,5 @@ class Cache {
 		else return null;
 	}
 }
+
+Cache::$debugInfo = Logger::get(Cache::getClassName())->isActive(Logger::DEBUG);

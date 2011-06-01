@@ -22,6 +22,8 @@ class ModuleLocation extends Location {
 	 * has not been loaded yet, else the value of loadConfig() (that can be NULL).
 	 */
 	private $configCache = false;
+	
+	private $configFileListCache = null;
 
 	/**
 	 * Creates a new ModuleLocation. If no directory for the module exists in
@@ -136,7 +138,7 @@ class ModuleLocation extends Location {
 			return false;
 		}
 	}
-
+	
 	/**
 	 * Load the config of all the module's {@link ModuleManager line}. The 
 	 * returned Config object is cached for subsequent call to the method.
@@ -150,27 +152,39 @@ class ModuleLocation extends Location {
 	}
 	
 	public function listConfigFiles() {
-		$r = null;
+		if ($this->configFileListCache !== null) {
+			return $this->configFileListCache;
+		}
+		$r = array();
 		foreach (array_reverse($this->getLocations()) as $location) {
 			$config = $location->searchConfigFile();
 			if ($config) {
 				$r[] = $config;
 			}
 		}
-		return $r;
+		return $this->configFileListCache = $r;
 	}
 	
 	private function doLoadConfig() {
+//REM		$r = null;
+//		foreach (array_reverse($this->getLocations()) as $location) {
+//			$config = $location->searchConfigFile();
+//			if ($config) {
+//				$config = Config::createForNode($config, $this->moduleName);
+//				if ($r === null) {
+//					$r = $config;
+//				} else {
+//					$r->apply($config, false);
+//				}
+//			}
+//		}
 		$r = null;
-		foreach (array_reverse($this->getLocations()) as $location) {
-			$config = $location->searchConfigFile();
-			if ($config) {
-				$config = Config::createForNode($config, $this->moduleName);
-				if ($r === null) {
-					$r = $config;
-				} else {
-					$r->apply($config, false);
-				}
+		foreach ($this->listConfigFiles() as $config) {
+			$config = Config::createForNode($config, $this->moduleName);
+			if ($r === null) {
+				$r = $config;
+			} else {
+				$r->apply($config, false);
 			}
 		}
 		return $r;
@@ -268,6 +282,14 @@ class ModuleLocation extends Location {
 
 		return $this->locations;
 	}
+	
+	private function getModuleClassPattern() {
+		return array(
+			"$this->moduleName.class.php", 
+			'module.class.php', 
+			"{$this->moduleName}Module.class.php"
+		);
+	}
 
 	/**
 	 * Searches the location for a file matching the module class file pattern
@@ -278,7 +300,7 @@ class ModuleLocation extends Location {
 	 */
 	public function searchModuleClass(&$cacheDeps = null) {
 
-		foreach (array("$this->moduleName.class.php", 'module.class.php', "{$this->moduleName}Module.class.php") as $file) {
+		foreach ($this->getModuleClassPattern() as $file) {
 			if (file_exists($file = "$this->path$file")) {
 				require_once $file;
 				if (is_array($cacheDeps)) {
@@ -298,6 +320,34 @@ class ModuleLocation extends Location {
 		}
 
 		return null;
+	}
+
+	public function listFileToMonitor() {
+		$r = array();
+		
+		$dirPaths = array();
+		foreach (ModuleManager::listModuleDirectories() as $dir) {
+			$dirPaths[] = $dir->path;
+		}
+		
+		$ds = DIRECTORY_SEPARATOR;
+		foreach ($dirPaths as $path) {
+			$base = "$path$this->moduleName$ds";
+			
+			$paths = array(
+				"$base$this->moduleName.yml",
+				"{$base}config.yml",
+				"$path$this->moduleName.yml",
+			);
+				
+			foreach (self::getModuleClassPattern() as $mc) {
+				$paths[] = "$base$mc";
+			}
+			
+			$r = array_merge($r, $paths);
+		}
+		
+		return $r;
 	}
 
 	public function searchModuleSuperclass(&$cacheDeps) {

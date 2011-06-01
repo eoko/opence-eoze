@@ -13,6 +13,7 @@ use eoko\config\Config;
 use eoko\template\PHPCompiler;
 use eoko\module\executor\Executor;
 use eoko\log\Logger;
+use eoko\cache\Cache;
 
 class Module implements file\Finder {
 	
@@ -39,6 +40,8 @@ class Module implements file\Finder {
 	private $lineageLocations;
 	/** @var ModuleLocation */
 	private $location;
+	
+	private $dependantCacheFiles, $dependantCacheKey;
 
 	/** @var Config */
 	private $config = null;
@@ -95,14 +98,38 @@ class Module implements file\Finder {
 	protected function setPrivateState(&$vals) {}
 	
 	protected function construct(ModuleLocation $location) {}
+	
+	private function getParentModules() {
+		$r = array();
+		foreach ($this->getParentNames(false) as $name) {
+			if (null !== $module = ModuleManager::getModule($name, false)) {
+				$r[] = $module;
+			}
+		}
+		return $r;
+	}
 
+	private function getParentName() {
+		foreach ($this->getParentNames(false) as $p) {
+			if ($p !== $this->name) return $p;
+		}
+		return null;
+	}
+	
 	public function getParentNames($includeSelf) {
 		$parents = array();
-		if ($includeSelf) $parents[] = get_relative_classname($this);
+		$lastRelative = get_relative_classname($this);
+		if ($includeSelf) {
+			$parents[] = $lastRelative;
+		}
 		$last = $this;
 		while (false !== $class = get_parent_class($last)) {
 			$last = $class;
-			$parents[] = relative_classname($class);
+			$rc = relative_classname($class);
+			if ($lastRelative !== $rc) {
+				$parents[] = $rc;
+			}
+			$lastRelative = $rc;
 		}
 		return $parents;
 	}
@@ -139,25 +166,40 @@ MSG
 	public function getConfig() {
 		if ($this->config) {
 			return $this->config;
+		} else if ($this->loadCachedConfig()) {
+			return $this->config;
 		}
 		
-		if (count($this->lineageLocations)) {
-			$locations = array_reverse($this->lineageLocations);
-			$config = new Config();
-			foreach ($locations as $l) {
-				$c = $l->loadConfig();
-				if ($l->moduleName !== $this->name) {
-					unset($c['abstract']);
-					unset($c['line']);
-				}
-				if ($c) {
-					if ($config) $config->apply($c);
-					else $config = $c;
-				}
+		$config = new Config();
+		
+		if (null !== $parent = $this->getParentName()) {
+			$parent = ModuleManager::getModule($parent, false);
+			if ($parent) {
+				$config->apply($parent->getConfig());
 			}
-		} else {
-			$config = $this->location->loadConfig();
 		}
+		
+		unset($config['abstract']);
+		unset($config['line']);
+		
+		$config->apply($this->location->loadConfig());
+		
+//		if (count($this->lineageLocations)) {
+//			$locations = array_reverse($this->lineageLocations);
+//			$config = new Config();
+//			foreach ($locations as $l) {
+//				$c = $l->loadConfig();
+//				if ($c) {
+//					if ($l->moduleName !== $this->name) {
+//						unset($c['abstract']);
+//						unset($c['line']);
+//					}
+//					$config->apply($c);
+//				}
+//			}
+//		} else {
+//			$config = $this->location->loadConfig();
+//		}
 
 		if ($this->extraConfig) {
 			if (!$config) {
@@ -165,13 +207,84 @@ MSG
 			} else {
 				$config->apply($this->extraConfig);
 			}
-		} else {
-			if (!$config) {
-				$config = new Config();
-			}
+//		} else {
+//			if (!$config) {
+//				$config = new Config();
+//			}
 		}
 		
+		$this->cacheConfig($config);
+		
 		return $this->config = $config;
+	}
+	
+	private function useCache() {
+		return true;
+	}
+	
+	/**
+	 * Set the Module's config cache dependancy. That is, if one of the given
+	 * file changed later, the config cache for this module will be invalidated.
+	 * If the second argument is passed, the dependancy will be registered both
+	 * way (warning, that would overwrite any existing monitor on the passed
+	 * $configKey).
+	 * @param array $dependantCacheFiles
+	 * @param mixed $cacheKey If set, the dependancy will be registered both
+	 * way, that is the $cacheKey will be invalidated when this module's config
+	 * cache is invalidated.
+	 */
+	public function setCacheDepencies($dependantCacheFiles, $cacheKey = null) {
+		$this->dependantCacheFiles = $dependantCacheFiles;
+		$this->dependantCacheKey = $cacheKey;
+		Cache::flattenKey($this->dependantCacheKey);
+	}
+	
+	public function getCacheMonitorFiles($parents = false) {
+		$r = $this->location->listFileToMonitor();
+		if ($parents) {
+			foreach ($this->getParentModules() as $parent) {
+				$r = array_merge($r, $parent->location->listFileToMonitor());
+			}
+		}
+		return $r;
+	}
+	
+	private function cacheConfig(Config $config) {
+		if (!$this->useCache()) {
+			return false;
+		}
+		$key = array($this, 'config');
+		$cacheFile = Cache::cacheObject($key, $config);
+		
+//		$toMonitor = $this->location->listFileToMonitor();
+//		foreach ($this->getParentModules() as $parent) {
+//			$toMonitor = array_merge($toMonitor, $parent->location->listFileToMonitor());
+//		}
+//		if ($this->dependantCacheFiles) {
+//			$toMonitor = array_merge($toMonitor, $this->dependantCacheFiles);
+//		}
+//		
+//		Cache::monitorFiles($key, $toMonitor);
+		if ($this->dependantCacheFiles) {
+			Cache::monitorFiles($key, $this->dependantCacheFiles);
+		}
+		
+		// reciproque dependancy
+		if ($this->dependantCacheKey) {
+			Cache::monitorFiles($this->dependantCacheKey, $cacheFile);
+		}
+	}
+	
+	private function loadCachedConfig() {
+//		if (true || !$this->useCache()) {
+		if (!$this->useCache()) {
+			return false;
+		} else if (null !== $config = Cache::getCachedData(array($this, 'config'))) {
+			$this->config = $config;
+			return true;
+		} else {
+			return false;
+		}
 	}
 	
 	public function __toString() {
