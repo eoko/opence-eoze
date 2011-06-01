@@ -288,16 +288,10 @@ class ModuleManager {
 		$module = $this->doInstantiateModule($name, $required, $deps);
 		
 		// module that don't support caching will set cacheDeps to FALSE
-		if ($this->useCache() && $deps !== false) {
-			if ($module) {
-				$module->setCacheDepencies($this->cachePile);
-				$monitors = array_merge($this->cachePile, $module->getCacheMonitorFiles(true));
-				Cache::monitorFiles($cacheKey, $monitors);
-			} else {
-				if ($this->cachePile) {
-					Cache::monitorFiles($cacheKey, $this->cachePile);
-				}
-			}
+		if ($module && $this->useCache() && $deps !== false) {
+			$module->setCacheDepencies($this->cachePile);
+			$monitors = array_merge($this->cachePile, $module->getCacheMonitorFiles(true));
+			Cache::monitorFiles($cacheKey, $monitors);
 			if (null !== $cacheFile = Cache::cacheObject($cacheKey, $module, $deps)) {
 				$this->cachePile[] = $cacheFile;
 			}
