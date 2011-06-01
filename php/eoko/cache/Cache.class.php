@@ -233,10 +233,8 @@ class Cache {
 	}
 	
 	public static function clearCachedData($class) {
-		if (is_array($class)) {
-			list($class, $key) = $class;
-		}
 		
+		self::parseClassAndKey($class, $namespace, $key);
 		$base = $class . '.DataCache' . (isset($key) ? ".$key" : '');
 		
 		foreach (array(
@@ -245,10 +243,13 @@ class Cache {
 			'.validity',
 		) as $ext) {
 			$file = self::getPhpFilePath(
-				get_namespace($class),
+				$namespace,
 				"$base$ext.php"
 			);
 			if ($file) {
+				Logger::get(get_called_class())->debug(
+					'clearCachedData: deleting file {}', $file
+				);
 				@unlink($file);
 			}
 		}
