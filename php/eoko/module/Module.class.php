@@ -184,33 +184,12 @@ MSG
 		
 		$config->apply($this->location->loadConfig());
 		
-//		if (count($this->lineageLocations)) {
-//			$locations = array_reverse($this->lineageLocations);
-//			$config = new Config();
-//			foreach ($locations as $l) {
-//				$c = $l->loadConfig();
-//				if ($c) {
-//					if ($l->moduleName !== $this->name) {
-//						unset($c['abstract']);
-//						unset($c['line']);
-//					}
-//					$config->apply($c);
-//				}
-//			}
-//		} else {
-//			$config = $this->location->loadConfig();
-//		}
-
 		if ($this->extraConfig) {
 			if (!$config) {
 				$config = $this->extraConfig;
 			} else {
 				$config->apply($this->extraConfig);
 			}
-//		} else {
-//			if (!$config) {
-//				$config = new Config();
-//			}
 		}
 		
 		$this->cacheConfig($config);
@@ -256,15 +235,6 @@ MSG
 		$key = array($this, 'config');
 		$cacheFile = Cache::cacheObject($key, $config);
 		
-//		$toMonitor = $this->location->listFileToMonitor();
-//		foreach ($this->getParentModules() as $parent) {
-//			$toMonitor = array_merge($toMonitor, $parent->location->listFileToMonitor());
-//		}
-//		if ($this->dependantCacheFiles) {
-//			$toMonitor = array_merge($toMonitor, $this->dependantCacheFiles);
-//		}
-//		
-//		Cache::monitorFiles($key, $toMonitor);
 		if ($this->dependantCacheFiles) {
 			Cache::monitorFiles($key, $this->dependantCacheFiles);
 		}
@@ -276,7 +246,6 @@ MSG
 	}
 	
 	private function loadCachedConfig() {
-//		if (true || !$this->useCache()) {
 		if (!$this->useCache()) {
 			return false;
 		} else if (null !== $config = Cache::getCachedData(array($this, 'config'))) {
