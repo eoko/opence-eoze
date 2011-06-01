@@ -338,7 +338,7 @@ eo.ui.TreeMenu = Ext.extend(sp, {
 		}
 		
 		var actionStore = new Ext.data.JsonStore({
-			fields: ["id", "label", "color", "command", "expanded", "open"]
+			fields: ["id", "label", "color", "iconCls", "command", "expanded", "open"]
 		});
 		
 		if (!!data.action_family) {
@@ -778,6 +778,7 @@ eo.ui.TreeMenu.prototype.TreeNode = Ext.extend(Ext.tree.TreeNode, {
 			,expanded: true
 			,open: d.open
 			,draggable: true
+			,cls: d.cssClass
 		};
 		
 		this.configureIconCls(d.iconCls);

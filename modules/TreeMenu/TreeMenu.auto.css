@@ -20,6 +20,11 @@
 	background-image: url(_images/default/grid/loading.gif) !important;
 }
 
+/* Broken items */
+.eozeTreeMenu .x-tree-node-el.error .x-tree-node-anchor {
+	background: url("_images/default/grid/invalid_line.gif") bottom repeat-x;
+}
+
 div.menu-message {
 	text-align: center;
 	padding: 10px;

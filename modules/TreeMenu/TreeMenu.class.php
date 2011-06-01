@@ -17,7 +17,7 @@ use eoko\modules\TreeMenu\MenuAction;
 use eoko\modules\TreeMenu\MenuFamily;
 
 use UserSession;
-use IllegalStateException, IllegalArgumentException;
+use Exception, IllegalStateException, IllegalArgumentException;
 
 class TreeMenu extends Module implements HasMenuActions {
 
@@ -141,7 +141,8 @@ class TreeMenu extends Module implements HasMenuActions {
 				try {
 					return $this->getMenuAction($config['action'])->createMenuNode($overrides);
 				} catch (MissingMenuElementException $ex) {
-					Logger::get($this)->warn('Missing menu item is ignored: {}', $ex->getMessage());
+					Logger::get($this)->warn('Missing menu item is broken: {}', $ex->getMessage());
+					$overrides['cssClass'] = 'error';
 					return MenuNode::create($overrides);
 				}
 			} else {
@@ -181,11 +182,19 @@ class TreeMenu extends Module implements HasMenuActions {
 			$r = array();
 			if (Arrays::isAssoc($items)) {
 				foreach ($items as $name => $config) {
-					$r[] = $this->createMenuItem($name, $config);
+					try {
+						$r[] = $this->createMenuItem($name, $config);
+					} catch (Exception $ex) {
+						Logger::error('Error creating menu item', $ex);
+					}
 				}
 			} else {
 				foreach ($items as $config) {
-					$r[] = $this->createMenuItem(null, $config);
+					try {
+						$r[] = $this->createMenuItem(null, $config);
+					} catch (Exception $ex) {
+						Logger::error('Error creating menu item', $ex);
+					}
 				}
 			}
 			
@@ -197,7 +206,7 @@ class TreeMenu extends Module implements HasMenuActions {
 			return $r;
 		}
 		
-		throw new \IllegalStateException('Invalid configuration item in menu.yml');
+		throw new IllegalStateException('Invalid configuration item in menu.yml');
 	}
 	
 	public function isAuthorized(MenuAction $action) {
@@ -213,7 +222,7 @@ class TreeMenu extends Module implements HasMenuActions {
 
 }
 
-class MissingMenuElementException extends \Exception {
+class MissingMenuElementException extends Exception {
 	
 }
 
