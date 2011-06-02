@@ -45,9 +45,13 @@ abstract class Renderer {
 	
 	public $subTemplateProvider = null;
 	
+	private $previousRenderer;
+	
 	public function __construct($opts = null) {
 		Options::apply($this, $opts);
 	}
+	
+	abstract protected function doRender();
 	
 	/**
 	 * @param array $opts
@@ -57,8 +61,6 @@ abstract class Renderer {
 		$class = get_called_class();
 		return new $class($opts);
 	}
-	
-	abstract protected function doRender();
 	
 	public function renderingErrorHandler($errno, $errstr, $errfile, $errline, $context) {
 
@@ -81,14 +83,19 @@ abstract class Renderer {
 		} else {
 			$msg .= ' (cannot determine error location)';
 		}
+		
+		restore_error_handler();
 
-		// TODO find why the exception is not catched by the exception handler
-		// automatically
-		\ExceptionHandler::processException(
-			new RenderingException(
-				$msg, $errno, $errstr, $errfile, $errline, $context
-			)
+		throw new RenderingException(
+			$msg, $errno, $errstr, $errfile, $errline, $context
 		);
+//		// TODO find why the exception is not catched by the exception handler
+//		// automatically
+//		\ExceptionHandler::processException(
+//			new RenderingException(
+//				$msg, $errno, $errstr, $errfile, $errline, $context
+//			)
+//		);
 	}
 	
 	protected function getTemplateFilename() {
@@ -99,8 +106,6 @@ abstract class Renderer {
 		}
 	}
 
-	private $previousRenderer;
-	
 	private function performRendering() {
 		set_error_handler(array($this, 'renderingErrorHandler'));
 		
@@ -113,7 +118,7 @@ abstract class Renderer {
 		restore_error_handler();
 	}
 	
-	public final function render($return = null) {
+	public function render($return = null) {
 		if ($return) {
 			return $this->doRenderToString();
 		} else {
