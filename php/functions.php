@@ -323,3 +323,39 @@ function obsafe_print_r($var, $return = false, $html = false, $level = 0) {
 	else
 		echo $output;
 }
+
+function includeExtension($fromFile, $extension, $require = true, $once = true, $baseExtension = null) {
+	if ($baseExtension === null) {
+		$baseExtension = 'class|interface|api|functions|fn';
+	} else if (is_array($baseExtension)) {
+		foreach ($baseExtension as &$ext) {
+			$ext = preg_quote($ext, '/');
+		}
+		$baseExtension = implode('|', $baseExtension);
+	}
+	$bn = basename($fromFile);
+	if (preg_match("/^(.+)\.(?:$baseExtension)\.php$/", $bn, $m)) {
+		if (is_array($extension)) {
+			foreach ($extension as $ext) {
+				includeExtension($fromFile, $extension, $require, $once, $baseExtension);
+			}
+		} else {
+			$file = dirname($fromFile) . DS . "$m[1].$extension.php";
+			if ($require) {
+				if ($once) {
+					require_once $file;
+				} else {
+					require $file;
+				}
+			} else {
+				if ($once) {
+					include_once $file;
+				} else {
+					include $file;
+				}
+			}
+		}
+	} else {
+		throw new \IllegalStateException('Unexpected filename: ' . $bn);
+	}
+}
