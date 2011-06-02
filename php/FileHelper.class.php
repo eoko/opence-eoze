@@ -103,7 +103,7 @@ class FileHelper {
 
 		return $matches;
 	}
-
+	
 	/**
 	 *
 	 * @param string $directory
@@ -118,7 +118,7 @@ class FileHelper {
 		if (DIRECTORY_SEPARATOR != '/') $directory = str_replace('/', DIRECTORY_SEPARATOR, $directory);
 
 		if (!is_dir($directory)) {
-			Logger::get($this)->warn("$directory is not a directory (cannot listDirs)");
+			Logger::get(get_called_class())->warn("$directory is not a directory (cannot listDirs)");
 			return array();
 		}
 
