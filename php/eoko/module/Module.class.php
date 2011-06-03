@@ -99,7 +99,11 @@ class Module implements file\Finder {
 	
 	protected function construct(ModuleLocation $location) {}
 	
-	private function getParentModules() {
+	protected function getLocation() {
+		return $this->location;
+	}
+	
+	protected function getParentModules() {
 		$r = array();
 		foreach ($this->getParentNames(false) as $name) {
 			if (null !== $module = ModuleManager::getModule($name, false)) {
