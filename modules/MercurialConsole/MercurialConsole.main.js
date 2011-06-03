@@ -29,6 +29,12 @@ var o = {
 //				,{xtype: "box", height: 10}
 //				,this.createInput()
 			]
+			,listeners: {
+				scope: this
+				,close: function() {
+					delete this.win;
+				}
+			}
 		});
 	}
 	
