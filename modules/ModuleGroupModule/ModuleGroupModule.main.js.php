@@ -83,36 +83,64 @@ var o = {
 		});
 	}
 	
-	,open: function() {
+	,open: function(destination, child) {
 		var args = arguments;
 		if (this.ready) {
+			if (child) {
+				var childIndex = Ext.each(this.modules, function(m) { 
+					if (m.name === child) return false;
+				});
+				if (childIndex !== undefined) {
+					this.activeTab = childIndex;
+					if (this.tab) {
+						this.on({
+							single: true
+							,scope: this
+							,open: function() {
+								this.tab.setActiveTab(childIndex);
+							}
+						})
+					}
+				}
+			}
 			spp.open.apply(this, arguments);
 		} else {
 			this.whenReady = this.open.createDelegate(this, args);
 		}
 	}
 	
-//	,createTab: function() {
-//		var r = spp.createTab.apply(this, arguments);
-//		
-//		// load if not already done
-//		this.load(false);
-//		
-//		return r;
-//	}
-//	
+	,createTab: function() {
+		var r = spp.createTab.apply(this, arguments);
+
+		r.on({
+			scope: this
+			,tabchange: this.onTabChange
+		});
+		
+		return r;
+	}
+	
+	// private
+	,onTabChange: function(tabPanel, tab) {
+		this.activeTab = tabPanel.items.indexOf(tab);
+	}
+	
 	,createTabConfig: function() {
 		var config = Ext.apply(spp.createTabConfig.call(this), this.config.tab),
-			me = this,
 			items = [];
 			
 		Ext.each(this.modules, function(m) {
 			items.push(new ModuleContainer(m));
-		})
+		});
+		
+		var activeTab = this.activeTab;
+		if (activeTab === undefined) {
+			activeTab = items.length ? 0 : undefined;
+		}
 		
 		return Ext.apply(config, {
 			xtype: "tabpanel"
-			,activeTab: items.length ? 0 : undefined
+			,activeTab: activeTab
 			,items: items
 		});
 	}
