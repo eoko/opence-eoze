@@ -5,28 +5,12 @@ require_once 'init.inc.php';
 
 Logger::getLogger()->setLevel(Logger::ERROR);
 
-use eoko\util\YmlReader;
+use eoko\module\ModuleManager;
 
-$pwd = '';
-UserSession::login('eric', $pwd);
+$m = ModuleManager::getModule('sm_child_48_products');
 
-$_REQUEST = array_merge($_REQUEST, array(
-	'controller' => 'menu',
-	'action' => 'loadUserMenu',
-));
+$x = $m->getConfig()->get('extra');
 
-$crashed = false;
-$n = 0;
-do {
-	try {
-		ob_start();
-		Router::getInstance()->route();
-		ob_end_clean();
-		echo "$n\n";
-		$n++;
-	} catch (Exception $ex) {
-		$crached = $ex;
-	}
-} while (!$crashed && $n < 200);
+//dump(isset($x['menu']));
 
-if ($crashed) echo $crashed;
+dump($m->getActionProvider()->getFamily());
