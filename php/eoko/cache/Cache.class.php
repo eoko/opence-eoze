@@ -139,7 +139,7 @@ class Cache {
 		
 		$debug = '';
 		
-		if (Logger::get(get_called_class())->isActive(Logger::DEBUG)) {
+		if (Logger::get(get_called_class())->isActive(Logger::DEBUG, false)) {
 			$debug = print_r($object, true);
 			$debug = "\n\n/* === Debug Informations ===\n\n$debug\n*/";
 		}

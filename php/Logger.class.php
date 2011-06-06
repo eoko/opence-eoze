@@ -155,13 +155,21 @@ class Logger {
 		}
 	}
 
-	public function isActive($level) {
+	/**
+	 *
+	 * @param int $level
+	 * @param boolean $testHasAppender If TRUE, will also test if the Logger has
+	 * at least one appender and, if not the case, will return FALSE even if the
+	 * given $level is active.
+	 * @return boolean
+	 */
+	public function isActive($level, $testHasAppender = true) {
 		if (isset($this->logLevel[$this->context])) {
 			$logLevel = $this->logLevel[$this->context];
 		} else {
 			$logLevel = $this->logLevel[self::$defaultContext];
 		}
-		return $level <= $logLevel && self::isLogSomewhere();
+		return $level <= $logLevel && (!$testHasAppender || self::isLogSomewhere());
 	}
 
 	private function setContext($context) {
