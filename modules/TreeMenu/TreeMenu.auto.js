@@ -893,11 +893,28 @@ eo.ui.TreeMenu.prototype.TreeNode = Ext.extend(Ext.tree.TreeNode, {
 		}
 		return undefined;
 	}
-
+	
+	,getFamilyAction: function(familyRecord) {
+		var r;
+		Ext.each(familyRecord.get("actions"), function(a) {
+			if (a.id === this.data.action) {
+				r = a;
+				return false;
+			}
+		}, this);
+		return r;
+	}
+	
 	,configureIconCls: function(myic) {
 		var fam = this.getActionFamily(arguments.callee.createDelegate(this)),
 			fic = myic || fam && fam.get("iconCls");
 		if (fic) {
+//			fam.get("actions")[0].baseIconCls
+			var fa = this.getFamilyAction(fam),
+				bic = fa && fa.baseIconCls;
+			if (bic) {
+				fic = fa.baseIconCls;
+			}
 			var ic = ic = this.iconCls || "" + " "
 				+ fic.replace('%action%', this.data.action || "");
 			if (this.setIconCls && this.attributes) {

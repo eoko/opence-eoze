@@ -5,7 +5,7 @@ namespace eoko\modules\TreeMenu;
 interface HasMenuActions {
 	
 	/**
-	 * @return MenuActionProvider
+	 * @return ActionProvider
 	 */
 	function getActionProvider();
 }

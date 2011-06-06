@@ -59,9 +59,12 @@ class ModuleProvider implements ActionProvider {
 		return null;
 	}
 	
-	public function getIconCls($action = null) {
+	public function getIconCls($action = null, $module = null) {
+		if ($module === null) {
+			$module = $this->getModuleName();
+		}
 		if (null !== $iconCls = $this->getPluginsConfig('iconCls')) {
-			$iconCls = str_replace('%module%', $this->getModuleName(), $iconCls);
+			$iconCls = str_replace('%module%', $module, $iconCls);
 			if ($action !== null) {
 				if ($action === false) $action = '';
 				$iconCls = str_replace('%action%', $action, $iconCls);
@@ -93,8 +96,15 @@ class ModuleProvider implements ActionProvider {
 	}
 	
 	private function buildMenuActions() {
-		// set cache to prevent recomputing
-		$this->menuActions = array();
+		$menuActions = array();
+		foreach ($this->buildMenuActionsData() as $id => $action) {
+			$menuActions[$id] = MenuAction::fromArray($action);
+		}
+		return $menuActions;
+	}
+	
+	protected function buildMenuActionsData() {
+		$menuActions = array();
 		if (null !== $config = $this->getMenuConfig()) {
 			if (isset($config['actions'])) {
 				$familyId = $this->getMenuFamilyId();
@@ -102,24 +112,28 @@ class ModuleProvider implements ActionProvider {
 					'action_family' => $familyId,
 				);
 				foreach ($config['actions'] as $name => $action) {
+					if ($action === false) {
+						continue;
+					}
 					$action = Arrays::applyIf($action, $defaults);
 					$action = $this->replacePlaceHolders($action);
 					if (!isset($action['id']) && is_string($name)) {
 						$action['id'] = $name;
 					}
-					$this->menuActions[$action['id']] = MenuAction::fromArray($action);
+//					$menuActions[$action['id']] = MenuAction::fromArray($action);
+					$menuActions[$action['id']] = $action;
 				}
 			}
 		}
-		return $this->menuActions;
+		return $menuActions;
 	}
 	
 	public function getAvailableActions() {
 		if ($this->menuActions) return $this->menuActions;
-		else return $this->buildMenuActions();
+		else return $this->menuActions = $this->buildMenuActions();
 	}
 	
-	private function getMenuFamilyId() {
+	protected function getMenuFamilyId() {
 		if (null !== $config = $this->getMenuConfig()) {
 			if (isset($config['family']['id'])) {
 				return $config['family']['id'];
@@ -127,7 +141,17 @@ class ModuleProvider implements ActionProvider {
 				return $config['familyId'];
 			}
 		}
+		// defaults to module name
 		return $this->getModuleName();
+	}
+	
+	protected function getSubFamilyId() {
+		if ((null !== $config = $this->getMenuConfig())
+				&& isset($config['subFamilyId'])) {
+			return $config['subFamilyId'];
+		}
+		// defatuls to familyId
+		return $this->getMenuFamilyId();
 	}
 	
 	private function buildMenuFamily() {
@@ -142,10 +166,14 @@ class ModuleProvider implements ActionProvider {
 				$defaults['iconCls'] = $iconCls;
 			}
 			if (isset($config['family'])) {
-				$defaults = Arrays::apply($defaults, 
-						$this->replacePlaceHolders($config['family']));
+				if ($config['family'] === false) {
+					return false;
+				} else {
+					$defaults = Arrays::apply($defaults, 
+							$this->replacePlaceHolders($config['family']));
+				}
 			}
-			return $this->menuFamily = MenuFamily::fromArray($defaults);
+			return MenuFamily::fromArray($defaults);
 		} else {
 			return false;
 		}
@@ -153,7 +181,7 @@ class ModuleProvider implements ActionProvider {
 
 	public function getFamily() {
 		if ($this->menuFamily) return $this->menuFamily;
-		else return $this->buildMenuFamily();
+		else return $this->menuFamily = $this->buildMenuFamily();
 	}
 
 }

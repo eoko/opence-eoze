@@ -12,7 +12,8 @@
 var ns = "eo.module.ModuleGroupModule",
 	NS = Ext.ns(ns);
 	
-var ModuleContainer = Ext.extend(Ext.Container, {
+//var ModuleContainer = Ext.extend(Ext.Container, {
+var ModuleContainer = Ext.extend(Ext.Panel, {
 	
 	initComponent: function() {
 		
@@ -79,7 +80,12 @@ var o = {
 				cmd = m.cmd = Oce.cmd(cmd);
 			}
 			// preload module code
-			cmd(releaseLatch);
+			cmd(function(module) {
+				if (module.getIconCls) {
+					m.iconCls = module.getIconCls();
+				}
+				releaseLatch();
+			});
 		});
 	}
 	
