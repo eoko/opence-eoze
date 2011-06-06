@@ -3012,7 +3012,9 @@ Oce.GridModule.plugins = {
 					if (!this.extra.iconCls) {
 						return action || "";
 					} else {
-						return this.extra.iconCls.replace("%action%", action || "");
+						return this.extra.iconCls
+								.replace("%module%", this.name)
+								.replace("%action%", action || "");
 					}
 				}
 

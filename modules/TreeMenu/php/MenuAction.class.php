@@ -16,6 +16,7 @@ class MenuAction {
 	private $command = null;
 	private $color = null;
 	private $icon = null;
+	private $baseIconCls = null;
 	private $expanded = null;
 	private $accessLevel = null;
 	

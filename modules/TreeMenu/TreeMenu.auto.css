@@ -16,7 +16,7 @@
     background-image: url(_images/default/tree/leaf.gif);
 }
 
-.x-tree-node-leaf.loading img.x-tree-node-icon {
+div.eozeTreeMenu .x-tree-node-leaf.loading img.x-tree-node-icon {
 	background-image: url(_images/default/grid/loading.gif) !important;
 }
 
