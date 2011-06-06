@@ -118,7 +118,7 @@ class Module implements file\Finder {
 	 */
 	private function getParentModule() {
 		if (null !== $name = $this->getParentModuleName()) {
-			return ModuleManager::getModule($p);
+			return ModuleManager::getModule($name);
 		} else {
 			return null;
 		}
