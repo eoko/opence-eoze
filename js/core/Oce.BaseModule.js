@@ -7,7 +7,9 @@ Ext.ns("Oce");
 
 Oce.BaseModule = Ext.extend(sp, {
 	
-	constructor: function() {
+	moduleActions: []
+	
+	,constructor: function() {
 		this.initModuleActions();
 		return spp.constructor.apply(this, arguments);
 	}

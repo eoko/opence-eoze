@@ -2,13 +2,33 @@
 
 var NS = Ext.ns("Oce.Modules.MediaManager");
 
-NS.MediaManager = eo.Class({
+var sp = Oce.BaseModule,
+	spp = sp.prototype;
 
-	open: function(destination) {
+NS.MediaManager = Ext.extend(sp, {
+
+	constructor: function() {
+		spp.constructor.apply(this, arguments);
+		this.addEvents("open");
+	}
+	
+	,open: function(destination) {
 		if (!destination) destination = Oce.mx.application.getMainDestination();
 		var p = this.mediaPanel || this.createMediaPanel();
 		destination.add(p);
 		p.show();
+		this.fireEvent("open", this, destination);
+	}
+	
+	,moduleActions: {
+		open: function(cb, scope, args) {
+			this.on({
+				single: true
+				,open: cb
+				,scope: scope
+			});
+			return this.open.apply(this, args);
+		}
 	}
 
 	,createMediaPanel: function() {
