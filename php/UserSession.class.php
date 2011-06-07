@@ -255,7 +255,7 @@ class UserSession {
 		$instance = self::getInstance();
 		if (!$instance->isIdentified()) throw new UserSessionTimeout(
 				null, null,
-				"Session timeout. Last acitivity: $instance->lastActivity, "
+				"Session timeout. Last activity: $instance->lastActivity, "
 				. "current time: " . ($now = time()) . " ; dif:"
 				. ($now - $instance->lastActivity) . " > " . self::$SESSION_LENGTH . "."
 		);
