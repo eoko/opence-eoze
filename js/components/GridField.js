@@ -397,17 +397,25 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 				var addCombo = this.addCombo = new Oce.form.ForeignComboBox(addComboConfig);
 				this.addStore = this.addCombo.store;
 				this.addStore.on('load', this.sortOutIds, this);
-				var setAddStoreEnabled = function() {
-					var enabled = this.getCount();
-					addCombo.setEnabled(enabled);
-					if (me.addButton) me.addButton.setEnabled(enabled);
+
+				// Lock the combo if there is no data.
+				// We only do that on local stores, because otherwise, it causes
+				// problem with Contacts/Enfants field... The solution however
+				// would probably be that any component needing the combo to
+				// be locked should ask it explicitly... <= TODO
+				if (this.addStore.local) {
+					var setAddStoreEnabled = function() {
+						var enabled = this.getCount();
+						addCombo.setEnabled(enabled);
+						if (me.addButton) me.addButton.setEnabled(enabled);
+					}
+					this.addStore.on({
+						add: setAddStoreEnabled,
+						remove: setAddStoreEnabled,
+						datachanged: setAddStoreEnabled,
+						load: setAddStoreEnabled
+					});
 				}
-				this.addStore.on({
-					add: setAddStoreEnabled,
-					remove: setAddStoreEnabled,
-					datachanged: setAddStoreEnabled,
-					load: setAddStoreEnabled
-				});
 				this.onAddStoreInit(this.addStore);
 			
 			}
