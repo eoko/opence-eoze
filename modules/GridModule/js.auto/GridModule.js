@@ -2772,9 +2772,11 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 	
 	// private
 	,columnMenu_onBeforeShow: function(colMenu) {
-		var cm = this.grid.getColumnModel();
-		var colCount = cm.getColumnCount();
+		var cm = this.grid.getColumnModel(),
+			colCount = cm.getColumnCount();
+			
 		colMenu.removeAll();
+		
 		// --- Select all ---
 		var checkAllItem = new Ext.menu.CheckItem({
 			 text:this.my.showAllColsText
@@ -2792,6 +2794,29 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 			}
 		});
 		colMenu.add(checkAllItem,'-');
+		
+		// This method intends to give some air to the layout to avoid some
+		// overly manifest freezing of the UI
+		var me = this,
+			applying = 0;
+		var apply = function(fn) {
+			var run = function() {
+				applying++;
+				fn();
+				applying--;
+				if (!applying) {
+					me.grid.el.unmask();
+					me.grid.view.refresh(true);
+				}
+			};
+			if (!applying) {
+				me.grid.el.mask('Application', 'x-mask-loading');
+				run.defer(100);
+			} else {
+				run();
+			}
+		};
+
 		// --- Items ---
 		var checkAllSelected = false;
 
@@ -2905,31 +2930,6 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 //			});
 //			win.show();
 //		}.createDelegate(this);
-
-		// --- Columns Menu Items ---
-		var colMenuItems = [];
-
-		var me = this;
-		var applying = 0;
-		// This method intends to give some air to the layout to avoid some
-		// overly manifest freezing of the UI
-		var apply = function(fn) {
-			var run = function() {
-				applying++;
-				fn();
-				applying--;
-				if (!applying) {
-					me.grid.el.unmask();
-					me.grid.view.refresh(true);
-				}
-			};
-			if (!applying) {
-				me.grid.el.mask('Application', 'x-mask-loading');
-				run.defer(100);
-			} else {
-				run();
-			}
-		}
 
 		var actions = {
 			add: {
