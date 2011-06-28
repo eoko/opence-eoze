@@ -146,6 +146,9 @@
 .ico_world {
 	background-image:url(../images/icons/world.png) !important;
 }
+.ico.box {
+	background-image:url(../images/icons/box.png) !important;
+}
 .ico_building {
 	background-image:url(../images/icons/building.png) !important;
 }
