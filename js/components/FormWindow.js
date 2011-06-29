@@ -15,7 +15,6 @@ eo.Window = Ext.extend(Ext.Window, {
 			,bodyStyle: 'padding:0'
 		}, config);
 
-//		config.minimizable = true;
 		config.minimizable = config.minimizable !== false;
 
 		this.addPlugins(config);
@@ -527,6 +526,8 @@ eo.Window.MinimizePlugin = eo.Object.create({
 	}
 });
 
+// Overrides TextArea to allow ENTER key to be used for newline, instead of
+// submiting the window
 (function() {
 	var spp = Ext.form.TextArea.prototype,
 		onFocus = spp.onFocus,
