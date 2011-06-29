@@ -269,7 +269,8 @@ Oce.FormWindow = Ext.extend(eo.Window, {
 				var dr = null;
 				var r = formPanel.form.items.each(function(field) {
 					
-					if (field instanceof Ext.form.Hidden || field.hidden) {
+					if (field instanceof Ext.form.Hidden || field.hidden
+							|| field instanceof Ext.form.DisplayField) {
 						return undefined;
 					}
 					
@@ -332,6 +333,43 @@ Oce.FormWindow = Ext.extend(eo.Window, {
 
 		this.formPanel = formPanel;
 		this.form = this.formPanel.form;
+	}
+	
+	/**
+	 * Focuses the window.  If a defaultButton is set, it will receive focus, otherwise the
+	 * window itself will receive focus.
+	 */
+	,focus : function(){
+		var f = this.focusEl,
+		db = this.defaultButton,
+		t = typeof db,
+		el,
+		ct;
+		if(Ext.isDefined(db)){
+			if(Ext.isNumber(db) && this.fbar){
+				f = this.fbar.items.get(db);
+			}else if(Ext.isString(db)){
+				f = Ext.getCmp(db);
+			}else{
+				f = db;
+			}
+			el = f.getEl();
+			ct = Ext.getDom(this.container);
+			if (el && ct) {
+				if (ct != document.body && !Ext.lib.Region.getRegion(ct).contains(Ext.lib.Region.getRegion(el.dom))){
+					return;
+				}
+			}
+		}
+		f = f || this.focusEl;
+		if (f instanceof Ext.form.ComboBox) {
+			(function() {
+				f.focus();
+				f.hasFocus = false;
+			}).defer(10);
+		} else {
+			f.focus.defer(10, f);
+		}
 	}
 	
 	,afterRender: function() {
@@ -493,7 +531,7 @@ eo.Window.MinimizePlugin = eo.Object.create({
 	var spp = Ext.form.TextArea.prototype,
 		onFocus = spp.onFocus,
 		onBlur = spp.onBlur,
-		fpb = function(c) { return c instanceof Oce.FormWindow };
+		fpb = function(c) {return c instanceof Oce.FormWindow};
 	Ext.apply(spp, {
 		onFocus: function() {
 			var p = this.findParentBy(fpb);
