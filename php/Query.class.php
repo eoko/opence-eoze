@@ -823,8 +823,26 @@ class Query {
 
 		$pdo = Database::getDefaultConnection();
 		$pdoStatement = $pdo->prepare($this->sql);
-
-		$this->getLogger()->debug("Executing query:\n{}", $this);
+		
+		$logger = $this->getLogger();
+		if ($logger->isActive(Logger::DEBUG)) {
+			$call = null;
+			foreach (debug_backtrace() as $trace) {
+				if (isset($trace['file']) && $trace['file'] !== __FILE__) {
+					$call = $trace;
+					break;
+				}
+			}
+			$file = $call['file'];
+			if (substr($file, 0, strlen(ROOT)) === ROOT) {
+				$file = substr($file, strlen(ROOT));
+				if (isset($call['line'])) $file .= ":$call[line]";
+//				$file .= ' ';
+//				if (isset($call['class'])) $file .= "$call[class]::";
+//				if (isset($call['function'])) $file .= "$call[function]()";
+			}
+			$this->getLogger()->debug("($file) Executing query:\n{}", $this);
+		}
 
 		if (!$pdoStatement->execute($this->bindings)) {
 			$errorInfo = $pdoStatement->errorInfo();
@@ -961,7 +979,7 @@ class Query {
 	 */
 	public function executeSelect($fetchStyle = PDO::FETCH_ASSOC, $columnIndex = null) {
 
-		self::getLogger()->debug('Executing select query');
+//		self::getLogger()->debug('Executing select query');
 		
 		$this->action = self::SELECT;
 		$this->buildSelect();
