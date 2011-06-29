@@ -1472,11 +1472,19 @@ class QuerySelectFunctionOnField extends QuerySelectBase {
 		if (is_array($this->fn)) {
 			$r = $query->getQualifiedName($this->field);
 			foreach ($this->fn as $fn) {
-				$r = "$fn($r)";
+				if (!strstr($fn, '{}')) {
+					$r = "$fn($r)";
+				} else {
+					$r = str_replace('{}', $r, $fn);
+				}
 			}
 			return $r;
 		} else {
-			return "$this->fn(" . $query->getQualifiedName($this->field) . ")";
+			if (strstr($this->fn, '{}')) {
+				return str_replace('{}', $query->getQualifiedName($this->field), $this->fn);
+			} else {
+				return "$this->fn(" . $query->getQualifiedName($this->field) . ")";
+			}
 		}
 	}
 }
