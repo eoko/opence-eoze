@@ -149,6 +149,12 @@
 .ico.box {
 	background-image:url(../images/icons/box.png) !important;
 }
+.ico.box.add {
+	background-image:url(../images/icons/box_add.png) !important;
+}
+.ico.box.delete {
+	background-image:url(../images/icons/box_delete.png) !important;
+}
 .ico_building {
 	background-image:url(../images/icons/building.png) !important;
 }
