@@ -262,32 +262,36 @@ Oce.FormWindow = Ext.extend(eo.Window, {
 			this.items = [formPanel];
 		}
 
+		// If no default focus item is defined, set default focus on the first
+		// field in the tabItem chain, or the first field of the form
+		if (!this.defaultButton) {
+			this.defaultButton = (function() {
+				var dr = null;
+				var r = formPanel.form.items.each(function(field) {
+					
+					if (field instanceof Ext.form.Hidden || field.hidden) {
+						return undefined;
+					}
+					
+					var i = field.tabIndex;
+					if (i !== undefined) {
+						if (i === 0) return false;
+						if (!dr || !(dr.tabIndex < i)) dr = field;
+					} else if (dr === null) {
+						dr = field;
+					}
+					return undefined;
+				});
+				if (r) return r;
+				else return dr;
+			})();
+		}
+
 		// --- Reload tool ---
 		// Refresh gear button
 
 		// Implements the window refresh tool button, if not already set in the
 		// config (in this case, we must find by its id to know...)
-// Hardly ever useful... Keep some time to be sure it was not used, however
-//		if (config.tools !== undefined) {
-//			var ids = Ext.pluck(config.tool, 'id');
-//			var free = true;
-//			for (var i=0,l=ids; i<l; i++) {
-//				if (ids[i] === 'refresh') {
-//					free = false;
-//					break;
-//				}
-//			}
-//			if (free) config.tools.push({
-//				id: 'refresh'
-//				,handler: this.refresh.createDelegate(this)
-//			});
-//		} else {
-//			config.tools = [];
-//			config.tools = [{
-//				id: 'refresh'
-//				,handler: this.refresh.createDelegate(this)
-//			}];
-//		}
 		this.tools = this.tools || [];
 		if (this.refreshable) {
 			this.tools.push({
@@ -302,11 +306,7 @@ Oce.FormWindow = Ext.extend(eo.Window, {
 			 closable: true
 			,collapsible: false
 			,loadMask: true
-//			,constrainHeader: true
-//			,bodyStyle: 'padding:0'
 			,maximizable: true
-//			,layout:'fit'
-//			,closeAction: 'hide'
 		})
 
 
@@ -364,8 +364,13 @@ Oce.FormWindow = Ext.extend(eo.Window, {
 		}
 		
 		if (sh) {
+			var shIf = function() {
+				if (!this.enterDisabled) sh();
+			}.createDelegate(this);
+			
 			var km = this.getKeyMap();
-			km.on(13, sh, scope);
+			km.on([10,13], shIf, scope);
+			km.on({key: [10, 13], ctrl: true}, sh, scope);
 			km.disable();
 		}
 	}
@@ -485,3 +490,22 @@ eo.Window.MinimizePlugin = eo.Object.create({
 		});
 	}
 });
+
+(function() {
+	var spp = Ext.form.TextArea.prototype,
+		onFocus = spp.onFocus,
+		onBlur = spp.onBlur,
+		fpb = function(c) { return c instanceof Oce.FormWindow };
+	Ext.apply(spp, {
+		onFocus: function() {
+			var p = this.findParentBy(fpb);
+			if (p) p.enterDisabled = true;
+			onFocus.apply(this, arguments);
+		}
+		,onBlur: function() {
+			var p = this.findParentBy(fpb);
+			if (p) delete p.enterDisabled;
+			onBlur.apply(this, arguments);
+		}
+	});
+})();
