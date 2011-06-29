@@ -65,10 +65,13 @@ class ExceptionHandler {
 			// DBG: trying to catch the output of some mystic errors that are
 			// not correctly pushed to the logs :(
 			error_log($ex->__toString());
+			
+			if ($answer && Logger::getLogger()->isActive(Logger::DEBUG)) {
+				header('HTTP/1.1 500 Internal Server Error');
+			}
 		}
 
 		if ($answer) {
-			header('HTTP/1.1 500 Internal Server Error');
 			ExtJSResponse::failure($reason, $systemError, $errorTitle, true, false,
 				$includeTimestamp);
 		}
