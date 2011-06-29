@@ -563,3 +563,5 @@ Ext.override(Ext.Element, {
 	}
 });
 })(); // closure
+
+Ext.form.TextField.prototype.selectOnFocus = true;
