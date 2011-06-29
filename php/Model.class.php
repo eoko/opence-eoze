@@ -530,10 +530,32 @@ abstract class Model {
 				&& $this->internal->colUpdated[$fieldName];
 		}
 	}
+	
+	public function __call($name, $args) {
+		if (substr($name, 0, 3) === 'get') {
+			$k = substr($name, 3);
+			if ($this->table->hasVirtual($k)) {
+				return $this->getTable()
+						->createQuery($this->context)
+						->select($k)
+						->where("`{$this->getPrimaryKeyName()}`=?", 
+								$this->getPrimaryKeyValue())
+						->executeSelectValue();
+			}
+		}
+		throw new Exception("Undefined method: $name()");
+	}
 
 	public function getInitialValue($fieldName) {
 		if ($this->internal->dbValues === null) {
-			throw new IllegalStateException('The model has not been loaded from the db');
+			if ($this->isNew()) {
+				return null;
+			} else {
+				$this->internal->dbValues = $this->table->loadModel(
+					$this->getPrimaryKeyValue()
+				)->internal->dbValues;
+				return $this->getInitialValue($fieldName);
+			}
 		} else {
 			return $this->internal->dbValues[$fieldName];
 		}
