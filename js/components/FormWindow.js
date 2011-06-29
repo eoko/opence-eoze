@@ -364,12 +364,10 @@ Oce.FormWindow = Ext.extend(eo.Window, {
 		}
 		
 		if (sh) {
-			var shIf = function() {
-				if (!this.enterDisabled) sh();
-			}.createDelegate(this);
-			
 			var km = this.getKeyMap();
-			km.on([10,13], shIf, scope);
+			km.on([10,13], function() {
+				if (!this.enterDisabled) sh.call(scope);
+			}, this);
 			km.on({key: [10, 13], ctrl: true}, sh, scope);
 			km.disable();
 		}
