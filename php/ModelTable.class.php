@@ -445,8 +445,12 @@ abstract class ModelTable extends ModelTableProxy {
 	 * @return ModelTableQuery
 	 */
 	protected function _createLoadQuery($relationsMode = ModelTable::LOAD_NAME, array $params = array()) {
+		
+		$query = $this->createQuery($params);
 
-		$query = $this->createQuery($params)->select('*');
+		foreach ($this->getColumns() as $col) {
+			$col->select($query);
+		}
 
 		$this->applyLoadQueryDefaultOrder($query);
 
