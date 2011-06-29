@@ -328,7 +328,19 @@ class ModelColumn implements ModelField {
 	 * @param Query $query
 	 */
 	public function select(ModelTableQuery $query) {
-		$query->select($this->name);
+		if ($this->type === self::T_DATETIME) {
+			// select date time as valid ISO-8601
+			$query->select(
+				new QuerySelectFunctionOnField(
+					$query, 
+					$this->name, 
+					'DATE_FORMAT({}, "%Y-%m-%dT%H:%m:%i")', 
+					$this->name
+				)
+			);
+		} else {
+			$query->select($this->name);
+		}
 	}
 
 	public static function buildColumnSelect($name, $tableName = null,
