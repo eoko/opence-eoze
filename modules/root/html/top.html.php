@@ -4,7 +4,7 @@
     <p><?php _('Bienvenue sur openCE') ?></p>
     <p><?php _('Votre compte est valide jusqu\'au %date%', $user->getEndUse(\DateHelper::DATE_LOCALE)) ?></p>
 	<p>
-		<a href="#" id="l_disco"><?php _('Déconnection') ?></a> -
+		<a href="#" id="l_disco" onclick="Oce.mx.Security.logout()"><?php _('Déconnexion') ?></a>
 		<a href="#" id="l_u_param"><?php _('Voir mes paramètres') ?></a>
 	</p>
 <?php else: ?>

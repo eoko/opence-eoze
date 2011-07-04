@@ -36,11 +36,15 @@ Oce.Security = function() {
 		}
 		
 		if (identified) {
-			eventManager.fire('login');
+			eventManager.fire("login");
 			loginInfos = args;
 			setTimeout(pingSession, sessionPingInterval);
 		} else {
-			eventManager.fire('logout', args);
+			eventManager.fire("logout", args || {
+				text: "Vous avez été déconnecté suite à une longue période. "
+					+ "Veuillez saisir à noueau vos identifiants pour continuer "
+					+ "votre travail."
+			});
 		}
 	}
 
