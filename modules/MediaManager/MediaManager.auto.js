@@ -10,42 +10,71 @@ NS.MediaManager = eo.Class({
 		destination.add(p);
 		p.show();
 	}
+	
+	// protected
+	,createToolbar: function(config) {
+		return Ext.create(Ext.apply({
+			xtype: "toolbar"
+			,items: this.createToolbarItems()
+		}, config));
+	}
+	
+	// private
+	,createUploadButton: function(config) {
+		
+		config = config || {};
+		
+		var button,
+			opts = { destination: config.destination };
+			
+		var r = Ext.create({
+			xtype: "form"
+			,fileUpload: true
+			,border: false
+			,bodyStyle: "background: none;"
+			,hideLabels: true
+			,itemCls: "no-margin"
+			,items: button = Ext.create({
+				xtype: "fileuploadfield"
+				,name: "image"
+				,buttonOnly: true
+				,buttonCfg: {
+					text: config.label || "Envoyer un fichier"
+					,iconCls: "ico add"
+				}
+				,listeners: {
+					fileselected: this.uploadFile.createDelegate(this, [opts])
+					,scope: this
+				}
+			})
+		});
+		
+		Ext.apply(opts, {
+			button: button
+			,form: r.getForm()
+		});
+		
+		return r;
+	}
+	
+	,createToolbarItems: function() {
+		return [
+			this.createUploadButton()
+			, "-"
+			,{
+				xtype: "button"
+				,text: "Supprimer"
+				,iconCls: "ico cross"
+				,handler: this.deleteSelected.createDelegate(this)
+			}
+		];
+	}
 
 	,createMediaPanel: function() {
-		var mediaPanel = this.mediaPanel = new eo.MediaPanel({
+		this.mediaPanel = new eo.MediaPanel({
 			title: "Media Manager"
 			,closable: true
-			,tbar: new Ext.Toolbar({
-				items: [this.uploadFormPanel = Ext.create({
-					xtype: "form"
-					,fileUpload: true
-//					,padding: 0
-//					,margin: 0
-					,border: false
-					,bodyStyle: "background: none;"
-					,hideLabels: true
-					,itemCls: "no-margin"
-					,items: this.uploadButton = Ext.create({
-						xtype: "fileuploadfield"
-						,name: "image"
-						,buttonOnly: true
-//						,buttonText: "Envoyer un fichier"
-						,buttonCfg: {
-							text: "Envoyer un fichier"
-							,iconCls: "ico add"
-						}
-						,listeners: {
-							fileselected: this.uploadFile
-							,scope: this
-						}
-					})
-				}), "|", {
-					xtype: "button"
-					,text: "Supprimer"
-					,iconCls: "ico cross"
-					,handler: this.deleteSelected.createDelegate(this)
-				}]
-			})
+			,tbar: this.createToolbar()
 			,listeners: {
 				close: function() {
 					delete this.mediaPanel;
@@ -55,8 +84,6 @@ NS.MediaManager = eo.Class({
 			,onDelete: this.deleteSelected.createDelegate(this)
 		});
 		
-		this.uploadForm = this.uploadFormPanel.getForm();
-
 		return this.mediaPanel;
 	}
 	
@@ -77,12 +104,16 @@ NS.MediaManager = eo.Class({
 		});
 	}
 
-	,uploadFile: function(fileSelector, v, path) {
-		this.uploadForm.submit({
+	,uploadFile: function(opts) {
+		
+		var button = opts.button;
+
+		opts.form.submit({
 			url: "index.php"
 			,params: {
 				controller: "media.grid" // TODO modularize
 				,action: "upload"
+				,destination: opts.destination
 				,path: this.mediaPanel.getDirectoryPath() || ""
 			}
 			,success: function(form, o) {
@@ -95,18 +126,18 @@ NS.MediaManager = eo.Class({
 						obj.errorMsg || "L'image n'a pas pu être uploadée."
 					);
 				}
-				this.uploadButton.enable();
+				button.enable();
 			}
 			,failure: function() {
 				Ext.Msg.alert(
 					"Erreur",
 					"Désolé, l'image n'a pas pu être uploadée."
 				);
-				this.uploadButton.enable();
+				button.enable();
 			}
 			,scope: this
 		});
-//		this.uploadButton.disable();
+//		button.disable();
 	}
 
 });

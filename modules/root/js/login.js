@@ -242,8 +242,6 @@ Oce.Modules.root.login = Ext.extend(Oce.Module, {
 	}
 
 	,start: function(modal, text) {
-//		if (isset(mx.MainApplication)) mx.MainApplication.shutdown();
-		Ext.getBody().addClass('bg');
 		this.createLoginWindow(modal, text).show();
 	}
 
