@@ -27,7 +27,7 @@ Oce.form.HtmlEditor = Ext.extend(Ext.form.HtmlEditor, {
 			}));
 //			plugins.push(new Ext.ux.form.HtmlEditor.HeadingButtons);
 		}
-		if (this.enableWordPaste !== false) {
+		if (this.enableWordPaste === true) {
 			plugins.push(new Ext.ux.form.HtmlEditor.Word());
 		}
 		if (plugins.length) {
