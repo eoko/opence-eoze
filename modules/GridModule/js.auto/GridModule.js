@@ -1497,7 +1497,9 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 			}
 
 			// --- Grid Store
-			this.storeColumns.push({name: col.dataIndex || col.name});
+			this.storeColumns.push(Ext.apply({
+				name: col.dataIndex || col.name
+			}, col.store));
 		}
 	}
 
