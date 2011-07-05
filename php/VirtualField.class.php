@@ -7,14 +7,21 @@ interface VirtualField extends ModelField {
 	function getClause(ModelTableQuery $query, QueryAliasable $aliasable = null);
 
 	function getOrderFieldAlias(QueryAliasable $aliasable, $alias = null);
+	
+	function isCachable();
 }
 
 abstract class VirtualFieldBase implements VirtualField {
 
 	protected $alias;
+	protected $cachable = true;
 
 	function __construct($alias) {
 		$this->alias = $alias;
+	}
+	
+	public function isCachable() {
+		return $this->cachable;
 	}
 	
 	public function getName() {
