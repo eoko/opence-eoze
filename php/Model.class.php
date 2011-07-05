@@ -536,7 +536,8 @@ abstract class Model {
 	public function __call($name, $args) {
 		if (substr($name, 0, 3) === 'get') {
 			$k = substr($name, 3);
-			if ($this->table->hasVirtual(ucfirst($k))) {
+			if ($this->table->hasVirtual($k)
+					|| $this->table->hasVirtual($k = lcfirst($k))) {
 				
 				if (array_key_exists($k, $this->virtualFieldsCache)) {
 					return $this->virtualFieldsCache[$k];
