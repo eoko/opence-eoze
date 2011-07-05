@@ -323,7 +323,9 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 	}
 
 	,editReccordLine: function(grid, rowIndex) {
-		this.editRow(grid.store.getAt(rowIndex))
+		if (this.my.recordEditable !== false) {
+			this.editRow(grid.store.getAt(rowIndex))
+		}
 	}
 
 	,beforeCreateGrid: function(config) {
