@@ -530,10 +530,48 @@ abstract class Model {
 				&& $this->internal->colUpdated[$fieldName];
 		}
 	}
+	
+	private $virtualFieldsCache = array();
+	
+	public function __call($name, $args) {
+		if (substr($name, 0, 3) === 'get') {
+			$k = substr($name, 3);
+			if ($this->table->hasVirtual($k)
+					|| $this->table->hasVirtual($k = lcfirst($k))) {
+				
+				if (array_key_exists($k, $this->virtualFieldsCache)) {
+					return $this->virtualFieldsCache[$k];
+				}
+				
+				$table = $this->getTable();
+				
+				$r = $table
+						->createQuery($this->context)
+						->select($k)
+						->where("`{$this->getPrimaryKeyName()}`=?", 
+								$this->getPrimaryKeyValue())
+						->executeSelectValue();
+				
+				if ($table->isVirtualCachable($k)) {
+					$this->virtualFieldsCache[$k] = $r;
+				}
+				
+				return $r;
+			}
+		}
+		throw new Exception("Undefined method: $name()");
+	}
 
 	public function getInitialValue($fieldName) {
 		if ($this->internal->dbValues === null) {
-			throw new IllegalStateException('The model has not been loaded from the db');
+			if ($this->isNew()) {
+				return null;
+			} else {
+				$this->internal->dbValues = $this->table->loadModel(
+					$this->getPrimaryKeyValue()
+				)->internal->dbValues;
+				return $this->getInitialValue($fieldName);
+			}
 		} else {
 			return $this->internal->dbValues[$fieldName];
 		}
@@ -645,7 +683,7 @@ abstract class Model {
 						->executeUpdate();
 
 				// TODO: implement the modification success check
-	//			if ($affectedRows != 1) return false;
+				// if ($affectedRows != 1) return false;
 
 				// afterSave event (must be fired here, see bellow)
 				$this->events->fire(self::EVT_AFTER_SAVE_BASE, $this);
@@ -663,6 +701,8 @@ abstract class Model {
 			// Must be done before saving the relations (some of them may try to
 			// save their parent model -- eg. ReferencesOne)
 			$this->internal->modified = false;
+			
+			$this->internal->dbValues = null;
 
 			// Propagate the save operation to all instanciated relations. The
 			// said relations may already have saved themselves on the afterSave

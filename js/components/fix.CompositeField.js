@@ -33,3 +33,20 @@ Ext.form.CompositeField.prototype.initComponent =
 		}
 	});
 })();
+
+// Fix: makes BasicForm consider CompositeField as a Field container
+// (in order for the CompositeField children's value to be processed by the
+// BasicForm data retrieving functions)
+(function() {
+	// Prevents FormPanel from considering CompositeField as a Field to be added
+	// to BasicForm
+	var spp = Ext.form.FormPanel.prototype,
+		uber = spp.isField;
+	spp.isField = function(c) {
+		return uber(c) && !(c instanceof Ext.form.CompositeField);
+	}
+	// Add cascade() method to CompositeField
+	Ext.copyTo(Ext.form.CompositeField.prototype, Ext.Container.prototype, [
+		"findBy", "cascade"
+	]);
+})();
