@@ -153,7 +153,10 @@ NS.MimeTypes = {
 
 		var fp = new Oce.FormPanel({
 			width: 300
-			,height: 200
+			,height: 240
+			,defaults: {
+				anchor: "0"
+			}
 			,items: [{
 				xtype: "compositefield"
 				,fieldLabel: "Dimensions" // i18n
@@ -198,10 +201,36 @@ NS.MimeTypes = {
 					,pressed: true
 				})]
 			}, {
-				xtype: "checkbox"
-				,name: "lightbox"
-				,checked: true
-				,fieldLabel: "Lightbox"
+				xtype: "textfield"
+				,name: "alt"
+				,fieldLabel: "Texte alternatif"
+			}, {
+				xtype: "oce.simplecombo"
+				,data: {
+					bottom: "Bas"
+					,center: "Centrée"
+					,left: "Gauche"
+					,middle: "Milieu"
+					,top: "Haut"
+					,right: "Droite"
+				}
+				,name: "align"
+				,fieldLabel: "Alignement"
+			},{
+				xtype: "spinnerfield"
+				,name: "border"
+				,minValue: 0
+				,fieldLabel: "Bordure"
+			},{
+				xtype: "spinnerfield"
+				,name: "hspace"
+				,minValue: 0
+				,fieldLabel: "Espacement horizontal"
+			},{
+				xtype: "spinnerfield"
+				,name: "vspace"
+				,minValue: 0
+				,fieldLabel: "Espacement vertical"
 			}]
 		});
 		var win = new Oce.FormWindow({
@@ -216,10 +245,30 @@ NS.MimeTypes = {
 
 					var w = form.findField("width").getValue(),
 						h = form.findField("height").getValue();
-	
+						
+					var params = "";
+
+					Ext.iterate({
+						alt: false
+						,align: false
+						,border: true
+						,vspace: true
+						,hspace: true
+					}, function(name, isInt) {
+							var v = form.findField(name).getValue();
+							if (v) {
+								if (!isInt) v = v.replace('"', "&quot;");
+								params += String.format(' {0}="{1}"', name, v);
+							}
+						}
+					);
+					
 					this.cmp.insertAtCursor(String.format(
-						'<img src="{0}" alt="{1}" width="{2}" height="{3}"/>',
-						img.data.url, img.data.name, w, h
+						'<img src="{0}" alt="{1}" width="{2}" height="{3}" {4}/>',
+						img.data.url, 
+						form.findField("alt").getValue() || img.data.name, 
+						w, h, 
+						params
 					));
 
 					win.close();
