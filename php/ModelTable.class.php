@@ -594,6 +594,12 @@ abstract class ModelTable extends ModelTableProxy {
 	protected function _hasVirtual($name) {
 		return array_key_exists($name, $this->virtuals);
 	}
+	
+	abstract public static function isVirtualCachable($name);
+	
+	protected function _isVirtualCachable($name) {
+		return $this->virtuals[$name]->isCachable();
+	}
 
 	/**
 	 * @return VirtualField
