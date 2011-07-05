@@ -282,9 +282,10 @@ class Columns {
 	}
 	
 	private function getDefaultFilterListOptions($col) {
-		return $this->table->createQuery()
-				->select(new \QuerySelectRaw("DISTINCT $col[name]"))
-				->orderBy($col['name'])
+		$q = $this->table->createQuery();
+		$f = $q->getQualifiedName($col['name']);
+		return $q->select(new \QuerySelectRaw("DISTINCT @val := $f"))
+				->orderBy(new \QuerySelectRaw('@val'))
 				->executeSelectColumn();
 	}
 
