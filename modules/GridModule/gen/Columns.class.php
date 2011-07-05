@@ -159,14 +159,31 @@ class Columns {
 			if (null !== $f = $this->table->getField($col['name'], false)) {
 				switch ($f->getType()) {
 					case ModelColumn::T_INT:
-						if (!isset($col['renderer']))
+						if (!isset($col['renderer'])) {
 							$col['renderer'] = 'Oce.ext.Renderer.integer';
+						}
 						$this->setColFormItemif($col, 'vtype', 'numInt');
+						self::setColStoreItemIf($col, 'type', 'int');
 						break;
 					case ModelColumn::T_FLOAT:
-						if (!isset($col['renderer']))
+					case ModelColumn::T_DECIMAL:
+						if (!isset($col['renderer'])) {
 							$col['renderer'] = 'Oce.ext.Renderer.float_fr_2';
+						}
 						$this->setColFormItemif($col, 'vtype', 'numFloat');
+						self::setColStoreItemIf($col, 'type', 'float');
+						break;
+					case ModelColumn::T_DATETIME:
+						self::setColStoreItemIf($col, 'dateFormat', 'Y-m-d H:i:s');
+					case ModelColumn::T_DATE:
+						self::setColStoreItemIf($col, 'type', 'date');
+						break;
+					case ModelColumn::T_BOOL:
+						self::setColStoreItemIf($col, 'type', 'boolean');
+						break;
+					case ModelColumn::T_TEXT:
+					case ModelColumn::T_STRING:
+						self::setColStoreItemIf($col, 'type', 'string');
 						break;
 				}
 
@@ -223,6 +240,26 @@ class Columns {
 			}
 		} else {
 			$col['form'] = array(
+				$name => $value
+			);
+		}
+	}
+	
+	private static function setColStoreItemIf(&$col, $name, $value = null) {
+		if (is_array($name)) {
+			foreach ($name as $k => $v) {
+				self::setColStoreItemIf($col, $k, $v);
+				return;
+			}
+		}
+		if (isset($col['store'])) {
+			if ($col['store'] !== false) {
+				if (!isset($col['store']['name'])) {
+					$col['store'][$name] = $value;
+				}
+			}
+		} else {
+			$col['store'] = array(
 				$name => $value
 			);
 		}

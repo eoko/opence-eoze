@@ -323,7 +323,9 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 	}
 
 	,editReccordLine: function(grid, rowIndex) {
-		this.editRow(grid.store.getAt(rowIndex))
+		if (this.my.recordEditable !== false) {
+			this.editRow(grid.store.getAt(rowIndex))
+		}
 	}
 
 	,beforeCreateGrid: function(config) {
@@ -1495,7 +1497,9 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 			}
 
 			// --- Grid Store
-			this.storeColumns.push({name: col.dataIndex || col.name});
+			this.storeColumns.push(Ext.apply({
+				name: col.dataIndex || col.name
+			}, col.store));
 		}
 	}
 
