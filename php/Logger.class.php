@@ -405,7 +405,7 @@ class Logger {
 	 * placeholders
 	 */
 	public function error($msg) {
-		$logger = isset($this) ? $this : Logger::getLogger();
+		$logger = isset($this) && $this instanceof Logger ? $this : Logger::getLogger();
 		if ($logger->isActive(self::ERROR)) {
 			$args = func_get_args();
 			$logger->logImpl(self::ERROR, $msg, array_slice($args, 1));

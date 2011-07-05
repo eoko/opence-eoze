@@ -112,7 +112,6 @@ if (defined('APP_MODULES_DIR')) {
 }
 
 defineIf('MODULES_NAMESPACE', 'eoko\\modules\\');
-defineIf('APP_MODULES_NAMESPACE', MODULES_NAMESPACE);
 
 require_once PHP_PATH . 'functions.php';
 require_once PHP_PATH . 'dump.php';
