@@ -163,7 +163,10 @@ class Columns {
 							$col['renderer'] = 'Oce.ext.Renderer.integer';
 						}
 						$this->setColFormItemif($col, 'vtype', 'numInt');
-						self::setColStoreItemIf($col, 'type', 'int');
+						self::setColStoreItemIf($col, array(
+							'type' => 'int',
+							'useNull' => true,
+						));
 						break;
 					case ModelColumn::T_FLOAT:
 					case ModelColumn::T_DECIMAL:
@@ -171,10 +174,12 @@ class Columns {
 							$col['renderer'] = 'Oce.ext.Renderer.float_fr_2';
 						}
 						$this->setColFormItemif($col, 'vtype', 'numFloat');
-						self::setColStoreItemIf($col, 'type', 'float');
+						self::setColStoreItemIf($col, array(
+							'type' => 'float',
+							'useNull' => true,
+						));
 						break;
 					case ModelColumn::T_DATETIME:
-						self::setColStoreItemIf($col, 'dateFormat', 'Y-m-d H:i:s');
 					case ModelColumn::T_DATE:
 						self::setColStoreItemIf($col, 'type', 'date');
 						break;
@@ -249,12 +254,12 @@ class Columns {
 		if (is_array($name)) {
 			foreach ($name as $k => $v) {
 				self::setColStoreItemIf($col, $k, $v);
-				return;
 			}
+			return;
 		}
 		if (isset($col['store'])) {
 			if ($col['store'] !== false) {
-				if (!isset($col['store']['name'])) {
+				if (!isset($col['store'][$name])) {
 					$col['store'][$name] = $value;
 				}
 			}
