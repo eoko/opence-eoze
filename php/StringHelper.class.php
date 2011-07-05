@@ -26,7 +26,7 @@ class StringHelper {
 	public static function replaceSuccessively($needle, $replaces, $subject) {
 		$nExpected = count($replaces);
 		$r = str_replace(
-			array_fill($needle, 0, $nExpected), 
+			array_fill(0, $nExpected, $needle), 
 			$replaces, 
 			$subject,
 			$n

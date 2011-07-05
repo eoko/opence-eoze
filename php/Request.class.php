@@ -183,8 +183,9 @@ class Request {
 
 		$r = array();
 
+		$originalKeys = $keys;
 		if ($keys === null) $keys = array_keys($this->request);
-
+		
 		foreach ($keys as $k => $v) {
 
 			$kExcludeEmptyString = $excludeEmptyStrings;
@@ -196,7 +197,7 @@ class Request {
 				$v = $k;
 			}
 
-			if ($kDefault !== null) {
+			if ($kDefault !== null || $originalKeys === null) {
 				$r[$v] = $this->get($v, $kDefault, $kExcludeEmptyString);
 			} else {
 				$r[$v] = $this->req($v, $kExcludeEmptyString);

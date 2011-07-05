@@ -35,6 +35,9 @@ class Router {
 	public $request;
 	public $actionTimestamp;
 
+	/** @var int */
+	private $routeCallCount = 0;
+	
 	/**
 	 * @return Router
 	 */
@@ -45,7 +48,12 @@ class Router {
 
 	private function __construct() {
 
-		$this->request = new Request($_REQUEST);
+		$request = $_REQUEST;
+		if (isset($request['route'])) {
+			\eoko\url\Maker::populateRouteRequest($request);
+		}
+		
+		$this->request = new Request($request);
 		$this->actionTimestamp = time();
 		Logger::getLogger($this)->info('Start action #{}', $this->actionTimestamp);
 
@@ -55,13 +63,28 @@ class Router {
 	public static function getActionTimestamp() {
 		return self::getInstance()->actionTimestamp;
 	}
+	
+	private function isAllowMultipleRouteCalls() {
+		return ConfigManager::get('eoko/router', 'allowMultipleCalls', false);
+	}
+	
+	private function testMultipleRouteCall() {
+		if ($this->routeCallCount === 0 || $this->isAllowMultipleRouteCalls()) {
+			$this->routeCallCount++;
+		} else {
+			throw new IllegalStateException('Forbidden multiple route calls!'
+					. ' See config node: eoko\\router\\allowMultipleCalls.');
+		}
+	}
 
 	/**
 	 * Examines the request's params and route to the appropriate action.
 	 * @see Router
 	 */
 	public function route() {
-
+		
+		$this->testMultipleRouteCall();
+        
 		if (!$this->request->has('controller')) {
 			$this->request->override(
 				'controller',

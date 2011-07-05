@@ -29,28 +29,45 @@ class Html extends BasicHtmlExecutor {
 </script>
 JS;
 		$layout->head->set('beforeJs', $js, false);
-		$layout->head->extra = $this->createTemplate('head_extra_script');
+		$extra = $layout->head->extra = $this->createTemplate('head_extra_script');
+		
+		if (null !== $env = $this->request->get('env')) {
+			$extra->context = json_encode(array(
+				'environment' => $env,
+				'target' => $this->request->get('target'),
+			));
+		}
 	}
 
 	protected function pushLayoutExtraJs(HtmlRootTemplate $layout) {
 		// Include js/*.auto[order].js and auto/*.js files
 		$autoJsFiles = array();
+		$autoCssFiles = array();
 		foreach (ModuleManager::listModules(false) as $module) {
 			$module instanceof \eoko\module\Module;
+			// js
 			$autoJsFiles = array_merge($autoJsFiles, $module->listLineFilesUrl('re:\.auto\d*\.js$', ''));
 			$autoJsFiles = array_merge($autoJsFiles, $module->listLineFilesUrl('re:\.auto\d*\.js$', 'js'));
-			$autoJsFiles = array_merge($autoJsFiles, $module->listLineFilesUrl('glob:*.js', 'js/auto'));
-			$autoJsFiles = array_merge($autoJsFiles, $module->listLineFilesUrl('glob:*.js', 'js.auto'));
+			$autoJsFiles = array_merge($autoJsFiles, $module->listLineFilesUrl('glob:*.js', 'js/auto', true));
+			$autoJsFiles = array_merge($autoJsFiles, $module->listLineFilesUrl('glob:*.js', 'js.auto', true));
+			// css
+			$autoCssFiles = array_merge($autoCssFiles, $module->listLineFilesUrl('re:\.auto\d*\.css$', ''));
+			$autoCssFiles = array_merge($autoCssFiles, $module->listLineFilesUrl('re:\.auto\d*\.css$', 'css'));
+			$autoCssFiles = array_merge($autoCssFiles, $module->listLineFilesUrl('glob:*.css', 'css/auto', true));
+			$autoCssFiles = array_merge($autoCssFiles, $module->listLineFilesUrl('glob:*.css', 'css.auto', true));
 		}
+		
 		$urls = array();
 		foreach ($autoJsFiles as $url) {
 			$urls[$url] = preg_match('/\.auto(\d+)\.js$/', $url, $m) ? 10 + (int) $m[1] : null;
 		}
 		$layout->pushJs($urls);
-
-//		$layout->pushJs(
-//			ModuleManager::getModule('GridModule')->listFilesUrl('glob:*.js', null, FileType::JS), 10
-//		);
+		
+		$urls = array();
+		foreach ($autoCssFiles as $url) {
+			$urls[$url] = preg_match('/\.auto(\d+)\.css$/', $url, $m) ? 10 + (int) $m[1] : null;
+		}
+		$layout->pushCss($urls);
 	}
 
 	protected function beforeRender(HtmlTemplate &$tpl) {

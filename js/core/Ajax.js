@@ -187,7 +187,9 @@ Oce.Ajax = function() {
 			}
 
 			if (onFailure !== false) {
-				onFailure(errors, response, obj);
+				if (false === onFailure(errors, response, obj)) {
+					return;
+				}
 			}
 
 			if (message !== false) {
@@ -445,7 +447,9 @@ Ext.Ajax.request = function(o){
 				 return me.doFormUpload.call(me, o, p, url);
 			 }
 // rx
-			if (o.jsonFormParam) {
+			if (o.serializeForm) {
+				serForm = o.serializeForm(form, o.jsonFormParam);
+			} else if (o.jsonFormParam) {
 				serForm = Oce.Ajax.serializeForm(form, o.jsonFormParam);
 			} else {
 				serForm = Ext.lib.Ajax.serializeForm(form);

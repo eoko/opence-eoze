@@ -54,7 +54,7 @@ var ACTION = eo.form.GridField.Action = Ext.extend(Ext.util.Observable, {
 		return sm.getSelected();
 	}
 
-	,run: function() {}
+	,run: Ext.emptyFn
 
 	,getRootWindow: function() {
 		return this.gridField.findParentBy(function(e) {
@@ -80,18 +80,21 @@ var ACTION = eo.form.GridField.Action = Ext.extend(Ext.util.Observable, {
 	}
 
 	,createToolbarItem: function() {
-
-		var item = Ext.create(Ext.apply({
+		var item = this.doCreateToolbarItem();
+		this.tbItems.push(item);
+		return item;
+	}
+	
+	,doCreateToolbarItem: function() {
+		return Ext.create(Ext.apply({
 			text: '- Action -'
 			,xtype: "button"
 			,handler: this.handler
 			,scope: this.scope || this
 			//,iconCls: "ico ico_add"
-		}, this.toolbarItemConfig));
-		
-		this.tbItems.push(item);
-		return item;
+		}, this.toolbarItemConfig));		
 	}
+	
 });
 
 ACTION.Remove = Ext.extend(ACTION, {
@@ -128,59 +131,88 @@ ACTION.Remove = Ext.extend(ACTION, {
 		var sels = sm.getSelections();
 
 		if (!sels || !sels.length) return;
-		var store = grid.store;
-
-		Ext.each(sels, function(row) {
-			store.remove(row);
-		});
+		grid.store.remove(sels);
+//		var store = grid.store;
+//
+//		Ext.each(sels, function(row) {
+//			store.remove(row);
+//		});
 	}
 
 });
 
 Ext.ns('eo.form.GridField.ModelAction');
 
+/**
+ * @cfg {Boolean} addWindow TRUE to use a add window
+ * @cfg {Boolean} editable TODO: This option is not implemented yet!!! TRUE 
+ *		to allow inline grid editing
+ */
 eo.form.GridField.ModelAction.Add = Ext.extend(ACTION, {
 
 	toolbarItemConfig: {
 		iconCls: 'ico ico_add'
 		,text: "Ajouter" // i18n
+		,winCloseAction: "close"
+	}
+	
+	,constructor: function(config) {
+		var tic;
+		if (config.toolbarItemConfig) {
+			 tic = Ext.apply(Ext.apply({}, this.toolbarItemConfig), config.toolbarItemConfig);
+		}
+		eo.form.GridField.ModelAction.Add.superclass.constructor.call(this, config);
+		
+		if (tic) this.toolbarItemConfig = tic;
 	}
 
 	// hook
 	,createForm: function() {
-		return this.model.createForm();
+		if (this.buildForm) {
+			return this.buildForm(this.model);
+		} else {
+			return this.model.createForm(this.formExtra);
+		}
 	}
 
-	,createWin: function() {
+	,createWin: function(config) {
 
-		var win;
-		var WIN_CLASS = Oce.FormWindow;
-		var form = this.createForm();
-		var gf = this.gridField;
+		config = config || {};
 
-		this.addWin = win = new WIN_CLASS({
+		var form = config.form || this.createForm(),
+			WIN_CLASS = Oce.FormWindow,
+			gf = this.gridField,
+			win;
+
+		this.addWin = win = new WIN_CLASS(Ext.apply({
 			formPanel: form
 			,minimizable: false
-			,closeAction: 'hide'
+			,closeAction: this.winCloseAction || 'close'
+			,clearFormOnShow: false
 			,modalTo: this.getRootWindow()
-			,clearFormOnShow: true
 			,title: this.winTitle || 'Nouvel enregistrement' // i18n
+			,submitButton: 0
 			,buttons: [{
 				text: 'Ok'
 				,handler: function() {
 					if (form.form.isValid()) {
 						var record = gf.addFormRecord(form);
 						record.markDirty();
-						win.hide();
+						win[win.closeAction]();
 					}
 				}
 			}, {
 				text: 'Annuler'
 				,handler: function() {
-					win.hide();
+					win[win.closeAction]();
 				}
 			}]
-		});
+			,listeners: {
+				close: function() {
+					delete this.addWin;
+				}.createDelegate(this)
+			}
+		}, config));
 
 		this.wins.push(win);
 
@@ -191,6 +223,8 @@ eo.form.GridField.ModelAction.Add = Ext.extend(ACTION, {
 		if (this.addWindow) {
 			var win = this.addWin || this.createWin();
 			win.show();
+		} else {
+			this.gridField.addRecord();
 		}
 	}
 });
@@ -200,41 +234,48 @@ eo.form.GridField.ModelAction.Edit = Ext.extend(ACTION, {
 	toolbarItemConfig: {
 		iconCls: 'ico ico_pencil'
 		,text: "Éditer" // i18n
+		,winCloseAction: "close"
 	}
 
-	,createWin: function() {
+	,createWin: function(config) {
+		
+		config = config || {};
 
-		var win;
-		var WIN_CLASS = Oce.FormWindow;
-		var formPanel = this.model.createForm();
-		var gf = this.gridField;
+		var formPanel = config.form || this.model.createForm(this.formExtra),
+			WIN_CLASS = Oce.FormWindow,
+			win;
 
-		this.editWin = win = new WIN_CLASS({
+		this.editWin = win = new WIN_CLASS(Ext.apply({
 			formPanel: formPanel
 			,title: this.winTitle || 'Modifier l\'enregistrement' // i18n
 			,minimizable: false
-			,closeAction: 'hide'
+			,closeAction: this.winCloseAction || 'close'
 			,modalTo: this.getRootWindow()
+			,submitButton: 0
 			,buttons: [{
 				text: 'Ok'
 				,handler: function() {
-//					var record = gf.addFormRecord(form);
-//					record.markDirty();
 					formPanel.form.updateRecord(win.record);
-					win.hide();
+					win[win.closeAction]();
 				}
 			}, {
 				text: 'Annuler'
 				,handler: function() {
-					win.hide();
+					win[win.closeAction]();
 				}
 			}]
+		
+			,listeners: {
+				close: function() {
+					delete this.editWin;
+				}.createDelegate(this)
+			}
 
 			,setRecord: function(record) {
 				this.record = record;
 				formPanel.form.loadRecord(record);
 			}
-		});
+		}, config));
 
 		this.wins.push(win);
 
@@ -246,17 +287,20 @@ eo.form.GridField.ModelAction.Edit = Ext.extend(ACTION, {
 		if (!record) return;
 		this.run(record);
 	}
-
-	,run: function(record) {
-
-		if (!record) {
-			record = this.getSelectedRecord();
-			if (!record) return;
-		}
-
+	
+	,editRecord: function(record) {
 		var win = this.editWin || this.createWin();
 		win.setRecord(record);
 		win.show();
+	}
+
+	,run: function(record) {
+		if (!record) {
+			record = this.getSelectedRecord();
+			if (!record) return;
+		} else {
+			this.editRecord(record);
+		}
 	}
 });
 
@@ -372,6 +416,8 @@ ACTION.Cancel = Ext.extend(ACTION, {
 		this.gridField.clearDirty();
 	}
 
-})
+});
+
+Oce.deps.reg('eo.form.GridField.Action');
 
 }); // deps closure

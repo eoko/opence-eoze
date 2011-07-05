@@ -124,7 +124,17 @@ abstract class Executor implements file\Finder {
 			return;
 		}
 
-		$result = execute($this, $this->actionMethod);
+		try {
+			$result = $this->doInvoke();
+		} catch (\Exception $ex) {
+			$m = 'handle' . get_relative_classname($ex);
+			if (method_exists($this, $m)) {
+				$result = $this->$m($ex);
+			} else {
+				throw $ex;
+			}
+		}
+		
 		$this->executed = true;
 		
 		if ($this->cancelled) {
@@ -134,6 +144,10 @@ abstract class Executor implements file\Finder {
 		$this->afterAction();
 		
 		return $this->processResult($result);
+	}
+	
+	private function doInvoke() {
+		return execute($this, $this->actionMethod);
 	}
 	
 //	public final function _beforeAction($action) {
@@ -214,6 +228,11 @@ abstract class Executor implements file\Finder {
 
 		$action = Module::parseAction($controller, $action, $this->request, false);
 		$action();
+	}
+	
+	public function redirectTo($url) {
+		$this->cancel();
+		header('Location: ' . \eoko\url\Maker::makeAbsolute($url));
 	}
 	
 	/**

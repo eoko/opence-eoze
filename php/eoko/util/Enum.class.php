@@ -10,6 +10,8 @@ abstract class Enum {
 	private $name;
 	private $value;
 	
+	static protected $args = array();
+	
 	private function __construct($name, $value, $args = null) {
 		$this->name = $name;
 		$this->value = $value;
@@ -23,6 +25,8 @@ abstract class Enum {
 			$this->construct();
 		}
 	}
+	
+	protected function construct() {}
 	
 //	protected function construct() {}
 	

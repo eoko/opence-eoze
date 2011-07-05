@@ -78,7 +78,8 @@ Ext.form.Action.ACTION_TYPES['jsonsubmit'] = Ext.extend(Ext.form.Action.Submit, 
 			
 			Oce.Ajax.request(Ext.apply(this.createCallback(o), {
 				form:this.form.el.dom,
-				jsonFormParam: o.jsonFormParam || undefined,
+				jsonFormParam: o.jsonFormParam,
+				serializeForm: o.serializeForm,
 				url:this.getUrl(isGet),
 				method: method,
 				headers: o.headers,
@@ -117,10 +118,11 @@ Oce.form.JsonForm = Ext.extend(Ext.form.BasicForm, {
 //        var submitAction = String.format('{0}submit', this.api ? 'direct' : '');
 //        this.doAction(submitAction, options);
         if (this.jsonFormParam) options.jsonFormParam = this.jsonFormParam;
+		if (this.serializeForm) options.serializeForm = this.serializeForm;
 		this.doAction('jsonsubmit', options);
         return this;
     }
-})
+});
 
 Oce.form.DateDisplayField = Ext.extend(Ext.form.DisplayField, {
 
@@ -154,7 +156,18 @@ Ext.reg('datedisplayfield', Oce.form.DateDisplayField);
 
 Ext.ns('Oce.form');
 
+/**
+ * @param {Ext.form.BasicForm} form
+ * @param {String} namePrefix
+ */
 Oce.form.getFormData = function(form, namePrefix) {
+	
+	// allow easy overriding of form data reading
+	if (form.getData) {
+		var d = form.getData(namePrefix);
+		if (d) return d;
+	}
+	
 	if (form instanceof Ext.form.BasicForm) form = form.el;
 	
 	var fElements = form.elements || (document.forms[form] || Ext.getDom(form)).elements,

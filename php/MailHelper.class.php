@@ -72,7 +72,7 @@ MAIL;
 //			$subject, $message, $to, $bcc
 //		);
 
-		mail($to,$subject,$message,$headers);
+		return mail($to,$subject,$message,$headers);
 	}
 
 	public static function isValid($mail) {

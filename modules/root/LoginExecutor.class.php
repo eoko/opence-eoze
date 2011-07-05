@@ -2,15 +2,15 @@
 
 namespace eoko\modules\root;
 
-use \UserSession;
-
-use \IllegalStateException;
+use eoko\module\executor\JsonExecutor;
+use UserSession;
+use IllegalStateException;
 
 /**
  * @internal Using alternate class name LoginExecutor (instead of simply login
  * to prevent the method login() from being considered a constructor...)
  */
-class LoginExecutor extends \eoko\module\executor\JsonExecutor {
+class LoginExecutor extends JsonExecutor {
 	
 	public function index() {
 		return $this->forward('root.bootstrap', 'get_js', array('name' => 'login'));

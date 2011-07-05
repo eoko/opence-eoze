@@ -7,6 +7,7 @@
 	display: none;
 }
 
+.img-chooser-dlg span.mimeIcon,
 .img-chooser-view .thumb span {
 	width: 64px;
 	height: 64px;
@@ -15,11 +16,24 @@
 .img-chooser-view .thumb span.image {
 	display: none;
 }
+.img-chooser-dlg span.mimeIcon.pdf,
+.img-chooser-dlg span.mimeIcon.csv,
 .img-chooser-view .thumb span.pdf,
 .img-chooser-view .thumb span.csv {
 	display: block;
-	background-image: url("images/mime/x-office-document-64.png") !important;
+	background: url("images/mime/x-office-document-64.png") center no-repeat !important;
 }
 
+.img-chooser-dlg img.image {
+	display: inline;
+}
+.img-chooser-dlg img.pdf,
+.img-chooser-dlg img.csv {
+	display: none;
+}
+
+.img-chooser-dlg span.image {
+	display: none;
+}
 
 

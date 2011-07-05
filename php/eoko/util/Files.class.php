@@ -95,8 +95,10 @@ class Files extends \FileHelper {
 		
 		if ($forbidUpward) {
 			// $basePath = realpath($basePath);
+			$target = rtrim($target, DS);
+			$basePath = rtrim($basePath, DS);
 			if (substr($target, 0, strlen($basePath)) !== $basePath) {
-				dump(array($target, $basePath));
+				//dump(array($target, $basePath));
 				throw new IllegalPathException(
 					$name, 
 					IllegalPathException::MSG_FORBIDDEN_UPWARD_RESOLUTION

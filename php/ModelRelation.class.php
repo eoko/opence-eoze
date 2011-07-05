@@ -47,6 +47,10 @@ abstract class ModelRelation {
 		$info->getLocalTableProxy()->attach($this->localTable);
 		$info->getTargetTableProxy()->attach($this->targetTable);
 	}
+	
+	public function reset() {
+		$this->cache = new ModelRelationCache($this->parentModel->context);
+	}
 
 	public function __toString() {
 		return get_class($this) . '{' . $this->name . '}';
@@ -84,8 +88,10 @@ abstract class ModelRelation {
 			}
 		}
 
-//		if ($this instanceof ModelRelationInfoHasMany && !is_array($value)) {
-		if ($this instanceof ModelRelationHasMany && !is_array($value)) {
+		if ($value !== null // explode(',', null) => array(0 => 0) => problem!
+				&& $this instanceof ModelRelationInfoHasMany
+				&& !is_array($value)) {
+
 			$value = explode(',', $value);
 			foreach ($value as &$v) {
 				$v = (int) trim($v);
@@ -381,7 +387,14 @@ class ModelRelationReferedByOne extends ModelRelationByReference
 	}
 	
 	public function doGetAsModel($createIfNone = false, array $overrideContext = null) {
+		return $this->getModelReference($createIfNone, $overrideContext);
+	}
 
+	/**
+	 * @return Model
+	 */
+	private function &getModelReference($createIfNone = false, array $overrideContext = null) {
+		
 		if (null !== $model =& $this->cache->get($overrideContext)) {
 			return $model;
 		}
@@ -400,6 +413,15 @@ class ModelRelationReferedByOne extends ModelRelationByReference
 //		}
 
 		return $model;
+	}
+	
+	public function doSet($value, $forceAcceptNull = false) {
+		if (is_array($value)) {
+			$model =& $this->getModelReference(true);
+			$model->setFields($value, $forceAcceptNull);
+		} else {
+			parent::doSet($value, $forceAcceptNull);
+		}
 	}
 
 	public function setFromModel(Model $model) {
@@ -511,8 +533,11 @@ class ModelRelationReferedByMany extends ModelRelationByReference implements Mod
 	 * @return ModelResultSet
 	 */
 	public function get(array $overrideContext = null) {
+		
 		if (null !== $models =& $this->cache->get($overrideContext)) {
 			return $models;
+		} else if ($this->parentModel->isNew()) {
+			return $models = array();
 		}
 		
 		$context = $overrideContext !== null ? $overrideContext : $this->parentModel->context;
@@ -577,7 +602,7 @@ class ModelRelationReferedByMany extends ModelRelationByReference implements Mod
 
 		$models = array();
 
-		foreach ($value as $m) {
+		if ($value) foreach ($value as $m) {
 			if (false == $m instanceof Model) {
 				$m = $this->targetTable->createModel($m, false, $this->parentModel->context);
 			}
@@ -679,7 +704,7 @@ class ModelRelationIndirectHasMany extends ModelRelationByAssoc
 		
 		$this->assocModels = array();
 
-		if (count($value) > 0) {
+		if ($value) {
 			foreach ($value as $v) {
 				if (!is_array($v)) {
 					$v = array(

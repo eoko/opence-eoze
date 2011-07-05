@@ -27,6 +27,10 @@ class JsFileExecutor extends ExecutorBase {
 
 		Logger::dbg('js module is: {}', $name);
 
+		if (!headers_sent()) {
+			header('Content-type: application/javascript');
+		}
+		
 		if (!($path = $this->searchPath($name, FileType::JS))) {
 			if (($path = $this->searchPath($name, FileType::JS_TPL))) {
 				require $path;

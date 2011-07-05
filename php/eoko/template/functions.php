@@ -79,6 +79,10 @@ function _urlFor($controller, $action = null, $params = null, $anchor = null) {
 	echo urlFor($controller, $action, $params, $anchor);
 }
 
+function _index() {
+	echo UrlMaker::makeAbsolute('index.php');
+}
+
 function linkTo($url, $text, $extra = null) {
 	
 	$extras = array();

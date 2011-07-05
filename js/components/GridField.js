@@ -13,7 +13,7 @@ Oce.grid.CheckColumn = Ext.extend(Ext.util.Observable, {
 		Oce.grid.CheckColumn.superclass.constructor.apply(this, arguments);
 		this.renderer = this.renderer.createDelegate(this);
 //		this.onEvents('changed');
-		this.addEvents('changed');
+		this.addEvents("changed", "storecreated");
 	}
 
 	,init : function(grid){
@@ -134,6 +134,11 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 	,initComponent: function() {
 
 		var me = this;
+		
+		this.gridConfig = Ext.applyIf(this.gridConfig || {}, {
+			title: this.title
+			,border: this.border
+		});
 
 		Oce.form.GridField.superclass.initComponent.apply(this, arguments);
 
@@ -175,6 +180,29 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 
 			// Editable columns
 			} else if (config.editor) {
+				
+				if (config.editor.name) {
+					// Having a name set for a grid editor can be the cause of
+					// great annoyance. When the editor is used at least once,
+					// it will be rendered (if it has not been passed already
+					// rendered). Then, when the form is submitted, the editor's
+					// element will be taken into account, and its value will be
+					// serialized in the form values. That is most probably not
+					// what is intended, since the editor is supposed to be used
+					// to edit the value of the grid's cell. For example, if the
+					// editor has the name "id" set, then it will most probably
+					// overwritte the record's own id value... So, you should
+					// double check that something wrong hasn't occured that
+					// leads use here! (Thanks for attention)
+					if (console) {
+						var msg = 'Warning!!! A grid editor has a name set: '
+								+ config.editor.name;
+						if (console.warn) console.warn(msg);
+						else if (console.log) console.log(msg);
+						debugger
+					}
+				}
+				
 				if (config.editor == 'checkbox') {
 					colConfig = new Oce.grid.CheckColumn(
 						Ext.apply({
@@ -187,18 +215,18 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 					colConfig = Ext.apply({
 						dataIndex: config.dataIndex || di
 					}, config, this.columnDefaults);
-					colConfig.editor = Ext.create(config.editor);
+					colConfig.editor = config.editor instanceof Ext.Component ? 
+							config.editor : Ext.create(config.editor);
 					if (!colConfig.renderer && colConfig.editor.createRenderer) {
 						colConfig.renderer = colConfig.editor.createRenderer('-');
 					}
-					colConfig = new Ext.grid.Column(colConfig);
 				} else {
 					// TODO: commented out to let pass an error with SM wizard
 					// but that will need a real fix...
 //					throw new Error('GridField Invalid Config');
 				}
 				if (colConfig) extraDataConfig = {
-					dataIndex: colConfig.dataIndex
+					dataIndex: colConfig.dataIndex || di
 					,name: colConfig.name || colConfig.dataIndex
 					,defaultValue: colConfig.defaultValue || null
 				}; else colConfig = {};
@@ -249,6 +277,19 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 
 		var storeFields = [].concat(dataIndexes);
 		if (this.storeExtraFields) storeFields = storeFields.concat(this.storeExtraFields);
+		
+		if (!this.createReader && this.storeConfig && this.storeConfig.xtype === 'groupingstore') {
+			this.createReader = this.createGroupingStoreJsonReader;
+		}
+		
+		if (this.recordType) {
+			if (!Ext.isFunction(this.recordType)) {
+				storeFields = Ext.extend(
+						Ext.data.Record.create(storeFields), this.recordType);
+			} else {
+				throw new Error("Illegal State");
+			}
+		}
 
 //		var store = this.store = new Ext.data.JsonStore(Ext.apply({
 		var store = this.store = Ext.create(Ext.apply({
@@ -263,12 +304,12 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 			}, this.baseParams || {})
 			,pruneModifiedRecords: true
 			,root: 'data'
-//REM			,fields: dataIndexes
 			,fields: storeFields
 			,autoload: true
 			,sortInfo: this.sortInfo
 			,reader: !this.createReader ? undefined : this.createReader({
-				fields: dataIndexes
+				// must account for storeFields possibly being a recordType constructor
+				fields: Ext.isFunction(storeFields) ? storeFields : dataIndexes
 				,root: 'data'
 				,totalProperty: 'count'
 				,idProperty: this.pkName
@@ -277,8 +318,23 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 
 			xtype: "jsonstore"
 		}));
+	
+		// override loadData
+		(function() {
+			var uber = store.loadData;
+			store.loadData = function() {
+				uber.apply(this, arguments);
+				me.fireEvent('loaded', me);
+				me.firstLoadDone = true;
+				me.dirty = false; // get my virginity back, for the modified evt
+				me.initialValue = me.syncValue(true);
+			};
+		})();
+			
+		this.afterStoreCreated();
+		this.fireEvent("storecreated", this, store);
 
-		if (this.subset) this.store.baseParams.subset = this.subset;
+		if (this.subset) store.baseParams.subset = this.subset;
 
 		// Autoset name from subset
 		if (!this.name && this.subset) this.setName(this.subset);
@@ -293,9 +349,9 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 			})
 		}
 
-		store.on('add', this.syncValue, this);
-		store.on('remove', this.syncValue, this);
-		store.on('update', this.syncValue, this);
+		store.on('add', this.onSyncValue, this);
+		store.on('remove', this.onSyncValue, this);
+		store.on('update', this.onSyncValue, this);
 		
 		if (this.rowId !== undefined) {
 			store.baseParams[this.pkRowId] = this.rowId;
@@ -341,17 +397,25 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 				var addCombo = this.addCombo = new Oce.form.ForeignComboBox(addComboConfig);
 				this.addStore = this.addCombo.store;
 				this.addStore.on('load', this.sortOutIds, this);
-				var setAddStoreEnabled = function() {
-					var enabled = this.getCount();
-					addCombo.setEnabled(enabled);
-					if (me.addButton) me.addButton.setEnabled(enabled);
+
+				// Lock the combo if there is no data.
+				// We only do that on local stores, because otherwise, it causes
+				// problem with Contacts/Enfants field... The solution however
+				// would probably be that any component needing the combo to
+				// be locked should ask it explicitly... <= TODO
+				if (this.addStore.local) {
+					var setAddStoreEnabled = function() {
+						var enabled = this.getCount();
+						addCombo.setEnabled(enabled);
+						if (me.addButton) me.addButton.setEnabled(enabled);
+					}
+					this.addStore.on({
+						add: setAddStoreEnabled,
+						remove: setAddStoreEnabled,
+						datachanged: setAddStoreEnabled,
+						load: setAddStoreEnabled
+					});
 				}
-				this.addStore.on({
-					add: setAddStoreEnabled,
-					remove: setAddStoreEnabled,
-					datachanged: setAddStoreEnabled,
-					load: setAddStoreEnabled
-				});
 				this.onAddStoreInit(this.addStore);
 			
 			}
@@ -382,7 +446,8 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 					me.newRecord = null;
 					// Select the row that was being edited or the the previous row
 					// (the just edited row may have been removed in the canceledit event)
-					me.grid.getSelectionModel().selectRow(editor.rowIndex-1, false);
+					var sm = me.grid.getSelectionModel();
+					if (sm) sm.selectRow(editor.rowIndex-1, false);
 				}
 			});
 			this.rowEditor.on('afteredit', function(editor) {
@@ -390,7 +455,8 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 					me.newRecord = null;
 					if (editor.repeat) this.onAddEditor();
 				}
-				me.grid.getSelectionModel().selectRow(editor.rowIndex, false);
+				var sm = me.grid.getSelectionModel();
+				if (sm) sm.selectRow(editor.rowIndex, false);
 			}.createDelegate(this));
 		}
 
@@ -436,6 +502,16 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 				"Invalid order field (name is missing): " + this.orderField
 			);
 		}
+	}
+	
+	// protected
+	,afterStoreCreated: function() {
+		// I am a hook
+	}
+	
+	// private
+	,createGroupingStoreJsonReader: function(config) {
+		return new Ext.data.JsonReader(config);
 	}
 
 	,value: ''
@@ -519,6 +595,7 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 					me.fireEvent('loaded', me);
 					me.firstLoadDone = true;
 					me.dirty = false; // get my virginity back, for the modified evt
+					me.initialValue = me.syncValue(true);
 				}
 			});
 		}
@@ -619,6 +696,13 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 			return record
 		}
 	}
+	
+	,addRecord: function(data) {
+		var record = this.createRecord(data);
+		this.store.add(record);
+		record.markDirty();
+		return record;
+	}
 
 	,addFormRecord: function(form) {
 		if (form instanceof Ext.FormPanel) form = form.form;
@@ -629,14 +713,24 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 		this.store.add(record);
 		return record;
 	}
+	
+	// private
+	,eachSubmitableRecord: function(cb, scope) {
+		this.store.each(cb, scope);
+	}
+	
+	// private
+	,onSyncValue: function() {
+		this.syncValue();
+	}
 
 	// private
-	,syncValue: function() {
-		if (!this.el) return;
+	,syncValue: function(supressEvent) {
 		var ids = [];
 		var extraData = [];
 		var i = this.orderStartIndex;
-		this.store.each(function(reccord) {
+//		this.store.each(function(reccord) {
+		this.eachSubmitableRecord(function(reccord) {
 			var id = reccord.data[this.pkName],
 				xData = {};
 			
@@ -655,17 +749,37 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 
 			extraData.push(xData);
 		}, this)
-
-		if (!this.el.dom) return;
-		this.el.dom.value = !this.extraData || this.extraData.length == 0 ?
-			Ext.encode(ids)
-			: Ext.encode(extraData);
-
-		if ((this.firstLoadDone || this.phantom) && !this.dirty) {
-			this.dirty = true;
-			this.fireEvent('modified');
-			this.fireEvent('dirtychanged', true);
+		
+		// save value
+		var v = !this.extraData || this.extraData.length == 0 ?
+				Ext.encode(ids) : Ext.encode(extraData),
+			el = this.el,
+			dom = el && el.dom;
+		
+		if (dom) {
+			dom.value = v;
 		}
+		
+		if (!supressEvent && (this.firstLoadDone || this.phantom)) {
+			if (v !== this.initialValue) {
+				if (!this.dirty) {
+					this.dirty = true;
+					this.fireModifiedEvent();
+					this.fireEvent('dirtychanged', true);
+				}
+			} else {
+				if (this.dirty) {
+					this.dirty = false;
+					this.fireEvent('dirtychanged', false);
+				}
+			}
+		}
+		
+		return v;
+	}
+	
+	,fireModifiedEvent: function() {
+		this.fireEvent('modified');
 	}
 
 	,removeById: function(id) {
@@ -720,11 +834,11 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 			}, this)
 		}
 	}
-
-	,setValue: function(v) {
-//		Oce.form.GridField.superclass.setValue.apply(this, arguments);
-//		if (this.el) this.syncValue(this.store);
-	}
+//
+//	,setValue: function(v) {
+////		Oce.form.GridField.superclass.setValue.apply(this, arguments);
+////		if (this.el) this.syncValue(this.store);
+//	}
 
 	,onCreate: function() {
 		var me = this;
@@ -823,7 +937,7 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 
 		var phantom = this.phantom; // prevent the modified event from firing for new records
 		this.phantom = false;
-		this.syncValue();
+		this.syncValue(true);
 		this.phantom = phantom;
 
 		this.wrap = this.el.wrap({
@@ -851,7 +965,10 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 					} else {
 						action.init(this);
 						var tbItem = action.createToolbarItem();
-						if (tbItem) tbarItems.push(tbItem);
+						if (tbItem) {
+							if (Ext.isArray(tbItem)) tbarItems = tbarItems.concat(tbItem);
+							else tbarItems.push(tbItem);
+						}
 					}
 				}, this)
 			}
@@ -943,6 +1060,26 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
             this.setSize(sz.width, this.height || sz.height);
         }
         this.resizeEl = this.positionEl = this.wrap;
+		
+		// This is needed for GridField to behave as expected in TabPanel, when
+		// it is set as a tab's only component. More generaly, this is probably
+		// needed to have the hide() method works correctly.
+		//
+		// Ext.Component:
+		//  
+		//	onHide : function(){
+		//		this.getVisibilityEl().addClass('x-hide-' + this.hideMode);
+		//	}
+		//
+		//	getVisibilityEl : function(){
+		//		return this.hideParent ? this.container : this.getActionEl();
+		//	}
+		//	
+		//	getActionEl : function(){
+		//		return this[this.actionMode];
+		//	}
+		// 
+		this.actionMode = "wrap";
 
 		// This is necessary to make the component compatible with
 		// the FieldLabeler plugin
@@ -966,6 +1103,13 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 	}
 
 	,createGrid: function() {
+		
+		var sm;
+		if (this.checkboxSel) {
+			sm = this.checkboxSel;
+		} else if (!this.disableSelection && (!this.gridConfig || !this.gridConfig.disableSelection)) {
+			sm = new Ext.grid.RowSelectionModel();
+		}
 
 		var me = this
 
@@ -973,7 +1117,7 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 //			columns: this.checkboxSel ? [this.checkboxSel].concat(this.gridColumns) : this.gridColumns
 			cm: new Ext.grid.ColumnModel(this.checkboxSel ? [this.checkboxSel].concat(this.gridColumns) : this.gridColumns)
 	        ,clicksToEdit: 1
-			,selModel: this.checkboxSel ? this.checkboxSel : new Ext.grid.RowSelectionModel()
+			,selModel: sm
 			,store: this.store
 			,plugins: this.gridPlugins
 			,enableColumnHide: false
@@ -1044,7 +1188,7 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 		this.initDragDrop(gridConfig);
 
 		this.grid = new Ext.grid.EditorGridPanel(gridConfig);
-		this.grid.on('afteredit', this.syncValue.createDelegate(this));
+		this.grid.on('afteredit', this.onSyncValue.createDelegate(this));
 
 		this.initDropTarget(this.grid);
 	}
@@ -1072,6 +1216,12 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 				ddGroup : this.gridDDGroup
 				,notifyDrop : function(dd, e, data){
 					var sm = grid.getSelectionModel();
+					if (!sm) {
+						if (console && console.warn) {
+							console.warn("Cannot use drag drop with no selection model!");
+						}
+						return;
+					}
 					var rows = sm.getSelections();
 					var cindex = dd.getDragData(e).rowIndex;
 					if (sm.hasSelection()) {

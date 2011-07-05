@@ -1,0 +1,4 @@
+abstract: true
+
+extra:
+  iconCls: ico %module% %action%

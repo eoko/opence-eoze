@@ -19,3 +19,8 @@ used:
     - root
     - MediaManager
     - CrocodocViewer
+    - AccessControl
+    - TreeMenu
+    - IconProvider
+    - TabModule
+    - MercurialConsole

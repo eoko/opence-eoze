@@ -128,7 +128,7 @@ class TplTable implements ConfigConstants {
 			// TODO this line has been added to skip a crash with a mirror relation
 			// WebsitePages->Parent, in Rhodia.Opence... this should be investigated
 			// that this is OK, and implement a real way to handle mirror relation
-			if ($prev->tableName !== $relation->tableName || $prev->referenceField !== $relation->referenceField)
+			if ($prev->localDBTableName !== $relation->localDBTableName || $prev->referenceField !== $relation->referenceField)
 
 					throw new IllegalStateException(
 				"Relation with name {$relation->getName()} already exist in table "

@@ -1,15 +1,42 @@
 Ext.ns('Oce');
 
-Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Panel, {
+/**
+ *
+ * beforeCreateWindow(windowConfig, action): must be called before a window
+ * is created, with the config object as argument. This is an opportunity for
+ * customizing components to modify the configuration of any window (to set icon,
+ * for example).
+ *
+ * @todo IMPORTANT the configuration objects for windows are shared between all
+ * GridModule instances. This is very problematic, since that prevent
+ * functionnality providers (plugins) to easily and efficiently customize a
+ * window before its creation.
+ *
+ */
+//Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Panel, {
+Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.util.Observable, {
 
-	constructor: function() {
+	spp: Ext.Panel.prototype
+	
+	/**
+	 * True if this component fires an "open" event. Read-only.
+	 * @type Boolean
+	 * @property openEvent
+	 */
+	,openEvent: true
+	/**
+	 * True if this component is opened. Read-only.
+	 * @type Boolean
+	 * @property opened
+	 */
+	,opened: false
+
+	,constructor: function() {
 
 		this.my = Ext.applyIf({
 			selectAllText: "Tout sélectionner"
 			,showAllColsText: "Toutes"
 			,tab: null
-//rem			,addWinLayout: 'auto'
-//			,editWinLayout: 'auto'
 		}, this.my || {})
 
 		Ext.apply(this, this.my);
@@ -23,6 +50,8 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 
 		Oce.GridModule.superclass.constructor.apply(this, arguments);
 
+		this.addEvents("open", "close");
+		
 		this.model.initRelations(this.modelRelations);
 
 		// Init plugins
@@ -42,11 +71,18 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 		this.initYearPlugin();
 		this.initFilterPlugin();
 
+		Ext.iterate(this.extra, function(name, config) {
+			var pg = Oce.GridModule.plugins[
+				name.substr(0,1).toUpperCase() + name.substr(1)
+			];
+			if (pg) {
+				this[name + "Plugin"] = new pg(this, config);
+			}
+		}, this);
+
 		this.initConfiguration();
-
-//		Oce.GridModule.superclass.constructor.apply(this, arguments);
 	}
-
+	
 	,getExtraModels: function(names, cb) {
 		var xm = this.extraModels;
 		var m = true;
@@ -129,7 +165,7 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 
 	// TODO REM
 	,initExtra: function() {
-		throw new Error('DEPRECATED');
+		throw new Error('DEPRECATED (use initPlugins)');
 	}
 
 //	,activeAddWindows: {}
@@ -517,25 +553,7 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 	,deleteSelectedRecords: function() {
 		var ids = this.getSelectedRowsId.call(this);
 		if (ids.length > 0) {
-			Ext.MessageBox.confirm('Veuillez confirmer',
-				'Vous êtes sur le point de supprimer ' + ids.length +
-					' enregistrement' + (ids.length > 1 ? 's' : '') +
-					'. Êtes-vous sûr de vouloir continuer ?', // i18n
-				function(btn){
-					if (btn == 'yes') {
-						// TODO possible nameclash 'controller' or 'action' vs primaryKeyName
-						var params = {'controller':this.controller, action:'delete_multiple'};
-						params.json = encodeURIComponent(Ext.util.JSON.encode({'ids': ids}));
-						Oce.Ajax.request({
-							 'params': params
-							,onSuccess: function() {
-								this.reload();
-							}.createDelegate(this)
-//							,onComplete: closeWindow
-						});
-					}
-				}.createDelegate(this)
-			);
+			this.deleteRecord(ids);
 		}
 	}
 
@@ -546,6 +564,10 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 		var me = this;
 
 		var fn = function() {
+			var grid = me.grid;
+			if (grid && grid.el) {
+				grid.el.mask("Suppression en cours", "x-mask-loading");
+			}
 			Oce.Ajax.request(Ext.apply({
 				params: {
 					json_ids: encodeURIComponent(Ext.util.JSON.encode(ids))
@@ -553,8 +575,14 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 					,action: "delete_multiple"
 				}
 				,onSuccess: function() {
-					me.reload();
-					if (callback) callback();
+					if (grid && grid.el) grid.el.unmask();
+					me.reload(function() {
+						if (callback) callback();
+					}, me);
+					me.afterDelete(ids);
+				}
+				,onFailure: function() {
+					if (grid && grid.el) grid.el.unmask();
 				}
 			}, ajaxOpts))
 		};
@@ -574,11 +602,13 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 			fn();
 		}
 	}
+	
+	,afterDelete: function() {}
 
 	,deleteRecords: function() {
 		this.deleteRecord.apply(this, arguments);
 	}
-
+	
 	,addWindowToolbarAddExtra: function(btnGroups, getWindowFn, handlers) {
 
 	}
@@ -590,14 +620,10 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 				'Êtes-vous sûr de vouloir supprimer cet enregistrement ?',
 				function(btn){
 					if (btn == 'yes') {
-						// TODO possible nameclash 'controller' or 'action' vs primaryKeyName
-						var params = {'controller':this.controller, action:'delete_one'};
-						params[this.primaryKeyName] = getWindowFn().idValue;
-						Oce.Ajax.request({
-							 'params': params
-							,onSuccess: handlers.reload
-							,onComplete: handlers.close
-						});
+						var win = getWindowFn();
+						win.forceClosing = true;
+						win.close();
+						this.deleteRecord(win.idValue, null, false);
 					}
 				}.createDelegate(this)
 			);
@@ -643,11 +669,13 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 						 text: 'Enregistrer'
 						 //,iconCls: 'ico_tick'
 						 ,iconCls: 'ico_disk'
+						 ,isSaveButton: true
 						 ,handler: handlers.save
 					 })
 					 ,cancelButton = new Ext.Button({
 						 text: 'Annuler'
 						 ,iconCls: 'ico_cross'
+						 ,isCloseButton: true
 						 ,handler: handlers.forceClose
 						 ,hidden: true
 					 })
@@ -799,9 +827,10 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 			,winConfig: Ext.apply({
 				 title: "Enregistrement" // i18n
 				,layout: this.my.editWinLayout
-				,'tbar': tbar
+				,tbar: tbar
 				,actionToolbar: tbar
 				,tools: [this.createEditWindowGearTool(tbar, winConfig)]
+				,submitButton: tbar.saveButton
 			}, winConfig)
 			
 		});
@@ -869,16 +898,6 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 				}
 				,beforerefresh: function(win) {
 					if (win.formPanel.isModified()) {
-//						Ext.MessageBox.confirm(
-//							"Confirmer le rechargement",
-//							"Cette fenêtre comporte des modifications qui n'ont pas été "
-//							+ "enregistrées. Si elle est rechargées maintenant, ces "
-//							+ "modifications seront perdues. Vous-vous vraiment recharger "
-//							+ "la fenêtre maintenant ?",
-//							function(btn) {
-//								if (btn === 'yes') win.refresh(true);
-//							}
-//						);
 						Ext.Msg.show({
 							// i18n
 							title: "Confirmer le rechargement"
@@ -935,16 +954,6 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 								}
 							}
 						});
-//						Ext.MessageBox.confirm(
-//							"Confirmer la fermeture",
-//							"Cette fenêtre comporte des modifications qui n'ont pas été "
-//							+ "enregistrées. Voulez-vous vraiment la fermer et abandonner "
-//							+ "ces modifications ?",
-//							function(btn) {
-//								if (btn === 'yes') win.close();
-//								else win.forceClosing = false;
-//							}
-//						);
 						return false;
 					}
 					return true;
@@ -964,6 +973,8 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 	,afterCreateEditWindow: function(win) {
 		this.parseContextHelpItems(win);
 	}
+
+	,beforeCreateWindow: function(config, action) {}
 
 	,parseContextHelpItems: function(win) {
 		if (!this.hasHelp()) return;
@@ -1128,14 +1139,19 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 	 * the same record for edit
 	 */
 	,createEditWindow: function(recordId, cb) {
+		
+		var winConfig = Ext.apply({}, this.applyExtraWinConfig('edit', {
+			 title: this.my.editWindowTitle || (this.title + " : Modifier") // i18n
+			,id: this.editWinId(recordId)
+			,layout: this.my.editWinLayout
+			,refreshable: true
+		}));
+		
+		this.beforeCreateWindow(winConfig, "edit");
+
 		return this.createFormWindow(
 			this.getEditFormConfig(),
-			this.applyExtraWinConfig('edit', {
-				 title: this.my.editWindowTitle || (this.title + " : Modifier") // i18n
-				,id: this.editWinId(recordId)
-				,layout: this.my.editWinLayout
-				,refreshable: true
-			}),
+			winConfig,
 			this.saveEdit,
 			this.editWindowToolbarAddExtra.createDelegate(this),
 			{
@@ -1199,13 +1215,17 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 		var formConfig = Ext.apply({}, this.getAddFormConfig());
 		this.onConfigureAddFormPanel(formConfig);
 
+		var winConfig = Ext.apply({}, this.applyExtraWinConfig('add', {
+			 title: this.my.addWindowTitle || ("Ajouter : " + this.title) // i18n
+			,layout: this.my.addWinLayout
+			,id: this.nextAddWinId()
+		}));
+
+		this.beforeCreateWindow(winConfig, "add");
+
 		return this.createFormWindow(
 			formConfig
-			,this.applyExtraWinConfig('add', {
-				 title: this.my.addWindowTitle || ("Ajouter : " + this.title) // i18n
-				,layout: this.my.addWinLayout
-				,id: this.nextAddWinId()
-			})
+			,winConfig
 			,function(win) {
 				this.saveNew.call(this, win, callback, win.loadModelData);
 			}, this.addWindowToolbarAddExtra.createDelegate(this)
@@ -1262,20 +1282,25 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 				} else {
 					Ext.iterate(win.form.getValues(), function(k,v) {
 						requestParams[k] = v;
-					})
+					});
 				}
 			}
 
 			var onSuccess = function(data, response) {
 				//location.href = data.url;
+				if (win) win.close();
 				if (Ext.isIE6 || Ext.isIE7) {
-					Ext.MessageBox.alert('Fichier', me.templates.download_popup({ // i18n
-						href: response.url
-					}));
+					Ext.Msg.alert(
+                'Fichier',
+                String.format(
+                    "Le fichier est disponible à l'adresse suivante : "
+                    + '<a href="{0}">{0}</a>.', 
+                    response.url
+                )
+            );
 				} else {
 					window.open(response.url);
 				}
-				if (win) win.close();
 			};
 
 			if (opts.onSuccess) {
@@ -1300,14 +1325,16 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 					,items: opts.form
 				};
 
-				win = new Oce.FormWindow({
+				win = new Oce.FormWindow(Ext.apply({
 					title: opts.winTitle || 'Options'
 					,formPanel: form
+					,submitButton: 0
+					,cancelButton: 1
 					,buttons: [
 						{text: 'Ok', handler: doRequest} // i18n
 						,{text: 'Annuler', handler: function() {win.close()}} // i18n
 					]
-				});
+				}, opts.winConfig));
 			}
 		}
 
@@ -1367,6 +1394,7 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 			var items = [];
 			var me = this;
 			Ext.iterate(this.extra.toolbar, function(name, menuItems) {
+				if (menuItems === false) return;
 				name = name.replace(/\%title\%/, me.getTitle());
 				var groupItems = [];
 				Ext.each(menuItems, function(item) {
@@ -1389,7 +1417,7 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 						groupItems.push(item);
 					}
 				});
-				items.push({
+				if (groupItems.length) items.push({
 					xtype: 'buttongroup',
 					title: name,
 					align: 'bottom',
@@ -1778,8 +1806,8 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 			this.initStore();
 		}
 	}
-
-	,create: function() {
+	
+	,create: function(config) {
 
 		var me = this;
 		
@@ -1788,27 +1816,34 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 
 		// --- Main Panel ----------------------------------------------------------
 
-		var tabPanelConfig = {
-			'title': this.my.title,
-			closable : true,
-			layout: 'fit'
+		var tabPanelConfig = Ext.apply({
+			title: this.my.title
+			,header: false
+			,closable : true
+			,layout: 'fit'
 			,cls: this.my.name
 	//		,
 	//		bbar: true
 			,items: [this.grid]
+			
 			,listeners: {
-				close: function() {
+				scope: this
+				,close: function() {
 					if (tab !== null) {
 						this.destroy();
 					}
-				}.createDelegate(this),
-				activate: function() {tab.doLayout()}
+					if (this.opened) {
+						this.opened = false;
+						this.fireEvent("close", this);
+					}
+				}
+				,activate: function() {
+					tab.doLayout();
+				}
 			}
-		};
+		}, config);
 
-		if (this.extra.toolbar !== false) {
-			tabPanelConfig.tbar = this.getToolbar();
-		}
+		this.beforeCreateTabPanel(tabPanelConfig);
 
 		var tab = new Ext.Panel(tabPanelConfig);
 
@@ -1817,6 +1852,13 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 		(function() {me.doFirstLoad();}).defer(500);
 
 		return tab;
+	}
+
+	,beforeCreateTabPanel: function(config) {
+		// toolbar plugin
+		if (this.extra.toolbar !== false) {
+			config.tbar = this.getToolbar();
+		}
 	}
 
 	,afterInitGrid: function() {}
@@ -2125,7 +2167,6 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 	,createFilterMenu: function(filters) {
 
 		var me = this
-			,menu
 			,blockCheckHandler = false
 			;
 
@@ -2147,7 +2188,7 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 		});
 
 		var lastFilters = {};
-		var searchHandler = function() {
+		var searchHandler = function(menu) {
 
 			if (!me.store) return;
 
@@ -2169,9 +2210,11 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 				me.store.baseParams.json_filters = encodeURIComponent(Ext.encode(activeFilters));
 				me.reload();
 			}
-		}.createDelegate(this);
+		};
 
-		var checkHandler = function() {
+		var checkHandler = function(menuItem) {
+			var menu = menuItem.parentMenu;
+			if (!menu) return;
 			if (blockCheckHandler) return;
 			var all = true;
 			menu.items.each(function(item) {
@@ -2179,7 +2222,7 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 					&& !item.isOption) all = false;
 			});
 			checkAllItem.setChecked(all);
-		}
+		};
 
 		var items = [
 			checkAllItem
@@ -2193,7 +2236,7 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 				items.push(Ext.applyIf(f, {
 					checked: true
 					,hideOnClick: false
-					,'checkHandler':checkHandler
+					,checkHandler: checkHandler
 				}))
 			}
 		});
@@ -2202,28 +2245,36 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 		items.push({
 			 text: 'Appliquer'
 			,iconCls : 'refresh'
-			,hideOnClick:false
-			,handler: function() {
-				searchHandler();
-				menu.hide();
+			
+			,scope: this
+			,handler: function(menuItem) {
+				var menu = menuItem.parentMenu;
+				if (menu) {
+					searchHandler.call(this, menu);
+					menu.hide();
+				}
 			}
 		});
 
-		menu = new Ext.menu.Menu({
+		return {
 			items: items
-		});
-
-		checkHandler();
-
-		menu.on('beforehide', searchHandler);
-
-		if (this.store) {
-			searchHandler();
-		} else {
-			this.afterInitStore = this.afterInitStore.createSequence(searchHandler);
-		}
-
-		return menu;
+			,listeners: {
+				scope: this
+				,beforehide: searchHandler
+				,afterrender: function(menu) {
+					checkHandler.call(this, {
+						parentMenu: menu
+					});
+					if (this.store) {
+						searchHandler.call(this, menu);
+					} else {
+						this.afterInitStore = this.afterInitStore.createSequence(function() {
+							searchHandler.call(me, menu);
+						});
+					}
+				}
+			}
+		};
 	}
 
 	,initSearchPlugin: function() {
@@ -2597,19 +2648,54 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 			})
 		}, this)
 	}
-
-	,open: function(destination) {
+	
+	,open: function(destination, config) {
+		
+		this.opening = true;
 		
 		if (!destination) destination = Oce.mx.application.getMainDestination();
 
 		if (this.my.tab === null) {
-			this.my.tab = this.create();
+			this.my.tab = this.create(config);
 			destination.add(this.my.tab);
 		}
 		
 		this.my.tab.show();
 
 		if (this.my.toolbar) this.my.toolbar.doLayout();
+		
+		this.opening = false;
+		this.opened = true;
+		this.fireEvent("open", this);
+	}
+	
+	,moduleActions: {
+		open: function(cb, scope, args) {
+			this.on({
+				single: true
+				,open: cb
+				,scope: scope
+			});
+			return this.open.apply(this, args);
+		}
+		,addRecord: function(cb, scope, args) {
+			this.addRecord.apply(this, args);
+			cb.call(scope || this, this);
+		}
+	}
+	
+	,executeAction: function(name, callback, scope, args) {
+		if (Ext.isObject(name)) {
+			callback = name.callback || name.fn;
+			scope = name.scope || this;
+			args = name.args;
+			name = name.action || name.name;
+		}
+		return this.moduleActions[name].call(this, callback, scope, args);
+	}
+	
+	,getAction: function(name) {
+		return this.actions[name].createDelegate(this);
 	}
 	
 	,firstLoad: false
@@ -2655,15 +2741,165 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 		this.reloadLatch--;
 	}
 
-	,reload: function() {
+	/**
+	 * @param {Function|Object} callback (Optional) A callback or a config 
+	 * object to be passed to the store.reload() function.
+	 * @param {Object} scope (Optional) Scope with which to call the callback 
+	 * (defaults to the GridModule object). This argument is ignored if a config
+	 * Object is given for callback, instead of a function.
+	 */
+	,reload: function(callback, scope) {
 		if (this.reloadLatch > 0) {
 			this.reloadLatch--;
 		} else {
+			var o;
+			if (callback) {
+				if (Ext.isFunction(callback)) {
+					o = {
+						callback: callback
+						,scope: scope || this
+					}
+				} else {
+					o = callback;
+				}
+			}
 			if (this.firstLoad) {
 				this.reloadLatch = 0;
-				this.store.reload();
+				this.store.reload(o);
 			}
 		}
+	}
+	
+	// private
+	,columnMenu_onBeforeShow: function(colMenu) {
+		var cm = this.grid.getColumnModel(),
+			colCount = cm.getColumnCount();
+			
+		colMenu.removeAll();
+		
+		// --- Select all ---
+		var checkAllItem = new Ext.menu.CheckItem({
+			 text:this.my.showAllColsText
+			,checked:!(this.checkIndexes instanceof Array)
+			,hideOnClick:false
+			,handler:function(item) {
+				var checked = ! item.checked;
+				apply(function() {
+					item.parentMenu.items.each(function(i) {
+						if(item !== i && i.setChecked && !i.disabled) {
+							i.setChecked(checked);
+						}
+					});
+				});
+			}
+		});
+		colMenu.add(checkAllItem,'-');
+		
+		// This method intends to give some air to the layout to avoid some
+		// overly manifest freezing of the UI
+		var me = this,
+			applying = 0;
+		var apply = function(fn) {
+			var run = function() {
+				applying++;
+				fn();
+				applying--;
+				if (!applying) {
+					me.grid.el.unmask();
+					me.grid.view.refresh(true);
+				}
+			};
+			if (!applying) {
+				me.grid.el.mask('Application', 'x-mask-loading');
+				run.defer(100);
+			} else {
+				run();
+			}
+		};
+
+		// --- Items ---
+		var checkAllSelected = false;
+
+		var groups = {}, groupMenus;
+		if (this.extra.columnGroups) {
+			groupMenus = [];
+			Ext.iterate(this.extra.columnGroups.items, function(title,items) {
+				var menu = new Ext.menu.Menu();
+
+				groupMenus.push(menu);
+
+				colMenu.add(new Ext.menu.CheckItem({
+					hideOnClick: false
+					,text: title
+					,menu: menu
+					,checkHandler: function(cb, check) {
+						if (!cb.initiated) return;
+						if (menu.items) {
+							apply(function() {
+								menu.items.each(function(item) {
+									item.setChecked(check);
+								});
+							})
+						}
+					}
+				}));
+
+				Ext.each(items, function(item) {
+					groups[item] = menu;
+				});
+			});
+			colMenu.add('-');
+		}
+
+		for(var i = 0; i < colCount; i++){
+			if(cm.config[i].hideable !== false){
+				checkAllSelected = checkAllSelected || !cm.isHidden(i);
+				(groups[cm.config[i].dataIndex] || colMenu).add(new Ext.menu.CheckItem({
+					itemId: 'col-'+cm.getColumnId(i),
+					text: cm.getColumnHeader(i),
+					checked: !cm.isHidden(i),
+					hideOnClick:false,
+					disabled: cm.config[i].hideable === false,
+					checkHandler: function(item, checked, cm) {
+						var index = cm.getIndexById(item.itemId.substr(4));
+						if(index != -1){
+							apply(function() {
+								// We don't want to use the normal setHidden
+								// method here, because it triggers an overly
+								// long to process "hiddenchange" event.
+								// We need however to clean the ColumnModel's
+								// totalWidth to avoid the columns rendering
+								// to become all fucked up (see
+								// ColumnModel.setHidden source).
+								cm.totalWidth = null;
+								cm.config[index].hidden = !checked;
+								// cm.setHidden(index, !checked);
+							});
+						}
+					}.createDelegate(this, [cm], 2)
+				}));
+			}
+		}
+
+		checkAllItem.setChecked(checkAllSelected);
+
+		// Finish group menus -- determine checked statut from items
+		if (groupMenus) {
+			Ext.each(groupMenus, function(menu) {
+				var checked = false,
+					cb = menu.ownerCt;
+				if (menu.items) {
+					menu.items.each(function(item) {
+						if (item.checked) checked = true;
+					});
+				} else {
+					cb.disable();
+				}
+				cb.setChecked(checked);
+				cb.initiated = true;
+			});
+		}
+
 	}
 
 	,initActions: function() {
@@ -2695,140 +2931,6 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 //			win.show();
 //		}.createDelegate(this);
 
-		// --- Columns Menu Items ---
-		var colMenu = new Ext.menu.Menu();
-
-		var me = this;
-		var applying = 0;
-		// This method intends to give some air to the layout to avoid some
-		// overly manifest freezing of the UI
-		var apply = function(fn) {
-			var run = function() {
-				applying++;
-				fn();
-				applying--;
-				if (!applying) {
-					me.grid.el.unmask();
-					me.grid.view.refresh(true);
-				}
-			};
-			if (!applying) {
-				me.grid.el.mask('Application', 'x-mask-loading');
-				run.defer(100);
-			} else {
-				run();
-			}
-		}
-
-		this.initGrid = this.initGrid.createSequence(function() {
-	//		this.$prototype.afterInitGrid.apply(this, arguments);
-			colMenu.on('beforeshow', function(colMenu) {
-				var cm = this.grid.getColumnModel();
-				var colCount = cm.getColumnCount();
-				colMenu.removeAll();
-				// --- Select all ---
-				var checkAllItem = new Ext.menu.CheckItem({
-					 text:this.my.showAllColsText
-					,checked:!(this.checkIndexes instanceof Array)
-					,hideOnClick:false
-					,handler:function(item) {
-						var checked = ! item.checked;
-						apply(function() {
-							item.parentMenu.items.each(function(i) {
-								if(item !== i && i.setChecked && !i.disabled) {
-									i.setChecked(checked);
-								}
-							});
-						});
-					}
-				});
-				colMenu.add(checkAllItem,'-');
-				// --- Items ---
-				var checkAllSelected = false;
-				
-				var groups = {}, groupMenus;
-				if (this.extra.columnGroups) {
-					groupMenus = [];
-					Ext.iterate(this.extra.columnGroups.items, function(title,items) {
-						var menu = new Ext.menu.Menu();
-						
-						groupMenus.push(menu);
-						
-						colMenu.add(new Ext.menu.CheckItem({
-							hideOnClick: false
-							,text: title
-							,menu: menu
-							,checkHandler: function(cb, check) {
-								if (!cb.initiated) return;
-								if (menu.items) {
-									apply(function() {
-										menu.items.each(function(item) {
-											item.setChecked(check);
-										});
-									})
-								}
-							}
-						}));
-						
-						Ext.each(items, function(item) {
-							groups[item] = menu;
-						});
-					});
-					colMenu.add('-');
-				}
-				
-				for(var i = 0; i < colCount; i++){
-					if(cm.config[i].hideable !== false){
-						checkAllSelected = checkAllSelected || !cm.isHidden(i);
-						(groups[cm.config[i].dataIndex] || colMenu).add(new Ext.menu.CheckItem({
-							itemId: 'col-'+cm.getColumnId(i),
-							text: cm.getColumnHeader(i),
-							checked: !cm.isHidden(i),
-							hideOnClick:false,
-							disabled: cm.config[i].hideable === false,
-							checkHandler: function(item, checked, cm) {
-								var index = cm.getIndexById(item.itemId.substr(4));
-								if(index != -1){
-									apply(function() {
-										// We don't want to use the normal setHidden
-										// method here, because it triggers an overly
-										// long to process "hiddenchange" event.
-										// We need however to clean the ColumnModel's
-										// totalWidth to avoid the columns rendering
-										// to become all fucked up (see
-										// ColumnModel.setHidden source).
-										cm.totalWidth = null;
-										cm.config[index].hidden = !checked;
-										// cm.setHidden(index, !checked);
-									});
-								}
-							}.createDelegate(this, [cm], 2)
-						}));
-					}
-				}
-				
-				checkAllItem.setChecked(checkAllSelected);
-				
-				// Finish group menus -- determine checked statut from items
-				if (groupMenus) {
-					Ext.each(groupMenus, function(menu) {
-						var checked = false,
-							cb = menu.ownerCt;
-						if (menu.items) {
-							menu.items.each(function(item) {
-								if (item.checked) checked = true;
-							});
-						} else {
-							cb.disable();
-						}
-						cb.setChecked(checked);
-						cb.initiated = true;
-					});
-				}
-				
-			}.createDelegate(this))
-		})
-
 		var actions = {
 			add: {
 				xtype: 'oce.rbbutton'
@@ -2852,7 +2954,12 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 				 xtype: 'oce.rbbutton'
 				,text: 'Colonnes'
 		//		,iconCls : 'b_ico_column'
-				,menu: colMenu
+				,menu: {
+					listeners: {
+						scope: this
+						,beforeshow: this.columnMenu_onBeforeShow
+					}
+				}
 			}
 
 			,pdf: {
@@ -2877,5 +2984,54 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.Pa
 	}
 
 });
+
+Oce.GridModule.plugins = {
+
+	IconCls: eo.Class({
+		constructor: function(gm) {
+			this.gm = gm;
+
+			if (!gm.extra.iconCls) return;
+
+			Ext.apply(gm, {
+
+				beforeCreateWindow: gm.beforeCreateWindow.createSequence(
+					function(config, action) {
+						this.configWindowIcon(config, action);
+					}
+				)
+
+				,beforeCreateTabPanel: gm.beforeCreateTabPanel.createSequence(function(config) {
+					// icon plugin
+					if (this.extra.iconCls) {
+						config.iconCls = this.getIconCls();
+					}
+				})
+
+				,getIconCls: function(action) {
+					if (!this.extra.iconCls) {
+						return action || "";
+					} else {
+						return this.extra.iconCls
+								.replace("%module%", this.name)
+								.replace("%action%", action || "");
+					}
+				}
+
+				// functionnality: icon
+				,configWindowIcon: function(config, action) {
+					var ic = this.getIconCls(action),
+						current = config.iconCls;
+					if (current) {
+						config.iconCls = current + " " + ic;
+					} else {
+						config.iconCls = ic;
+					}
+				}
+
+			});
+		}
+	})
+}
 
 Oce.deps.reg('Oce.GridModule');

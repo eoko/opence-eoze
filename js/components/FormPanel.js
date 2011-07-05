@@ -1,4 +1,4 @@
-Ext.ns('Oce');
+Ext.ns("Oce");
 
 // ----<<  FormPanel  >>--------------------------------------------------------
 
@@ -15,11 +15,11 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
 		});
 
 		config = Ext.applyIf(config || {}, {
-			 url:'index.php'
-			,bodyStyle: 'padding:25px; background:transparent'
+			 url:"index.php"
+			,bodyStyle: "padding:15px; background:transparent"
 			,border: false
-			,waitMsg: 'Chargement des données'
-			,waitTitle: 'Veuillez patientez'
+			,waitMsg: "Chargement des données"
+			,waitTitle: "Veuillez patientez"
 			,trackResetOnLoad: true
 		});
 
@@ -56,28 +56,29 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
 
 		var keys = new Array();
 
-		if ('submitHandler' in config) {
-
-			var listener = function(field, el) {
-				if (el.getKey() == Ext.EventObject.ENTER) config.submitHandler();
-			}
-
-//			for (var i in config.items) {
-			Ext.each(config.items, function(item) {
-				if ((item.xtype !== undefined && !/combo/.test(item.xtype))
-					|| (item instanceof Ext.Component && !(item instanceof Ext.form.ComboBox))) {
-
-					if ('listeners' in item == false) item.listeners = {}
-					if (item.listeners.specialkey === undefined) {
-						item.listeners.specialkey = listener;
-					} else if (Ext.isArray(item.listeners.specialkey)) {
-						item.listeners.specialkey = item.listeners.specialkey.concat([listener]);
-					} else {
-						item.listeners.specialkey = [item.listeners.specialkey, listener]
-					}
-				}
-			});
-		}
+//		if ('submitHandler' in config) {
+//
+//			var listener = function(field, el) {
+//				if (el.getKey() == Ext.EventObject.ENTER) config.submitHandler();
+//			}
+//
+////			for (var i in config.items) {
+//			Ext.each(config.items, function(item) {
+//				if ((item.xtype !== undefined && !/combo/.test(item.xtype))
+//					|| (item instanceof Ext.Component && !(item instanceof Ext.form.ComboBox))) {
+//
+//					if (!item.listeners) item.listeners = {};
+//					
+//					if (!item.listeners.specialkey) {
+//						item.listeners.specialkey = listener;
+////					} else if (Ext.isArray(item.listeners.specialkey)) {
+////						item.listeners.specialkey = item.listeners.specialkey.concat([listener]);
+////					} else {
+////						item.listeners.specialkey = [item.listeners.specialkey, listener]
+//					}
+//				}
+//			});
+//		}
 
 //		if ('cancelButtonIndex' in config) {
 //			var cancelButtonHandler = config.buttons[config.cancelButtonIndex].handler;
@@ -91,7 +92,7 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
 //		}
 
 		if (keys.length > 0) {
-			if ('keys' in config) {
+			if ("keys" in config) {
 				var previous;
 				if (keys.config instanceof Array) {
 					previous = keys.config;
@@ -109,13 +110,29 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
 		if (this.formListeners) {
 			this.form.on(this.formListeners);
 		}
-
+		
 		this.tabsByName = {};
-		Ext.each(this.findByType('panel'), function(item) {
+		Ext.each(this.findByType("panel"), function(item) {
 			if (item.tabName) this.tabsByName[item.tabName] = item;
 		}, this)
 
 		this.modified = false;
+	}
+	
+	,initComponent: function() {
+		Oce.FormPanel.superclass.initComponent.apply(this, arguments);
+		
+		if (this.submitHandler) {
+			
+			var h = this.submitHandler,
+				l = function(field, el) {
+					if (el.getKey() == Ext.EventObject.ENTER) h();
+				};
+			
+			this.items.each(function(item) {
+				item.on("specialkey", l);
+			});
+		}
 	}
 	
 	,afterRender: function() {
@@ -134,7 +151,7 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
 		var changeListener = function() {
 			if (!this.modified && !me.preventModificationEvents) {
 				this.modified = true;
-				me.fireEvent('modified');
+				me.fireEvent("modified");
 			}
 		}.createDelegate(this);
 
@@ -150,32 +167,66 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
 		var addChangeListener = function(item) {
 
 			// Defaults on the change event to cover the max of corner cases
-			item.on('change', changeListener);
+			item.on("change", changeListener);
 
 			// But tries to find more appropriate events for specific types of
 			// fields
 			if (item instanceof Ext.form.TextField) {
 				if (item.el) {
-					item.mon(item.el, 'keyup', changeListenerWithDirtyCheck.createCallback(item));
+					item.mon(item.el, "keyup", changeListenerWithDirtyCheck.createCallback(item));
 				} else {
-					item.on('afterrender', function() {addChangeListener(item)})
+					item.on("afterrender", function() {addChangeListener(item)})
 				}
 			}
 			if (item instanceof Ext.form.Checkbox) {
-				item.on('check', changeListener);
+				item.on("check", changeListener);
 			}
 			if (item instanceof Ext.form.TriggerField) {
-				item.on('select', changeListener);
+				item.on("select", changeListener);
 			}
 			if (item instanceof Oce.form.GridField) {
-				item.on('modified', changeListener);
+				item.on("modified", changeListener);
 			}
 			if (item instanceof Ext.form.HtmlEditor) {
-//				item.on('sync', changeListener);
-				item.on('change', changeListener);
+//				item.on("sync", changeListener);
+				item.on("change", changeListener);
 			}
 			if (item instanceof Ext.form.CompositeField) {
 				item.items.each(addChangeListener);
+			}
+			if (item instanceof Ext.ux.form.SpinnerField) {
+				item.on("spin", changeListener);
+			}
+			if (item instanceof Ext.form.RadioGroup) {
+				// we've got a problem here... RadioGroup will bufferize the
+				// events of its children for 10ms before firing its own change
+				// event; as a consequences, this event won't be in the same
+				// thread as the one launching the loading action of the 
+				// underlying form, and so it won't be blocked here. However, it
+				// needs to be, in order to prevent the initial value setting of
+				// the form, when it's loaded, to intenpestively trigger this
+				// FormPanel's own modification event...
+
+				// ... so, first, let's remove the faulty event listener
+				item.un("change", changeListener);
+				
+				// ... and listen on the source instead!
+				// (to make it even funnier, the eachItem method only works when 
+				// items have already been constructed)
+				if (item.items && item.items.each) {
+					item.eachItem(function(item) {
+						item.on("check", changeListener);
+					});
+				} else {
+					item.on({
+						single: true
+						,afterrender: function(item) {
+							item.eachItem(function(item) {
+								item.on("check", changeListener);
+							});
+						}
+					});
+				}
 			}
 		};
 
@@ -193,11 +244,11 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
 						&& item.checkboxName) {
 
 					var addCheckListener = function(fs) {
-						fs.checkbox.on('click', changeListener);
+						fs.checkbox.on("click", changeListener);
 					}
 					
 					if (item.checkbox) addCheckListener(item);
-					else item.on('afterrender', addCheckListener.createCallback(item));
+					else item.on("afterrender", addCheckListener.createCallback(item));
 				}
 
 				if (item instanceof Ext.Container) {
@@ -211,7 +262,7 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
 
 	,clearModified: function() {
 		this.modified = false;
-		this.fireEvent('modificationcleared');
+		this.fireEvent("modificationcleared");
 	}
 
 	,setWindow: function(win) {
@@ -219,7 +270,7 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
 
 			// remove previous event
 			if (this.windowSaveListener) {
-				this.win.un('aftersave', this.windowSaveListener);
+				this.win.un("aftersave", this.windowSaveListener);
 				delete this.windowSaveListener;
 			}
 
@@ -228,7 +279,7 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
 			win.setTab = this.setTab.createDelegate(this);
 
 			// clearing modified state on successful save
-			win.on('aftersave', this.windowSaveListener = this.clearModified.createDelegate(this));
+			win.on("aftersave", this.windowSaveListener = this.clearModified.createDelegate(this));
 		}
 	}
 
@@ -241,7 +292,7 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
 			callback(this.form);
 		} else {
 			var me = this;
-			this.on('afterload', function() {
+			this.on("afterload", function() {
 				callback(me.form);
 				callback.call(scope || me, me.form);
 			});
@@ -255,12 +306,12 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
 
 		var params = {
 			controller: this.controller
-			,action:'load_one'
+			,action:"load_one"
 		};
 		params[win.pkName] = win.idValue;
 
 //		this.beforeFormLoad(params);
-		this.fireEvent('beforeload', params);
+		this.fireEvent("beforeload", params);
 
 		this.preventModificationEvents = true;
 		var afterLoadSuccess = function() {
@@ -278,10 +329,10 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
 		};
 
 		this.form.load({
-			url: 'index.php'
+			url: "index.php"
 			,params: params
-			,waitMsg: 'Chargement des données' // i18n
-			,waitTitle: 'Veuillez patientez' // i18n
+			,waitMsg: "Chargement des données" // i18n
+			,waitTitle: "Veuillez patientez" // i18n
 
 			,scope: this
 			,success: function(response, action, type) {
@@ -293,13 +344,13 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
 //				this.afterEditFormLoaded(this.form);
 				this.loaded = true;
 				afterLoadSuccess();
-				this.fireEvent('afterload', this.form);
+				this.fireEvent("afterload", this.form);
 				if (callback) callback(this.form);
 			}
 			,failure: function(form, action) {
 				me.preventModificationEvents = false;
-				if (action && action.result && action.result.cause === 'sessionTimeout') {
-					Oce.mx.Security.onOnce('login', this.refresh.createDelegate(this));
+				if (action && action.result && action.result.cause === "sessionTimeout") {
+					Oce.mx.Security.onOnce("login", this.refresh.createDelegate(this));
 				} else {
 					win.close();
 					Ext.MessageBox.alert("Erreur", "Impossible de charger les données") // i18n
@@ -312,7 +363,7 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
 	// Overridden to allow for JsonForm
 	,createForm: function() {
         var config = Ext.applyIf({listeners: {}}, this.initialConfig);
-		if (config.jsonFormParam) {
+		if (config.jsonFormParam || config.serializeForm) {
 			return new Oce.form.JsonForm(null, config);
 		} else {
 			return new Ext.form.BasicForm(null, config);
@@ -332,7 +383,7 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
 
 }); // << FormPanel
 
-Ext.reg('oce.form', Oce.FormPanel)
+Ext.reg("oce.form", Oce.FormPanel)
 
 /**
  * @class Oce.columnContainer
@@ -395,7 +446,7 @@ Oce.ColumnContainer = Ext.extend(Ext.Container, {
 			if (config.cols) {
 				return config.cols;
 			} else if (config.columns === undefined || !config.items) {
-				throw new Error('Invalid config options: cols || (columns && items)');
+				throw new Error("Invalid config options: cols || (columns && items)");
 			}
 			var n = config.columns;
 			var colItems = []; 
@@ -484,4 +535,4 @@ Oce.ColumnContainer = Ext.extend(Ext.Container, {
 	}
 });
 
-Ext.reg('colcontainer', Oce.ColumnContainer);
+Ext.reg("colcontainer", Oce.ColumnContainer);

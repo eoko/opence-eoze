@@ -12,7 +12,8 @@
 use eoko\config\ConfigManager;
 
 $directAccess = false;
-date_default_timezone_set('Europe/London');
+date_default_timezone_set('Europe/Paris');
+bcscale(2);
 
 function defineIf($name, $value) {
 	if (!defined($name)) define($name, $value);
@@ -35,18 +36,20 @@ if (file_exists($filename = ROOT . '../config.php')
 defineIf('APP_NAME', 'Opence');
 defineIf('APP_TITLE', 'OpenCE!');
 
-$phpSubDirs = array(
-	'GridModule'
-);
+// removed on 2/26/11 2:27 PM
+//$phpSubDirs = array(
+//	'GridModule'
+//);
 
-if (!isset($dbConfig)) {
-	$dbConfig = array(
-		'user' => 'root'
-		,'host' => 'localhost'
-		,'database' => 'oce_dev'
-		,'password' => 'root'
-	);
-}
+// deprecated on 2/26/11 2:10 PM
+//if (!isset($dbConfig)) {
+//	$dbConfig = array(
+//		'user' => 'root'
+//		,'host' => 'localhost'
+//		,'database' => 'oce_dev'
+//		,'password' => 'root'
+//	);
+//}
 
 defineIf('USE_CONTROLLER_CACHE', false);
 
@@ -84,10 +87,10 @@ defineIf('CSS_URL', EOZE_BASE_URL . 'css/');
 defineIf('JS_PATH', EOZE_PATH . 'js' . DS);
 defineIf('JS_URL', EOZE_BASE_URL . 'js/');
 
-defineIf('MODEL_PATH', ROOT . 'models' . DS);
-defineIf('MODEL_BASE_PATH', MODEL_PATH . 'base' . DS);
-defineIf('MODEL_PROXY_PATH', MODEL_PATH . 'proxy' . DS);
-defineIf('MODEL_QUERY_PATH', MODEL_PATH . 'query' . DS);
+//defineIf('MODEL_PATH', ROOT . 'models' . DS);
+//defineIf('MODEL_BASE_PATH', MODEL_PATH . 'base' . DS);
+//defineIf('MODEL_PROXY_PATH', MODEL_PATH . 'proxy' . DS);
+//defineIf('MODEL_QUERY_PATH', MODEL_PATH . 'query' . DS);
 
 defineIf('LIB_BASE_URL', SITE_BASE_URL . LIB_DIR . '/');
 defineIf('LIB_IMAGES_BASE_URL', LIB_BASE_URL . 'images' . '/');
@@ -156,7 +159,9 @@ require_once PHP_PATH . 'ModelRelationInfo.class.php';
 //require_once PHP_PATH . str_replace('\\', DS, 'eoko/cqlix/Relation/RelationInfo') . '.classes.php';
 
 // --- Exception handler ---
-if ((!isset($test) || !$test) && (!isset($is_script) || !$is_script)) require_once (PHP_PATH . 'ExceptionHandler.class.php');
+if ((!isset($test) || !$test) && (!isset($is_script) || !$is_script)) {
+	require_once (PHP_PATH . 'ExceptionHandler.class.php');
+}
 
 // --- Class loader --
 // Autoload for helpers in /inc
@@ -166,16 +171,15 @@ $classLoader = eoko\php\ClassLoader::register();
 $classLoader->addIncludePath(array(
 	PHP_PATH,
 	APP_PHP_PATH,
-	MODEL_PATH,
-	MODEL_PROXY_PATH
 ));
 
 if (USE_CONTROLLER_CACHE) $classLoader->addIncludePath(CACHE_PATH . 'php');
 
-foreach ($phpSubDirs as $dir) {
-	$classLoader->addIncludePath(PHP_PATH . $dir . DS);
-	$classLoader->addIncludePath(APP_PHP_PATH . $dir . DS);
-}
+// removed on 2/26/11 2:27 PM
+//foreach ($phpSubDirs as $dir) {
+//	$classLoader->addIncludePath(PHP_PATH . $dir . DS);
+//	$classLoader->addIncludePath(APP_PHP_PATH . $dir . DS);
+//}
 
 
 // === Configure Plugins ===
@@ -191,17 +195,56 @@ if (function_exists('configure_application')) {
 if (!isset($bootstrap)) $bootstrap = new \eoko\application\BaseBootstrap();
 $bootstrap();
 
+
+// Load directories configuration (from eoze\application)
+function loadAppConfig($classLoader) {
+	$appConfig = ConfigManager::get('eoze\application');
+	if (isset($appConfig['directories'])) {
+		$dc = $appConfig['directories'];
+		if (isset($dc['models'])) {
+			$m = $dc['models'];
+			if (substr($m, -1) !== DS) $m .= DS;
+			define('MODEL_PATH', ROOT . $m);
+			define('MODEL_BASE_PATH', MODEL_PATH . 'base' . DS);
+			define('MODEL_PROXY_PATH', MODEL_PATH . 'proxy' . DS);
+			define('MODEL_QUERY_PATH', MODEL_PATH . 'query' . DS);
+
+			$classLoader->addIncludePath(array(
+				MODEL_PATH, MODEL_PROXY_PATH
+			));
+		}
+	}
+}
+
+loadAppConfig($classLoader);
+
 // Finally, start the session (must be done after the autoloader has been set,
 // so that object stored in session (notably: UserSession) can be instantiated)
 session_start();
 
-require_once 'debug.inc.php';
+//require_once 'debug.inc.php'; // there's nothing in there...
 
-// debug
-//Logger::addAppender(new LoggerOutputAppender(true));
+// == Logging ==
+if (ConfigManager::get('eoko/log/appenders/Output') || isset($_GET['olog'])) {
+	Logger::addAppender(new LoggerOutputAppender());
+}
+
+if (ConfigManager::get('eoko/log/appenders/FirePHP')) {
+	Logger::addAppender(new LoggerFirePHPAppender());
+}
+
+if (null !== $level = ConfigManager::get('eoko/log', 'level', null)) {
+	Logger::getLogger()->setLevel(constant("Logger::$level"));
+}
+
+if (($levels = ConfigManager::get('eoko/log/levels'))) {
+	Logger::setLevels($levels);
+}
 
 if (!defined('ADD_LOG_APPENDERS') || ADD_LOG_APPENDERS) {
-	Logger::addAppender(new LoggerFileAppender());
+	if (ConfigManager::get('eoko/log/appenders/File')) {
+		Logger::addAppender(new LoggerFileAppender());
+	}
 }
 
 \eoko\util\file\FileTypes::getInstance();

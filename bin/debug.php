@@ -1,29 +1,22 @@
 <?php
 
 require_once 'init.inc.php';
-Logger::addAppender(new LoggerOutputAppender(false));
+//Logger::addAppender(new LoggerOutputAppender(false));
 
-use eoko\util\YmlReader;
+Logger::getLogger()->setLevel(Logger::ERROR);
+Logger::getLogger('eoko\cache\Cache')->setLevel(Logger::DEBUG);
 
-class Test {
-	private function doRun() {
-		echo 'Test';
-	}
-	public function run() {
-		$this->doRun();
-	}
-}
+use eoko\module\ModuleManager;
 
-class TTest extends Test {
-	private function doRun() {
-		echo 'T-Test';
-	}
-	public function run() {
-		$this->doRun();
-	}
-}
+$m = ModuleManager::getModule('sm_child_48_main');
 
-$t = new TTEst;
-$t->run();
+$m instanceof eoko\modules\TreeMenu\HasMenuActions;
 
-phpinfo();
+dump($m->getAvailableActions());
+
+//dump($m->getConfig());
+$x = $m->getConfig()->get('extra');
+
+dumpl($x['menu']);
+
+//dump($m->getActionProvider()->getFamily());
