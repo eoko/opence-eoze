@@ -191,6 +191,17 @@ class Columns {
 						self::setColStoreItemIf($col, 'type', 'string');
 						break;
 				}
+				
+				// auto set col.filter[type === list].options
+				if (isset($col['filter']) && isset($col['filter']['type'])
+						&& $col['filter']['type'] === 'list'
+						&& (
+							!isset($col['filter']['options'])
+							|| ($col['filter']['options'] === 'auto')
+						)
+				) {
+					$col['filter']['options'] = $this->getDefaultFilterListOptions($col);
+				}
 
 				if (isset($col['formField'])) {
 					if (!isset($col['formField']['allowBlank'])) {
@@ -268,6 +279,13 @@ class Columns {
 				$name => $value
 			);
 		}
+	}
+	
+	private function getDefaultFilterListOptions($col) {
+		return $this->table->createQuery()
+				->select(new \QuerySelectRaw("DISTINCT $col[name]"))
+				->orderBy($col['name'])
+				->executeSelectColumn();
 	}
 
 	protected function formConfigFromModel($name, $action = null) {
