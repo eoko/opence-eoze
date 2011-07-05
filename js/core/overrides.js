@@ -565,3 +565,11 @@ Ext.override(Ext.Element, {
 })(); // closure
 
 Ext.form.TextField.prototype.selectOnFocus = true;
+
+// Fix Int data type to actually return NULL if the value cannot be parsed
+Ext.data.Types.INT.convert = function(v) {
+	var r = v !== undefined && v !== null && v !== '' ?
+			parseInt(String(v).replace(Ext.data.Types.stripRe, ''), 10) 
+			: (this.useNull ? null : 0); 
+	return Ext.isNumber(r) ? r : (this.useNull ? null : 0);
+}
