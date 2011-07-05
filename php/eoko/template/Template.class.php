@@ -2,6 +2,8 @@
 
 namespace eoko\template;
 
+includeExtension(__FILE__, 'functions');
+
 use IllegalArgumentException;
 
 class Template extends Renderer {
@@ -22,6 +24,10 @@ class Template extends Renderer {
 	
 	public function __unset($name) {
 		unset($this->vars[$name]);
+	}
+	
+	public function clearData() {
+		$this->vars = array();
 	}
 
 	/**
@@ -121,14 +127,8 @@ class Template extends Renderer {
 	}
 
 	protected function doRender() {
-		
 		extract($this->vars);
-		
-		eval(
-			'namespace eoko\\template { ?>' . 
-			$this->getContent()
-			. '<? } ?>'
-		);
+		eval("namespace eoko\\template { ?>{$this->getContent()}<? } ?>");
 	}
 
 }

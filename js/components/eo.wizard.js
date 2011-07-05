@@ -12,9 +12,12 @@ if (!eo.wizard.WindowBase) {
 eo.wizard.Step = Ext.extend(Ext.util.Observable, {
 
 	constructor: function(config) {
-		eo.wizard.Step.superclass.constructor.call(this, config);
+		
+		this.addEvents("enter", "leave");
 		Ext.apply(this, config);
-
+		
+		eo.wizard.Step.superclass.constructor.call(this, config);
+		
 		if (!this.name) this.name = Ext.id();
 
 		if (false == this.panel instanceof Ext.Panel) {
@@ -57,7 +60,7 @@ eo.wizard.Step = Ext.extend(Ext.util.Observable, {
 	}
 
 	,canFinish: function() {
-		if (this.finish) {
+		if (this.finish && !this.finishDisabled) {
 			if (Ext.isFunction(this.finish)) return this.finish();
 			else return this.finish;
 		} else {
@@ -90,8 +93,12 @@ eo.wizard.Step = Ext.extend(Ext.util.Observable, {
 		} else if (n instanceof eo.wizard.Step) {
 			return n;
 		} else if (Ext.isFunction(n)) {
-			return n.call(this);
+			// we cannot require the step here, because this method is called
+			// during parent's construction, before parent.steps exists...
+			return this.parent.getStep(n.call(this), false);
 		} else if (Ext.isString(n)) {
+			// we cannot require the step here, because this method is called
+			// during parent's construction, before parent.steps exists...
 			return this.parent.getStep(n, false);
 		} else {
 			throw new Error('Invalid step property "' + prop + '": ' + n);
@@ -111,6 +118,42 @@ eo.wizard.Step = Ext.extend(Ext.util.Observable, {
 	}
 	,getPrev: function() {
 		return this.getNextOrPrev("prev");
+	}
+	
+	/**
+	 * Equivalent of the continueNext() method, except that the actual call is
+	 * deferred of the specified delay. The wizard navigation UI will be
+	 * disabled until the delay has passed, and a visual indicator will inform
+	 * the user of the interface state.
+	 * @param {Int} delay The delay, in ms.
+	 */
+	,deferContinueNext: function(delay) {
+		var wiz = this.parent.getRootWizard();
+		wiz.disableButtons();
+
+		// TODO the next button should probably be accessed indirectly, through
+		// an event, for coherence with the wizard method...
+		var win = wiz.findParentBy(function(p){return p instanceof Ext.Window}),
+			bt = win && win.buttons && win.buttons.next,
+			cls = "";
+		
+		if (bt) {
+			cls = bt.iconCls;
+			bt.setIconClass("ico loader button");
+		}
+		
+		(function() {
+			if (bt) bt.setIconClass(cls);
+			this.continueNext();
+		}).defer(delay, this);
+	}
+	/**
+	 * Create a delegate method for the {@link deferContinueNext()} method with
+	 * the specified delay. The returned callback can be called from any scope.
+	 * @param {Int} delay
+	 */
+	,getDeferedContinueNext: function(delay) {
+		return this.deferContinueNext.createDelegate(this, [delay]);
 	}
 
 	,continueFinish: function() {
@@ -146,6 +189,27 @@ eo.wizard.Step = Ext.extend(Ext.util.Observable, {
 		this.parent.wait.apply(this.parent, arguments);
 	}
 
+	/**
+	 * Must be called when the step is entered (i.e. becomes the active step).
+	 * Called automatically by the owner wizard.
+	 */
+	,enter: function() {
+		// This is required so that if the set step dynamically decide
+		// its next step, it is given the opportunity to update its
+		// dynamic next step previous step
+		// That is: step.next().prev = step, which is done in 
+		// testComplete...
+		if (this.testComplete) this.testComplete();
+		this.fireEvent("enter", this);
+	}
+	/**
+	 * Must be called when the step is left (i.e. stops being the active step).
+	 * Called automatically by the owner wizard.
+	 */
+	,leave: function() {
+		this.fireEvent("leave", this);
+	}
+	
 });
 
 eo.wizard.FormStep = Ext.extend(eo.wizard.Step, {
@@ -190,10 +254,8 @@ eo.wizard.FormStep = Ext.extend(eo.wizard.Step, {
 		this.form = form;
 
 		// --- Rewrite next if it is given as an array
-		if (this.conditions) {
+		if (this.conditions || this.testFormValid || this.testFormValidity) {
 			
-			var tests = Ext.isArray(this.conditions) ? this.conditions : [this.conditions];
-
 			var ff = function(field) {
 				if (field instanceof Ext.form.Field) return field;
 				if ((field = me.form.findField(field))) {
@@ -203,44 +265,56 @@ eo.wizard.FormStep = Ext.extend(eo.wizard.Step, {
 				}
 			}
 
-			var testFields = function(fields) {
-				if (!Ext.isArray(fields)) fields = [fields];
-				var field;
-				for (var i=0,l=fields.length; i<l; i++) {
-					field = ff(fields[i]);
-					if (!field.isValid(true) || !field.getValue()) return false;
-//					if (!field.getValue()) return false;
+			var getComplete;
+			if (this.conditions === undefined || Ext.isBoolean(this.conditions)) {
+				// test all fields
+				getComplete = function() {
+					var r = true;
+					form.items.each(function(field) {
+						if (!field.isValid(true)) return r = false;
+						else return undefined;
+					});
+					return r;
 				}
-				return true;
+			} else {
+				var tests = Ext.isArray(this.conditions) ? this.conditions : [this.conditions];
+
+				var testFields = function(fields) {
+					if (!Ext.isArray(fields)) fields = [fields];
+					var field;
+					for (var i=0,l=fields.length; i<l; i++) {
+						field = ff(fields[i]);
+						if (!field.isValid(true) || !field.getValue()) return false;
+					}
+					return true;
+				}
+
+				getComplete = function() {
+					for (var i=0,l=tests.length; i<l; i++) {
+						if (testFields(tests[i].fields)) {
+							return tests[i];
+						}
+					}
+					return false;
+				};
 			}
 
-			this.defaultActions = {
-				next: this.next
-				,prev: this.prev
-				,finish: this.finish
+			// This cannot be run in this constructor, since next & prev wouldn't
+			// have been set by the parent wizard, if they need to be...
+			// That's why this method is called later, in setNext/PrevIf.
+			this.beforeTestComplete = function() {
+				var next = me.getNext(),
+//					prev = me.getPrev(),
+					t = getComplete();
+				
+				if (next) next.enabled = t;
+//				if (prev) prev.enabled = t;
+				
+				me.finishDisabled = !t;
 			};
-
-			var getComplete = function() {
-				for (var i=0,l=tests.length; i<l; i++) {
-					if (testFields(tests[i].fields)) {
-						return tests[i];
-					}
-				}
-				return false;
-			};
-
-			(this.beforeTestComplete = function() {
-				var t = getComplete();
-				if (t) {
-					me.next = "next" in t && t.next !== true ? t.next : me.defaultActions.next;
-					me.prev = "prev" in t && t.next !== true ? t.prev : me.defaultActions.prev;
-					me.finish = "finish" in t && t.next !== true ? t.finish : me.defaultActions.finish;
-				} else {
-					me.next = false;
-					me.finish = false;
-					me.prev = me.defaultActions.prev;
-				}
-			})();
+			// finishDisabled must be initialized, because canFinish will be called
+			// in this same constructor, a bit later, to init this.lastCanFinish
+			this.finishDisabled = !getComplete();
 		}
 
 		// --- Add events to fields required to complete a step
@@ -298,46 +372,44 @@ eo.wizard.FormStep = Ext.extend(eo.wizard.Step, {
 			}
 		}
 
-		this.lastNext = this.hasNext();
+		this.lastHasNext = this.hasNext();
 		this.lastFinish = this.canFinish();
-		this.lastPrev = this.hasPrev();
+		this.lastHasPrev = this.hasPrev();
+		this.lastNext = this.getNext();
 	}
 
 	,setPrevIf: function(step) {
-		if (this.defaultActions) {
-			if (this.defaultActions.prev === undefined) this.defaultActions.prev = step;
-			this.beforeTestComplete();
-		} else {
-			this.superclass.setPrevIf.call(this, step);
-		}
+		this.superclass.setPrevIf.call(this, step);
+		if (this.beforeTestComplete) this.beforeTestComplete();
 	}
 	,setNextIf: function(step) {
-		if (this.defaultActions) {
-			if (this.defaultActions.next === undefined) this.defaultActions.next = step;
-			this.beforeTestComplete();
-		} else {
-			this.superclass.setNextIf.call(this, step);
-		}
+		this.superclass.setNextIf.call(this, step);
+		if (this.beforeTestComplete) this.beforeTestComplete();
 	}
-
-//REM?	,hasPrev: function() {
-//		return this.getPrev() ? true : false;
-//	}
-//	,hasNext: function() {
-//		return this.getNext() ? true : false;
-//	}
 
 	,testComplete: function() {
 		if (this.beforeTestComplete) this.beforeTestComplete();
 		
-		var next = this.hasNext(),
-			finish = this.canFinish(),
-			prev = this.hasPrev();
-
-		if (next !== this.lastNext || finish !== this.lastFinish || prev !== this.lastPrev) {
-			this.lastNext = next;
-			this.lastPrev = prev;
+		var hasNext = this.hasNext()
+			,finish = this.canFinish()
+			,hasPrev = this.hasPrev()
+			,next = this.getNext()
+			;
+			
+		if (hasNext !== this.lastHasNext 
+				|| finish !== this.lastFinish 
+				|| hasPrev !== this.lastHasPrev
+				|| next !== this.lastNext
+		) {
+			this.lastHasNext = hasNext;
+			this.lastHasPrev = hasPrev;
 			this.lastFinish = finish;
+			
+			if (this.lastNext !== next) {
+				this.lastNext = next;
+				next.prev = this;
+			}
+			
 			this.parent.updateStep();
 		}
 	}
@@ -356,6 +428,27 @@ eo.wizard.texts = {
 	,finish: "Finish"
 };
 
+/**
+ * <h1>General principles of the wizard</h1>
+ * 
+ * <h2>Dynamic steps</h2>
+ * For any step, the next step can be computed dynamically by overriding the 
+ * step's next() method.
+ * Previous steps, however, cannot be computed in the same way (by overridding
+ * the prev method), because prev steps are dynamically set internally according
+ * to the next step of each step. This is a technical limitation (to be able to
+ * predict the full step path -- previous steps as well as next steps -- from 
+ * the currently set step. However, this is consistant with an end-user 
+ * expectation that their actions in a step may have an influence on the steps 
+ * to come, but not on the steps they have already completed.
+ * 
+ * @param {Object} [config] Configuration of the wizard
+ * 
+ * @class
+ * @todo clean this doc block
+ * @author Éric Ortéga <eric@planysphere.fr>
+ * @since before 09/03/11 20:06
+ */
 eo.WizardPanel = eo.wizard.WizardPanel = Ext.extend(Ext.Panel, {
 
 	texts: eo.wizard.texts
@@ -600,31 +693,36 @@ eo.WizardPanel = eo.wizard.WizardPanel = Ext.extend(Ext.Panel, {
 
 	,getStep: function(name, require, searchChildren, searchRoot) {
 		
-		searchChildren = searchChildren !== false;
-		searchRoot = searchRoot !== false;
+		// getStep can be called during child steps construction, that is before
+		// the current step has finished its own construction, and so this.steps
+		// could be undefined...
+		if (this.steps) {
+			searchChildren = searchChildren !== false;
+			searchRoot = searchRoot !== false;
 
-		if (name instanceof eo.wizard.Step) {
-			return name;
-		} else if (name in this.steps) {
-			return this.steps[name];
-		}
+			if (name instanceof eo.wizard.Step) {
+				return name;
+			} else if (name in this.steps) {
+				return this.steps[name];
+			}
 
-		if (searchRoot) {
-			var root = this.getRootWizard();
-			if (root !== this) return root.getStep(name, require, searchChildren, false);
-		}
+			if (searchRoot) {
+				var root = this.getRootWizard();
+				if (root !== this) return root.getStep(name, require, searchChildren, false);
+			}
 
-		var r = false;
-		if (searchChildren) {
-			this.steps.each(function(step) {
-				if (!r && step.getStep) {
-					// the call of getStep() on the children must have
-					// searchParents set to false, to prevent infinite recursion
-					r = step.getStep(name, false, searchChildren, false);
-					if (r) return false;
-				}
-			});
-			if (r) return r;
+			var r = false;
+			if (searchChildren) {
+				this.steps.each(function(step) {
+					if (!r && step.getStep) {
+						// the call of getStep() on the children must have
+						// searchParents set to false, to prevent infinite recursion
+						r = step.getStep(name, false, searchChildren, false);
+						if (r) return false;
+					}
+				});
+				if (r) return r;
+			}
 		}
 
 		if (require === false) {
@@ -729,6 +827,9 @@ eo.WizardPanel = eo.wizard.WizardPanel = Ext.extend(Ext.Panel, {
 	}
 
 	,updateButtons: function() {
+		
+		if (!this.hasListener("updatebuttons")) return;
+		
 		var cfg = {prev:{},next:{},cancel:{}}
 			,cs = this.currentStep
 			;
@@ -765,12 +866,15 @@ eo.WizardPanel = eo.wizard.WizardPanel = Ext.extend(Ext.Panel, {
 	}
 
 	,updateProgress: function() {
-		this.fireEvent("updateprogress", this);
+		if (this.hasListener("updateprogress")) {
+			this.fireEvent("updateprogress", this);
+		}
 	}
 
 	,updateStep: function() {
-		if (this.hasListener("updatebuttons")) this.updateButtons();
-		if (this.hasListener("updateprogress")) this.updateProgress();
+		var w = this.getRootWizard();
+		w.updateButtons();
+		w.updateProgress();
 	}
 
 	,setStep: function(step) {
@@ -786,6 +890,12 @@ eo.WizardPanel = eo.wizard.WizardPanel = Ext.extend(Ext.Panel, {
 			if (step.getParent() !== this) {
 				step.getParent().setStep(step);
 			} else {
+				if (this.currentStep === step) return step;
+				
+				// notify step of the change
+				this.currentStep.leave();
+				step.enter();
+				
 				this.getLayout().setActiveItem(step.panelIndex);
 				this.currentStep = step;
 				if (this.parentStep) this.parentStep.parent.setStep(this.parentStep);
@@ -795,6 +905,7 @@ eo.WizardPanel = eo.wizard.WizardPanel = Ext.extend(Ext.Panel, {
 		return step;
 	}
 
+	// private
 	,setActiveItem: function(index) {
 		this.getLayout().setActiveItem(index);
 	}

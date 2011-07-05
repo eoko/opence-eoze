@@ -8,8 +8,7 @@ if (($_SERVER && realpath($_SERVER['SCRIPT_FILENAME']) === __FILE__)
 
 if (!defined('DS')) define('DS', DIRECTORY_SEPARATOR);
 
-function start() {
-
+call_user_func(function() {
 	$eoze = realpath(dirname(__FILE__) . DS . '..') . DS;
 	$root = realpath(dirname(__FILE__) . DS . '..' . DS . '..') . DS;
 
@@ -32,6 +31,4 @@ function start() {
 
 	global $directAccess;
 	require_once "{$eoze}php{$ds}init.inc.php";
-}
-
-start();
+});

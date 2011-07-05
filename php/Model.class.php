@@ -208,8 +208,11 @@ abstract class Model {
 
 	public function __set($fieldName, $value) {
 		Logger::dbg('Setting {} => {}', $fieldName, $value);
-		if ($this->getTable()->getColumn($fieldName)->isPrimary()) $this->setPrimaryKeyValueImpl($fieldName, $value);
-		else $this->setField($fieldName, $value, false);
+		if ($this->getTable()->getColumn($fieldName)->isPrimary()) {
+			$this->setPrimaryKeyValueImpl($fieldName, $value);
+		} else {
+			$this->setField($fieldName, $value, false);
+		}
 	}
 
 	public function echoIf($field, $defaultValue = '-', $exludeEmptyString = true, $render = true) {
@@ -344,11 +347,45 @@ abstract class Model {
 		}
 	}
 
+	// TODO this should be documented & have unit tests
+	// it is known to be used twice in opence
 	public function getDataEx($relationNames, $aliasPrefix = null, $includeBaseData = true) {
 		$data = $includeBaseData ? $this->getData($aliasPrefix) : array();
-		foreach ($relationNames as $rName) {
+		
+		if ($relationNames === '*') {
+			$relationNames = $this->table->getRelationNames();
+		}
+		
+		foreach ($relationNames as $k => $rName) {
+			
+			if (is_string($k)) {
+				$params = $rName;
+				$rName = $k; // relation name
+			} else {
+				$params = null;
+			}
+			
 			if (null !== $foreignModel = $this->getForeignModel($rName)) {
-				$data = array_merge($data, $foreignModel->getData("$aliasPrefix{$rName}->"));
+				if ($foreignModel instanceof Model) {
+					if (!$params) {
+						$data = array_merge($data, $foreignModel->getData("$aliasPrefix{$rName}->"));
+					} else {
+						$data = array_merge($data, $foreignModel->getDataEx($params, "$aliasPrefix{$rName}->"));
+					}
+				} else if ($foreignModel instanceof ModelSet) {
+					// we have a HasMany relation here...
+					$hasManyData = array();
+					foreach ($foreignModel as $model) {
+						if ($params) {
+							$hasManyData[] = $model->getDataEx($params);
+						} else {
+							$hasManyData[] = $model->getData();
+						}
+					}
+					$data["$aliasPrefix$rName"] = $hasManyData;
+				} else {
+					throw new IllegalStateException();
+				}
 			}
 		}
 		return $data;
@@ -373,7 +410,7 @@ abstract class Model {
 						if ($return) {
 							return false;
 						} else {
-							throw new SystemException("{$this->getModelName()}.$col->name must be set");
+							throw new SystemException("{$this->getModelName()}.$col->name must be set in $this");
 						}
 					}
 				}
@@ -493,10 +530,48 @@ abstract class Model {
 				&& $this->internal->colUpdated[$fieldName];
 		}
 	}
+	
+	private $virtualFieldsCache = array();
+	
+	public function __call($name, $args) {
+		if (substr($name, 0, 3) === 'get') {
+			$k = substr($name, 3);
+			if ($this->table->hasVirtual($k)
+					|| $this->table->hasVirtual($k = lcfirst($k))) {
+				
+				if (array_key_exists($k, $this->virtualFieldsCache)) {
+					return $this->virtualFieldsCache[$k];
+				}
+				
+				$table = $this->getTable();
+				
+				$r = $table
+						->createQuery($this->context)
+						->select($k)
+						->where("`{$this->getPrimaryKeyName()}`=?", 
+								$this->getPrimaryKeyValue())
+						->executeSelectValue();
+				
+				if ($table->isVirtualCachable($k)) {
+					$this->virtualFieldsCache[$k] = $r;
+				}
+				
+				return $r;
+			}
+		}
+		throw new Exception("Undefined method: $name()");
+	}
 
 	public function getInitialValue($fieldName) {
 		if ($this->internal->dbValues === null) {
-			throw new IllegalStateException('The model has not been loaded from the db');
+			if ($this->isNew()) {
+				return null;
+			} else {
+				$this->internal->dbValues = $this->table->loadModel(
+					$this->getPrimaryKeyValue()
+				)->internal->dbValues;
+				return $this->getInitialValue($fieldName);
+			}
 		} else {
 			return $this->internal->dbValues[$fieldName];
 		}
@@ -608,7 +683,7 @@ abstract class Model {
 						->executeUpdate();
 
 				// TODO: implement the modification success check
-	//			if ($affectedRows != 1) return false;
+				// if ($affectedRows != 1) return false;
 
 				// afterSave event (must be fired here, see bellow)
 				$this->events->fire(self::EVT_AFTER_SAVE_BASE, $this);
@@ -626,6 +701,8 @@ abstract class Model {
 			// Must be done before saving the relations (some of them may try to
 			// save their parent model -- eg. ReferencesOne)
 			$this->internal->modified = false;
+			
+			$this->internal->dbValues = null;
 
 			// Propagate the save operation to all instanciated relations. The
 			// said relations may already have saved themselves on the afterSave
@@ -700,6 +777,7 @@ abstract class Model {
 	 */
 	public function notifyDelete() {
 		if (!$this->deleted) {
+			$this->beforeDelete(false);
 			$this->deleted = true;
 			$this->onDeleteInternal();
 			$this->onDelete(false);
@@ -719,6 +797,13 @@ abstract class Model {
 	 */
 	protected function onDelete($isSaving) {}
 	
+	/**
+	 * Hooking method called when the model is marked for deletion, or when
+	 * it is actually in the process of being deleted.
+	 * @param boolean $isSaving TRUE if the model is actually being deleted,
+	 * FALSE if it is just marked for deletion (actual deletion will then
+	 * occur on the next call to the {@link save()} method of this model).
+	 */
 	protected function beforeDelete($isSaving) {}
 	
 	protected function onDeleteInternal() {
@@ -782,7 +867,7 @@ abstract class Model {
 	private $deletedFromDB = false;
 	
 	private function doDelete($isSaving) {
-
+		
 		if ($this->isNew()) {
 			throw new IllegalStateException('Cannot delete a new model');
 		}
@@ -911,7 +996,7 @@ abstract class Model {
 	abstract function setPrimaryKeyValue($value);
 
 	protected function setPrimaryKeyValueImpl($primaryKeyName, $value, $forceAcceptNull = false) {
-		$this->getLogger()->warn('Deprecated');
+		// $this->getLogger()->warn('Deprecated'); // why ???
 		$this->setColumn($primaryKeyName, $value, $forceAcceptNull);
 		// $this->setField($primaryKeyName, $value, $forceAcceptNull);
 	}

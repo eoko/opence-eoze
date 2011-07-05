@@ -54,6 +54,10 @@ NS.Model = eo.Object.create({
 		this.fields = fields;
 		this.nameLookup = nameLookup;
 		this.aliasLookup = aliasLookup;
+		
+		if (NS.Model.aspects) Ext.iterate(NS.Model.aspects, function(n, a) {
+			this[n] = new a(this);
+		}, this);
 
 		// Fields specials etc
 		fields.each(function(field) {
@@ -161,6 +165,38 @@ NS.Model = eo.Object.create({
 		throw new Error('No field: ' + name);
 	}
 
+	/**
+	 * Retrieves an array of fields.
+	 * @param {String|Array|RegExp} field
+	 */
+	,getFields: function(fields) {
+
+		if (Ext.isString(fields)) {
+			return this.getField(fields);
+		} else {
+			var r = [];
+
+			if (Ext.isArray(fields)) {
+				Ext.each(fields, function(field) {
+					r.push(this.getFields(field));
+				});
+			} else if (eo.isRegex(fields)) {
+				var h = {};
+				Ext.iterate(this.nameLookup, function(n, f) {
+					if (fields.test(n)) h[n] = f;
+				});
+				Ext.iterate(this.aliasLookup, function(n, f) {
+					if (fields.test(n)) h[f.name] = f;
+				});
+				r = eo.hashToArray(h);
+			} else {
+				throw new Error("Illegal Argument: " + (typeof fields));
+			}
+
+			return r;
+		}
+	}
+	
 	// Get a specified version of this model, as one of its subclass
 	// experimental, not tested, etc... do not use!!!
 	,as: function(subclass) {
@@ -271,6 +307,19 @@ NS.Model = eo.Object.create({
 	}
 }); // Model
 
+/**
+ * Adds an aspect to the Model. The aspect constructor will be called when a
+ * Model is instanciated, with the model instance as only argument. The 
+ * constructed object will be appended to the Model as its name member.
+ * @param {String} name This is the dude!
+ * @param {Function} constructor
+ * @author Éric Ortéga <eric@planysphere.fr>
+ * @since 09/03/11 01:31
+ */
+NS.Model.addAspect = function(name, constructor) {
+	(NS.Model.aspects = NS.Model.aspects || {})[name] = constructor;
+};
+
 //NS.Record = eo.Object.create({
 NS.Record = ({
 
@@ -327,7 +376,8 @@ NS.Model.createBunch = function(items) {
 	return r;
 }
 
-NS.ModelField = eo.Object.create({
+//NS.ModelField = eo.Object.create({
+NS.ModelField = eo.Class({
 
 	name: undefined
 	,label: undefined
@@ -345,12 +395,30 @@ NS.ModelField = eo.Object.create({
 
 		if (this.special) NS.SpecialFields[this.special](this);
 	}
-
+	
 	/**
 	 * Called when the model owning this field is constructed, to provide an
 	 * opportunity to configure the model...
 	 */
 	,onModelCreate: function(model) {}
+	
+	/**
+	 * Tests whether the given string or regex matches this field's name or
+	 * alias.
+	 * @param {String|Regex} name
+	 * @return Boolean TRUE if the name arugment is a String and it equals this 
+	 * field's name or alias, or if name is a RegExp and it matches this field's
+	 * name or alias; else return FALSE.
+	 */
+	,testName: function(name) {
+		if (eo.isRegex(name)) {
+			return name.test(this.name) || name.test(this.alias);
+		} else if (Ext.isString(name)) {
+			return name === this.name || name === this.alias;
+		} else {
+			throw new Error("Illegal Argument");
+		}
+	}
 
 	,isPrimaryKey: function() {
 		return this.primaryKey;
@@ -449,7 +517,7 @@ NS.ModelField = eo.Object.create({
 
 	,createGridColumn: function(config) {
 //		if (this.internal === true) return null;
-		if (this.internal === true) return this.doCreateGridColumn(Ext.apply({ internal: true }, config));
+		if (this.internal === true) return this.doCreateGridColumn(Ext.apply({internal: true}, config));
 		else return this.doCreateGridColumn(config);
 	}
 
@@ -566,8 +634,19 @@ NS.DateField = Ext.extend(NS.ModelField, {
 	,createReadOnlyField: function(config) {
 		return NS.DateField.superclass.createReadOnlyField.call(this, Ext.apply({
 			xtype: "datedisplayfield"
-			,format: this.format
+			// Format is set at a global level
+			//,format: this.format
 		}, config));
+	}
+	
+	,doCreateGridColumn: function(config) {
+		return Ext.apply(NS.DateField.superclass.doCreateGridColumn.call(this, config), {
+			xtype: "datecolumn"
+			,format: eo.locale.dateFormat
+			,storeFieldConfig: {
+				type: "date"
+			}
+		});
 	}
 });
 
@@ -612,7 +691,10 @@ NS.RelationOneField = Ext.extend(NS.StringField, {
 NS.RelationManyField = Ext.extend(NS.ModelField, {
 	xtype: "gridfield"
 	,doCreateField: function(config) {
-		
+		// TODO
+	}
+	,doCreateGridColumn: function(config) {
+		// TODO
 	}
 })
 
@@ -663,6 +745,7 @@ NS.ModelField.create = function(config) {
 /**
  * Known dependencies:
  * - GridField.CqlixPlugin overrides eo.cqlix.Model & eo.cqlix.ModelField on this
+ * - eo.cqlix.Model.form
  */
 Oce.deps.reg('eo.cqlix.Model');
 

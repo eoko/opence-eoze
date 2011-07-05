@@ -15,7 +15,7 @@ Ext.ux.Spinner = Ext.extend(Ext.util.Observable, {
     triggerClass: 'x-form-spinner-trigger',
     splitterClass: 'x-form-spinner-splitter',
     alternateKey: Ext.EventObject.shiftKey,
-    defaultValue: 0,
+    defaultValue: 1,
     accelerate: false,
 
     constructor: function(config){

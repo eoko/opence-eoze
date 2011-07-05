@@ -411,16 +411,24 @@ abstract class ModelTable extends ModelTableProxy {
 	abstract public static function hasName();
 
 	protected function _hasName() {
-		if ($this->hasColumn('name') || $this->hasColumn('nom'))
-				return true;
+		if (null === $name = $this->getNameFieldName(false)) {
+			return false;
+		} else {
+			return $this->hasColumn($name);
+		}
+//		return $this->hasColumn();
+//		if ($this->hasColumn('name') || $this->hasColumn('nom'))
+//				return true;
 	}
 
-	abstract public static function getNameFieldName();
+	abstract public static function getNameFieldName($require = true);
 
-	protected function _getNameFieldName() {
-		if ($this->hasColumn('name')) return 'name';
+	protected function _getNameFieldName($require = true) {
+		if ($this->hasColumn('label')) return 'label';
+		else if ($this->hasColumn('name')) return 'name';
 		else if ($this->hasColumn('nom')) return 'nom';
-		else throw new IllegalStateException();
+		else if ($require) throw new IllegalStateException();
+		else return null;
 	}
 
 	const LOAD_NONE   = 0;
@@ -437,8 +445,12 @@ abstract class ModelTable extends ModelTableProxy {
 	 * @return ModelTableQuery
 	 */
 	protected function _createLoadQuery($relationsMode = ModelTable::LOAD_NAME, array $params = array()) {
+		
+		$query = $this->createQuery($params);
 
-		$query = $this->createQuery($params)->select('*');
+		foreach ($this->getColumns() as $col) {
+			$col->select($query);
+		}
 
 		$this->applyLoadQueryDefaultOrder($query);
 
@@ -564,6 +576,11 @@ abstract class ModelTable extends ModelTableProxy {
 
 	abstract public static function getRelationsInfo();
 
+	abstract public static function getRelationNames();
+	protected function _getRelationNames() {
+		return array_keys($this->getRelationsInfo());
+	}
+
 	abstract public static function hasField($name);
 
 	protected function _hasField($name) {
@@ -576,6 +593,12 @@ abstract class ModelTable extends ModelTableProxy {
 
 	protected function _hasVirtual($name) {
 		return array_key_exists($name, $this->virtuals);
+	}
+	
+	abstract public static function isVirtualCachable($name);
+	
+	protected function _isVirtualCachable($name) {
+		return $this->virtuals[$name]->isCachable();
 	}
 
 	/**
@@ -913,7 +936,7 @@ abstract class ModelTable extends ModelTableProxy {
 		if (count($data) === 1) {
 			return $this->createModel($data[0], true, $context);
 		} else if (1 < $n = count($data)) {
-			$conditions = StringHelper::replaceSuccessively('?', $inputs, $conditions);
+			$condition = StringHelper::replaceSuccessively('?', $inputs, $condition);
 			throw new IllegalStateException(<<<EX
 Data corruption: there should be only 1 ($n found) $this->modelName 
 for condition: $condition.

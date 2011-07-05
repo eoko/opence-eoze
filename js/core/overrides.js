@@ -176,17 +176,46 @@ Ext.override(Ext.Panel, {
 })();
 
 
-// Add setEnabled function to ext components
+// Add setEnabled && setVisible function to ext components
+(function() {
+var spp = Ext.Component.prototype,
+	enable = spp.enable,
+	disable = spp.disable;
 Ext.override(Ext.Component, {
 
-	setEnabled: function(enabled) {
+	enable: function() {
+		// fixes a bug that might happen if the component has already been destroyed
+		var rendered = this.rendered;
+		this.rendered = !!this.el && !!this.el.dom;
+		enable.apply(this, arguments);
+		this.rendered = rendered;
+	}
+	
+	,disable: function() {
+		// fixes a bug that might happen if the component has already been destroyed
+		var rendered = this.rendered;
+		this.rendered = !!this.el && !!this.el.dom;
+		disable.apply(this, arguments);
+		this.rendered = rendered;
+	}
+	
+	,setEnabled: function(enabled) {
 		if (enabled) {
 			this.enable();
 		} else {
 			this.disable();
 		}
 	}
+	
+	,setVisible: function(visible) {
+		if (visible) {
+			this.show();
+		} else {
+			this.hide();
+		}
+	}
 });
+})(); // closure
 
 
 // Add a change event to HtmlEditor
@@ -215,3 +244,324 @@ Ext.override(Ext.Component, {
 		}
 	});
 })();
+
+
+// Fix DateColumn rendering
+// 
+// There is a problem with editable DateColumns... The DateField value is
+// retrieved according to its format configuration. The DateColumn, though,
+// uses Ext.util.Format.dateRenderer(this.format) to set its renderer. That's
+// ok for display, since the DateColumn's this.format is effectively the format
+// intended for display; however, no input format can be set...
+// 
+// Ext.util.Format.dateRenderer will, in turn, use Ext.util.Format.date() to
+// convert the submitted value. If the value submitted to this function is
+// not a Date object, it will convert it to a Date using the _native_ 
+// Date.parse() method!!! This native function doesn't account for localisation
+// at all, and so produce akward value in many cases...
+// 
+// The solution implemented here uses an additionnal inputFormat for DateColumn,
+// or it parses submitted value with its display format configuration... That is
+// not perfect; the solution should probably take place at the level of the
+// communication between the form.Field used as editor and the DateColumn.
+// Unfortunatly, I do not have time to investigate any further :-/
+//
+Ext.grid.Column.types.datecolumn =
+	Ext.grid.DateColumn = Ext.extend(Ext.grid.Column, {
+
+	format : 'm/d/Y',
+	constructor: function(cfg){
+		Ext.grid.DateColumn.superclass.constructor.call(this, cfg);
+//		this.renderer = Ext.util.Format.dateRenderer(this.format);
+		var me = this;
+		this.renderer = function(v) {
+			if (!v) return "";
+			var format = me.inputFormat || me.format || "d/m/Y";
+			if (!(v instanceof Date)) {
+				// instead of:
+				// Date.parse(v)
+				// which doesn't account for various possible formats
+				var tmp = Date.parseDate(v, format);
+				if (tmp) v = tmp;
+				else v = new Date(Date.parse(v));
+			}
+			return v.dateFormat(format);
+		}
+	}
+});
+
+(function() {
+	
+	var uber = Ext.form.CheckboxGroup.prototype.initComponent;
+	
+	var calcColumns = function() {
+		var cols, max;
+		
+		cols = this.rowColumns;
+		
+		if (Ext.isNumber(cols)) {
+			this.columns = cols;
+			return;
+		}
+		
+		max = 0;
+		Ext.each(cols, function(l) {
+			max = Math.max(max, l);
+		});
+		
+		this.columns = max;
+
+		var items = [], mi = this.items;
+		Ext.each(cols, function(l) {
+			items = items.concat(mi.splice(0, l));
+			if (mi.length) {
+				for (var i=0; i<max-l; i++) {
+					items.push({xtype:"container"}); // spacer
+				}
+			}
+		});
+		
+		this.items = items;
+	}
+
+	/**
+	 * @option {Array|Integer} rowColumns The number of items to be placed on
+	 * each row; spacers will be added at the end of rows that haven't the max
+	 * number of items.
+	 */
+	Ext.form.CheckboxGroup.prototype.initComponent = function() {
+		if (this.rowColumns) {
+			calcColumns.call(this);
+		}
+		uber.call(this);
+	};
+})();
+
+/**
+ * @author Éric Ortéga <eric@planysphere.fr>
+ * @since 29/04/11 17:10
+ * 
+ * Allow custom xtype for the PagingToolbar.
+ */
+//
+//Ext.override(Ext.form.ComboBox, {
+//	
+//	initList : function(){
+//		if(!this.list){
+//			var cls = 'x-combo-list',
+//			listParent = Ext.getDom(this.getListParent() || Ext.getBody());
+//
+//			this.list = new Ext.Layer({
+//				parentEl: listParent,
+//				shadow: this.shadow,
+//				cls: [cls, this.listClass].join(' '),
+//				constrain:false,
+//				zindex: this.getZIndex(listParent)
+//			});
+//
+//			var lw = this.listWidth || Math.max(this.wrap.getWidth(), this.minListWidth);
+//			this.list.setSize(lw, 0);
+//			this.list.swallowEvent('mousewheel');
+//			this.assetHeight = 0;
+//			if(this.syncFont !== false){
+//				this.list.setStyle('font-size', this.el.getStyle('font-size'));
+//			}
+//			if(this.title){
+//				this.header = this.list.createChild({
+//					cls:cls+'-hd', 
+//					html: this.title
+//					});
+//				this.assetHeight += this.header.getHeight();
+//			}
+//
+//			this.innerList = this.list.createChild({
+//				cls:cls+'-inner'
+//				});
+//			this.mon(this.innerList, 'mouseover', this.onViewOver, this);
+//			this.mon(this.innerList, 'mousemove', this.onViewMove, this);
+//			this.innerList.setWidth(lw - this.list.getFrameWidth('lr'));
+//
+//			if(this.pageSize){
+//				this.footer = this.list.createChild({
+//					cls:cls+'-ft'
+//					});
+//				// <rx+>
+//				var xtype = this.pagingToolbarXtype || "paging";
+//				if (xtype.xtype) xtype = xtype.xtype;
+//				this.pageTb = Ext.create({
+//					xtype: xtype,
+//					store: this.store,
+//					pageSize: this.pageSize,
+//					renderTo:this.footer
+//				});
+//				// </rx+>
+//				// <rx->
+//				// this.pageTb = new Ext.PagingToolbar({
+//				// 	store: this.store,
+//				// 	pageSize: this.pageSize,
+//				// 	renderTo:this.footer
+//				// });
+//				// <rx->
+//				this.assetHeight += this.footer.getHeight();
+//			}
+//
+//			if(!this.tpl){
+//                
+//				this.tpl = '{' + this.displayField + '}';
+//			}
+//            
+//			/**
+//            * The {@link Ext.DataView DataView} used to display the ComboBox's options.
+//            * @type Ext.DataView
+//            */
+//			this.view = new Ext.DataView({
+//				applyTo: this.innerList,
+//				tpl: this.tpl,
+//				singleSelect: true,
+//				selectedClass: this.selectedClass,
+//				itemSelector: this.itemSelector || '.' + cls + '-item',
+//				emptyText: this.listEmptyText,
+//				deferEmptyText: false
+//			});
+//
+//			this.mon(this.view, {
+//				containerclick : this.onViewClick,
+//				click : this.onViewClick,
+//				scope :this
+//			});
+//
+//			this.bindStore(this.store, true);
+//
+//			if(this.resizable){
+//				this.resizer = new Ext.Resizable(this.list,  {
+//					pinned:true, 
+//					handles:'se'
+//				});
+//				this.mon(this.resizer, 'resize', function(r, w, h){
+//					this.maxHeight = h-this.handleHeight-this.list.getFrameWidth('tb')-this.assetHeight;
+//					this.listWidth = w;
+//					this.innerList.setWidth(w - this.list.getFrameWidth('lr'));
+//					this.restrictHeight();
+//				}, this);
+//
+//				this[this.pageSize?'footer':'innerList'].setStyle('margin-bottom', this.handleHeight+'px');
+//			}
+//		}
+//	}
+//});
+	
+Ext.form.ComboBox.override({
+	
+	initList: function() {
+		if(!this.list){
+			var cls = 'x-combo-list',
+			listParent = Ext.getDom(this.getListParent() || Ext.getBody());
+
+			this.list = new Ext.Layer({
+				parentEl: listParent,
+				shadow: this.shadow,
+				cls: [cls, this.listClass].join(' '),
+				constrain:false,
+				zindex: this.getZIndex(listParent)
+			});
+
+			var lw = this.listWidth || Math.max(this.wrap.getWidth(), this.minListWidth);
+			this.list.setSize(lw, 0);
+			this.list.swallowEvent('mousewheel');
+			this.assetHeight = 0;
+			if(this.syncFont !== false){
+				this.list.setStyle('font-size', this.el.getStyle('font-size'));
+			}
+			if(this.title){
+				this.header = this.list.createChild({cls:cls+'-hd', html: this.title});
+				this.assetHeight += this.header.getHeight();
+			}
+
+			this.innerList = this.list.createChild({cls:cls+'-inner'});
+			this.mon(this.innerList, 'mouseover', this.onViewOver, this);
+			this.mon(this.innerList, 'mousemove', this.onViewMove, this);
+			this.innerList.setWidth(lw - this.list.getFrameWidth('lr'));
+
+			if(this.pageSize){
+				this.footer = this.list.createChild({cls:cls+'-ft'});
+				this.pageTb = new Ext.PagingToolbar({
+					store: this.store,
+					pageSize: this.pageSize,
+					renderTo:this.footer
+				});
+				this.assetHeight += this.footer.getHeight();
+			}
+
+			if(!this.tpl){
+				this.tpl = '<tpl for="."><div class="'+cls+'-item">{' + this.displayField + '}</div></tpl>';
+			}
+
+			this.view = new Ext.DataView({
+				applyTo: this.innerList,
+				tpl: this.tpl,
+				singleSelect: true,
+				selectedClass: this.selectedClass,
+				itemSelector: this.itemSelector || '.' + cls + '-item',
+				emptyText: this.listEmptyText,
+				deferEmptyText: false
+			});
+
+			this.mon(this.view, {
+				containerclick : this.onViewClick,
+				click : this.onViewClick,
+				scope :this
+			});
+
+			this.bindStore(this.store, true);
+
+			if(this.resizable){
+				this.resizer = new Ext.Resizable(this.list,  {
+					pinned:true, handles:'se'
+				});
+				this.mon(this.resizer, 'resize', function(r, w, h){
+					this.maxHeight = h-this.handleHeight-this.list.getFrameWidth('tb')-this.assetHeight;
+					this.listWidth = w;
+					this.innerList.setWidth(w - this.list.getFrameWidth('lr'));
+					this.restrictHeight();
+				}, this);
+
+				this[this.pageSize?'footer':'innerList'].setStyle('margin-bottom', this.handleHeight+'px');
+			}
+		}
+	}
+
+}); // Ext.form.ComboBox.override
+
+
+// Fix Ext.Element.getValue, that can crash because of a delayed event, that is
+// the dom element value can be required after the DOM element has been deleted...
+(function() {
+	var spp = Ext.Element.prototype,
+		hasClass = spp.hasClass,
+		addClass = spp.addClass;
+Ext.override(Ext.Element, {
+	
+	getValue: function(asNumber) {
+		var d = this.dom;
+		if (!d) return asNumber ? parseInt("") : "";
+		var val = d.value;
+		return asNumber ? parseInt(val, 10) : val;
+	}
+	
+	,addClass: function() {
+		if (!this.dom) {
+			return this;
+		}
+		return addClass.apply(this, arguments);
+	}
+	
+	,hasClass: function() {
+		if (!this.dom) {
+			return false;
+		}
+		return hasClass.apply(this, arguments);
+	}
+});
+})(); // closure
+
+Ext.form.TextField.prototype.selectOnFocus = true;

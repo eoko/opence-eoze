@@ -1,8 +1,10 @@
 (function() {
 
 	var NS = Ext.ns("eo.form");
+	
+	var localeNS = Ext.ns("eo.locale");
 
-	var dateFormat = "d/m/Y",
+	var dateFormat = localeNS.dateFormat = "d/m/Y",
 		altDateFormats = "j/n/Y|j/n/y|j/n|j n Y|j n y|j n|Y-m-d|Y n j",
 		timeFormat = "H:i",
 		altTimeFormats = "G:i|G:i|G i|Gi|G|G:i:s|G i s";

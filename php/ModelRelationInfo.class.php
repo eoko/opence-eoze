@@ -203,11 +203,13 @@ abstract class ModelRelationInfo implements ModelField {
 
 		if ($relationName === null) $relationName = $this->name;
 		if ($alias === null) $alias = $relationName;
-
+		
 		$this->parseSelectJoinAlias($relationName, $joinAlias, $leftAlias);
 
 //r		$alias = is_string($sqlAlias) ? $sqlAlias : $alias;
-
+		
+		// TODO getLabelSelectFormatString is app specific (implemented in
+		// myTable)
 		if (null !== $labelFormat = $this->targetTable->getLabelSelectFormatString()) {
 			$join = $query->join($this, $joinAlias, $leftAlias);
 			$join->selectFormatted($alias, $labelFormat);
@@ -369,7 +371,8 @@ abstract class ModelRelationInfo implements ModelField {
 		}
 		$r = array(
 			'name' => $this->name,
-			'fieldType' => 'hasOne',
+//			'fieldType' => 'hasOne',
+			'fieldType' => $this instanceof ModelRelationInfoHasOne ? 'hasOne' : 'hasMany',
 			'type' => $this->getType(),
 			'allowNull' => $this->isNullable(),
 			'hasDefault' => $referenceField->hasDefault(),
@@ -611,10 +614,14 @@ class ModelRelationInfoIsRefered extends ModelRelationInfoByReference {
 	}
 
 	public function notifyDeleteToRefering($deletedValue) {
-		$this->findReciproque()->onTargetDelete(
-			$deletedValue instanceof Model ?
-				$deletedValue->getPrimaryKeyValue() : $deletedValue
-		);
+		if (null !== $reciproque = $this->findReciproque()) {
+			$reciproque->onTargetDelete(
+				$deletedValue instanceof Model ?
+					$deletedValue->getPrimaryKeyValue() : $deletedValue
+			);
+		} else {
+			Logger::get($this)->warn('Cannot find reciproque: ' . $this);
+		}
 	}
 
 	/**
@@ -983,11 +990,11 @@ abstract class ModelRelationInfoByAssoc extends ModelRelationInfo {
 		return $this->assocTable->getColumn($this->otherForeignKey);
 	}
 
-	public function createCqlixFieldConfig() {
-		$cfg = parent::createCqlixFieldConfig();
-		$cfg['fieldType'] = 'hasMany';
-		return $cfg;
-	}
+//	public function createCqlixFieldConfig() {
+//		$cfg = parent::createCqlixFieldConfig();
+//		$cfg['fieldType'] = 'hasMany';
+//		return $cfg;
+//	}
 }
 
 class ModelRelationInfoIndirectHasOne extends ModelRelationInfoByAssoc

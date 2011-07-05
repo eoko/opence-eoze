@@ -4,7 +4,7 @@ class PdfHelper {
 
 	public static function render($src, $options = array()) {
 		
-		require_once LIBS_PATH . 'html2pdf/html2pdf.class.php';
+		require_once LIBS_PATH . 'html2pdf.phar';
 
 		ArrayHelper::applyIf($options, array(
 			'orientation' => 'P',

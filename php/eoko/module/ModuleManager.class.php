@@ -7,6 +7,7 @@ const GET_MODULE_NAMESPACE = 'eoko\\_getModule\\';
 use eoko\config\Config, eoko\config\ConfigManager;
 use eoko\php\generator\ClassGeneratorManager;
 use eoko\util\Files;
+use eoko\cache\Cache;
 
 use eoko\module\exceptions\MissingModuleException;
 use eoko\module\exceptions\InvalidModuleException;
@@ -77,7 +78,7 @@ class ModuleManager {
 			);
 		}
 		$parent = self::$modulesDirectories === null ? null : self::$modulesDirectories[count(self::$modulesDirectories) - 1];
-		self::$modulesDirectories[] = new ModulesDirectory($dirName, $basePath, $baseUrl, $namespace, $parent);
+		self::$modulesDirectories[] = ModulesDirectory::create($dirName, $basePath, $baseUrl, $namespace, $parent);
 	}
 
 	private function testGetModuleNamespace($classOrNamespace) {
@@ -107,8 +108,19 @@ class ModuleManager {
 
 				$classPath = substr($class, strlen($location->namespace));
 				$classPath = $location->path . str_replace('\\', DS, $classPath);
-
-				if (file_exists($path = "$classPath$suffix.php")) {
+				
+				$cp2 = $location->path . 'php' . DS . $classPath;
+				$cp2 = substr($class, strlen($location->namespace));
+				$cp2 = str_replace('\\', '/', $cp2);
+				if (preg_match('@^([^/]+)/(.*)$@', $cp2, $m)) {
+					$cp2 = implode(DS, array($m[1], 'php', $m[2]));
+					$cp2 = $location->path . str_replace('/', DS, $cp2);
+				} else {
+					$cp2 = false;
+				}
+				
+				if (file_exists($path = "$classPath$suffix.php")
+						|| $cp2 && file_exists($path = "$cp2$suffix.php")) {
 					require_once $path;
 					return true;
 				}
@@ -131,7 +143,6 @@ class ModuleManager {
 		$self = self::getInstance();
 		$config = ConfigManager::get(__NAMESPACE__);
 		
-//		dump($config);
 		$r = array();
 
 		foreach (self::$modulesDirectories as $modulesDir) {
@@ -139,6 +150,13 @@ class ModuleManager {
 			$usedModules = isset($config['used'][$modulesDir->name]) ? $config['used'][$modulesDir->name] : null;
 			foreach($modulesDir->listModules($usedModules, $onlyWithDir) as $module) {
 				$r[$module->getName()] = $module;
+			}
+		}
+		
+		// Children modules
+		foreach ($r as $module) {
+			if ($module instanceof HasChildrenModules) {
+				$r = array_merge($r, $module->listChildrenModules());
 			}
 		}
 
@@ -229,29 +247,99 @@ class ModuleManager {
 	 * @return Module
 	 */
 	public static function getModule($name, $required = true) {
+		
+		$me = self::getInstance();
+		
 		if ($name instanceof Module) {
-			return $name;
+			$module = $name;
 		} else if (isset(self::$modules[$name])) {
-			return self::$modules[$name];
+			$module = self::$modules[$name];
 		} else {
-			return self::$modules[$name] = self::getInstance()->doGetModule($name, $required);
+			// this one must return, because doGetModule is filling in the
+			// dependancy pile by itself
+			return self::$modules[$name] = $me->doGetModule($name, $required);
 		}
+		
+		// save in cache dependancy pile, if needed
+		if ($me->cachePile !== null
+			&& $module 
+			&& $me->useCache()
+			&& (null !== $cacheFile = Cache::getCacheFile($me->makeCacheKey($name)))
+		) {
+			$me->cachePile[] = $cacheFile;
+		}
+		
+		return $module;
+	}
+	
+	private function useCache() {
+		return true;
+//		return false;
+	}
+	
+	private $cachePile = null;
+	
+	public function makeCacheKey($moduleName) {
+		return array($this, "cachedModule_$moduleName");
 	}
 	
 	private function doGetModule($name, $required) {
-
-		if (strstr($name, '\\')) {
-			$ns = get_namespace($name, $relName);
-			try {
-				return $this->getModuleInNamespace($relName, $ns);
-			} catch (MissingModuleException $ex) {
-				throw new MissingModuleException($name, $ex);
-			}
+		
+		$cacheKey = $this->makeCacheKey($name);
+		
+		// try the cache
+		if ($this->useCache()
+				&& (null !== $module = Cache::getCachedData($cacheKey))) {
+			return $module;
+		}
+		
+		if ($this->useCache() && $this->cachePile === null) {
+			$this->cachePile = array();
+			$rootCall = true;
+		} else {
+			$rootCall = false;
 		}
 
+		$deps = array();
+		$module = $this->doInstantiateModule($name, $required, $deps);
+		
+		// module that don't support caching will set cacheDeps to FALSE
+		if ($module && $this->useCache() && $deps !== false) {
+			
+			// The module cache doesn't need to monitor itself, so we use the
+			// current cache pile
+			$monitors = array_merge($this->cachePile, $module->getCacheMonitorFiles(true));
+			
+			// 1. The module config needs to depend on the module cache file
+			// 2. The dependancies needs to be kept in the cache!!!
+			// => That's why we must use Cache::getCacheFile to add the cacheFile
+			// to the pile *before* caching the module
+			if (null !== $cacheFile = Cache::getCacheFile($cacheKey, false)) {
+				$this->cachePile[] = $cacheFile;
+			}
+			$module->setCacheDepencies($this->cachePile);
+			
+			Cache::monitorFiles($cacheKey, $monitors);
+			Cache::cacheObject($cacheKey, $module, $deps);
+			// the cachePile has already been updated
+		}
+		
+		if ($rootCall) {
+			$this->cachePile = null;
+		}
+
+		return $module;
+	}
+	
+	private function doInstantiateModule($name, $required, &$cacheDeps) {
+
+		if (strstr($name, '\\')) {
+			throw new \Exception('DEPRECATED');
+		}
+		
 		// try to delegate
 		if (self::$moduleFactories) foreach (self::$moduleFactories as $factory) {
-			if (null !== $module = $factory->generateModule($name)) {
+			if (null !== $module = $factory->generateModule($name, $cacheDeps)) {
 				Logger::get($this)->debug('Module generated by factory: {}', $name);
 				return $module;
 			}
@@ -259,7 +347,7 @@ class ModuleManager {
 
 		// ... or do the job
 		foreach (self::$modulesDirectories as $location) {
-			if (($module = $this->tryGetModule($name, $location))) {
+			if (($module = $this->tryGetModule($name, $location, $cacheDeps))) {
 				return $module;
 			}
 		}
@@ -267,28 +355,9 @@ class ModuleManager {
 		if ($required) throw new MissingModuleException($name);
 		else return null;
 	}
-
-	private function getModuleInNamespace($name, $ns) {
-
-		throw new \Exception('DEPRECATED');
-			
-		Logger::get($this)->warn(
-			'GetModule used to retrieve absolute class: {}. This is wrong. '
-			. 'Do not do that!',
-			$name
-		);
-		
-		foreach (self::$modulesDirectories as $location) {
-			$location instanceof ModulesDirectory;
-			if ($location->testNamespace($ns)) {
-				$module = $this->tryGetModule($name, $location);
-				if ($module) {
-					return $module;
-				}
-			}
-		}
-		
-		throw new MissingModuleException($name);
+	
+	public function listModuleDirectories() {
+		return self::$modulesDirectories;
 	}
 
 	/**
@@ -301,37 +370,40 @@ class ModuleManager {
 	 * been found (that is a directory that could contains module information),
 	 * but this location doesn't contains the information to instanciate the
 	 * module.
+	 * @param &$cacheDeps
 	 * @return class
 	 */
-	private function tryGetModule($name, ModulesDirectory $dir) {
+	private function tryGetModule($name, ModulesDirectory $dir, &$cacheDeps) {
 
-		$location = new ModuleLocation($dir, $name);
+		$location = ModuleLocation::create($dir, $name);
 		$config = $location->loadConfig();
 		
 		if ($location->isDisabled()) return null;
 
 		if (!$location->isActual()) {
 			$namespace = "$dir->namespace$name\\";
-			return $this->createDefaultModule($location, $config);
+			return $this->createDefaultModule($location, $config, false, $cacheDeps);
 		} else {
 
 			$module = null;
-			if (null !== $class = $location->searchModuleClass()) {
+			if (null !== $class = $location->searchModuleClass($cacheDeps)) {
 				$module = $this->createModule($name, $class);
 			}
 
 			// try to create the module from the config file information
-			if ($config && ($m = $this->createDefaultModule($location, $config))) {
+			if ($config && ($m = $this->createDefaultModule($location, $config, false, $cacheDeps))) {
 				return $m;
 			}
 
 			if (!$module) {
 				// generate the module class in the namespace
-				$superclass = $location->searchModuleSuperclass();
+				$superclass = $location->searchModuleSuperclass($cacheDeps);
 				if ($superclass === null) {
 					$superclass = __NAMESPACE__ . '\\Module';
 				}
-				class_extend($class = "$location->namespace$name", $superclass);
+				if (is_array($cacheDeps)) {
+					$cacheDeps[] = class_extend($class = "$location->namespace$name", $superclass);
+				}
 				$module = $this->createModule($name, $class);
 			}
 
@@ -344,443 +416,92 @@ class ModuleManager {
 	}
 
 	private function createModule($name, $class) {
-		return new $class(new ModuleLocation($this->getTopLevelDirectory(), $name));
+		return new $class(ModuleLocation::create($this->getTopLevelDirectory(), $name));
+		
+		// if this is used, that may break the possibility to find parent Modules
+		// configuration files, during configuration inheritance processing,
+		// in Module->getConfig (eg. for SMInstance autogenerated child, the
+		// TLDirectory found would be the last in the list, because these
+		// autogenerated modules don't have any concrete file... So the 
+		// configuration for SMInstance, lying in a directory at the application
+		// level would be ignored if using the following line).
+		// 
+		// In the first place, I did that to handle Module class loading in
+		// Module::loadExecutorTopLevelClass()...
+		// $module->basePath will be taken from the first location on the stack
+		// If we send the raw Location stack (which solve the aforementioned 
+		// SMInstance problem), $module->basePath will be null, and that will
+		// cause some problems.
+		// 
+		// < The last problem mentionned was that the Module class hierarchy
+		// loading was broken by $module->basePath being NULL. I have since added
+		// a bit of documentation specifying that $basePath had to be NULL when
+		// the module didn't have a concrete directory in the top level 
+		// location.
+		// 
+		// That fixes both problems mentionned here, and probably responds to
+		// the expectations of existing methods which use $basePath. That's 
+		// quite weird however... $basePath and existing methods using it should
+		// probably be refactored so that $basePath always point to the top
+		// level concrete directory in the location hierarchy, while keeping the
+		// whole parent location hierarchy information in the module->location,
+		// as done above. That would more acurately meet developpers' 
+		// expectations!
+		// 
+		return new $class(ModuleLocation::createTopLevelLocation($this->getTopLevelDirectory(), $name));
 	}
-
+	
 	/**
 	 * Generates a default module class and instanciates it, according to its
 	 * configuration file "class" item.
+	 * @param ModuleLocation $location
+	 * @param Config $config
+	 * @param boolean setExtraConfig if set to TRUE, the passed configuration
+	 * will be applied as the last (topmost) layer, thus overridding every
+	 * config inherited by parent modules. If set to FALSE, the passed $config
+	 * will only be used to drive the module creation. It is not necessary to
+	 * apply as an extra config the natural configuration of the module (that
+	 * is, the config naturally falling under the rules of the module 
+	 * configuration inheritance), since this configuration item will naturally
+	 * be the topmost one. It can be useful to force the inheritance though, in
+	 * the case of autogenerated configuration values that the normal config
+	 * inheriting process would not consider.
+	 * @params &$cacheDeps
 	 */
-	public function createDefaultModule(ModuleLocation $location, $config) {
-
-		$config = Config::create($config);
+	public function createDefaultModule(ModuleLocation $location, $config, 
+			$setExtraConfig = true, &$cacheDeps = null) {
+		
+		$config = Config::createForNode($config, $location->moduleName);
 		if (isset($config[$location->moduleName])) $config = $config->node($location->moduleName, true);
-
+		
 		if (!isset($config['class'])) {
 			// this is a base module, in the vertical hierarchy (direct descendant
 			// of Module) -- it cannot be created from config, let's return false
 			// to let the ModuleManager find and instanciate the module class
 			return false;
 		}
-
+		
 		$class = $location->namespace . $location->moduleName;
 
 		// Generate the module class, if needed
 		if (!class_exists($class)) {
 			$baseModule = self::getModule($config->class);
+			$cacheDeps[] = $this->inNamespace("ModuleManager::getModule('$config->class');");
 			// use the base module to generate the default class
-			$baseModule->generateDefaultModuleClass($class, $config);
+			if (is_array($cacheDeps)) {
+				$cacheDeps[] = $baseModule->generateDefaultModuleClass($class, $config);
+			}
 		}
 		
 		// create an instance of the newly created class
 		$module = $this->createModule($location->moduleName, $class);
-		// 17/02/11 01:46 This has been deprecated
-		// $module->setConfig($config);
+		if ($setExtraConfig) $module->setExtraConfig($config);
 		return $module;
 	}
 	
-}
-
-class Location {
-
-	public $path;
-	public $url;
-	public $namespace;
-
-	function __construct($path, $url, $namespace) {
-		$this->path = $path;
-		$this->url = $url;
-		$this->namespace = $namespace;
+	private function inNamespace($code) {
+		$ns = __NAMESPACE__;
+		return "namespace $ns { $code }";
 	}
 
-	public function __toString() {
-		return "Path: $this->path; URL: $this->url; Namespace: $this->namespace";
-	}
-}
-
-/**
- * Represents the different locations of one named module.
- */
-class ModuleLocation extends Location {
-
-	public $moduleName;
-	/** @var ModulesDirectory */
-	public $directory;
-
-	/** @var array[ModuleLocation] Cache for actual locations */
-	private $actualLocations = null, $locations = null;
-
-	/**
-	 * @var mixed Cache for the {@link loadConfig()} method. FALSE if the config
-	 * has not been loaded yet, else the value of loadConfig() (that can be NULL).
-	 */
-	private $configCache = false;
-
-	/**
-	 * Creates a new ModuleLocation. If no directory for the module exists in
-	 * the location, the $path is set to NULL. This test can be bypassed by
-	 * passing a $path to the constructor -- which should be avoided anyway,
-	 * except if you know what you are doing.
-	 * @param ModulesDirectory $dir
-	 * @param string $moduleName
-	 * @param string|boolean $path TRUE to let the constructor search for the
-	 * module's path, or a value to force the location's path to be set
-	 */
-	function __construct(ModulesDirectory $dir, $moduleName, $path = true) {
-
-		$this->directory = $dir;
-		$this->moduleName = $moduleName;
-
-		if ($path === true) {
-			$path = is_dir($path = "$dir->path$moduleName") ? $path . DS : null;
-		}
-
-		parent::__construct(
-			$path,
-			$path !== null && $dir->url !== null ? "$dir->url$moduleName/" : null,
-			"$dir->namespace$moduleName\\"
-		);
-	}
-
-	public function __toString() {
-		return "$this->moduleName << $this->directory";
-	}
-
-	/**
-	 * Finds the module's config file path. The directory parents are not
-	 * searched by this method.
-	 * @return string The path of the found config file, or NULL if no config
-	 * file is found in this location.
-	 */
-	public function searchConfigFile() {
-		if ($this->isActual()) {
-			if (file_exists($file = "$this->path$this->moduleName.yml")
-					|| file_exists($file = "{$this->path}config.yml")) {
-
-				return $file;
-			} else {
-				return null;
-			}
-		} else if (file_exists($file = "{$this->directory->path}$this->moduleName.yml")) {
-			return $file;
-		} else {
-			return false;
-		}
-	}
-
-	/**
-	 * Load the config of all the module's {@link ModuleManager line}. The 
-	 * returned Config object is cached for subsequent call to the method.
-	 * @return Config or NULL
-	 */
-	public function loadConfig() {
-		if ($this->configCache === false) {
-			$this->configCache = $this->doLoadConfig();
-		}
-		return $this->configCache;
-	}
-	
-	private function doLoadConfig() {
-		$r = null;
-		foreach (array_reverse($this->getLocations()) as $location) {
-			$config = $location->searchConfigFile();
-			if ($config) {
-				$config = Config::create($config);
-				if ($r === null) {
-					$r = $config;
-				} else {
-					$r->apply($config, false);
-				}
-			}
-		}
-		return $r;
-	}
-
-	/**
-	 * An actual ModuleLocation is a location that actually contains a directory
-	 * for its module.
-	 * @return boolean
-	 * @see $moduleName
-	 */
-	public function isActual() {
-		return $this->path !== null;
-	}
-
-	/**
-	 * A module location can be ignored by placing a file named "disabled" in
-	 * its directory. This method will return FALSE if such a file is present,
-	 * OR if the module doesn't exist in the current location (independantly of
-	 * its existence in parent locations). Namely, a module will exists, if it
-	 * has a directory with its name in the location, or a configuration file
-	 * in the root of the location directory.
-	 * @return boolean
-	 */
-	public function isDisabled() {
-		return $this->path === null ? 
-//				($this->directory->path === null || !file_exists("{$this->directory->path}$this->moduleName.yml"))
-				($this->directory->path === null || !$this->loadConfig())
-				: file_exists($this->path . 'disabled');
-	}
-	
-	/**
-	 * Gets the ModuleLocations of this location's module, starting from this
-	 * locations and including only location in which a directory for this
-	 * module exists.
-	 * @return array[ModuleLocation]
-	 */
-	public function getActualLocations($includeSelf = true) {
-		
-		if ($this->actualLocations !== null) {
-			if ($includeSelf || !$this->path !== null) {
-				return $this->actualLocations;
-			} else {
-				$r = $this->actualLocations;
-				array_unshift($r);
-				return $r;
-			}
-		}
-
-		$this->actualLocations = array();
-
-		// if _this_ is an actual location
-		if ($this->path !== null) {
-			$this->actualLocations[] = $this;
-		}
-
-		// search parents
-		$dir = $this->directory->parent;
-		while ($dir) {
-			if (is_dir($path = "$dir->path$this->moduleName")) {
-				$this->actualLocations[] = new ModuleLocation($dir, $this->moduleName, $path . DS);
-			}
-			$dir = $dir->parent;
-		}
-
-		return $this->getActualLocations($includeSelf);
-	}
-
-	public function getLineActualLocations($includeSelf = true) {
-		$r = array();
-		foreach ($this->getActualLocations($includeSelf) as $loc) {
-			if ($loc->moduleName === $this->moduleName) $r[] = $loc;
-		}
-		return $r;
-	}
-
-	public function getLocations($includeSelf = true) {
-
-		if ($this->locations !== null) {
-			if ($includeSelf) {
-				return $this->locations;
-			} else {
-				$r = $this->locations;
-				array_unshift($r);
-				return $r;
-			}
-		}
-
-		$this->locations = array($this);
-
-		$dir = $this->directory->parent;
-		while ($dir) {
-			$this->locations[] = new ModuleLocation($dir, $this->moduleName);
-			$dir = $dir->parent;
-		}
-
-		return $this->locations;
-	}
-
-	/**
-	 * Searches the location for a file matching the module class file pattern
-	 * and, if one is found, returns the module class' name.
-	 * @return string The qualified class name, or NULL.
-	 * @throws InvalidModuleException if a matching file is found but doesn't
-	 * contain a class that matches the module classes naming pattern.
-	 */
-	public function searchModuleClass() {
-
-		foreach (array("$this->moduleName.class.php", 'module.class.php', "{$this->moduleName}Module.class.php") as $file) {
-			if (file_exists($file = "$this->path$file")) {
-				require_once $file;
-				foreach (array($this->moduleName, 'module', "{$this->moduleName}module") as $class) {
-					$class = $this->namespace . $class;
-					if (class_exists($class, false)) {
-						return $class;
-					}
-				}
-				// A file matching the module filename pattern
-				// (eg. GridModule.class.php) has been found and included, but
-				// we cannot find the matching class...
-				throw new InvalidModuleException($this->moduleName, 'cannot find module class');
-			}
-		}
-
-		return null;
-	}
-
-	public function searchModuleSuperclass() {
-		foreach ($this->getActualLocations(false) as $location) {
-			if (null !== $class = $location->searchModuleClass()) {
-				return $class;
-			}
-		}
-		return null;
-	}
-
-}
-
-class ModulesDirectory extends Location {
-
-	/** @var ModulesDirectory */
-	public $parent;
-	/**
-	 * @var string The module name, as it is referred in the config. This name
-	 * is either extracted from the "locations" param in the config, or an
-	 * arbitrary bame can be given when the ModulesDirectory instance is
-	 * created. This name can be used in other configuration items to refer to
-	 * this particular ModulesDirectory, so it must be unique.
-	 */
-	public $name;
-
-	function __construct($name, $path, $url, $namespace, ModulesDirectory $prev = null) {
-		if (substr($path, -1) !== DS) $path .= DS;
-		if (substr($url, -1) !== '/') $url .= '/';
-		if (substr($namespace, -1) !== '\\') $namespace .= '\\';
-		parent::__construct($path, $url, $namespace);
-		$this->parent = $prev;
-		$this->name = $name;
-	}
-
-	/**
-	 * Tests if the passed namespace is the same as this ModuleInfo's one.
-	 * @param string $namespaceOrClass
-	 * @return bool  TRUE if the passed namespace is the same this ModuleInfo's
-	 * one, else FALSE.
-	 */
-	public function testNamespace($namespaceOrClass) {
-		$ns = substr($namespaceOrClass, 0, strlen($this->namespace));
-		if (substr($ns, -1) !== '\\') $ns .= '\\';
-		return $ns === $this->namespace;
-	}
-
-	public function getLineagePathsUrl($names) {
-		$pathsUrl = array();
-		foreach ($names as $name) {
-			$pathsUrl = $pathsUrl + $this->getPathsUrl($name);
-		}
-		return $pathsUrl;
-	}
-
-	public function getPathsUrl($moduleName) {
-		$pathsUrl = array();
-		if (file_exists($path = "$this->path$moduleName" . DS)) {
-			$pathsUrl[$path] = $this->url !== null ? "$this->url$moduleName/" : null;
-		}
-		if ($this->parent) {
-			$pathsUrl = $pathsUrl + $this->parent->getPathsUrl($moduleName);
-		}
-		return $pathsUrl;
-	}
-	
-	public function getLineageLocations($names) {
-		$locations = array();
-		foreach ($names as $name) {
-			$locations = array_merge($locations, $this->getLocations($name));
-		}
-		return $locations;
-	}
-
-	private function getLocations($moduleName) {
-		$locations = array();
-		if (file_exists($path = "$this->path$moduleName" . DS)) {
-			$locations[] = new ModuleLocation($this, $moduleName, $path);
-		} else if (file_exists($path = "$this->path{$moduleName}.yml")) {
-			$locations[] = new ModuleLocation($this, $moduleName, null);
-		}
-		if ($this->parent) {
-			$locations = array_merge($locations, $this->parent->getLocations($moduleName));
-		}
-		return $locations;
-	}
-
-	/**
-	 * List the Modules in this directory. This method should be avoided when
-	 * performance is desired, since it will instanciate all the modules in the
-	 * directory, which requires quite a bit of file parsing and config file
-	 * reading...
-	 * @return array[Module]
-	 */
-	public function listModules($usedModules = null, $onlyWithDir = false) {
-		if ($usedModules === '*') $usedModules = null;
-		$r = array();
-		if ($this->path) {
-			foreach (Files::listDirs($this->path) as $dir) {
-				if (($usedModules === null || array_search($dir, $usedModules, true) !== false)
-						&& null !== $module = ModuleManager::getModule($dir, false)) {
-					$r[] = $module;
-				}
-			}
-			if (!$onlyWithDir) {
-				foreach (Files::listFiles($this->path, 'glob:*.yml') as $file) {
-					if (($usedModules === null || array_search($dir, $usedModules, true) !== false)
-							&& null !== $module = ModuleManager::getModule(substr($file, 0, -4), false)) {
-						$r[] = $module;
-					}
-				}
-			}
-		}
-		return $r;
-	}
-
-	/**
-	 * Gets parent path urls.
-	 * @param string $moduleName
-	 * @return array or NULL if there is no parent paths for the given module.
-	 */
-	public function getParentPathsUrl($moduleName) {
-		if ($this->parent && count($pathUrls = $this->parent->doGetParentPathsUrl($moduleName))) {
-			return $pathUrls;
-		} else {
-			return null;
-		}
-	}
-
-	private function doGetParentPathsUrl($moduleName) {
-		$pathUrls = array();
-		if (file_exists($path = "$this->path$moduleName" . DS)) {
-			$pathUrls[$path] = $this->url !== null ? "$this->url$moduleName/" : null;
-		}
-		if ($this->parent) {
-			$pathUrls = $pathUrls + $this->parent->doGetParentPathsUrl($moduleName);
-		}
-		return $pathUrls;
-	}
-
-	public function __toString() {
-		return "Path: $this->path, URL: $this->url, Namespace: $this->namespace, Parent: "
-				. ($this->parent !== null ? "\n\t\t$this->parent" : "NULL");
-	}
-}
-
-interface ModuleFactory {
-	function generateModule($name);
-}
-
-class Module_ModuleFactory implements ModuleFactory {
-
-	private $moduleName;
-
-	function __construct($moduleName) {
-		$this->moduleName = $moduleName;
-	}
-
-	public function generateModule($name) {
-		// avoid infinite recursion
-		if ($name !== $this->moduleName) {
-			$module = ModuleManager::getModule($this->moduleName);
-			return $module->generateModule($name);
-		} else {
-			return null;
-		}
-	}
 }

@@ -1,11 +1,17 @@
 /*  
 // Icon Classes */
-.export_pdf {
+
+/* 
+ * TODO: clean that, that's some very ugly namespace polution!!!
+ */
+
+.x-btn-text.export_pdf {
 	background-image:url(../images/opence/32x32/export_pdf.png) !important;
 }
-.export_excel {
+.x-btn-text.export_excel {
 	background-image:url(../images/opence/32x32/export_excel.png) !important;
 }
+/*
 .printer {
 	background-image:url(../images/opence/32x32/printer.png) !important;
 }
@@ -47,7 +53,12 @@
 }
 .user_child {
 	background-image:url(../images/opence/32x32/user_child.png) !important;
+}*/
+	
+.ico32.green_ball {
+	background-image:url(../images/opence/32x32/green_ball.png) !important;
 }
+
 .b_ico_earth {
 	background-image:url(../images/opence/32x32/earth.png) !important;
 }
@@ -99,6 +110,10 @@
 	padding-right : 3px;
 }
 
+.x-window-header.ico {
+	width: auto;
+}
+
 .ico.col {
 	display: inline;
 }
@@ -109,6 +124,12 @@
 .ico.add,
 .ico_add {
 	background-image:url(../images/icons/add.png) !important;
+}
+.ico.arrow_down {
+	background-image:url(../images/icons/arrow_down.png) !important;
+}
+.application_form_edit {
+	background-image:url(../images/icons/application_form_edit.png) !important;
 }
 .ico_undo, .ico.undo,
 .ico_arrow_undo {
@@ -125,15 +146,26 @@
 .ico_world {
 	background-image:url(../images/icons/world.png) !important;
 }
+.ico.box {
+	background-image:url(../images/icons/box.png) !important;
+}
+.ico.box.add {
+	background-image:url(../images/icons/box_add.png) !important;
+}
+.ico.box.delete {
+	background-image:url(../images/icons/box_delete.png) !important;
+}
 .ico_building {
 	background-image:url(../images/icons/building.png) !important;
 }
+.ico.user,
 .ico_user {
 	background-image:url(../images/icons/user.png) !important;
 }
 .ico_tick {
 	background-image:url(../images/icons/tick.png) !important;
 }
+.ico.cross,
 .ico_cross {
 	background-image:url(../images/icons/cross.png) !important;
 }
@@ -152,6 +184,21 @@
 .ico_help {
 	background-image:url(../images/icons/help.png) !important;
 }
+.ico.lock {
+	background-image:url(../images/icons/lock.png) !important;
+}
+.ico.lock_open {
+	background-image:url(../images/icons/lock_open.png) !important;
+}
+.ico.lock_openable {
+	background-image:url(../images/icons/lock.png) !important;
+}
+.ico.lock_openable:hover {
+	background-image:url(../images/icons/lock_open.png) !important;
+}
+.ico.layout_content {
+	background-image:url(../images/icons/layout_content.png) !important;
+}
 .ico_male {
 	background-image:url(../images/icons/male.png) !important;
 }
@@ -161,6 +208,7 @@
 .ico_send_mail {
 	background-image:url(../images/icons/email_go.png) !important;
 }
+.ico.pdf,
 .ico_pdf {
 	background-image:url(../images/icons/page_white_acrobat.png) !important;
 }
@@ -183,6 +231,9 @@
 .ico_tick {
 	background-image:url(../images/icons/tick.png) !important;
 }
+.ico.report {
+	background-image:url(../images/icons/report.png) !important;
+}
 .ico_stop {
 	background-image:url(../images/icons/stop.png) !important;
 }
@@ -192,8 +243,20 @@
 .ico_arrow_inout {
 	background-image:url(../images/icons/arrow_inout.png) !important;
 }
+.ico.star {
+	background-image:url(../images/icons/star.png) !important;
+}
 .ico_telephone {
 	background-image:url(../images/icons/telephone.png) !important;
+}
+.ico.vcard {
+	background-image:url(../images/icons/vcard.png) !important;
+}
+.ico.vcard.add {
+	background-image:url(../images/icons/vcard_add.png) !important;
+}
+.ico.vcard.edit {
+	background-image:url(../images/icons/vcard_edit.png) !important;
 }
 .ico.wrench, .ico_wrench {
 	background-image:url(../images/icons/wrench.png) !important;

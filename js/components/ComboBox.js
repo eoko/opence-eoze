@@ -7,9 +7,7 @@ Oce.deps.wait('Ext.ux.form.TwinComboBox', function() {
 
 	Oce.form.SimpleComboBox = Ext.extend(Ext.ux.form.TwinComboBox, {
 
-		oData: {}
-
-		,createRenderer: function(defaultLabel) {
+		createRenderer: function(defaultLabel) {
 			var me = this;
 			return function(v) {
 				if (me.oData[v]) return me.oData[v];
@@ -19,6 +17,16 @@ Oce.deps.wait('Ext.ux.form.TwinComboBox', function() {
 		}
 
 		,constructor: function(cfg) {
+			
+			if (!cfg) cfg = {};
+			
+			if (!cfg.data) {
+				cfg = Ext.apply({
+					data: []
+				}, cfg);
+			}
+			
+			this.oData = {};
 
 			var data;
 			if (Ext.isObject(cfg.data)) {
@@ -175,7 +183,7 @@ Oce.deps.wait('Ext.ux.form.TwinComboBox', function() {
 			var me = this;
 			var storeBaseParams = Ext.apply({
 				controller:cfg.controller,
-				action:'auto_complete'
+				action: cfg.action || 'auto_complete'
 			}, cfg.baseParams || {});
 
 			if (cfg.autoComplete) {
@@ -320,6 +328,20 @@ Oce.deps.wait('Ext.ux.form.TwinComboBox', function() {
 //			this.store.load.createDelegate(this.store).defer(50);
 		}
 
+		,createRenderer: function(defaultLabel) {
+			defaultLabel = defaultLabel || "-";
+			return function(v) {
+				if (!v) return defaultLabel;
+				var i = this.store.find(this.valueField, v);
+				if (i !== -1) {
+					var row = this.store.getAt(i),
+						label = row.get(this.displayField);
+					if (label) return label;
+				}
+				return String.format("#{0} (Label Error)", v);
+			}.createDelegate(this);
+		}
+
 		,expand: function() {
 			if (!this.hiddenLoad) {
 				Oce.form.ForeignComboBox.superclass.expand.call(this);
@@ -329,12 +351,6 @@ Oce.deps.wait('Ext.ux.form.TwinComboBox', function() {
 		,onStoreFirstLoaded: function() {
 			
 			if (this.remoteOnce) this.mode = 'local';
-
-			this.fireEvent('storefirstloaded');
-			this.fireEvent('afterfirstload');
-			if (this.storeLoadingListeners) {
-				Ext.each(this.storeLoadingListeners, function(l) {l()});
-			}
 
 			// init setValue
 			var me = this;
@@ -347,10 +363,10 @@ Oce.deps.wait('Ext.ux.form.TwinComboBox', function() {
 			// if the combo is paginated, then we must ensure that the
 			// server will include data for the set row each time the
 			// value is changed, by specifying the initValue param.
-			// It is best not be set as a baseParam though, as this is
+			// It is best not to be set as a baseParam though, as this is
 			// not useful for all other load operations initiated
 			// internally by ext.
-			// It seems that is is use less to remove the aditional row
+			// It seems that it is useless to remove the aditional row
 			// for the selected value (see the KEEP below) because
 			// apparently ext kinda reset the store params after setValue...
 			// That works this way, I haven't investigated any further,
@@ -383,16 +399,30 @@ Oce.deps.wait('Ext.ux.form.TwinComboBox', function() {
 			} else {
 				me.setValue = Oce.form.ForeignComboBox.superclass.setValue;
 			}
+			
+			// initialisation value callback
+			if (this.initialisationValueCallback) {
+				this.initialisationValueCallback.call(
+				this.initialisationValueCallbackScope || this, this);
+			}
+
+			this.fireEvent('storefirstloaded', this);
+			this.fireEvent('afterfirstload', this);
+			if (this.storeLoadingListeners) {
+				Ext.each(this.storeLoadingListeners, function(l) {l()});
+			}
 		}
 
 		,initialisationValue: undefined
 
-		,setValue: function(v, cb) {
+		,setValue: function(v, cb, scope) {
 			var me = this;
 			// prevent mark while we are waiting for the first load before
 			// setting the value
 			this.preventMark = true;
 			this.initialisationValue = v;
+			this.initialisationValueCallback = cb;
+			this.initialisationValueCallbackScope = scope;
 		}
 
 		// Overidden, so that the store is not reloaded when a selection is

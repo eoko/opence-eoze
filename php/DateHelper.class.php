@@ -17,7 +17,7 @@ class DateHelper {
 	}
 
 	public static function getDatetime($datetime, $format) {
-
+		throw new \IllegalStateException('Not implemented');
 	}
 
 	const SQL_DATE			= 1;
@@ -27,6 +27,7 @@ class DateHelper {
 	const DATETIME_LOCALE	= 8;
 
 	public static function getDateAs($date, $format = self::SQL_DATE) {
+		if ($date === null) return null;
 		switch ($format) {
 			case self::SQL_DATE:
 				return $date;
@@ -45,6 +46,7 @@ class DateHelper {
 	}
 
 	public static function getDatetimeAs($datetime, $format = self::SQL_DATE) {
+		if ($datetime === null) return null;
 		switch ($format) {
 			case self::SQL_DATE:
 				return substr($datetime, 0, 10);
@@ -64,6 +66,7 @@ class DateHelper {
 	}
 
 	public static function getTimeAs($time, $format = self::TIME) {
+		if ($time === null) return null;
 		switch ($format) {
 			case self::SQL_DATE:
 				return date("Y-m-d", $time);

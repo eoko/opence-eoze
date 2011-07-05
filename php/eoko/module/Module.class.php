@@ -13,6 +13,7 @@ use eoko\config\Config;
 use eoko\template\PHPCompiler;
 use eoko\module\executor\Executor;
 use eoko\log\Logger;
+use eoko\cache\Cache;
 
 class Module implements file\Finder {
 	
@@ -25,6 +26,12 @@ class Module implements file\Finder {
 	protected $name;
 
 	protected $namespace;
+	/**
+	 * Base path for this module's top level actual directory. If this module
+	 * doesn't have a concrete directory in the top level location, $basePath 
+	 * will be NULL.
+	 * @var string
+	 */
 	protected $basePath;
 	protected $baseUrl;
 	
@@ -33,9 +40,18 @@ class Module implements file\Finder {
 	private $lineageLocations;
 	/** @var ModuleLocation */
 	private $location;
+	
+	private $dependantCacheFiles, $dependantCacheKey;
 
 	/** @var Config */
 	private $config = null;
+	/** 
+	 * @var Config this is used to allow injection of extra configuration,
+	 * when the configuration inheritance will take place. The extra config
+	 * will be the last config applied, that is, it will override every other
+	 * existing items with same names.
+	 */
+	private $extraConfig = null;
 	
 	/** @var file\Finder */
 	private $fileFinder = null;
@@ -45,8 +61,8 @@ class Module implements file\Finder {
 	protected $defaultInternalExecutor = self::DEFAULT_EXECUTOR;
 	private $executorClassNames = null;
 
-	public function __construct(ModuleLocation $location) {
-
+	public final function __construct(ModuleLocation $location) {
+		
 		$this->name = $location->moduleName;
 		$this->basePath = $location->path;
 		$this->baseUrl = $location->url;
@@ -63,15 +79,84 @@ class Module implements file\Finder {
 
 		$this->pathsUrl = $location->directory->getLineagePathsUrl($lineage);
 		$this->lineageLocations = $location->directory->getLineageLocations($lineage);
+		
+		$this->construct($location);
+	}
+	
+	public static function __set_state($vals) {
+		$class = get_called_class();
+		$o = new $class($vals['location']);
+		$o->setPrivateState($vals);
+		if (is_array($vals)) {
+			foreach ($vals as $k => $v) {
+				$o->$k = $v;
+			}
+		}
+		return $o;
+	}
+	
+	protected function setPrivateState(&$vals) {}
+	
+	protected function construct(ModuleLocation $location) {}
+	
+	protected function getLocation() {
+		return $this->location;
+	}
+	
+	protected function getParentModules() {
+		$r = array();
+		foreach ($this->getParentNames(false) as $name) {
+			if (null !== $module = ModuleManager::getModule($name, false)) {
+				$r[] = $module;
+			}
+		}
+		return $r;
+	}
+	
+	/**
+	 * @return Module
+	 */
+	private function getParentModule() {
+		if (null !== $name = $this->getParentModuleName()) {
+			return ModuleManager::getModule($name);
+		} else {
+			return null;
+		}
 	}
 
-	private function getParentNames($includeSelf) {
+	/**
+	 * Get the name of the first module ancestor, if any.
+	 * @internal This method walks up the php classes hierarchy, using
+	 * ModuleManager to see if an ancestor is a module of its own. The name
+	 * of the first class, that is not the same as this module's class (which
+	 * means that the class is a parent in the lineage, the vertical inheritance
+	 * chain) and that is an eoze module will be returned).
+	 * @return string
+	 */
+	private function getParentModuleName() {
+		foreach ($this->getParentNames(false) as $p) {
+			if ($p !== $this->name
+					&& ModuleManager::getModule($p, false)) {
+				return $p;
+			}
+		}
+		return null;
+	}
+	
+	public function getParentNames($includeSelf) {
 		$parents = array();
-		if ($includeSelf) $parents[] = get_relative_classname($this);
+		$lastRelative = get_relative_classname($this);
+		if ($includeSelf) {
+			$parents[] = $lastRelative;
+		}
 		$last = $this;
 		while (false !== $class = get_parent_class($last)) {
 			$last = $class;
-			$parents[] = relative_classname($class);
+			$rc = relative_classname($class);
+			if ($lastRelative !== $rc) {
+				$parents[] = $rc;
+			}
+			$lastRelative = $rc;
 		}
 		return $parents;
 	}
@@ -89,30 +174,110 @@ MSG
 		);
 		return;
 	}
+	
+	public function isAbstract() {
+		return $this->getConfig()->get('abstract', false);
+	}
+	
+	public function isDisabled() {
+		return $this->location->isDisabled();
+	}
 
+	public function setExtraConfig($config) {
+		$this->extraConfig = $config;
+	}
+	
 	/**
 	 * @return Config
 	 */
 	public function getConfig() {
 		if ($this->config) {
 			return $this->config;
+		} else if ($this->loadCachedConfig()) {
+			return $this->config;
 		}
-
-		$locations = array_reverse($this->lineageLocations);
-		$config = array_shift($locations)->loadConfig();
-		foreach ($locations as $l) {
-			$c = $l->loadConfig();
-			if ($c) {
-				if ($config) $config->apply($c);
-				else $config = $c;
+		
+		$config = new Config();
+		
+		if (null !== $parent = $this->getParentModule()) {
+			$config->apply($parent->getConfig());
+		}
+		
+		unset($config['abstract']);
+		unset($config['line']);
+		
+		$config->apply($this->location->loadConfig());
+		
+		if ($this->extraConfig) {
+			if (!$config) {
+				$config = $this->extraConfig;
+			} else {
+				$config->apply($this->extraConfig);
 			}
 		}
-
-		if (!$config) {
-			$config = new Config();
-		}
-
+		
+		$this->cacheConfig($config);
+		
 		return $this->config = $config;
+	}
+	
+	private function useCache() {
+		return true;
+	}
+	
+	/**
+	 * Set the Module's config cache dependancy. That is, if one of the given
+	 * file changed later, the config cache for this module will be invalidated.
+	 * If the second argument is passed, the dependancy will be registered both
+	 * way (warning, that would overwrite any existing monitor on the passed
+	 * $configKey).
+	 * @param array $dependantCacheFiles
+	 * @param mixed $cacheKey If set, the dependancy will be registered both
+	 * way, that is the $cacheKey will be invalidated when this module's config
+	 * cache is invalidated.
+	 */
+	public function setCacheDepencies($dependantCacheFiles, $cacheKey = null) {
+		$this->dependantCacheFiles = $dependantCacheFiles;
+		$this->dependantCacheKey = $cacheKey;
+		Cache::flattenKey($this->dependantCacheKey);
+	}
+	
+	public function getCacheMonitorFiles($parents = false) {
+		$r = $this->location->listFileToMonitor();
+		if ($parents) {
+			foreach ($this->getParentModules() as $parent) {
+				$r = array_merge($r, $parent->location->listFileToMonitor());
+			}
+		}
+		return $r;
+	}
+	
+	private function cacheConfig(Config $config) {
+		if (!$this->useCache()) {
+			return false;
+		}
+		$key = array($this, 'config');
+		$cacheFile = Cache::cacheObject($key, $config);
+		
+		if ($this->dependantCacheFiles) {
+			Cache::monitorFiles($key, $this->dependantCacheFiles);
+		}
+		
+		// reciproque dependancy
+		if ($this->dependantCacheKey) {
+			Cache::monitorFiles($this->dependantCacheKey, $cacheFile);
+		}
+	}
+	
+	private function loadCachedConfig() {
+		if (!$this->useCache()) {
+			return false;
+		} else if (null !== $config = Cache::getCachedData(array($this, 'config'))) {
+			$this->config = $config;
+			return true;
+		} else {
+			return false;
+		}
 	}
 	
 	public function __toString() {
@@ -203,117 +368,6 @@ MSG
 		if ($type === null) $type = $this->defaultInternalExecutor;
 		return $this->createExecutor($type, $action, $opts, true);
 	}
-
-// <editor-fold defaultstate="collapsed" desc="REM">
-	/**
-	 * Get this Module's {@link Executor} as specified by its $type.
-	 * 
-	 * An empty string or NULL for the $executorClass means the default
-	 * Executor; '_' for the $executorClass means the default 
-	 * {@link InternalExecutor}.
-	 * 
-	 * @param string $type            the class of the Executor to get.
-	 * NULL or an empty string means this Module's default Executor (that is 
-	 * the html executor, in the base Module implementation).
-	 * 
-	 * @param boolean $fallbackExecutor        name of the Executor to fall back
-	 * on, if a declared Executor for the given $executorClass is not found. 
-	 * Set to FALSE to disable the fallback mecanism and require the specified
-	 * $executorClass (a MissingExecutorException will be thrown if the 
-	 * specified executor doesn't exist).
-	 * 
-	 * This parameter doesn't have any effect if the default Executor or the
-	 * default internal Executor is required by setting $executorClass to 
-	 * {@link self::DEFAULT_EXECUTOR} {@internal (or NULL)} or 
-	 * {@link self::DEFAULT_INTERNAL_EXECUTOR}
-	 * 
-	 * @return Executor
-	 */
-//	private function doGetExecutor($type, $internal, $action, Request $request = null, $fallbackExecutor = false) {
-//
-//		if ($type === null) $type = self::DEFAULT_EXECUTOR;
-//		else if ($type instanceof Executor) $type = $type->getName(); // we're creating a new executor
-//
-//		if (isset($this->executorClassNames[$type])) {
-//			if ($type === self::DEFAULT_EXECUTOR && $this->defaultExecutor) {
-//				$type = $this->defaultExecutor;
-//			} else if ($type === self::DEFAULT_INTERNAL_EXECUTOR && $this->defaultInternalExecutor) {
-//				$type = $this->defaultInternalExecutor;
-//			}
-//			// already loaded
-//			return $this->createExecutor($type, $internal, $action, $request);
-//
-//		} else if ($type === self::DEFAULT_EXECUTOR) {
-//			// redirect (we cannot find a file with the type)
-//			return $this->getDefaultExecutor($internal, $action, $request);
-//
-//		} else if ($type === self::DEFAULT_INTERNAL_EXECUTOR) {
-//			// redirect (we cannot find a file with the type)
-//			return $this->getDefaultInternalExecutor($internal, $action, $request);
-//
-//		} else if ($this->loadExecutorClass($type)) {
-//			// bingo!
-//			return $this->createExecutor($type, $internal, $action, $request);
-//
-//		} else if ($fallbackExecutor !== false) {
-//			// fallback
-//			throw new Exception('Deprecated!!!');
-//			return $this->getExecutor($fallbackExecutor, false);
-//
-//		} else {
-//			throw new MissingExecutorException($this, $type);
-//		}
-//	}
-//
-//	protected function generateDefaultExecutorClass($type, $config) {
-//		$type = ucfirst($type);
-//		if (method_exists($this, $m = "generateDefault{$type}ExecutorClass")) {
-//			return $this->$m($config);
-//		} else {
-//			return false;
-//		}
-//	}
-//
-//	/**
-//	 * Create the default executor for this controller.
-//	 *
-//	 * The following applies to the base Module implementation, this behaviour
-//	 * may be overridden by Module subclasses:
-//	 *
-//	 * The default executor that is the Module's html Executor. If no such
-//	 * executor is declared by this Module, a default BasicHtmlExecutor will be
-//	 * instanciated and returned.
-//	 *
-//	 * @return Executor
-//	 */
-//	protected function getDefaultExecutor($internal, $action, Request $request = null) {
-//
-//		if (null !== $type = $this->defaultExecutor) {
-//
-//			$this->executorClassNames[self::DEFAULT_EXECUTOR] =&
-//					$this->executorClassNames[$type];
-//
-//			return $this->doGetExecutor($type, $internal, $action, $request, false);
-//		} else {
-//			throw new MissingExecutorException($this, self::DEFAULT_EXECUTOR);
-//		}
-//	}
-//
-//	/**
-//	 * @return Executor
-//	 */
-//	protected function getDefaultInternalExecutor($internal, $action, Request $request) {
-//		if (null !== $type = $this->defaultInternalExecutor) {
-//
-//			$this->executorClassNames[self::DEFAULT_INTERNAL_EXECUTOR] =&
-//					$this->executorClassNames[$type];
-//
-//			return $this->doGetExecutor($type, $internal, $action, $request, false);
-//		} else {
-//			throw new MissingExecutorException($this, self::DEFAULT_INTERNAL_EXECUTOR);
-//		}
-//	}
-// </editor-fold>
 
 	/**
 	 * Tries to find the class file/code for the Executor of the given $type at this
@@ -484,41 +538,70 @@ MSG
 	 * @return string the fully qualified class name
 	 */
 	private function loadExecutorTopLevelClass($type) {
-
+		
 		if (isset($this->executorClassNames[$type])) {
 			// The class has already been loaded
 			return $this->executorClassNames[$type];
+		} else {
+			return $this->executorClassNames[$type] = $this->doLoadExecutorTopLevelClass($type);
 		}
-
+	}
+	
+	private function doLoadExecutorTopLevelClass($type) {
+		
 		$type = self::sanitizeExecutorName($type);
 
 		$locations = $this->lineageLocations;
 
 		if (!$locations) {
-			return false;
+			$locations = array();
+		} else {
+			if ($locations[0]->namespace === $this->namespace) {
+				array_shift($locations);
+			}
 		}
 
-		if ($locations[0]->namespace === $this->namespace) {
-			array_shift($locations);
-		}
-
+		$basePath = $this->location->findTopLevelActualLocation()->path;
+		
 		// if there is a user-defined class in the top level module directory
-		if (null !== $classFile = $this->findExecutorClassFile($type, $this->basePath, $this->name)) {
+		//
+		// NB. We must not search if this file exist in $this->basePath, but
+		// in $basePath, which is the $path of the TopLevelActualLocation of
+		// this module.
+		// 
+		// In fact, I'm not sure for now that it is the right place to search
+		// but, for sure, $this->path is not, since it can easily be NULL when
+		// the Module is not overriden at the topmost level(s).
+		//
+		if (null !== $classFile = $this->findExecutorClassFile($type, $basePath, $this->name)) {
 			$finalClassLoader = function() use($classFile) {
 				require_once $classFile;
 			};
 		} else {
 			$ns = $this->namespace;
 			$finalClassLoader = function() use($type, $ns) {
-				$type = ucfirst($type);
-				class_extend($type, "$ns{$type}Base", $ns);
+				// We must test that the class doesn't already exist, for the 
+				// case where the module itself has not been overriden at all. 
+				// 
+				// eg. if the module root is not overriden at all
+				// (ie. there is only one dir root in only one modules dir), then 
+				// $this->namespace will be the same as the original module,
+				// and the class will have already been loaded).
+				// 
+				// TODO: what if the module is just not present at the topmost
+				// level ?
+				//
+				if (!class_exists("$ns$type")) {
+					$type = ucfirst($type);
+					class_extend($type, "$ns{$type}Base", $ns);
+				}
 			};
 		}
-
+        
 		$prevNamespace = null;
 
 		$baseLoaders = array();
-
+        
 		foreach ($locations as $location) {
 			if (null !== $classFile = $this->findExecutorClassFile(
 					$type, $location->path, $location->moduleName)) {
@@ -553,83 +636,7 @@ MSG
 		$finalClassLoader();
 
 		return $this->findExecutorClassName($type, $this->namespace);
-
-		
-		if (null !== $classCode = $this->loadExecutorClass($type)) {
-			$this->registerExecutorBaseClassLoader($type, $class);
-
-			$this->executorClassNames[$type] = $class = $this->findExecutorClassName($type);
-			return $class;
-		} else {
-			throw new MissingExecutorException($this, $type);
-		}
-
-//		$parents = array($prev = get_class($this));
-//		$parents[] = $prev = get_parent_class($prev);
-//		$parents[] = $prev = get_parent_class($prev);
-//
-//		dump(array(
-//			$parents,
-//			self::each($parents, function($name) {
-//				return class_exists($name, false);
-//			}),
-//		));
-
-////		dump($this->location);
-//
-//		if (($filename = $this->searchPath($possibleClassFiles, FileType::PHP))) {
-//			require_once $filename;
-//			return true;
-//		}
-//		// If a parent superclass exists, a filename must be found. That would
-//		// indeed be the case if either the parent or the child module declares
-//		// a file matching the executor $type.
-//
-//		// TODO this doesn't seem like a good idea
-//		return class_exists($this->namespace . $type);
-//
-//		return false;
 	}
-
-//	/**
-//	 * Creates the executor of the specified $type for this controller.
-//	 * @param string $type
-//	 * @return Executor
-//	 */
-//	protected final function doCreateExecutor($type, $internal, $action, Request $request = null) {
-//
-//		if ((isset($this->executorClassNames[$type]))) {
-//			$class = $this->executorClassNames[$type];
-//			return new $class($this, $type, $internal, $action, $request);
-//		}
-//
-//		foreach ($this->getAllowedExecutorClassNames() as $class) {
-//			if (class_exists($class, false)) {
-//				$this->executorClassNames[$type] = $class;
-//				return new $class($this, $type, $internal, $action, $request);
-//			}
-//		}
-//
-//		// Alias the parent class
-//		if ($this->namespace !== MODULES_NAMESPACE && (
-//				class_exists($class = MODULES_NAMESPACE . "$this->name\\$type")
-//				|| class_exists($class = MODULES_NAMESPACE . "$this->name\\{$type}Executor")
-//		)) {
-//
-//			$ns = rtrim($this->namespace, '\\');
-//			// do not use class_alias, to be able to set the namespace
-//			// eval("namespace $ns; class $type extends \\$class {}");
-//			class_extend($type, $class, $ns);
-//
-//			$class = "$ns\\$type";
-//			return new $class($this, $type, $internal, $action, $request);
-//		}
-//
-//		throw new SystemException(
-//			"Missing class for executor: $this->name.$type "
-//			. "(expected name: $this->namespace " . implode('|', $this->getAllowedExecutorClassNames()) . ')'
-//		);
-//	}
 	
 	protected function doGenerateModuleClass($class, $config) {
 		return class_extend($class, get_class($this));
@@ -642,18 +649,8 @@ MSG
 	 * @return void
 	 */
 	public final function generateDefaultModuleClass($class, $config) {
-		$this->doGenerateModuleClass($class, $config);
-		// TODO cache the returned code
-
-//		class_extend($class, get_class($this));
-//		$namespace = get_namespace($class, $class, \GET_NAMESPACE_RTRIM);
-//		$r = $this->doGenerateModuleClass($class, $namespace, $config);
-//		if ($r instanceof PHPCompiler) {
-//			$r->compile();
-//			return true;
-//		} else {
-//			return $r;
-//		}
+		return $this->doGenerateModuleClass($class, $config);
+		// TODO cache the returned code in file
 	}
 	
 	/**
@@ -707,14 +704,6 @@ MSG
 		else return $module;
 	}
 	
-//	/**
-//	 * @param string $controller
-//	 * @param boolean|string|Executor $defaultExecutor   FALSE to not try to
-//	 * get a default Executor.
-//	 * @param boolean $require
-//	 * @return Executor
-//	 */
-//	public static function parseAction($controller, $action, $request, $defaultExecutor = Module::DEFAULT_EXECUTOR, $require = true) {
 	/**
 	 * Creates the executor to serve the given $request, forcing the $controller
 	 * (ie. Module and Executor type) and $action to be the ones specified.
@@ -759,7 +748,7 @@ MSG
 		if (!($module instanceof Module)) {
 			$module = ModuleManager::getModule($module);
 		}
-
+		
 		return $module->createRequestExecutor($request, $executor);
 	}
 	
@@ -771,7 +760,7 @@ MSG
 			$module = ModuleManager::getModule($module);
 		}
 		
-		dump("Not yet implemented");
+		throw new IllegalStateException('Not implemented yet');
 		
 //		$module->getInternalExecutor($executor, $action, $opts, $fallbackExecutor)
 	}
@@ -828,7 +817,7 @@ MSG
 		return $r;
 	}
 
-	public function listLineFilesUrl($pattern, $dir) {
+	public function listLineFilesUrl($pattern, $dir, $recursive = false) {
 		$r = array();
 		if ($dir) {
 			$urlDir = str_replace('\\', '/', $dir) . '/';
@@ -839,7 +828,7 @@ MSG
 			$loc instanceof ModuleLocation;
 			if (!$loc->url) continue;
 			$baseUrl = $loc->url . $urlDir;
-			$urls = Files::listFilesIfDirExists($loc->path . $dir, $pattern, false, false);
+			$urls = Files::listFilesIfDirExists($loc->path . $dir, $pattern, $recursive, false);
 			foreach ($urls as &$url) $url = "$baseUrl$url";
 			$r = array_merge($r, $urls);
 		}

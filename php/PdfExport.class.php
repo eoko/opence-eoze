@@ -4,7 +4,7 @@
  * @license http://www.planysphere.fr/licenses/psopence.txt
  */
 
-require_once LIBS_PATH . 'html2pdf/html2pdf.class.php';
+require_once LIBS_PATH . 'html2pdf.phar';
 
 class PdfExport {
 

@@ -2,21 +2,41 @@
 
 var NS = Ext.ns("Oce.Modules.MediaManager");
 
-NS.MediaManager = eo.Class({
+var sp = Oce.BaseModule,
+	spp = sp.prototype;
 
-	open: function(destination) {
+NS.MediaManager = Ext.extend(sp, {
+
+	constructor: function() {
+		spp.constructor.apply(this, arguments);
+		this.addEvents("open");
+	}
+	
+	,open: function(destination) {
 		if (!destination) destination = Oce.mx.application.getMainDestination();
 		var p = this.mediaPanel || this.createMediaPanel();
 		destination.add(p);
 		p.show();
+		this.fireEvent("open", this, destination);
+	}
+	
+	,moduleActions: {
+		open: function(cb, scope, args) {
+			this.on({
+				single: true
+				,open: cb
+				,scope: scope
+			});
+			return this.open.apply(this, args);
+		}
 	}
 
 	,createMediaPanel: function() {
-		this.mediaPanel = new eo.MediaPanel({
+		var mediaPanel = this.mediaPanel = new eo.MediaPanel({
 			title: "Media Manager"
 			,closable: true
 			,tbar: new Ext.Toolbar({
-				items: this.uploadFormPanel = Ext.create({
+				items: [this.uploadFormPanel = Ext.create({
 					xtype: "form"
 					,fileUpload: true
 //					,padding: 0
@@ -29,13 +49,27 @@ NS.MediaManager = eo.Class({
 						xtype: "fileuploadfield"
 						,name: "image"
 						,buttonOnly: true
-						,buttonText: "Envoyer un fichier"
+//						,buttonText: "Envoyer un fichier"
+						,buttonCfg: {
+							text: "Envoyer un fichier"
+							,iconCls: "ico add"
+						}
 						,listeners: {
 							fileselected: this.uploadFile
 							,scope: this
 						}
 					})
-				})
+				}), "-", {
+					xtype: "button"
+					,text: "Supprimer"
+					,iconCls: "ico cross"
+					,handler: this.deleteSelected.createDelegate(this)
+				}, "-", {
+					xtype: "button"
+					,text: "Télécharger"
+					,iconCls: "ico download"
+					,handler: this.downloadSelected.createDelegate(this)
+				}]
 			})
 			,listeners: {
 				close: function() {
@@ -43,19 +77,45 @@ NS.MediaManager = eo.Class({
 				}
 				,scope: this
 			}
+			,onDelete: this.deleteSelected.createDelegate(this)
 		});
 		
 		this.uploadForm = this.uploadFormPanel.getForm();
 
 		return this.mediaPanel;
 	}
+	
+	,deleteSelected: function() {
+		var mp = this.mediaPanel,
+			sr = mp.getSelectedRecord();
+		if (!sr) return;
+		Oce.Ajax.request({
+			params: {
+				controller: "media.grid"
+				,action: "delete"
+				,path: mp.getDirectoryPath() || ""
+				,file: sr.data.filename
+			}
+			,success: function() {
+				mp.reload();
+			}
+		});
+	}
+	
+	,downloadSelected: function() {
+		var mp = this.mediaPanel,
+			sr = mp.getSelectedRecord();
+		if (!sr) return;
+		window.open(sr.json.url);
+	}
 
-	,uploadFile: function(fileSelector, v) {
+	,uploadFile: function(fileSelector, v, path) {
 		this.uploadForm.submit({
 			url: "index.php"
 			,params: {
-				controller: "media.grid"
+				controller: "media.grid" // TODO modularize
 				,action: "upload"
+				,path: this.mediaPanel.getDirectoryPath() || ""
 			}
 			,success: function(form, o) {
 				var obj = Ext.util.JSON.decode(o.response.responseText);

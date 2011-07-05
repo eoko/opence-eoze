@@ -5,14 +5,18 @@ Oce.MainApplication = {
 	moduleInstances: {}
 
 	,start: function(){
-		Oce.ClassLoader.require('root', 'ApplicationBootstrap', function(success) {
-			if (success) eo.root.MainApplication.start();
-		});
-//		Oce.ClassLoader.require('root', 'MainApplication.mod', function(success){
-//			if (success) {
-//				Ext.getBody().removeClass('bg')
-//			}
-//		});
+		var env = Oce.Context.environment;
+		if (env) {
+			if (!Oce.Environments) {
+				alert('Oce.Environments is undefined');
+			} else {
+				Oce.Environments[env]();
+			}
+		} else {
+			Oce.ClassLoader.require('root', 'ApplicationBootstrap', function(success) {
+				if (success) eo.root.MainApplication.start();
+			});
+		}
 	}
 
 	,defaultModuleLoadingErrorCallback: function(error) {
@@ -24,8 +28,11 @@ Oce.MainApplication = {
 			if (callback) callback(this.moduleInstances[moduleName]);
 		} else {
 			var me = this;
+			var previousCursor = Ext.getBody().getStyle("cursor");
+//			Ext.getBody().setStyle("cursor", "wait");
 			Oce.getModuleByName(moduleName,
 				function(module) {
+//					Ext.getBody().setStyle("cursor", previousCursor);
 					if (callback) {
 						try {
 							callback(
@@ -39,6 +46,7 @@ Oce.MainApplication = {
 				}
 				// error
 				,function(error) {
+					Ext.getBody().setStyle("cursor", previousCursor);
 					if (errorCallback) errorCallback(error);
 					else this.defaultModuleLoadingErrorCallback(error);
 				}
@@ -91,6 +99,21 @@ Oce.command = {
 		f.run = function(cb) {
 			f.run = Oce.command.compile(cmd, action, args, callback, forceParse);
 			f.run(cb);
+		}
+		f.toString = function() {
+			var a = "";
+			if (args) {
+				if (Ext.isString(args)) a = args;
+				else if (Ext.isArray(args)) {
+					a = args.join(",");
+				}
+			} else {
+				a = "";
+			}
+			return String.format(
+				"javascript: Oce.cmd('{0}')()",
+				cmd + (action ? "#" + action : "") + a
+			)
 		}
 		return f;
 	}

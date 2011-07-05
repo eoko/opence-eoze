@@ -3,6 +3,8 @@ self:
   include:
     js:
       dir: js
+      
+abstract: true
 
 module:
   superclass: Oce.GridModule
