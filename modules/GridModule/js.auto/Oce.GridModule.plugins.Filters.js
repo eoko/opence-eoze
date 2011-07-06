@@ -24,6 +24,7 @@ var ColumnFiltersPlugin = Ext.extend(eo.Class, {
 		return new Ext.ux.grid.GridFilters({
 			encode: true
 			,local: false
+			,paramPrefix: 'json_filters'
 		});
 	}
 	
