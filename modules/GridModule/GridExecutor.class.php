@@ -329,6 +329,8 @@ abstract class GridExecutor extends JsonExecutor {
 		);
 
 		$this->createLoadQuery_sort($query);
+		
+		$this->createLoadQuery_filters($query);
 
 		$this->createLoadQuery_search($query);
 
@@ -361,6 +363,67 @@ abstract class GridExecutor extends JsonExecutor {
 					$sort, $dir
 //					$this->table->getField($sort)->orderClause($dir, $query->dbTable)
 				);
+			}
+		}
+	}
+	
+	private static $filter_acceptedOperators = array(
+		'eq' => '=',
+		'gt' => '>',
+		'lt' => '<',
+	);
+	
+	private static $filter_acceptedTypes = array(
+		'boolean' => 'boolean',
+		'date' => 'date',
+		'list' => 'list',
+		'numeric' => 'numeric',
+		'string' => 'string',
+	);
+
+	protected function createLoadQuery_filters(ModelTableQuery $query) {
+		
+//		dump($this->request->toArray());
+
+		if ($this->request->has('filters')) {
+			foreach ($this->request->getRaw('filters') as $filter) {
+				
+				$type = self::$filter_acceptedTypes[$filter['type']];
+				
+				$field = $this->table->getField($filter['field']);
+				$field = $filter['field'];
+				$value = $filter['value'];
+				
+				switch ($type) {
+					case 'date':
+						$date = \DateTime::createFromFormat('d/m/Y', $value);
+						$value = $date->format('Y-m-d');
+					case 'numeric':
+						$op = self::$filter_acceptedOperators[$filter['comparison']];
+						$query->andWhere("$field $op ?", $value);
+						break;
+					
+					case 'boolean':
+						$query->andWhere("$field = ?", $value ? 1 : 0);
+						break;
+					
+					case 'list':
+						$query->andWhereIn($field, $value);
+						break;
+					
+					case 'string':
+						$value = str_replace('%', 'µ§~€PLACEHOLDER_FOR_STAR', $value);
+						$value = str_replace('_', 'µ§~€PLACEHOLDER_FOR_QT', $value);
+						$value = str_replace('*', '%', $value);
+						$value = str_replace('?', '_', $value);
+						if (!strstr($value, '%') && !strstr($value, '_')) {
+							$value .= '%';
+						}
+						$value = str_replace('µ§~€PLACEHOLDER_FOR_STAR', '*', $value);
+						$value = str_replace('µ§~€PLACEHOLDER_FOR_QT', '?', $value);
+						$query->andWhere("$field LIKE ?", $value);
+						break;
+				}
 			}
 		}
 	}

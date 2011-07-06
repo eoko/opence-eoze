@@ -572,4 +572,21 @@ Ext.data.Types.INT.convert = function(v) {
 			parseInt(String(v).replace(Ext.data.Types.stripRe, ''), 10) 
 			: (this.useNull ? null : 0); 
 	return Ext.isNumber(r) ? r : (this.useNull ? null : 0);
-}
+};
+
+(function() {
+	var o = Ext.data.Types.DATE,
+		uber = o.convert,
+		iso = {
+			dateFormat: 'Y-m-d\\TH:i:s'
+		},
+		sql = {
+			dateFormat: 'Y-m-d H:i:s'
+		};
+		
+	o.convert = function(v) {
+		if (!v) return null;
+		if (Ext.isDate(v)) return v;
+		return uber.call(this, v) || uber.call(iso, v) || uber.call(sql, v);
+	}
+})();
