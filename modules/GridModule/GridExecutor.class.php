@@ -416,11 +416,8 @@ abstract class GridExecutor extends JsonExecutor {
 						$value = str_replace('_', 'µ§~€PLACEHOLDER_FOR_QT', $value);
 						$value = str_replace('*', '%', $value);
 						$value = str_replace('?', '_', $value);
-						if (!strstr($value, '%') && !strstr($value, '_')) {
-							$value .= '%';
-						}
-						$value = str_replace('µ§~€PLACEHOLDER_FOR_STAR', '*', $value);
-						$value = str_replace('µ§~€PLACEHOLDER_FOR_QT', '?', $value);
+						$value = str_replace('µ§~€PLACEHOLDER_FOR_STAR', '\\%', $value);
+						$value = str_replace('µ§~€PLACEHOLDER_FOR_QT', '\\%', $value);
 						$query->andWhere("$field LIKE ?", $value);
 						break;
 				}
