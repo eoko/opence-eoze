@@ -700,6 +700,23 @@ MSG;
 	}
 
 	protected function mod_getFields(Request $request, &$setters, &$missingFields) {}
+	
+	public function toggleFieldValue() {
+		$name = $this->request->req('name');
+		$id = $this->request->req('id');
+		
+		$q = $this->table->createQuery();
+		
+		$q->set(array(
+			$name => new \SqlVariable("IF({$q->getQualifiedName($name)},0,1)")
+		));
+				
+		$success = 1 === $q->where('id=?', $id)->executeUpdate();
+		
+		$this->data = $this->table->loadModel($id)->getData();
+
+		return $success;
+	}
 
 	  //////////////////////////////////////////////////////////////////////////
 	 // SAVE - Shared
