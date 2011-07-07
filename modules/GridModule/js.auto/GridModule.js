@@ -379,6 +379,7 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 		this.beforeCreateGrid(config);
 
 		this.grid = new Ext.grid.GridPanel(config);
+		this.grid.ownerGridModule = this;
 
 		this.afterCreateGrid(this.grid);
 
@@ -485,6 +486,34 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 		} else {
 			Ext.MessageBox.alert("Erreur", 'Certains champs ne sont pas correctement remplis.') // i18n
 		}
+	}
+	
+	,toggleFieldValue: function(recordId, name) {
+		var g = this.grid,
+			ge = g && g.el;
+		if (ge) {
+			ge.mask("Enregistrement", "x-mask-loading");
+		}
+		Oce.Ajax.request({
+			params: {
+				controller: this.controller
+				,action: "toggleFieldValue"
+				,id: recordId
+				,name: name
+			}
+			,onSuccess: function(data) {
+				var s = g.store,
+					rec = s.getById(data[s.idProperty]),
+					v = data[name];
+				if (rec) {
+					rec.data[name] = eo.bool(data[name]);
+					rec.commit();
+				}
+			}
+			,onComplete: function() {
+				if (ge) ge.unmask();
+			}
+		});
 	}
 
 	/**
