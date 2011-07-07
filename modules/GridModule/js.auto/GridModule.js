@@ -2967,9 +2967,9 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 			}
 
 			,columns: {
-				 xtype: 'oce.rbbutton'
+				xtype: 'oce.rbbutton'
 				,text: 'Colonnes'
-		//		,iconCls : 'b_ico_column'
+				,iconCls : 'b_ico_columns'
 				,menu: {
 					listeners: {
 						scope: this

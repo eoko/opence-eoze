@@ -9,7 +9,7 @@ Oce.RibbonButton = Ext.extend(Ext.Button, {
 			width: '48'
 			,iconAlign: 'top'
 			,scale: 'large'
-			,arrowAlign: 'bottom'
+			,arrowAlign: 'right'
 		})
 
 		Oce.RibbonButton.superclass.constructor.call(this, config);

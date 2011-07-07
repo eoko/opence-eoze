@@ -112,6 +112,9 @@ Oce.Module.executeAction = function(action, listeners, scope) {
 	
 	var before, after;
 	
+	if (!listeners) {
+		listeners = action.listeners;
+	}
 	if (listeners) {
 		scope = listeners.scope || scope;
 		before = listeners.beforeAction || listeners.before;
