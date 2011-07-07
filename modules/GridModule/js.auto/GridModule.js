@@ -339,28 +339,32 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 	,initGrid: function() {
 
 		var checkboxSel = this.gridColumns[0];
+		
+		var pagingToolbar = {
+			xtype: "paging"
+			,pageSize: this.pageSize
+			,store: this.store
+			,params: {action:'load'}
+			,displayInfo: true
+			,displayMsg: 'Enregistrements {0} - {1} sur {2}'
+			,emptyMsg: "Aucune données existantes"
+		};
 
 		var config = Ext.apply({
-			store: this.store,
-			columns: this.gridColumns,
-			sm:checkboxSel,
-			//  autoExpandColumn: 'username',
-			loadMask: true,
-			columnLines:true,
-			border : false,
-			header : false,
-			autoScroll : true,
-			stripeRows : true,
-			enableColumnHide: false,
+			store: this.store
+			,columns: this.gridColumns
+			,sm:checkboxSel
+			//,autoExpandColumn: 'username'
+			,loadMask: true
+			,columnLines:true
+			,border : false
+			,header : false
+			,autoScroll : true
+			,stripeRows : true
+			,enableColumnHide: false
 
-			bbar: new Ext.PagingToolbar({
-				pageSize: this.pageSize,
-				store: this.store,
-				params: {action:'load'},
-				displayInfo: true,
-				displayMsg: 'Enregistrements {0} - {1} sur {2}',
-				emptyMsg: "Aucune données existantes"
-			})
+			,bbar: pagingToolbar
+			,pagingToolbar: pagingToolbar
 
 			,viewConfig: Ext.apply({
 				// grid view config can be added here
