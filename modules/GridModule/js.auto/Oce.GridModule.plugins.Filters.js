@@ -4,6 +4,8 @@ var ColumnFiltersPlugin = Ext.extend(eo.Class, {
 	
 	constructor: function(gm) {
 		gm.beforeCreateGrid = gm.beforeCreateGrid.createSequence(this.beforeCreateGrid, this);
+		gm.afterCreateGrid = gm.afterCreateGrid.createSequence(this.afterCreateGrid, this);
+		gm.openActionHandlers["gridFilters"] = this.openActionHandler;
 	}
 	
 	,beforeCreateGrid: function(config) {
@@ -21,6 +23,14 @@ var ColumnFiltersPlugin = Ext.extend(eo.Class, {
 			,local: false
 			,paramPrefix: 'json_filters'
 		});
+	}
+	
+	,openActionHandler: function(filters) {
+		var g = this.grid;
+		g.filters.applyState(g, { filters: filters });
+		if (this.firstLoad) {
+			this.reload();
+		}
 	}
 	
 });

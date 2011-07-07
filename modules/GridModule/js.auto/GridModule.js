@@ -45,6 +45,7 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 		this.reloadLatch = 0;
 		this.activeAddWindows = {};
 		this.editWindows = {};
+		this.openActionHandlers = {};
 
 		this.pageSize = this.extra.pageSize || 30;
 
@@ -2657,7 +2658,7 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 		}, this)
 	}
 	
-	,open: function(destination, config) {
+	,open: function(destination, config, action) {
 		
 		this.opening = true;
 		
@@ -2675,6 +2676,13 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 		this.opening = false;
 		this.opened = true;
 		this.fireEvent("open", this);
+		
+		if (action) {
+			Ext.iterate(action, function (k, v) {
+				var fn = this.openActionHandlers[k];
+				if (fn) fn.call(this, v);
+			}, this);
+		}
 	}
 	
 	,moduleActions: {
