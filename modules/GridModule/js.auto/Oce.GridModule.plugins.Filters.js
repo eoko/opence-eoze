@@ -8,15 +8,10 @@ var ColumnFiltersPlugin = Ext.extend(eo.Class, {
 	
 	,beforeCreateGrid: function(config) {
 		var p = this.createGridPlugin(),
-			cp = config.plugins;
-		if (cp) {
-			if (Ext.isArray(cp)) {
-				cp.push(p);
-			} else {
-				config.plugins = [cp, p];
-			}
-		} else {
-			config.plugins = [p];
+			pt = config.pagingToolbar;
+		config.plugins = eo.pushWrap(config.plugins, p);
+		if (pt) {
+			pt.plugins = eo.pushWrap(pt.plugins, p);
 		}
 	}
 	

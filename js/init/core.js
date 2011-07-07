@@ -361,6 +361,17 @@ eo.arrayToHash = function(arr, keyIndex) {
 	return r;
 };
 
+eo.pushWrap = function(o, v) {
+	if (!o) {
+		return v;
+	} else if (Ext.isArray(o)) {
+		o.push(v);
+		return o;
+	} else {
+		return [o, v];
+	}
+};
+
 eo.addAspect = function() {
 	for (var i=0,l=arguments.length; i<l; i++) {
 
