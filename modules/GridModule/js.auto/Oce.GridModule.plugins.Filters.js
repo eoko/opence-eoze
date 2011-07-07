@@ -36,5 +36,6 @@ var ColumnFiltersPlugin = Ext.extend(eo.Class, {
 });
 
 Oce.GridModule.plugins.ColumnFilters = ColumnFiltersPlugin;
+Oce.GridModule.plugins.GridFilters = ColumnFiltersPlugin;
 	
 }); // deps
