@@ -237,6 +237,9 @@
 .ico_stop {
 	background-image:url(../images/icons/stop.png) !important;
 }
+.ico.table {
+	background-image:url(../images/icons/table.png) !important;
+}
 .ico_note{
 	background-image:url(../images/icons/note.png) !important;
 }

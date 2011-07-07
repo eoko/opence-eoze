@@ -108,6 +108,41 @@ Oce.Module = Ext.extend(Ext.util.Observable, {
 	}
 });
 
+Oce.Module.executeAction = function(action, listeners, scope) {
+	
+	var before, after;
+	
+	if (listeners) {
+		scope = listeners.scope || scope;
+		before = listeners.beforeAction || listeners.before;
+		after = listeners.afterAction || listeners.after;
+	}
+	
+	if (before) before.call(scope);
+	
+	var module = action.module;
+	
+	if (module.substr(0,12) !== "Oce.Modules.") {
+		module = String.format("Oce.Modules.{0}.{0}", action.module);
+	}
+	
+	Oce.mx.application.getModuleInstance(
+		module,
+		function(module) {
+			module.executeAction({
+				action: action.method || action.action
+				,args: action.args
+				,callback: function() {
+					if (after) after.call(scope, true);
+				}
+			});
+		},
+		function() {
+			after.call(scope, false);
+		}
+	);
+};
+
 Oce.ApplicationModule = Ext.extend(Ext.Panel, {
 
 //	my: {}
