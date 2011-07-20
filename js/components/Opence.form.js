@@ -131,7 +131,7 @@ Oce.form.DateDisplayField = Ext.extend(Ext.form.DisplayField, {
 			return Oce.form.DateDisplayField.superclass.setValue.call(this, null);
 		} else {
 			var format = this.format || eo.Locale.getDateFormat();
-			if (date.split(' ').length == 2) {
+			if (!(date instanceof Date) && date.split(' ').length == 2) {
 				var parts = date.split(' ')
 					,timeParts = parts[1].split(':')
 					,dateParts = parts[0].split('-')
