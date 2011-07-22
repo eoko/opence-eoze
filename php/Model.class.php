@@ -348,12 +348,17 @@ abstract class Model {
 	}
 
 	// TODO this should be documented & have unit tests
-	// it is known to be used twice in opence
+	// it is known to be used twice in opence, and in:
+	// OpenCE:
+	// - SmInstance.grid.class.php
 	public function getDataEx($relationNames, $aliasPrefix = null, $includeBaseData = true) {
 		$data = $includeBaseData ? $this->getData($aliasPrefix) : array();
 		
 		if ($relationNames === '*') {
 			$relationNames = $this->table->getRelationNames();
+		} else if (!is_array($relationNames)) {
+			$r = $this->getDataEx(array($relationNames), null, false);
+			return $r[$relationNames];
 		}
 		
 		foreach ($relationNames as $k => $rName) {
