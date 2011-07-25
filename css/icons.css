@@ -181,6 +181,9 @@
 .ico_book {
 	background-image:url(../images/icons/book.png) !important;
 }
+.ico.find {
+	background-image:url(../images/icons/find.png) !important;
+}
 .ico_help {
 	background-image:url(../images/icons/help.png) !important;
 }
