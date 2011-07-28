@@ -826,29 +826,42 @@ eo.ui.TreeMenu.prototype.TreeNode = Ext.extend(Ext.tree.TreeNode, {
 	
 	// private
 	,runAction: function() {
-		this.setLoading(true);
-		var me = this,
-			action = this.action,
-			module = this.action.module;
-		if (module.substr(0,12) !== "Oce.Modules.") {
-			module = String.format("Oce.Modules.{0}.{0}", this.action.module);
-		}
-		Oce.mx.application.getModuleInstance(
-			module,
-			function(module) {
-				module.executeAction({
-					action: action.method
-					,args: action.args
-					,callback: function() { this.setLoading(false); }
-					,scope: me
-				});
-			},
-			function() {
-				me.setLoading(false);
-				Ext.Msg.alert("Échec de l'action", 
-						"Le module visé pas l'action n'est pas accessible.");
+		Oce.Module.executeAction(this.action, {
+			scope: this
+			,before: this.setLoading.createDelegate(this, [true])
+			,after: function(success) {
+				this.setLoading(false);
+				if (!success) {
+					Ext.Msg.alert(
+						"Échec de l'action", 
+						"Le module visé pas l'action n'est pas accessible."
+					);
+				}
 			}
-		);
+		})
+//		this.setLoading(true);
+//		var me = this,
+//			action = this.action,
+//			module = this.action.module;
+//		if (module.substr(0,12) !== "Oce.Modules.") {
+//			module = String.format("Oce.Modules.{0}.{0}", this.action.module);
+//		}
+//		Oce.mx.application.getModuleInstance(
+//			module,
+//			function(module) {
+//				module.executeAction({
+//					action: action.method
+//					,args: action.args
+//					,callback: function() { this.setLoading(false); }
+//					,scope: me
+//				});
+//			},
+//			function() {
+//				me.setLoading(false);
+//				Ext.Msg.alert("Échec de l'action", 
+//						"Le module visé pas l'action n'est pas accessible.");
+//			}
+//		);
 	}
 	
 	// private

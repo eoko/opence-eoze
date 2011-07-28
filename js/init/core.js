@@ -361,6 +361,17 @@ eo.arrayToHash = function(arr, keyIndex) {
 	return r;
 };
 
+eo.pushWrap = function(o, v) {
+	if (!o) {
+		return v;
+	} else if (Ext.isArray(o)) {
+		o.push(v);
+		return o;
+	} else {
+		return [o, v];
+	}
+};
+
 eo.addAspect = function() {
 	for (var i=0,l=arguments.length; i<l; i++) {
 
@@ -489,3 +500,10 @@ Ext.isInteger = eo.isInteger = function(o) {
 eo.trueFn = function() { return true; };
 eo.falseFn = function() { return false; };
 eo.nullFn = function() { return null; };
+
+eo.bool = function(v) {
+	if (Ext.isBoolean(v)) return v;
+	else if (Ext.isString(v)) return !!v && v !== "0";
+	else if (Ext.isNumber(v)) return !!parseInt(v);
+	else return !!v;
+}

@@ -19,7 +19,7 @@ class ModelTableQuery extends Query implements QueryAliasable {
 	 * @return ModelTableQuery
 	 */
 	public function select($field_s = null, $aliasPrefix = null) {
-
+		
 		if ($aliasPrefix !== null) throw new IllegalArgumentException('DEPRECATED');
 
 		if ($this->action === null) $this->action = self::SELECT;

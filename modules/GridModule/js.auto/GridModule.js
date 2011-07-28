@@ -45,6 +45,7 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 		this.reloadLatch = 0;
 		this.activeAddWindows = {};
 		this.editWindows = {};
+		this.openActionHandlers = {};
 
 		this.pageSize = this.extra.pageSize || 30;
 
@@ -323,7 +324,9 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 	}
 
 	,editReccordLine: function(grid, rowIndex) {
-		this.editRow(grid.store.getAt(rowIndex))
+		if (this.my.recordEditable !== false) {
+			this.editRow(grid.store.getAt(rowIndex))
+		}
 	}
 
 	,beforeCreateGrid: function(config) {
@@ -337,28 +340,32 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 	,initGrid: function() {
 
 		var checkboxSel = this.gridColumns[0];
+		
+		var pagingToolbar = {
+			xtype: "paging"
+			,pageSize: this.pageSize
+			,store: this.store
+			,params: {action:'load'}
+			,displayInfo: true
+			,displayMsg: 'Enregistrements {0} - {1} sur {2}'
+			,emptyMsg: "Aucune données existantes"
+		};
 
 		var config = Ext.apply({
-			store: this.store,
-			columns: this.gridColumns,
-			sm:checkboxSel,
-			//  autoExpandColumn: 'username',
-			loadMask: true,
-			columnLines:true,
-			border : false,
-			header : false,
-			autoScroll : true,
-			stripeRows : true,
-			enableColumnHide: false,
+			store: this.store
+			,columns: this.gridColumns
+			,sm:checkboxSel
+			//,autoExpandColumn: 'username'
+			,loadMask: true
+			,columnLines:true
+			,border : false
+			,header : false
+			,autoScroll : true
+			,stripeRows : true
+			,enableColumnHide: false
 
-			bbar: new Ext.PagingToolbar({
-				pageSize: this.pageSize,
-				store: this.store,
-				params: {action:'load'},
-				displayInfo: true,
-				displayMsg: 'Enregistrements {0} - {1} sur {2}',
-				emptyMsg: "Aucune données existantes"
-			})
+			,bbar: pagingToolbar
+			,pagingToolbar: pagingToolbar
 
 			,viewConfig: Ext.apply({
 				// grid view config can be added here
@@ -372,6 +379,7 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 		this.beforeCreateGrid(config);
 
 		this.grid = new Ext.grid.GridPanel(config);
+		this.grid.ownerGridModule = this;
 
 		this.afterCreateGrid(this.grid);
 
@@ -478,6 +486,34 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 		} else {
 			Ext.MessageBox.alert("Erreur", 'Certains champs ne sont pas correctement remplis.') // i18n
 		}
+	}
+	
+	,toggleFieldValue: function(recordId, name) {
+		var g = this.grid,
+			ge = g && g.el;
+		if (ge) {
+			ge.mask("Enregistrement", "x-mask-loading");
+		}
+		Oce.Ajax.request({
+			params: {
+				controller: this.controller
+				,action: "toggleFieldValue"
+				,id: recordId
+				,name: name
+			}
+			,onSuccess: function(data) {
+				var s = g.store,
+					rec = s.getById(data[s.idProperty]),
+					v = data[name];
+				if (rec) {
+					rec.data[name] = eo.bool(data[name]);
+					rec.commit();
+				}
+			}
+			,onComplete: function() {
+				if (ge) ge.unmask();
+			}
+		});
 	}
 
 	/**
@@ -1495,7 +1531,9 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 			}
 
 			// --- Grid Store
-			this.storeColumns.push({name: col.dataIndex || col.name});
+			this.storeColumns.push(Ext.apply({
+				name: col.dataIndex || col.name
+			}, col.store));
 		}
 	}
 
@@ -2649,7 +2687,7 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 		}, this)
 	}
 	
-	,open: function(destination, config) {
+	,open: function(destination, config, action) {
 		
 		this.opening = true;
 		
@@ -2667,6 +2705,13 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 		this.opening = false;
 		this.opened = true;
 		this.fireEvent("open", this);
+		
+		if (action) {
+			Ext.iterate(action, function (k, v) {
+				var fn = this.openActionHandlers[k];
+				if (fn) fn.call(this, v);
+			}, this);
+		}
 	}
 	
 	,moduleActions: {
@@ -2951,9 +2996,9 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 			}
 
 			,columns: {
-				 xtype: 'oce.rbbutton'
+				xtype: 'oce.rbbutton'
 				,text: 'Colonnes'
-		//		,iconCls : 'b_ico_column'
+				,iconCls : 'b_ico_columns'
 				,menu: {
 					listeners: {
 						scope: this
