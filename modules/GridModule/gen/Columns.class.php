@@ -159,15 +159,48 @@ class Columns {
 			if (null !== $f = $this->table->getField($col['name'], false)) {
 				switch ($f->getType()) {
 					case ModelColumn::T_INT:
-						if (!isset($col['renderer']))
+						if (!isset($col['renderer'])) {
 							$col['renderer'] = 'Oce.ext.Renderer.integer';
+						}
 						$this->setColFormItemif($col, 'vtype', 'numInt');
+						self::setColStoreItemIf($col, array(
+							'type' => 'int',
+							'useNull' => true,
+						));
 						break;
 					case ModelColumn::T_FLOAT:
-						if (!isset($col['renderer']))
+					case ModelColumn::T_DECIMAL:
+						if (!isset($col['renderer'])) {
 							$col['renderer'] = 'Oce.ext.Renderer.float_fr_2';
+						}
 						$this->setColFormItemif($col, 'vtype', 'numFloat');
+						self::setColStoreItemIf($col, array(
+							'type' => 'float',
+							'useNull' => true,
+						));
 						break;
+					case ModelColumn::T_DATETIME:
+					case ModelColumn::T_DATE:
+						self::setColStoreItemIf($col, 'type', 'date');
+						break;
+					case ModelColumn::T_BOOL:
+						self::setColStoreItemIf($col, 'type', 'boolean');
+						break;
+					case ModelColumn::T_TEXT:
+					case ModelColumn::T_STRING:
+						self::setColStoreItemIf($col, 'type', 'string');
+						break;
+				}
+				
+				// auto set col.filter[type === list].options
+				if (isset($col['filter']) && isset($col['filter']['type'])
+						&& $col['filter']['type'] === 'list'
+						&& (
+							!isset($col['filter']['options'])
+							|| ($col['filter']['options'] === 'auto')
+						)
+				) {
+					$col['filter']['options'] = $this->getDefaultFilterListOptions($col);
 				}
 
 				if (isset($col['formField'])) {
@@ -226,6 +259,35 @@ class Columns {
 				$name => $value
 			);
 		}
+	}
+	
+	private static function setColStoreItemIf(&$col, $name, $value = null) {
+		if (is_array($name)) {
+			foreach ($name as $k => $v) {
+				self::setColStoreItemIf($col, $k, $v);
+			}
+			return;
+		}
+		if (isset($col['store'])) {
+			if ($col['store'] !== false) {
+				if (!isset($col['store'][$name])) {
+					$col['store'][$name] = $value;
+				}
+			}
+		} else {
+			$col['store'] = array(
+				$name => $value
+			);
+		}
+	}
+	
+	private function getDefaultFilterListOptions($col) {
+		$q = $this->table->createQuery();
+		$f = $q->getQualifiedName($col['name']);
+		$r = $q->select(new \QuerySelectRaw("DISTINCT $f"))
+				->executeSelectColumn();
+		natsort($r);
+		return array_values($r);
 	}
 
 	protected function formConfigFromModel($name, $action = null) {
