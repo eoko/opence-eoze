@@ -400,15 +400,15 @@ abstract class GridExecutor extends JsonExecutor {
 						$value = $date->format('Y-m-d');
 					case 'numeric':
 						$op = self::$filter_acceptedOperators[$filter['comparison']];
-						$query->andWhere("$field $op ?", $value);
+						$query->andWhere("`$field` $op ?", $value);
 						break;
 					
 					case 'boolean':
-						$query->andWhere("$field = ?", $value ? 1 : 0);
+						$query->andWhere("`$field` = ?", $value ? 1 : 0);
 						break;
 					
 					case 'list':
-						$query->andWhereIn($field, $value);
+						$query->andWhereIn(`$field`, $value);
 						break;
 					
 					case 'string':
@@ -418,7 +418,7 @@ abstract class GridExecutor extends JsonExecutor {
 						$value = str_replace('?', '_', $value);
 						$value = str_replace('µ§~€PLACEHOLDER_FOR_STAR', '\\%', $value);
 						$value = str_replace('µ§~€PLACEHOLDER_FOR_QT', '\\%', $value);
-						$query->andWhere("$field LIKE ?", $value);
+						$query->andWhere("`$field` LIKE ?", $value);
 						break;
 				}
 			}
