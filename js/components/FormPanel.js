@@ -111,6 +111,17 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
 			this.form.on(this.formListeners);
 		}
 		
+		// Mark the form as unmodified, after a successful submit action
+		this.form.on({
+			scope: this
+			,actioncomplete: function(form, action) {
+				if (action.type === "submit"
+						&& action.result.success) {
+					this.clearModified();
+				}
+			}
+		});
+		
 		this.tabsByName = {};
 		Ext.each(this.findByType("panel"), function(item) {
 			if (item.tabName) this.tabsByName[item.tabName] = item;
@@ -262,6 +273,18 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
 
 	,clearModified: function() {
 		this.modified = false;
+
+		// clear dirty mark on form items
+		var clearItemDirty = function(item) {
+			if (Ext.isFunction(item.clearDirty)) {
+				item.clearDirty();
+			}
+			if (item instanceof Ext.form.CompositeField) {
+				item.items.each(clearItemDirty);
+			}
+		};
+		this.form.items.each(clearItemDirty);
+		
 		this.fireEvent("modificationcleared");
 	}
 

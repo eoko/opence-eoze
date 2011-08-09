@@ -15,9 +15,11 @@ abstract class VirtualFieldBase implements VirtualField {
 
 	protected $alias;
 	protected $cachable = true;
+	
+	protected $defaultAlias = null;
 
-	function __construct($alias) {
-		$this->alias = $alias;
+	function __construct($alias = null) {
+		$this->alias = $alias !== null ? $alias : $this->defaultAlias;
 	}
 	
 	public function isCachable() {

@@ -386,7 +386,7 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 		return this.grid;
 	}
 
-	,saveEdit: function(win) {
+	,saveEdit: function(win, onSuccess) {
 		var me = this;
 		this.beforeSaveEdit(win, function(stop, successCb, params) {
 			if (false !== stop) {
@@ -394,7 +394,7 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 					name: 'mod'
 					,params: params
 				};
-				me.save.call(me, win, action, successCb);
+				me.save.call(me, win, action, successCb || onSuccess);
 			}
 		});
 	}
@@ -439,20 +439,27 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 				// or it will be considered modified and will trigger a confirmation
 				// dialog
 				win.fireEvent('aftersave', win, action);
-				win.close();
+//				win.close();
 
 				this.reload();
+				
+				if (onSuccess) {
+					var r;
+					if (!loadModelData) {
+						r = onSuccess(action.result.newId);
+					} else {
+						r = onSuccess(action.result.newId, action.result.data)
+					}
+					if (r !== false) {
+						win.close();
+					}
+				} else {
+					win.close();
+				}
+				
 				var msg = Oce.pickFirst(action.result, ['message','messages','msg']);
 				if (msg !== undefined) {
 					Oce.Ajax.defaultSuccessMsgHandler(msg);
-				}
-				
-				if (onSuccess) {
-					if (!loadModelData) {
-						onSuccess(action.result.newId);
-					} else {
-						onSuccess(action.result.newId, action.result.data)
-					}
 				}
 			}.createDelegate(this);
 
@@ -695,22 +702,38 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 	,createFormWindowToolbar: function(getWindowFn, handlers, addExtraFn, opts) {
 
 		var saveButton, cancelButton;
+		
+		if (opts && opts.saveWithoutCloseButton) {
+			saveButton = new Ext.SplitButton({
+				 text: "Enregistrer"
+				 ,iconCls: "ico_disk"
+				 ,isSaveButton: true
+				 ,handler: handlers.save
+				 ,menu: [{
+					text: "Enregistrer sans fermer"
+					,handler: function() {
+						handlers.save(eo.falseFn);
+					}
+				 }]
+			 });
+		} else {
+			saveButton = new Ext.Button({
+				 text: "Enregistrer"
+				 ,iconCls: "ico_disk"
+				 ,isSaveButton: true
+				 ,handler: handlers.save
+			 });
+		}
 
 		var btnGroups = {
 			base: {
-				 xtype: 'buttongroup'
-				,anchor: 'right'
+				 xtype: "buttongroup"
+				,anchor: "right"
 				,items: [
-					 saveButton = new Ext.Button({
-						 text: 'Enregistrer'
-						 //,iconCls: 'ico_tick'
-						 ,iconCls: 'ico_disk'
-						 ,isSaveButton: true
-						 ,handler: handlers.save
-					 })
+					 saveButton
 					 ,cancelButton = new Ext.Button({
-						 text: 'Annuler'
-						 ,iconCls: 'ico_cross'
+						 text: "Annuler"
+						 ,iconCls: "ico_cross"
 						 ,isCloseButton: true
 						 ,handler: handlers.forceClose
 						 ,hidden: true
@@ -722,17 +745,17 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 		if (opts && opts.monitorFormModification) {
 
 			saveButton.disable();
-			cancelButton.setText('Fermer');
+			cancelButton.setText("Fermer");
 
 			handlers.onFormPanelCreated(function(formPanel) {
 				formPanel.on({
 					modified: function() {
 						saveButton.enable();
-						cancelButton.setText('Annuler');
+						cancelButton.setText("Annuler");
 					}
 					,modificationcleared: function() {
 						saveButton.disable();
-						cancelButton.setText('Fermer');
+						cancelButton.setText("Fermer");
 					}
 				})
 			});
@@ -751,7 +774,7 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 //				text: "help1",
 				iconCls: "fugico_question-frame"
 				,tooltip: "Aide" // i18n
-				,handler: this.viewHelp.createDelegate(this, [this.getHelpTopic('add')]) // TODO help
+				,handler: this.viewHelp.createDelegate(this, [this.getHelpTopic("add")]) // TODO help
 			});
 			var contextHelpButton = new Ext.Button({
 //				text: "help2",
@@ -1192,6 +1215,7 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 			this.editWindowToolbarAddExtra.createDelegate(this),
 			{
 				monitorFormModification: true
+				,saveWithoutCloseButton: true
 			}
 		);
 	}
@@ -1233,6 +1257,7 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 			this.editWindowToolbarAddExtra.createDelegate(this),
 			Ext.apply({
 				monitorFormModification: true
+				,saveWithoutCloseButton: true
 			}, opts)
 		);
 	}
