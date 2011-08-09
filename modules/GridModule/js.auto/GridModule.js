@@ -708,7 +708,9 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 				 text: "Enregistrer"
 				 ,iconCls: "ico_disk"
 				 ,isSaveButton: true
-				 ,handler: handlers.save
+				 ,handler: function() {
+					 handlers.save();
+				 }
 				 ,menu: [{
 					text: "Enregistrer sans fermer"
 					,handler: function() {
@@ -721,7 +723,9 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 				 text: "Enregistrer"
 				 ,iconCls: "ico_disk"
 				 ,isSaveButton: true
-				 ,handler: handlers.save
+				 ,handler: function() {
+					 handlers.save();
+				 }
 			 });
 		}
 
