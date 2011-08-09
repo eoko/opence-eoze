@@ -129,6 +129,12 @@
 .ico_add {
 	background-image:url(../images/icons/add.png) !important;
 }
+.ico.arrow_left {
+	background-image:url(../images/icons/arrow_left.png) !important;
+}
+.ico.arrow_right {
+	background-image:url(../images/icons/arrow_right.png) !important;
+}
 .ico.arrow_down {
 	background-image:url(../images/icons/arrow_down.png) !important;
 }
