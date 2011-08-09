@@ -16,6 +16,7 @@ abstract class VirtualFieldBase implements VirtualField {
 	protected $alias;
 	protected $cachable = true;
 	
+	protected $type = null;
 	protected $defaultAlias = null;
 
 	function __construct($alias = null) {
@@ -32,7 +33,11 @@ abstract class VirtualFieldBase implements VirtualField {
 	}
 	
 	public function getType() {
-		throw new UnsupportedOperationException(get_class($this) . '::getType()');
+		if ($this->type !== null) {
+			return $this->type;
+		} else {
+			throw new UnsupportedOperationException(get_class($this) . '::getType()');
+		}
 	}
 
 	public function isNullable() {
@@ -148,17 +153,22 @@ SQL;
 
 class FormattedVirtualField extends VirtualFieldBase {
 
-	protected $format;
-	private $nullable;
+	protected $format = null;
+	protected $nullable = true;
+	protected $type = ModelColumn::T_STRING;
 
-	function __construct($format, $defaultAlias = null, $nullable = true) {
+	function __construct($format = null, $defaultAlias = null, $nullable = null) {
 		parent::__construct($defaultAlias);
 		$this->nullable = $nullable;
-		$this->format = $format;
-	}
-
-	public function getType() {
-		return ModelColumn::T_STRING;
+		if ($format !== null) {
+			$this->format = $format;
+		}
+		if ($defaultAlias !== null) {
+			$this->defaultAlias = $defaultAlias;
+		}
+		if ($nullable !== null) {
+			$this->nullable = $nullable;
+		}
 	}
 
 	public function isNullable() {
