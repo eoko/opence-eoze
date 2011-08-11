@@ -1500,7 +1500,7 @@ class ModelTableFinder extends QueryWhere {
 	 * @return ModelSet
 	 */
 	public function execute($mode = ModelSet::ONE_PASS) {
-		return ModelSet::create($this->table, $this->query->where($this), $mode);
+		return ModelSet::create($this->table, $this->query->andWhere($this), $mode);
 	}
 
 }
