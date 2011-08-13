@@ -87,7 +87,7 @@ abstract class Model {
 
 	protected function __construct(&$fields, array $initValues = null, 
 			$strict = false, array $context = array()) {
-
+		
 		$this->events = new EventManager();
 
 		$this->table = $this->getTable();
@@ -1256,7 +1256,7 @@ abstract class Model {
 			
 			if ($this->internal->fields[$name] !== $v || !$testChanged) {
 //				self::getLogger()->debug('Converted value for field {} : {} => {}', $name, $value, $v);
-				$this->internal->fields[$name] = $v;
+				$this->internal->fields[$name] = $this->applyFieldValue($name, $v);
 				$this->internal->colUpdated[$name] = true;
 				$this->internal->modified = true;
 				return true;
@@ -1312,6 +1312,10 @@ abstract class Model {
 //			}
 		}
 	}
+	
+	protected function applyFieldValue($field, $value) {
+		return $value;
+	}
 
 	protected function setAllFieldsFromDatabase(array $setters) {
 		$this->internal->dbValues = array();
@@ -1319,7 +1323,7 @@ abstract class Model {
 			if (!array_key_exists($field, $setters)) {
 				throw new IllegalArgumentException('Missing field in ' . $this->getModelName() . ': ' . $field);
 			}
-			$this->internal->fields[$field] = $setters[$field];
+			$this->internal->fields[$field] = $this->applyFieldValue($field, $setters[$field]);
 			$this->internal->dbValues[$field] = $setters[$field];
 		}
 		// Load virtual fields

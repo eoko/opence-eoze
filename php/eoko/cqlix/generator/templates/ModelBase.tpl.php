@@ -13,9 +13,11 @@
  *
 <?php foreach ($fields as $field): ?>
  * @property $<?php echo $field->getName() . PHP_EOL ?>
+
 <?php endforeach ?>
 <?php foreach ($relations as $relation): ?>
  * @property-read $<?php echo lcfirst($relation->getName()) . PHP_EOL ?>
+
 <?php endforeach ?>
  */
 abstract class <?php echo $modelName ?>Base extends <?php echo $baseModelName ?> {
@@ -73,7 +75,7 @@ abstract class <?php echo $modelName ?>Base extends <?php echo $baseModelName ?>
 
 	/**
 	 * Get the name of this class's Model.
-	 * @return String
+	 * @return string
 	 */
 	protected function getModelName() {
 		return '<?php echo $modelName ?>';
@@ -90,7 +92,8 @@ abstract class <?php echo $modelName ?>Base extends <?php echo $baseModelName ?>
 	 *
 	 * @param array $initValues an array containing values with which the
 	 * Model's fields will be initialized. This
-	 * @return <?php echo $modelName ?>
+	 * @return <?php echo $modelName?>
+
 	 */
 	static function create($initValues = null, $strict = false, array $params = array()) {
 		return new <?php echo $modelName ?>($initValues, $strict, $params);
@@ -189,6 +192,7 @@ abstract class <?php echo $modelName ?>Base extends <?php echo $baseModelName ?>
 
 	/**
 	 * @return <?php echo $tableName ?>
+
 	 */
 	static function getTable() {
 		return <?php echo $tableName ?>::getInstance();
@@ -199,6 +203,7 @@ abstract class <?php echo $modelName ?>Base extends <?php echo $baseModelName ?>
 	/**
 	 * Get the value of the <?php echo $field->getVarName() ?> field.
 	 * @return <?php echo $field->getPhpType() ?>
+
 	 */
 	function is<?php echo $field->getVarName(true) ?>() {
 		$value = $this->getField('<?php echo $field->getName() ?>');
@@ -208,6 +213,7 @@ abstract class <?php echo $modelName ?>Base extends <?php echo $baseModelName ?>
 	/**
 	 * Get the value of the <?php echo $field->getVarName() ?> field.
 	 * @return <?php echo $field->getPhpType() ?>
+
 	 */
 	function get<?php echo $field->getVarName(true) ?>($format = DateHelper::SQL_DATE) {
 		$datetime = $this->getField('<?php echo $field->getName() ?>');
@@ -217,6 +223,7 @@ abstract class <?php echo $modelName ?>Base extends <?php echo $baseModelName ?>
 	/**
 	 * Get the value of the <?php echo $field->getVarName() ?> field.
 	 * @return <?php echo $field->getPhpType() ?>
+
 	 */
 	function get<?php echo $field->getVarName(true) ?>($format = DateHelper::SQL_DATETIME) {
 		$datetime = $this->getField('<?php echo $field->getName() ?>');
@@ -226,9 +233,11 @@ abstract class <?php echo $modelName ?>Base extends <?php echo $baseModelName ?>
 	/**
 	 * Get the value of the <?php echo $field->getVarName() ?> field.
 	 * @return <?php echo $field->getPhpType() ?>
+
 	 */
 	function get<?php echo $field->getVarName(true) ?>() {
-		return $this->getField('<?php echo $field->getName() ?>');
+		$v = $this->getField('<?php echo $field->getName() ?>');
+		return $v === null ? null : <?php echo $field->getPhpConvertTypeString() ?> $v;
 	}
 <?php endif ?>
 
@@ -236,6 +245,7 @@ abstract class <?php echo $modelName ?>Base extends <?php echo $baseModelName ?>
 	 * Set the value of the <?php echo $field->getVarName() ?> field.
 	 * @param <?php echo $field->getPhpType() ?> $value
 	 * @return <?php echo $modelName ?> 
+
 	 */
 	function set<?php echo $field->getVarName(true) ?>($<?php echo $field->getVarName() ?>
 , <?php echo $field->isNullable() ? '$ignoredArgument' : '$forceAcceptNull' ?> = false) {
@@ -259,14 +269,16 @@ foreach ($proxyMethods as $method) {
 <?php foreach ($relations as $relation): ?>
 <?php //if ($relation instanceof ModelRelationReferencingHasOne): ?>
 	/**
-	 * @return <?php echo $relation->getTargetModelName() ?> 
+	 * @return <?php echo $relation->getTargetModelName() ?>
+
 	 */
 	function get<?php echo $relation->getName() ?>(array $overrideContext = null) {
 		return $this->getForeignModel('<?php echo $relation->getName() ?>', $overrideContext);
 	}
 	/**
 	 *
-	 * @return <?php echo $relation->getTargetModelName() ?> 
+	 * @return <?php echo $relation->getTargetModelName() ?>
+
 	 */
 	function set<?php echo $relation->getName() ?>(<?php echo $relation->getTargetModelName() ?> $<?php echo lcfirst($relation->getName()) ?>) {
 		// return $this->getRelation('<?php echo $relation->getName() ?>')->get($this);
