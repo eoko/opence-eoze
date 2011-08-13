@@ -276,6 +276,16 @@ class ModelColumn implements ModelField {
 		return ucfirst($this->type);
 	}
 	
+	public function getPhpConvertTypeString() {
+		switch ($this->type) {
+			case self::T_INT: return '(int)';
+			case self::T_FLOAT: return '(float)';
+			case self::T_STRING: return '(string)';
+			case self::T_BOOL: return '(bool)';
+			default: return '';
+		}
+	}
+	
 	public function getHeader() {
 		return $this->name;
 	}
