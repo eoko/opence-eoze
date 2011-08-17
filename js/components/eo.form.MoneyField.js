@@ -50,8 +50,10 @@ eo.form.MoneyField = Ext.extend(Ext.form.NumberField, {
 	
 	,onResize: function(w, h) {
 		eo.form.MoneyField.superclass.onResize.apply(this, arguments);
-		this.el.setWidth(w-13);
-		this.displayEl.setWidth(w-13);
+//		this.el.setWidth(w-13);
+//		this.displayEl.setWidth(w-13);
+		this.el.setWidth(w-17);
+		this.displayEl.setWidth(w-17);
 	}
 	
 	,onDestroy: function() {
