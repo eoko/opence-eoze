@@ -99,6 +99,10 @@ Ext.ns("eo.form").CheckableFieldSet = Ext.extend(Ext.form.FieldSet, {
 		return this; 
 	}
 	
+	,setEditable: function(editable) {
+		this.checkbox.setDisplayed(editable);
+	}
+	
 	// TODO Maybe that's fast expedient, and the isValid method should try to
 	// integrate more gracefuly with Ext's validation process... A bit of
 	// investigation of form.Field isValid method could be useful.
