@@ -18,6 +18,7 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 		
 		var loginWindow = new Oce.DefaultWin({
 			 title: 'Identification'
+			,defaultButton: 'login-user'
 			,closable: false
 			,maximizable: false
 			,width: 380
