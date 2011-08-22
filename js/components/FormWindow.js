@@ -344,7 +344,8 @@ Oce.FormWindow = Ext.extend(eo.Window, {
 		t = typeof db,
 		el,
 		ct;
-		if(Ext.isDefined(db)){
+//REM		if(Ext.isDefined(db)){
+		if (db) {
 			if(Ext.isNumber(db) && this.fbar){
 				f = this.fbar.items.get(db);
 			}else if(Ext.isString(db)){
