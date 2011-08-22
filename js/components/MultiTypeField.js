@@ -40,7 +40,10 @@ Ext.ux.form.MultiTypeField = Ext.form.Field.extend({
 
 	,setField: function(field) {
 		var ct = this.fieldCt;
-		if (!ct) return;
+		if (!ct) {
+			this.field = field;
+			return;
+		}
 		if (!field) field = this.defaultField;
 		//if (this.field) ct.remove(this.field);
 		ct.removeAll();
@@ -62,33 +65,38 @@ Ext.ux.form.MultiTypeField = Ext.form.Field.extend({
 	}
 
 	,getValue: function() {
-		if (!this.field) {
+		var f = this.field;
+		if (!f || !f.getValue) {
 			return undefined;
-		} else if (this.field instanceof Ext.form.DateField) {
-			var v = this.field.getValue();
+		} else if (f instanceof Ext.form.DateField) {
+			var v = f.getValue();
 			if (v instanceof Date) return v.format("Y-m-d");
 			else return v;
 		} else {
-			return this.field.getValue();
+			return f.getValue();
 		}
 	}
 
 	,setValue: function(v) {
-		if (this.field) this.field.setValue(v);
+		var f = this.field;
+		if (f && f.getValue) f.setValue(v);
 		else this.value = v;
 	}
 
 	,isValid: function() {
-		if (this.field) return this.field.isValid();
+		var f = this.field;
+		if (f && f.isValid) return f.isValid();
 		else return true;
 	}
 
 	,markInvalid: function() {
-		if (this.field) this.field.markInvalid();
+		var f = this.field;
+		if (f && f.markInvalid) f.markInvalid();
 	}
 
 	,clearInvalid: function() {
-		if (this.field) this.field.clearInvalid();
+		var f = this.field;
+		if (f && f.clearInvalid) f.clearInvalid();
 	}
 });
 
