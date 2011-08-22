@@ -59,7 +59,7 @@ eo.form.MoneyField = Ext.extend(Ext.form.NumberField, {
 	}
 	
 	,onDestroy: function() {
-		this.wrap.remove();
+		if (this.rendered) this.wrap.remove();
 	}
 	
 });
