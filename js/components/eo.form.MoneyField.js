@@ -19,9 +19,9 @@ eo.form.MoneyField = Ext.extend(Ext.form.NumberField, {
 		Ext.form.TextField.prototype.setValue.call(this, v);
 	}
 	
-	,setReadOnly: function(on) {
+	,setReadOnly: function(readOnly) {
 		if (this.el && this.wrap) {
-			if (on) {
+			if (readOnly) {
 				this.wrap.addClass("readonly");
 				this.el.addClass("x-hidden");
 				this.displayEl.removeClass("x-hidden");
@@ -30,6 +30,8 @@ eo.form.MoneyField = Ext.extend(Ext.form.NumberField, {
 				this.displayEl.addClass("x-hidden");
 				this.el.removeClass("x-hidden");
 			}
+		} else {
+			this.readOnly = readOnly;
 		}
 	}
 	
