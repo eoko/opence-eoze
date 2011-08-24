@@ -2731,16 +2731,23 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 
 		if (this.my.toolbar) this.my.toolbar.doLayout();
 		
-		this.opening = false;
-		this.opened = true;
-		this.fireEvent("open", this);
-		
-		if (action) {
-			Ext.iterate(action, function (k, v) {
-				var fn = this.openActionHandlers[k];
-				if (fn) fn.call(this, v);
-			}, this);
-		}
+		this.beforeFinishOpen(function() {
+			
+			this.opening = false;
+			this.opened = true;
+			this.fireEvent("open", this);
+
+			if (action) {
+				Ext.iterate(action, function (k, v) {
+					var fn = this.openActionHandlers[k];
+					if (fn) fn.call(this, v);
+				}, this);
+			}
+		});
+	}
+	
+	,beforeFinishOpen: function(cb) {
+		cb.call(this);
 	}
 	
 	,moduleActions: {
