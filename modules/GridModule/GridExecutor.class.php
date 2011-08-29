@@ -7,6 +7,7 @@ use eoko\util\Json;
 use eoko\file\FileType;
 use eoko\template\HtmlTemplate;
 use eoko\cqlix\table_filters\TableHasFilters;
+use eoko\database\Database;
 
 use Model;
 use ModelTable;
@@ -45,17 +46,43 @@ abstract class GridExecutor extends JsonExecutor {
 		UserSession::requireLoggedIn();
 	}
 	
+	protected final function callInTransaction($method) {
+		if (!method_exists($this, $method)) {
+			throw new IllegalArgumentException('Missing method: ' . get_class() . "::$method");
+		}
+		$db = DataBase::getDefaultConnection();
+		if (!$db->beginTransaction()) {
+			Logger::get($this)->warn('Transactions not supported');
+		} else {
+			Logger::get($this)->info('Beginning data transaction');
+		}
+		try {
+			$result = $this->$method();
+			if (!$db->commit()) {
+				throw new IllegalStateException('Data commit failed');
+			}
+			return $result;
+		} catch (Exception $ex) {
+			if ($db->rollBack()) {
+				Logger::get($this)->info('Data modifications have been rolled back');
+			} else {
+				Logger::get($this)->error('Data modifications cannot be rolled back');
+			}
+			throw $ex;
+		}
+	}
+	
 	  //////////////////////////////////////////////////////////////////////////
 	 // ADD
 	////////////////////////////////////////////////////////////////////////////
 
-	protected function before_add(&$form) {}
+	public final function add() {
+		return $this->callInTransaction('doAdd');
+	}
 
-	public function add() {
-
+	protected function doAdd() {
+		
 		$request = $this->request->getSub('form');
-
-		$this->before_add($request);
 
 		$setters = array();
 		$missingFields = array();
@@ -628,8 +655,12 @@ MSG;
 	 // EDIT
 	//////////////////////////////////////////////////////////////////////////
 
-	public function mod() {
+	public final function mod() {
+		return $this->callInTransaction('doMod');
+	}
 
+	protected function doMod() {
+		
 		$request = $this->request->requireSub('form');
 		$setters = array();
 		$missingFields = array();
@@ -729,6 +760,11 @@ MSG;
 	//////////////////////////////////////////////////////////////////////////
 
 	public function delete_multiple() {
+		$this->callInTransaction('doDeleteMultiple');
+	}
+	
+	protected function doDeleteMultiple() {
+		
 		$ids = $this->request->req('ids');
 		$count = count($ids);
 		if ($count === $n = $this->table->deleteWherePkIn($ids)) {
@@ -750,6 +786,10 @@ MSG;
 	}
 
 	public function delete_one() {
+		return $this->callInTransaction('doDeleteOne');
+	}
+	
+	protected function doDeleteOne() {
 		$id = $this->request->req($this->table->getPrimaryKeyName());
 		if (1 === $n = $this->table->deleteWherePkIn(array($id))) {
 			return true;
