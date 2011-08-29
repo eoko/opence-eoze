@@ -1,3 +1,8 @@
+(function() {
+	
+var sp = Ext.form.Field,
+	spp = sp.prototype;
+
 Ext.ns("Ext.ux.form");
 
 /**
@@ -7,21 +12,25 @@ Ext.ns("Ext.ux.form");
  * liberally decide to add the input Component to its BasicForm, without
  * taking any action to monitor its desctruction, to remove it...
  */
-Ext.ux.form.MultiTypeField = Ext.form.Field.extend({
+Ext.ux.form.MultiTypeField = Ext.extend(sp, {
 
 	isFormField: true
-	,defaultField: {xtype:"textfield", disabled: true}
 	,autoCreate: {tag: "div"}
 
+	,defaultField: {xtype:"textfield", disabled: true}
+	
 	,initComponent: function() {
-//		this.layout = "fit";
-		Ext.ux.form.MultiTypeField.superclass.initComponent.call(this);
-		this.setField(this.defaultField);
+		this.items = [this.cloneDefaultField()];
+		spp.initComponent.call(this);
 	}
 	
+	// private
+	,cloneDefaultField: function() { return Ext.apply({}, this.defaultField) }
+	
 	,onRender: function() {
-		Ext.ux.form.MultiTypeField.superclass.onRender.apply(this, arguments);
+		spp.onRender.apply(this, arguments);
 		if (!this.fieldCt) {
+			debugger
 			this.fieldCt = new Ext.Container({
 				renderTo: this.el
 				,layout: "fit"
@@ -32,8 +41,7 @@ Ext.ux.form.MultiTypeField = Ext.form.Field.extend({
 	}
 	
 	,onResize: function(w, h) {
-		Ext.ux.form.MultiTypeField.superclass.onResize.apply(this, arguments);
-//		this.el.setSize(w, h);
+		spp.onResize.apply(this, arguments);
 		this.fieldCt.setSize(w, h);
 		this.fieldCt.doLayout();
 	}
@@ -44,7 +52,7 @@ Ext.ux.form.MultiTypeField = Ext.form.Field.extend({
 			this.field = field;
 			return;
 		}
-		if (!field) field = this.defaultField;
+		if (!field) field = this.cloneDefaultField();
 		//if (this.field) ct.remove(this.field);
 		ct.removeAll();
 		this.field = ct.add(Ext.apply({
@@ -61,7 +69,7 @@ Ext.ux.form.MultiTypeField = Ext.form.Field.extend({
 	,fireEvent: function(e) {
 		// block the fucking add event !!!
 		if (e === "add") return undefined;
-		else return Ext.ux.form.MultiTypeField.superclass.fireEvent.apply(this, arguments);
+		else return spp.fireEvent.apply(this, arguments);
 	}
 
 	,getValue: function() {
@@ -101,3 +109,5 @@ Ext.ux.form.MultiTypeField = Ext.form.Field.extend({
 });
 
 Ext.reg("multitypefield", Ext.ux.form.MultiTypeField);
+	
+})(); // closure
