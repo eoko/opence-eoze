@@ -760,7 +760,7 @@ MSG;
 	//////////////////////////////////////////////////////////////////////////
 
 	public function delete_multiple() {
-		$this->callInTransaction('doDeleteMultiple');
+		return $this->callInTransaction('doDeleteMultiple');
 	}
 	
 	protected function doDeleteMultiple() {
