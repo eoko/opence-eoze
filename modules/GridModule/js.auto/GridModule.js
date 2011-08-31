@@ -46,6 +46,7 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 		this.activeAddWindows = {};
 		this.editWindows = {};
 		this.openActionHandlers = {};
+		this.storeBaseParams = {};
 
 		this.pageSize = this.extra.pageSize || 30;
 
@@ -232,7 +233,10 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 			var controller = this.controller;
 
 			Ext.applyIf(this.store, {
-				baseParams: {'controller': controller, action:'load'},
+				baseParams: Ext.apply({
+					controller: controller
+					,action:'load'
+				}, this.storeBaseParams),
 				url: 'index.php',
 				root: 'data',
 				idProperty: this.primaryKeyName,
@@ -240,7 +244,9 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 				fields: this.storeColumns,
 				remoteSort: true
 			});
-
+			
+			delete this.storeBaseParams;
+			
 			this.beforeInitStore(this.store);
 
 //			this.store = new Oce.MultipleSortJsonStore(this.store);
@@ -2222,16 +2228,32 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 					});
 				}
 			})
+			// apply default filters
+			var activeFilters = [],
+				lastFilters = {},
+				allActive = true;
+			Ext.each(filterItems, function(f) {
+				var n = f.filterName;
+				lastFilters[n] = f.checked;
+				if (f.checked) {
+					activeFilters.push(n);
+				} else {
+					allActive = false;
+				}
+			});
+			lastFilters.all = allActive;
+			this.storeBaseParams.json_filters = encodeURIComponent(Ext.encode(activeFilters));
+			// create menu (needs the last filters)
 			this.actions.filter = {
 				xtype: 'oce.rbbutton'
 				,text: 'Filtres'
 				,iconCls: 'b_ico_filter'
-				,menu: this.createFilterMenu(filterItems)
+				,menu: this.createFilterMenu(filterItems, lastFilters)
 			};
 		}
 	}
 
-	,createFilterMenu: function(filters) {
+	,createFilterMenu: function(filters, lastFilters) {
 
 		var me = this
 			,blockCheckHandler = false
@@ -2243,7 +2265,7 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 			,hideOnClick:false
 			,filterName: 'all'
 			,handler:function(item) {
-				var checked = ! item.checked;
+				var checked = !item.checked;
 				blockCheckHandler = true;
 				item.parentMenu.items.each(function(i) {
 					if(item !== i && i.setChecked && !i.disabled && !i.isOption) {
@@ -2254,7 +2276,7 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 			}
 		});
 
-		var lastFilters = {};
+		lastFilters = Ext.apply({}, lastFilters);
 		var searchHandler = function(menu) {
 
 			if (!me.store) return;
