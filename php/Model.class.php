@@ -60,6 +60,8 @@ abstract class Model {
 	 */
 	private $forceNew = null;
 
+	private $forcedAllFieldsUpdate = false;
+	
 	protected $determinationMultifieldListeners = null;
 	protected $determinationListeners = null;
 	protected $undeterminedFields = array();
@@ -423,6 +425,14 @@ abstract class Model {
 		}
 		return true;
 	}
+	
+	/**
+	 * Marks all fields as modified. This will has effect until after the 
+	 * next successful saving operation.
+	 */
+	public function touchAllFields() {
+		$this->forcedAllFieldsUpdate = true;
+	}
 
 	/**
 	 * Returns an array containing all the reccord's fields that have changed,
@@ -447,7 +457,8 @@ abstract class Model {
 
 		foreach ($this->getFields(self::F_COLUMN) as $k => $v) {
 //			if (($this->internal->fields[$k] !== null && $this->internal->colUpdated[$k])) {
-			if (isset($this->internal->colUpdated[$k]) && $this->internal->colUpdated[$k]) {
+			if ($this->forcedAllFieldsUpdate
+					|| isset($this->internal->colUpdated[$k]) && $this->internal->colUpdated[$k]) {
 				$r[$k] = $v;
 			} else {
 				// Cache fields's col
@@ -708,6 +719,8 @@ abstract class Model {
 			$this->internal->modified = false;
 			
 			$this->internal->dbValues = null;
+			
+			$this->forcedAllFieldsUpdate = false;
 
 			// Propagate the save operation to all instanciated relations. The
 			// said relations may already have saved themselves on the afterSave
