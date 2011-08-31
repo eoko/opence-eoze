@@ -1043,8 +1043,9 @@ eo.WizardPanel = eo.wizard.WizardPanel = Ext.extend(Ext.Panel, {
 		var prev = opts[successCB];
 		opts[successCB] = function() {
 			if (prev) prev.apply(this, arguments);
-			me.fireEvent('aftersubmit', this, true);
-			if (finish) finish.apply(this, arguments);
+			me.fireEvent.apply(me, 
+					["aftersubmit", me, true].concat(Array.prototype.slice.call(arguments, 0)));
+			if (finish) finish.apply(me, arguments);
 		}
 		
 		var prev2 = opts["callback"];
