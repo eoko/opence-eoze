@@ -21,11 +21,12 @@
 }
 .b_ico_del {
 /*	background-image:url(../images/opence/32x32/trash_full.png) !important;*/
-	background-image: url(../images/icons_fatcow/32x32/delete.png) !important;
+	background-image:url(../images/opence/32x32/del.png) !important;
+/*	background-image: url(../images/icons_fatcow/32x32/delete.png) !important;*/
 }
 .b_ico_add {
-/*	background-image:url(../images/opence/32x32/add.png) !important;*/
-	background-image: url(../images/icons_fatcow/32x32/add.png) !important;
+	background-image:url(../images/opence/32x32/add.png) !important;
+/*	background-image: url(../images/icons_fatcow/32x32/add.png) !important;*/
 }
 .b_ico_filter {
 	background-image: url(../images/icons_fatcow/32x32/filter.png) !important;
