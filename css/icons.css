@@ -11,49 +11,6 @@
 .x-btn-text.export_excel {
 	background-image:url(../images/opence/32x32/export_excel.png) !important;
 }
-/*
-.printer {
-	background-image:url(../images/opence/32x32/printer.png) !important;
-}
-.refresh {
-	background-image:url(../images/icons/arrow_refresh.png) !important;
-}
-.magnifier {
-	background-image:url(../images/icons/magnifier.png) !important;
-}
-.folder {
-	background-image:url(../images/icons/folder.png) !important;
-}
-.folder_key {
-	background-image:url(../images/icons/folder_key.png) !important;
-}
-.folder_star {
-	background-image:url(../images/icons/folder_star.png) !important;
-}
-.help {
-	background-image:url(../images/icons/help.png) !important;
-}
-.nmail {
-	background-image:url(../images/opence/32x32/nmail.png) !important;
-}
-.ndoc {
-	background-image:url(../images/opence/32x32/ndoc.png) !important;
-}
-.user {
-	background-image:url(../images/opence/32x32/user.png) !important;
-}
-.users {
-	background-image:url(../images/opence/32x32/users.png) !important;
-}
-.user_add {
-	background-image:url(../images/opence/32x32/user_add.png) !important;
-}
-.user_husband {
-	background-image:url(../images/opence/32x32/user_husband.png) !important;
-}
-.user_child {
-	background-image:url(../images/opence/32x32/user_child.png) !important;
-}*/
 	
 .ico32.green_ball {
 	background-image:url(../images/opence/32x32/green_ball.png) !important;
@@ -63,10 +20,15 @@
 	background-image:url(../images/opence/32x32/earth.png) !important;
 }
 .b_ico_del {
-	background-image:url(../images/opence/32x32/trash_full.png) !important;
+/*	background-image:url(../images/opence/32x32/trash_full.png) !important;*/
+	background-image: url(../images/icons_fatcow/32x32/delete.png) !important;
 }
 .b_ico_add {
-	background-image:url(../images/opence/32x32/add.png) !important;
+/*	background-image:url(../images/opence/32x32/add.png) !important;*/
+	background-image: url(../images/icons_fatcow/32x32/add.png) !important;
+}
+.b_ico_filter {
+	background-image: url(../images/icons_fatcow/32x32/filter.png) !important;
 }
 .b_ico_temp {
 	background-image:url(../images/opence/32x32/add.png) !important;
@@ -84,7 +46,8 @@
 	background-image:url(../images/opence/32x32/donate.png) !important;
 }
 .b_ico_mail {
-	background-image:url(../images/opence/32x32/mail.png) !important;
+/*	background-image:url(../images/opence/32x32/mail.png) !important;*/
+	background-image: url(../images/icons_fatcow/32x32/email.png) !important;
 }
 .b_ico_coherence {
 	background-image:url(../images/opence/32x32/coherence.png) !important;
@@ -100,10 +63,11 @@
 	background-image:url(../images/unlicensed/icon_columns.png) !important;
 }
 
-
 .bhelp {
-	background-image:url(../images/opence/32x32/help.png) !important;
+	background-image:url(../images/icons_fatcow/32x32/help.png) !important;
 }
+
+
 /* Ico Grid */
 .ico {
 	background : no-repeat transparent;
