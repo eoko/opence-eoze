@@ -467,7 +467,7 @@ eo.ui.TreeMenu = Ext.extend(sp, {
 			},{
 				xtype: "container"
 				,layout: "form"
-				,labelWidth: 130
+				,labelWidth: 135
 				,items: [{
 					xtype: "checkbox"
 					,name: "expanded"
