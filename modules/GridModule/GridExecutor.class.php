@@ -412,8 +412,8 @@ abstract class GridExecutor extends JsonExecutor {
 		
 //		dump($this->request->toArray());
 
-		if ($this->request->has('filters')) {
-			foreach ($this->request->getRaw('filters') as $filter) {
+		if (null !== $filters = $this->request->get('columnFilters', null)) {
+			foreach ($filters as $filter) {
 				
 				$type = self::$filter_acceptedTypes[$filter['type']];
 				
