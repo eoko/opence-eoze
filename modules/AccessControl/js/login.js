@@ -86,7 +86,7 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 				fieldLabel: 'Identifiant',
 				allowBlank: false,
 				minLength: 3,
-				maxLength: 8,
+				maxLength: 45,
 				listeners: {
 					specialkey: {
 						fn: function(field, el) {
