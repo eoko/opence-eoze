@@ -54,7 +54,7 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 		this.addEvents("open", "close");
 		
 		this.model.initRelations(this.modelRelations);
-
+		
 		// Init plugins
 		// Must be done before initActions, to give plugins the opportunity to
 		// add their own actions.
@@ -2763,6 +2763,11 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 			this.addRecord.apply(this, args);
 			cb.call(scope || this, this);
 		}
+	}
+	
+	,addModuleAction: function(name, fn) {
+		this.moduleActions = Ext.apply({}, this.moduleActions);
+		this.moduleActions[name] = fn;
 	}
 	
 	,executeAction: function(name, callback, scope, args) {
