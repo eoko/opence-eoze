@@ -2225,7 +2225,7 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 			this.actions.filter = {
 				xtype: 'oce.rbbutton'
 				,text: 'Filtres'
-//				,iconCls: 'b_ico_add'
+				,iconCls: 'b_ico_filter'
 				,menu: this.createFilterMenu(filterItems)
 			};
 		}
