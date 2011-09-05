@@ -57,6 +57,7 @@ class TplField extends ModelColumn implements ConfigConstants {
 			case 'date': $type = self::T_DATE; break;
 			case 'datetime': $type = self::T_DATETIME; break;
 			case 'time': $type = self::T_TIME; break;
+			case 'bigint':
 			case 'int': // TODO DBG => int(1) == bool
 //				if ($length == null || $length != 1) { $type = self::T_INT; break; }
 //				if ($length == null || $length != 1) { $type = self::T_INT; break; }
