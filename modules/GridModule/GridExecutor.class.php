@@ -501,6 +501,8 @@ abstract class GridExecutor extends JsonExecutor {
 			$start
 //			$this->request->get('start', 0, true)
 		);
+		
+		$this->beforeExecuteLoadQuery($query);
 
 		$r = $query->executeSelect();
 		if (count($r) === 0) {
@@ -515,6 +517,8 @@ abstract class GridExecutor extends JsonExecutor {
 
 		return true;
 	}
+	
+	protected function beforeExecuteLoadQuery(ModelTableQuery $query) {}
 
 	  //////////////////////////////////////////////////////////////////////////
 	 // LOAD -- One Model
