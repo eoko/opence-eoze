@@ -1111,9 +1111,9 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 			sm = new Ext.grid.RowSelectionModel();
 		}
 
-		var me = this
+		var me = this;
 
-		,gridConfig = Ext.apply({
+		var gridConfig = Ext.apply({
 //			columns: this.checkboxSel ? [this.checkboxSel].concat(this.gridColumns) : this.gridColumns
 			cm: new Ext.grid.ColumnModel(this.checkboxSel ? [this.checkboxSel].concat(this.gridColumns) : this.gridColumns)
 	        ,clicksToEdit: 1
@@ -1129,6 +1129,11 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 			}, this.gridViewConfig) : undefined
 //			,border: false
 		}, this.gridConfig);
+		
+		if (this.cls) {
+			gridConfig.cls = gridConfig.cls ? gridConfig.cls + " " : "";
+			gridConfig.cls += this.cls;
+		}
 
 		// Enforce to take into account plugins that may have been added to
 		// this.gridPlugins during iniatilization (else, it could be overwritted
