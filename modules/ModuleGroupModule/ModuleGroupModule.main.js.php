@@ -148,6 +148,7 @@ var o = {
 			xtype: "tabpanel"
 			,activeTab: activeTab
 			,items: items
+			,tabPosition: "bottom"
 		});
 	}
 	

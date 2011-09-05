@@ -503,7 +503,7 @@ eo.nullFn = function() { return null; };
 
 eo.bool = function(v) {
 	if (Ext.isBoolean(v)) return v;
-	else if (Ext.isString(v)) return !!v && v !== "0";
+	else if (Ext.isString(v)) return !!parseInt(v);
 	else if (Ext.isNumber(v)) return !!parseInt(v);
 	else return !!v;
 }

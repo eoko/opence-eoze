@@ -465,6 +465,8 @@ class Query {
 
 				$parts[] = $col instanceof SqlVar ? $col->buildSql(false, $this->bindings)
 					: $this->getQualifiedName($col) . " = $v";
+			} else if ($val instanceof SqlFunction) {
+				$parts[] = "{$this->getQualifiedName($col)} = {$val->getString()}";
 			} else {
 
 				$parts[] = $col instanceof SqlVar ? $col->buildSql(false, $this->bindings)

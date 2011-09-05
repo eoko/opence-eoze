@@ -7,6 +7,7 @@ use eoko\util\Json;
 use eoko\file\FileType;
 use eoko\template\HtmlTemplate;
 use eoko\cqlix\table_filters\TableHasFilters;
+use eoko\database\Database;
 
 use Model;
 use ModelTable;
@@ -45,17 +46,43 @@ abstract class GridExecutor extends JsonExecutor {
 		UserSession::requireLoggedIn();
 	}
 	
+	protected final function callInTransaction($method) {
+		if (!method_exists($this, $method)) {
+			throw new IllegalArgumentException('Missing method: ' . get_class() . "::$method");
+		}
+		$db = DataBase::getDefaultConnection();
+		if (!$db->beginTransaction()) {
+			Logger::get($this)->warn('Transactions not supported');
+		} else {
+			Logger::get($this)->info('Beginning data transaction');
+		}
+		try {
+			$result = $this->$method();
+			if (!$db->commit()) {
+				throw new IllegalStateException('Data commit failed');
+			}
+			return $result;
+		} catch (Exception $ex) {
+			if ($db->rollBack()) {
+				Logger::get($this)->info('Data modifications have been rolled back');
+			} else {
+				Logger::get($this)->error('Data modifications cannot be rolled back');
+			}
+			throw $ex;
+		}
+	}
+	
 	  //////////////////////////////////////////////////////////////////////////
 	 // ADD
 	////////////////////////////////////////////////////////////////////////////
 
-	protected function before_add(&$form) {}
+	public final function add() {
+		return $this->callInTransaction('doAdd');
+	}
 
-	public function add() {
-
+	protected function doAdd() {
+		
 		$request = $this->request->getSub('form');
-
-		$this->before_add($request);
 
 		$setters = array();
 		$missingFields = array();
@@ -385,8 +412,8 @@ abstract class GridExecutor extends JsonExecutor {
 		
 //		dump($this->request->toArray());
 
-		if ($this->request->has('filters')) {
-			foreach ($this->request->getRaw('filters') as $filter) {
+		if (null !== $filters = $this->request->get('columnFilters', null)) {
+			foreach ($filters as $filter) {
 				
 				$type = self::$filter_acceptedTypes[$filter['type']];
 				
@@ -400,15 +427,15 @@ abstract class GridExecutor extends JsonExecutor {
 						$value = $date->format('Y-m-d');
 					case 'numeric':
 						$op = self::$filter_acceptedOperators[$filter['comparison']];
-						$query->andWhere("$field $op ?", $value);
+						$query->andWhere("`$field` $op ?", $value);
 						break;
 					
 					case 'boolean':
-						$query->andWhere("$field = ?", $value ? 1 : 0);
+						$query->andWhere("`$field` = ?", $value ? 1 : 0);
 						break;
 					
 					case 'list':
-						$query->andWhereIn($field, $value);
+						$query->andWhereIn(`$field`, $value);
 						break;
 					
 					case 'string':
@@ -418,7 +445,7 @@ abstract class GridExecutor extends JsonExecutor {
 						$value = str_replace('?', '_', $value);
 						$value = str_replace('µ§~€PLACEHOLDER_FOR_STAR', '\\%', $value);
 						$value = str_replace('µ§~€PLACEHOLDER_FOR_QT', '\\%', $value);
-						$query->andWhere("$field LIKE ?", $value);
+						$query->andWhere("`$field` LIKE ?", $value);
 						break;
 				}
 			}
@@ -632,8 +659,12 @@ MSG;
 	 // EDIT
 	//////////////////////////////////////////////////////////////////////////
 
-	public function mod() {
+	public final function mod() {
+		return $this->callInTransaction('doMod');
+	}
 
+	protected function doMod() {
+		
 		$request = $this->request->requireSub('form');
 		$setters = array();
 		$missingFields = array();
@@ -735,6 +766,11 @@ MSG;
 	protected function beforeDeleteMultiple($ids) {}
 	
 	public function delete_multiple() {
+		return $this->callInTransaction('doDeleteMultiple');
+	}
+	
+	protected function doDeleteMultiple() {
+		
 		$ids = $this->request->req('ids');
 		$count = count($ids);
 		if (false !== $this->beforeDeleteMultiple($ids)) {
@@ -762,6 +798,10 @@ MSG;
 	protected function beforeDeleteOne($id) {}
 
 	public function delete_one() {
+		return $this->callInTransaction('doDeleteOne');
+	}
+	
+	protected function doDeleteOne() {
 		$id = $this->request->req($this->table->getPrimaryKeyName());
 		if (false !== $this->beforeDeleteOne($id)) {
 			if (1 === $n = $this->table->deleteWherePkIn(array($id))) {

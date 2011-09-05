@@ -5,8 +5,11 @@ namespace eoko\modules\TreeMenu;
 use eoko\module\executor\JsonExecutor;
 use MenuNode, MenuNodeTable;
 use UserSession;
+use eoko\database\Database;
 
 class Json extends JsonExecutor {
+	
+	private static $defaultMenuUserId = -1;
 	
 	public function loadUserMenu() {
 		
@@ -17,7 +20,7 @@ class Json extends JsonExecutor {
 		$nodes = $finder->execute();
 		
 		if (!$nodes->count()) {
-			$nodes = $this->getModule()->createDefaultMenu();
+			$nodes = $this->createDefaultMenu();
 		}
 		
 		$data = array();
@@ -30,6 +33,62 @@ class Json extends JsonExecutor {
 		$this->data = $data;
 		
 		return true;
+	}
+	
+	private function createDefaultMenu() {
+		$db = Database::getDefaultConnection();
+		$db->beginTransaction();
+		try {
+			$result = $this->doCreateDefaultMenu();
+			$db->commit();
+			return $result;
+		} catch (\Exception $ex) {
+			$db->rollBack();
+			throw $ex;
+		}
+	}
+	
+	private function doCreateDefaultMenu() {
+		
+		$userId = $this->getUserId();
+		
+		if ($userId == self::$defaultMenuUserId) {
+			return $this->getModule()->createDefaultMenu();
+		}
+		
+		$finder = MenuNodeTable::find('`users_id`=?', self::$defaultMenuUserId);
+		$finder->query
+				->orderBy('parent__menu_nodes_id')
+				->thenOrderBy('order');
+		
+		$nodes = $finder->execute()->toArray();
+		
+		if (!$nodes) {
+			return $this->getModule()->createDefaultMenu();
+		}
+		
+		$lookup = array();
+		foreach ($nodes as $node) {
+			$lookup[$node->getId()] = $node;
+			$node->unlinkRelations();
+			$node->touchAllFields();
+			$node->setId(null);
+			$node->setUsersId($userId);
+			$parentId = $node->getParentMenuNodesId();
+			$node->saveManaged(true);
+			if ($parentId !== null) {
+				$node->setParentMenuNodesId($parentId);
+				$children[] = $node;
+			}
+		}
+		
+		foreach ($children as $node) {
+			$node instanceof MenuNode;
+			$node->setParentMenuNodesId($lookup[$node->getParentMenuNodesId()]->getId());
+			$node->saveManaged();
+		}
+		
+		return $nodes;
 	}
 	
 	public function getAvailableActions() {

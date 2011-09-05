@@ -67,6 +67,7 @@ class TplField extends ModelColumn implements ConfigConstants {
 			case 'bool': $type = self::T_BOOL; break;
 			case 'decimal':
 				$type = self::T_DECIMAL; break;
+			case 'tinytext':
 			case 'text': $type = self::T_TEXT; break;
 			case 'varchar':
 			case 'blob':

@@ -5,7 +5,7 @@
  * @author Éric Ortéga <eric@planysphere.fr>
  * @since 08/03/11 13:04
  */
-Ext.ns("eo.form").CheckableFieldSet = Ext.form.FieldSet.extend({
+Ext.ns("eo.form").CheckableFieldSet = Ext.extend(Ext.form.FieldSet, {
 	spp: Ext.form.FieldSet.prototype
 	
 	,checked: false
@@ -97,6 +97,10 @@ Ext.ns("eo.form").CheckableFieldSet = Ext.form.FieldSet.extend({
 			this.onCheckClick();
 		}
 		return this; 
+	}
+	
+	,setEditable: function(editable) {
+		this.checkbox.setDisplayed(editable);
 	}
 	
 	// TODO Maybe that's fast expedient, and the isValid method should try to

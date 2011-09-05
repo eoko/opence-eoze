@@ -17,8 +17,6 @@ eo.ui.TreeMenu = Ext.extend(sp, {
 	
 	,initComponent: function() {
 		
-		var me = this;
-		
 		this.sjax = new eo.Sjax;
 
 		// customizing the prototype's TreeNode class with this menu's config
@@ -140,29 +138,23 @@ eo.ui.TreeMenu = Ext.extend(sp, {
 					,align: "middle"
 				}
 				,items: [{
-					xtype: "trigger"
+					xtype: "eo.search"
 					,flex: 1
-					,enableKeyEvents: true
 					,emptyText: "Filtrer"
-					,triggerClass : 'x-form-clear-trigger'
-					,onTriggerClick: function() {
-						this.setValue();
-						me.filterTree(this);
-						me.resetCollapse();
-					}
 					,listeners: {
-						keydown: {
-							fn: this.filterTree
-							,buffer: 350
-							,scope: this
+						scope: this
+						,search: function(f) {
+							this.filterTree(f);
+						}
+						,clearsearch: function() {
+							this.resetCollapse();
 						}
 						,render: function() {
 							this.filter = new Ext.tree.TreeFilter(this, {
 								clearBlank: true
 								,autoClear: true
-							})
+							});
 						}
-						,scope: this
 					}
 				}
 				,new Ext.Toolbar.Separator({
@@ -475,7 +467,7 @@ eo.ui.TreeMenu = Ext.extend(sp, {
 			},{
 				xtype: "container"
 				,layout: "form"
-				,labelWidth: 130
+				,labelWidth: 135
 				,items: [{
 					xtype: "checkbox"
 					,name: "expanded"

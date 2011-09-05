@@ -22,6 +22,9 @@ var CollisionError = Ext.ns("eo.errors").OverrideCollisionError = function(prop)
 
 })(); // closure
 
+// default label separator (French style)
+Ext.layout.FormLayout.prototype.labelSeparator = " :";
+
 if (false) {
 Ext.data.JsonStore.prototype.loadRecords = function(o, options, success){
 	var i, len;

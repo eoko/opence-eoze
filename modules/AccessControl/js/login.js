@@ -18,6 +18,7 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 		
 		var loginWindow = new Oce.DefaultWin({
 			 title: 'Identification'
+			,defaultButton: 'login-user'
 			,closable: false
 			,maximizable: false
 			,width: 380
@@ -85,7 +86,7 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 				fieldLabel: 'Identifiant',
 				allowBlank: false,
 				minLength: 3,
-				maxLength: 8,
+				maxLength: 45,
 				listeners: {
 					specialkey: {
 						fn: function(field, el) {
