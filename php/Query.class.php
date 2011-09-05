@@ -56,6 +56,8 @@ use eoko\database\Database;
  */
 class Query {
 
+	private static $executionCount = 0;
+	
 	private $db = null;
 
 	private $table = null;
@@ -816,12 +818,18 @@ class Query {
 		if ($name[0] !== '`') return '`' . $name . '`';
 		else return $name;
 	}
+	
+	public static function getExecutionCount() {
+		return self::$executionCount;
+	}
 
 	/**
 	 *
 	 * @return PDOStatement
 	 */
 	private function executeSql(&$pdo = null) {
+		
+		self::$executionCount++;
 
 		$pdo = Database::getDefaultConnection();
 		$pdoStatement = $pdo->prepare($this->sql);
