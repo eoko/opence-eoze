@@ -451,10 +451,8 @@ eo.wizard.texts = {
  */
 eo.WizardPanel = eo.wizard.WizardPanel = Ext.extend(Ext.Panel, {
 
-	texts: eo.wizard.texts
-
-	,constructor: function(config) {
-
+	constructor: function(config) {
+		
 		this.addEvents({
 			updatebuttons: true
 			,updateprogress: true
@@ -836,9 +834,9 @@ eo.WizardPanel = eo.wizard.WizardPanel = Ext.extend(Ext.Panel, {
 
 		if (cs.canFinish()) {
 			cfg.next.enable = true;
-			cfg.next.text = this.texts.finish;
+			cfg.next.text = eo.wizard.texts.finish;
 		} else {
-			cfg.next.text = this.texts.next;
+			cfg.next.text = eo.wizard.texts.next;
 
 			if (cs.hasNext()) {
 				cfg.next.enable = true;
@@ -1043,8 +1041,9 @@ eo.WizardPanel = eo.wizard.WizardPanel = Ext.extend(Ext.Panel, {
 		var prev = opts[successCB];
 		opts[successCB] = function() {
 			if (prev) prev.apply(this, arguments);
-			me.fireEvent('aftersubmit', this, true);
-			if (finish) finish.apply(this, arguments);
+			me.fireEvent.apply(me, 
+					["aftersubmit", me, true].concat(Array.prototype.slice.call(arguments, 0)));
+			if (finish) finish.apply(me, arguments);
 		}
 		
 		var prev2 = opts["callback"];
@@ -1496,10 +1495,8 @@ eo.wizard.progress = {
 
 eo.WizardWindow = eo.wizard.Window = Ext.extend(eo.wizard.WindowBase, {
 
-	texts: eo.wizard.texts
-
-	,constructor: function(config) {
-
+	constructor: function(config) {
+		
 		if (!config.wizard) throw new Error('Missing config option: "wizard"');
 
 		var me = this
@@ -1518,19 +1515,19 @@ eo.WizardWindow = eo.wizard.Window = Ext.extend(eo.wizard.WindowBase, {
 				|| wizard.cancellable ? true : false)
 
 			,prevButton = my.buttons.prev = new Ext.Button({
-				text: this.texts.prev
+				text: eo.wizard.texts.prev
 				,listeners: {
 					click: {fn: wizard.prev, scope:wizard}
 				}
 			})
 			,nextButton = my.buttons.next = new Ext.Button({
-				text: this.texts.next
+				text: eo.wizard.texts.next
 				,listeners: {
 					click: {fn: wizard.next, scope:wizard}
 				}
 			})
 			,cancelButton = !closable ? null : my.buttons.cancel = new Ext.Button({
-				text: this.texts.cancel
+				text: eo.wizard.texts.cancel
 				,handler: function() {me.close()}
 			})
 			;

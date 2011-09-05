@@ -56,12 +56,14 @@ class ModelColumn implements ModelField {
 	protected $converter = null;
 
 	const T_INT = 'int';
+	const T_INTEGER = 'int';
 	const T_STRING = 'string';
 	const T_TEXT = 'text';
 	const T_DATE = 'date';
 	const T_TIME = 'time';
 	const T_DATETIME = 'datetime';
 	const T_BOOL = 'bool';
+	const T_BOOLEAN = 'bool';
 	const T_FLOAT = 'float';
 	const T_DECIMAL = 'decimal';
 	const T_ENUM = 'enum';
@@ -272,6 +274,16 @@ class ModelColumn implements ModelField {
 
 	function getPhpType() {
 		return ucfirst($this->type);
+	}
+	
+	public function getPhpConvertTypeString() {
+		switch ($this->type) {
+			case self::T_INT: return '(int)';
+			case self::T_FLOAT: return '(float)';
+			case self::T_STRING: return '(string)';
+			case self::T_BOOL: return '(bool)';
+			default: return '';
+		}
 	}
 	
 	public function getHeader() {

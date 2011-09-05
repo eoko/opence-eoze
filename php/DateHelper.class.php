@@ -28,6 +28,9 @@ class DateHelper {
 
 	public static function getDateAs($date, $format = self::SQL_DATE) {
 		if ($date === null) return null;
+		if (is_string($format)) {
+			return date($format, strtotime($date));
+		}
 		switch ($format) {
 			case self::SQL_DATE:
 				return $date;
@@ -47,6 +50,9 @@ class DateHelper {
 
 	public static function getDatetimeAs($datetime, $format = self::SQL_DATE) {
 		if ($datetime === null) return null;
+		if (is_string($format)) {
+			return date($format, strtotime($datetime));
+		}
 		switch ($format) {
 			case self::SQL_DATE:
 				return substr($datetime, 0, 10);

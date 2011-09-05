@@ -13,6 +13,16 @@ class TableFilterOption extends TableFilter {
 	}
 
 	protected function getConditionString($opts) {
-		return isset($opts[$this->name]) ? $this->onCondition : $this->offCondition;
+		return isset($opts[$this->name]) 
+				? $this->getOnCondition($opts) 
+				: $this->getOffCondition($opts);
+	}
+	
+	protected function getOnCondition($opts) {
+		return $this->onCondition;
+	}
+	
+	protected function getOffCondition($opts) {
+		return $this->offCondition;
 	}
 }

@@ -60,6 +60,8 @@ abstract class Model {
 	 */
 	private $forceNew = null;
 
+	private $forcedAllFieldsUpdate = false;
+	
 	protected $determinationMultifieldListeners = null;
 	protected $determinationListeners = null;
 	protected $undeterminedFields = array();
@@ -87,7 +89,7 @@ abstract class Model {
 
 	protected function __construct(&$fields, array $initValues = null, 
 			$strict = false, array $context = array()) {
-
+		
 		$this->events = new EventManager();
 
 		$this->table = $this->getTable();
@@ -348,12 +350,17 @@ abstract class Model {
 	}
 
 	// TODO this should be documented & have unit tests
-	// it is known to be used twice in opence
+	// it is known to be used twice in opence, and in:
+	// OpenCE:
+	// - SmInstance.grid.class.php
 	public function getDataEx($relationNames, $aliasPrefix = null, $includeBaseData = true) {
 		$data = $includeBaseData ? $this->getData($aliasPrefix) : array();
 		
 		if ($relationNames === '*') {
 			$relationNames = $this->table->getRelationNames();
+		} else if (!is_array($relationNames)) {
+			$r = $this->getDataEx(array($relationNames), null, false);
+			return $r[$relationNames];
 		}
 		
 		foreach ($relationNames as $k => $rName) {
@@ -418,6 +425,14 @@ abstract class Model {
 		}
 		return true;
 	}
+	
+	/**
+	 * Marks all fields as modified. This will has effect until after the 
+	 * next successful saving operation.
+	 */
+	public function touchAllFields() {
+		$this->forcedAllFieldsUpdate = true;
+	}
 
 	/**
 	 * Returns an array containing all the reccord's fields that have changed,
@@ -442,7 +457,8 @@ abstract class Model {
 
 		foreach ($this->getFields(self::F_COLUMN) as $k => $v) {
 //			if (($this->internal->fields[$k] !== null && $this->internal->colUpdated[$k])) {
-			if (isset($this->internal->colUpdated[$k]) && $this->internal->colUpdated[$k]) {
+			if ($this->forcedAllFieldsUpdate
+					|| isset($this->internal->colUpdated[$k]) && $this->internal->colUpdated[$k]) {
 				$r[$k] = $v;
 			} else {
 				// Cache fields's col
@@ -703,6 +719,8 @@ abstract class Model {
 			$this->internal->modified = false;
 			
 			$this->internal->dbValues = null;
+			
+			$this->forcedAllFieldsUpdate = false;
 
 			// Propagate the save operation to all instanciated relations. The
 			// said relations may already have saved themselves on the afterSave
@@ -1251,7 +1269,7 @@ abstract class Model {
 			
 			if ($this->internal->fields[$name] !== $v || !$testChanged) {
 //				self::getLogger()->debug('Converted value for field {} : {} => {}', $name, $value, $v);
-				$this->internal->fields[$name] = $v;
+				$this->internal->fields[$name] = $this->applyFieldValue($name, $v);
 				$this->internal->colUpdated[$name] = true;
 				$this->internal->modified = true;
 				return true;
@@ -1307,6 +1325,10 @@ abstract class Model {
 //			}
 		}
 	}
+	
+	protected function applyFieldValue($field, $value) {
+		return $value;
+	}
 
 	protected function setAllFieldsFromDatabase(array $setters) {
 		$this->internal->dbValues = array();
@@ -1314,7 +1336,7 @@ abstract class Model {
 			if (!array_key_exists($field, $setters)) {
 				throw new IllegalArgumentException('Missing field in ' . $this->getModelName() . ': ' . $field);
 			}
-			$this->internal->fields[$field] = $setters[$field];
+			$this->internal->fields[$field] = $this->applyFieldValue($field, $setters[$field]);
 			$this->internal->dbValues[$field] = $setters[$field];
 		}
 		// Load virtual fields

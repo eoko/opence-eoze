@@ -85,12 +85,19 @@ var <?php echo $var ?> = Ext.extend(sp, {
 	,createTabConfig: function() {
 		return {
 			xtype: "panel"
+			,border: false
 			,closable: true
 <?php if ($iconCls): ?>
 			,iconCls: "<?php echo $iconCls ?>"
 <?php endif ?>
 		};
 	}
+	
+<?php if ($iconCls): ?>
+	,getIconCls: function(action) {
+			return "<?php echo $iconCls ?>";
+	}	
+<?php endif ?>
 });
 	
 <?php if (isset($main)): ?>
