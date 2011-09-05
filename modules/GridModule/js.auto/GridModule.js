@@ -1667,6 +1667,11 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 						'maxLength', 'minLength','inputType'
 					]);
 				}
+				
+				debugger
+				if (Ext.isDefined(config.verticalFlex)) {
+					debugger
+				}
 
 				if ('regex' in config) {
 					config.getErrors = function(regex) {
