@@ -968,9 +968,15 @@ class Query {
 		return $this->executeSql()->fetchAll(PDO::FETCH_COLUMN, $colIndex);
 	}
 
-	public function executeSelectValue() {
+	public function executeSelectValue($require = true, $default = null) {
 		$col = $this->executeSelectColumn(0);
-		return $col[0];
+		if ($col) {
+			return $col[0];
+		} else if ($require) {
+			throw new SqlSystemException('Query returned 0 row.');
+		} else {
+			return $default;
+		}
 	}
 	
 	/**
