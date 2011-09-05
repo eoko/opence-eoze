@@ -1548,17 +1548,20 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 	// private
 	,FormConfig: Ext.extend(Object, {
 
-		constructor: function(columns, action, defaults) {
+		formLayout: undefined
+		,winLayout: "auto"
+		
+		,constructor: function(columns, action, defaults) {
 			
 			this.action = action;
 			this.defaults = defaults;
-
+			
 			this.fields = [];
 			this.originalIndexes = []; // used to create tabs
 
 			this.stickingTop = []; // tmp
 			this.stickingBottom = []; // tmp
-
+			
 			Ext.each(columns, function(col) {
 				this.processCol(col);
 			}, this);
@@ -1570,9 +1573,77 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 			Ext.each(this.stickingBottom, function(field) {
 				this.fields.push(field);
 			}, this);
+			
+			// Vertical flex
+			this.processVerticalFlexFields();
 
 			delete this.stickingTop;
 			delete this.stickingBottom;
+		}
+		
+		,onConfigureForm: function(formConfig) {
+			if (Ext.isDefined(this.formLayout)) {
+				formConfig.layout = this.formLayout;
+				formConfig.labelAlign = "top";
+			}
+			return formConfig;
+		}
+		
+		// private
+		,processVerticalFlexFields: function() {
+			var verticalFlexFields = [],
+				previousFields = [];
+			
+			Ext.each(this.fields, function(fieldConfig) {
+				if (Ext.isDefined(fieldConfig.verticalFlex)) {
+					// previous
+					if (previousFields.length) {
+						verticalFlexFields.push({
+							xtype: "container"
+							,layout: "form"
+							,items: previousFields
+							,defaults: this.defaults
+						});
+						previousFields = [];
+					}
+					// flexed field
+					Ext.apply(fieldConfig, {
+						flex: fieldConfig.verticalFlex
+					});
+					if (fieldConfig.labelHeader) {
+						Ext.apply(fieldConfig, {
+							cls: (fieldConfig.cls || "") + " eo-gm-form-has-label-header"
+							,title: fieldConfig.fieldLabel 
+									+ Ext.layout.FormLayout.prototype.labelSeparator
+						});
+					}
+					verticalFlexFields.push(fieldConfig);
+				} else {
+					previousFields.push(fieldConfig);
+				}
+			}, this);
+			
+			if (verticalFlexFields.length) {
+				if (previousFields.length) {
+					verticalFlexFields.push({
+						xtype: "container"
+						,layout: "form"
+						,items: previousFields
+						,defaults: this.defaults
+					})
+				}
+				this.fields = {
+					xtype: "container"
+					,layout: {
+						type: "vbox"
+						,align: "stretch"
+					}
+					,items: verticalFlexFields
+				};
+				this.winLayout = this.formLayout = "fit";
+			}
+			
+//			debugger
 		}
 		
 		// private
@@ -1674,10 +1745,6 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 				]);
 			}
 
-			if (Ext.isDefined(config.verticalFlex)) {
-				debugger
-			}
-
 			if ('regex' in config) {
 				config.getErrors = function(regex) {
 					return function(v) {
@@ -1752,12 +1819,8 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 				this.my.editWinLayout = 'fit';
 			}
 		} else {
-			// Removed on 15/02/11 14:01
-			// This caused window to not autosize on the contained form panel.
-			// Issue copb #7
-			// Was probably here for a reason, though :/
-			// this.my.addWinLayout = this.my.editWinLayout = "fit";
-			this.my.addWinLayout = this.my.editWinLayout = "auto";
+			this.my.addWinLayout = addConfig.winLayout;
+			this.my.editWinLayout = editConfig.winLayout;
 		}
 
 		//... Edit form
@@ -1773,11 +1836,11 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 				};
 			}
 		} else {
-			this.my.editFormConfig = {
+			this.my.editFormConfig = editConfig.onConfigureForm({
 				xtype: 'oce.form'
 				,jsonFormParam: 'json_form'
 				,items: editConfig.fields
-			}
+			});
 		}
 
 		//... Add form
@@ -1793,11 +1856,11 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 				}
 			}
 		} else {
-			this.my.addFormConfig = {
+			this.my.addFormConfig = addConfig.onConfigureForm({
 				xtype: 'oce.form'
 				,jsonFormParam: 'json_form'
 				,items: addConfig.fields
-			}
+			});
 		}
 
 		// Form size
