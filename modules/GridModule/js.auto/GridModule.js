@@ -1611,15 +1611,39 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 						previousFields = [];
 					}
 					// flexed field
-					Ext.apply(fieldConfig, {
-						flex: fieldConfig.verticalFlex
-					});
-					if (fieldConfig.labelHeader) {
+					var fsp = Ext.ComponentMgr.types[fieldConfig.xtype],
+						fspp = fsp.prototype;
+					if (fsp === Oce.form.GridField
+							|| fspp instanceof Oce.form.GridField
+							|| fsp === Ext.Panel
+							|| fspp instanceof Ext.Panel) {
 						Ext.apply(fieldConfig, {
-							cls: (fieldConfig.cls || "") + " eo-gm-form-has-label-header"
-							,title: fieldConfig.fieldLabel 
-									+ Ext.layout.FormLayout.prototype.labelSeparator
+							flex: fieldConfig.verticalFlex
+							,cls: (fieldConfig.cls || "") + " eo-gm-form-has-label-header"
+							,padding: "0 0 3px 0"
 						});
+						if (fieldConfig.labelHeader) {
+							Ext.apply(fieldConfig, {
+								title: fieldConfig.fieldLabel 
+										+ Ext.layout.FormLayout.prototype.labelSeparator
+							});
+						}
+					} else {
+						var lht = fieldConfig.labelHeader ? fieldConfig.fieldLabel : false;
+						fieldConfig = {
+							xtype: "panel"
+							,cls: "eo-gm-form-has-label-header"
+							,border: false
+							,layout: "fit"
+							,items: fieldConfig
+							,flex: fieldConfig.verticalFlex
+							,padding: "0 0 3px 0"
+						};
+						if (lht) {
+							Ext.apply(fieldConfig, {
+								title: lht + Ext.layout.FormLayout.prototype.labelSeparator
+							});
+						}
 					}
 					verticalFlexFields.push(fieldConfig);
 				} else {
