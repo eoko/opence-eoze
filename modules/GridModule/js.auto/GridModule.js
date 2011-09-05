@@ -1551,8 +1551,10 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 		formLayout: undefined
 		,winLayout: "auto"
 		
-		,constructor: function(columns, action, defaults) {
+		,constructor: function(gm, action, defaults) {
 			
+			this.gm = gm;
+			var columns = gm.columns;
 			this.action = action;
 			this.defaults = defaults;
 			
@@ -1584,7 +1586,9 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 		,onConfigureForm: function(formConfig) {
 			if (Ext.isDefined(this.formLayout)) {
 				formConfig.layout = this.formLayout;
-				formConfig.labelAlign = "top";
+			}
+			if (this.gm.extra && this.gm.extra.labelAlign) {
+				formConfig.labelAlign = this.gm.extra.labelAlign;
 			}
 			return formConfig;
 		}
@@ -1785,14 +1789,12 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 
 		var defaults = this.getGridColumnDefaults();
 		
-		function FormConfig(columns, action) {} // << FormConfig
-
-		var addConfig = new this.FormConfig(this.columns, 'add', defaults),
-			editConfig = new this.FormConfig(this.columns, 'edit', defaults);
+		var addConfig = new this.FormConfig(this, 'add', defaults),
+			editConfig = new this.FormConfig(this, 'edit', defaults);
 
 		if (this.forms) {
 			Ext.iterate(this.forms, function(name, config) {
-				var formFields = new FormConfig(this.columns, name);
+				var formFields = new this.FormConfig(this, name);
 				// Events
 				this.onFormItemsConfig(formFields.fields);
 				if (formFields.action) {
