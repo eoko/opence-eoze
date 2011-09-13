@@ -102,7 +102,8 @@ class TplTable implements ConfigConstants {
 		
 		if (!$this->config) return;
 
-		$colConfig = $this->config[self::CFG_COLUMNS];
+		$colConfig = isset($this->config[self::CFG_COLUMNS]) 
+				? $this->config[self::CFG_COLUMNS] : array();
 		foreach ($this->directLocalRelations as $name => $relation) {
 			if (isset($colConfig[$relation->referenceField]['relation'])) {
 				$relation->configure($colConfig[$relation->referenceField]['relation']);
