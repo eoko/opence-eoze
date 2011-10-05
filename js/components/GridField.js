@@ -203,13 +203,12 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 				}
 				
 				if (config.editor == 'checkbox') {
-					colConfig = new Oce.grid.CheckColumn(
-						Ext.apply({
-							dataIndex: config.dataIndex || di
-						}, config)
-					);
-					this.gridPlugins.push(colConfig);
+					colConfig = Ext.apply({
+						dataIndex: config.dataIndex || di
+						,xtype: 'checkcolumn'
+					}, config);
 					delete colConfig.editor;
+					delete colConfig.editable;
 				} else if (config.editor.xtype) {
 					colConfig = Ext.apply({
 						dataIndex: config.dataIndex || di
