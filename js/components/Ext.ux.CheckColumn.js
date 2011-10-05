@@ -43,7 +43,8 @@ Ext.ux.grid.CheckColumn = Ext.extend(Ext.grid.Column, {
      * Process and refire events routed from the GridView's processEvent method.
      */
     processEvent : function(name, e, grid, rowIndex, colIndex){
-        if (name == 'mousedown') {
+//        if (name == 'mousedown') {
+        if (name == 'click') { // mousedown is not compatible with drag & drop
             var record = grid.store.getAt(rowIndex);
             record.set(this.dataIndex, !record.data[this.dataIndex]);
             return false; // Cancel row selection.
