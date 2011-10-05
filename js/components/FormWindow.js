@@ -19,22 +19,22 @@ eo.Window = Ext.extend(Ext.Window, {
 
 		this.addPlugins(config);
 
-		if (Ext.isChrome) {
-			Ext.applyIf(config, {
-				autoWidth: true
-			});
-		}
+//		if (Ext.isChrome) {
+//			Ext.applyIf(config, {
+//				autoWidth: true
+//			});
+//		}
 
 		eo.Window.superclass.constructor.call(this, config);
 
-		if (Ext.isChrome) {
-			this.on({
-				scope: this
-				,afterrender: function() {
-					this.setWidth(this.getWidth());
-				}
-			});
-		}
+//		if (Ext.isChrome) {
+//			this.on({
+//				scope: this
+//				,afterrender: function() {
+//					this.setWidth(this.getWidth());
+//				}
+//			});
+//		}
 //		eo.Window.superclass.constructor.call(this, config);
 
 		if (this.modalTo) {
