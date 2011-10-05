@@ -1,8 +1,10 @@
 <?php
 
 namespace eoko\config;
+
 use eoko\file, eoko\file\Finder as FileFinder, eoko\file\FileType;
 use eoko\util\Files;
+use eoko\config\ConfigManager;
 
 class Application implements FileFinder {
 	
@@ -11,7 +13,14 @@ class Application implements FileFinder {
 	/** @var FileFinder */
 	private $fileFinder = null;
 	
-	private function __construct() {}
+	private $isDevMode = false;
+	
+	private function __construct() {
+		$config = ConfigManager::get('eoze/application');
+		$this->isDevMode = isset($config['devMode']) && $config['devMode'] !== 'auto'
+				? $config['devMode']
+				: ($_SERVER['HTTP_HOST'] === 'localhost');
+	}
 	
 	/**
 	 * @return Application
@@ -49,13 +58,25 @@ class Application implements FileFinder {
 	
 	public function resolveFileFinderAlias($alias) {
 		if ($alias === '@ext') {
-			return array(
-				FileType::JS => array(
-//					'ext/ext-base' => -10,
+			$js = $this->isDevMode
+				? array(
 					'ext/ext-base-debug' => -10,
-					'ext/ext-all-debug' => -9,
+					'ext/ext-all-debug-w-comments' => -9,
 					'ext/ext-lang-fr' => -8,
-				),
+				)
+				: array(
+					'ext/ext-base' => -10,
+					'ext/ext-all' => -9,
+					'ext/ext-lang-fr' => -8,
+				);
+			return array(
+				FileType::JS => $js,
+//				FileType::JS => array(
+////					'ext/ext-base' => -10,
+//					'ext/ext-base-debug' => -10,
+//					'ext/ext-all-debug-w-comments' => -9,
+//					'ext/ext-lang-fr' => -8,
+//				),
 				FileType::CSS => array(
 //					'reset-min' => -1,
 					'ext-all' => 1,
