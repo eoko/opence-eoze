@@ -63,19 +63,32 @@ class Config extends \eoko\config\Config {
 
 		$extends = array('Model', 'Table', 'Query', 'Proxy');
 		$tmp = array();
-		foreach ($extends as $v) $tmp[strtolower($v)] = $v;
+		foreach ($extends as $v) {
+			$tmp[strtolower($v)] = $v;
+		}
 		$types = $extends = $tmp;
 		if (isset($config['extends'])) {
 			$ex = $config['extends'];
 			if (is_string($ex)) {
-				if (!strstr($ex, '%s')) $ex .= '%s';
+				if (!strstr($ex, '%s')) {
+					$ex .= '%s';
+				}
 				foreach ($extends as $type => &$name) {
 					$name = sprintf($ex, $type);
 				}
 			} else if (is_array($ex)) {
 				foreach ($extends as $type => &$name) {
 					if (isset($ex[$type])) {
-						$name = $ex[$type];
+						if (is_array($ex[$type])) {
+							foreach ($ex[$type] as $exItem) {
+								if (class_exists($exItem)) {
+									$name = $exItem;
+									break;
+								}
+							}
+						} else {
+							$name = $ex[$type];
+						}
 					}
 				}
 			} else {
