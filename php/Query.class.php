@@ -1034,6 +1034,7 @@ class Query {
 	
 	public function setAction($action) {
 		$this->sql = null;
+		$this->bindings = array();
 		$this->action = $action;
 	}
 
