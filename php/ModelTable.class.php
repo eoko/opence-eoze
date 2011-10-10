@@ -1156,10 +1156,32 @@ EX
 		// Actually remove the data from the data store
 		return $query->executeDelete();
 	}
+	
+	abstract static public function deleteWhereNotIn($field, $values);
+	protected function _deleteWhereNotIn($field, $values) {
+		$query = $this->createLoadQuery(self::LOAD_NONE);
+		// Create the where clause
+		$where = $query->createWhere()->whereNotIn($field, $values);
+		// Notify each refering model of the end of the relationship, in order
+		// to trigger cleaning and post processing procedures
+		foreach (
+			$this->createModelSet($query->where($where), ModelSet::ONE_PASS)
+			as $model
+		) {
+			$model->notifyDelete();
+		}
+		// Actually remove the data from the data store
+		return $query->executeDelete();
+	}
 
 	abstract public static function deleteWherePkIn($values);
 	protected function _deleteWherePkIn($values) {
 		return $this->deleteWhereIn($this->getPrimaryKeyName(), $values);
+	}
+	
+	abstract public static function deleteWherePkNotIn($values);
+	protected function _deleteWherePkNotIn($values) {
+		return $this->deleteWhereNotIn($this->getPrimaryKeyName(), $values);
 	}
 
 	/**
