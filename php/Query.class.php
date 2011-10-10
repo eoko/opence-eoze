@@ -1033,6 +1033,7 @@ class Query {
 	}
 	
 	public function setAction($action) {
+		$this->sql = null;
 		$this->action = $action;
 	}
 
