@@ -1171,7 +1171,12 @@ EX
 			$model->notifyDelete();
 		}
 		// Actually remove the data from the data store
-		return $query->executeDelete();
+		$query->setAction(Query::DELETE);
+		return $this->executeDelete($query);
+	}
+	
+	protected function executeDelete(ModelTableQuery $query) {
+		return $query->execute();
 	}
 
 	abstract public static function deleteWherePkIn($values);
