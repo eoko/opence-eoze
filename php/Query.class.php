@@ -1031,6 +1031,10 @@ class Query {
 	public function exists() {
 		return $this->executeCount() > 0;
 	}
+	
+	public function setAction($action) {
+		$this->action = $action;
+	}
 
 	/**
 	 * Execute the query
