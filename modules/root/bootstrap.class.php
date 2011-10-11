@@ -39,7 +39,7 @@ class Bootstrap extends \eoko\module\executor\JsFileExecutor {
 				)
 			);
 		}
-		ExtJSResponse::answer();
+		ExtJSResponse::answer(false);
 	}
 
 	/**
