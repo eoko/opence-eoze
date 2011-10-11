@@ -193,6 +193,9 @@
 .ico_send_mail {
 	background-image:url(../images/icons/email_go.png) !important;
 }
+.ico.play {
+	background-image:url(../images/icons/control_play_blue.png) !important;
+}
 .ico.pdf,
 .ico_pdf {
 	background-image:url(../images/icons/page_white_acrobat.png) !important;
