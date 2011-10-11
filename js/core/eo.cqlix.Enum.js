@@ -5,7 +5,7 @@ Oce.deps.wait('eo.cqlix.Model', function() {
 
 var NS = eo.cqlix;
 
-NS.EnumValue = eo.Object.create({
+NS.EnumValue = Ext.extend(Object, {
 
 	/**
 	 * @param {Object} config
@@ -32,7 +32,7 @@ NS.EnumValue = eo.Object.create({
 	}
 });
 
-NS.EnumField = NS.Enum = eo.Object.extend(NS.ModelField, {
+NS.EnumField = NS.Enum = Ext.extend(NS.ModelField, {
 	
 	/**
 	 * @var {String} (default: " : ") the separator used between the checkbox 
@@ -278,7 +278,7 @@ NS.EnumField = NS.Enum = eo.Object.extend(NS.ModelField, {
 	}
 });
 
-NS.Enums = eo.Object.create({
+NS.Enums = Ext.extend(Object, {
 
 	constructor: function(config) {
 
@@ -303,7 +303,7 @@ NS.Enums = eo.Object.create({
 	
 });
 
-NS.EnumsGroup = eo.Object.create({
+NS.EnumsGroup = Ext.extend(Object, {
 
 	constructor: function(config) {
 		config = config || {};
@@ -332,7 +332,7 @@ NS.EnumsGroup = eo.Object.create({
 	}
 })
 
-NS.BooleanField = eo.Object.extend(NS.EnumField, {
+NS.BooleanField = Ext.extend(NS.EnumField, {
 
 	constructor: function(config) {
 
@@ -373,25 +373,27 @@ NS.BooleanField = eo.Object.extend(NS.EnumField, {
 	}
 
 	,createGridColumnEditor: function(config) {
-		return "checkbox";
+		return 'checkbox';
 	}
 
 	,doCreateGridColumn: function(config) {
-		return Ext.applyIf(NS.BooleanField.superclass.doCreateGridColumn.call(this, config), {
+		
+		var col = {
 			width: 42
 			// TODO this is a GridField specific field, but it should propably 
 			// tried to be used somewhat, when creating a standard grid store...
 			,storeFieldConfig: {
-				convert: function(v) {
-					return v !== false 
-						// in order to consider 0 or "0" as false...
-						&& parseInt(v) !== 0;
-				}
+				convert: eo.bool
 			}
-			,renderer: function(v) {
+		};
+		
+		if (!config.editable) {
+			col.renderer = function(v) {
 				return !!v ? "Oui" : "Non";
-			}
-		});
+			};
+		}
+		
+		return Ext.applyIf(NS.BooleanField.superclass.doCreateGridColumn.call(this, config), col);
 	}
 });
 

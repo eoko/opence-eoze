@@ -17,13 +17,11 @@ class ConfigReader extends \eoko\config\ConfigReader {
 
 			foreach ($loc['extends'] as &$ex) {
 				if (count($parts = explode('|', $ex)) > 1) {
+					$items = array();
 					foreach ($parts as $p) {
-						$p = trim($p);
-						if (class_exists($p)) {
-							$ex = $p;
-							break;
-						}
+						$items[] = trim($p);
 					}
+					$ex = $items;
 				}
 			}
 		}
