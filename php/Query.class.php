@@ -487,6 +487,7 @@ class Query {
 	}
 
 	private function buildUpdate() {
+		$this->bindings = array();
 		$this->sql = $this->buildUpdateClause()
 				. $this->buildWhere()
 				. ';';
