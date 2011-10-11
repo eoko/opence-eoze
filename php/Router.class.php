@@ -37,6 +37,7 @@ class Router {
 	public $request;
 	public $actionTimestamp;
 	
+	private $microTimeStart;
 	/** @var MonitorRequest */
 	private $requestMonitorRecord;
 
@@ -53,19 +54,22 @@ class Router {
 
 	private function __construct() {
 
+		$this->microTimeStart = self::microtime($time);
+		$this->actionTimestamp = $time;
+		
 		$request = $_REQUEST;
 		if (isset($request['route'])) {
 			\eoko\url\Maker::populateRouteRequest($request);
 		}
 		
 		$this->request = new Request($request);
-		$this->actionTimestamp = time();
+		
 		Logger::getLogger($this)->info('Start action #{}', $this->actionTimestamp);
 		
 		if (class_exists('MonitorRequest') 
 				&& $this->request->get('controller') !== 'AccessControl.login') {
 			$this->requestMonitorRecord = MonitorRequest::create(array(
-				'datetime' => date('Y-m-d H:i:s'),
+				'datetime' => date('Y-m-d H:i:s', $time),
 				'action_timestamp' => $this->actionTimestamp,
 				'http_request' => serialize($request),
 				'json_request' => json_encode($request),
@@ -95,6 +99,11 @@ class Router {
 					. ' See config node: eoko\\router\\allowMultipleCalls.');
 		}
 	}
+	
+	private static function microtime(&$time = null) {
+		list($µ, $time) = explode(' ', microtime());
+		return (int) ($time . substr($µ, 2, 6));
+	}
 
 	/**
 	 * Examines the request's params and route to the appropriate action.
@@ -117,20 +126,20 @@ class Router {
 			$action();
 
 			if ($this->requestMonitorRecord) {
-				$time = time();
-				$runningTime = $time - $this->requestMonitorRecord->getActionTimestamp();
+				$microtime = self::microtime($time);
+				$runningTime = $microtime - $this->microTimeStart;
 				$this->requestMonitorRecord->setFinishState('OK');
 				$this->requestMonitorRecord->setFinishDatetime(date('Y-m-d H:i:s'), $time);
-				$this->requestMonitorRecord->setRunningTime($runningTime);
+				$this->requestMonitorRecord->setRunningTimeMicro($runningTime);
 				$this->requestMonitorRecord->saveManaged();
 			}
 		} catch (Exception $ex) {
 			if ($this->requestMonitorRecord) {
-				$time = time();
-				$runningTime = $time - $this->requestMonitorRecord->getActionTimestamp();
+				$microtime = self::microtime($time);
+				$runningTime = $microtime - $this->microTimeStart;
 				$this->requestMonitorRecord->setFinishState("$ex");
 				$this->requestMonitorRecord->setFinishDatetime(date('Y-m-d H:i:s'), $time);
-				$this->requestMonitorRecord->setRunningTime($runningTime);
+				$this->requestMonitorRecord->setRunningTimeMicro($runningTime);
 				$this->requestMonitorRecord->saveManaged();
 			}
 			throw $ex;
