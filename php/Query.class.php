@@ -1646,7 +1646,7 @@ class QueryErrorHandler {
 	}
 
 	public static function process(Query $query = null, $error) {
-		Logger::get('QueryErrorHandler')->error("Query error message: $error[2]");
+		Logger::get('QueryErrorHandler')->error("Query error message: $error[2]. ($query)");
 		switch ($error[1]) {
 			case 1062:
 				if (preg_match("/^Duplicate entry '([^']+)' for key '([^']+)'$/",
