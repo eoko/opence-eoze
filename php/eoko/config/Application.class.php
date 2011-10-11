@@ -22,6 +22,10 @@ class Application implements FileFinder {
 				: ($_SERVER['HTTP_HOST'] === 'localhost');
 	}
 	
+	public function isDevMode() {
+		return $this->isDevMode;
+	}
+	
 	/**
 	 * @return Application
 	 */
