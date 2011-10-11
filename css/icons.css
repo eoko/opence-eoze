@@ -222,6 +222,18 @@
 .ico.report {
 	background-image:url(../images/icons/report.png) !important;
 }
+.ico.star {
+	background-image:url(../images/icons/star.png) !important;
+}
+.ico.star.empty {
+	background-image:url(../images/icons/star_empty.png) !important;
+}
+.ico.star.blue {
+	background-image:url(../images/icons/star_blue.png) !important;
+}
+.ico.star.green {
+	background-image:url(../images/icons/star_green.png) !important;
+}
 .ico_stop {
 	background-image:url(../images/icons/stop.png) !important;
 }
