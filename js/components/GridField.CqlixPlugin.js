@@ -73,7 +73,7 @@ var CQLIX_PLUGIN = eo.form.GridField.CqlixPlugin = eo.Object.create({
 					xtype: "actioncolumn"
 //					,header: "Supprimer"
 					,editable: false
-					,width: 2*(16+5)+5
+					,width: 2*(18+5)+5
 					//,resizable: false
 					,fixed: true
 					,items: [{

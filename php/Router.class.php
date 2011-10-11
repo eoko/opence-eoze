@@ -8,6 +8,8 @@ use eoko\config\ConfigManager;
 use eoko\module\ModuleManager;
 use eoko\module\Module;
 
+use \MonitorRequest;
+
 if (!isset($GLOBALS['directAccess'])) { header('HTTP/1.0 404 Not Found'); exit('Not found'); }
 
 /**
@@ -56,7 +58,19 @@ class Router {
 		$this->request = new Request($request);
 		$this->actionTimestamp = time();
 		Logger::getLogger($this)->info('Start action #{}', $this->actionTimestamp);
-
+		
+		if (class_exists('MonitorRequest') 
+				&& $this->request->get('controller') !== 'AccessControl.login') {
+			MonitorRequest::create(array(
+				'datetime' => date('Y-m-d H:i:s'),
+				'http_request' => serialize($request),
+				'json_request' => json_encode($request),
+				'php_request' => serialize($this->request),
+				'controller' => $this->request->get('controller'),
+				'action' => $this->request->get('action'),
+			))->saveManaged();
+		}
+		
 		UserMessageService::parseRequest($this->request);
 	}
 
