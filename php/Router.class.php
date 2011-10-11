@@ -36,6 +36,9 @@ class Router {
 
 	public $request;
 	public $actionTimestamp;
+	
+	/** @var MonitorRequest */
+	private $requestMonitorRecord;
 
 	/** @var int */
 	private $routeCallCount = 0;
@@ -61,14 +64,16 @@ class Router {
 		
 		if (class_exists('MonitorRequest') 
 				&& $this->request->get('controller') !== 'AccessControl.login') {
-			MonitorRequest::create(array(
+			$this->requestMonitorRecord = MonitorRequest::create(array(
 				'datetime' => date('Y-m-d H:i:s'),
+				'action_timestamp' => $this->actionTimestamp,
 				'http_request' => serialize($request),
 				'json_request' => json_encode($request),
 				'php_request' => serialize($this->request),
 				'controller' => $this->request->get('controller'),
 				'action' => $this->request->get('action'),
-			))->saveManaged();
+			));
+			$this->requestMonitorRecord->saveManaged();
 		}
 		
 		UserMessageService::parseRequest($this->request);
@@ -107,8 +112,29 @@ class Router {
 			);
 		}
 
-		$action = Module::parseRequestAction($this->request);
-		$action();
+		try {
+			$action = Module::parseRequestAction($this->request);
+			$action();
+
+			if ($this->requestMonitorRecord) {
+				$time = time();
+				$runningTime = $time - $this->requestMonitorRecord->getActionTimestamp();
+				$this->requestMonitorRecord->setFinishState('OK');
+				$this->requestMonitorRecord->setFinishDatetime(date('Y-m-d H:i:s'), $time);
+				$this->requestMonitorRecord->setRunningTime($runningTime);
+				$this->requestMonitorRecord->saveManaged();
+			}
+		} catch (Exception $ex) {
+			if ($this->requestMonitorRecord) {
+				$time = time();
+				$runningTime = $time - $this->requestMonitorRecord->getActionTimestamp();
+				$this->requestMonitorRecord->setFinishState("$ex");
+				$this->requestMonitorRecord->setFinishDatetime(date('Y-m-d H:i:s'), $time);
+				$this->requestMonitorRecord->setRunningTime($runningTime);
+				$this->requestMonitorRecord->saveManaged();
+			}
+			throw $ex;
+		}
 		
 //		if (($controller = $this->getController()) !== null) {
 //
