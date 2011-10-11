@@ -719,9 +719,10 @@ abstract class ModelTable extends ModelTableProxy {
 	 * @ignore
 	 */
 	protected function _delete($primaryKeyValue) {
-		return $this->createQuery()
+		return $this->executeDelete(
+			$this->createQuery()
 				->where($this->getPrimaryKeyName() . ' = ?', $primaryKeyValue)
-				->executeDelete() === 1;
+		) === 1;
 	}
 
 	function __toString() {
@@ -1136,7 +1137,7 @@ EX
 			$model->notifyDelete();
 		}
 		// Actually remove the data from the data store
-		return $query->executeDelete();
+		return $this->executeDelete($query);
 	}
 
 	abstract static public function deleteWhereIn($field, $values);
@@ -1154,7 +1155,7 @@ EX
 			$model->notifyDelete();
 		}
 		// Actually remove the data from the data store
-		return $query->executeDelete();
+		return $this->executeDelete($query);
 	}
 	
 	abstract static public function deleteWhereNotIn($field, $values);
@@ -1171,12 +1172,11 @@ EX
 			$model->notifyDelete();
 		}
 		// Actually remove the data from the data store
-		$query->setAction(Query::DELETE);
 		return $this->executeDelete($query);
 	}
 	
 	protected function executeDelete(ModelTableQuery $query) {
-		return $query->execute();
+		return $query->executeDelete();
 	}
 
 	abstract public static function deleteWherePkIn($values);
