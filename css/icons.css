@@ -114,6 +114,12 @@
 .ico_delete {
 	background-image:url(../images/icons/delete.png) !important;
 }
+.ico.collapse-all {
+	background-image:url("images/ext-tree-collapse-all.gif") !important;
+}
+.ico.expand-all {
+	background-image:url("images/ext-tree-expand-all.gif") !important;
+}
 .ico.save,
 .ico_disk {
 	background-image:url(../images/icons/disk.png) !important;
