@@ -191,6 +191,7 @@ new <?php echo $this->getClass() ?>(<?php echo $head ? $rTabs : '' ?>
 
 	public function tplOnDeleteAction() {
 		switch ($this->onDeleteAction) {
+			case 'NOTHING':
 			case 'DELETE':
 			case 'SET_NULL':
 				echo <<<PHP
