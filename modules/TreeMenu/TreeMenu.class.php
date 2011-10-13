@@ -12,6 +12,7 @@ use eoko\cache\Cache;
 use eoko\util\Arrays;
 use eoko\log\Logger;
 
+use eoko\modules\TreeMenu\HasAccessLevel;
 use eoko\modules\TreeMenu\HasMenuActions;
 use eoko\modules\TreeMenu\MenuAction;
 use eoko\modules\TreeMenu\MenuFamily;
@@ -209,7 +210,7 @@ class TreeMenu extends Module implements HasMenuActions {
 		throw new IllegalStateException('Invalid configuration item in menu.yml');
 	}
 	
-	public function isAuthorized(MenuAction $action) {
+	public function isAuthorized(HasAccessLevel $item) {
 		return true;
 	}
 	

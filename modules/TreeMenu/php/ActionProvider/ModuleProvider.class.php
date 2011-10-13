@@ -92,6 +92,8 @@ class ModuleProvider implements ActionProvider {
 			$in = str_replace('%module%', $this->getModuleName(), $in);
 			$in = str_replace('%title%', $this->getModuleTitle(), $in);
 			return $in;
+		} else {
+			return $in;
 		}
 	}
 	
