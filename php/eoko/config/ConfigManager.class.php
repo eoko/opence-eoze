@@ -67,7 +67,7 @@ class ConfigManager {
 		}
 	}
 
-	private function node($node) {
+	private function &node($node) {
 		if (is_object($node)) {
 			$node = get_class($node);
 		}
@@ -94,6 +94,11 @@ class ConfigManager {
 		} else {
 			return $node;
 		}
+	}
+	
+	public static function put($node, $value) {
+		$node =& self::getInstance()->node($node);
+		$node = $value;
 	}
 
 	/**
