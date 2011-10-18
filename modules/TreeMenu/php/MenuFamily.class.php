@@ -2,7 +2,7 @@
 
 namespace eoko\modules\TreeMenu;
 
-class MenuFamily {
+class MenuFamily implements HasAccessLevel {
 
 	/** @var string */
 	private $id;
@@ -43,7 +43,7 @@ class MenuFamily {
 		}
 		$r['actions'] = array();
 		foreach ($this->actions as $action) {
-			if ($module && !$module->isAuthorized($action)) {
+			if ($module && (!$module->isAuthorized($action) || !$module->isAuthorized($this))) {
 				continue;
 			}
 			if ($associative) {
@@ -74,5 +74,9 @@ class MenuFamily {
 		} else {
 			return null;
 		}
+	}
+	
+	public function getAccessLevel() {
+		return $this->accessLevel;
 	}
 }

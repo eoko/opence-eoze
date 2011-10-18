@@ -114,6 +114,12 @@
 .ico_delete {
 	background-image:url(../images/icons/delete.png) !important;
 }
+.ico.collapse-all {
+	background-image:url("images/ext-tree-collapse-all.gif") !important;
+}
+.ico.expand-all {
+	background-image:url("images/ext-tree-expand-all.gif") !important;
+}
 .ico.save,
 .ico_disk {
 	background-image:url(../images/icons/disk.png) !important;
@@ -193,6 +199,9 @@
 .ico_send_mail {
 	background-image:url(../images/icons/email_go.png) !important;
 }
+.ico.play {
+	background-image:url(../images/icons/control_play_blue.png) !important;
+}
 .ico.pdf,
 .ico_pdf {
 	background-image:url(../images/icons/page_white_acrobat.png) !important;
@@ -218,6 +227,18 @@
 }
 .ico.report {
 	background-image:url(../images/icons/report.png) !important;
+}
+.ico.star {
+	background-image:url(../images/icons/star.png) !important;
+}
+.ico.star.empty {
+	background-image:url(../images/icons/star_empty.png) !important;
+}
+.ico.star.blue {
+	background-image:url(../images/icons/star_blue.png) !important;
+}
+.ico.star.green {
+	background-image:url(../images/icons/star_green.png) !important;
 }
 .ico_stop {
 	background-image:url(../images/icons/stop.png) !important;

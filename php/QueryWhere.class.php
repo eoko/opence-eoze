@@ -91,7 +91,7 @@ class QueryWhere {
 	public function whereNotIn($field, $values = array()) {
 		if (func_num_args() > 2) $values = array_splice(func_get_args(), 1);
 		$this->sql = null;
-		return $this->pushInCondition($field, $values, ' NOT');
+		return $this->pushInCondition($field, $values, null, ' NOT');
 	}
 
 	/**

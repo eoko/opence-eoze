@@ -194,23 +194,21 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 					// overwritte the record's own id value... So, you should
 					// double check that something wrong hasn't occured that
 					// leads use here! (Thanks for attention)
-					if (console) {
-						var msg = 'Warning!!! A grid editor has a name set: '
-								+ config.editor.name;
-						if (console.warn) console.warn(msg);
-						else if (console.log) console.log(msg);
-						debugger
+					var logger = console && (console.warn || console.log)
+					if (logger) {
+						logger('Warning!!! A grid editor has a name set: '
+								+ config.editor.name);
+//						debugger
 					}
 				}
 				
 				if (config.editor == 'checkbox') {
-					colConfig = new Oce.grid.CheckColumn(
-						Ext.apply({
-							dataIndex: config.dataIndex || di
-						}, config)
-					);
-					this.gridPlugins.push(colConfig);
+					colConfig = Ext.apply({
+						dataIndex: config.dataIndex || di
+						,xtype: 'checkcolumn'
+					}, config);
 					delete colConfig.editor;
+					delete colConfig.editable;
 				} else if (config.editor.xtype) {
 					colConfig = Ext.apply({
 						dataIndex: config.dataIndex || di
@@ -1111,9 +1109,9 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 			sm = new Ext.grid.RowSelectionModel();
 		}
 
-		var me = this
+		var me = this;
 
-		,gridConfig = Ext.apply({
+		var gridConfig = Ext.apply({
 //			columns: this.checkboxSel ? [this.checkboxSel].concat(this.gridColumns) : this.gridColumns
 			cm: new Ext.grid.ColumnModel(this.checkboxSel ? [this.checkboxSel].concat(this.gridColumns) : this.gridColumns)
 	        ,clicksToEdit: 1
@@ -1129,6 +1127,11 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 			}, this.gridViewConfig) : undefined
 //			,border: false
 		}, this.gridConfig);
+		
+		if (this.cls) {
+			gridConfig.cls = gridConfig.cls ? gridConfig.cls + " " : "";
+			gridConfig.cls += this.cls;
+		}
 
 		// Enforce to take into account plugins that may have been added to
 		// this.gridPlugins during iniatilization (else, it could be overwritted
