@@ -1,5 +1,10 @@
 <?php
 
+// needed to avoid multiple inclusion of the file, in case it exists in PEAR
+include 'SymfonyComponents' . DS . 'YAML' . DS . 'sfYaml.php';
+
+if (!class_exists('sfYaml', true)) {
+	
 /*
  * This file is part of the symfony package.
  * (c) 2004-2006 Fabien Potencier <fabien.potencier@symfony-project.com>
@@ -134,4 +139,6 @@ function echoln($string)
 {
   echo $string."\n";
 }
+}
+
 }
