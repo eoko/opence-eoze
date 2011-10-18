@@ -15,6 +15,10 @@ class Database {
 	
 	private function __construct() {}
 	
+	public static function reset() {
+		self::$defaultProxy = null;
+	}
+	
 	/**
 	 * @return DatabaseProxy
 	 */
