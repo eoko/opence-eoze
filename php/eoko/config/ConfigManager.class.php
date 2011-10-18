@@ -36,13 +36,15 @@ class ConfigManager {
 	private $delimiter;
 	private $altDelimiters;
 
-	private function __construct() {
+	private function __construct($init = true) {
 
 		Logger::get($this)->startTimer('LOAD', 'Config loaded in {}');
 
 		// Paths
 		// First, add defaults path
-		self::addPath(EOZE_CONFIG_PATH);
+		if ($init) {
+			self::addPath(EOZE_CONFIG_PATH);
+		}
 		foreach (self::$configPaths as &$path) {
 			if (substr($path, -1) !== DS) $path .= DS;
 		}
@@ -65,6 +67,13 @@ class ConfigManager {
 		if ($this->modified) {
 			$this->cacheData();
 		}
+	}
+	
+	public static function reset() {
+		$useCache = self::$useCache;
+		self::$useCache = false;
+		self::$instance = new ConfigManager(false);
+		self::$useCache = $useCache;
 	}
 
 	private function &node($node) {
