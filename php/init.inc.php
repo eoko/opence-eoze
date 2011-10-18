@@ -21,7 +21,7 @@ function defineIf($name, $value) {
 
 // Directories
 defineIf('DS', DIRECTORY_SEPARATOR);
-defineIf('ROOT', realpath(dirname(__FILE__) . DS . '..' . DS . '..') . DS);
+defineIf('ROOT', realpath(__DIR__ . DS . '..' . DS . '..') . DS);
 
 defineIf('SITE_BASE_URL', 'http://' .
 		(isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost')
