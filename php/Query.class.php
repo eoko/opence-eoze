@@ -489,6 +489,7 @@ class Query {
 	}
 
 	private function buildUpdate() {
+		$this->bindings = array();
 		$this->sql = $this->buildUpdateClause()
 				. $this->buildWhere()
 				. ';';
@@ -978,9 +979,15 @@ class Query {
 		return $this->executeSql()->fetchAll(PDO::FETCH_COLUMN, $colIndex);
 	}
 
-	public function executeSelectValue() {
+	public function executeSelectValue($require = true, $default = null) {
 		$col = $this->executeSelectColumn(0);
-		return $col[0];
+		if ($col) {
+			return $col[0];
+		} else if ($require) {
+			throw new SqlSystemException('Query returned 0 row.');
+		} else {
+			return $default;
+		}
 	}
 	
 	/**
@@ -1032,6 +1039,12 @@ class Query {
 
 	public function exists() {
 		return $this->executeCount() > 0;
+	}
+	
+	public function setAction($action) {
+		$this->sql = null;
+		$this->bindings = array();
+		$this->action = $action;
 	}
 
 	/**
@@ -1642,7 +1655,7 @@ class QueryErrorHandler {
 	}
 
 	public static function process(Query $query = null, $error) {
-		Logger::get('QueryErrorHandler')->error("Query error message: $error[2]");
+		Logger::get('QueryErrorHandler')->error("Query error message: $error[2]. ($query)");
 		switch ($error[1]) {
 			case 1062:
 				if (preg_match("/^Duplicate entry '([^']+)' for key '([^']+)'$/",

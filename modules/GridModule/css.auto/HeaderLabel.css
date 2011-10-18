@@ -1,0 +1,20 @@
+
+.eo-gm-form-has-label-header {
+	margin-bottom: 4px;
+	padding-bottom: 4px;
+}
+
+.eo-gm-form-has-label-header .x-panel-header {
+	background: none;
+	border-width: 0 0 1px;
+	padding: 0;
+	padding-bottom: 3px;
+}
+.eo-gm-form-has-label-header.x-panel-noborder .x-panel-header {
+	border: 0;
+}
+.eo-gm-form-has-label-header .x-panel-header .x-panel-header-text {
+	margin-bottom: 4px;
+	font: 12px tahoma,arial,helvetica,sans-serif;
+	color: #000;
+}

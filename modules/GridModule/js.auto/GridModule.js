@@ -1580,23 +1580,27 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 //		}, this);
 //	}
 
-	/**
-	 * Must call afterBuildFormsConfig()
-	 */
-	,buildFormsConfig: function() {
+	// private
+	,FormConfig: Ext.extend(Object, {
 
-		var defaults = this.getGridColumnDefaults();
-
-		function FormConfig(columns, action) {
-
+		formLayout: undefined
+		,winLayout: "auto"
+		
+		,constructor: function(gm, action, defaults) {
+			
+			this.gm = gm;
+			var columns = gm.columns;
+			this.action = action;
+			this.defaults = defaults;
+			
 			this.fields = [];
 			this.originalIndexes = []; // used to create tabs
 
 			this.stickingTop = []; // tmp
 			this.stickingBottom = []; // tmp
-
+			
 			Ext.each(columns, function(col) {
-				processCol.call(this, col);
+				this.processCol(col);
 			}, this);
 
 			// Flush sticking fields
@@ -1606,143 +1610,250 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 			Ext.each(this.stickingBottom, function(field) {
 				this.fields.push(field);
 			}, this);
+			
+			// Vertical flex
+			this.processVerticalFlexFields();
 
 			delete this.stickingTop;
 			delete this.stickingBottom;
-
-			// --- End constructor ---
-
-			function inherit(a, b) {
-				Ext.iterate(b, function(k, v) {
-					if (a[k] === undefined) {
-						a[k] = v;
-					} else if (Ext.isObject(a[k])) {
-						a[k] = inherit(a[k], v);
-					}
-				});
-				return a;
+		}
+		
+		,onConfigureForm: function(formConfig) {
+			if (Ext.isDefined(this.formLayout)) {
+				formConfig.layout = this.formLayout;
 			}
-
-			function inheritNode(obj, src, name) {
-				if (name in src) {
-					if (name in obj) {
-						obj[name] = inherit(obj[name], src[name]);
-					} else {
-						obj[name] = src[name];
+			if (this.gm.extra && this.gm.extra.labelAlign) {
+				formConfig.labelAlign = this.gm.extra.labelAlign;
+			}
+			return formConfig;
+		}
+		
+		// private
+		,processVerticalFlexFields: function() {
+			var verticalFlexFields = [],
+				previousFields = [];
+			
+			Ext.each(this.fields, function(fieldConfig) {
+				if (Ext.isDefined(fieldConfig.verticalFlex)) {
+					// previous
+					if (previousFields.length) {
+						verticalFlexFields.push({
+							xtype: "container"
+							,layout: "form"
+							,items: previousFields
+							,defaults: this.defaults
+						});
+						previousFields = [];
 					}
+					// flexed field
+					var fsp = Ext.ComponentMgr.types[fieldConfig.xtype],
+						fspp = fsp.prototype;
+					if (fsp === Oce.form.GridField
+							|| fspp instanceof Oce.form.GridField
+							|| fsp === Ext.Panel
+							|| fspp instanceof Ext.Panel) {
+						Ext.apply(fieldConfig, {
+							flex: fieldConfig.verticalFlex
+							,cls: (fieldConfig.cls || "") + " eo-gm-form-has-label-header"
+							,padding: "0 0 3px 0"
+						});
+						if (fieldConfig.labelHeader) {
+							Ext.apply(fieldConfig, {
+								title: fieldConfig.fieldLabel 
+										+ Ext.layout.FormLayout.prototype.labelSeparator
+							});
+						}
+					} else {
+						var lht = fieldConfig.labelHeader ? fieldConfig.fieldLabel : false;
+						fieldConfig = {
+							xtype: "panel"
+							,cls: "eo-gm-form-has-label-header"
+							,border: false
+							,layout: "fit"
+							,items: fieldConfig
+							,flex: fieldConfig.verticalFlex
+							,padding: "0 0 3px 0"
+						};
+						if (lht) {
+							Ext.apply(fieldConfig, {
+								title: lht + Ext.layout.FormLayout.prototype.labelSeparator
+							});
+						}
+					}
+					verticalFlexFields.push(fieldConfig);
+				} else {
+					previousFields.push(fieldConfig);
+				}
+			}, this);
+			
+			if (verticalFlexFields.length) {
+				if (previousFields.length) {
+					verticalFlexFields.push({
+						xtype: "container"
+						,layout: "form"
+						,items: previousFields
+						,defaults: this.defaults
+					})
+				}
+				this.fields = {
+					xtype: "container"
+					,layout: {
+						type: "vbox"
+						,align: "stretch"
+					}
+					,items: verticalFlexFields
+				};
+				this.winLayout = this.formLayout = "fit";
+			}
+			
+//			debugger
+		}
+		
+		// private
+		,inherit: function(a, b) {
+			Ext.iterate(b, function(k, v) {
+				if (a[k] === undefined) {
+					a[k] = v;
+				} else if (Ext.isObject(a[k])) {
+					a[k] = this.inherit(a[k], v);
+				}
+			}, this);
+			return a;
+		}
+
+		// private
+		,inheritNode: function(obj, src, name) {
+			if (name in src) {
+				if (name in obj) {
+					obj[name] = this.inherit(obj[name], src[name]);
+				} else {
+					obj[name] = src[name];
 				}
 			}
-
-			function applyProp(name, obj, src, defaultSrc) {
-				if (obj.name !== undefined) return;
-				else if (src.name !== undefined) obj[name] = src[name];
-				else if (defaultSrc.name !== undefined) obj[name] = defaultSrc[name];
-			}
-
+		}
+		
+		// private
+		,applyProp: function(name, obj, src, defaultSrc) {
+			if (obj.name !== undefined) return;
+			else if (src.name !== undefined) obj[name] = src[name];
+			else if (defaultSrc.name !== undefined) obj[name] = defaultSrc[name];
+		}
+		
+		// private
+		,applyProps: function(obj, src, defaultSrc, props) {
 			// TODO: investigate what name should be, bellow (instead of an
 			// undeclared var ...)
-			function applyProps(obj, src, defaultSrc, props) {
-				Ext.each(props, function(prop) {
-					// (see TODO upper) my guess:
-					applyProp(prop, obj, src, defaultSrc);
-					//applyProp(name, obj, src, defaultSrc);
-				});
-				return obj;
+			Ext.each(props, function(prop) {
+				// (see TODO upper) my guess:
+				this.applyProp(prop, obj, src, defaultSrc);
+				//applyProp(name, obj, src, defaultSrc);
+			}, this);
+			return obj;
+		}
+
+		// private
+		,processCol: function(col) {
+			
+			if (col.form === false) {
+				this.originalIndexes.push(null);
+				return;
+			}
+			
+			var action = this.action,
+				defaults = this.defaults;
+
+			var colForm = col.form || {};
+
+			// --- Inherit
+			var config = {
+				xtype: col.type !== undefined ? col.type : defaults.type,
+				name: col.name,
+				fieldLabel: colForm.fieldLabel || col.header,
+				'allowBlank': col.allowBlank !== undefined ? col.allowBlank : defaults.allowBlank
 			}
 
-			function processCol(col) {
-
-				if (col.form === false) {
+			if (action in col) {
+				if (col[action] === false) {
 					this.originalIndexes.push(null);
 					return;
 				}
-
-				var colForm = col.form || {};
-
-				// --- Inherit
-				var config = {
-					xtype: col.type !== undefined ? col.type : defaults.type,
-					name: col.name,
-					fieldLabel: colForm.fieldLabel || col.header,
-					'allowBlank': col.allowBlank !== undefined ? col.allowBlank : defaults.allowBlank
-				}
-
-				if (action in col) {
-					if (col[action] === false) {
-						this.originalIndexes.push(null);
-						return;
-					}
-					Ext.apply(config, col[action]);
-				}
-
-				if (Ext.isObject(col.form)) inherit(config, col.form);
-
-				inheritNode(config, col, 'formField');
-
-				// --- Process
-				if ('formField' in config) {
-					config = Ext.apply({
-						fieldLabel: col.header
-						,allowBlank: col.allowBlank
-					}, config.formField)
-				} else {
-					if ('hidden' in config) {
-						config.xtype = 'hidden';
-						delete config.hidden;
-					} else if ('readOnly' in config) {
-						config.xtype = config.submit === false ?
-							'displayfield' : 'oce.submitdisplayfield';
-						delete config.readOnly;
-						delete config.submit;
-					}
-
-					if (col.primary) config.itemId = '*id*';
-
-					applyProps(config, col, defaults, [
-						'maxLength', 'minLength','inputType'
-					]);
-				}
-
-				if ('regex' in config) {
-					config.getErrors = function(regex) {
-						return function(v) {
-							if (regex.test(v)) return [];
-							else return [
-								config.validationError || 'Champ invalide' // i18n
-							]
-						}
-					}(
-						config.regex instanceof RegExp ? config.regex
-							: new RegExp(config.regex.replace(/\\/g,'\\\\'))
-					);
-				}
-
-				// --- Store result
-				this.originalIndexes.push(config);
-
-				if ('stick' in config) {
-					if (config.stick == 'top') {
-						this.stickingTop.push(config);
-					} else if (config.stick == 'bottom') {
-						this.stickingBottom.push(config);
-					} else {
-						throw 'Invalid stick config (must be top|bottom): ' + config.stick;
-					}
-					delete config.stick;
-				} else {
-					this.fields.push(config);
-				}
+				Ext.apply(config, col[action]);
 			}
 
+			if (Ext.isObject(col.form)) this.inherit(config, col.form);
 
-		} // << FormConfig
+			this.inheritNode(config, col, 'formField');
 
-		var addConfig = new FormConfig(this.columns, 'add'),
-			editConfig = new FormConfig(this.columns, 'edit');
+			// --- Process
+			if ('formField' in config) {
+				config = Ext.apply({
+					fieldLabel: col.header
+					,allowBlank: col.allowBlank
+				}, config.formField)
+			} else {
+				if ('hidden' in config) {
+					config.xtype = 'hidden';
+					delete config.hidden;
+				} else if ('readOnly' in config) {
+					config.xtype = config.submit === false ?
+						'displayfield' : 'oce.submitdisplayfield';
+					delete config.readOnly;
+					delete config.submit;
+				}
+
+				if (col.primary) config.itemId = '*id*';
+
+				this.applyProps(config, col, defaults, [
+					'maxLength', 'minLength','inputType'
+				]);
+			}
+
+			if ('regex' in config) {
+				config.getErrors = function(regex) {
+					return function(v) {
+						if (regex.test(v)) return [];
+						else return [
+							config.validationError || 'Champ invalide' // i18n
+						]
+					}
+				}(
+					config.regex instanceof RegExp ? config.regex
+						: new RegExp(config.regex.replace(/\\/g,'\\\\'))
+				);
+			}
+
+			// --- Store result
+			this.originalIndexes.push(config);
+
+			if ('stick' in config) {
+				if (config.stick == 'top') {
+					this.stickingTop.push(config);
+				} else if (config.stick == 'bottom') {
+					this.stickingBottom.push(config);
+				} else {
+					throw 'Invalid stick config (must be top|bottom): ' + config.stick;
+				}
+				delete config.stick;
+			} else {
+				this.fields.push(config);
+			}
+		}
+
+	}) // FormConfig
+
+	/**
+	 * Must call afterBuildFormsConfig()
+	 */
+	,buildFormsConfig: function() {
+
+		var defaults = this.getGridColumnDefaults();
+		
+		var addConfig = new this.FormConfig(this, 'add', defaults),
+			editConfig = new this.FormConfig(this, 'edit', defaults);
 
 		if (this.forms) {
 			Ext.iterate(this.forms, function(name, config) {
-				var formFields = new FormConfig(this.columns, name);
+				var formFields = new this.FormConfig(this, name);
 				// Events
 				this.onFormItemsConfig(formFields.fields);
 				if (formFields.action) {
@@ -1769,12 +1880,8 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 				this.my.editWinLayout = 'fit';
 			}
 		} else {
-			// Removed on 15/02/11 14:01
-			// This caused window to not autosize on the contained form panel.
-			// Issue copb #7
-			// Was probably here for a reason, though :/
-			// this.my.addWinLayout = this.my.editWinLayout = "fit";
-			this.my.addWinLayout = this.my.editWinLayout = "auto";
+			this.my.addWinLayout = addConfig.winLayout;
+			this.my.editWinLayout = editConfig.winLayout;
 		}
 
 		//... Edit form
@@ -1790,11 +1897,11 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 				};
 			}
 		} else {
-			this.my.editFormConfig = {
+			this.my.editFormConfig = editConfig.onConfigureForm({
 				xtype: 'oce.form'
 				,jsonFormParam: 'json_form'
 				,items: editConfig.fields
-			}
+			});
 		}
 
 		//... Add form
@@ -1810,11 +1917,11 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 				}
 			}
 		} else {
-			this.my.addFormConfig = {
+			this.my.addFormConfig = addConfig.onConfigureForm({
 				xtype: 'oce.form'
 				,jsonFormParam: 'json_form'
 				,items: addConfig.fields
-			}
+			});
 		}
 
 		// Form size

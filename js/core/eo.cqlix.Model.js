@@ -4,7 +4,7 @@ Ext.ns('eo.cqlix');
 
 var NS = eo.cqlix;
 
-NS.Model = eo.Object.create({
+NS.Model = Ext.extend(Object, {
 
 	constructor: function(config) {
 
@@ -320,7 +320,7 @@ NS.Model.addAspect = function(name, constructor) {
 	(NS.Model.aspects = NS.Model.aspects || {})[name] = constructor;
 };
 
-//NS.Record = eo.Object.create({
+//NS.Record = Ext.extend(Object, {
 NS.Record = ({
 
 //	constructor: function(values) {
@@ -376,8 +376,7 @@ NS.Model.createBunch = function(items) {
 	return r;
 }
 
-//NS.ModelField = eo.Object.create({
-NS.ModelField = eo.Class({
+NS.ModelField = Ext.extend(Object, {
 
 	name: undefined
 	,label: undefined
@@ -734,13 +733,6 @@ NS.ModelField.create = function(config) {
 
 	return new constructor(config);
 };
-
-//NS.EnumField = eo.Object.extend(NS.Field, {
-//	constructor: function(config) {
-//
-//		NS.EnumField.superclass.constructor.call(this, config);
-//	}
-//});
 
 /**
  * Known dependencies:

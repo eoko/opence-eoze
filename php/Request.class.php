@@ -13,6 +13,10 @@ class Request {
 
 	private $request;
 
+	private static $httpRequest = null;
+	
+	private $originalRequest = null;
+	
 	/**
 	 * @return Logger
 	 */
@@ -28,7 +32,6 @@ class Request {
 		return Router::getInstance()->request;
 	}
 
-	private static $httpRequest = null;
 	public static function setHttpRequest($request) {
 		self::$httpRequest = new Request($request);
 	}
@@ -252,8 +255,6 @@ class Request {
 		if (!$this->hasSub($key)) throw new MissingRequiredRequestParamException($key);
 		return new Request($this->request[$key]);
 	}
-	
-	private $originalRequest = null;
 	
 	public function override($override, $value = null) {
 		

@@ -444,7 +444,7 @@ abstract class GridExecutor extends JsonExecutor {
 						$value = str_replace('*', '%', $value);
 						$value = str_replace('?', '_', $value);
 						$value = str_replace('µ§~€PLACEHOLDER_FOR_STAR', '\\%', $value);
-						$value = str_replace('µ§~€PLACEHOLDER_FOR_QT', '\\%', $value);
+						$value = str_replace('µ§~€PLACEHOLDER_FOR_QT', '\\_', $value);
 						$query->andWhere("`$field` LIKE ?", $value);
 						break;
 				}
@@ -528,6 +528,8 @@ abstract class GridExecutor extends JsonExecutor {
 			$start
 //			$this->request->get('start', 0, true)
 		);
+		
+		$this->beforeExecuteLoadQuery($query);
 
 		$r = $query->executeSelect();
 		if (count($r) === 0) {
@@ -542,6 +544,8 @@ abstract class GridExecutor extends JsonExecutor {
 
 		return true;
 	}
+	
+	protected function beforeExecuteLoadQuery(ModelTableQuery $query) {}
 
 	  //////////////////////////////////////////////////////////////////////////
 	 // LOAD -- One Model
@@ -758,7 +762,9 @@ MSG;
 	  //////////////////////////////////////////////////////////////////////////
 	 // DELETE
 	//////////////////////////////////////////////////////////////////////////
-
+	
+	protected function beforeDeleteMultiple($ids) {}
+	
 	public function delete_multiple() {
 		return $this->callInTransaction('doDeleteMultiple');
 	}
@@ -767,23 +773,29 @@ MSG;
 		
 		$ids = $this->request->req('ids');
 		$count = count($ids);
-		if ($count === $n = $this->table->deleteWherePkIn($ids)) {
-			$this->deletedCount = $count;
-			return true;
-		} else {
-			if ($n < $count) {
-				throw new SystemException(
-					'Delete failed',
-					lang('Une erreur a empêché la suppression de tous les enregistrements.')
-				);
-			} else if ($n > $count) {
-				Logger::getLogger('GridController')->error('Terrible mistake, I have '
-					. 'deleted more reccords than required here!!! {} rows deleted', $n);
-				throw new SystemException('Terrible Mistake');
+		if (false !== $this->beforeDeleteMultiple($ids)) {
+			if ($count === $n = $this->table->deleteWherePkIn($ids)) {
+				$this->deletedCount = $count;
+				return true;
+			} else {
+				if ($n < $count) {
+					throw new SystemException(
+						'Delete failed',
+						lang('Une erreur a empêché la suppression de tous les enregistrements.')
+					);
+				} else if ($n > $count) {
+					Logger::getLogger('GridController')->error('Terrible mistake, I have '
+						. 'deleted more reccords than required here!!! {} rows deleted', $n);
+					throw new SystemException('Terrible Mistake');
+				}
+				return false;
 			}
+		} else {
 			return false;
 		}
 	}
+	
+	protected function beforeDeleteOne($id) {}
 
 	public function delete_one() {
 		return $this->callInTransaction('doDeleteOne');
@@ -791,16 +803,20 @@ MSG;
 	
 	protected function doDeleteOne() {
 		$id = $this->request->req($this->table->getPrimaryKeyName());
-		if (1 === $n = $this->table->deleteWherePkIn(array($id))) {
-			return true;
-		} else {
-			Logger::getLogger('GridController')->error('{} rows deleted', $n);
-			if ($n > 0) {
-				Logger::getLogger('GridController')->error('Terrible mistake, I have '
-					. 'deleted more than 1 reccord here!!! {} rows deleted', $n);
-				throw new SystemException('Terrible Mistake');
+		if (false !== $this->beforeDeleteOne($id)) {
+			if (1 === $n = $this->table->deleteWherePkIn(array($id))) {
+				return true;
+			} else {
+				Logger::getLogger('GridController')->error('{} rows deleted', $n);
+				if ($n > 0) {
+					Logger::getLogger('GridController')->error('Terrible mistake, I have '
+						. 'deleted more than 1 reccord here!!! {} rows deleted', $n);
+					throw new SystemException('Terrible Mistake');
+				}
+				throw new SystemException('Delete failed');
+				return false;
 			}
-			throw new SystemException('Delete failed');
+		} else {
 			return false;
 		}
 	}

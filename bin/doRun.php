@@ -5,7 +5,7 @@ if (!isset($_SERVER['SCRIPT_NAME'])) {
 }
 
 if (!isset($class)) {
-	if ($argc !== 2) {
+	if ($argc < 2) {
 		echo 'Usage: ./run SCRIPT_CLASS_NAME' . PHP_EOL;
 		exit(-1);
 	} else {

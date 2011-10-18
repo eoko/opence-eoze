@@ -5,7 +5,7 @@ namespace eoko\modules\TreeMenu;
 use MenuNode;
 use eoko\util\Arrays;
 
-class MenuAction {
+class MenuAction implements HasAccessLevel {
 	
 	/** @var string */
 	private $id;

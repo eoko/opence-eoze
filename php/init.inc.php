@@ -180,12 +180,6 @@ if (USE_CONTROLLER_CACHE) $classLoader->addIncludePath(CACHE_PATH . 'php');
 //	$classLoader->addIncludePath(APP_PHP_PATH . $dir . DS);
 //}
 
-
-// === Configure Plugins ===
-
-eoko\plugin\PluginManager::init();
-
-
 // === Configure application ===
 
 if (function_exists('configure_application')) {
@@ -216,6 +210,10 @@ function loadAppConfig($classLoader) {
 }
 
 loadAppConfig($classLoader);
+
+// === Configure Plugins ===
+
+eoko\plugin\PluginManager::init();
 
 // Finally, start the session (must be done after the autoloader has been set,
 // so that object stored in session (notably: UserSession) can be instantiated)

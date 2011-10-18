@@ -444,7 +444,8 @@ abstract class ModelRelationInfoHasReference extends ModelRelationInfoByReferenc
 
 	// OnDeleteAction
 	const ODA_SET_NULL = 0;
-	const ODA_DELETE = 1;
+	const ODA_DELETE   = 1;
+	const ODA_NOTHING  = 2;
 
 	/**
 	 * What to do when the refered model is deleted?
@@ -481,6 +482,7 @@ abstract class ModelRelationInfoHasReference extends ModelRelationInfoByReferenc
 		switch ($this->getOnDeleteAction()) {
 			case self::ODA_SET_NULL: return $this->onTargetDelete_setNull($targetPkValue);
 			case self::ODA_DELETE: return $this->onTargetDelete_delete($targetPkValue);
+			case self::ODA_NOTHING: return 0;
 			default: throw new IllegalArgumentException();
 		}
 	}
