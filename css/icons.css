@@ -1,0 +1,315 @@
+/*  
+// Icon Classes */
+
+/* 
+ * TODO: clean that, that's some very ugly namespace polution!!!
+ */
+
+.x-btn-text.export_pdf {
+	background-image:url(../images/opence/32x32/export_pdf.png) !important;
+}
+.x-btn-text.export_excel {
+	background-image:url(../images/opence/32x32/export_excel.png) !important;
+}
+	
+.ico32.green_ball {
+	background-image:url(../images/opence/32x32/green_ball.png) !important;
+}
+
+.b_ico_earth {
+	background-image:url(../images/opence/32x32/earth.png) !important;
+}
+.b_ico_del {
+/*	background-image:url(../images/opence/32x32/trash_full.png) !important;*/
+	background-image:url(../images/opence/32x32/del.png) !important;
+/*	background-image: url(../images/icons_fatcow/32x32/delete.png) !important;*/
+}
+.b_ico_add {
+	background-image:url(../images/opence/32x32/add.png) !important;
+/*	background-image: url(../images/icons_fatcow/32x32/add.png) !important;*/
+}
+.b_ico_filter {
+	background-image: url(../images/icons_fatcow/32x32/filter.png) !important;
+}
+.b_ico_temp {
+	background-image:url(../images/opence/32x32/add.png) !important;
+}
+.b_ico_vcard {
+	background-image:url(../images/opence/32x32/vcard.png) !important;
+}
+.b_ico_flag {
+	background-image:url(../images/opence/32x32/flag.png) !important;
+}
+.b_ico_user {
+	background-image:url(../images/opence/32x32/user.png) !important;
+}
+.b_ico_donate {
+	background-image:url(../images/opence/32x32/donate.png) !important;
+}
+.b_ico_mail {
+/*	background-image:url(../images/opence/32x32/mail.png) !important;*/
+	background-image: url(../images/icons_fatcow/32x32/email.png) !important;
+}
+.b_ico_coherence {
+	background-image:url(../images/opence/32x32/coherence.png) !important;
+}
+.b_ico_gear {
+	background-image:url(../images/opence/32x32/gear.png) !important;
+}
+.b_ico_green_ball {
+	background-image:url(../images/opence/32x32/green_ball.png) !important;
+}
+
+.b_ico_columns {
+	background-image:url(../images/unlicensed/icon_columns.png) !important;
+}
+
+.bhelp {
+	background-image:url(../images/icons_fatcow/32x32/help.png) !important;
+}
+
+
+/* Ico Grid */
+.ico {
+	background : no-repeat transparent;
+	height : 16px;
+	width : 16px;
+	display: block;
+	margin : 0 auto;
+	padding-right : 3px;
+}
+
+.x-window-header.ico {
+	width: auto;
+}
+
+.ico.col {
+	display: inline;
+}
+
+.ico_accept {
+	background-image:url(../images/icons/accept.png) !important;
+}
+.ico.add,
+.ico_add {
+	background-image:url(../images/icons/add.png) !important;
+}
+.ico.arrow_left {
+	background-image:url(../images/icons/arrow_left.png) !important;
+}
+.ico.arrow_right {
+	background-image:url(../images/icons/arrow_right.png) !important;
+}
+.ico.arrow_down {
+	background-image:url(../images/icons/arrow_down.png) !important;
+}
+.application_form_edit {
+	background-image:url(../images/icons/application_form_edit.png) !important;
+}
+.ico_undo, .ico.undo,
+.ico_arrow_undo {
+	background-image:url(../images/icons/arrow_undo.png) !important;
+}
+.ico.delete,
+.ico_delete {
+	background-image:url(../images/icons/delete.png) !important;
+}
+.ico.collapse-all {
+	background-image:url("images/ext-tree-collapse-all.gif") !important;
+}
+.ico.expand-all {
+	background-image:url("images/ext-tree-expand-all.gif") !important;
+}
+.ico.save,
+.ico_disk {
+	background-image:url(../images/icons/disk.png) !important;
+}
+.ico_world {
+	background-image:url(../images/icons/world.png) !important;
+}
+.ico.box {
+	background-image:url(../images/icons/box.png) !important;
+}
+.ico.box.add {
+	background-image:url(../images/icons/box_add.png) !important;
+}
+.ico.box.delete {
+	background-image:url(../images/icons/box_delete.png) !important;
+}
+.ico_building {
+	background-image:url(../images/icons/building.png) !important;
+}
+.ico.user,
+.ico_user {
+	background-image:url(../images/icons/user.png) !important;
+}
+.ico.tick,
+.ico_tick {
+	background-image:url(../images/icons/tick.png) !important;
+}
+.ico.tick.clickable:hover {
+	background-image:url(../images/icons/cross.png) !important;
+}
+.ico.cross,
+.ico_cross {
+	background-image:url(../images/icons/cross.png) !important;
+}
+.ico.cross.clickable:hover {
+	background-image:url(../images/icons/tick.png) !important;
+}
+.ico_8ball {
+	background-image:url(../images/icons/sport_8ball.png) !important;
+}
+.ico_user_add {
+	background-image:url(../images/icons/user_add.png) !important;
+}
+.ico_bin {
+	background-image:url(../images/icons/bin.png) !important;
+}
+.ico_book {
+	background-image:url(../images/icons/book.png) !important;
+}
+.ico.find {
+	background-image:url(../images/icons/find.png) !important;
+}
+.ico_help {
+	background-image:url(../images/icons/help.png) !important;
+}
+.ico.lock {
+	background-image:url(../images/icons/lock.png) !important;
+}
+.ico.lock_open {
+	background-image:url(../images/icons/lock_open.png) !important;
+}
+.ico.lock_openable {
+	background-image:url(../images/icons/lock.png) !important;
+}
+.ico.lock_openable:hover {
+	background-image:url(../images/icons/lock_open.png) !important;
+}
+.ico.layout_content {
+	background-image:url(../images/icons/layout_content.png) !important;
+}
+.ico_male {
+	background-image:url(../images/icons/male.png) !important;
+}
+.ico_female {
+	background-image:url(../images/icons/female.png) !important;
+}
+.ico_send_mail {
+	background-image:url(../images/icons/email_go.png) !important;
+}
+.ico.play {
+	background-image:url(../images/icons/control_play_blue.png) !important;
+}
+.ico.pdf,
+.ico_pdf {
+	background-image:url(../images/icons/page_white_acrobat.png) !important;
+}
+.ico_edit,
+.ico_pencil {
+	background-image:url(../images/icons/pencil.png) !important;
+}
+.ico_bullet_green {
+	background-image:url(../images/icons/bullet_green.png) !important;
+}
+.ico_bullet_red {
+	background-image:url(../images/icons/bullet_red.png) !important;
+}
+.ico_clock {
+	background-image:url(../images/icons/clock.png) !important;
+}
+.ico_arrow_right {
+	background-image:url(../images/icons/arrow_right.png) !important;
+}
+.ico_tick {
+	background-image:url(../images/icons/tick.png) !important;
+}
+.ico.report {
+	background-image:url(../images/icons/report.png) !important;
+}
+.ico.star {
+	background-image:url(../images/icons/star.png) !important;
+}
+.ico.star.empty {
+	background-image:url(../images/icons/star_empty.png) !important;
+}
+.ico.star.blue {
+	background-image:url(../images/icons/star_blue.png) !important;
+}
+.ico.star.green {
+	background-image:url(../images/icons/star_green.png) !important;
+}
+.ico_stop {
+	background-image:url(../images/icons/stop.png) !important;
+}
+.ico.table {
+	background-image:url(../images/icons/table.png) !important;
+}
+.ico_note{
+	background-image:url(../images/icons/note.png) !important;
+}
+.ico_arrow_inout {
+	background-image:url(../images/icons/arrow_inout.png) !important;
+}
+.ico.star {
+	background-image:url(../images/icons/star.png) !important;
+}
+.ico_telephone {
+	background-image:url(../images/icons/telephone.png) !important;
+}
+.ico.vcard {
+	background-image:url(../images/icons/vcard.png) !important;
+}
+.ico.vcard.add {
+	background-image:url(../images/icons/vcard_add.png) !important;
+}
+.ico.vcard.edit {
+	background-image:url(../images/icons/vcard_edit.png) !important;
+}
+.ico.wrench, .ico_wrench {
+	background-image:url(../images/icons/wrench.png) !important;
+}
+
+.icon-magnifier {
+	background-image:url(../images/icons/magnifier.png) !important;
+}
+.icon-tranches {
+	background-image:url(../images/icons/timeline_marker.png) !important;
+}
+
+/* --- Fugue Icons --- */
+.fugico_arrow {
+	background-image:url(../images/icons_fugue/arrow.png) !important;
+}
+.x-item-disabled .fugico_arrow {
+	background-image:url(../images/icons_fugue/arrow+disabled.png) !important;
+}
+.fugico_arrow-180 {
+	background-image:url(../images/icons_fugue/arrow-180.png) !important;
+}
+.x-item-disabled .fugico_arrow-180 {
+	background-image:url(../images/icons_fugue/arrow-180+disabled.png) !important;
+}
+.arrow-circle-315 {
+	background-image:url(../images/icons_fugue/arrow-circle-315.png) !important;
+}
+.x-item-disabled .arrow-circle-315 {
+	background-image:url(../images/icons_fugue/arrow-circle-315+disabled.png) !important;
+}
+.fugico_question-frame {
+	background-image:url(../images/icons_fugue/question-frame.png) !important;
+}
+.fugico_question-balloon {
+	background-image:url(../images/icons_fugue/question-balloon.png) !important;
+}
+
+
+.sort-desc {
+	background-image: url("../images/default/grid/sort_desc.gif") !important;
+	background-position: 4px 7px !important;
+}
+.sort-asc {
+	background-image: url("../images/default/grid/sort_asc.gif") !important;
+	background-position: 4px 7px !important;
+}

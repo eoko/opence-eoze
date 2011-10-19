@@ -1,0 +1,22 @@
+# Uncomment this line on 1&1 to enable php5
+#AddType x-mapp-php5 .php
+
+# Enabke URL Rewriting
+Options +FollowSymlinks
+RewriteEngine On
+
+# 1and1 needs RewriteBase /subdir
+#RewriteBase /dev
+
+#... without query strings
+RewriteRule ^jsod/([^/]*)/([^/]*)\.mod\.js$         index.php?controller=$1&action=get_module&name=$2
+RewriteRule ^jsod/([^/]*)/([^/]*).js$	            index.php?controller=$1&action=get_js&name=$2
+
+# Modules images
+RewriteRule ^modules/(?:[^/]*)/_images/(.*)$	    eoze/images/$1
+
+RewriteRule .sql$                                   eoze/php/error404.php
+RewriteRule .yml$                                   eoze/php/error404.php
+RewriteRule (^|/)config(/|$)                        eoze/php/error404.php
+
+RewriteRule ^$                                      index.php
