@@ -48,6 +48,8 @@ class Logger {
 	private static $defaultLogger = null;
 	private static $defaultContext = 'ROOT';
 	
+	private static $previousEntries;
+
 	/**
 	 * Shortcut for {@link Logger::getLogger()}
 	 * 
@@ -115,6 +117,12 @@ class Logger {
 
 	public static function addAppender(LoggerAppender $appender) {
 		self::$appenders[] = $appender;
+		// Process entries created before the appender is added
+		if (self::$previousEntries) {
+			foreach (self::$previousEntries as $entry) {
+				$appender->process($entry);
+			}
+		}
 	}
 
 	public static function removeAllAppender($class = null) {
@@ -206,10 +214,10 @@ class Logger {
 			}
 		}
 	}
-
+	
 	protected function logImpl($level, $msg, $args = array()) {
 
-		if ($this->isActive($level)) {
+		if ($this->isActive($level, false)) {
 
 			if (self::$buffer !== null) {
 				self::$buffer[] = array($level, $msg, $args);
@@ -260,6 +268,8 @@ class Logger {
 			$infoLine = $this->getTraceString();
 
 			$entry = new LogEntry($msg, $level, $date, $this->context, $infoLine);
+			
+			self::$previousEntries[] = $entry;
 
 			foreach (self::$appenders as $appender) {
 				$appender->process($entry);
@@ -291,10 +301,8 @@ class Logger {
 	 */
 	public static function log($level, $msg) {
 		$logger = isset($this) ? $this : Logger::getLogger();
-		if ($logger->isActive($level)) {
-			$args = func_get_args();
-			$logger->logImpl($level, $msg, array_slice($args, 2));
-		}
+		$args = func_get_args();
+		$logger->logImpl($level, $msg, array_slice($args, 2));
 	}
 
 	/**
@@ -320,36 +328,25 @@ class Logger {
 	 * placeholders
 	 */
 	public function debug($msg) {
-//		$logger = isset($this) && get_class($this) == __CLASS__ ? $this : Logger::getLogger();
 		$logger = isset($this) && $this instanceof Logger ? $this : Logger::getLogger();
-		if ($logger->isActive(self::DEBUG)) {
-			if (func_num_args() == 1 && !is_string($msg))
-				return $logger->debug('{}', $msg);
-			$args = func_get_args();
-			$logger->logImpl(self::DEBUG, $msg, array_slice($args, 1));
-		}
+		$args = func_get_args();
+		$logger->logImpl(self::DEBUG, $msg, array_slice($args, 1));
 	}
 
 	public static function dbg($msg) {
 		$logger = Logger::getLogger();
-		if ($logger->isActive(self::DEBUG)) {
-			if (func_num_args() == 1 && !is_string($msg))
-				return $logger->debug('{}', $msg);
-			$args = func_get_args();
-			$logger->logImpl(self::DEBUG, $msg, array_slice($args, 1));
-		}
+		$args = func_get_args();
+		$logger->logImpl(self::DEBUG, $msg, array_slice($args, 1));
 	}
 
 	public static function tmp($msg) {
-		if (isset($this))
-			throw new IllegalStateException('Only use static call with this, to help cleaning afterward!');
-		$logger = Logger::getLogger();
-		if ($logger->isActive(self::DEBUG)) {
-			if (func_num_args() == 1 && !is_string($msg))
-				return $logger->debug('{}', $msg);
-			$args = func_get_args();
-			$logger->logImpl(self::DEBUG, $msg, array_slice($args, 1));
+		if (isset($this)) {
+			throw new IllegalStateException(
+					'Only use static call with this, to help cleaning afterward!');
 		}
+		$logger = Logger::getLogger();
+		$args = func_get_args();
+		$logger->logImpl(self::DEBUG, $msg, array_slice($args, 1));
 	}
 
 	/**
@@ -376,10 +373,8 @@ class Logger {
 	 */
 	public static function warn($msg) {
 		$logger = isset($this) ? $this : Logger::getLogger();
-		if ($logger->isActive(self::WARNING)) {
-			$args = func_get_args();
-			$logger->logImpl(self::WARNING, $msg, array_slice($args, 1));
-		}
+		$args = func_get_args();
+		$logger->logImpl(self::WARNING, $msg, array_slice($args, 1));
 	}
 
 	/**
@@ -406,10 +401,8 @@ class Logger {
 	 */
 	public function error($msg) {
 		$logger = isset($this) && $this instanceof Logger ? $this : Logger::getLogger();
-		if ($logger->isActive(self::ERROR)) {
-			$args = func_get_args();
-			$logger->logImpl(self::ERROR, $msg, array_slice($args, 1));
-		}
+		$args = func_get_args();
+		$logger->logImpl(self::ERROR, $msg, array_slice($args, 1));
 	}
 
 	/**
@@ -436,10 +429,8 @@ class Logger {
 	 */
 	public static function info($msg) {
 		$logger = isset($this) ? $this : Logger::getLogger();
-		if ($logger->isActive(self::INFO)) {
-			$args = func_get_args();
-			$logger->logImpl(self::INFO, $msg, array_slice($args, 1));
-		}
+		$args = func_get_args();
+		$logger->logImpl(self::INFO, $msg, array_slice($args, 1));
 	}
 
 	private function getAssertionLevel() {
@@ -448,7 +439,7 @@ class Logger {
 
 	public static function assert($observed, $expected, $msg = 'Expected: {}, Observed: {}') {
 		$logger = isset($this) ? $this : Logger::getLogger();
-		if ($logger->isActive(self::ASSERTION)) {
+		if ($logger->isActive(self::ASSERTION, false)) {
 			if ($observed !== $expected) {
 				$msg = 'ASSERTION FAILED -- ' . $msg;
 				$args = func_get_args();
@@ -460,7 +451,7 @@ class Logger {
 
 	public static function assertTrue($expression, $msg = '') {
 		$logger = isset($this) ? $this : Logger::getLogger();
-		if ($logger->isActive(self::ASSERTION)) {
+		if ($logger->isActive(self::ASSERTION, false)) {
 			if ($expression !== true) {
 				$msg = 'ASSERTION FAILED -- ' . $msg;
 				$args = func_get_args();
@@ -471,7 +462,7 @@ class Logger {
 
 	public static function assertFalse($expression, $msg = '') {
 		$logger = isset($this) ? $this : Logger::getLogger();
-		if ($logger->isActive(self::ASSERTION)) {
+		if ($logger->isActive(self::ASSERTION, false)) {
 			if ($expression !== false) {
 				$msg = 'ASSERTION FAILED -- ' . $msg;
 				$args = func_get_args();
