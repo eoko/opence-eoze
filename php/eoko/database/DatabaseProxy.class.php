@@ -90,7 +90,7 @@ class DatabaseProxy {
 	/**
 	 * @return PDO
 	 */
-	public static function getConnection() {
+	public function getConnection() {
 		if (!$this->connection) {
 			$this->connection = self::getAdapter()->getConnection();
 		}
