@@ -45,6 +45,9 @@ class ClassLoader {
 		if (is_array($path)) {
 			foreach ($path as $path) $this->addIncludePath($path);
 		} else {
+			if (substr($path, -1) !== DS) {
+				$path .= DS;
+			}
 			$this->includePaths[] = $path;
 		}
 	}
