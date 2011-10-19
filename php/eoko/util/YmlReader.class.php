@@ -3,6 +3,7 @@
 namespace eoko\util;
 
 use Symfony\Component\Yaml\Yaml;
+use eoko\log\Logger;
 
 if (!class_exists('Symfony\\Component\\Yaml\\Yaml')) {
 	throw new SystemException(<<<MSG
@@ -56,6 +57,11 @@ class YmlReader {
 	}
 
 	public static function loadFile($filename) {
-		return self::load(str_replace("\t", '  ', file_get_contents($filename)));
+		$input = file_get_contents($filename);
+		if (strstr($input, "\t")) {
+			$input = str_replace("\t", '  ', $input);
+			Logger::get(get_class())->warn('Yaml file should not contain tabs: ' . $filename);
+		}
+		return self::load($input);
 	}
 }
