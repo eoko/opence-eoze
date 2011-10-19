@@ -68,8 +68,10 @@ defineIf('PHP_PATH', EOZE_PATH . PHP_DIR . DS);
 defineIf('APP_PATH', ROOT . 'app' . DS);
 defineIf('APP_PHP_PATH', APP_PATH . PHP_DIR . DS);
 
-defineIf('CACHE_PATH', EOZE_PATH . 'cache' . DS);
-defineIf('LOG_PATH', EOZE_PATH . 'log' . DS);
+defineIf('MY_EOZE_PATH', ROOT . '.eoze' . DS);
+defineIf('CACHE_PATH', MY_EOZE_PATH . 'cache' . DS);
+defineIf('LOG_PATH', MY_EOZE_PATH . 'log' . DS);
+defineIf('TMP_PATH', MY_EOZE_PATH . 'tmp' . DS);
 defineIf('HELP_PATH', ROOT . 'help' . DS);
 defineIf('LIBS_PATH', PHP_PATH . 'lib' . DS);
 defineIf('DATABASE_DUMP_PATH', ROOT . 'mysql' . DS);
@@ -112,6 +114,19 @@ if (defined('APP_MODULES_DIR')) {
 }
 
 defineIf('MODULES_NAMESPACE', 'eoko\\modules\\');
+
+function createEozeDirIf($path) {
+	if (!file_exists($path)) {
+		mkdir($path);
+	}
+}
+createEozeDirIf(MY_EOZE_PATH);
+if (!file_exists(MY_EOZE_PATH . '.htaccess')) {
+	file_put_contents(MY_EOZE_PATH . '.htaccess', 'DENY FROM ALL' . PHP_EOL);
+}
+createEozeDirIf(CACHE_PATH);
+createEozeDirIf(LOG_PATH);
+createEozeDirIf(TMP_PATH);
 
 require_once PHP_PATH . 'functions.php';
 require_once PHP_PATH . 'dump.php';
