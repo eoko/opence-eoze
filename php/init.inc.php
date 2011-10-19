@@ -172,6 +172,12 @@ $classLoader->addIncludePath(array(
 	APP_PHP_PATH,
 ));
 
+foreach (explode(':', get_include_path()) as $path) {
+	if ($path !== '.') {
+		$classLoader->addIncludePath($path);
+	}
+}
+
 if (USE_CONTROLLER_CACHE) $classLoader->addIncludePath(CACHE_PATH . 'php');
 
 // removed on 2/26/11 2:27 PM
