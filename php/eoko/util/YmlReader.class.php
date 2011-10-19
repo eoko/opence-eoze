@@ -2,15 +2,21 @@
 
 namespace eoko\util;
 
-use \sfYaml;
+use Symfony\Component\Yaml\Yaml;
 
-require_once LIBS_PATH . 'sfYaml' . DS . 'sfYaml.php';
+if (!class_exists('Symfony\\Component\\Yaml\\Yaml')) {
+	throw new SystemException(<<<MSG
+Missing dependency: Symfony\\Component\\Yaml.
+Install it with PEAR (see: http://pear.symfony.com/): pear install symfony2/Yaml.
+MSG
+	);
+}
 
 /**
  * Proxy class to enable class autoloading for YAML lib
  * @ignore
  */
-class YmlReader extends sfYaml {
+class YmlReader {
 
 	/**
 	 * Loads YAML into a PHP array.
@@ -31,8 +37,7 @@ class YmlReader extends sfYaml {
 	 * @throws InvalidArgumentException If the YAML is not valid
 	 */
 	public static function load($input) {
-		require_once LIBS_PATH . 'sfYaml' . DS . 'sfYaml.php';
-		return sfYaml::load(str_replace("\t", '  ', $input));
+		return Yaml::parse($input);
 	}
 
 	/**
@@ -47,8 +52,7 @@ class YmlReader extends sfYaml {
 	 * @return string A YAML string representing the original PHP array
 	 */
 	public static function dump($array, $inline = 0) {
-		require_once LIBS_PATH . 'sfYaml' . DS . 'sfYamlDumper.php';
-		return sfYaml::dump($array, $inline);
+		return Yaml::dump($array, $inline);
 	}
 
 	public static function loadFile($filename) {
