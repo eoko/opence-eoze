@@ -1,0 +1,78 @@
+/* ----------------------------- */
+/*    Typographie globale        */
+/* ----------------------------- */
+
+ol, ul .w_help {
+list-style :disc;
+padding : 10px 0px 5px 40px;
+}
+
+h1 .w_help  {
+  color: #396095;
+  margin: 10px 0 15px 0;
+  padding: 0px 0 0 0;
+  line-height: 1.2;
+  font-size: 2em;
+  letter-spacing:-1px;
+  font-weight:bold;
+}
+h2 .w_help{
+  color: #FF7800;
+  margin: 20px 0 5px 0;
+  padding: 0 0 0 0;
+  line-height: 1.2;
+  font-size: 1.7em;
+  letter-spacing:-1px;
+  font-weight:bold;
+}
+
+h3.w_help {
+  color : #666;
+  font-size: 1.4em;
+  font-weight: normal;
+  margin: 10px 0 5px 0;
+  padding: 10px 0 0 0;
+}
+
+h4 .w_help {
+	font-size: 1.2em;
+	margin: 1.5em 0 0.8em 0;
+}
+
+h5 .w_help {
+	font-size: 1em;
+	/*font-style: italic;
+	font-weight: normal;*/
+	margin: 1.5em 0 1em 0;
+}
+
+a .w_help {
+  color: #3B81BE;
+  text-decoration: none;
+}
+
+a:visited .w_help {
+  }
+
+
+a:hover, a:focus, a:active .w_help {
+  text-decoration: underline;
+}
+
+h2 a {
+  color: #FF7800;
+  /*font-family:Sans-serif;*/
+}
+.w_help h2 a:visited {
+  color: #EAA515;
+}
+.w_help h2 a:hover, h2 a:focus, h2 a:active {
+  text-decoration: none;
+  color: #eb5800;
+}
+
+
+.w_help h2 span.hometype {
+  color:#999;
+}
+
