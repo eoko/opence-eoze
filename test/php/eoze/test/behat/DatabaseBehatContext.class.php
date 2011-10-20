@@ -2,9 +2,6 @@
 
 namespace eoze\test\behat;
 
-require_once 'PHPUnit/Autoload.php';
-require_once 'PHPUnit/Framework/Assert/Functions.php';
-
 use Behat\Behat\Context\BehatContext;
 // PHPUnit
 use PHPUnit_Extensions_Database_Operation_Factory,
@@ -20,7 +17,7 @@ use PHPUnit_Extensions_Database_Operation_Factory,
 
 use PDO;
 
-use eoze\database\Database;
+use eoko\database\Database;
 
 /**
  * Most of the code of this class is copied from PHPUnit's PHPUnit_Extensions_Database_TestCase
