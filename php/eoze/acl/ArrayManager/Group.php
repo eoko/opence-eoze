@@ -2,6 +2,8 @@
 
 namespace eoze\acl\ArrayManager;
 
+use eoze\acl\AclHelper;
+
 /**
  *
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
@@ -17,15 +19,25 @@ class Group extends Role implements \eoze\acl\Group {
 	}
 	
 	public function setRoles(array $roles) {
+		$this->roles = array();
 		foreach ($roles as $role) {
 			if (!($role instanceof Role)) {
 				throw new \IllegalArgumentException();
 			}
+			$this->roles[$role->getId()] = $role;
 		}
-		$this->roles = $roles;
 	}
 
-	public function addRole(Role $role) {
-		$this->roles[] = $role;
+	public function addRole($role) {
+		$this->roles[] = $this->getManager()->role($role);
+	}
+	
+	public function removeRole($role, $strict = false) {
+		$rid = AclHelper::rid($role);
+		if ($strict && !isset($this->roles[$rid])) {
+			throw new IllegalStateException("Group#{$this->getId()} has no Role#$rid");
+		}
+		unset($this->roles[$rid]);
+		return $rid;
 	}
 }
