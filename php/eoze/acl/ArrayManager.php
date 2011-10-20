@@ -58,17 +58,70 @@ class ArrayManager extends AbstractAclManager {
 			return $o;
 		}
 	}
-	
+
+	/**
+	 * @param int $gid
+	 * @return ArrayManager\Group
+	 */
 	public function getGroup($gid) {
 		return $this->get($gid, 'Group');
 	}
 	
+	/**
+	 * @param int $rid
+	 * @return ArrayManager\Role
+	 */
 	public function getRole($rid) {
 		return $this->get($rid, 'Role');
 	}
 	
+	/**
+	 * @param int $uid
+	 * @return ArrayManager\User
+	 */
 	public function getUser($uid) {
 		return $this->get($uid, 'User');
 	}
 
+	/**
+	 * @param bool $disablable
+	 * @return ArrayManager\Role 
+	 */
+	public function newRole($disablable = false) {
+		if (!$disablable) {
+			$role = new ArrayManager\Role($this);
+		} else {
+			$role = new ArrayManager\DisablableRole($this);
+		}
+		$this->add($role);
+		return $role;
+	}
+
+	/**
+	 * @param bool $disablable
+	 * @return ArrayManager\Group 
+	 */
+	public function newGroup($disablable = false) {
+		if (!$disablable) {
+			$group = new ArrayManager\Group($this);
+		} else {
+			$group = new ArrayManager\DisablableGroup($this);
+		}
+		$this->add($group);
+		return $group;
+	}
+
+	/**
+	 * @param bool $disablable
+	 * @return ArrayManager\User 
+	 */
+	public function newUser($disablable = false) {
+		if (!$disablable) {
+			$user = new ArrayManager\User($this);
+		} else {
+			$user = new ArrayManager\DisablableUser($this);
+		}
+		$this->add($user);
+		return $user;
+	}
 }
