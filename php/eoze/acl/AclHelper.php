@@ -5,6 +5,8 @@ namespace eoze\acl;
 use IllegalArgumentException,
 	RuntimeException;
 
+use eoze\Helper;
+
 /**
  *
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
@@ -22,10 +24,8 @@ class AclHelper {
 			if ($o instanceof HasIntId && is_a($o, __NAMESPACE__ . "\\$class")) {
 				return $o->getId();
 			}
-		} else if (null !== $id = eoze\parseInt($o)) {
+		} else if (null !== $id = Helper::parseInt($o)) {
 			return $id;
-//		} else if ($o === null) {
-//			return null;
 		}
 		throw new RuntimeException('Invalid id: ' . $o);
 	}
