@@ -21,6 +21,7 @@ class Role implements \eoze\acl\Role {
 
 	public function __construct(ArrayManager $manager, $id = null) {
 		$this->manager = $manager;
+		$id = (int) $id;
 		if ($id !== null) {
 			$this->id = $manager->takeId($id, $this);
 		} else {
