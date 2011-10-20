@@ -23,9 +23,9 @@ class OpenceException extends Exception {
 	function __construct($debugMessage = '', $message = '', Exception $previous = null) {
 		$this->debugMessage = $debugMessage;
 		$this->msg = $message;
-//		parent::__construct($debugMessage, 1, $previous);
+		parent::__construct($debugMessage, null, $previous);
 	}
-
+	
 	/**
 	 * @return OpenceException
 	 */
