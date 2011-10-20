@@ -40,4 +40,9 @@ class Group extends Role implements \eoze\acl\Group {
 		}
 		unset($this->roles[$rid]);
 	}
+	
+	public function hasRole($role) {
+		$rid = AclHelper::rid($role);
+		return isset($this->roles[$rid]) && $this->roles[$rid]->getId() === $rid;
+	}
 }
