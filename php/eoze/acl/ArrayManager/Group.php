@@ -21,11 +21,9 @@ class Group extends Role implements \eoze\acl\Group {
 	
 	public function setRoles(array $roles) {
 		$this->roles = array();
+		$manager = $this->getManager();
 		foreach ($roles as $role) {
-			if (!($role instanceof Role)) {
-				$this->roles = array();
-				throw new \IllegalArgumentException();
-			}
+			$role = $manager->role($role);
 			$this->roles[$role->getId()] = $role;
 		}
 	}

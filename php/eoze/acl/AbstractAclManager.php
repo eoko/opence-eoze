@@ -51,7 +51,7 @@ abstract class AbstractAclManager implements AclManager {
 		if ($role instanceof Role) {
 			return $role;
 		} else if (is_int($role)) {
-			$role = $this->getRole($role);
+			$role = $this->getRole($role, true);
 			if ($role instanceof Role) {
 				return $role;
 			} else {
@@ -70,8 +70,8 @@ abstract class AbstractAclManager implements AclManager {
 		if ($user instanceof User) {
 			return $user;
 		} else if (is_int($user)) {
-			$user = $this->getUser($user);
-			if ($user instanceof Role) {
+			$user = $this->getUser($user, true);
+			if ($user instanceof User) {
 				return $user;
 			} else {
 				throw new IllegalStateException();
@@ -90,8 +90,8 @@ abstract class AbstractAclManager implements AclManager {
 		if ($group instanceof Group) {
 			return $group;
 		} else if (is_int($group)) {
-			$group = $this->getGroup($group);
-			if ($user instanceof Role) {
+			$group = $this->getGroup($group, true);
+			if ($group instanceof Group) {
 				return $group;
 			} else {
 				throw new IllegalStateException();
