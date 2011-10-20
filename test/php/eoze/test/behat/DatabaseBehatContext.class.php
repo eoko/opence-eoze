@@ -20,7 +20,7 @@ use PHPUnit_Extensions_Database_Operation_Factory,
 
 use PDO;
 
-use eoze\database\Database;
+use eoko\database\Database;
 
 /**
  * Most of the code of this class is copied from PHPUnit's PHPUnit_Extensions_Database_TestCase
