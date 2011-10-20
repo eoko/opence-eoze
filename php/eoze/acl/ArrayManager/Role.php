@@ -30,7 +30,8 @@ class Role implements \eoze\acl\Role {
 	}
 	
 	public function __toString() {
-		return basename(str_replace('\\', DIRECTORY_SEPARATOR, get_class())) . '#' . $this->getId();
+		$class = str_replace('\\', DIRECTORY_SEPARATOR, get_class($this));
+		return basename($class . '#' . $this->getId());
 	}
 	
 	public function getId() {
