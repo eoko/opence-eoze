@@ -128,6 +128,7 @@ createEozeDirIf(CACHE_PATH);
 createEozeDirIf(LOG_PATH);
 createEozeDirIf(TMP_PATH);
 
+require_once PHP_PATH . 'eoze' . DS . 'functions.php';
 require_once PHP_PATH . 'functions.php';
 require_once PHP_PATH . 'dump.php';
 
