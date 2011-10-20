@@ -1,23 +1,19 @@
 <?php use \ModelColumn ?>
 /**
  * Base of the <?php echo $modelName ?> Model.
- * @param $values an array of values ($fieldName => $value) to initially set
- * the <?php echo $modelName ?> with
+ *
  * @package <?php echo $package ?>
 
  * @subpackage models_base
 <?php if ($version): ?>
- * @since <?php echo $version ?>
-
+ * @since <?php echo $version, PHP_EOL ?>
 <?php endif ?>
  *
 <?php foreach ($fields as $field): ?>
- * @property $<?php echo $field->getName() . PHP_EOL ?>
-
+ * @property $<?php echo $field->getName(), PHP_EOL ?>
 <?php endforeach ?>
 <?php foreach ($relations as $relation): ?>
- * @property-read $<?php echo lcfirst($relation->getName()) . PHP_EOL ?>
-
+ * @property-read $<?php echo lcfirst($relation->getName()), PHP_EOL ?>
 <?php endforeach ?>
  */
 abstract class <?php echo $modelName ?>Base extends <?php echo $baseModelName ?> {
@@ -46,6 +42,10 @@ abstract class <?php echo $modelName ?>Base extends <?php echo $baseModelName ?>
 	);
 <?php endif ?>
 
+	/**
+	 * @param $values an array of values ($fieldName => $value) to initially set
+	 * the <?php echo $modelName ?> with
+	 */
 	protected function __construct($initValues = null, $strict = false, array $params = array()) {
 
 		$fields = array(
