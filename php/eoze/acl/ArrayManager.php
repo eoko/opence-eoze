@@ -63,9 +63,13 @@ class ArrayManager extends AbstractAclManager {
 		return true;
 	}
 	
-	private function get($id, $class) {
+	private function get($id, $class, $require) {
 		if (!isset($this->entities[$id])) {
-			return null;
+			if ($require) {
+				throw new IllegalArgumentException("$class#$id does not exist");
+			} else {
+				return null;
+			}
 		} else {
 			$o = $this->entities[$id];
 			if (!is_a($o, get_class() . "\\$class")) {
@@ -80,24 +84,24 @@ class ArrayManager extends AbstractAclManager {
 	 * @param int $gid
 	 * @return ArrayManager\Group
 	 */
-	public function getGroup($gid) {
-		return $this->get($gid, 'Group');
+	public function getGroup($gid, $require = false) {
+		return $this->get($gid, 'Group', $require);
 	}
 	
 	/**
 	 * @param int $rid
 	 * @return ArrayManager\Role
 	 */
-	public function getRole($rid) {
-		return $this->get($rid, 'Role');
+	public function getRole($rid, $require = false) {
+		return $this->get($rid, 'Role', $require);
 	}
 	
 	/**
 	 * @param int $uid
 	 * @return ArrayManager\User
 	 */
-	public function getUser($uid) {
-		return $this->get($uid, 'User');
+	public function getUser($uid, $require = false) {
+		return $this->get($uid, 'User', $require);
 	}
 
 	public function newRole($id = null, $disablable = null) {
