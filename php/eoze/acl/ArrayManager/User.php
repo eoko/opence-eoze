@@ -2,6 +2,10 @@
 
 namespace eoze\acl\ArrayManager;
 
+use eoze\acl\AclHelper;
+
+use IllegalStateException, IllegalArgumentException;
+
 /**
  *
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
@@ -16,20 +20,28 @@ class User extends Group implements \eoze\acl\User {
 		return $this->groups;
 	}
 
-	public function setGroups($groups) {
+	public function setGroups(array $groups) {
+		$this->groups = array();
 		foreach ($groups as $group) {
 			if (!($group instanceof Group)) {
-				throw new \IllegalArgumentException();
+				$this->groups = array();
+				throw new IllegalArgumentException();
+			} else {
+				$this->groups[$group->getId()] = $group;
 			}
 		}
-		$this->groups = $groups;
 	}
 	
-	public function addGroup(Group $group) {
+	public function addGroup($group) {
+		$group = $this->getManager()->group($group);
 		$this->groups[$group->getId()] = $group;
 	}
 	
-	public function removeGroup(Group $group) {
-		unset($this->groups[$group->getId()]);
+	public function removeGroup($group, $strict = false) {
+		$gid = AclHelper::gid($group);
+		if ($strict && !isset($this->roles[$gid])) {
+			throw new IllegalStateException("$this has no Group#$gid");
+		}
+		unset($this->groups[$gid]);
 	}
 }
