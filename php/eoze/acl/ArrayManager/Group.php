@@ -3,6 +3,7 @@
 namespace eoze\acl\ArrayManager;
 
 use eoze\acl\AclHelper;
+use IllegalStateException;
 
 /**
  *
@@ -37,7 +38,7 @@ class Group extends Role implements \eoze\acl\Group {
 	public function removeRole($role, $strict = false) {
 		$rid = AclHelper::rid($role);
 		if ($strict && !isset($this->roles[$rid])) {
-			throw new IllegalStateException("Group#{$this->getId()} has no Role#$rid");
+			throw new IllegalStateException("$this has no Role#$rid");
 		}
 		unset($this->roles[$rid]);
 		return $rid;
