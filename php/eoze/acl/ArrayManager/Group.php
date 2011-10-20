@@ -30,7 +30,8 @@ class Group extends Role implements \eoze\acl\Group {
 	}
 
 	public function addRole($role) {
-		$this->roles[] = $this->getManager()->role($role);
+		$role = $this->getManager()->role($role);
+		$this->roles[$role->getId()] = $role;
 	}
 	
 	public function removeRole($role, $strict = false) {
