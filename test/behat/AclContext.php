@@ -64,7 +64,9 @@ class AclContext extends DatabaseBehatContext {
 	 */
 	public function leGroupeALeRole($gid, $rid) {
 		assertNotNull($group = $this->getManager()->getGroup($gid));
-		assertTrue($group->hasRole($rid));
+		if (eoze\parseInt($rid) !== null) {
+			assertTrue($group->hasRole($rid));
+		}
 	}
 
 //	protected function getDataSet() {
