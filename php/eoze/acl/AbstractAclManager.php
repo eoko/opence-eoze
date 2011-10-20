@@ -43,6 +43,14 @@ abstract class AbstractAclManager implements AclManager {
 				&& $this->lastUserAllowedRoleIdMap[$rid];
 	}
 	
+	private static function id($var) {
+		if (is_numeric($var) && (int) $var == $var) {
+			return (int) $var;
+		} else {
+			return false;
+		}
+	}
+	
 	/**
 	 * @param Role|int $role
 	 * @return Role 
@@ -50,15 +58,16 @@ abstract class AbstractAclManager implements AclManager {
 	public function role($role) {
 		if ($role instanceof Role) {
 			return $role;
-		} else if (is_int($role)) {
-			$role = $this->getRole($role, true);
+		} else if (false !== $id = self::id($role)) {
+			$role = $this->getRole($id, true);
 			if ($role instanceof Role) {
 				return $role;
 			} else {
 				throw new IllegalStateException();
 			}
 		} else {
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException('Must be an instance of Role, or a value '
+					. "parsable to an int: '$role'");
 		}
 	}
 
@@ -69,8 +78,8 @@ abstract class AbstractAclManager implements AclManager {
 	public function user($user) {
 		if ($user instanceof User) {
 			return $user;
-		} else if (is_int($user)) {
-			$user = $this->getUser($user, true);
+		} else if (self::id($user)) {
+			$user = $this->getUser($id, true);
 			if ($user instanceof User) {
 				return $user;
 			} else {
@@ -89,8 +98,8 @@ abstract class AbstractAclManager implements AclManager {
 	public function group($group) {
 		if ($group instanceof Group) {
 			return $group;
-		} else if (is_int($group)) {
-			$group = $this->getGroup($group, true);
+		} else if (self::id($group)) {
+			$group = $this->getGroup($id, true);
 			if ($group instanceof Group) {
 				return $group;
 			} else {
