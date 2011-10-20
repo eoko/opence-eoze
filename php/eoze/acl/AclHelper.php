@@ -48,6 +48,14 @@ class AclHelper {
 			return true;
 		}
 	}
+	
+	public static function isDisablable($o) {
+		if (!is_object($o)) {
+			throw new IllegalArgumentException();
+		} else {
+			return $o instanceof Disablable;
+		}
+	}
 
 	/**
 	 * @param HasRoles $o
