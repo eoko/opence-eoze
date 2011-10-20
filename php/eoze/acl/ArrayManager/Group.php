@@ -22,6 +22,7 @@ class Group extends Role implements \eoze\acl\Group {
 		$this->roles = array();
 		foreach ($roles as $role) {
 			if (!($role instanceof Role)) {
+				$this->roles = array();
 				throw new \IllegalArgumentException();
 			}
 			$this->roles[$role->getId()] = $role;
