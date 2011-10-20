@@ -25,4 +25,8 @@ final class Helper {
 			return $default;
 		}
 	}
+	
+	public static function isInt($value) {
+		return self::parseInt($value) !== null;
+	}
 }
