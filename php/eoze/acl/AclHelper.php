@@ -18,15 +18,16 @@ class AclHelper {
 	private static function getId($o, $class) {
 		if (is_integer($o)) {
 			return $o;
-		} else if (is_numeric($o) && (int) $o == $o) {
-			return (int) $o;
-		} else if ($o === null) {
-			return null;
-		} else if ($o instanceof HasIntId && is_a($o, __NAMESPACE__ . "\\$class")) {
-			return $o->getId();
-		} else {
-			throw new RuntimeException();
+		} else if (is_object($o)) {
+			if ($o instanceof HasIntId && is_a($o, __NAMESPACE__ . "\\$class")) {
+				return $o->getId();
+			}
+		} else if (null !== $id = eoze\parseInt($o)) {
+			return $id;
+//		} else if ($o === null) {
+//			return null;
 		}
+		throw new RuntimeException('Invalid id: ' . $o);
 	}
 	
 	public static function rid($role) {
