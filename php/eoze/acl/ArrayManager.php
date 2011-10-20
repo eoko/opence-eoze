@@ -42,7 +42,7 @@ class ArrayManager extends AbstractAclManager {
 		if ($this->entities[$id] !== $o) {
 			throw new IllegalStateException();
 		}
-		unset($this->entities[$id]);
+		$this->entities[$id] = null;
 		return true;
 	}
 	
@@ -83,11 +83,10 @@ class ArrayManager extends AbstractAclManager {
 		return $this->get($uid, 'User');
 	}
 
-	/**
-	 * @param bool $disablable
-	 * @return ArrayManager\Role 
-	 */
-	public function newRole($disablable = false) {
+	public function newRole($disablable = null, $id = null) {
+		if ($disablable === null) {
+			$disablable = $this->config->disablableRolesDefault;
+		}
 		if (!$disablable) {
 			$role = new ArrayManager\Role($this);
 		} else {
@@ -97,11 +96,10 @@ class ArrayManager extends AbstractAclManager {
 		return $role;
 	}
 
-	/**
-	 * @param bool $disablable
-	 * @return ArrayManager\Group 
-	 */
-	public function newGroup($disablable = false) {
+	public function newGroup($disablable = null, $id = null) {
+		if ($disablable === null) {
+			$disablable = $this->config->disablableGroupsDefault;
+		}
 		if (!$disablable) {
 			$group = new ArrayManager\Group($this);
 		} else {
@@ -111,11 +109,10 @@ class ArrayManager extends AbstractAclManager {
 		return $group;
 	}
 
-	/**
-	 * @param bool $disablable
-	 * @return ArrayManager\User 
-	 */
-	public function newUser($disablable = false) {
+	public function newUser($disablable = null, $id = null) {
+		if ($disablable === null) {
+			$disablable = $this->config->disablableUserDefault;
+		}
 		if (!$disablable) {
 			$user = new ArrayManager\User($this);
 		} else {

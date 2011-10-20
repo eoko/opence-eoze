@@ -22,6 +22,15 @@ abstract class AbstractAclManager implements AclManager {
 	private $lastUserId = null;
 	
 	private $lastUserAllowedRoleIdMap = null;
+
+	/**
+	 * @var AclManagerConfig
+	 */
+	protected $config;
+	
+	public function __construct(AclManagerConfig $config = null) {
+		$this->config = AclManagerConfig::create($config);
+	}
 	
 	public function isAllowed($user, $role) {
 		$uid = AclHelper::uid($user);
