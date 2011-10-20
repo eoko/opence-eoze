@@ -29,6 +29,21 @@ interface AclManager {
 	 * @return Group
 	 */
 	function getGroup($gid, $require = false);
+
+	/**
+	 * @return Role
+	 */
+	function role($uid);
+
+	/**
+	 * @return User
+	 */
+	function user($uid);
+	
+	/**
+	 * @return Group
+	 */
+	function group($gid);
 	
 	/**
 	 * Creates a new Role in this Manager.

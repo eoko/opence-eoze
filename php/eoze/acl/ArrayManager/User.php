@@ -23,12 +23,8 @@ class User extends Group implements \eoze\acl\User {
 	public function setGroups(array $groups) {
 		$this->groups = array();
 		foreach ($groups as $group) {
-			if (!($group instanceof Group)) {
-				$this->groups = array();
-				throw new IllegalArgumentException();
-			} else {
-				$this->groups[$group->getId()] = $group;
-			}
+			$group = $this->getManager()->group($group);
+			$this->groups[$group->getId()] = $group;
 		}
 	}
 	
