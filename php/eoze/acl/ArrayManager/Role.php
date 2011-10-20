@@ -29,6 +29,10 @@ class Role implements \eoze\acl\Role {
 		$manager->add($this);
 	}
 	
+	public function __toString() {
+		return basename(str_replace('\\', DIRECTORY_SEPARATOR, get_class())) . '#' . $this->getId();
+	}
+	
 	public function getId() {
 		return $this->id;
 	}
