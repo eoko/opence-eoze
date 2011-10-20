@@ -4,11 +4,14 @@ namespace eoze\test\phpunit;
 
 require_once 'PHPUnit/Extensions/Database/TestCase.php';
 
-use eoze\database\Database;
+use PHPUnit_Extensions_Database_DataSet_YamlDataSet as YamlDataSet,
+	PHPUnit_Extensions_Database_TestCase as TestCase;
 
-class DataSetFilter extends PHPUnit_Extensions_Database_DataSet_DataSetFilter {}
+use eoko\database\Database;
 
-abstract class DatabaseTestCase extends PHPUnit_Extensions_Database_TestCase {
+//class DataSetFilter extends \PHPUnit_Extensions_Database_DataSet_DataSetFilter {}
+
+abstract class DatabaseTestCase extends TestCase {
 
 	// only instantiate pdo once for test clean-up/fixture load
 	static private $pdo = null;
@@ -38,6 +41,6 @@ abstract class DatabaseTestCase extends PHPUnit_Extensions_Database_TestCase {
 		if ($dir !== null && substr($dir, -1) !== DIRECTORY_SEPARATOR) {
 			$dir = $dir . DIRECTORY_SEPARATOR;
 		}
-        return new PHPUnit_Extensions_Database_DataSet_YamlDataSet("$dir$ymlFile");
+        return new YamlDataSet("$dir$ymlFile");
 	}
 }
