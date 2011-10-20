@@ -47,7 +47,7 @@ abstract class AbstractAclManager implements AclManager {
 	 * @param Role|int $role
 	 * @return Role 
 	 */
-	protected function role($role) {
+	public function role($role) {
 		if ($role instanceof Role) {
 			return $role;
 		} else if (is_int($role)) {
@@ -66,7 +66,7 @@ abstract class AbstractAclManager implements AclManager {
 	 * @param User|int $user
 	 * @return User 
 	 */
-	protected function user($user) {
+	public function user($user) {
 		if ($user instanceof User) {
 			return $user;
 		} else if (is_int($user)) {
@@ -86,7 +86,7 @@ abstract class AbstractAclManager implements AclManager {
 	 * @param Group|int $group
 	 * @return Group 
 	 */
-	protected function group($group) {
+	public function group($group) {
 		if ($group instanceof Group) {
 			return $group;
 		} else if (is_int($group)) {
