@@ -78,7 +78,7 @@ abstract class AbstractAclManager implements AclManager {
 	public function user($user) {
 		if ($user instanceof User) {
 			return $user;
-		} else if (self::id($user)) {
+		} else if (false !== $id = self::id($user)) {
 			$user = $this->getUser($id, true);
 			if ($user instanceof User) {
 				return $user;
@@ -98,7 +98,7 @@ abstract class AbstractAclManager implements AclManager {
 	public function group($group) {
 		if ($group instanceof Group) {
 			return $group;
-		} else if (self::id($group)) {
+		} else if (false !== $id = self::id($group)) {
 			$group = $this->getGroup($id, true);
 			if ($group instanceof Group) {
 				return $group;
