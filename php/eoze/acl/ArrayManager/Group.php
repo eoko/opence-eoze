@@ -41,6 +41,5 @@ class Group extends Role implements \eoze\acl\Group {
 			throw new IllegalStateException("$this has no Role#$rid");
 		}
 		unset($this->roles[$rid]);
-		return $rid;
 	}
 }
