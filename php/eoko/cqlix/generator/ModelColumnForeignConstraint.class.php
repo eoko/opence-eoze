@@ -1,5 +1,7 @@
 <?php
 
+namespace eoko\cqlix\generator;
+
 class ModelColumnForeignConstraint {
 
 	public $targetTable;
