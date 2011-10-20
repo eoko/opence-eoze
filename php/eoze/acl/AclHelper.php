@@ -18,6 +18,8 @@ class AclHelper {
 	private static function getId($o, $class) {
 		if (is_integer($o)) {
 			return $o;
+		} else if (is_numeric($o) && (int) $o == $o) {
+			return (int) $o;
 		} else if ($o === null) {
 			return null;
 		} else if ($o instanceof HasIntId && is_a($o, __NAMESPACE__ . "\\$class")) {
