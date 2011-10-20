@@ -112,13 +112,13 @@ class ClassLoader {
 			}
 		}
 
-		if (substr($class, 0, 5) === 'eoze\\') {
-			$orig = $class;
-			$class = 'eoko' . substr($class, 4);
-			if ($this->doLoad($class, $suffix)) {
-				class_alias($class, $orig);
-			}
-		}
+//		if (substr($class, 0, 5) === 'eoze\\') {
+//			$orig = $class;
+//			$class = 'eoko' . substr($class, 4);
+//			if ($this->doLoad($class, $suffix)) {
+//				class_alias($class, $orig);
+//			}
+//		}
 
 		return false;
 	}
