@@ -16,7 +16,7 @@ class Group extends Role implements \eoze\acl\Group {
 		return $this->roles;
 	}
 	
-	public function setRoles($roles) {
+	public function setRoles(array $roles) {
 		foreach ($roles as $role) {
 			if (!($role instanceof Role)) {
 				throw new \IllegalArgumentException();
