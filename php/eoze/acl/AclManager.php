@@ -16,19 +16,19 @@ interface AclManager {
 	 * Loads the Role for the given id.
 	 * @return Role
 	 */
-	function getRole($rid);
+	function getRole($rid, $require = false);
 	
 	/**
 	 * Loads the User for the given id.
 	 * @return User
 	 */
-	function getUser($uid);
+	function getUser($uid, $require = false);
 	
 	/**
 	 * Loads the Group for the given id.
 	 * @return Group
 	 */
-	function getGroup($gid);
+	function getGroup($gid, $require = false);
 	
 	/**
 	 * Creates a new Role in this Manager.
