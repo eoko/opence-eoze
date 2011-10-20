@@ -16,27 +16,27 @@ class AclHelper {
 	private function __construct() {}
 	
 	private static function getId($o, $class) {
-		if (is_integer($role)) {
-			return $role;
-		} else if ($role === null) {
+		if (is_integer($o)) {
+			return $o;
+		} else if ($o === null) {
 			return null;
 		} else if ($o instanceof HasIntId && is_a($o, __NAMESPACE__ . "\\$class")) {
-			return $role->getId();
+			return $o->getId();
 		} else {
 			throw new RuntimeException();
 		}
 	}
 	
 	public static function rid($role) {
-		return self::getId($o, 'Role');
+		return self::getId($role, 'Role');
 	}
 	
 	public static function uid($user) {
-		return self::getId($o, 'User');
+		return self::getId($user, 'User');
 	}
 	
 	public static function gid($group) {
-		return self::getId($o, 'Group');
+		return self::getId($group, 'Group');
 	}
 	
 	private static function isEnabled($o) {
