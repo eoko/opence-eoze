@@ -19,9 +19,14 @@ class Role implements \eoze\acl\Role {
 	 */
 	private $manager;
 
-	public function __construct(ArrayManager $manager) {
+	public function __construct(ArrayManager $manager, $id = null) {
 		$this->manager = $manager;
-		$this->id = $manager->nextId();
+		if ($id !== null) {
+			$this->id = $manager->takeId($id, $this);
+		} else {
+			$this->id = $manager->nextId();
+		}
+		$manager->add($this);
 	}
 	
 	public function getId() {

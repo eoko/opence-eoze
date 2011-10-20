@@ -18,7 +18,21 @@ class ArrayManager extends AbstractAclManager {
 	private $nextId = 1;
 	
 	public function nextId() {
-		return $this->nextId++;
+		do {
+			$id = $this->nextId++;
+		} while (array_key_exists($id, $this->entities));
+		return $id;
+	}
+	
+	public function takeId($id, $o) {
+		if (array_key_exists($id, $this->entities)) {
+			throw new IllegalStateException("Id $id is already taken");
+		}
+		if ($id == $this->nextId) {
+			$this->nextId++;
+		}
+		$this->entities[$id] = array($id, $o);
+		return $id;
 	}
 	
 	public function add(ArrayManager\Role $o) {
@@ -26,7 +40,10 @@ class ArrayManager extends AbstractAclManager {
 		if ($o->getManager() !== $this) {
 			throw new IllegalArgumentException('Entity from other Manager');
 		}
-		assert($id < $this->nextId);
+		if (array_key_exists($id, $this->entities)
+				&& (!is_array($this->entities[$id]))) {
+			throw new IllegalStateException();
+		}
 		$this->entities[$id] = $o;
 		return $id;
 	}
@@ -83,42 +100,39 @@ class ArrayManager extends AbstractAclManager {
 		return $this->get($uid, 'User');
 	}
 
-	public function newRole($disablable = null, $id = null) {
+	public function newRole($id = null, $disablable = null) {
 		if ($disablable === null) {
 			$disablable = $this->config->disablableRolesDefault;
 		}
 		if (!$disablable) {
-			$role = new ArrayManager\Role($this);
+			$role = new ArrayManager\Role($this, $id);
 		} else {
-			$role = new ArrayManager\DisablableRole($this);
+			$role = new ArrayManager\DisablableRole($this, $id);
 		}
-		$this->add($role);
 		return $role;
 	}
 
-	public function newGroup($disablable = null, $id = null) {
+	public function newGroup($id = null, $disablable = null) {
 		if ($disablable === null) {
 			$disablable = $this->config->disablableGroupsDefault;
 		}
 		if (!$disablable) {
-			$group = new ArrayManager\Group($this);
+			$group = new ArrayManager\Group($this, $id);
 		} else {
-			$group = new ArrayManager\DisablableGroup($this);
+			$group = new ArrayManager\DisablableGroup($this, $id);
 		}
-		$this->add($group);
 		return $group;
 	}
 
-	public function newUser($disablable = null, $id = null) {
+	public function newUser($id = null, $disablable = null) {
 		if ($disablable === null) {
 			$disablable = $this->config->disablableUserDefault;
 		}
 		if (!$disablable) {
-			$user = new ArrayManager\User($this);
+			$user = new ArrayManager\User($this, $id);
 		} else {
-			$user = new ArrayManager\DisablableUser($this);
+			$user = new ArrayManager\DisablableUser($this, $id);
 		}
-		$this->add($user);
 		return $user;
 	}
 }
