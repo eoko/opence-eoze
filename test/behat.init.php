@@ -26,7 +26,9 @@ call_user_func(function() {
 	// PHPUnit
 	require_once 'PHPUnit/Autoload.php';
 	require_once 'PHPUnit/Framework/Assert/Functions.php';
-	
-	class_alias('Behat\Behat\Exception\PendingException', 'PendingException');
-	class_alias('Behat\Behat\Exception\PendingException', $featureNamespace . 'PendingException');
+
+	foreach (array('', $featureNamespace) as $ns) {
+		class_alias('Behat\Behat\Exception\PendingException', $ns . 'PendingException');
+		class_alias('Behat\Gherkin\Node\TableNode', $ns . 'TableNode');
+	}
 });
