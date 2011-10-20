@@ -6,6 +6,8 @@ use eoze\test\behat\DatabaseBehatContext;
 use eoze\acl\AclManager;
 use eoze\acl\ArrayManager;
 
+use eoze\Helper;
+
 class AclContext extends DatabaseBehatContext {
 
 	/**
@@ -46,6 +48,22 @@ class AclContext extends DatabaseBehatContext {
 	}
 
 	/**
+	 * @Given /^les utilisateurs suivants:$/
+	 */
+	public function lesUtilisateursSuivants(TableNode $table) {
+		foreach ($table->getHash() as $row) {
+			$manager = $this->getManager();
+			$user = $manager->newUser($row['id']);
+			if ($row['groupes']) {
+				$user->setGroups(explode(',', $row['groupes']));
+			}
+			if ($row['roles']) {
+				$user->setRoles(explode(',', $row['roles']));
+			}
+		}
+	}
+
+	/**
 	 * @Given /^le role "([^"]*)" existe$/
 	 */
 	public function leRoleExiste($rid) {
@@ -64,7 +82,7 @@ class AclContext extends DatabaseBehatContext {
 	 */
 	public function leGroupeALeRole($gid, $rid) {
 		assertNotNull($group = $this->getManager()->getGroup($gid));
-		if (eoze\parseInt($rid) !== null) {
+		if (Helper::parseInt($rid) !== null) {
 			assertTrue($group->hasRole($rid));
 		}
 	}
