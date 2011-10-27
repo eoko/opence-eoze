@@ -17,6 +17,11 @@ class DataArray implements Data {
 	
 	private $values;
 	
+	/**
+	 * Creates a new DataArray object.
+	 * 
+	 * @param array $values The array from which values will be read.
+	 */
 	public function __construct(array $values = null) {
 		$this->values = $values !== null ? $values : array();
 	}
