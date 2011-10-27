@@ -33,11 +33,19 @@ class Classes {
 		}
 	}
 
-	public static function getParentNames($class) {
+	/**
+	 * Gets the names of all the parent classes of the given $class.
+	 * 
+	 * @param string|Object|ReflectionClass $class
+	 * @param bool $includeSelf TRUE to include the name of the explored $class in the
+	 * returned array.
+	 * @return array An array containing the names of all the parent classes as strings.
+	 */
+	public static function getParentNames($class, $includeSelf = false) {
 		if (!($class instanceof ReflectionClass)) {
 			$rc = new ReflectionClass($class);
 		}
-		$r = array();
+		$r = $includeSelf ? array($class) : array();
 		while ($rc = $rc->getParentClass()) {
 			$r[] = $rc->getName();
 		}
