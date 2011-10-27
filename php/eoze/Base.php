@@ -3,6 +3,7 @@
 namespace eoze;
 
 use eoko\config\ConfigManager;
+use eoko\util\Arrays;
 
 use eoze\util\Data;
 use eoze\util\Data\DataArray;
@@ -20,11 +21,18 @@ class Base {
 	 */
 	protected $config;
 	
-	public function __construct(array $config = null) {
+	final public function __construct(array $config = null) {
 		$config = Arrays::apply(ConfigManager::get($this), $config);
 		$this->config = new DataArray($config);
+		$this->onConstruct();
 	}
 	
+	protected function onConstruct() {}
+
+	/**
+	 * Gets the fully qualified (i.e. namespaced) name of the called class.
+	 * @return string
+	 */
 	public static function getClass() {
 		return get_called_class();
 	}
