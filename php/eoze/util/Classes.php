@@ -42,9 +42,7 @@ class Classes {
 	 * @return array An array containing the names of all the parent classes as strings.
 	 */
 	public static function getParentNames($class, $includeSelf = false) {
-		if (!($class instanceof ReflectionClass)) {
-			$rc = new ReflectionClass($class);
-		}
+		$rc = self::toReflectionClass($class);
 		$r = $includeSelf ? array($class) : array();
 		while ($rc = $rc->getParentClass()) {
 			$r[] = $rc->getName();
@@ -66,6 +64,6 @@ class Classes {
 		$r = $includeSelf ? array($class) : array();
 		$r = array_merge($r, $rc->getInterfaceNames());
 		$r = array_merge($r, self::getParentNames($class));
-		return array_keys($r);
+		return $r;
 	}
 }
