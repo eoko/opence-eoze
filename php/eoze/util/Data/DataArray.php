@@ -15,8 +15,8 @@ class DataArray implements Data {
 	
 	private $values;
 	
-	public function __construct(array $values = array()) {
-		$this->values = $values;
+	public function __construct(array $values = null) {
+		$this->values = $values !== null ? $values : array();
 	}
 	
 	public function has($key) {
