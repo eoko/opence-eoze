@@ -9,7 +9,8 @@ namespace eoze\util;
  * the $key as a separator. That is, the following must be TRUE:
  * 
  * <code>
- * $data->get('path')->get('to') === $data->get('path.to');
+ * $array = $data->get('path');
+ * $array['to'] === $data->get('path.to'); // must be TRUE
  * </code>
  * 
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
