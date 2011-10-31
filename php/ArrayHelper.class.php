@@ -9,12 +9,16 @@ class ArrayHelper {
 	/**
 	 * Tests whether the passed $arr argument is an array and, in case it is,
 	 * if it is an associative array.
-	 * @param mixed $arr
+	 * @param mixed $array
 	 * @return boolean 
 	 * @see isAssoc()
 	 */
-	public static function isAssocArray($arr) {
-		return is_array($arr) && self::isAssoc($arr);
+	public static function isAssocArray($array) {
+		return is_array($array) && self::isAssoc($array);
+	}
+	
+	public static function isIndexedArray($array) {
+		return is_array($array) && !self::isAssoc($array);
 	}
 
 	public static function apply(&$obj = null, $vals, $maxRecursionLevel = 0, $applyNumericalIndexArray = false) {
