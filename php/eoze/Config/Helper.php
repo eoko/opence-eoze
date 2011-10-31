@@ -112,7 +112,8 @@ class Helper {
 	 * 
 	 * @param array $parent the parent array
 	 * @param array $child  the overriding array
-	 * @return array        the extended array
+	 * @return array        the extended array. This method always returns an
+	 *                      array, event if both params are NULL.
 	 * 
 	 * @throws IllegalArgumentException
 	 */
@@ -260,7 +261,7 @@ class Helper {
 		return $parent;
 	}
 	
-	public static function complement(array $config = null, array $parent = null) {
+	public static function complement(array $child = null, array $parent = null) {
 		throw new NotImplementedYetException();
 	}
 }
