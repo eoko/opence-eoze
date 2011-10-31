@@ -6,17 +6,32 @@ require_once 'init.inc.php';
 Logger::getLogger()->setLevel(Logger::ERROR);
 Logger::getLogger('eoko\cache\Cache')->setLevel(Logger::DEBUG);
 
-use eoko\module\ModuleManager;
-
-$m = ModuleManager::getModule('sm_child_48_main');
-
-$m instanceof eoko\modules\TreeMenu\HasMenuActions;
-
-dump($m->getAvailableActions());
-
-//dump($m->getConfig());
-$x = $m->getConfig()->get('extra');
-
-dumpl($x['menu']);
-
-//dump($m->getActionProvider()->getFamily());
+//require_once 'Benchmark/Iterate.php';
+//
+//$benchmark = new Benchmark_Iterate;
+//
+//$parent = array(
+//	'key1' => 1,
+//	'key2' => 2,
+//	'indexed' => array(1,2,3),
+//	'sub' => array(
+//		'key1' => 1,
+//		'key2' => 2,
+//		'indexed' => array(1,2,3),
+//	)
+//);
+//
+//$child = array(
+//	'key2' => 3,
+//	'key3' => 3,
+//	'indexed[]' => array(4,5,6),
+//	'sub' => array(
+//		'key2' => 3,
+//		'key3' => 3,
+//		'indexed' => array(4,5,6),
+//	)
+//);
+//
+//$benchmark->run(10000, 'eoze\Config\Helper::extend', $parent, $child);
+//
+//print_r($benchmark->get());
