@@ -3,10 +3,11 @@
 namespace eoze\Base;
 
 use eoko\config\ConfigManager;
-use eoko\util\Arrays;
 
 use eoze\util\Data;
 use eoze\util\Data\DataArray;
+use eoze\util\Classes;
+use eoze\Config\Helper;
 
 /**
  *
@@ -21,9 +22,46 @@ class ConfigurableClass {
 	 */
 	protected $config;
 	
+//	/**
+//	 * @Eoze:inject Eoze\Eoze
+//	 */
+//	private $eoze;
+//	
+//	/**
+//	 * @Eoze:inject({
+//	 * $: Eoze\Config\Reader\Eoze
+//	 * required: false
+//	 * [Eoze\Eoze::isDevMode()]:
+//	 *   required: true
+//	 * })
+//	 * 
+//	 * @Eoze:require Eoze\Config\Reader\Eoze
+//	 * @Eoze:include Eoze\Config\Reader\Eoze
+//	 * 
+//	 */
+//	private $configReader;
+	
+	private static $classConfig = null;
+	
 	public function __construct(array $config = null) {
-		$config = Arrays::apply(ConfigManager::get($this), $config);
+		if ($config) {
+			$config = Helper::extend(self::getClassConfig(), $config);
+		} else {
+			$config = self::getClassConfig();
+		}
 		$this->config = new DataArray($config);
+	}
+	
+	private static function getClassConfig() {
+		$class = get_called_class();
+		if (!isset(self::$classConfig[$class])) {
+			$config = array();
+			foreach (array_reverse(Classes::getParentNames($class, true)) as $parent) {
+				$config = Helper::extend($config, ConfigManager::get($parent));
+			}
+			self::$classConfig[$class] = $config;
+		}
+		return self::$classConfig[$class];
 	}
 	
 }
