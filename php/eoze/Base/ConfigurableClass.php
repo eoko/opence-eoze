@@ -22,25 +22,6 @@ class ConfigurableClass {
 	 */
 	protected $config;
 	
-//	/**
-//	 * @Eoze:inject Eoze\Eoze
-//	 */
-//	private $eoze;
-//	
-//	/**
-//	 * @Eoze:inject({
-//	 * $: Eoze\Config\Reader\Eoze
-//	 * required: false
-//	 * [Eoze\Eoze::isDevMode()]:
-//	 *   required: true
-//	 * })
-//	 * 
-//	 * @Eoze:require Eoze\Config\Reader\Eoze
-//	 * @Eoze:include Eoze\Config\Reader\Eoze
-//	 * 
-//	 */
-//	private $configReader;
-	
 	private static $classConfig = null;
 	
 	public function __construct(array $config = null) {
