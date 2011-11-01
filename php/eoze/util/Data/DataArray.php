@@ -2,7 +2,11 @@
 
 namespace eoze\util\Data;
 
+use ArrayIterator;
+use IteratorAggregate;
+
 use IllegalStateException;
+
 use eoze\util\Data;
 
 /**
@@ -13,14 +17,16 @@ use eoze\util\Data;
  * @author Éric Ortega <eric@planysphere.fr>
  * @since 27 oct. 2011
  */
-class DataArray implements Data {
+class DataArray implements IteratorAggregate, Data {
 	
 	private $values;
 	
 	/**
 	 * Creates a new DataArray object.
 	 * 
-	 * @param array $values The array from which values will be read.
+	 * @param array $values The array from which values will be read (must be
+	 * completly expanded, that is must not contain shorcut keys such has
+	 * 'key.to.be.expanded').
 	 */
 	public function __construct(array $values = null) {
 		$this->values = $values !== null ? $values : array();
@@ -61,4 +67,9 @@ class DataArray implements Data {
 		$value = $node;
 		return true;
 	}
+	
+	public function getIterator() {
+		return new ArrayIterator($this->values);
+	}
+
 }
