@@ -4,6 +4,8 @@ namespace eoze\util;
 
 use ReflectionClass;
 
+use IllegalArgumentException;
+
 /**
  * Utility class providing helper methods to get informations about classes,
  * mostly by using reflection.
@@ -19,6 +21,19 @@ use ReflectionClass;
 class Classes {
 	
 	private function __construct() {}
+	
+	public static function vendor($class) {
+		if (is_object($class)) {
+			$class = get_class($class);
+		}
+		if (preg_match('/^\\\\?([^\\\\]+)\\\\.+$/', $class, $m)) {
+			return $m[1];
+		} else {
+			throw new IllegalArgumentException(
+				"Class $class is not a PHP 5.3 namespaced class"
+			);
+		}
+	}
 	
 	private static function toReflectionClass(&$class) {
 		if ($class instanceof ReflectionClass) {
