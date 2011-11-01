@@ -2,6 +2,8 @@
 
 namespace eoze\util;
 
+use Traversable;
+
 /**
  * Generic interface for reading values in a (key, value) data source.
  * 
@@ -17,7 +19,7 @@ namespace eoze\util;
  * @author Éric Ortega <eric@planysphere.fr>
  * @since 27 oct. 2011
  */
-interface Data {
+interface Data extends Traversable {
 	
 	/**
 	 * Returns TRUE if the $key is set in the data source, even if the value
