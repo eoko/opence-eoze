@@ -22,6 +22,16 @@ class Classes {
 	
 	private function __construct() {}
 	
+	/**
+	 * Find the vendor name of a given class or object; this is effectively the 
+	 * part of the class name that comes before the first backslash.
+	 * 
+	 * @param Object|string $class
+	 * @return string
+	 * 
+	 * @throws IllegalArgumentException If the class doesn't belong to a 
+	 * namespace or if the class belongs to the root namespace (\).
+	 */
 	public static function vendor($class) {
 		if (is_object($class)) {
 			$class = get_class($class);
