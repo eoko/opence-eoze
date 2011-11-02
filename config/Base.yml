@@ -1,0 +1,10 @@
+config.node: eoze\Base
+
+Registry: eoze\dependency\Registry
+
+#private:
+#  $messageTranslator:
+#    interface: eoze\i18n\MessageTranslator
+#    keys: fr
+
+$locale: eoze\I18n\LocaleHelper
