@@ -1,3 +1,2 @@
 config.node: eoze\Base
 
-$locale: eoze\I18n\LocaleHelper
