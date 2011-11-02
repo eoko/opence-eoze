@@ -55,10 +55,10 @@ class Base extends ConfigurableClass {
 		return get_called_class();
 	}
 	
-	protected function locale($message, $num = 1, array $replacements = null) {
-//		return $this->messageTranslator->translate($message, $num, $replace);
-		return $message;
-	}
+//	protected function locale($message, $num = 1, array $replacements = null) {
+////		return $this->messageTranslator->translate($message, $num, $replace);
+//		return $message;
+//	}
 	
 	private function resolveDependencies() {
 		$injections = array();
@@ -74,12 +74,16 @@ class Base extends ConfigurableClass {
 		}
 	}
 	
+	private static $classesInjections = array();
+	
 	private function getInjectionsFromAnnotations(array &$injections) {
-		$class = new ReflectionClass($this);
-		$filter = ReflectionProperty::IS_PUBLIC | ReflectionProperty::IS_PROTECTED;
-		foreach ($class->getProperties($filter) as $property) {
-			$name = $property->getName();
-			if (!isset($injections[$name])) {
+		$class = get_class($this);
+		if (!isset(self::$classesInjections[$class])) {
+			$reflectionClass = new ReflectionClass($class);
+			$classInjections = array();
+			$filter = ReflectionProperty::IS_PUBLIC | ReflectionProperty::IS_PROTECTED;
+			foreach ($reflectionClass->getProperties($filter) as $property) {
+				$name = $property->getName();
 				$doc = $property->getDocComment();
 				if ($doc) {
 					if (preg_match('/^[\s*]*@Eoze:inject(?:$|\s+(.+)$)/m', $doc, $m)) {
@@ -90,8 +94,16 @@ class Base extends ConfigurableClass {
 						} else {
 							throw new IllegalStateException('Illegal annotation ');
 						}
-						$injections[$name] = $spec;
+						$classInjections[$name] = $spec;
 					}
+				}
+			}
+			self::$classesInjections[$class] = $classInjections ? $classInjections : false;
+		}
+		if (self::$classesInjections[$class]) {
+			foreach (self::$classesInjections[$class] as $key => $spec) {
+				if (!isset($injections[$key])) {
+					$injections[$key] = $spec;
 				}
 			}
 		}
