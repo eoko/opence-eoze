@@ -26,13 +26,18 @@ class Base extends ConfigurableClass {
 	
 	public function __construct(array $config = null) {
 		parent::__construct($config);
-		$this->dependencyRegistry = Eoze::getEoze()->getRegistry();
+		// Init dependency registry
+		if (null !== $registry = $this->config->getOr('eoze\Dependency\Registry')) {
+			$this->dependencyRegistry = $registry;
+		} else {
+			$this->dependencyRegistry = Eoze::getEoze()->getRegistry();
+		}
 		$this->resolveDependencies();
 		$this->construct();
 	}
 	
 	protected function construct() {}
-
+	
 	/**
 	 * Gets the {@link Registry} used to resolve dependencies within this
 	 * class.
