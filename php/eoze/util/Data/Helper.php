@@ -6,6 +6,8 @@ use IllegalArgumentException;
 
 /**
  *
+ * @todo This class is a work in progress!
+ * 
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  * @author Éric Ortega <eric@planysphere.fr>
  * @since 28 oct. 2011
@@ -29,6 +31,7 @@ class Helper {
 	 * @return array 
 	 */
 	public static function expand(array $array = null, $separator = '.') {
+		throw new \UnsupportedOperationException(get_class() . '::expand()');
 		return self::expandImpl($array, $separator);
 	}
 	
