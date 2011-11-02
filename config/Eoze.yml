@@ -2,6 +2,6 @@ config.node: eoze\Eoze
 
 register():
   
-  eoze\dependency\Registry: eoze\dependency\Registry
+  eoze\Dependency\Registry: eoze\Dependency\Registry
   
   eoze\I18n\LocaleHelper: eoze\I18n\LocaleHelper\IntlOrDefault

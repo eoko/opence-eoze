@@ -3,7 +3,7 @@
 namespace eoze;
 
 use eoze\Base\ConfigurableClass;
-use eoze\dependency\Registry;
+use eoze\Dependency\Registry;
 
 /**
  *
@@ -22,9 +22,9 @@ class Eoze extends ConfigurableClass {
 	
 	public function __construct(array $config = null) {
 		parent::__construct($config);
-		$class = $this->config->get('register().eoze\dependency\Registry');
+		$class = $this->config->get('register().eoze\Dependency\Registry');
 		$registers = $this->config->getOr('register()');
-		unset($registers['eoze\dependency\Registry']);
+		unset($registers['eoze\Dependency\Registry']);
 		$this->registry = new $class(array(
 			'register()' => $registers,
 		));
