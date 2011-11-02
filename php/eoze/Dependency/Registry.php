@@ -38,7 +38,8 @@ class Registry {
 		} else if (is_string($spec)) {
 			$class = $spec;
 		} else {
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException('Illegal argument type for $spec: ' 
+					. gettype($spec));
 		}
 		if ($fallbacks !== false) {
 			$fallbacks = Classes::getImplementedInterfaces($class, false);
@@ -48,8 +49,15 @@ class Registry {
 	
 	public function register($spec, $provider = null) {
 		if (is_array($spec)) {
-			foreach ($spec as $spec) {
-				$this->register($spec, $provider);
+			if ($provider !== null) {
+				throw new IllegalArgumentException();
+			}
+			foreach ($spec as $spec => $provider) {
+				if (is_int($spec)) {
+					$this->register($provider);
+				} else {
+					$this->register($spec, $provider);
+				}
 			}
 		} else {
 			if ($provider === null) {
@@ -60,7 +68,7 @@ class Registry {
 				Logger::get($this)->warn("Already registered: $interface");
 			}
 			$this->functionnality[$interface] = $provider;
-			if ($this->useFallbacks) {
+			if ($this->useFallbacks && $fallbacks) {
 				foreach ($fallbacks as $fallback) {
 					$this->fallbacks[$fallback] =& $this->functionnality[$interface];
 				}
@@ -70,12 +78,12 @@ class Registry {
 	
 	private static function instantiate($spec, &$provider, array $config = null) {
 		if (is_string($provider)) {
-			$provider = new $provider(ConfigManager::get($provider));
+			$provider = new $provider();
 		}
 		$o = null;
 		if (is_object($provider)) {
 			if ($provider instanceof ServiceFactory) {
-				$provider = $provider->createService(ConfigManager::get($provider));
+				$provider = $provider->createService();
 			}
 			if ($provider instanceof Factory) {
 				$o = $provider->create($config);
@@ -134,6 +142,7 @@ class Registry {
 		if (null !== $o = $this->getIf($spec, $config)) {
 			return $o;
 		} else {
+//			dump($this);
 			throw new MissingDependencyException("Missing dependency: $spec");
 		}
 	}

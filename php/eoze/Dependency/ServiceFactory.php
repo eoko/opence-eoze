@@ -10,5 +10,5 @@ namespace eoze\Dependency;
  */
 interface ServiceFactory {
 	
-	function createService(array $config = null);
+	function createService();
 }
