@@ -81,7 +81,7 @@ class AnnotationProcessor {
 			}
 			$this->classesInjections[$class] = $injections ? $injections : false;
 		}
-		return $this->classesInjections[$class];
+		return $this->classesInjections[$class] ? $this->classesInjections[$class] : null;
 	}
 	
 //	public static function parseSetterDocCommentInjections($doc) {
@@ -189,7 +189,8 @@ class AnnotationProcessor {
 			}
 			$this->classesSetterInjections[$class] = $injections ? $injections : false;
 		}
-		return $this->classesSetterInjections[$class];
+		return $this->classesSetterInjections[$class] 
+				? $this->classesSetterInjections[$class] : null;
 	}
 	
 }
