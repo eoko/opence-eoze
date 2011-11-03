@@ -69,7 +69,7 @@ class AnnotationProcessor {
 		}
 	}
 	
-	public function parseInjections($class) {
+	public function parsePropertyInjections($class) {
 		if (!isset($this->classesInjections[$class])) {
 			$reflectionClass = new ReflectionClass($class);
 			$injections = array();
