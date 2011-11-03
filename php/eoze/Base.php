@@ -4,10 +4,11 @@ namespace eoze;
 
 use eoze\Base\ConfigurableClass;
 use eoze\Dependency\Registry;
+use eoze\Base\AnnotationProcessor;
 
 use eoko\config\ConfigManager;
 
-use ReflectionClass, ReflectionProperty;
+use ReflectionClass, ReflectionProperty, ReflectionMethod;
 
 use IllegalStateException;
 
@@ -22,7 +23,7 @@ class Base extends ConfigurableClass {
 	/**
 	 * @var Registry
 	 */
-	private static $dependencyRegistry;
+	private $dependencyRegistry;
 	
 	public function __construct(array $config = null) {
 		parent::__construct($config);
@@ -60,50 +61,61 @@ class Base extends ConfigurableClass {
 //		return $message;
 //	}
 	
+	/**
+	 * @var AnnotationProcessor
+	 */
+	private static $annotationProcessor;
+
+	/**
+	 * @return AnnotationProcessor
+	 */
+	private static function getAnnotationProcessor() {
+		if (!self::$annotationProcessor) {
+			self::$annotationProcessor = new AnnotationProcessor();
+		}
+		return self::$annotationProcessor;
+	}
+	
 	private function resolveDependencies() {
-		$injections = array();
+		$annotationProcessor = self::getAnnotationProcessor();
+		$class = get_class($this);
+		
+		$propertyInjections = $annotationProcessor->parsePropertyInjections($class);
 		foreach ($this->config as $key => $value) {
 			if ($key{0} === '$') {
 				$key = substr($key, 1);
-				$injections[$key] = $value;
+				$propertyInjections[$key] = $value;
 			}
 		}
-		$this->getInjectionsFromAnnotations($injections);
-		foreach ($injections as $key => $spec) {
-			$this->dependencyRegistry->hook($this->$key, $spec);
+		
+		$setterInjections = $annotationProcessor->parseSetterInjections($class);
+		
+		if ($propertyInjections) {
+			foreach ($propertyInjections as $property => $spec) {
+				$this->dependencyRegistry->hook($this->$property, $spec);
+			}
 		}
-	}
-	
-	private static $classesInjections = array();
-	
-	private function getInjectionsFromAnnotations(array &$injections) {
-		$class = get_class($this);
-		if (!isset(self::$classesInjections[$class])) {
-			$reflectionClass = new ReflectionClass($class);
-			$classInjections = array();
-			$filter = ReflectionProperty::IS_PUBLIC | ReflectionProperty::IS_PROTECTED;
-			foreach ($reflectionClass->getProperties($filter) as $property) {
-				$name = $property->getName();
-				$doc = $property->getDocComment();
-				if ($doc) {
-					if (preg_match('/^[\s*]*@Eoze:inject(?:$|\s+(.+)$)/m', $doc, $m)) {
-						if (isset($m[1])) {
-							$spec = trim($m[1]);
-						} else if (preg_match('/^[\s*]*@var\s+([^\s]+)$/m', $doc, $m)) {
-							$spec = trim($m[1]);
-						} else {
-							throw new IllegalStateException('Illegal annotation ');
-						}
-						$classInjections[$name] = $spec;
+
+		if ($setterInjections) {
+			foreach ($setterInjections as $method => $argumentSpecs) {
+				if ($argumentSpecs) {
+					$arguments = array();
+					foreach ($argumentSpecs as $spec) {
+						$arguments[] = $this->dependencyRegistry->get($spec);
 					}
-				}
-			}
-			self::$classesInjections[$class] = $classInjections ? $classInjections : false;
-		}
-		if (self::$classesInjections[$class]) {
-			foreach (self::$classesInjections[$class] as $key => $spec) {
-				if (!isset($injections[$key])) {
-					$injections[$key] = $spec;
+					switch (count($arguments)) {
+						case 1:
+							$this->$method($arguments[0]);
+							break;
+						case 2:
+							$this->$method($arguments[0], $arguments[1]);
+							break;
+						case 3:
+							$this->$method($arguments[0], $arguments[1], $arguments[2]);
+							break;
+					}
+				} else {
+					$this->$method();
 				}
 			}
 		}
