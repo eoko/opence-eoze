@@ -39,6 +39,8 @@ class TplField extends ModelColumn implements ConfigConstants {
 	public $enum = false, $enumLabels = null;
 	private $enumConfig;
 	private $enumCodeValues = null;
+	
+	public $unsigned = false;
 
 	function __construct($field, $type, $length = null, $canNull = false,
 			$default = null, $unique = false, $foreignKeyToTable = null,
