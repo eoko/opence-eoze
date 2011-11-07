@@ -77,14 +77,29 @@ class AclContext extends DatabaseBehatContext {
 		assertNotNull($this->getManager()->getGroup($gid));
 	}
 
-    /**
+	/**
+     * @Given /^l\'utilisateur "([^"]*)" existe$/
+     */
+	public function lUtilisateurExiste($uid) {
+		assertNotNull($this->getManager()->getUser($uid));
+	}
+
+	/**
 	 * @Given /^le groupe "([^"]*)" a le role "([^"]*)"$/
+	 * @Given /^l'utilisateur "([^"]*)" a le role "([^"]*)"$/
 	 */
 	public function leGroupeALeRole($gid, $rid) {
 		assertNotNull($group = $this->getManager()->getGroup($gid));
 		if (Helper::parseInt($rid) !== null) {
 			assertTrue($group->hasRole($rid));
 		}
+	}
+
+    /**
+     * @Given /^l\'utilisateur "([^"]*)" a le groupe "([^"]*)"$/
+     */
+	public function lUtilisateurALeGroupe($argument1, $argument2) {
+		throw new PendingException();
 	}
 
 //	protected function getDataSet() {
