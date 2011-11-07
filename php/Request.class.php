@@ -9,7 +9,10 @@ use eoko\util\Arrays;
 use eoko\util\Json;
 use eoko\url\Maker as UrlMaker;
 
-class Request {
+use eoze\message\Message;
+use eoze\util\Data\DataArray;
+
+class Request implements Message {
 
 	private $request;
 
@@ -94,6 +97,15 @@ class Request {
 
 	public function toArray() {
 		return $this->request;
+	}
+	
+	private $messageBody = null;
+	
+	public function getBody() {
+		if (!$this->messageBody) {
+			$this->messageBody = new DataArray($this->toArray());
+		}
+		return $this->messageBody;
 	}
 
 	public function print_r($preFormatted = true, $return = false) {
