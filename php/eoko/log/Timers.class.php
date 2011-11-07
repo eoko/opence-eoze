@@ -18,12 +18,12 @@ class Timers {
 	 * @return Timer
 	 */
 	public function create($context, $key, $message, $level) {
-		if (isset($this->timers[$context][$key])) {
-			throw new IllegalStateException("Timer $context:$key already created");
-		}
+//		if (isset($this->timers[$context][$key])) {
+//			throw new IllegalStateException("Timer $context:$key already created");
+//		}
 		return $this->timers[$context][$key] = new Timer($message, $level);
 	}
-
+	
 	/**
 	 * Retrieves the {@link Timer} for the specified $context and $key. If no
 	 * such Timer has yet been created by {@link create()}, NULL will be
