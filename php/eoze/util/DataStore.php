@@ -2,7 +2,7 @@
 
 namespace eoze\util;
 
-use eoze\util\ObjectRepository\Query;
+use eoze\util\DataStore\Query;
 
 /**
  *
@@ -10,14 +10,9 @@ use eoze\util\ObjectRepository\Query;
  * @author Éric Ortega <eric@planysphere.fr>
  * @since 2 nov. 2011
  */
-interface ObjectRepository {
+interface DataStore {
 
 	function query(Query $query = null);
 	
 	function getElementFieldValue($element, $field);
-	
-//	/**
-//	 * @return Query
-//	 */
-//	function createQuery();
 }

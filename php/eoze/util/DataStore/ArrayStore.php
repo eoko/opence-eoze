@@ -1,8 +1,8 @@
 <?php
 
-namespace eoze\util\ObjectRepository;
+namespace eoze\util\DataStore;
 
-use eoze\util\ObjectRepository;
+use eoze\util\DataStore;
 
 /**
  *
@@ -10,7 +10,7 @@ use eoze\util\ObjectRepository;
  * @author Éric Ortega <eric@planysphere.fr>
  * @since 2 nov. 2011
  */
-class ArrayRepository implements ObjectRepository {
+class ArrayStore implements DataStore {
 	
 	private $data;
 	

@@ -1,8 +1,8 @@
 <?php
 
-namespace eoze\util\ObjectRepository\Query;
+namespace eoze\util\DataStore\Query;
 
-use eoze\util\ObjectRepository;
+use eoze\util\DataStore;
 
 use IllegalArgumentException;
 

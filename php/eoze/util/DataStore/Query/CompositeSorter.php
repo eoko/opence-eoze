@@ -1,6 +1,6 @@
 <?php
 
-namespace eoze\util\ObjectRepository\Query;
+namespace eoze\util\DataStore\Query;
 
 /**
  *
