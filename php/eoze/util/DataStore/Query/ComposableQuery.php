@@ -1,9 +1,9 @@
 <?php
 
-namespace eoze\util\ObjectRepository\Query;
+namespace eoze\util\DataStore\Query;
 
-use eoze\util\ObjectRepository;
-use eoze\util\ObjectRepository\Query;
+use eoze\util\DataStore;
+use eoze\util\DataStore\Query;
 
 /**
  *
@@ -19,15 +19,15 @@ class ComposableQuery implements Query {
 	
 	private $pager;
 	
-//	public function options(ObjectRepository $repository, &$filter, &$sorter, &$pager) {
-//		$this->setRepository($repository);
+//	public function options(DataStore $store, &$filter, &$sorter, &$pager) {
+//		$this->setRepository($store);
 //		$filter = $this->filter;
 //		$sorter = $this->sorter;
 //		$pager  = $this->pager;
 //	}
 	
-	public function getOptions(ObjectRepository $repository) {
-		$this->setRepository($repository);
+	public function getOptions(DataStore $store) {
+		$this->setRepository($store);
 		return array(
 			self::FILTER => $this->filter,
 			self::PAGER  => $this->pager,
@@ -35,15 +35,15 @@ class ComposableQuery implements Query {
 		);
 	}
 	
-	protected function setRepository(ObjectRepository $repository) {
+	protected function setRepository(DataStore $store) {
 		if ($this->filter) {
-			$this->filter->setRepository($repository);
+			$this->filter->setRepository($store);
 		}
 		if ($this->sorter) {
-			$this->sorter->setRepository($repository);
+			$this->sorter->setRepository($store);
 		}
 		if ($this->pager) {
-			$this->pager->setRepository($repository);
+			$this->pager->setRepository($store);
 		}
 	}
 

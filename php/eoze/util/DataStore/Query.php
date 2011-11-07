@@ -1,8 +1,8 @@
 <?php
 
-namespace eoze\util\ObjectRepository;
+namespace eoze\util\DataStore;
 
-use eoze\util\ObjectRepository;
+use eoze\util\DataStore;
 
 /**
  *
@@ -17,21 +17,21 @@ interface Query {
 	const SORTER = 'sorter';
 
 //	/**
-//	 * A reference to the ObjectRepository is needed to return repository-type
+//	 * A reference to the DataStore is needed to return repository-type
 //	 * dependant Query implementations.
 //	 */
-//	function options(ObjectRepository $repository, &$filter, &$sorter, &$pager);
+//	function options(DataStore $store, &$filter, &$sorter, &$pager);
 
 	/**
 	 * Gets the different parts composing the query.
 	 * 
-	 * A reference to the ObjectRepository is needed to return repository-type
+	 * A reference to the DataStore is needed to return repository-type
 	 * dependant Query implementations.
 	 * 
-	 * @param ObjectRepository $repository
+	 * @param DataStore $store
 	 * 
 	 * @return array in the form array($optionType1 => $option1, $optionType2 => $option2, etc.)
 	 */
-	function getOptions(ObjectRepository $repository);
+	function getOptions(DataStore $store);
 
 }

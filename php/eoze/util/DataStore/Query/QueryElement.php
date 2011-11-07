@@ -1,9 +1,9 @@
 <?php
 
-namespace eoze\util\ObjectRepository\Query;
+namespace eoze\util\DataStore\Query;
 
-use eoze\util\ObjectRepository\Query;
-use eoze\util\ObjectRepository;
+use eoze\util\DataStore\Query;
+use eoze\util\DataStore;
 
 use IllegalStateException;
 
@@ -22,16 +22,16 @@ abstract class QueryElement implements Query {
 	protected $type;
 
 	/**
-	 * @var ObjectRepository
+	 * @var DataStore
 	 */
-	private $repository;
+	private $store;
 	
 	public static function getClass() {
 		return get_called_class();
 	}
 	
 	/**
-	 * @return ObjectRepository
+	 * @return DataStore
 	 */
 	protected function getRepository() {
 		if (!$this->repository) {
@@ -40,12 +40,12 @@ abstract class QueryElement implements Query {
 		return $this->repository;
 	}
 	
-	public function setRepository(ObjectRepository $repository) {
-		$this->repository = $repository;
+	public function setRepository(DataStore $store) {
+		$this->repository = $store;
 	}
 	
-//	public function options(ObjectRepository $repository, &$filters, &$sorter, &$pager) {
-//		$this->repository = $repository;
+//	public function options(DataStore $store, &$filters, &$sorter, &$pager) {
+//		$this->repository = $store;
 //		if ($this instanceof Filter) {
 //			$filters = array($this);
 //		} else if ($this instanceof Sorter) {
@@ -57,8 +57,8 @@ abstract class QueryElement implements Query {
 //		}
 //	}
 	
-	public function getOptions(ObjectRepository $repository) {
-		$this->repository = $repository;
+	public function getOptions(DataStore $store) {
+		$this->repository = $store;
 		return array($this->type => $this);
 	}
 }
