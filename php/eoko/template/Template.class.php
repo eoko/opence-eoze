@@ -29,6 +29,10 @@ class Template extends Renderer {
 	public function clearData() {
 		$this->vars = array();
 	}
+	
+	public function getData() {
+		return $this->vars;
+	}
 
 	/**
 	 * Set the Template's variable $name to the given $value.

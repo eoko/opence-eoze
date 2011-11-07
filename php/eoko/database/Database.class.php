@@ -22,7 +22,7 @@ class Database {
 	/**
 	 * @return DatabaseProxy
 	 */
-	private function getDefaultProxy() {
+	private static function getDefaultProxy() {
 		if (self::$defaultProxy === null) {
 			self::$defaultProxy = new DatabaseProxy(ConfigManager::get(__NAMESPACE__));
 		}

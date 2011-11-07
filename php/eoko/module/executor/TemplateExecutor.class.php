@@ -39,6 +39,10 @@ abstract class TemplateExecutor extends ExecutorBase {
 	protected function clearData() {
 		$this->getTemplate()->clearData();
 	}
+	
+	public function getData() {
+		return $this->getTemplate()->getData();
+	}
 
 	public function __set($name, $value) {
 		if ($this->myTemplate) {
