@@ -268,17 +268,31 @@ class Generator extends Script {
 				$field = $r['Field'];
 
 				// type
-				preg_match('/([^(]+)(\(([\d,]+)\))?/', $r['Type'], $match);
-				$type = $match[1];
-				$length = isset($match[3]) ? $match[3] : null;
+				$regex = '/^' 
+						. '(?P<type>[^\s(]+)' 
+						. '\s*'
+						. '(?:\((?P<length>[\d,]+)\))?'
+						. '(?P<unsigned>\s*unsigned)?'
+						. '$/';
+				if (!preg_match($regex, $r['Type'], $matches)) {
+					throw new IllegalStateException("Cannot parse type: '$r[Type]'");
+				}
+				$type = $matches['type'];
+				$length = isset($matches['length']) ? $matches['length'] : null;
 
 				$default = $r['Default'] != '' ? $r['Default'] : null;
 				$primaryKey = stristr($r['Key'], 'PRI') !== false ? true : false;
 				$autoIncrement = stristr($r['Extra'], 'auto_increment') !== false ? true : false;
 				$canNull = $r['Null'] == 'YES' ? true : false;
 
-				$fields[$field] = new TplField($field, $type, $length, $canNull, $default,
+				$tplField = new TplField($field, $type, $length, $canNull, $default,
 						false, null, $primaryKey, $autoIncrement);
+				
+				if (isset($matches['unsigned'])) {
+					$tplField->unsigned = true;
+				}
+				
+				$fields[$field] = $tplField;
 			}
 
 			// --- Index ---
@@ -286,7 +300,9 @@ class Generator extends Script {
 			$createTable = Query::executeQuery('SHOW CREATE TABLE `' . $dbTable . '`;');
 			$createTable = $createTable->fetchColumn(1);
 
-			preg_match('/(?:,|\s)ENGINE\s*=\s*(\w+)\s+/', $createTable, $matches);
+			if (!preg_match('/(?:,|\s)ENGINE\s*=\s*(\w+)\s+/', $createTable, $matches)) {
+				throw new IllegalStateException('Cannot parse ENGINE');
+			}
 			$engine = $matches[1];
 
 			if (strtolower($engine) !== 'innodb') {
@@ -296,8 +312,8 @@ class Generator extends Script {
 				$pattern = '/(?:\s|,)CONSTRAINT `(\w+)` FOREIGN KEY \(`(\w+)`\) REFERENCES `(\w+)` \(`(\w+)`\)/';
 				preg_match_all($pattern, $createTable, $matches, PREG_SET_ORDER);
 
-				foreach ($matches as $match) {
-					list($ignore, $constraintName, $localKey, $constraintTable, $otherField) = $match;
+				foreach ($matches as $matches) {
+					list($ignore, $constraintName, $localKey, $constraintTable, $otherField) = $matches;
 					$fields[$localKey]->foreignConstraint = new ModelColumnForeignConstraint($constraintTable, $otherField, $constraintName);
 				}
 			}
@@ -306,8 +322,8 @@ class Generator extends Script {
 			$pattern = '/(?:\s|,)UNIQUE KEY `(?:\w+)` \(`(\w+)`\)/';
 			preg_match_all($pattern, $createTable, $matches, PREG_SET_ORDER);
 
-			foreach ($matches as $match) {
-				$uniqueField = $match[1];
+			foreach ($matches as $matches) {
+				$uniqueField = $matches[1];
 				$fields[$uniqueField]->unique = true;
 			}
 
