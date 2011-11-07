@@ -5,13 +5,13 @@ namespace eoze\test\phpunit;
 require_once 'PHPUnit/Extensions/Database/TestCase.php';
 
 use PHPUnit_Extensions_Database_DataSet_YamlDataSet as YamlDataSet,
-	PHPUnit_Extensions_Database_TestCase as TestCase;
+	PHPUnit_Extensions_Database_TestCase;
 
 use eoko\database\Database;
 
 //class DataSetFilter extends \PHPUnit_Extensions_Database_DataSet_DataSetFilter {}
 
-abstract class DatabaseTestCase extends TestCase {
+abstract class DatabaseTestCase extends PHPUnit_Extensions_Database_TestCase {
 
 	// only instantiate pdo once for test clean-up/fixture load
 	static private $pdo = null;
