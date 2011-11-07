@@ -11,36 +11,12 @@ use ModelTable;
  * @since 20 oct. 2011
  */
 class ModelManager extends AbstractAclManager {
-	
-	/**
-	 * @var ModelTable
-	 */
-	private $roleTable;
-	/**
-	 * @var ModelTable
-	 */
-	private $userTable;
-	/**
-	 * @var ModelTable
-	 */
-	private $groupTable;
-	
-	function __construct(ModelTable $roleTable, ModelTable $userTable, ModelTable $groupTable) {
-		$this->roleTable = $roleTable;
-		$this->userTable = $userTable;
-		$this->groupTable = $groupTable;
-	}
-	
-	public protected function getGroup($gid) {
-		return $this->groupTable->loadModel($uid);
-	}
 
-	public protected function getRole($rid) {
-		return $this->roleTable->loadModel($uid);
-	}
+	private $idTableName = 'AclIdTable';
 
-	public protected function getUser($uid) {
-		return $this->userTable->loadModel($uid);
-	}
-
+	private $roleTableName = 'AclRoleTable';
+	
+	private $groupTableName = 'AclGroupTable';
+	
+	private $userTableName = 'AclUserTable';
 }
