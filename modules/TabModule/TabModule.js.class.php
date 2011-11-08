@@ -40,6 +40,7 @@ class Js extends \eoko\module\executor\ExecutorBase {
 		$tpl->module = $moduleName;
 		$tpl->var = $config->get('moduleJsVarName');
 		$tpl->iconCls = $module->getIconCls(false);
+		$tpl->title = $module->getTitle();
 		
 		$cfg = $config->get('config');
 		if ($cfg) {
