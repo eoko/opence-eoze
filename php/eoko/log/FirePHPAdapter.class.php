@@ -3,6 +3,7 @@
 namespace eoko\log;
 
 use LogEntry;
+use FirePHP;
 
 /**
  *
