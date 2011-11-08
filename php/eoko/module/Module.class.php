@@ -402,6 +402,9 @@ MSG
 			"$name.$type.class.php",
 			"$type.class.php",
 			$type . "Executor.class.php",
+			"$name.$type.php",
+			"$type.php",
+			"{$type}Executor.php",
 			ucfirst($type) . "Executor.class.php",
 		);
 
