@@ -13,6 +13,8 @@ var <?php echo $var ?> = Ext.extend(sp, {
 	
 	,doConstruct: function() {}
 	
+	,controller: "<?php echo $module ?>"
+	
 	/**
 	 * True if this component fires an "open" event. Read-only.
 	 * @type Boolean
