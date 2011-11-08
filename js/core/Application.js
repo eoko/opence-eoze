@@ -34,13 +34,22 @@ Oce.MainApplication = {
 				function(module) {
 //					Ext.getBody().setStyle("cursor", previousCursor);
 					if (callback) {
-						try {
+						if (Ext.isChrome) {
+							// Chrome handles error correctly, but traces them
+							// to the point where they are thrown, so it's 
+							// better to not rethrow the exception
 							callback(
 								me.moduleInstances[moduleName] = new module()
 							);
-						} catch (err) {
-	//						debugger;
-							throw err;
+						} else {
+							try {
+								callback(
+									me.moduleInstances[moduleName] = new module()
+								);
+							} catch (err) {
+		//						debugger;
+								throw err;
+							}
 						}
 					}
 				}
