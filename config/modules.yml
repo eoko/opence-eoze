@@ -24,4 +24,5 @@ used:
     - IconProvider
     - TabModule
     - MercurialConsole
-    - Prolix
+    - DirectModule
+    - DirectGridModule

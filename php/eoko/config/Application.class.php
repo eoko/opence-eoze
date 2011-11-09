@@ -110,11 +110,11 @@ class Application implements FileFinder {
 		} else if ($alias === '@oce-components') {
 			$js = array();
 			$js['init/init.js'] = 0;
-			foreach (Files::listFiles(JS_PATH . 'components', 'glob:*.js') as $file) {
+			foreach (Files::listFiles(JS_PATH . 'components', 'glob:*.js', true) as $file) {
 				$js['components/' . $file] = 3;
 			}
 			$css = array();
-			foreach (Files::listFiles(CSS_PATH . 'auto', 'glob:*.css') as $file) {
+			foreach (Files::listFiles(CSS_PATH . 'auto', 'glob:*.css', true) as $file) {
 				$css['auto/' . $file] = 10;
 			}
 			return array(
