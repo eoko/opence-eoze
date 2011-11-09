@@ -56,6 +56,7 @@ class LoginExecutor extends JsonExecutor {
 		$path = $this->findPath('login', FileType::JS);
 		$tpl = Template::create()->setFile($path);
 		$this->prepareLoginTemplate($tpl);
+		header('Content-type: application/x-javascript');
 		$tpl->render();
 	}
 }
