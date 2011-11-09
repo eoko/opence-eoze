@@ -13,6 +13,7 @@ MODULE.override({
 			module: this
 			,title: this.getTitle()
 			,iconCls: this.getIconCls()
+			,closable: true
 		}));
 	}
 	
