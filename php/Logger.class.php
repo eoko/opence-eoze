@@ -10,6 +10,9 @@
 use eoko\shell\ShellEoze;
 use \IllegalArgumentException;
 
+use eoko\log\FirePHPAdapter;
+use eoko\log\ChromePHPAdapter;
+
 /**
  * Logging utility class.
  *
@@ -623,48 +626,23 @@ class LoggerOutputAppender implements LoggerAppender {
  */
 class LoggerFirePHPAppender implements LoggerAppender {
 
-	private $firephp;
+	private $adapter;
 
 	function __construct() {
-
+		
 		ob_start();
-
-		$found = false;
-		foreach (explode(':', get_include_path()) as $dir) {
-			$filename = LIBS_PATH . 'FirePHPCore/FirePHP.class.php';
-			if (file_exists($filename)) {
-				require_once($filename);
-				$found = true;
-				break;
-			}
-		}
-
-		if ($found) {
-			$this->firephp = FirePHP::getInstance(true);
-			$this->firephp->setOptions(array('includeLineNumbers' => false));
+		
+		if (preg_match('/Chrome|Chromium/i', $_SERVER['HTTP_USER_AGENT'])) {
+			$this->adapter = new ChromePHPAdapter();
+//		} else if (preg_match('/FirePHP|Mozilla/i', $_SERVER['HTTP_USER_AGENT'])) {
+//			$this->adapter = self::createFirePHP();
 		} else {
-			Logger::getLogger('LoggerFirePHPAppender')->error('FirePHP.class.php '
-					. 'cannot be found in include path');
+			$this->adapter = new FirePHPAdapter();
 		}
 	}
-
+	
 	function process(LogEntry $entry) {
-
-		switch ($entry->level) {
-			case Logger::INFO:
-				$this->firephp->info("{$entry->getLevelName()} {$entry->fileLine} -- {$entry->msg}");
-				break;
-			case Logger::WARNING:
-				$this->firephp->warn("{$entry->getLevelName()} {$entry->fileLine} -- {$entry->msg}");
-				break;
-			case Logger::ASSERTION:
-			case Logger::ERROR:
-				$this->firephp->error("{$entry->getLevelName()} {$entry->fileLine} -- {$entry->msg}");
-				break;
-			default:
-				$this->firephp->log("{$entry->getLevelName()} {$entry->fileLine} -- {$entry->msg}");
-				break;
-		}
+		$this->adapter->process($entry);
 	}
 
 }

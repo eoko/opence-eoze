@@ -146,6 +146,18 @@ Oce.Module.executeAction = function(action, listeners, scope) {
 	);
 };
 
+eo.getModule = function(module) {
+	if (module.indexOf(".") == -1) {
+		module = String.format("Oce.Modules.{0}.{0}", module);
+	}
+	var registry = Oce.mx.application.moduleInstances;
+	if (registry[module]) {
+		return registry[module];
+	} else {
+		throw new Error(String.format("Module {0} has not been loaded", module));
+	}
+}
+
 Oce.ApplicationModule = Ext.extend(Ext.Panel, {
 
 //	my: {}

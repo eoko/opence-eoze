@@ -13,6 +13,8 @@ var <?php echo $var ?> = Ext.extend(sp, {
 	
 	,doConstruct: function() {}
 	
+	,controller: "<?php echo $module ?>"
+	
 	/**
 	 * True if this component fires an "open" event. Read-only.
 	 * @type Boolean
@@ -87,17 +89,19 @@ var <?php echo $var ?> = Ext.extend(sp, {
 			xtype: "panel"
 			,border: false
 			,closable: true
-<?php if ($iconCls): ?>
-			,iconCls: "<?php echo $iconCls ?>"
-<?php endif ?>
+			,iconCls: this.getIconCls()
 		};
 	}
 	
-<?php if ($iconCls): ?>
+	,getTitle: function() {
+		return "<?php echo $title ?>";
+	}
+	
 	,getIconCls: function(action) {
-			return "<?php echo $iconCls ?>";
-	}	
+<?php if ($iconCls): ?>
+		return "<?php echo $iconCls ?>" + (action ? ' ' + action : '');
 <?php endif ?>
+	}
 });
 	
 <?php if (isset($main)): ?>
