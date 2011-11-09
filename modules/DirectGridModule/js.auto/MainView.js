@@ -8,8 +8,15 @@ Oce.deps.wait("eo.DirectModule.MainView", function() {
 	
 Ext.ns('eo.DirectGridModule');
 
-eo.DirectGridModule.MainView = Ext.extend(eo.DirectModule.MainView, {
+var NS = eo.DirectGridModule,
+	sp = eo.DirectModule.MainView,
+	spp = sp.prototype;
+
+eo.DirectGridModule.MainView = Ext.extend(sp, {
 	
-	
+	initComponent: function() {
+		debugger
+		spp.initComponent.call(this);
+	}
 });
 }); // deps
