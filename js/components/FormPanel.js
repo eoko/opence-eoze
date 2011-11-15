@@ -453,7 +453,7 @@ Oce.ColumnContainer = Ext.extend(Ext.Container, {
 			layout: "column"
 			,labelAlign: "top"
 			,frame: true
-			,spacing: 5
+			,spacing: 10
 			,columns: 2
 		}, config);
 		delete cfg.cols;
@@ -501,23 +501,6 @@ Oce.ColumnContainer = Ext.extend(Ext.Container, {
 			return cols;
 		})();
 
-		var n = cols.length,
-			items = [],
-			spacing = cfg.spacing;
-			
-		if (Ext.isString(spacing)) {
-			var m = /^(\d+)%?$/.exec(spacing);
-			if (m === null) throw new Error("Invalid config option value for spacing: " + spacing);
-			spacing = parseInt(m[1]);
-		}
-		
-		var lw = (100 - (n-1) * spacing) / n,
-			ow = (100 - lw)/(n-1),
-			anchor = (100 - spacing*n) + "%";
-			
-		lw /= 100;
-		ow /= 100;
-		
 		Ext.each(cols, function(col) {
 			var items = col.items;
 			for (var i=0,l=items.length; i<l; i++) {
@@ -532,21 +515,53 @@ Oce.ColumnContainer = Ext.extend(Ext.Container, {
 				}
 			}
 		});
+		
+		var n = cols.length,
+			items = [],
+			spacing = cfg.spacing,
+			percent = false;
+		
+		defaults.columnWidth = 1/n;
 			
+		if (Ext.isString(spacing)) {
+			var m = /^(\d+)(%?)$/.exec(spacing);
+			if (m === null) throw new Error("Invalid config option value for spacing: " + spacing);
+			spacing = parseInt(m[1]);
+			percent = !!(m[2]);
+		}
+
+		var lw = (100 - (n-1) * spacing) / n,
+			ow = (100 - lw)/(n-1),
+			anchor = (100 - spacing*n) + "%";
+
+		lw /= 100;
+		ow /= 100;
+
 		for (var i=0,l=cols.length; i<l-1; i++) {
 			var ct = Ext.apply({
-				columnWidth: ow
-				,defaults: Ext.apply({
-					anchor: anchor
+				defaults: Ext.apply({
+					anchor: '100%'
 				}, defaults.defaults)
 				,items: cols[i].items
 			}, defaults);
 			items.push(ct);
+			if (percent) {
+				items.push({
+					xtype: 'container'
+					,columnWidth: spacing
+					,html: '&nbsp;'
+				});
+			} else {
+				items.push({
+					xtype: 'container'
+					,width: spacing
+					,html: '&nbsp;'
+				});
+			}
 		}
 		// last col
 		items.push(Ext.apply({
-			columnWidth: lw
-			,defaults: Ext.apply({
+			defaults: Ext.apply({
 				anchor: "100%"
 			}, defaults.defaults)
 			,items: cols[cols.length - 1].items
