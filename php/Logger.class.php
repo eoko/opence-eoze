@@ -632,7 +632,8 @@ class LoggerFirePHPAppender implements LoggerAppender {
 		
 		ob_start();
 		
-		if (preg_match('/Chrome|Chromium/i', $_SERVER['HTTP_USER_AGENT'])) {
+		if (isset($_SERVER['HTTP_USER_AGENT']) 
+				&& preg_match('/Chrome|Chromium/i', $_SERVER['HTTP_USER_AGENT'])) {
 			$this->adapter = new ChromePHPAdapter();
 //		} else if (preg_match('/FirePHP|Mozilla/i', $_SERVER['HTTP_USER_AGENT'])) {
 //			$this->adapter = self::createFirePHP();
