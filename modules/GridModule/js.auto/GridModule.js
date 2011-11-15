@@ -2171,7 +2171,7 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 				title: tabName
 				,tabName: tabName.toLowerCase()
 				,autoScroll:true
-				,defaults:{anchor:'-20'}
+				,defaults:{anchor:'100%'}
 				,items: tabItems
 			};
 		}
@@ -2279,13 +2279,32 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 				,items: tabPanelItems
 			}]
 		} else {
-//			if (tabPanelItems.length == 1) {
-//				return {
-//					xtype: 'oce.form'
-//					,jsonFormParam: 'json_form'
-//					,items: tabPanelItems[0].items
-//				};
-//			}
+			if (tabPanelItems[0].length == 1) {
+				return {
+					xtype: 'panel'
+					,border: false
+
+					,width: tabConfig.windowWidth
+					,height: tabConfig.windowHeight
+
+					,bodyStyle: 'background:transparent;'
+
+					,layout: 'fit'
+					,anchor:'100% 100%'
+
+					,defaults:{
+						 layout:'form'
+						,autoScroll: true
+						,defaultType:'textfield'
+						,bodyStyle:'padding:10px;  background:transparent;'
+					}
+					
+					,items: Ext.apply(tabPanelItems[0][0], {
+						header: false
+						,border: false
+					})
+				};
+			}
 			return [{
 				 xtype:'tabpanel'
 				,activeTab: 0 // fix it if the first tab doesn't display on opening
