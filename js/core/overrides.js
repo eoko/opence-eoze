@@ -593,3 +593,21 @@ Ext.data.Types.INT.convert = function(v) {
 		return uber.call(this, v) || uber.call(iso, v) || uber.call(sql, v);
 	}
 })();
+
+/**
+ * @todo Check other browser (safari, probably...)
+ * With chrome, for a reason I don't get, the wrapping .x-form-element div
+ * is not given the same height as the wrapped textarea, but a greater height,
+ * that may leads to layout issues.
+ */
+if (Ext.isChrome) {
+	(function() {
+		var spp = Ext.form.TextArea.prototype;
+		spp.afterRender = spp.afterRender.createSequence(function() {
+			var el = this.el.up('.x-form-element');
+			if (el) {
+				el.setHeight(this.getHeight());
+			}
+		});
+	})();
+}
