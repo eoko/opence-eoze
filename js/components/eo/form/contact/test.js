@@ -16,6 +16,19 @@ eo.deps.wait('eo.form.contact.locale', function() {
 		,layout: 'fit'
 		,items: {
 			xtype: 'contactpanel'
+//			,value: {
+//				phoneNumbers: [{
+//					type: 'MOBILE'
+//					,'default': false
+//					,number: '062028'
+//					,unlisted: true
+//				},{
+//					type: 'MOBILE'
+//					,'default': true
+//					,number: '062028'
+//					,unlisted: false
+//				}]
+//			}
 		}
 	});
 	
@@ -34,5 +47,25 @@ eo.deps.wait('eo.form.contact.locale', function() {
 	setInterval(function() {
 		output.setValue(Ext.encode(win.items.get(0).getValue()))
 	}, 500);
+	
+	win.items.get(0).setValue({
+		phoneNumbers: [{
+			type: 'MOBILE'
+			,'default': false
+			,number: '062028'
+			,unlisted: true
+		},{
+			type: 'MOBILE'
+			,'default': true
+			,number: '06202'
+			,unlisted: false
+		}]
+		
+		,emails: [{
+			type: 'PERSONNAL'
+			,email: 'hop hopp.pop'
+		}]
+		
+	});
 
 });

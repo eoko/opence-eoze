@@ -54,8 +54,6 @@ eo.form.contact.AbstractContactField = Ext.extend(sp, {
 				,tooltip: NS.locale('setDefault',
 						NS.locale.genre(this.textKeyNaturalItem || this.textKeyItem),
 						{type: ':' + (this.textKeyNaturalItem || this.textKeyItem)})
-//				,enableToggle: true
-//				,pressed: true
 				,handler: function() {
 					if (!this.isDefault()) {
 						this.fireEvent('becomedefault', this);
@@ -183,6 +181,29 @@ eo.form.contact.AbstractContactField = Ext.extend(sp, {
 			data[name] = value;
 		});
 		return data;
+	}
+
+	,setValue: function(data) {
+		if (!this.rendered) {
+			this.value = data;
+			return;
+		}
+		if (this.defaultPickable && !(this.defaultName in data)) {
+			this.valueFields[this.defaultName].setValue(false);
+		}
+		Ext.iterate(data, function(name, value) {
+			var field = this.valueFields[name];
+			if (field) {
+				field.setValue(value);
+			}
+		}, this);
+	}
+	
+	,afterRender: function() {
+		spp.afterRender.apply(this, arguments);
+		if (this.value) {
+			this.setValue(this.value);
+		}
 	}
 	
 });
