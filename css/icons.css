@@ -150,6 +150,12 @@
 .ico.tick.clickable:hover {
 	background-image:url(../images/icons/cross.png) !important;
 }
+.ico.tick.pressable {
+	background-image:url(../images/icons/tick+gray.png) !important;
+}
+.x-btn-pressed .ico.tick.pressable {
+	background-image:url(../images/icons/tick.png) !important;
+}
 .ico.cross,
 .ico_cross {
 	background-image:url(../images/icons/cross.png) !important;
