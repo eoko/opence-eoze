@@ -73,17 +73,25 @@ class Columns {
 	 * @return array
 	 */
 	protected function findTemplate($tpl, $require = false) {
+		if ($tpl === 'checkbox_YesNo') {
+			dump_mark();
+		}
 		if ($tpl === false) return null;
 		$tplElt = explode('.', $tpl);
 		$n = count($tplElt);
 		if ($n == 1) {
 			// form 'xxx' => find default tpl
-			if (isset($this->templates['$this'][$tpl])) return $this->templates['$this'][$tpl];
-			else if (isset($this->templates['$super'][$tpl])) return $this->templates['$super'][$tpl];
+			if (isset($this->templates['$this'][$tpl])) {
+				return $this->extendTemplate($this->templates['$this'][$tpl]);
+			} else if (isset($this->templates['$super'][$tpl])) {
+				return $this->extendTemplate($this->templates['$super'][$tpl]);
+			}
 		} else if ($n == 2) {
 			// form 'xxx.yy' => find qualified tpl
 			list($module, $name) = $tplElt;
-			if (isset($this->templates[$module][$name])) return $this->templates[$module][$name];
+			if (isset($this->templates[$module][$name])) {
+				return $this->extendTemplate($this->templates[$module][$name]);
+			}
 		} else {
 			// wtf ? maybe later...
 			throw new InvalidConfigurationException();
@@ -93,6 +101,18 @@ class Columns {
 			throw new InvalidConfigurationException(null, $tpl, "Cannot find template '$tpl'");
 		} else {
 			return null;
+		}
+	}
+	
+	private function extendTemplate($config) {
+		
+		$tpl = Arrays::pickOneOf($config, array('tpl', 'template'));
+		
+		if ($tpl === null) {
+			return $config;
+		} else {
+			$template = $this->findTemplate($tpl, true);
+			return Arrays::apply($template, $config, false);
 		}
 	}
 	
