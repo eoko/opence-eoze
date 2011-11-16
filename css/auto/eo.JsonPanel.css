@@ -1,0 +1,68 @@
+
+.eo-json-list {
+	font-family: monospace;
+}
+
+.eo-json-list .list {
+	display: inline-block;
+	min-width: 100%;
+}
+
+.eo-json-list .line {
+	white-space: nowrap;
+	position: relative;
+}
+.eo-json-list .line.offset1 {
+	background-color: #FAFAFF;
+}
+.eo-json-list .line.offset0 {
+	background-color: #FAFFFA;
+}
+.eo-json-list .line:hover {
+	background-color: #ffffcc;
+}
+
+.eo-json-list .gutter {
+	display: block;
+	position: absolute;
+	background-color: #eee;
+	background-repeat: no-repeat;
+	background-position: center center;
+	color: #666;
+}
+.eo-json-list .gutter.fold {
+	left: 0;
+	width: 16px;
+	height: 100%;
+}
+.eo-json-list .gutter.fold.collapse {
+	background-image: url(_images/icons_fatcow/16x16/bullet_toggle_minus.png);
+	cursor: pointer;
+}
+.eo-json-list .gutter.fold.expand {
+	background-image: url(_images/icons_fatcow/16x16/bullet_toggle_plus.png);
+	cursor: pointer;
+}
+.eo-json-list .gutter.number {
+	width: 20px;
+	text-align: right;
+	padding-right: 5px;
+	left: 16px;
+	height: 100%;
+}
+
+.eo-json-list code {
+}
+
+.eo-json-list .key {
+/*	font-weight: bold;*/
+	color: royalblue;
+}
+
+.eo-json-list .value {
+	color: #3F6666;
+	color: #8A230D;
+}
+.eo-json-list .value.string {
+	color: #008800;
+}
