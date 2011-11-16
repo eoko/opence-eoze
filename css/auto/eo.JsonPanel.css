@@ -36,11 +36,11 @@
 	height: 100%;
 }
 .eo-json-list .gutter.fold.collapse {
-	background-image: url(_images/icons_fatcow/16x16/bullet_toggle_minus.png);
+	background-image: url(../../images/icons_fatcow/16x16/bullet_toggle_minus.png);
 	cursor: pointer;
 }
 .eo-json-list .gutter.fold.expand {
-	background-image: url(_images/icons_fatcow/16x16/bullet_toggle_plus.png);
+	background-image: url(../../images/icons_fatcow/16x16/bullet_toggle_plus.png);
 	cursor: pointer;
 }
 .eo-json-list .gutter.number {
