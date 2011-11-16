@@ -15,6 +15,13 @@ use ChromePHP;
  */
 class ChromePHPAdapter {
 	
+	public function __construct() {
+		if (!is_dir('/tmp/chromelogs')) {
+			mkdir('/tmp/chromelogs');
+		}
+		ChromePhp::useFile('/tmp/chromelogs', 'chromelogs');
+	}
+	
 	public function process(LogEntry $entry) {
 		switch ($entry->level) {
 			case Logger::INFO:
