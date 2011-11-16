@@ -43,7 +43,9 @@ class LegacyGridModule {
 					'name' => $controllerName,
 					'namespace' => 'Oce.Modules',
 
-					'title' => ucfirst($controllerName)
+					'title' => ucfirst($controllerName),
+					
+					'primaryKeyName' => $table->getPrimaryKeyName(),
 				), false)
 				->toArray();
 
