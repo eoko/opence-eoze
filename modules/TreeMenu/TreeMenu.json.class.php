@@ -21,8 +21,33 @@ class Json extends JsonExecutor {
 		
 		if (!$nodes->count()) {
 			$nodes = $this->createDefaultMenu();
+		} else {
+			// we want an array so that the ModelCollection won't reload
+			// the query
+			$nodes = $nodes->toArray();
 		}
 		
+		$nodesById = array();
+		$nodesChildren = array();
+		foreach ($nodes as $node) {
+			$nodesById[$node->getId()] = $node;
+			// $nodesChildren must be initialized for node with no
+			// children too!
+			$nodesChildren[$node->getId()] = array();
+		}
+		foreach ($nodes as $node) {
+			if (null !== $parentId = $node->getParentMenuNodesId()) {
+				$nodesChildren[$parentId][] = $node;
+			}
+		}
+
+		foreach ($nodesChildren as $id => $children) {
+			if (isset($nodesById[$id])) {
+				$node = $nodesById[$id];
+				$node->setChildren($children);
+			}
+		}
+
 		$data = array();
 		foreach ($nodes as $node) {
 			if ($node->parent__menu_nodes_id == null) {
