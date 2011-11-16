@@ -18,6 +18,9 @@ NS.ContactPanel = Ext.extend(sp, {
 		{xtype: 'organisationsfieldset', name: 'organisations'}
 	]
 	
+	,autoScroll: true
+	,bodyStyle: 'padding: 5px 2px; background: transparent;'
+	
 	,initComponent: function() {
 		
 		var items = [], tbar = [];
@@ -48,8 +51,6 @@ NS.ContactPanel = Ext.extend(sp, {
 			layout: 'form'
 			,items: items
 			
-			,bodyStyle: 'padding: 0px; background: transparent;'
-
 			,tbar: tbar
 		});
 		

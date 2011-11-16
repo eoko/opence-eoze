@@ -91,7 +91,7 @@ NS.AbstractFieldSet = Ext.extend(sp, {
 		}
 		
 		// layout
-		this.doLayout();
+		this.redoLayout();
 		
 		field.focus();
 		
@@ -127,7 +127,6 @@ NS.AbstractFieldSet = Ext.extend(sp, {
 			if (this.autoHide) {
 				this.show();
 			}
-			this.doLayout();
 		} else {
 			if (this.allowBlank === false) {
 				this.addField();
@@ -135,6 +134,8 @@ NS.AbstractFieldSet = Ext.extend(sp, {
 				this.hide();
 			}
 		}
+		
+		this.redoLayout();
 	}
 	
 	// private
@@ -177,6 +178,14 @@ NS.AbstractFieldSet = Ext.extend(sp, {
 					this.setDefaultField(field);
 				}
 			}, this);
+		}
+	}
+	
+	,redoLayout: function() {
+		var owner = this.ownerCt;
+		this.doLayout();
+		if (owner) {
+			owner.doLayout();
 		}
 	}
 
