@@ -94,6 +94,8 @@ NS.AbstractFieldSet = Ext.extend(sp, {
 		this.doLayout();
 		
 		field.focus();
+		
+		return field;
 	}
 
 	,add: function() {
@@ -163,6 +165,19 @@ NS.AbstractFieldSet = Ext.extend(sp, {
 			}
 		});
 		return data;
+	}
+	
+	,setValue: function(data) {
+		this.removeAll();
+		if (data) {
+			Ext.each(data, function(value) {
+				var field = this.addField();
+				field.setValue(value);
+				if (field.isDefault()) {
+					this.setDefaultField(field);
+				}
+			}, this);
+		}
 	}
 
 });

@@ -56,6 +56,20 @@ NS.ContactPanel = Ext.extend(sp, {
 		spp.initComponent.call(this);
 	}
 	
+	,afterRender: function() {
+		spp.afterRender.apply(this, arguments);
+		if (this.value) {
+			this.setValue(this.value);
+		}
+	}
+	
+	,getFieldSet: function(name) {
+		var index = Ext.each(this.fieldSets, function(fs) {
+			return fs.name !== name;
+		});
+		return this.fieldSets[index];
+	}
+	
 	,getValue: function() {
 		var data = {};
 		Ext.each(this.fieldSets, function(fs) {
@@ -63,6 +77,13 @@ NS.ContactPanel = Ext.extend(sp, {
 		});
 		return data;
 	}
+	
+	,setValue: function(data) {
+		Ext.iterate(data, function(name, value) {
+			this.getFieldSet(name).setValue(value);
+		}, this);
+	}
+	
 });
 
 Ext.reg('contactpanel', NS.ContactPanel);
