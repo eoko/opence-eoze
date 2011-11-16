@@ -25,14 +25,17 @@ var NS = Ext.ns("eo").deps = Oce.deps = {
 	,lockingKeys: {}
 	
 	,waitIn: function(ns, key, callback) {
+		var fn = function() {
+			callback(Ext.ns(ns), ns);
+		};
 		if (Ext.isArray(key)) {
 			var tmp = [];
 			Ext.each(key, function(k) {
 				tmp.push(ns + "." + k);
 			});
-			return this.wait(tmp, callback);
+			return this.wait(tmp, fn);
 		} else if (Ext.isString(key)) {
-			return this.wait(ns + "." + key, callback);
+			return this.wait(ns + "." + key, fn);
 		} else {
 			throw new Error("Illegal argument type: " + (typeof key));
 		}
@@ -219,3 +222,10 @@ if (!Array.prototype.indexOf) {
         return -1;
     }
 }
+
+eo.warn = function() {
+	if (console) {
+		(console.warn || console.log).apply(console, arguments);
+	}
+}
+
