@@ -16,6 +16,7 @@ use ChromePHP;
 class ChromePHPAdapter {
 	
 	public function __construct() {
+		// TODO this should not be hardcoded for my computer......
 		if (!is_dir('/tmp/chromelogs')) {
 			mkdir('/tmp/chromelogs');
 		}
