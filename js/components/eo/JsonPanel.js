@@ -172,6 +172,7 @@ eo.JsonPanel = Ext.extend(Ext.Panel, {
 				cls = 'boolean';
 			} else if (Ext.isString(v)) {
 				cls = 'string';
+				v = v.replace(/\n/g, '\u23ce');
 				v = '<span class="delimiter">"</span>' + v + '<span class="delimiter">"</span>';
 			}
 			return {
