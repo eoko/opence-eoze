@@ -26,7 +26,7 @@ NS.ContactPanel = Ext.extend(sp, {
 	,bodyStyle: 'padding: 5px 2px; background: transparent;'
 	
 	,constructor: function(config) {
-		if (config.name) {
+		if (config.name || this.name) {
 			this.markInvalid = this.clearInvalid = Ext.emptyFn;
 		}
 		spp.constructor.apply(this, arguments);
@@ -34,7 +34,8 @@ NS.ContactPanel = Ext.extend(sp, {
 	
 	,initComponent: function() {
 		
-		var items = [], tbar = [];
+		var items = this.items = this.items || [], 
+			tbar = [];
 		
 		var fieldSets = [];
 
