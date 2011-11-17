@@ -12,7 +12,7 @@ var NS  = eo.form.contact,
 
 eo.form.contact.EmailField = Ext.extend(sp, {
 	
-	textItem: NS.locale('email')
+	fieldConfig: 'email'
 	
 	,textInvalidEmail: NS.locale('invalidEmail')
 	
@@ -24,7 +24,7 @@ eo.form.contact.EmailField = Ext.extend(sp, {
 		
 		this.emailField = Ext.create({
 			xtype: 'textfield'
-			,emptyText: this.textItem
+			,emptyText: NS.locale(this.textKeyItem)
 			,flex: 1
 			,regex: /.+@.+\..+$/
 			,regexText: this.textInvalidEmail
