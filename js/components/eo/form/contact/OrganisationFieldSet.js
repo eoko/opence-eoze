@@ -12,6 +12,8 @@ var sp  = NS.AbstractFieldSet,
 NS.OrganisationFieldSet = Ext.extend(sp, {
 
 	fieldConfig: NS.config.organisation
+	
+	,numTitle: 1
 
 	,getFieldClass: function() {
 		return NS.OrganisationField;
