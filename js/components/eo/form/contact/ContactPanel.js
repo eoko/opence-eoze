@@ -9,6 +9,10 @@ eo.deps.waitIn('eo.form.contact', 'locale', function(NS) {
 var sp  = Ext.Panel,
 	spp = sp.prototype;
 
+/**
+ * A convenience container Panel for contact FieldSets, which provides a top toolbar
+ * that will contain the FieldSets add field buttons.
+ */
 NS.ContactPanel = Ext.extend(sp, {
 	
 	fieldSets: [
@@ -20,6 +24,13 @@ NS.ContactPanel = Ext.extend(sp, {
 	
 	,autoScroll: true
 	,bodyStyle: 'padding: 5px 2px; background: transparent;'
+	
+	,constructor: function(config) {
+		if (config.name) {
+			this.markInvalid = this.clearInvalid = Ext.emptyFn;
+		}
+		spp.constructor.apply(this, arguments);
+	}
 	
 	,initComponent: function() {
 		
@@ -37,20 +48,22 @@ NS.ContactPanel = Ext.extend(sp, {
 				
 				var fieldSet = Ext.create(fs);
 				
+				if (this.markInvalid) {
+					fieldSet.clearInvalid = fieldSet.markInvalid = false;
+				}
+				
 				fieldSets.push(fieldSet);
 
 				items.push(fieldSet);
 				tbar.push(fieldSet.createAddButton());
 			}
-		});
+		}, this);
 		
 		this.fieldSets = fieldSets;
 		
 		Ext.apply(this, {
-			
 			layout: 'form'
 			,items: items
-			
 			,tbar: tbar
 		});
 		
@@ -83,6 +96,30 @@ NS.ContactPanel = Ext.extend(sp, {
 		Ext.iterate(data, function(name, value) {
 			this.getFieldSet(name).setValue(value);
 		}, this);
+	}
+	
+	// Make this a recognized FormPanel.isField
+//	,markInvalid: Ext.emptyFn
+//	,clearInvalid: Ext.emptyFn
+	,getName: function() {
+		return this.name;
+	}
+	
+	,validate: function() {
+		var valid = true;
+		Ext.each(this.fieldSets, function(fs) {
+			if (!fs.validate()) {
+				valid = false;
+				return false;
+			}
+		});
+		return valid;
+	}
+	
+	,reset: function() {
+		Ext.each(this.fieldSets, function(fs) {
+			fs.reset();
+		});
 	}
 	
 });

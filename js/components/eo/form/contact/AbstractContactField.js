@@ -27,9 +27,24 @@ eo.form.contact.AbstractContactField = Ext.extend(sp, {
 	,defaultName: 'default'
 
 	,constructor: function(config) {
-		this.addEvents('beforeremoveline', 'removeline', 'becomedefault');
+		this.addEvents('beforeremoveline', 'removeline', 'becomedefault', 'change');
 		this.valueFields = {};
 		spp.constructor.call(this, config);
+		
+		Ext.iterate(this.valueFields, function(name, field) {
+			if (field instanceof Ext.form.Checkbox) {
+				field.on('check', this.fieldChangeListener, this);
+			} else {
+				field.on('change', this.fieldChangeListener, this);
+			}
+		}, this);
+	}
+	
+	// private
+	,fieldChangeListener: function() {
+		if (this.isValid()) {
+			this.fireEvent('change', this);
+		}
 	}
 
 	// private
