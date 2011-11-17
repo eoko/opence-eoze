@@ -11,6 +11,9 @@ module:
 
 options:
   formPropsFromDB: false
+  autoName:
+    inflector: [Inflector, camelCaseToUnderscored]
+    inflectOnlyLcFirst: true
 
 extra:
   search: true
