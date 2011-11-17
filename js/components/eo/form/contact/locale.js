@@ -59,16 +59,25 @@ NS.locale = function(key, num, genre, replacements) {
 			text = text.replace(/{m}(.+?){\/m}/g, '$1');
 			text = text.replace(/{f}.+?{\/f}/g, '');
 		}
+		// Replacements
 		if (replacements) {
 			Ext.iterate(replacements, function(key, value) {
+				value = '' + value;
 				if (value.substr(0,1) === ':') {
-					value = NS.locale(value.substr(1));
+					value = NS.locale(value.substr(1), num, genre);
 				}
 				text = text.replace(new RegExp('{:' + key + '}', 'g'), value);
-//				text = text.replace(new RegExp('{:' + key + ':lcFirst}', 'g'), 
-//						value.substr(0,1).toLowerCase() + value.substr(1));
 				text = text.replace(new RegExp('{:' + key + ':lc}', 'g'), value.toLowerCase());
 			});
+		}
+		// Conditionnal words
+		var re = /{de}\s?(.)/;
+		while ((matches = re.exec(text))) {
+			if (eo.lang.isVowel(matches[1])) {
+				text = text.replace(re, "d'$1");
+			} else {
+				text = text.replace(re, "de $1");
+			}
 		}
 	} else {
 		eo.warn('Missing locale for key: ' + key);
