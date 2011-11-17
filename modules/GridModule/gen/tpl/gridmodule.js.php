@@ -27,6 +27,7 @@ var moduleClass = Ext.extend(<?php echo $superclass ?>, {
 	,forms: <?php echo $forms ?>
 <?php endif // forms ?>
 
+
 <?php if (isset($tabs)): ?>
 	,tabs: <?php echo $tabs ?>
 <?php endif // tabs ?>

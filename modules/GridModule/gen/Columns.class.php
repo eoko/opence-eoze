@@ -11,6 +11,9 @@ use eoko\util\Arrays;
 
 use \IllegalStateException, \InvalidConfigurationException;
 
+require_once __DIR__ . '/LegacyGridModule.class.php';
+use LegacyGridModule;
+
 class Columns {
 
 	public $columnsConfig;
@@ -265,8 +268,15 @@ class Columns {
 
 			$this->columns[$name] = $col;
 		}
+		
+		foreach ($this->columns as $name => &$col) {
+			if (isset($col['useFields']) && $col['useFields']) {
+				LegacyGridModule::convertTabFields($this->columnsConfig, $col['formField']);
+			}
+		}
+		unset($col);
 	}
-
+	
 	private function setColFormItemIf(&$col, $name, $value) {
 		if (isset($col['form'])) {
 			if ($col['form'] !== false) {

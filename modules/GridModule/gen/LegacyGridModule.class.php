@@ -281,12 +281,14 @@ class LegacyGridModule {
 				}
 			}
 
-			if ($tpl !== null) $tpl->tabs = self::toJSTemplate ($tabs);
+			if ($tpl !== null) {
+				$tpl->tabs = self::toJSTemplate($tabs);
+			}
 			return $tabs;
 		}
 	}
 
-	private static function convertTabFields($columns, &$config) {
+	public static function convertTabFields($columns, &$config) {
 		if (isset($config['items'])) {
 			$assoc = ArrayHelper::isAssoc($config['items']);
 			foreach ($config['items'] as $k => &$v) {
