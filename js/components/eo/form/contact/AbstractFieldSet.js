@@ -15,8 +15,16 @@ NS.AbstractFieldSet = Ext.extend(sp, {
 	,collapsible: true
 	
 	,autoHide: true
+
+	// disable bubbling of add/remove events, to prevent parent
+	// FormPanel to become aware of this FieldSet's children
+	// Fields
+	,bubbleEvents: []
+	
+	,getName: function() { return this.name; }
 	
 	,constructor: function() {
+		this.addEvents('change');
 		spp.constructor.apply(this, arguments);
 		Ext.applyIf(this, {
 			title: NS.locale(this.fieldConfig.textKeyItem)
@@ -41,6 +49,9 @@ NS.AbstractFieldSet = Ext.extend(sp, {
 		spp.afterRender.apply(this, arguments);
 		if (this.autoHide && !this.items.length) {
 			this.hide();
+		}
+		if (this.value) {
+			this.setValue(this.value);
 		}
 	}
 	
@@ -71,8 +82,11 @@ NS.AbstractFieldSet = Ext.extend(sp, {
 			scope: this
 			,removeline: this.removeFieldHandler
 			,becomedefault: this.setDefaultFieldHandler
-		})
-		
+			,change: function() {
+				this.fireEvent('change', this);
+			}
+		});
+	
 		spp.add.call(this, field);
 		
 		// default
@@ -92,6 +106,8 @@ NS.AbstractFieldSet = Ext.extend(sp, {
 		
 		// layout
 		this.redoLayout();
+		
+//		this.fireEvent('change', this);
 		
 		field.focus();
 		
@@ -135,6 +151,8 @@ NS.AbstractFieldSet = Ext.extend(sp, {
 			}
 		}
 		
+		this.fireEvent('change', this);
+		
 		this.redoLayout();
 	}
 	
@@ -159,6 +177,9 @@ NS.AbstractFieldSet = Ext.extend(sp, {
 	}
 	
 	,getValue: function() {
+		if (!this.rendered) {
+			return this.value;
+		}
 		var data = [];
 		this.items.each(function(item) {
 			if (item.isValid()) {
@@ -169,6 +190,10 @@ NS.AbstractFieldSet = Ext.extend(sp, {
 	}
 	
 	,setValue: function(data) {
+		if (!this.rendered) {
+			this.value = data;
+			return;
+		}
 		this.removeAll();
 		if (data) {
 			Ext.each(data, function(value) {
@@ -188,7 +213,19 @@ NS.AbstractFieldSet = Ext.extend(sp, {
 			owner.doLayout();
 		}
 	}
-
+	
+	// Needed to be recognized by FormPanel.isField
+	,markInvalid: Ext.emptyFn
+	,clearInvalid: Ext.emptyFn
+	
+	,validate: function() {
+		return true;
+	}
+	
+	,reset: function() {
+		this.setValue([]);
+	}
+	
 });
 
 eo.deps.reg('AbstractFieldSet', ns);

@@ -197,7 +197,7 @@ Ext.reg("checkfieldset", eo.form.CheckableFieldSet);
 						c.items.each(fn, this);
 					}
 					// end hack ------------------------------------------------
-				} else if (c.findBy && c != formPanel) {
+				} else if (c.findBy && c != formPanel && !c.formRoot) {
 					formPanel.applySettings(c);
 					if (c.items && c.items.each) {
 						c.items.each(fn, this);

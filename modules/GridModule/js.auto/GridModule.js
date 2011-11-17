@@ -495,9 +495,20 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 
 			this.beforeFormSubmit(form, opts);
 
-			form.submit(opts);
+			this.submitForm(form, opts);
 		} else {
 			Ext.MessageBox.alert("Erreur", 'Certains champs ne sont pas correctement remplis.') // i18n
+		}
+	}
+	
+	,submitForm: function(form, opts) {
+		if (this.submitMethod === 'json') {
+			debugger
+			var values = form.getFieldValues();
+			opts.params[form.jsonFormParam || 'json_form'] = Ext.encode(values);
+			Ext.Ajax.request(opts);
+		} else {
+			form.submit(opts);
 		}
 	}
 	
@@ -1897,11 +1908,11 @@ Ext.ns('Oce.Modules.GridModule').GridModule = Oce.GridModule = Ext.extend(Ext.ut
 				};
 			}
 		} else {
-			this.my.editFormConfig = editConfig.onConfigureForm({
+			this.my.editFormConfig = Ext.apply(editConfig.onConfigureForm({
 				xtype: 'oce.form'
 				,jsonFormParam: 'json_form'
 				,items: editConfig.fields
-			});
+			}), this.extra.formConfig);
 		}
 
 		//... Add form
