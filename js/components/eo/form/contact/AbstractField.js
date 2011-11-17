@@ -27,11 +27,48 @@ eo.form.contact.AbstractField = Ext.extend(sp, {
 	,defaultName: 'default'
 
 	,constructor: function(config) {
-		this.addEvents('beforeremoveline', 'removeline', 'becomedefault', 'change');
-		this.valueFields = {};
-		spp.constructor.call(this, config);
 		
-		Ext.iterate(this.valueFields, function(name, field) {
+		this.addEvents('beforeremoveline', 'removeline', 'becomedefault', 'change');
+
+		// Apply fieldConfig
+		var fieldConfig = config.fieldConfig || this.fieldConfig;
+		if (fieldConfig) {
+			if (Ext.isString(fieldConfig)) {
+				fieldConfig = NS.config[fieldConfig];
+			}
+			if (!Ext.isObject(fieldConfig)) {
+				throw new Error('Config is missing or invalid');
+			}
+			Ext.apply(this, fieldConfig);
+		}
+
+		// Init instance members
+		this.valueFields = {};
+		
+		// Call super
+		spp.constructor.call(this, config);
+
+		// initComponent has been called in the parent's constructor
+		this.addChangeTrackingListeners(this.valueFields);
+	}
+	
+	/**
+	 * Adds listeners to the given fields, in order to track when they
+	 * are notified. The event type may depends on the field type, but
+	 * the listener used will generally allways be 
+	 * <code>this.fieldChangeListener</code>.
+	 *
+	 * @param {Object|Array} the fields to which the listener should be added.
+	 * When first called by AbstractField, this method is passed all the
+	 * <code>this.valueFields</code>. Overriding methods can call their
+	 * parent method with some other fields (but take care not to modify
+	 * the original object, which is the actual object used for the state 
+	 * of this instance.
+	 *
+	 * @protected
+	 */
+	,addChangeTrackingListeners: function(fields) {
+		Oce.walk(fields, function(name, field) {
 			if (field instanceof Ext.form.Checkbox) {
 				field.on('check', this.fieldChangeListener, this);
 			} else {
@@ -40,7 +77,12 @@ eo.form.contact.AbstractField = Ext.extend(sp, {
 		}, this);
 	}
 	
-	// private
+	/**
+	 * Listener to be added to children fields event that should be
+	 * considered as a modification.
+	 * 
+	 * @protected
+	 */
 	,fieldChangeListener: function() {
 		if (this.isValid()) {
 			this.fireEvent('change', this);

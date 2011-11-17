@@ -9,9 +9,11 @@ Oce.deps.waitIn('eo.form.contact', 'AbstractField', function(NS, ns) {
 var sp  = NS.AbstractField,
 	spp = sp.prototype;
 
-NS.PhoneNumberField = Ext.extend(sp, Ext.apply({
+NS.PhoneNumberField = Ext.extend(sp, {
 	
-	textUnlisted: NS.locale('unlisted')
+	fieldConfig: 'phone'
+	
+	,textUnlisted: NS.locale('unlisted')
 	,textItem: NS.locale('number')
 	
 	,numberName:   'number'
@@ -49,7 +51,7 @@ NS.PhoneNumberField = Ext.extend(sp, Ext.apply({
 		return this.numberFormField.getValue();
 	}
 	
-}, NS.config.phone));
+});
 
 Ext.reg('phonenumberfield', NS.PhoneNumberField);
 

@@ -9,7 +9,7 @@ eo.deps.waitIn('eo.form.contact', 'AbstractField', function(NS) {
 var sp  = NS.AbstractField,
 	spp = sp.prototype;
 	
-NS.AddressField = Ext.extend(sp, Ext.apply({
+NS.AddressField = Ext.extend(sp, {
 	
 	textItem: NS.locale('address')
 	
@@ -70,7 +70,7 @@ NS.AddressField = Ext.extend(sp, Ext.apply({
 				|| this.cityField.getValue();
 	}
 	
-}, NS.config.address));
+});
 
 Ext.reg('addressfield', eo.form.contact.AddressField);
 

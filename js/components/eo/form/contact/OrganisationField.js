@@ -9,7 +9,7 @@ eo.deps.waitIn('eo.form.contact', 'AbstractField', function(NS, ns) {
 var sp  = NS.AbstractField,
 	spp = sp.prototype;
 
-eo.form.contact.OrganisationField = Ext.extend(sp, Ext.apply({
+eo.form.contact.OrganisationField = Ext.extend(sp, {
 	
 	textItem: NS.locale('organisation')
 	,textSociety: NS.locale('society')
@@ -58,7 +58,7 @@ eo.form.contact.OrganisationField = Ext.extend(sp, Ext.apply({
 				|| this.titleField.getValue();
 	}
 	
-}, NS.config.organisation));
+});
 
 Ext.reg('organisationfield', NS.OrganisationField);
 
