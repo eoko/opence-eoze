@@ -11,7 +11,7 @@ var sp  = NS.AbstractField,
 	
 NS.AddressField = Ext.extend(sp, {
 	
-	textItem: NS.locale('address')
+	fieldConfig: 'address'
 	
 	,textStreet:  NS.locale('number, street')
 	,textZipCode: NS.locale('zip')
