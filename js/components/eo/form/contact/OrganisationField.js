@@ -11,7 +11,8 @@ var sp  = NS.AbstractField,
 
 eo.form.contact.OrganisationField = Ext.extend(sp, {
 	
-	textItem: NS.locale('organisation')
+	fieldConfig: 'organisation'
+	
 	,textSociety: NS.locale('society')
 	,textTitle: NS.locale('title')
 	
