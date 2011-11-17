@@ -4,9 +4,9 @@
  * @author Éric Ortega <eric@planysphere.fr>
  * @since 15 nov. 2011
  */
-eo.deps.waitIn('eo.form.contact', 'AbstractContactField', function(NS) {
+eo.deps.waitIn('eo.form.contact', 'AbstractField', function(NS) {
 
-var sp  = NS.AbstractContactField,
+var sp  = NS.AbstractField,
 	spp = sp.prototype;
 	
 NS.AddressField = Ext.extend(sp, Ext.apply({

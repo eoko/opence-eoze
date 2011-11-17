@@ -15,7 +15,7 @@ var sp  = Ext.form.CompositeField,
  * Provides base functionnalities for removing the field, and selecting 
  * the field's type.
  */
-eo.form.contact.AbstractContactField = Ext.extend(sp, {
+eo.form.contact.AbstractField = Ext.extend(sp, {
 	
 	textRemove: NS.locale('remove')
 
@@ -105,7 +105,7 @@ eo.form.contact.AbstractContactField = Ext.extend(sp, {
 	}
 	
 	,setDefault: function(on) {
-		this.defaultButton.toggle(on);
+		this.defaultButton && this.defaultButton.toggle(on);
 	}
 	
 	// protected
@@ -223,6 +223,6 @@ eo.form.contact.AbstractContactField = Ext.extend(sp, {
 	
 });
 
-Oce.deps.reg('eo.form.contact.AbstractContactField');
+Oce.deps.reg('eo.form.contact.AbstractField');
 	
 }); // deps

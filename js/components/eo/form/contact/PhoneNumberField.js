@@ -4,9 +4,9 @@
  * @author Éric Ortega <eric@planysphere.fr>
  * @since 15 nov. 2011
  */
-Oce.deps.waitIn('eo.form.contact', 'AbstractContactField', function(NS, ns) {
+Oce.deps.waitIn('eo.form.contact', 'AbstractField', function(NS, ns) {
 
-var sp  = NS.AbstractContactField,
+var sp  = NS.AbstractField,
 	spp = sp.prototype;
 
 NS.PhoneNumberField = Ext.extend(sp, Ext.apply({
