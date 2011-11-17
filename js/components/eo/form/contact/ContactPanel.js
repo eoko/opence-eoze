@@ -34,6 +34,10 @@ NS.ContactPanel = Ext.extend(sp, {
 	
 	,initComponent: function() {
 		
+		this.defaults = Ext.apply({
+			anchor: '100%'
+		}, this.defaults);
+		
 		var items = this.items = this.items || [], 
 			tbar = [];
 		
