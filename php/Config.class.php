@@ -225,7 +225,9 @@ class Config implements ArrayAccess, IteratorAggregate {
 	}
 
 	/**
-	 * Get whether this config contains a root node (or value) with the given $name.
+	 * Gets whether this config contains a root node (or value) 
+	 * with the given $name.
+	 * 
 	 * @param string $key
 	 * @return bool
 	 */
@@ -233,8 +235,12 @@ class Config implements ArrayAccess, IteratorAggregate {
 		if (func_num_args() > 1) {
 			$array =& $this->value;
 			foreach (func_get_args() as $key) {
-				if (!is_array($array) && !($array instanceof ArrayAccess)) return false;
-				if (!array_key_exists($key, $array)) return false;
+				if (!is_array($array) && !($array instanceof ArrayAccess)) {
+					return false;
+				}
+				if (!array_key_exists($key, $array)) {
+					return false;
+				}
 				$array =& $array[$key];
 			}
 			return true;
@@ -243,9 +249,36 @@ class Config implements ArrayAccess, IteratorAggregate {
 		}
 	}
 
+	/**
+	 * Gets the config value for the given key, or $default if the option 
+	 * is not set.
+	 * 
+	 * @param string $name   the config key to search
+	 * @param mixed $default the default value to return if the option is not set
+	 * @return mixed
+	 */
 	public function get($name, $default = null) {
-		if ($this->has($name)) return $this->value[$name];
-		else return $default;
+		if ($this->has($name)) {
+			return $this->value[$name];
+		} else {
+			return $default;
+		}
+	}
+	
+	/**
+	 * Gets the value for the given path, or $default if the given config 
+	 * option is not set.
+	 * 
+	 * @param string $path   the slash-separated (/) path
+	 * @param mixed $default the default value to return if the option is not set
+	 * @return mixed
+	 */
+	public function getValue($path, $default = null) {
+		if ($this->hasNode($path)) {
+			return $this->node($path, false, false);
+		} else {
+			return null;
+		}
 	}
 
 	/**
@@ -339,7 +372,11 @@ class Config implements ArrayAccess, IteratorAggregate {
 		
 		if (count($pathElt) == 1) {
 			if (isset($this->value[$path])) {
-				return new eoko\config\Config($this->value[$path], $path, $this->configName);
+				if (is_array($this->value[$path])) {
+					return new eoko\config\Config($this->value[$path], $path, $this->configName);
+				} else {
+					return $this->value[$path];
+				}
 			} else if ($require) {
 				MissingConfigurationException::throwFrom($this,
 						"Cannot resolve path: $path");
