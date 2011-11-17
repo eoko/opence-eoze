@@ -6,8 +6,22 @@
 class Inflector {
 
 	public static function explodeCamelCase($string, $split = '_') {
-		if ($split != '') $string = implode(explode($split, $string));
+		if ($split) {
+			$string = implode(explode($split, $string));
+		}
 		return preg_split('/(?<=\\w)(?=[A-Z])/', $string);
+	}
+	
+	/**
+	 * Converts a camelCasedString to an underscored_separated_string.
+	 * 
+	 * @param string $string
+	 * @param string $glue
+	 * @param string $split
+	 * @return string
+	 */
+	public static function camelCaseToUnderscored($string, $glue = '_', $split = '_') {
+		return strtolower(implode($glue, self::explodeCamelCase($string, $split)));
 	}
 
 	public static function capitalizeWords($source, $split = '_', $newSplit = '_') {
