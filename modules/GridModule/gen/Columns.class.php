@@ -3,13 +3,16 @@
 namespace eoko\modules\GridModule\gen;
 
 use eoko\config\Config;
-use \ConfigInheritor;
-use \ModelColumn;
-use \ModelTable;
+use ConfigInheritor;
+use ModelColumn;
+use ModelTable;
 
 use eoko\util\Arrays;
 
-use \IllegalStateException, \InvalidConfigurationException;
+use Inflector;
+
+use IllegalStateException, 
+	InvalidConfigurationException;
 
 require_once __DIR__ . '/LegacyGridModule.class.php';
 use LegacyGridModule;
@@ -176,9 +179,33 @@ class Columns {
 
 			Arrays::apply($col, $colConfig, false);
 
+			// Automatically apply name
+			if (!isset($col['name'])) {
+				$autoName = $this->config->getValue('options/autoName');
+				if ($autoName !== null && $autoName !== false) {
 
-			if (!isset($col['name'])) $col = array_merge(array('name'=>$name),$col);
-
+					if ($autoName === true) {
+						// simplest case
+						$col['name'] = $name;
+					
+					// then $autoName is a Config object
+					} else {
+						if ((null !== $inflector = $autoName->getValue('inflector'))
+								&& (!$autoName->getValue('inflectOnlyLcFirst', false)
+								|| !preg_match('/^[A-Z]/', $name))) {
+							// inflector
+							if ($inflector instanceof Config) {
+								$inflector = $inflector->toArray();
+							}
+							$col['name'] = call_user_func($inflector, $name);
+						} else {
+							// no inflector
+							$col['name'] = $name;
+						}
+					}
+				}
+			}
+			
 			if (null !== $f = $this->table->getField($col['name'], false)) {
 				switch ($f->getType()) {
 					case ModelColumn::T_INT:
