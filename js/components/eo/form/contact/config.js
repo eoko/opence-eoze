@@ -21,6 +21,7 @@ NS.texts = Ext.apply({
 	,homeFax: 'Télécopie{p/} domicile{p/}'
 	,invalidEmail: 'Email invalide'
 	,main: 'Principal{f}e{/f}{p/}'
+	,maxNumberIs: 'Le nombre maximum {de} {:item:lc} est de {:number:lc}'
 	,mobile: 'Mobile{p/}'
 	,number: 'Numéro'
 	,'number, street': 'Numéro, rue'
