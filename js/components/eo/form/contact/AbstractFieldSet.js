@@ -3,8 +3,8 @@
  * abstract but can actually be instanciated if given enougth config options,
  * in order to allow for on the fly configuration in pure text (e.g. Yaml files).
  * 
- * @config {int} numTitle The number to which the title must be accorded
- * (default: undefined).
+ * @cfg {int} numTitle The number to which the title must be accorded
+ * (default to undefined).
  *
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  * @author Éric Ortega <eric@planysphere.fr>
@@ -18,9 +18,18 @@ var sp  = Ext.form.FieldSet,
 NS.AbstractFieldSet = Ext.extend(sp, {
 
 	/**
-	 * @config {int} the maximum number of fields that can be added to this FieldSet.
+	 * @fg {int} maxFieldNumber the maximum number of fields that can be added 
+	 * to this FieldSet.
 	 */
 	maxFieldNumber: null
+	/**
+	 * @cfg {int} initialFieldNumber the initial number of fields that will be
+	 * added to the FieldSet. Note that this property is not used if the FieldSet
+	 * is given a {@link eo.form.contact.AbstractFieldSet#value value} (or if
+	 * {@link eo.form.contact.AbstractFieldSet#setValue#setValue setValue} is
+	 * called before the Component is rendered.
+	 */
+	,initialFieldNumber: 0
 
 	,cls: 'line'
 	,collapsible: true
@@ -89,6 +98,10 @@ NS.AbstractFieldSet = Ext.extend(sp, {
 		}
 		if (this.value) {
 			this.setValue(this.value);
+		} else if (this.initialFieldNumber) {
+			for (var i=0, l=this.initialFieldNumber; i<l; i++) {
+				this.addField();
+			}
 		}
 	}
 	
