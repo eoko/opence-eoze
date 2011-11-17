@@ -56,13 +56,17 @@ Oce.pickInBy = function(o, name) {
 	return r;
 }
 
-Oce.walk = function(o, fn) {
+/**
+ * Call the given function on all elements of the given object,
+ * whether it is an Object (hash) or an array.
+ */
+Oce.walk = function(o, fn, scope) {
 	if (Ext.isArray(o)) {
 		for (var i=0,len=o.length; i<len; i++) {
-			fn(i, o[i]);
+			fn.call(scope, i, o[i]);
 		}
 	} else if (Ext.isObject(o)) {
-		Ext.iterate(o, fn);
+		Ext.iterate(o, fn, scope);
 	} else {
 		return false;
 	}
