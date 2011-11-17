@@ -10,7 +10,7 @@ var NS  = eo.form.contact,
 	sp  = NS.AbstractField,
 	spp = sp.prototype;
 
-eo.form.contact.EmailField = Ext.extend(sp, Ext.apply({
+eo.form.contact.EmailField = Ext.extend(sp, {
 	
 	textItem: NS.locale('email')
 	
@@ -51,7 +51,7 @@ eo.form.contact.EmailField = Ext.extend(sp, Ext.apply({
 		return data;
 	}
 	
-}, NS.config.email));
+});
 
 Ext.reg('emailfield', NS.EmailField);
 
