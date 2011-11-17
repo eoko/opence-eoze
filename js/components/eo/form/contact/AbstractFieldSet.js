@@ -23,10 +23,10 @@ NS.AbstractFieldSet = Ext.extend(sp, {
 	 */
 	maxFieldNumber: null
 	/**
-	 * @cfg {int} initialFieldNumber the initial number of fields that will be
-	 * added to the FieldSet. Note that this property is not used if the FieldSet
-	 * is given a {@link eo.form.contact.AbstractFieldSet#value value} (or if
-	 * {@link eo.form.contact.AbstractFieldSet#setValue#setValue setValue} is
+	 * @cfg {int} initialFieldNumber the initial number of empty fields that will 
+	 * be added to the FieldSet. Note that this property is not used if the 
+	 * FieldSet is given a {@link eo.form.contact.AbstractFieldSet#value value} (or 
+	 * if {@link eo.form.contact.AbstractFieldSet#setValue#setValue setValue} is
 	 * called before the Component is rendered.
 	 */
 	,initialFieldNumber: 0
@@ -43,7 +43,20 @@ NS.AbstractFieldSet = Ext.extend(sp, {
 	
 	,constructor: function(config) {
 		
-		this.addEvents('change');
+		/**
+		 * @event change
+		 * Fires when one the children field's value changes.
+		 * @param {eo.form.contact.AbstractFieldSet} this
+		 */
+		/**
+		 * @event fullstatechanged
+		 * Fires when the FieldSet reach its 
+		 * {@link eo.form.contact.AbstractFieldSet#maxFieldNumber maximum field number}.
+		 * @param {eo.form.contact.AbstractFieldSet} this
+		 * @param {Boolean} full true if the FieldSet is full, else false if it can accept
+		 * more fields
+		 */
+		this.addEvents('change', 'fullstatechanged');
 		
 		// make a copy, since we're modifying it
 		config = Ext.apply({}, config);
@@ -112,17 +125,42 @@ NS.AbstractFieldSet = Ext.extend(sp, {
 	,createAddButton: function() {
 		var fc = this.fieldConfig,
 			key = fc.textKeyNaturalItem || fc.textKeyItem;
-		return new Ext.Button({
+		
+		var tooltip = NS.locale(
+			'addA', 
+			NS.locale.genre(key), 
+			{item: ':' + key}
+		);
+
+		var button = new Ext.Button({
 			iconCls: 'ico add'
-			,text: NS.locale(NS.locale(this.fieldConfig.textKeyItem))
+			,text: NS.locale(this.fieldConfig.textKeyItem)
 			,scope: this
 			,handler: this.addField
-			,tooltip: NS.locale(
-				'addA', 
-				NS.locale.genre(key), 
-				{item: ':' + key}
-			)
+			,tooltip: tooltip
 		});
+
+		if (Ext.isNumber(this.maxFieldNumber)) (function() {
+			var genre = NS.locale.genre(key);
+			var tooltipFull = NS.locale(
+				'maxNumberIs',
+				this.maxFieldNumber,
+				genre,
+				{item: ':' + key, number: eo.lang.intToWord(this.maxFieldNumber)}
+			);
+			button.mon(this, 'fullstatechanged', function(fs, full) {
+				if (full) {
+					button.disable();
+					button.setTooltip(tooltipFull);
+				} else {
+					button.enable();
+					button.setTooltip(tooltip);
+				}
+				button.setEnabled(!full);
+			});
+		}).call(this);
+		
+		return button;
 	}
 	
 	// protected
@@ -157,7 +195,13 @@ NS.AbstractFieldSet = Ext.extend(sp, {
 		// layout
 		this.redoLayout();
 		
+		// The event will be fired if the field is actually modified...
 //		this.fireEvent('change', this);
+		if (Ext.isNumber(this.maxFieldNumber) && this.getFieldCount() >= this.maxFieldNumber
+				&& !this.alreadyFull) {
+			this.alreadyFull = true;
+			this.fireEvent('fullstatechanged', this, true);
+		}
 		
 		field.focus();
 		
@@ -211,6 +255,16 @@ NS.AbstractFieldSet = Ext.extend(sp, {
 		this.fireEvent('change', this);
 		
 		this.redoLayout();
+		
+		if (Ext.isNumber(this.maxFieldNumber) && this.getFieldCount() < this.maxFieldNumber
+				&& this.alreadyFull) {
+			this.alreadyFull = false;
+			this.fireEvent('fullstatechanged', this, false);
+		}
+	}
+	
+	,getFieldCount: function() {
+		return this.items.getCount();
 	}
 	
 	// private
