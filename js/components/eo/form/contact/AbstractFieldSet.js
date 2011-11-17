@@ -1,4 +1,10 @@
 /**
+ * Base class for extensible FieldSets in contact panel. This class is called
+ * abstract but can actually be instanciated if given enougth config options,
+ * in order to allow for on the fly configuration in pure text (e.g. Yaml files).
+ * 
+ * @config {int} numTitle The number to which the title must be accorded
+ * (default: undefined).
  *
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  * @author Éric Ortega <eric@planysphere.fr>
@@ -11,7 +17,12 @@ var sp  = Ext.form.FieldSet,
 
 NS.AbstractFieldSet = Ext.extend(sp, {
 
-	cls: 'line'
+	/**
+	 * @config {int} the maximum number of fields that can be added to this FieldSet.
+	 */
+	maxFieldNumber: null
+
+	,cls: 'line'
 	,collapsible: true
 	
 	,autoHide: true
@@ -21,14 +32,40 @@ NS.AbstractFieldSet = Ext.extend(sp, {
 	// Fields
 	,bubbleEvents: []
 	
-	,getName: function() { return this.name; }
-	
-	,constructor: function() {
+	,constructor: function(config) {
+		
 		this.addEvents('change');
-		spp.constructor.apply(this, arguments);
-		Ext.applyIf(this, {
-			title: NS.locale(this.fieldConfig.textKeyItem)
-		});
+		
+		// make a copy, since we're modifying it
+		config = Ext.apply({}, config);
+
+		// Convert fieldConfig as a string to config object
+		var fieldConfig = config.fieldConfig;
+		if (Ext.isString(fieldConfig)) {
+			this.fieldConfig = NS.config[config.fieldConfig];
+			delete config.fieldConfig;
+			if (!Ext.isObject(this.fieldConfig)) {
+				throw new Error('Config is missing');
+			}
+		}
+		
+		spp.constructor.call(this, config);
+
+		// Automatic title
+		if (!this.title) {
+			var num = 'numTitle' in this ? this.numTitle : (this.allowMultiple() ? 2 : 1);
+			this.title = NS.locale(this.fieldConfig.textKeyItem, num);
+		}
+	}
+	
+	,getName: function() {
+		return this.name;
+	}
+	
+	// private
+	,allowMultiple: function() {
+		var m = this.maxFieldNumber;
+		return m === null || m === undefined || m > 1;
 	}
 
 	// private
@@ -64,7 +101,7 @@ NS.AbstractFieldSet = Ext.extend(sp, {
 			key = fc.textKeyNaturalItem || fc.textKeyItem;
 		return new Ext.Button({
 			iconCls: 'ico add'
-			,text: this.textItem || this.title
+			,text: NS.locale(NS.locale(this.fieldConfig.textKeyItem))
 			,scope: this
 			,handler: this.addField
 			,tooltip: NS.locale(
@@ -124,10 +161,17 @@ NS.AbstractFieldSet = Ext.extend(sp, {
 	
 	// protected
 	,createField: function() {
-		var c = this.getFieldClass();
-		return new c({
+		
+		var config = {
 			removable: true
-		});
+		};
+		
+		if (this.fieldXType) {
+			return Ext.create(Ext.apply({xtype: this.fieldXType}, config));
+		} else {
+			var c = this.getFieldClass();
+			return new c(config);
+		}
 	}
 	
 	// private
@@ -227,6 +271,8 @@ NS.AbstractFieldSet = Ext.extend(sp, {
 	}
 	
 });
+
+Ext.reg('contactfieldset', NS.AbstractFieldSet);
 
 eo.deps.reg('AbstractFieldSet', ns);
 	

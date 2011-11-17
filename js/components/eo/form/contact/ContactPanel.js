@@ -14,7 +14,7 @@ var sp  = Ext.Panel,
  * that will contain the FieldSets add field buttons.
  */
 NS.ContactPanel = Ext.extend(sp, {
-	
+
 	fieldSets: [
 		{xtype: 'phonenumbersfieldset', name: 'phoneNumbers', allowBlank: false},
 		{xtype: 'emailsfieldset', name: 'emails'},
@@ -49,6 +49,10 @@ NS.ContactPanel = Ext.extend(sp, {
 			} else {
 				if (Ext.isString(fs) && Ext.ComponentMgr.isRegistered(fs)) {
 					fs = {xtype: fs};
+				} else if (!fs.xtype) {
+					fs = Ext.apply({
+						xtype: 'contactfieldset'
+					}, fs);
 				}
 				
 				var fieldSet = Ext.create(fs);
