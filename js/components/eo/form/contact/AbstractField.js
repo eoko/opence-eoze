@@ -49,17 +49,20 @@ eo.form.contact.AbstractField = Ext.extend(sp, {
 
 	// private
 	,initComponent: function() {
-		
-		this.typeCombo = Ext.create(this.createTypeComboConfig());
-		this.items.unshift(this.typeCombo);
-		
+
+		// id
 		this.idField = new Ext.form.Hidden({
 			emptyValue: null
 		});
 		this.items.unshift(this.idField);
-		
 		this.valueFields[this.idName] = this.idField;
-		this.valueFields[this.typeName] = this.typeCombo;
+
+		// Type
+		if (this.types) {
+			this.typeCombo = Ext.create(this.createTypeComboConfig());
+			this.items.unshift(this.typeCombo);
+			this.valueFields[this.typeName] = this.typeCombo;
+		}
 
 		// default
 		if (this.defaultPickable) {
