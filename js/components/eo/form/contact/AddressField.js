@@ -21,47 +21,29 @@ NS.AddressField = Ext.extend(sp, {
 	,zipCodeName: 'zip'
 	,cityName:    'city'
 	
-	,initComponent: function() {
-		
-		this.streetField = new Ext.form.TextArea({
-			emptyText: this.textStreet
-			,height: 36
-			,emptyValue: null
-		});
-		
-		this.zipField = new Ext.form.TextField({
-			emptyText: this.textZipCode
-			,emptyValue: null
-		});
-		
-		this.cityField = new Ext.form.TextField({
-			emptyText: this.textCity
-			,emptyValue: null
-		});
-
-		this.items = [{
-			xtype: 'container'
-			,flex: 1
-			,layout: {
-				type: 'form'
-			}
-			,cls: 'closer-items'
-			,defaults: {
-				hideLabel: true
-				,anchor: '100%'
-			}
-			,items: [
-				this.streetField,
-				this.zipField,
-				this.cityField
-			]
-		}];
+	,fieldsLayout: 'v'
 	
-		spp.initComponent.call(this);
-		
-		this.valueFields[this.streetName]  = this.streetField;
-		this.valueFields[this.zipCodeName] = this.zipField;
-		this.valueFields[this.cityName]    = this.cityField;
+	,createFields: function() {
+		return [
+			this.streetField = new Ext.form.TextArea({
+				name: this.streetName
+				,emptyText: this.textStreet
+				,height: 36
+				,emptyValue: null
+			}),
+
+			this.zipField = new Ext.form.TextField({
+				name: this.zipCodeName
+				,emptyText: this.textZipCode
+				,emptyValue: null
+			}),
+
+			this.cityField = new Ext.form.TextField({
+				name: this.cityName
+				,emptyText: this.textCity
+				,emptyValue: null
+			})
+		];
 	}
 	
 	,isValid: function() {

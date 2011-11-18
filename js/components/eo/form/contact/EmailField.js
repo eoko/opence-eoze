@@ -18,23 +18,17 @@ eo.form.contact.EmailField = Ext.extend(sp, {
 	
 	,emailName: 'email'
 	
-	,initComponent: function() {
-		
-		this.items = [];
-		
-		this.emailField = Ext.create({
-			xtype: 'textfield'
-			,emptyText: NS.locale(this.textKeyItem)
-			,flex: 1
-			,regex: /.+@.+\..+$/
-			,regexText: this.textInvalidEmail
-		});
-		
-		this.items.push(this.emailField);
-
-		spp.initComponent.call(this);
-		
-		this.valueFields[this.emailName] = this.emailField;
+	,createFields: function() {
+		return [
+			this.emailField = Ext.create({
+				name: this.emailName
+				,xtype: 'textfield'
+				,emptyText: NS.locale(this.textKeyItem)
+				,flex: 1
+				,regex: /.+@.+\..+$/
+				,regexText: this.textInvalidEmail
+			})
+		];
 	}
 	
 	,isValid: function() {
