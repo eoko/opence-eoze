@@ -18,35 +18,22 @@ NS.PhoneNumberField = Ext.extend(sp, {
 	
 	,numberName:   'number'
 	,unlistedName: 'unlisted'
-	
-	,initComponent: function() {
-		
-		this.numberFormField = new Ext.form.TextField({
-			emptyText: this.textItem
-			,allowBlank: false
-		});
-		
-		this.unlistedCheckbox = new Ext.form.Checkbox({
-			boxLabel: this.textUnlisted
-		});
-		
-		this.numberFormField.flex = 1;
-	
-		var items = [
-			this.numberFormField,
-			this.unlistedCheckbox
+
+	,createFields: function(layout) {
+		return [
+			this.numberFormField = new Ext.form.TextField({
+				name: this.numberName
+				,emptyText: this.textItem
+				,allowBlank: false
+				,flex: 1
+			}),
+			this.unlistedCheckbox = new Ext.form.Checkbox({
+				name: this.unlistedName
+				,boxLabel: this.textUnlisted
+			})
 		];
-		
-		Ext.apply(this, {
-			items: items
-		});
-		
-		spp.initComponent.call(this);
-		
-		this.valueFields[this.numberName] = this.numberFormField;
-		this.valueFields[this.unlistedName] = this.unlistedCheckbox;
 	}
-	
+
 	,isValid: function() {
 		return this.numberFormField.getValue();
 	}
