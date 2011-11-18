@@ -200,12 +200,14 @@ eo.form.contact.AbstractField = Ext.extend(sp, {
 		// could be).
 		if (this.createFields) {
 			var fields = this.createFields();
+			// store value fields
 			Ext.each(fields, function(fields) {
 				if (fields.submitValue) {
 					instanceValueFields[fields.getName()] = fields;
 				}
 				fields.submitValue = false;
 			});
+			// layout
 			this.items = this.layoutItems(fields, this.fieldsLayout);
 		}
 
