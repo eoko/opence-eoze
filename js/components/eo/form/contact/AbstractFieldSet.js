@@ -3,9 +3,6 @@
  * abstract but can actually be instanciated if given enougth config options,
  * in order to allow for on the fly configuration in pure text (e.g. Yaml files).
  * 
- * @cfg {int} numTitle The number to which the title must be accorded
- * (default to undefined).
- *
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  * @author Éric Ortega <eric@planysphere.fr>
  * @since 15 nov. 2011
@@ -51,6 +48,11 @@ NS.AbstractFieldSet = Ext.extend(sp, {
 	 * put on their own row.
 	 */
 	,fieldsLayout: undefined
+	/**
+	 * @cfg {int} numTitle The number to which the title must be accorded
+	 * (default to 1).
+	 */
+	,numTitle: 1
 
 	,cls: 'line'
 	,collapsible: true

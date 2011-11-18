@@ -13,8 +13,6 @@ NS.EmailFieldSet = Ext.extend(sp, {
 
 	fieldConfig: NS.config.email
 	
-	,numTitle: 1
-
 	,getFieldClass: function() {
 		return NS.EmailField;
 	}

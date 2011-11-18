@@ -13,8 +13,6 @@ NS.AddressFieldSet = Ext.extend(sp, {
 
 	fieldConfig: NS.config.address
 	
-	,numTitle: 1
-
 	,getFieldClass: function() {
 		return NS.AddressField;
 	}
