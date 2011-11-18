@@ -25,7 +25,26 @@ eo.form.contact.AbstractField = Ext.extend(sp, {
 	,idName:      'id'
 	,typeName:    'type'
 	,defaultName: 'default'
-
+	
+	/**
+	 * @cfg {string} fieldsLayout Forces the layout of the children 
+	 * {@link Ext.form.Field fields} (defaults to undefined). 
+	 * 
+	 * Accepted values are 'vertical' (shortcut 'v') or horizontal (shortcut 'h').
+	 * 
+	 * The designer of a component (that is a child class of this) can hint the
+	 * preferred grouping of children fields in a row. If this property is left
+	 * blank, this composition will be used.
+	 * 
+	 * If this property is set to 'horizontal', all fields will be forced on one 
+	 * row.
+	 * 
+	 * If the property is set to 'vertical', then the fields hinted as grouped by
+	 * the developper will be kept on one row, but the other fields will each be
+	 * put on their own row.
+	 */
+	,fieldsLayout: undefined
+	
 	,constructor: function(config) {
 		
 		this.addEvents('beforeremoveline', 'removeline', 'becomedefault', 'change');
@@ -88,9 +107,107 @@ eo.form.contact.AbstractField = Ext.extend(sp, {
 			this.fireEvent('change', this);
 		}
 	}
+	
+	/**
+	 * Ensures that at least one field in the group is flex, else apply 
+	 * flex=1 to all the fields.
+	 * @private
+	 */
+	,flexHorizontalItemGroup: function(fields) {
+		var hasFlexedFields = false;
+		Ext.each(fields, function(field) {
+			if (field.flex) {
+				hasFlexedFields = true;
+				return false;
+			}
+		});
+		if (!hasFlexedFields) {
+			Ext.each(fields, function(field) {
+				field.flex = 1;
+			});
+		}
+		return fields;
+	}
+	
+	/**
+	 * Returns an array in which nested arrays in the given fields 
+	 * array are converted to CompositeFields. This only applies to
+	 * the first level of nesting.
+	 * @private
+	 */
+	,composeItems: function(fields) {
+		var r = [];
+		Ext.each(fields, function(field) {
+			if (Ext.isArray(field)) {
+				r.push(new Ext.form.CompositeField({
+					items: this.flexHorizontalItemGroup(field)
+				}));
+			} else {
+				r.push(field);
+			}
+		}, this);
+		return r;
+	}
+	
+	/**
+	 * @private
+	 */
+	,layoutItems: function(fields, layout) {
+		if (!layout) { // auto
+			// if the fields array has nested array, that means that the
+			// component developper meant to use composite layout,
+			// else horizontal layout will be enought
+			var hasNested = false;
+			Ext.each(fields, function(field) {
+				if (Ext.isArray(field)) {
+					hasNested = true;
+				}
+			});
+			return this.layoutItems(fields, hasNested ? 'v' : 'h');
+		} else if (/^v(?:ertical)?$/i.test(layout)) { // vertical
+			// if we are in V mode, we can honnor the layout requested by
+			// the component (that is, have multiple fields on one single
+			// row, if needed)
+			return [{
+				xtype: 'container'
+				,flex: 1
+				,layout: {
+					type: 'form'
+				}
+				,cls: 'closer-items'
+				,defaults: {
+					hideLabel: true
+					,anchor: '100%'
+				}
+				,items: this.composeItems(fields)
+			}];
+		} else if (/^h(?:orizontal)?$/i.test(layout)) { // this is horizontal
+			// if we are in H, we *force* the h
+			// even if the component is trying to compose h/v
+			return this.flexHorizontalItemGroup(eo.flattenArray(fields));
+		} else {
+			throw new Error('Illegal argument: ' + layout);
+		}
+	}
 
 	// private
 	,initComponent: function() {
+		
+		var instanceValueFields = {};
+		
+		// If this object has a createFields methods, that supposes that
+		// initComponent is not overriden (while, if done correctly, it
+		// could be).
+		if (this.createFields) {
+			var fields = this.createFields();
+			Ext.each(fields, function(fields) {
+				if (fields.submitValue) {
+					instanceValueFields[fields.getName()] = fields;
+				}
+				fields.submitValue = false;
+			});
+			this.items = this.layoutItems(fields, this.fieldsLayout);
+		}
 
 		// id
 		this.idField = new Ext.form.Hidden({
@@ -141,6 +258,11 @@ eo.form.contact.AbstractField = Ext.extend(sp, {
 			});
 			this.items.push(this.deleteButton);
 		}
+		
+		// adds instance value fields
+		Ext.iterate(instanceValueFields, function(name, field) {
+			this.valueFields[name] = field;
+		}, this);
 		
 		spp.initComponent.call(this);
 	}
