@@ -30,6 +30,27 @@ NS.AbstractFieldSet = Ext.extend(sp, {
 	 * called before the Component is rendered.
 	 */
 	,initialFieldNumber: 0
+	/**
+	 * @cfg {string} fieldsLayout Forces the layout of the children's 
+	 * {@link Ext.form.Field fields} (defaults to undefined). 
+	 * 
+	 * (The value is forwarded as is to 
+	 * {@link eo.form.contact.AbstractField#fieldsLayout}).
+	 * 
+	 * Accepted values are 'vertical' (shortcut 'v') or horizontal (shortcut 'h').
+	 * 
+	 * The designer of a component (that is a child class of this) can hint the
+	 * preferred grouping of children fields in a row. If this property is left
+	 * blank, this composition will be used.
+	 * 
+	 * If this property is set to 'horizontal', all fields will be forced on one 
+	 * row.
+	 * 
+	 * If the property is set to 'vertical', then the fields hinted as grouped by
+	 * the developper will be kept on one row, but the other fields will each be
+	 * put on their own row.
+	 */
+	,fieldsLayout: undefined
 
 	,cls: 'line'
 	,collapsible: true
@@ -221,6 +242,7 @@ NS.AbstractFieldSet = Ext.extend(sp, {
 		
 		var config = {
 			removable: true
+			,fieldsLayout: this.fieldsLayout
 		};
 		
 		if (this.fieldXType) {
