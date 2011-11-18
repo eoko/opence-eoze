@@ -242,8 +242,10 @@ NS.AbstractFieldSet = Ext.extend(sp, {
 		
 		var config = {
 			removable: true
-			,fieldsLayout: this.fieldsLayout
 		};
+		if (Ext.isDefined(this.fieldsLayout)) {
+			config.fieldsLayout = this.fieldsLayout;
+		}
 		
 		if (this.fieldXType) {
 			return Ext.create(Ext.apply({xtype: this.fieldXType}, config));
