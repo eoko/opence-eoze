@@ -200,6 +200,9 @@ eo.form.contact.AbstractField = Ext.extend(sp, {
 		// could be).
 		if (this.createFields) {
 			var fields = this.createFields();
+			if (!Ext.isArray(fields)) {
+				fields = [fields];
+			}
 			// store value fields
 			Ext.each(fields, function(fields) {
 				if (fields.submitValue) {
