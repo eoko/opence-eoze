@@ -87,13 +87,13 @@ NS.config = {
 	}
 	
 	,organisation: {
-		types: {
-			MAIN: 'main {g:organisation}',
-			OTHER: 'other {g:organisation}'
-		}
-		,defaultType: 'MAIN'
+//		types: {
+//			MAIN: 'main {g:organisation}',
+//			OTHER: 'other {g:organisation}'
+//		}
+//		,defaultType: 'MAIN'
 		
-		,textKeyItem: 'organisation'
+		textKeyItem: 'organisation'
 	}
 
 };
