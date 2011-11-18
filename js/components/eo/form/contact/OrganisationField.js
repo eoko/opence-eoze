@@ -19,39 +19,19 @@ eo.form.contact.OrganisationField = Ext.extend(sp, {
 	,organisationName: 'organisation'
 	,titleName: 'title'
 	
-	,initComponent: function() {
-		
-		this.organisationField = new Ext.form.TextField({
-			emptyText: this.textSociety
-			,emptyValue: null
-		});
-		
-		this.titleField = new Ext.form.TextField({
-			emptyText: this.textTitle
-			,emptyValue: null
-		});
-
-		this.items = [{
-			xtype: 'container'
-			,flex: 1
-			,layout: {
-				type: 'form'
-			}
-			,cls: 'closer-items'
-			,defaults: {
-				hideLabel: true
-				,anchor: '100%'
-			}
-			,items: [
-				this.organisationField,
-				this.titleField
-			]
-		}];
-	
-		spp.initComponent.call(this);
-		
-		this.valueFields[this.organisationName] = this.organisationField;
-		this.valueFields[this.titleName] = this.titleField;
+	,createFields: function() {
+		return [
+			this.organisationField = new Ext.form.TextField({
+				name: this.organisationName
+				,emptyText: this.textSociety
+				,emptyValue: null
+			})
+			,this.titleField = new Ext.form.TextField({
+				name: this.titleName
+				,emptyText: this.textTitle
+				,emptyValue: null
+			})
+		]
 	}
 	
 	,isValid: function() {
