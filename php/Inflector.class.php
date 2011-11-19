@@ -20,8 +20,8 @@ class Inflector {
 	 * @param string $split
 	 * @return string
 	 */
-	public static function camelCaseToUnderscored($string, $glue = '_', $split = '_') {
-		return strtolower(implode($glue, self::explodeCamelCase($string, $split)));
+	public static function camelCaseToUnderscored($string, $glue = '_') {
+		return strtolower(implode($glue, self::explodeCamelCase($string, false)));
 	}
 
 	public static function capitalizeWords($source, $split = '_', $newSplit = '_') {
