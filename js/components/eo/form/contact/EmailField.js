@@ -7,7 +7,7 @@
 Oce.deps.wait('eo.form.contact.AbstractField', function() {
 
 var NS  = eo.form.contact,
-	spp = NS.AbstractField.sp.prototype;
+	spp = NS.AbstractField.prototype;
 
 eo.form.contact.EmailField = Ext.extend(eo.form.contact.AbstractField, {
 	
