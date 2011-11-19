@@ -6,8 +6,7 @@
  */
 Oce.deps.waitIn('eo.form.contact', 'AbstractFieldSet', function(NS) {
 	
-var sp  = NS.AbstractFieldSet,
-	spp = sp.prototype;
+var spp = NS.AbstractFieldSet.prototype;
 
 eo.form.contact.AddressFieldSet = Ext.extend(eo.form.contact.AbstractFieldSet, {
 
