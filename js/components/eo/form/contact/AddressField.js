@@ -6,10 +6,9 @@
  */
 eo.deps.waitIn('eo.form.contact', 'AbstractField', function(NS) {
 
-var sp  = NS.AbstractField,
-	spp = sp.prototype;
+var spp = NS.AbstractField.prototype;
 	
-NS.AddressField = Ext.extend(sp, {
+eo.form.contact.AddressField = Ext.extend(eo.form.contact.AbstractField, {
 	
 	fieldConfig: 'address'
 	
