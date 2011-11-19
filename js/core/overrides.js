@@ -611,3 +611,21 @@ if (Ext.isChrome) {
 		});
 	})();
 }
+
+/**
+ * Overrides ButtonGroup to make it hidden by default if it contains 0 items.
+ */
+(function() {
+
+var sp = Ext.ButtonGroup,
+	spp = sp.prototype,
+	uber = spp.initComponent;
+	
+spp.initComponent = function() {
+	if (!this.items.length) {
+		this.hidden = true;
+	}
+	uber.call(this);
+};
+	
+})(); // closure
