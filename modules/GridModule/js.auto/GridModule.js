@@ -3,7 +3,7 @@
 var NS = Ext.ns('Oce.Modules.GridModule');
 
 /**
- *
+ * 
  * beforeCreateWindow(windowConfig, action): must be called before a window
  * is created, with the config object as argument. This is an opportunity for
  * customizing components to modify the configuration of any window (to set icon,
@@ -14,8 +14,15 @@ var NS = Ext.ns('Oce.Modules.GridModule');
  * functionnality providers (plugins) to easily and efficiently customize a
  * window before its creation.
  *
+ * <h3>Actions</h3>
+ *
+ * If a GridModule has its action 'remove' disabled, then it doesn't display the 
+ * button in the ribbon or the edit window. The actions are configured in the 
+ * 'module.actions' config option (yaml) of the module.
+ * 
  */
-NS.GridModule = Oce.GridModule = Ext.extend(Ext.util.Observable, {
+//Oce.GridModule = 
+Oce.Modules.GridModule.GridModule = Ext.extend(Ext.util.Observable, {
 
 	spp: Ext.Panel.prototype
 	
