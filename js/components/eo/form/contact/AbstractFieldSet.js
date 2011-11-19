@@ -246,7 +246,7 @@ eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 	 * its children fields.
 	 * @return {Boolean}
 	 */
-	,hasDefaultSelection: function() {
+	,hasPrimaryFieldSelection: function() {
 		var c = this.getFieldConstructor();
 		if (c) {
 			return c.prototype.hasPrimaryField();
@@ -264,7 +264,7 @@ eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 	,getFieldConstructor: function() {
 		var xtype = this.fieldXType;
 		if (xtype) {
-			return Ext.ComponentMgr.get(xtype);
+			return Ext.ComponentMgr.types[xtype];
 		}
 	}
 	
@@ -274,10 +274,14 @@ eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 	 * @protected
 	 */
 	,createField: function() {
-		
-		var config = {
+
+		// apply defaults to the config passed to the field constructor
+		// because some defaults options are ignored (like 
+		// reservePrimaryButtonSpace)
+		var config = Ext.applyIf({
 			removable: true
-		};
+		}, this.defaults);
+		
 		if (Ext.isDefined(this.fieldsLayout)) {
 			config.fieldsLayout = this.fieldsLayout;
 		}
@@ -298,7 +302,7 @@ eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 		
 		if (this.items.length) {
 			if (wasDefault) {
-				this.setDefaultField(this.items.get(0));
+				this.setPrimaryField(this.items.get(0));
 			}
 			if (this.autoHide) {
 				this.show();
@@ -335,10 +339,14 @@ eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 	 * @private
 	 */
 	,setPrimaryFieldHandler: function(field) {
-		this.setDefaultField(field);
+		this.setPrimaryField(field);
 	}
 	
-	,hasDefaultField: function() {
+	/**
+	 * Returns `true` if the FieldSet contains a child Field selected as
+	 * the primary one for the FieldSet.
+	 */
+	,hasPrimaryField: function() {
 		return !!this.items.each(function(item) {
 			if (item.isDefault()) {
 				return false;
@@ -346,13 +354,22 @@ eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 		});
 	}
 	
-	,setDefaultField: function(field) {
+	/**
+	 * Sets the given field as the primary one in this FieldSet.
+	 * @param {eo.form.contact.AbstractField} field
+	 */
+	,setPrimaryField: function(field) {
 		this.items.each(function(item) {
 			item.setDefault(false);
 		});
 		field.setDefault(true);
 	}
-	
+
+	/**
+	 * Gets the value of the field.
+	 * @return {Object} A data `Object` containing the values of the children
+	 * fields.
+	 */
 	,getValue: function() {
 		if (!this.rendered) {
 			return this.value;
@@ -366,6 +383,11 @@ eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 		return data;
 	}
 	
+	/**
+	 * Sets the value of the field.
+	 * @param {Object} data The data `object` containing the values of the 
+	 * children fields.
+	 */
 	,setValue: function(data) {
 		if (!this.rendered) {
 			this.value = data;
@@ -377,7 +399,7 @@ eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 				var field = this.addField();
 				field.setValue(value);
 				if (field.isDefault()) {
-					this.setDefaultField(field);
+					this.setPrimaryField(field);
 				}
 			}, this);
 		}

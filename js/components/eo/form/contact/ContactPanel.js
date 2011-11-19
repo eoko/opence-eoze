@@ -43,7 +43,7 @@ eo.form.contact.ContactPanel = Ext.extend(Ext.Panel, {
 		
 		var fieldSets = [];
 		
-		var hasFieldSetWithDefaultCheckbox = false;
+		var hasFieldSetWithPrimarySelection = false;
 
 		Ext.each(this.fieldSets, function(fs) {
 			if (fs === '-' || fs === '->') {
@@ -59,8 +59,8 @@ eo.form.contact.ContactPanel = Ext.extend(Ext.Panel, {
 				
 				var fieldSet = Ext.create(fs);
 				
-				if (fieldSet.hasDefaultSelection()) {
-					hasFieldSetWithDefaultCheckbox = true;
+				if (fieldSet.hasPrimaryFieldSelection()) {
+					hasFieldSetWithPrimarySelection = true;
 				}
 				
 				if (this.markInvalid) {
@@ -73,6 +73,14 @@ eo.form.contact.ContactPanel = Ext.extend(Ext.Panel, {
 				tbar.push(fieldSet.createAddButton());
 			}
 		}, this);
+		
+		if (hasFieldSetWithPrimarySelection) {
+			Ext.each(fieldSets, function(fs) {
+				fs.defaults = Ext.apply(fs.defaults, {
+					defaultReservePrimaryButtonSpace: true
+				});
+			});
+		}
 		
 		this.fieldSets = fieldSets;
 		
