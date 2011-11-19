@@ -3,6 +3,11 @@
 var NS = Ext.ns('Oce.Modules.GridModule');
 
 /**
+ *
+ * <h3>Alias</h3>
+ * 
+ * {#GridModule} is aliased as Oce.Modules.GridModule.GridModule. This alias
+ * is still supported for legacy reasons, but its usage is deprecated.
  * 
  * beforeCreateWindow(windowConfig, action): must be called before a window
  * is created, with the config object as argument. This is an opportunity for
@@ -21,8 +26,7 @@ var NS = Ext.ns('Oce.Modules.GridModule');
  * 'module.actions' config option (yaml) of the module.
  * 
  */
-//Oce.GridModule = 
-Oce.Modules.GridModule.GridModule = Ext.extend(Ext.util.Observable, {
+Oce.GridModule = Ext.extend(Ext.util.Observable, {
 
 	spp: Ext.Panel.prototype
 	
@@ -2886,6 +2890,9 @@ Oce.Modules.GridModule.GridModule = Ext.extend(Ext.util.Observable, {
 	}
 
 });
+
+// Legacy support (deprecated)
+Oce.Modules.GridModule.GridModule = Oce.GridModule;
 
 Oce.GridModule.plugins = {
 
