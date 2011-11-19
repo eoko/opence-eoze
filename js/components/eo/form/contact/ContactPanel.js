@@ -37,9 +37,18 @@ eo.form.contact.ContactPanel = Ext.extend(Ext.Panel, {
 		this.defaults = Ext.apply({
 			anchor: '100%'
 		}, this.defaults);
-		
-		var items = this.items = this.items || [], 
+
+		// Don't touch the original array! The array passed to the parent's
+		// initComponent method must be a copy.
+		// var items = this.items = this.items || [], 
+		var items = [], 
 			tbar = [];
+		
+		if (this.items) {
+			Ext.each(this.items, function(item) {
+				items.push(item);
+			});
+		}
 		
 		var fieldSets = [];
 		
