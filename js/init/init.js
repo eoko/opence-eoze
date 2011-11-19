@@ -3,6 +3,13 @@ Ext.ns('Oce.mx', 'Oce.ext');
 Ext.BLANK_IMAGE_URL = Oce.ext.BLANK_IMAGE_URL || 'images/s.gif';
 Ext.Ajax.url = 'index.php';
 
+/**
+ * @class eo
+ * Eoze core utilities and functions.
+ * @singleton
+ */
+eo = {};
+
 if (typeof Oce)
 
 if (!Oce.functionality) {
