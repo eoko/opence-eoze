@@ -691,11 +691,15 @@ NS.GridModule = Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		}.createDelegate(this)
 
 		// Toolbar
-		var tbarItems = [{
-			text: 'Supprimer'
-			,iconCls: 'ico_bin'
-			,handler: deleteHandler
-		}];
+		var tbarItems = [];
+		
+		if (this.hasAction('remove')) {
+			tbarItems.push({
+				text: 'Supprimer'
+				,iconCls: 'ico_bin'
+				,handler: deleteHandler
+			});
+		}
 
 		if (this.my.edit !== undefined && this.my.edit.tbar  !== undefined) {
 			tbarItems.concat(this.my.edit.tbar);
@@ -1475,42 +1479,47 @@ NS.GridModule = Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	,getToolbar: function() {
 		if (this.my.toolbar === undefined) {
 			var items = [];
-			var me = this;
 			Ext.iterate(this.extra.toolbar, function(name, menuItems) {
 				if (menuItems === false) return;
-				name = name.replace(/\%title\%/, me.getTitle());
+				name = name.replace(/\%title\%/, this.getTitle());
 				var groupItems = [];
 				Ext.each(menuItems, function(item) {
 					if (item === '-') {
 						groupItems.push(new Ext.Toolbar.Separator());
 					} else {
 						if (Ext.isString(item)) {
-							item = me.actions[item];
+							item = this.actions[item];
+							if (!item) {
+								// the item has been disabled in the config
+								return;
+							}
 						} else if (Ext.isObject(item)) {
 							var itemitem = item.item;
 							if (!itemitem) throw new Error('Invalid toolbar item config');
-							if (Ext.isString(itemitem)) itemitem = me.actions[itemitem];
+							if (Ext.isString(itemitem)) itemitem = this.actions[itemitem];
 							if (false == itemitem instanceof Ext.Component) {
 								item = Ext.apply({}, item, itemitem);
 							}
 						}
 						// DEBUG INFO: dying here often means that the module
 						// actions have not been initialized correctly
-						if (item.depends && !me.hasDependance(item.depends)) return;
+						if (item.depends && !this.hasDependance(item.depends)) {
+							return;
+						}
 						groupItems.push(item);
 					}
-				});
+				}, this);
 				if (groupItems.length) items.push({
 					xtype: 'buttongroup',
 					title: name,
 					align: 'bottom',
 					items: groupItems
 				});
-			});
+			}, this);
 
 			this.my.toolbar = new Ext.Toolbar({
 				items: items
-			})
+			});
 
 			this.my.toolbar.getItemForAction = function(actionId) {
 				var items = this.findBy(function(item){
@@ -1519,7 +1528,7 @@ NS.GridModule = Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				});
 				if (items.length) return items[0];
 				return undefined;
-			}
+			};
 		}
 
 		return this.my.toolbar;
@@ -2573,6 +2582,10 @@ NS.GridModule = Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		return this.moduleActions[name].call(this, callback, scope, args);
 	}
 	
+	,hasAction: function(name) {
+		return !!this.actions[name];
+	}
+	
 	,getAction: function(name) {
 		return this.actions[name].createDelegate(this);
 	}
@@ -2858,8 +2871,11 @@ NS.GridModule = Oce.GridModule = Ext.extend(Ext.util.Observable, {
 
 		}
 
-		if (this.actions) Ext.applyIf(this.actions, actions);
-		else this.actions = actions;
+		if (this.actions) {
+			Ext.applyIf(this.actions, actions);
+		} else {
+			this.actions = actions;
+		}
 	}
 
 });
