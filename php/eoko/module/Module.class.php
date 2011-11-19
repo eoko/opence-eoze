@@ -741,7 +741,7 @@ MSG
 			'module' => "$module",
 			'executor' => "$executor",
 		));
-
+		
 		if (!$module) {
 			throw new \eoko\routing\InvalidRequestException(
 				"Invalid controller information: {$request->req('controller')}"
