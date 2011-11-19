@@ -7,10 +7,9 @@
 Oce.deps.wait('eo.form.contact.AbstractField', function() {
 
 var NS  = eo.form.contact,
-	sp  = NS.AbstractField,
-	spp = sp.prototype;
+	spp = NS.AbstractField.sp.prototype;
 
-eo.form.contact.EmailField = Ext.extend(sp, {
+eo.form.contact.EmailField = Ext.extend(eo.form.contact.AbstractField, {
 	
 	fieldConfig: 'email'
 	

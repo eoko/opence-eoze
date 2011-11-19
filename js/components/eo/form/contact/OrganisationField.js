@@ -6,10 +6,9 @@
  */
 eo.deps.waitIn('eo.form.contact', 'AbstractField', function(NS, ns) {
 
-var sp  = NS.AbstractField,
-	spp = sp.prototype;
+var spp = NS.AbstractField.prototype;
 
-eo.form.contact.OrganisationField = Ext.extend(sp, {
+eo.form.contact.OrganisationField = Ext.extend(eo.form.contact.AbstractField, {
 	
 	fieldConfig: 'organisation'
 	
