@@ -49,7 +49,7 @@ eo.form.contact.AbstractField = Ext.extend(Ext.form.CompositeField, {
 	 * If set, a checkable button will be created to let the user select the primary
 	 * Field in the parent FieldSet. If set to `undefined`, 
 	 */
-	,primaryField: 'default'
+	,primaryField: 'primary'
 	
 	/**
 	 * @cfg {String} fieldsLayout Forces the layout of the children 
@@ -70,11 +70,25 @@ eo.form.contact.AbstractField = Ext.extend(Ext.form.CompositeField, {
 	 */
 	,fieldsLayout: undefined
 	/**
-	 * @cfg {Boolean} reserveDefaultCheckboxSpace If true, reserves the space 
-	 * (screeen estate), the "set default' checkbox would have occupied , and
-	 * draws the this field's children fields after this margin.
+	 * @cfg {Boolean} reservePrimaryButtonSpace If `true`, reserves the space 
+	 * (screeen estate), the "set primary" button would have occupied, even if
+	 * this type of Field cannot actually be selected as primary. This is to allow
+	 * display alignement between multiple {eo.form.contact.AbstractFieldSet FieldSet}s.
+	 * 
+	 * If left to `undefined`, and the parent FieldSet is contained in a 
+	 * {eo.form.contact.ContactPanel ContactPanel}, then the ContactPanel will use
+	 * {#defaultReservePrimaryButtonSpace} to handle this automatically by 
+	 * introspecting its children FieldSets.
 	 */
-	,reserveDefaultCheckboxSpace: true
+	,reservePrimaryButtonSpace: undefined
+	/**
+	 * @cfg {Boolean} defaultReservePrimaryButtonSpace This value will be used instead
+	 * of {#reservePrimaryButtonSpace}, if the latter is not defined. This options 
+	 * exists in order to enable {eo.form.contact.ContactPanel} to set a default value,
+	 * while preserving the possibility to override this default for the classes 
+	 * extending {eo.form.contact.AbstractField AbstractField}, or at runtime.
+	 */
+	,defaultReservePrimaryButtonSpace: undefined
 	
 	,constructor: function(config) {
 
@@ -283,6 +297,7 @@ eo.form.contact.AbstractField = Ext.extend(Ext.form.CompositeField, {
 		}
 
 		// default
+		var reservePrimaryButtonSpace = this.reservePrimaryButtonSpace;
 		if (this.hasPrimaryField()) {
 			this.primaryButton = new Ext.Button({
 				iconCls: 'ico tick pressable'
@@ -305,7 +320,8 @@ eo.form.contact.AbstractField = Ext.extend(Ext.form.CompositeField, {
 			items.unshift(this.primaryButton);
 			
 			this.valueFields[this.primaryField] = this.primaryButton;
-		} else if (this.reserveDefaultCheckboxSpace) {
+		} else if (Ext.isDefined(reservePrimaryButtonSpace) ? reservePrimaryButtonSpace 
+				: this.defaultReservePrimaryButtonSpace) {
 			items.unshift({
 				xtype: 'box'
 				,width: 22
