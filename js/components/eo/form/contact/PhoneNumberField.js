@@ -6,10 +6,9 @@
  */
 Oce.deps.waitIn('eo.form.contact', 'AbstractField', function(NS, ns) {
 
-var sp  = NS.AbstractField,
-	spp = sp.prototype;
+var spp = NS.AbstractField.prototype;
 
-NS.PhoneNumberField = Ext.extend(sp, {
+eo.form.contact.PhoneNumberField = Ext.extend(eo.form.contact.AbstractField, {
 	
 	fieldConfig: 'phone'
 	
@@ -30,6 +29,10 @@ NS.PhoneNumberField = Ext.extend(sp, {
 			this.unlistedCheckbox = new Ext.form.Checkbox({
 				name: this.unlistedName
 				,boxLabel: this.textUnlisted
+				,width: Ext.isChrome ? 90 : undefined // chrome doesn't seem able to correctly
+						// calculate this value automatically (maybe it's just my Ubuntu :/)
+						// FireFox does it correctly
+						// TODO test other browsers
 			})
 		];
 	}
