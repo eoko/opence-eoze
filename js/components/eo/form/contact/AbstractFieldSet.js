@@ -12,7 +12,7 @@ eo.deps.waitIn('eo.form.contact', 'locale', function(NS, ns) {
 var sp  = Ext.form.FieldSet,
 	spp = sp.prototype;
 
-NS.AbstractFieldSet = Ext.extend(sp, {
+eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 
 	/**
 	 * @fg {int} maxFieldNumber the maximum number of fields that can be added 
@@ -102,18 +102,19 @@ NS.AbstractFieldSet = Ext.extend(sp, {
 			this.title = NS.locale(this.fieldConfig.textKeyItem, num);
 		}
 	}
-	
+
 	,getName: function() {
 		return this.name;
 	}
 	
-	// private
+	/**
+	 * @private
+	 */
 	,allowMultiple: function() {
 		var m = this.maxFieldNumber;
 		return m === null || m === undefined || m > 1;
 	}
 
-	// private
 	,initComponent: function() {
 		
 		this.defaults = this.defaults || {};
@@ -126,7 +127,6 @@ NS.AbstractFieldSet = Ext.extend(sp, {
 		spp.initComponent.call(this);
 	}
 
-	// private
 	,afterRender: function() {
 		spp.afterRender.apply(this, arguments);
 		if (this.autoHide && !this.items.length) {
@@ -144,6 +144,8 @@ NS.AbstractFieldSet = Ext.extend(sp, {
 	/**
 	 * Creates a button with a handler configured to add a field
 	 * to that FieldSet.
+	 * @return {Ext.Button}
+	 * @private
 	 */
 	,createAddButton: function() {
 		var fc = this.fieldConfig,
@@ -192,7 +194,7 @@ NS.AbstractFieldSet = Ext.extend(sp, {
 		field.on({
 			scope: this
 			,removeline: this.removeFieldHandler
-			,becomedefault: this.setDefaultFieldHandler
+			,becomeprimary: this.setPrimaryFieldHandler
 			,change: function() {
 				this.fireEvent('change', this);
 			}
@@ -239,7 +241,38 @@ NS.AbstractFieldSet = Ext.extend(sp, {
 		eo.warn('Direct remove() to eo.form.contact.AbstractFieldSet is disabled.');
 	}
 	
-	// protected
+	/**
+	 * Returns `true` if this FieldSet accept selection of one primary field in
+	 * its children fields.
+	 * @return {Boolean}
+	 */
+	,hasDefaultSelection: function() {
+		var c = this.getFieldConstructor();
+		if (c) {
+			return c.prototype.hasPrimaryField();
+		}
+	}
+
+	/**
+	 * Gets the constructor for the children fields. By default, this method 
+	 * uses {#fieldXType} to retrieve the actual constructor. This method can
+	 * be overridden to directly provide the constructor function (can be useful
+	 * if the constructor is not registered in {@link Ext.ComponentMgr}.
+	 * @return {Function}
+	 * @protected
+	 */
+	,getFieldConstructor: function() {
+		var xtype = this.fieldXType;
+		if (xtype) {
+			return Ext.ComponentMgr.get(xtype);
+		}
+	}
+	
+	/**
+	 * Creates a new child Field. This method can be overridden to customize the
+	 * creation process.
+	 * @protected
+	 */
 	,createField: function() {
 		
 		var config = {
@@ -252,7 +285,7 @@ NS.AbstractFieldSet = Ext.extend(sp, {
 		if (this.fieldXType) {
 			return Ext.create(Ext.apply({xtype: this.fieldXType}, config));
 		} else {
-			var c = this.getFieldClass();
+			var c = this.getFieldConstructor();
 			return new c(config);
 		}
 	}
@@ -288,13 +321,20 @@ NS.AbstractFieldSet = Ext.extend(sp, {
 			this.fireEvent('fullstatechanged', this, false);
 		}
 	}
-	
+
+	/**
+	 * Gets the number of children fields in the FieldSet.
+	 */
 	,getFieldCount: function() {
 		return this.items.getCount();
 	}
 	
-	// private
-	,setDefaultFieldHandler: function(field) {
+	/**
+	 * 
+	 * @param {Ext.Component} field
+	 * @private
+	 */
+	,setPrimaryFieldHandler: function(field) {
 		this.setDefaultField(field);
 	}
 	
