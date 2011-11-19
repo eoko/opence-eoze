@@ -181,8 +181,13 @@ Oce.deps.wait('Ext.ux.form.TwinComboBox', function() {
 		,constructor: function(cfg) {
 
 			var me = this;
+			
+			// inherits class config (very dirty hack, yeah... this class
+			// is doomed anyway)
+			cfg = Ext.apply(Ext.apply({}, this), cfg);
+			
 			var storeBaseParams = Ext.apply({
-				controller:cfg.controller,
+				controller: cfg.controller,
 				action: cfg.action || 'auto_complete'
 			}, cfg.baseParams || {});
 
