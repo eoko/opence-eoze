@@ -9,7 +9,7 @@ Oce.deps.waitIn('eo.form.contact', 'AbstractFieldSet', function(NS) {
 var sp  = NS.AbstractFieldSet,
 	spp = sp.prototype;
 	
-NS.PhoneFieldSet = Ext.extend(sp, {
+eo.form.contact.PhoneFieldSet = Ext.extend(eo.form.contact.AbstractFieldSet, {
 
 	fieldConfig: NS.config.phone
 
@@ -17,7 +17,7 @@ NS.PhoneFieldSet = Ext.extend(sp, {
 
 	,title: NS.locale('phone')
 
-	,getFieldClass: function() {
+	,getFieldConstructor: function() {
 		return NS.PhoneNumberField;
 	}
 });

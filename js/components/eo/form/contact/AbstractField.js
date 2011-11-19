@@ -6,8 +6,7 @@
  */
 eo.deps.waitIn('eo.form.contact', 'locale', function(NS, ns) {
 
-var sp  = Ext.form.CompositeField,
-	spp = sp.prototype;
+var spp = Ext.form.CompositeField.prototype;
 
 /**
  * Base class for contact fields.
@@ -15,19 +14,45 @@ var sp  = Ext.form.CompositeField,
  * Provides base functionnalities for removing the field, and selecting 
  * the field's type.
  */
-eo.form.contact.AbstractField = Ext.extend(sp, {
+eo.form.contact.AbstractField = Ext.extend(Ext.form.CompositeField, {
 	
 	textRemove: NS.locale('remove')
 
+	/**
+	 * @cfg {Boolean} removable `true` to make the field removable from its containing
+	 * {eo.form.contact.AbstractFieldSet FieldSet}.
+	 */
 	,removable: true
-	,defaultPickable: true
 
-	,idName:      'id'
-	,typeName:    'type'
-	,defaultName: 'default'
+	/**
+	 * @cfg {String} idField The name that will be used in the object returned by
+	 * {#getValue} to hold the value of the id field (if `undefined`, the field will 
+	 * not be created).
+	 */
+	,idField:      'id'
+	/**
+	 * @cfg {String} typeField The name that will be used in the object retruned 
+	 * {#getValue} by get value to hold the value of the type combo. (if undefined, 
+	 * the type combo will not be created).
+	 * @see types
+	 */
+	,typeField:    'type'
+	/**
+	 * @cfg {Array|Object} types The data to be used to populate the combo of the
+	 * {@link #typeField}.
+	 */
+	/**
+	 * @cfg {String} primaryField The name that will be used in the object returned
+	 * by {#getValue} to hold the value representing if this Field is the selected 
+	 * primary Field in its parent {@link eo.form.contact.AbstractFieldSet FieldSet}.
+	 * 
+	 * If set, a checkable button will be created to let the user select the primary
+	 * Field in the parent FieldSet. If set to `undefined`, 
+	 */
+	,primaryField: 'default'
 	
 	/**
-	 * @cfg {string} fieldsLayout Forces the layout of the children 
+	 * @cfg {String} fieldsLayout Forces the layout of the children 
 	 * {@link Ext.form.Field fields} (defaults to undefined). 
 	 * 
 	 * Accepted values are 'vertical' (shortcut 'v') or horizontal (shortcut 'h').
@@ -44,10 +69,22 @@ eo.form.contact.AbstractField = Ext.extend(sp, {
 	 * put on their own row.
 	 */
 	,fieldsLayout: undefined
+	/**
+	 * @cfg {Boolean} reserveDefaultCheckboxSpace If true, reserves the space 
+	 * (screeen estate), the "set default' checkbox would have occupied , and
+	 * draws the this field's children fields after this margin.
+	 */
+	,reserveDefaultCheckboxSpace: true
 	
 	,constructor: function(config) {
-		
-		this.addEvents('beforeremoveline', 'removeline', 'becomedefault', 'change');
+
+		/**
+		 * @event becomeprimary
+		 * Fires when the Field is selected as its owning {@link eo.form.contact.AbstractFieldSet
+		 * FieldSet} primary field.
+		 * @param {eo.form.contact.AbstractField} this
+		 */
+		this.addEvents('beforeremoveline', 'removeline', 'becomeprimary', 'change');
 
 		// Apply fieldConfig
 		var fieldConfig = config.fieldConfig || this.fieldConfig;
@@ -72,12 +109,21 @@ eo.form.contact.AbstractField = Ext.extend(sp, {
 	}
 	
 	/**
+	 * Returns `true` if this Field type can be selected as primary in their
+	 * {@link eo.form.contact.AbstractFieldSet FieldSet}.
+	 * @return {Boolean}
+	 */
+	,hasPrimaryField: function() {
+		return Ext.isString(this.primaryField);
+	}
+	
+	/**
 	 * Adds listeners to the given fields, in order to track when they
 	 * are notified. The event type may depends on the field type, but
 	 * the listener used will generally allways be 
 	 * <code>this.fieldChangeListener</code>.
 	 *
-	 * @param {Object|Array} the fields to which the listener should be added.
+	 * @param {Object|Array} fields The fields to which the listener should be added.
 	 * When first called by AbstractField, this method is passed all the
 	 * <code>this.valueFields</code>. Overriding methods can call their
 	 * parent method with some other fields (but take care not to modify
@@ -190,14 +236,20 @@ eo.form.contact.AbstractField = Ext.extend(sp, {
 		}
 	}
 
-	// private
+	/**
+	 * @private
+	 */
 	,initComponent: function() {
+		var items,
+			idName = this.idField,
+			types = this.types,
+			typeName = this.typeField;
 		
 		var instanceValueFields = {};
 		
 		// If this object has a createFields methods, that supposes that
 		// initComponent is not overriden (while, if done correctly, it
-		// could be).
+		// could still be).
 		if (this.createFields) {
 			var fields = this.createFields();
 			if (!Ext.isArray(fields)) {
@@ -211,26 +263,28 @@ eo.form.contact.AbstractField = Ext.extend(sp, {
 				fields.submitValue = false;
 			});
 			// layout
-			this.items = this.layoutItems(fields, this.fieldsLayout);
+			items = this.items = this.layoutItems(fields, this.fieldsLayout);
 		}
 
 		// id
-		this.idField = new Ext.form.Hidden({
-			emptyValue: null
-		});
-		this.items.unshift(this.idField);
-		this.valueFields[this.idName] = this.idField;
+		if (idName) {
+			var idField = new Ext.form.Hidden({
+				emptyValue: null
+			});
+			items.unshift(idField);
+			this.valueFields[this.idField] = idField;
+		}
 
 		// Type
-		if (this.types) {
-			this.typeCombo = Ext.create(this.createTypeComboConfig());
-			this.items.unshift(this.typeCombo);
-			this.valueFields[this.typeName] = this.typeCombo;
+		if (types && typeName) {
+			var typeCombo = Ext.create(this.createTypeComboConfig());
+			items.unshift(typeCombo);
+			this.valueFields[typeName] = typeCombo;
 		}
 
 		// default
-		if (this.defaultPickable) {
-			this.defaultButton = new Ext.Button({
+		if (this.hasPrimaryField()) {
+			this.primaryButton = new Ext.Button({
 				iconCls: 'ico tick pressable'
 				,scope: this
 				,tooltip: NS.locale('setDefault',
@@ -238,7 +292,7 @@ eo.form.contact.AbstractField = Ext.extend(sp, {
 						{type: ':' + (this.textKeyNaturalItem || this.textKeyItem)})
 				,handler: function() {
 					if (!this.isDefault()) {
-						this.fireEvent('becomedefault', this);
+						this.fireEvent('becomeprimary', this);
 					}
 				}
 				,getValue: function() {
@@ -248,9 +302,14 @@ eo.form.contact.AbstractField = Ext.extend(sp, {
 					this.toggle(!!value);
 				}
 			});
-			this.items.unshift(this.defaultButton);
+			items.unshift(this.primaryButton);
 			
-			this.valueFields[this.defaultName] = this.defaultButton;
+			this.valueFields[this.primaryField] = this.primaryButton;
+		} else if (this.reserveDefaultCheckboxSpace) {
+			items.unshift({
+				xtype: 'box'
+				,width: 22
+			})
 		}
 		
 		// removable
@@ -261,7 +320,7 @@ eo.form.contact.AbstractField = Ext.extend(sp, {
 				,tooltip: this.textRemove
 				,handler: this.removeHandler
 			});
-			this.items.push(this.deleteButton);
+			items.push(this.deleteButton);
 		}
 		
 		// adds instance value fields
@@ -273,11 +332,11 @@ eo.form.contact.AbstractField = Ext.extend(sp, {
 	}
 	
 	,isDefault: function() {
-		return !this.defaultButton || this.defaultButton.pressed;
+		return !this.primaryButton || this.primaryButton.pressed;
 	}
 	
 	,setDefault: function(on) {
-		this.defaultButton && this.defaultButton.toggle(on);
+		this.primaryButton && this.primaryButton.toggle(on);
 	}
 	
 	// protected
@@ -347,17 +406,22 @@ eo.form.contact.AbstractField = Ext.extend(sp, {
 	,focus: function(defer) {
 		var field = this.items.get(
 			1
-			+ (this.defaultPickable ? 1 : 0)
+			+ (this.hasPrimaryField() ? 1 : 0)
 		);
 		if (field) {
 			field.focus(defer);
 		}
 	}
-	
+
 	,isValid: function() {
 		return false;
 	}
 	
+	/**
+	 * Gets the value of the field. The value will be returned as an `Object`
+	 * holding the value of this field's children fields.
+	 * @return {Object}
+	 */
 	,getValue: function() {
 		var data = {};
 		Ext.iterate(this.valueFields, function(name, field) {
@@ -370,13 +434,19 @@ eo.form.contact.AbstractField = Ext.extend(sp, {
 		return data;
 	}
 
+	/**
+	 * Sets the value of the field.
+	 * @param {Object} data The data `Object` from which the value of the
+	 * children fields will be taken.
+	 */
 	,setValue: function(data) {
+		var primaryName = this.primaryField;
 		if (!this.rendered) {
 			this.value = data;
 			return;
 		}
-		if (this.defaultPickable && !(this.defaultName in data)) {
-			this.valueFields[this.defaultName].setValue(false);
+		if (this.hasPrimaryField() && !(primaryName in data)) {
+			this.valueFields[primaryName].setValue(false);
 		}
 		Ext.iterate(data, function(name, value) {
 			var field = this.valueFields[name];

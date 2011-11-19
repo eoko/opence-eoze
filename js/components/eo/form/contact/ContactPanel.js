@@ -13,7 +13,7 @@ var sp  = Ext.Panel,
  * A convenience container Panel for contact FieldSets, which provides a top toolbar
  * that will contain the FieldSets add field buttons.
  */
-NS.ContactPanel = Ext.extend(sp, {
+eo.form.contact.ContactPanel = Ext.extend(Ext.Panel, {
 
 	fieldSets: [
 		{xtype: 'phonenumbersfieldset', name: 'phoneNumbers', allowBlank: false},
@@ -42,6 +42,8 @@ NS.ContactPanel = Ext.extend(sp, {
 			tbar = [];
 		
 		var fieldSets = [];
+		
+		var hasFieldSetWithDefaultCheckbox = false;
 
 		Ext.each(this.fieldSets, function(fs) {
 			if (fs === '-' || fs === '->') {
@@ -56,6 +58,10 @@ NS.ContactPanel = Ext.extend(sp, {
 				}
 				
 				var fieldSet = Ext.create(fs);
+				
+				if (fieldSet.hasDefaultSelection()) {
+					hasFieldSetWithDefaultCheckbox = true;
+				}
 				
 				if (this.markInvalid) {
 					fieldSet.clearInvalid = fieldSet.markInvalid = false;

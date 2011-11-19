@@ -9,11 +9,11 @@ Oce.deps.waitIn('eo.form.contact', 'AbstractFieldSet', function(NS) {
 var sp  = NS.AbstractFieldSet,
 	spp = sp.prototype;
 
-NS.AddressFieldSet = Ext.extend(sp, {
+eo.form.contact.AddressFieldSet = Ext.extend(eo.form.contact.AbstractFieldSet, {
 
 	fieldConfig: NS.config.address
 	
-	,getFieldClass: function() {
+	,getFieldConstructor: function() {
 		return NS.AddressField;
 	}
 });
