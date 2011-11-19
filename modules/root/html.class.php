@@ -42,6 +42,7 @@ JS;
 	protected function pushLayoutExtraJs(HtmlRootTemplate $layout) {
 		// Include js/*.auto[order].js and auto/*.js files
 		$autoJsFiles = array();
+		$baseJsFiles = array();
 		$autoCssFiles = array();
 		foreach (ModuleManager::listModules(false) as $module) {
 			$module instanceof \eoko\module\Module;
@@ -50,6 +51,7 @@ JS;
 			$autoJsFiles = array_merge($autoJsFiles, $module->listLineFilesUrl('re:\.auto\d*\.js$', 'js'));
 			$autoJsFiles = array_merge($autoJsFiles, $module->listLineFilesUrl('glob:*.js', 'js/auto', true));
 			$autoJsFiles = array_merge($autoJsFiles, $module->listLineFilesUrl('glob:*.js', 'js.auto', true));
+			$baseJsFiles = array_merge($baseJsFiles, $module->listLineFilesUrl('glob:*.js', 'js.base', true));
 			// css
 			$autoCssFiles = array_merge($autoCssFiles, $module->listLineFilesUrl('re:\.auto\d*\.css$', ''));
 			$autoCssFiles = array_merge($autoCssFiles, $module->listLineFilesUrl('re:\.auto\d*\.css$', 'css'));
@@ -58,14 +60,17 @@ JS;
 		}
 		
 		$urls = array();
+		foreach($baseJsFiles as $url) {
+			$urls[$url] = 10;
+		}
 		foreach ($autoJsFiles as $url) {
-			$urls[$url] = preg_match('/\.auto(\d+)\.js$/', $url, $m) ? 10 + (int) $m[1] : null;
+			$urls[$url] = preg_match('/\.auto(\d+)\.js$/', $url, $m) ? 20 + (int) $m[1] : null;
 		}
 		$layout->pushJs($urls);
 		
 		$urls = array();
 		foreach ($autoCssFiles as $url) {
-			$urls[$url] = preg_match('/\.auto(\d+)\.css$/', $url, $m) ? 10 + (int) $m[1] : null;
+			$urls[$url] = preg_match('/\.auto(\d+)\.css$/', $url, $m) ? 20 + (int) $m[1] : null;
 		}
 		$layout->pushCss($urls);
 	}
