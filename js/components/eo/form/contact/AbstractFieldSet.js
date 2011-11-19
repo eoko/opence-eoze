@@ -13,12 +13,18 @@ var sp  = Ext.form.FieldSet,
 	spp = sp.prototype;
 
 eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
-
+	
+	/**
+	 * @cfg {String/Object} fieldConfig The global configuration Object of the
+	 * children fields. In not set, this value will be deciphered from the 
+	 * {#getFieldConstructor children field constructor}'s prototype.
+	 */
+	fieldConfig: undefined
 	/**
 	 * @fg {int} maxFieldNumber the maximum number of fields that can be added 
 	 * to this FieldSet.
 	 */
-	maxFieldNumber: null
+	,maxFieldNumber: null
 	/**
 	 * @cfg {int} initialFieldNumber the initial number of empty fields that will 
 	 * be added to the FieldSet. Note that this property is not used if the 
@@ -85,10 +91,16 @@ eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 		config = Ext.apply({}, config);
 
 		// Convert fieldConfig as a string to config object
-		var fieldConfig = config.fieldConfig;
+		var fieldConfig = config.fieldConfig || this.fieldConfig;
+		if (!fieldConfig) {
+			this.xtypeChildren = config.xtypeChildren || this.xtypeChildren;
+			fieldConfig = this.getFieldConstructor().prototype.fieldConfig;
+		}
 		if (Ext.isString(fieldConfig)) {
-			this.fieldConfig = NS.config[config.fieldConfig];
-			delete config.fieldConfig;
+			this.fieldConfig = NS.config[fieldConfig];
+			delete config.fieldConfig; // because we don't want this to override
+					// this.fieldConfig that we just set, when the parent's 
+					// constructor will do Ext.apply(this, config)
 			if (!Ext.isObject(this.fieldConfig)) {
 				throw new Error('Config is missing');
 			}
@@ -255,14 +267,14 @@ eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 
 	/**
 	 * Gets the constructor for the children fields. By default, this method 
-	 * uses {#fieldXType} to retrieve the actual constructor. This method can
+	 * uses {#xtypeChildren} to retrieve the actual constructor. This method can
 	 * be overridden to directly provide the constructor function (can be useful
 	 * if the constructor is not registered in {@link Ext.ComponentMgr}.
 	 * @return {Function}
 	 * @protected
 	 */
 	,getFieldConstructor: function() {
-		var xtype = this.fieldXType;
+		var xtype = this.xtypeChildren;
 		if (xtype) {
 			return Ext.ComponentMgr.types[xtype];
 		}
@@ -286,8 +298,8 @@ eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 			config.fieldsLayout = this.fieldsLayout;
 		}
 		
-		if (this.fieldXType) {
-			return Ext.create(Ext.apply({xtype: this.fieldXType}, config));
+		if (this.xtypeChildren) {
+			return Ext.create(Ext.apply({xtype: this.xtypeChildren}, config));
 		} else {
 			var c = this.getFieldConstructor();
 			return new c(config);
