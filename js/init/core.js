@@ -198,6 +198,13 @@ MyModule2.greats();
  */
 (function() {
 
+/**
+ * @class eo
+ * Eoze core utilities and functions.
+ * @singleton
+ */
+eo = {};
+
 Ext.ns('eo.Object');
 
 var NS = eo.Object;
