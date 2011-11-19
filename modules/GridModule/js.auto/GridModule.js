@@ -515,9 +515,27 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	
 	,submitForm: function(form, opts) {
 		if (this.submitMethod === 'json') {
-			debugger
 			var values = form.getFieldValues();
 			opts.params[form.jsonFormParam || 'json_form'] = Ext.encode(values);
+			var success = opts.success,
+				failure = opts.failure;
+			delete opts.success;
+			delete opts.failure;
+			opts.callback = function(options, succeeded, response) {
+				var action = {
+					result: Ext.decode(response.responseText)
+				};
+				if (!succeeded) {
+					failure(form, options);
+				} else {
+					if (action.result.success) {
+						success(form, action);
+					} else {
+						failure(form, action);
+					}
+				}
+				
+			};
 			Ext.Ajax.request(opts);
 		} else {
 			form.submit(opts);
