@@ -39,8 +39,17 @@ class NameMaker extends Inflector {
 	public static function singular($name) {
 		if (substr($name, -1) === 's') {
 			return substr($name, 0, -1);
+		} else if (preg_match('/\d$/', $name)) {
+			return $name;
 		} else {
-			throw new \Exception('Not implemented');
+			$knownSingulars = \eoko\config\ConfigManager::get('eoko\lang\Inflector\singulars');
+			foreach ($knownSingulars as $word => $singular) {
+				$word = preg_quote($word, '/');
+				if (preg_match("/(?:\b|_)$word$/", $name)) {
+					return $singular;
+				}
+			}
+			throw new \Exception('Not implemented, singularize for: ' . $name);
 		}
 	}
 
