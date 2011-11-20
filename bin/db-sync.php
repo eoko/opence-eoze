@@ -21,10 +21,10 @@ $dumper = Database::getDefaultAdapter()->getDumper();
 // Untested modifications...
 if ($arg === 'dump') {
 //	$fn = 'dbDump';
-	$dumper->dump(DATABASE_DUMP_PATH . 'db.sql.gz');
+	$dumper->dump(DATABASE_DUMP_PATH . 'data.sql.gz', DATABASE_DUMP_PATH . 'structure.sql.gz');
 } else if ($arg === 'load') {
 //	$fn = 'dbLoad';
-	$dumper->load(DATABASE_DUMP_PATH . 'db.sql.gz');
+	$dumper->load(DATABASE_DUMP_PATH . 'data.sql.gz');
 } else {
 	dieUsage();
 }
