@@ -693,17 +693,20 @@ abstract class Model {
 				$setters = $this->buildUpdatedFields(ModelColumn::OP_UPDATE);
 				unset($setters[$this->getPrimaryKeyName()]);
 
-				$affectedRows = $this->getTable()->createQuery($this->context)
-						->set($setters)
-						->where($this->getPrimaryKeyName() . ' = ?', $this->getPrimaryKeyValue())
-						->executeUpdate();
+				// don't try to save if no field has actually been updated
+				if ($setters) {
+					$affectedRows = $this->getTable()->createQuery($this->context)
+							->set($setters)
+							->where($this->getPrimaryKeyName() . ' = ?', $this->getPrimaryKeyValue())
+							->executeUpdate();
 
-				// TODO: implement the modification success check
-				// if ($affectedRows != 1) return false;
+					// TODO: implement the modification success check
+					// if ($affectedRows != 1) return false;
 
-				// afterSave event (must be fired here, see bellow)
-				$this->events->fire(self::EVT_AFTER_SAVE_BASE, $this);
-				$this->afterSave(false);
+					// afterSave event (must be fired here, see bellow)
+					$this->events->fire(self::EVT_AFTER_SAVE_BASE, $this);
+					$this->afterSave(false);
+				}
 			}
 
 			// clear $forceNew state
