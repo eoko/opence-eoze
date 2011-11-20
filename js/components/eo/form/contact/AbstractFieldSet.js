@@ -21,12 +21,12 @@ eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 	 */
 	fieldConfig: undefined
 	/**
-	 * @fg {int} maxFieldNumber the maximum number of fields that can be added 
+	 * @fg {Integer} maxFieldNumber the maximum number of fields that can be added 
 	 * to this FieldSet.
 	 */
 	,maxFieldNumber: null
 	/**
-	 * @cfg {int} initialFieldNumber the initial number of empty fields that will 
+	 * @cfg {Integer} initialFieldNumber the initial number of empty fields that will 
 	 * be added to the FieldSet. Note that this property is not used if the 
 	 * FieldSet is given a {@link eo.form.contact.AbstractFieldSet#value value} (or 
 	 * if {@link eo.form.contact.AbstractFieldSet#setValue#setValue setValue} is
@@ -34,7 +34,7 @@ eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 	 */
 	,initialFieldNumber: 0
 	/**
-	 * @cfg {string} fieldsLayout Forces the layout of the children's 
+	 * @cfg {String} fieldsLayout Forces the layout of the children's 
 	 * {@link Ext.form.Field fields} (defaults to undefined). 
 	 * 
 	 * (The value is forwarded as is to 
@@ -55,10 +55,18 @@ eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 	 */
 	,fieldsLayout: undefined
 	/**
-	 * @cfg {int} numTitle The number to which the title must be accorded
+	 * @cfg {Integer} numTitle The number to which the title must be accorded
 	 * (default to 1).
 	 */
 	,numTitle: 1
+	/**
+	 * @cfg {Boolean} returnSingleValue If set to `true`, the {@link #getValue}
+	 * method will not return the value of multiple children as an array, but
+	 * instead, it will return only one value object for only one child (or
+	 * `null` if it has no children. This option is considered only if 
+	 * {@link #maxFieldNumber} is set to `1`.
+	 */
+	,returnSingleValue: false
 
 	,cls: 'line'
 	,collapsible: true
@@ -379,20 +387,30 @@ eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 
 	/**
 	 * Gets the value of the field.
-	 * @return {Object} A data `Object` containing the values of the children
-	 * fields.
+	 * @return {Object[]|Object} An array containing the values of the children
+	 * fields. Depending on the {@link #returnSingleValue} option, this method
+	 * can also return a single `Object` value.
 	 */
 	,getValue: function() {
 		if (!this.rendered) {
 			return this.value;
 		}
-		var data = [];
-		this.items.each(function(item) {
-			if (item.isValid()) {
-				data.push(item.getValue());
+		if (this.maxFieldNumber === 1 && this.returnSingleValue) {
+			switch (this.items.length) {
+				case 0: return null;
+				case 1: return this.items.get(0).getValue();
+				default: throw new Error('Illegal State (not supposed to be able '
+						+ 'to have more than one child)');
 			}
-		});
-		return data;
+		} else {
+			var data = [];
+			this.items.each(function(item) {
+				if (item.isValid()) {
+					data.push(item.getValue());
+				}
+			});
+			return data;
+		}
 	}
 	
 	/**
