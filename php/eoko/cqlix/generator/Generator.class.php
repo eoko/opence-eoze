@@ -569,7 +569,7 @@ class Generator extends Script {
 		}
 	}
 
-/**
+	/**
 	 * @param array $fields
 	 * @return ModelColumn
 	 */
@@ -578,6 +578,14 @@ class Generator extends Script {
 			if ($field->isPrimary()) return $field;
 		}
 		return null;
+	}
+	
+	/**
+	 * @param string $tableName
+	 * @return TplField
+	 */
+	public function getTablePrimaryField($tableName) {
+		return self::getPrimaryField($this->tableFields[$tableName]);
 	}
 
 	private function getVersionString() {
@@ -958,17 +966,28 @@ class Generator extends Script {
 			foreach ($this->tableFields as $otherTable => $myFields) {
 
 				$secondaryKeyPatterns[$otherTable] = array();
+				
+				$quotedOtherTable = '(?:' . preg_quote($otherTable) 
+						. '|' . NameMaker::singular($otherTable) . ')';
 
 				foreach ($myFields as $field) {
 					$field instanceof TplField;
 					if ($field->isPrimary()) {
-						$primaryKeyPatterns[$otherTable] = preg_quote($otherTable) . '_' . preg_quote($field->getName());
+						$primaryKeyPatterns[$otherTable] = $quotedOtherTable . '_' . preg_quote($field->getName());
 	//					$primaryKeyPatterns[$otherTable] = '/(?:^|_)' . $primaryKeyPatterns[$otherTable] . '$/';
 						$primaryKeyPatterns[$otherTable] = '/^(?:(\w+)_)?' . $primaryKeyPatterns[$otherTable] . '$/';
 					} else if ($detectSecondaryRelations) {
-						$pattern = preg_quote($otherTable) . '_' . preg_quote($field->getName());
+						$pattern = $quotedOtherTable . '_' . preg_quote($field->getName());
 						$pattern = '/(?:^|_)' . $pattern . '$/';
 						$secondaryKeyPatterns[$otherTable][$field->getName()] = $pattern;
+// Modified on 20/11/11 03:12 to add singular table name support
+//						$primaryKeyPatterns[$otherTable] = preg_quote($otherTable) . '_' . preg_quote($field->getName());
+//	//					$primaryKeyPatterns[$otherTable] = '/(?:^|_)' . $primaryKeyPatterns[$otherTable] . '$/';
+//						$primaryKeyPatterns[$otherTable] = '/^(?:(\w+)_)?' . $primaryKeyPatterns[$otherTable] . '$/';
+//					} else if ($detectSecondaryRelations) {
+//						$pattern = preg_quote($otherTable) . '_' . preg_quote($field->getName());
+//						$pattern = '/(?:^|_)' . $pattern . '$/';
+//						$secondaryKeyPatterns[$otherTable][$field->getName()] = $pattern;
 					}
 				}
 			}
@@ -1044,29 +1063,54 @@ class Generator extends Script {
 					$fieldName = $field->getName();
 					$otherTable = $field->getForeignConstraint()->targetTable;
 					$otherField = $field->getForeignConstraint()->targetField;
+					
+					$quotedTable = preg_quote($fieldName, '/');
+					$quotedOtherTable = preg_quote($otherTable, '/');
+					$quotedOtherId = preg_quote(
+						$this->getTablePrimaryField($otherTable)->getName(), '/'
+					);
+					
 
 					$prefix = null;
 					$alias = null;
+					
+//					dump(array(
+//						$tableName, $otherTable, $fieldName,
+//						preg_match("/^(?P<alias>.+)_$quotedOtherId$/", $fieldName, $matches),
+//						$matches
+//					));
 
 					// Decide what is the alias
 					if (preg_match($primaryKeyPatterns[$otherTable], $fieldName, $match)) {
 						// If the referencing field is in the form xxx_table_id,
 						// then xxx is the alias (this is congruent with the search
 						// by name)
-						if (isset($match[1])) $prefix = $match[1];
+						if (isset($match[1])) {
+							$prefix = $match[1];
+						}
 	//REM					if (isset($match[1])) $alias = ModelRelationReferencingHasOne::makeAlias($otherTable, $match[1]);
 	//REM					else $alias = null;
-					} else {
-						// Else, the whole referencing field name should be
-						// considered the alias...
-						$alias = $fieldName;
+					
+					} else if (preg_match("/^(?P<alias>.+)(?:$quotedOtherTable)?_$quotedOtherId$/", $fieldName, $matches)) {
+						$alias = $matches['alias'];
+						$alias = NameMaker::camelCase($alias, true);
+//						dump($alias);
+//					} else {
+//						// Else, the whole referencing field name should be
+//						// considered the alias...
+//						$alias = $fieldName;
 					}
 
 					if ($otherField !== $this->primaryKeys[$otherTable]) {
 						Logger::warn('Foreign Key constraint found on non-primary key ' + $otherField + ' in table ' + $otherTable);
 					} else {
-						$rel = new TplRelationReferencesOne($tableName,
-								$otherTable, $alias, null, $fieldName, $prefix);
+						$rel = new TplRelationReferencesOne(
+								$tableName,
+								$otherTable, 
+								$field->localRelationAlias ? $field->localRelationAlias : $alias,
+								null, 
+								$fieldName, 
+								$prefix);
 
 						$this->addHasOneRelation($tableName, $rel, self::GUESS_BY_CONSTRAINT);
 

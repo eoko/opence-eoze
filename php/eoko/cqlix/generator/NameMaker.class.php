@@ -35,6 +35,14 @@ class NameMaker extends Inflector {
 		if (!isset(self::$cache[$dbTableName])) self::generateTableEntries ($dbTableName);
 		return self::$cache[self::dbFromModel($modelName)]['plural_model'];
 	}
+	
+	public static function singular($name) {
+		if (substr($name, -1) === 's') {
+			return substr($name, 0, -1);
+		} else {
+			throw new \Exception('Not implemented');
+		}
+	}
 
 	public static function isSingular($name) {
 		if (preg_match('/(?:^|_)([^0-9_]+)\d*_?$/', $name, $matches) === 0) {
