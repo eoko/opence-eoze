@@ -15,12 +15,13 @@ var sp  = Ext.Panel,
  */
 eo.form.contact.ContactPanel = Ext.extend(Ext.Panel, {
 
-	fieldSets: [
-		{xtype: 'phonenumbersfieldset', name: 'phoneNumbers', allowBlank: false},
-		{xtype: 'emailsfieldset', name: 'emails'},
-		{xtype: 'addressesfieldset', name: 'addresses'},
-		{xtype: 'organisationsfieldset', name: 'organisations'}
-	]
+//	fieldSets: [
+//		{xtype: 'phonenumbersfieldset', name: 'phoneNumbers', allowBlank: false},
+//		{xtype: 'emailsfieldset', name: 'emails'},
+//		{xtype: 'addressesfieldset', name: 'addresses'},
+//		{xtype: 'organisationsfieldset', name: 'organisations'}
+//	]
+	fieldSets: undefined
 	
 	,autoScroll: true
 	,bodyStyle: 'padding: 5px 2px; background: transparent;'
