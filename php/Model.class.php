@@ -1199,10 +1199,8 @@ abstract class Model {
 				'this' => $this
 				,'srcModel' => $srcModel
 			));
+			throw new ModelSaveException(get_class($srcModel) . ' needs to be saved before');
 		}
-		if ($srcModel->isNew()) throw new ModelSaveException(
-			get_class($srcModel) . ' needs to be saved before'
-		);
 	}
 
 	/**
