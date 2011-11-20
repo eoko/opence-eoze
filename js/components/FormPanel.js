@@ -363,12 +363,16 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
 				for (var i=0,l=win.formRefreshers.length; i<l; i++) {
 					win.formRefreshers[i]();
 				}
-				if (this.initFormItems) this.initFormItems(action.result);
+				if (this.initFormItems) {
+					this.initFormItems(action.result);
+				}
 //				this.afterEditFormLoaded(this.form);
 				this.loaded = true;
 				afterLoadSuccess();
 				this.fireEvent("afterload", this.form);
-				if (callback) callback(this.form);
+				if (callback) {
+					callback(this.form);
+				}
 			}
 			,failure: function(form, action) {
 				me.preventModificationEvents = false;
@@ -378,7 +382,9 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
 					win.close();
 					Ext.MessageBox.alert("Erreur", "Impossible de charger les données") // i18n
 				}
-				if (callback) callback(this.form);
+				if (callback) {
+					callback(this.form);
+				}
 			}
 		});
 	}
