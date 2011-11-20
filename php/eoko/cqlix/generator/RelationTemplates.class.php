@@ -40,6 +40,7 @@ abstract class TplRelation {
 	public $onDeleteAction = null;
 
 	function __construct($alias, $localTableName, $targetTableName, $reciproque) {
+//		dump_trace();
 		$this->alias = $alias;
 		$this->localDBTableName = $localTableName;
 		$this->targetDBTableName = $targetTableName;
@@ -121,13 +122,25 @@ new <?php echo $this->getClass() ?>(<?php echo $head ? $rTabs : '' ?>
 //		echo get_class($this) . ' => ';
 //		echo "getName(): $this->targetDBTableName: $this->alias, $this->prefix\n";
 		
-		if (!$this->alias) $this->alias = $this->makeAlias();
+		if (!$this->alias) {
+			$this->alias = $this->makeAlias();
+		}
 
 		if ($this->alias === null) {
+			// filter out local table prefix in target table name
+			$regex = '/^(?:' . preg_quote($this->localDBTableName)
+					. '|' . preg_quote(NameMaker::singular($this->localDBTableName)) . ')'
+					. '_(?P<target>.+)$/';
+			if (preg_match($regex, $this->targetDBTableName, $matches)) {
+				$target = $matches['target'];
+			} else {
+				$target = $this->targetDBTableName;
+			}
+			
 			if ($this instanceof ModelRelationHasOne) {
-				$name = NameMaker::modelFromDB($this->targetDBTableName);
+				$name = NameMaker::modelFromDB($target);
 			} else if ($this instanceof ModelRelationHasMany) {
-				$name = NameMaker::pluralizeModel(NameMaker::modelFromDB($this->targetDBTableName));
+				$name = NameMaker::pluralizeModel(NameMaker::modelFromDB($target));
 			} else {
 				print_r($this);
 				throw new IllegalStateException(get_class($this) . ' => ' . $this);
@@ -145,6 +158,17 @@ new <?php echo $this->getClass() ?>(<?php echo $head ? $rTabs : '' ?>
 			&& (!$testReciproque
 					|| (($this->reciproque !== null || $other->reciproque === null)
 						|| $this->reciproque->equals($other->reciproque, false)));
+	}
+	
+	public function getTargetType() {
+		if ($this instanceof ModelRelationHasOne) {
+			return NameMaker::modelFromDB($this->targetDBTableName);
+		} else if ($this instanceof ModelRelationHasMany) {
+			return 'array';
+		} else {
+			print_r($this);
+			throw new IllegalStateException(get_class($this) . ' => ' . $this);
+		}
 	}
 
 	public function getTargetModelName() {
@@ -268,8 +292,9 @@ class TplRelationReferencesOne extends TplRelationByReference
 	protected function makeAlias() {
 		if (\property_exists($this, 'referencingAlias') && $this->referencingAlias !== null) {
 			return $this->referencingAlias;
-		} else if ($this->prefix === null) return null;
-		else {
+		} else if ($this->prefix === null) {
+			return null;
+		} else {
 			if (preg_match('/^(.+)__(.+?)$/', trim($this->prefix, '_'), $m)) {
 				$this->reciproqueName = NameMaker::camelCase($m[2], true);
 				return NameMaker::camelCase($m[1], true);

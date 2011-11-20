@@ -269,7 +269,7 @@ foreach ($proxyMethods as $method) {
 <?php foreach ($relations as $relation): ?>
 <?php //if ($relation instanceof ModelRelationReferencingHasOne): ?>
 	/**
-	 * @return <?php echo $relation->getTargetModelName() ?>
+	 * @return <?php echo $relation->getTargetType() ?>
 
 	 */
 	function get<?php echo $relation->getName() ?>(array $overrideContext = null) {
@@ -280,7 +280,7 @@ foreach ($proxyMethods as $method) {
 	 * @return <?php echo $relation->getTargetModelName() ?>
 
 	 */
-	function set<?php echo $relation->getName() ?>(<?php echo $relation->getTargetModelName() ?> $<?php echo lcfirst($relation->getName()) ?>) {
+	function set<?php echo $relation->getName() ?>(<?php echo $relation->getTargetType() ?> $<?php echo lcfirst($relation->getName()) ?>) {
 		// return $this->getRelation('<?php echo $relation->getName() ?>')->get($this);
 		return $this->setForeignModel('<?php echo $relation->getName() ?>', $<?php echo lcfirst($relation->getName()) ?>);
 	}
