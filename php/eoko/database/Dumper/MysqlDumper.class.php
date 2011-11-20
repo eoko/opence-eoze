@@ -45,12 +45,12 @@ class MysqlDumper implements Dumper {
 		$this->dumpData = $on ? true : false;
 	}
 	
-	public function dump($filename) {
+	public function dump($dataFilename, $structureFilename = null) {
 		
-		$this->logger->info('Dumping database to {}', $filename);
+		$this->logger->info('Dumping database to {} (structure: {})', $dataFilename, $structureFilename);
 		
-		$dir = dirname($filename);
-		$filename = basename($filename);
+		$dir = dirname($dataFilename);
+		$dataFilename = basename($dataFilename);
 		
 		$owd = getcwd();
 		if (!@chdir($dir)) {
@@ -58,7 +58,10 @@ class MysqlDumper implements Dumper {
 		}
 		
 		try {
-			$this->doDump($filename);
+			if ($structureFilename) {
+				$structureFilename = basename($structureFilename);
+			}
+			$this->doDump($dataFilename, $structureFilename);
 		} catch (\Exception $ex) {
 			// restore original dir
 			chdir($owd);
@@ -69,15 +72,36 @@ class MysqlDumper implements Dumper {
 		chdir($owd);
 	}
 	
-	private function doDump($filename) {
-		if (file_exists($filename)) unlink($filename);
+	private function doDump($dataFilename, $structureFilename) {
+		
 
 		$config = $this->config;
-		$cmd = "mysqldump --user $config->user --password=$config->password --opt $config->database | gzip > $filename";
-		system($cmd);
-
-		if (!file_exists($filename)) {
-			throw new IllegalStateException('Error with dumping the database!');
+		if ($dataFilename) {
+			if (file_exists($dataFilename)) {
+				unlink($dataFilename);
+			}
+			
+			$cmd = "mysqldump --user $config->user --password=$config->password "
+					. "--opt $config->database | gzip > $dataFilename";
+			system($cmd);
+			
+			if (!file_exists($dataFilename)) {
+				throw new IllegalStateException('Error with dumping the database!');
+			}
+		}
+		
+		if ($structureFilename) {
+			if (file_exists($structureFilename)) {
+				unlink($structureFilename);
+			}
+			
+			$cmd = "mysqldump --no-data --user $config->user --password=$config->password "
+					. "--opt $config->database | gzip > $structureFilename";
+			system($cmd);
+			
+			if (!file_exists($structureFilename)) {
+				throw new IllegalStateException('Error with dumping the database!');
+			}
 		}
 	}
 	

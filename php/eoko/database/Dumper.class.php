@@ -6,7 +6,7 @@ interface Dumper {
 	
 	const DATA = 'data';
 
-	function dump($filename);
+	function dump($dataFilename, $structureFilename = null);
 	
 	function load($filename);
 	
