@@ -273,7 +273,9 @@ NS.FormConfig = Ext.extend(Object, {
 		// contain indexes that must be replaced by actual field config.
 		Ext.each(fieldsThatUseOtherFields, function(field) {
 			var tabBuilder = new NS.TabBuilder(this);
-			tabBuilder.convertItemIndexes(field.items);
+			if (field.items) {
+				tabBuilder.convertItemIndexes(field.items);
+			}
 		}, this);
 	}
 
