@@ -105,9 +105,15 @@ abstract class ModelRelation {
 	protected function doSet($value, $forceAcceptNull = false) {
 //	public function set(Model $callingModel, $value, $forceAcceptNull = false) {
 		if ($this instanceof ModelRelationHasOne) {
-			if ($value instanceof Model) $this->setFromModel($value);
-			else if (is_array($value)) $this->setFromDB($value);
-			else $this->setFromId($value, $forceAcceptNull);
+			if ($value instanceof Model) {
+				$this->setFromModel($value);
+			} else if (is_array($value)) {
+				$this->setFromModel(
+					$this->targetTable->createModel($value, false, $this->parentModel->context)
+				);
+			} else {
+				$this->setFromId($value, $forceAcceptNull);
+			}
 		} else if ($this instanceof ModelRelationHasMany) {
 			throw new UnsupportedOperationException();
 //			if ($value === null) {
