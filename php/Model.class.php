@@ -1220,7 +1220,9 @@ abstract class Model {
 	 * saved.
 	 */
 	public function setFieldFromModelPk($fieldName, Model $srcModel) {
-		if ($srcModel === null) throw new IllegalArgumentException('$model cannot be null');
+		if ($srcModel === null) {
+			throw new IllegalArgumentException('$model cannot be null');
+		}
 		if ($srcModel->isNew()) {
 			$this->setUndetermined($fieldName, 'setFieldFromModelPk');
 			$srcModel->on(self::EVT_AFTER_SAVE_BASE,
