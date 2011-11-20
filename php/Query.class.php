@@ -455,6 +455,13 @@ class Query {
 
 	protected function buildUpdateClause() {
 		$parts = array();
+		
+		if (!$this->set) {
+			throw new IllegalStateException(
+				'Cannot build update clause, no setters have been defined'
+			);
+		}
+		
 		foreach ($this->set as $col => $val) {
 			
 			if ($val instanceof SqlVar) {
