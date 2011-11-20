@@ -108,9 +108,14 @@ abstract class ModelRelation {
 			if ($value instanceof Model) {
 				$this->setFromModel($value);
 			} else if (is_array($value)) {
-				$this->setFromModel(
-					$this->targetTable->createModel($value, false, $this->parentModel->context)
-				);
+				if (count($value) === 1 
+						&& array_key_exists($this->targetTable->getPrimaryKeyName(), $value)) {
+					$this->setFromId($value[$this->targetTable->getPrimaryKeyName()]);
+				} else {
+					$this->setFromModel(
+						$this->targetTable->createModel($value, false, $this->parentModel->context)
+					);
+				}
 			} else {
 				$this->setFromId($value, $forceAcceptNull);
 			}
