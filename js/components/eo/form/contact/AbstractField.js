@@ -259,7 +259,8 @@ eo.form.contact.AbstractField = Ext.extend(Ext.form.CompositeField, {
 			types = this.types,
 			typeName = this.typeField;
 		
-		var instanceValueFields = {};
+		var instanceValueFields = {},
+			hasOwnIdField = false;
 		
 		// If this object has a createFields methods, that supposes that
 		// initComponent is not overriden (while, if done correctly, it
@@ -270,18 +271,21 @@ eo.form.contact.AbstractField = Ext.extend(Ext.form.CompositeField, {
 				fields = [fields];
 			}
 			// store value fields
-			Ext.each(fields, function(fields) {
-				if (fields.submitValue) {
-					instanceValueFields[fields.getName()] = fields;
+			Ext.each(fields, function(field) {
+				if (field.submitValue !== false) {
+					instanceValueFields[field.getName()] = field;
+					field.submitValue = false;
+					if (field.name === idName) {
+						hasOwnIdField = true;
+					}
 				}
-				fields.submitValue = false;
 			});
 			// layout
 			items = this.items = this.layoutItems(fields, this.fieldsLayout);
 		}
 
 		// id
-		if (idName) {
+		if (idName && !hasOwnIdField) {
 			var idField = new Ext.form.Hidden({
 				emptyValue: null
 			});
