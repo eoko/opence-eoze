@@ -360,7 +360,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		var checkboxSel = this.gridColumns[0];
 		
 		var pagingToolbar = {
-			xtype: "paging"
+			xtype: 'paging'
 			,pageSize: this.pageSize
 			,store: this.store
 			,params: {action:'load'}
@@ -371,6 +371,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 
 		var config = Ext.apply({
 			store: this.store
+			,id: 'oce-gridmodule-grid-' + this.name
 			,columns: this.gridColumns
 			,sm:checkboxSel
 			//,autoExpandColumn: 'username'
