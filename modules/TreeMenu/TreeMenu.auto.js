@@ -758,8 +758,8 @@ eo.ui.TreeMenu.prototype.TreeNode = Ext.extend(Ext.tree.TreeNode, {
 		
 		var d = this.data = config && config.data || {};
 		
-		d.expanded = !!parseInt(d.expanded);
-		d.open = !!parseInt(d.open);
+		d.expanded = eo.bool(d.expanded);
+		d.open = eo.bool(d.open);
 		
 		var cfg = {
 			text: d.label
