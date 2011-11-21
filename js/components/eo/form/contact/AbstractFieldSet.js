@@ -20,6 +20,10 @@ eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 	 * {#getFieldConstructor children field constructor}'s prototype.
 	 */
 	fieldConfig: undefined
+	
+	,isFormField: true
+	,hideLabel: true
+	
 	/**
 	 * @fg {Integer} maxFieldNumber the maximum number of fields that can be added 
 	 * to this FieldSet.
@@ -424,7 +428,20 @@ eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 			return;
 		}
 		this.removeAll();
-		if (data) {
+		if (data === null || data === undefined) {
+			return;
+		}
+		if (!Ext.isArray(data)) {
+			if (this.returnSingleValue) {
+				var field = this.addField();
+				field.setValue(data);
+				if (field.isDefault()) {
+					this.setPrimaryField(field);
+				}
+			} else {
+				throw new Error('Invalid value data: ' + data);
+			}
+		} else {
 			Ext.each(data, function(value) {
 				var field = this.addField();
 				field.setValue(value);
