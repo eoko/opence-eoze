@@ -74,6 +74,8 @@ abstract class ModelTable extends ModelTableProxy {
 	public $renderers = null;
 
 	private $plugins = null;
+	
+	private $constructed = false;
 
 	/**
 	 * Create a new ModelTable
@@ -96,8 +98,9 @@ abstract class ModelTable extends ModelTableProxy {
 		$this->preConfigure($this->cols, $this->relations, $this->virtuals);
 		$this->configureBase();
 		$this->configure();
+		$this->constructed = true;
 	}
-
+	
 	protected function preConfigure(&$cols, &$relations, &$virtuals) {}
 
 	/**
@@ -119,6 +122,16 @@ abstract class ModelTable extends ModelTableProxy {
 
 	protected function configureBase() {
 
+	}
+
+	protected function addVirtual(VirtualField $virtual, $name = null) {
+		if ($this->constructed) {
+			throw new IllegalStateException('This operation is only allowed during initialization');
+		}
+		if ($name === null) {
+			$name = $virtual->getName();
+		}
+		$this->virtuals[$name] = $virtual;
 	}
 
 	/**
