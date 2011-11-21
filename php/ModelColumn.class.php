@@ -423,8 +423,4 @@ class ModelColumn extends ModelFieldBase {
 		return $r;
 	}
 	
-	public function castValue($value) {
-		return ModelFieldHelper::castTo($this->getType(), $value);
-	}
-	
 }
