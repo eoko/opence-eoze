@@ -1,12 +1,7 @@
 <?php
 
 interface ModelRelationInfoHasOne extends ModelRelationMarkerHasOne {}
-interface ModelRelationInfoHasMany extends ModelRelationMarkerHasMany {
-//	/**
-//	 * @return ModelTableQuery
-//	 */
-//	function createLoadQuery($joinAlias = null);
-}
+interface ModelRelationInfoHasMany extends ModelRelationMarkerHasMany {}
 
 class ModelRelationReciproqueFactory {
 
@@ -38,7 +33,7 @@ class ModelRelationReciproqueFactory {
  * @property ModelTable $targetTable
  * @property ModelTable $localTable
  */
-abstract class ModelRelationInfo implements ModelField {
+abstract class ModelRelationInfo extends ModelFieldBase {
 
 	/** @var string */
 	public $name;
@@ -145,7 +140,7 @@ abstract class ModelRelationInfo implements ModelField {
 		else if ($this instanceof ModelRelationInfoHasMany) return ModelColumn::T_INT;
 		else throw new UnsupportedOperationException(get_class($this) . '::getType()');
 	}
-
+	
 	public function isNullable() {
 		return true;
 	}
@@ -396,7 +391,7 @@ abstract class ModelRelationInfo implements ModelField {
 	}
 }
 
-class ModelRelationInfoField implements ModelField {
+class ModelRelationInfoField extends ModelFieldBase {
 
 	/**@var ModelRelationInfo */
 	protected $info;
@@ -426,7 +421,7 @@ class ModelRelationInfoField implements ModelField {
 	public function isNullable() {
 		return $this->info->targetTable->getField($this->fieldName, true)->isNullable();
 	}
-
+	
 }
 
 abstract class ModelRelationInfoByReference extends ModelRelationInfo {

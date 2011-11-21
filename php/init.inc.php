@@ -167,6 +167,7 @@ require_once PHP_PATH . 'Logger.class.php';
 // TODO: make that ondemand compliant!
 require_once PHP_PATH . 'ModelRelation.class.php';
 require_once PHP_PATH . 'ModelField.class.php';
+require_once PHP_PATH . 'ModelFieldBase.class.php';
 require_once PHP_PATH . 'ModelRelationInfo.class.php';
 
 //require_once PHP_PATH . str_replace('\\', DS, 'eoko/cqlix/Relation/Relation') . '.classes.php';
