@@ -179,7 +179,7 @@ NS.FormConfig = Ext.extend(Object, {
 	// private
 	,processCol: function(col) {
 
-		if (col.form === false) {
+		if (col.form === false || col.internal === true) {
 			this.originalIndexes.push(null);
 			return;
 		}

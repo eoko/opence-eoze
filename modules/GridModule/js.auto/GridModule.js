@@ -1612,7 +1612,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 
 			// --- Grid ---
 
-			if (col.grid !== false) {
+			if (col.grid !== false && col.internal !== true) {
 				this.gridColumns.push(col);
 			}
 
@@ -1763,7 +1763,6 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			if (!this.primaryKeyName) this.primaryKeyName = 'id';
 
 			this.buildGridColumnsConfig();
-//			this.buildStoreColumnsConfig();
 			this.buildFormsConfig();
 
 			// --- Store ---
