@@ -11,7 +11,7 @@ interface VirtualField extends ModelField {
 	function isCachable();
 }
 
-abstract class VirtualFieldBase implements VirtualField {
+abstract class VirtualFieldBase extends ModelFieldBase implements VirtualField {
 
 	protected $alias;
 	protected $cachable = true;
@@ -20,7 +20,22 @@ abstract class VirtualFieldBase implements VirtualField {
 	protected $defaultAlias = null;
 
 	function __construct($alias = null) {
-		$this->alias = $alias !== null ? $alias : $this->defaultAlias;
+		if ($alias !== null) {
+			$this->alias = $alias;
+		} else if ($this->alias) {
+			if ($this->alias === true) {
+				$this->alias = $this->guessAliasFromClassName();
+			}
+		} else {
+			$this->alias = $alias !== null ? $alias : $this->defaultAlias;
+		}
+	}
+	
+	private function guessAliasFromClassName() {
+		$class = get_class($this);
+		if (preg_match('/(?:^|_)([^_]+?)(?:VirtualField)?$/', $class, $matches)) {
+			return lcfirst($matches[1]);
+		}
 	}
 	
 	public function isCachable() {
@@ -28,8 +43,11 @@ abstract class VirtualFieldBase implements VirtualField {
 	}
 	
 	public function getName() {
-		if ($this->alias !== null) return $this->alias;
-		else throw new UnsupportedOperationException(get_class($this) . '::getName()');
+		if ($this->alias !== null) {
+			return $this->alias;
+		} else {
+			throw new UnsupportedOperationException(get_class($this) . '::getName()');
+		}
 	}
 	
 	public function getType() {
@@ -39,11 +57,11 @@ abstract class VirtualFieldBase implements VirtualField {
 			throw new UnsupportedOperationException(get_class($this) . '::getType()');
 		}
 	}
-
+	
 	public function isNullable() {
 		return true;
 	}
-
+	
 	public function select(ModelTableQuery $query, $alias = null, QueryAliasable $aliasable = null) {
 		if ($alias === null) $alias = $this->alias;
 		return $query->select(
@@ -69,6 +87,11 @@ abstract class VirtualFieldBase implements VirtualField {
 	protected function doGetOrderFieldAlias(QueryAliasable $aliasable, $alias) {
 		return Query::quoteName($alias);
 	}
+}
+
+class AbstractVirtualField extends VirtualFieldBase {
+	
+	protected $alias = true;
 }
 
 //class FieldAliasVirtualField extends VirtualFieldBase {
@@ -151,7 +174,7 @@ SQL;
 	}
 }
 
-class FormattedVirtualField extends VirtualFieldBase {
+class FormattedVirtualField extends AbstractVirtualField {
 
 	protected $format = null;
 	protected $nullable = true;
