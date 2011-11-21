@@ -320,6 +320,9 @@ eo.form.contact.AbstractField = Ext.extend(Ext.form.CompositeField, {
 				,setValue: function(value) {
 					this.toggle(!!value);
 				}
+				,reset: function() {
+					this.toggle(false);
+				}
 			});
 			items.unshift(this.primaryButton);
 			
@@ -463,6 +466,12 @@ eo.form.contact.AbstractField = Ext.extend(Ext.form.CompositeField, {
 		var primaryName = this.primaryField;
 		if (!this.rendered) {
 			this.value = data;
+			return;
+		}
+		Ext.iterate(this.valueFields, function(name, field) {
+			field.reset();
+		});
+		if (!data) {
 			return;
 		}
 		if (this.hasPrimaryField() && !(primaryName in data)) {
