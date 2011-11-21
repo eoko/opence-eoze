@@ -178,6 +178,7 @@ abstract class Model {
 	 * model that own the field.
 	 * @param string $field
 	 * @param Model $model
+	 * @param ModelField $modelField
 	 * @return mixed
 	 */
 	private function getFieldValue($field, &$model = null, &$modelField = null) {
@@ -308,8 +309,9 @@ abstract class Model {
 	 */
 	public function getFields($fields = null) {
 		if ($fields === null) {
-			return $this->internal->fields;
-		} else if (is_array($fields)) {
+			$fields = array_keys($this->internal->fields);
+		}
+		if (is_array($fields)) {
 			$r = array();
 			foreach ($fields as $field) {
 				$r[$field] = $this->getField($field);
@@ -348,7 +350,74 @@ abstract class Model {
 			return $r;
 		}
 	}
-
+	
+	/**
+	 * Get the value of each field in the given array.
+	 * 
+	 * The names of the field in the returned array can be aliased by
+	 * specifying this alias as the key of the field in the passed
+	 * $fields array.
+	 * 
+	 * Example:
+	 * <code>
+	 *     $alias => $field
+	 * </code>
+	 * 
+	 * If no alias is specified, the name of the field will be used.
+	 * 
+	 * Special value '*' is allowed to add all base fields of the Model
+	 * to the returned array.
+	 * 
+	 * This method will extend the passed fields to the model's virtual 
+	 * fields, relations, and fields of its relations.
+	 * 
+	 * The following field specification are all legal:
+	 * 
+	 * <code>
+	 *     '*', // alias for all the model's base fields
+	 *     'my_simple_field',
+	 *     'myVirtualField',
+	 *     'MyRelation',
+	 *     'MyRelation->id',
+	 * </code>
+	 * 
+	 * @param array $fields
+	 * @return array
+	 */
+	public function getDataAs($fields) {
+		$return = array();
+		foreach ($fields as $alias => $field) {
+			if ($field === '*') {
+				$prefix = is_string($alias) ? $alias : null;
+				foreach ($this->getFields() as $name => $value) {
+					$alias = $prefix . $name;
+					if (!array_key_exists($alias, $return)) {
+						$return[$alias] = $value;
+					}
+				}
+			} else {
+				// get data
+				$data = $this->getFieldValue($field);
+				// convert Model & ModelSet
+				if ($data instanceof ModelSet) {
+					$setData = array();
+					foreach ($data as $model) {
+						$setData[] = $model->getData();
+					}
+					$data = $setData;
+				} else if ($data instanceof Model) {
+					$data = $data->getData();
+				}
+				// save
+				if (!is_string($alias)) {
+					$alias = $field;
+				}
+				$return[$alias] = $data;
+			}
+		}
+		return $return;
+	}
+	
 	// TODO this should be documented & have unit tests
 	// it is known to be used twice in opence, and in:
 	// OpenCE:
@@ -393,6 +462,8 @@ abstract class Model {
 				} else {
 					throw new IllegalStateException();
 				}
+			} else {
+				$data["$aliasPrefix$rName"] = null;
 			}
 		}
 		return $data;
@@ -1114,7 +1185,7 @@ abstract class Model {
 				"The field $name is in an undetermined state"
 			);
 		}
-		return $this->internal->fields[$name];
+		return $this->table->getField($name)->castValue($this->internal->fields[$name]);
 	}
 
 	/**
