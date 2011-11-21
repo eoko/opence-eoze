@@ -347,7 +347,11 @@ abstract class GridExecutor extends JsonExecutor {
 				$relModes = ModelTable::LOAD_NONE;
 			}
 		}
-
+//		dump(array(
+//			'form' => $this->getRelationSelectionModes('form'),
+//			'grid' => $this->getRelationSelectionModes('grid'),
+//		));
+		
 //		dump($relModes);
 //		unset($relModes[3]['Contact->Conjoint']);
 		$query = $this->table->createLoadQuery(
@@ -573,23 +577,25 @@ MSG;
 		
 	protected function doLoadOne($id) {
 
-		$query = $this->createLoadQuery('form')->selectFirst();
-
-		$idField = $query->getQualifiedName($this->table->getPrimaryKeyName());
-		$result = $query->andWhere("$idField = ?", $id)->executeSelectFirst();
-
 		$model = $this->table->loadModel($id, $this->load_one_createContext());
+
+		$data = $this->loadOne_loadData($model);
 
 		if ($model === null) {
 			return false;
 		}
 
 		$this->generateLoadFormPages($model);
+		
+		$this->loadOne_addExtraData($data, $model);
 
-		$this->data = $result;
+		$this->data = $data;
 
 		return true;
 	}
+
+	protected function loadOne_loadData(Model $model) {}
+	protected function loadOne_addExtraData(array &$data, Model $model) {}
 
 	protected function load_one_createContext() {
 		return array();
