@@ -42,20 +42,28 @@ eo.form.contact.ContactPanel = Ext.extend(Ext.Panel, {
 		// Don't touch the original array! The array passed to the parent's
 		// initComponent method must be a copy.
 		// var items = this.items = this.items || [], 
-		var items = [], 
+		var items = [],
+			configFieldSets = [],
 			tbar = [];
 		
 		if (this.items) {
 			Ext.each(this.items, function(item) {
-				items.push(item);
+				if (item.xtypeChildren) {
+					configFieldSets.push(item);
+				} else {
+					items.push(item);
+				}
 			});
 		}
 		
-		var fieldSets = [];
-		
-		var hasFieldSetWithPrimarySelection = false;
+		var fieldSets = [],
+			hasFieldSetWithPrimarySelection = false;
+			
+		if (this.fieldSets) {
+			configFieldSets = configFieldSets.concat(this.fieldSets);
+		}
 
-		Ext.each(this.fieldSets, function(fs) {
+		Ext.each(configFieldSets, function(fs) {
 			if (fs === '-' || fs === '->') {
 				tbar.push(fs);
 			} else {
