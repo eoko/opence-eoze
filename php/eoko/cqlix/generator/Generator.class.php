@@ -384,6 +384,14 @@ class Generator extends Script {
 			$this->tableFields[$dbTable] = $fields;
 		}
 	}
+	
+	private function getTableConfig($table, $key = null, $default = null) {
+		if (isset($this->modelsConfig[$table][$key])) {
+			return $this->modelsConfig[$table][$key];
+		} else {
+			return $default;
+		}
+	}
 
 	private function discoverDirectReferencingOneRelations() {
 
@@ -393,9 +401,14 @@ class Generator extends Script {
 		);
 		
 		foreach ($this->tableFields as $table => $fields) {
-			$this->discoverTableReferencesOneRelations($table, $fields);
+			$this->discoverTableReferencesOneRelations(
+				$table, 
+				$fields, 
+				$this->getTableConfig($table, 'guessByName', true),
+				$this->getTableConfig($table, 'guessByConstraint', true)
+			);
 		}
-
+		
 		$this->mergeRelationsFoundByNameAndByFK(true, true);
 		
 		foreach ($this->referencesOneRelations as $dbTable => $relation) {
