@@ -95,6 +95,14 @@ eo.form.contact.AbstractField = Ext.extend(Ext.form.CompositeField, {
 	 */
 	,autoTooltip: true
 	
+	/**
+	 * @property {Boolean} 
+	 * All the children fields of the component, that is the base fields
+	 * and the extra fields.
+	 * @private
+	 */
+	,allFields: undefined
+	
 	,constructor: function(config) {
 
 		/**
@@ -222,90 +230,149 @@ eo.form.contact.AbstractField = Ext.extend(Ext.form.CompositeField, {
 		return r;
 	}
 	
+	// private
+	,getItemsLayout: function() {
+		var fields = this.allFields;
+		if (!this.itemsLayout) {
+			if (!this.fieldsLayout) {
+				// if the fields array has nested array, that means that the
+				// component developper meant to use composite layout,
+				// else horizontal layout will be enought
+				var hasNested = false;
+				Ext.each(fields, function(field) {
+					if (Ext.isArray(field)) {
+						hasNested = true;
+					}
+				});
+				this.itemsLayout = hasNested ? 'v' : 'h';
+			} else if (/^v(?:ertical)?$/i.test(this.fieldsLayout)) { // vertical
+				this.itemsLayout = 'v';
+			} else if (/^h(?:orizontal)?$/i.test(this.fieldsLayout)) { // this is horizontal
+				this.itemsLayout = 'h';
+			} else {
+				throw new Error('Illegal layout: ' + this.fieldsLayout);
+			}
+		}
+		return this.itemsLayout;
+	}
+	
 	/**
 	 * @private
 	 */
-	,layoutItems: function(fields, layout) {
-		if (!layout) { // auto
-			// if the fields array has nested array, that means that the
-			// component developper meant to use composite layout,
-			// else horizontal layout will be enought
-			var hasNested = false;
-			Ext.each(fields, function(field) {
-				if (Ext.isArray(field)) {
-					hasNested = true;
-				}
-			});
-			return this.layoutItems(fields, hasNested ? 'v' : 'h');
-		} else if (/^v(?:ertical)?$/i.test(layout)) { // vertical
-			// if we are in V mode, we can honnor the layout requested by
-			// the component (that is, have multiple fields on one single
-			// row, if needed)
-			return [{
-				xtype: 'container'
-				,flex: 1
-				,layout: {
-					type: 'form'
-				}
-				,cls: 'closer-items'
-				,defaults: {
-					hideLabel: true
-					,anchor: '100%'
-				}
-				,items: this.composeItems(fields)
-			}];
-		} else if (/^h(?:orizontal)?$/i.test(layout)) { // this is horizontal
-			// if we are in H, we *force* the h
-			// even if the component is trying to compose h/v
-			return this.flexHorizontalItemGroup(eo.flattenArray(fields));
-		} else {
-			throw new Error('Illegal argument: ' + layout);
+	,layoutItems: function() {
+		var fields = this.allFields;
+		switch (this.getItemsLayout()) {
+			case 'v':
+				// if we are in V mode, we can honnor the layout requested by
+				// the component (that is, have multiple fields on one single
+				// row, if needed)
+				return [this.mainCt = Ext.create({
+					xtype: 'container'
+					,flex: 1
+					,layout: {
+						type: 'form'
+					}
+					,cls: 'closer-items'
+					,defaults: {
+						hideLabel: true
+						,anchor: '100%'
+					}
+					,items: this.composeItems(fields)
+				})];
+			case 'h':
+				// if we are in H, we *force* the h
+				// even if the component is trying to compose h/v
+				this.mainCt = this;
+				return this.flexHorizontalItemGroup(eo.flattenArray(fields));
 		}
 	}
+	
+	// private
+	,createChildrenFields: function(method) {
+		
+		var initFields = function(field) {
+			var idName = this.idField,
+				valueFields = this.instanceValueFields;
+			// store submit fields
+			if (field.submitValue !== false) {
+				valueFields[field.getName()] = field;
+				field.submitValue = false;
+				// check for own id field
+				if (field.name === idName) {
+					this.hasOwnIdField = true;
+				}
+			}
+			// emptyText to tooltip
+			if (this.autoTooltip && !field.hasOwnProperty('tooltip') && field.emptyText) {
+				field.on({
+					single: true
+					,afterrender: function(field) {
+						field.el.dom['qtip'] = field.emptyText;
+					}
+				});
+			}
+		};
+		
+		return function(method) {
+			var fields = [];
+			if (this[method]) {
+				fields = this[method]();
+			}
+			if (!Ext.isArray(fields)) {
+				fields = [fields];
+			}
+			Ext.each(fields, initFields, this);
+			return fields;
+		};
+	}() // closure
+	
+	/**
+	 * Abstract method that must be implemented to create children value fields.
+	 * 
+	 * @return {Array} The `array` of **instanciated** value fields to be
+	 * added to the main container of this field.
+	 * @method
+	 * @protected
+	 */
+	,createFields: undefined
+	
+	/**
+	 * Abstract method that can be implemented to create extra children value fields.
+	 * Those fields would be hidden by default, and they will always be optionnal.
+	 * 
+	 * @return {Array} The `array` of **instanciated** value fields to be
+	 * added to the main container of this field.
+	 * @method
+	 * @protected
+	 */
+	,createExtraFields: undefined
 
 	/**
 	 * @private
 	 */
 	,initComponent: function() {
-		var items,
-			idName = this.idField,
+		var idName = this.idField,
 			typeName = this.typeField;
 		
-		var instanceValueFields = {},
-			hasOwnIdField = false;
+		this.instanceValueFields = {};
 		
-		// If this object has a createFields methods, that supposes that
-		// initComponent is not overriden (while, if done correctly, it
-		// could still be).
-		if (this.createFields) {
-			var fields = this.createFields();
-			if (!Ext.isArray(fields)) {
-				fields = [fields];
-			}
-			// store value fields
-			Ext.each(fields, function(field) {
-				if (field.submitValue !== false) {
-					instanceValueFields[field.getName()] = field;
-					field.submitValue = false;
-					if (field.name === idName) {
-						hasOwnIdField = true;
-					}
-				}
-				if (this.autoTooltip && !field.hasOwnProperty('tooltip') && field.emptyText) {
-					field.on({
-						single: true
-						,afterrender: function(field) {
-							field.el.dom['qtip'] = field.emptyText;
-						}
-					});
-				}
-			});
-			// layout
-			items = this.items = this.layoutItems(fields, this.fieldsLayout);
-		}
+		var fields = this.createChildrenFields('createFields'),
+			extraFields = this.createChildrenFields('createExtraFields');
+
+		// store all fields
+		this.allFields = fields.concat(extraFields);
+			
+		// filled by createChildrenFields
+		var instanceValueFields = this.instanceValueFields;
+		
+		Ext.each(extraFields, function(field) {
+			field.hide();
+		});
+		
+		var items = this.items = this.layoutItems();
 
 		// id
-		if (idName && !hasOwnIdField) {
+		if (idName && !this.hasOwnIdField) {
 			var idField = new Ext.form.Hidden({
 				emptyValue: null
 			});
@@ -355,15 +422,77 @@ eo.form.contact.AbstractField = Ext.extend(Ext.form.CompositeField, {
 			})
 		}
 		
+		var rightCol = new Ext.Container({
+			layout: {
+				type: 'vbox'
+			}
+			,height: '100%'
+		});
+		items.push(rightCol);
+		
 		// removable
 		if (this.removable) {
-			this.deleteButton = new Ext.Button({
+			rightCol.add(new Ext.Button({
 				iconCls: 'ico delete'
 				,scope: this
 				,tooltip: this.textRemove
 				,handler: this.removeHandler
-			});
-			items.push(this.deleteButton);
+			}));
+			rightCol.add(new Ext.BoxComponent({
+				flex: 1
+			}));
+		}
+		
+		if (this.createExtraFields) {
+			
+			if (this.getItemsLayout() !== 'v') {
+				throw new Error('Not implemented yet');
+			}
+			
+			this.mainCt.autoHeight = true;
+			rightCol.add(new Ext.Button({
+				iconCls: 'ico contact expand'
+				,scope: this
+				,tooltip: NS.locale('showAllFields')
+				,isCollapsed: true
+				,collapseData: {
+					'true': {
+						fn: 'hide',
+						cls: 'expand',
+						tooltip: NS.locale('showAllFields')
+					},
+					'false': {
+						fn: 'show',
+						cls: 'collapse',
+						tooltip: NS.locale('onlyBaseFields')
+					}
+				}
+				,handler: function(button) {
+					button.isCollapsed = !button.isCollapsed;
+					var cd = button.collapseData[button.isCollapsed],
+						fn = cd.fn;
+					button.setTooltip(cd.tooltip)
+					Ext.each(extraFields, function(field) {
+						field[fn]();
+					});
+					this.mainCt.syncSize();
+					rightCol.setHeight(this.mainCt.getHeight());
+					
+					this.doLayout();
+					
+					var top = this.findParentBy(function(p) {
+						return !p.ownerCt;
+					});
+					if (top) {
+						top.doLayout();
+					}
+					
+					button.setIconClass('ico contact ' + cd.cls);
+				}
+			}));
+			rightCol.add(new Ext.BoxComponent({
+				height: 2
+			}));
 		}
 		
 		// adds instance value fields
