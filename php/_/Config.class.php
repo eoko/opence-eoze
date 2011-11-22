@@ -398,7 +398,7 @@ class Config implements ArrayAccess, IteratorAggregate {
 							sprintf('Cannot resolve path: %s (missing node: %s)',
 									$path, implode('/', $resolving)));
 				} else if ($createIfNeeded) {
-					return Config::createEmpty($path, $this->configName);
+					return \eoko\Config\Config::createEmpty($path, $this->configName);
 				} else {
 					return null;
 				}
@@ -408,7 +408,7 @@ class Config implements ArrayAccess, IteratorAggregate {
 		}
 
 		if (is_array($node) || $node instanceof ArrayAccess) {
-			return new Config($node, $path, $this->configName);
+			return new \eoko\Config\Config($node, $path, $this->configName);
 		} else {
 			return $node;
 		}
