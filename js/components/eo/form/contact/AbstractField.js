@@ -130,6 +130,14 @@ eo.form.contact.AbstractField = Ext.extend(Ext.form.CompositeField, {
 	,hasPrimaryField: function() {
 		return Ext.isString(this.primaryField);
 	}
+
+	/**
+	 * Returns `true` if this Field has a type selection combo.
+	 * @return {Boolean}
+	 */
+	,hasTypeField: function() {
+		return this.types && this.typeField;
+	}
 	
 	/**
 	 * Adds listeners to the given fields, in order to track when they
@@ -256,7 +264,6 @@ eo.form.contact.AbstractField = Ext.extend(Ext.form.CompositeField, {
 	,initComponent: function() {
 		var items,
 			idName = this.idField,
-			types = this.types,
 			typeName = this.typeField;
 		
 		var instanceValueFields = {},
@@ -294,7 +301,7 @@ eo.form.contact.AbstractField = Ext.extend(Ext.form.CompositeField, {
 		}
 
 		// Type
-		if (types && typeName) {
+		if (this.hasTypeField()) {
 			var typeCombo = Ext.create(this.createTypeComboConfig());
 			items.unshift(typeCombo);
 			this.valueFields[typeName] = typeCombo;
@@ -428,7 +435,7 @@ eo.form.contact.AbstractField = Ext.extend(Ext.form.CompositeField, {
 	
 	,focus: function(defer) {
 		var field = this.items.get(
-			1
+			(this.hasTypeField() ? 1 : 0)
 			+ (this.hasPrimaryField() ? 1 : 0)
 		);
 		if (field) {
