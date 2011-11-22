@@ -196,11 +196,18 @@ class Columns {
 								|| !preg_match('/^[A-Z]/', $name))
 							&& (!isset($col['inflect'])  || $col['inflect'])
 						) {
-							// inflector
-							if ($inflector instanceof Config) {
-								$inflector = $inflector->toArray();
+							// Do not inflect virtual fields
+							if (!$autoName->getValue('inflectVirtualFields')
+									&& (null !== $field = $this->table->getField($name, false))
+									&& $field instanceof \VirtualField) {
+								$col['name'] = $name;
+							} else {
+								// inflector
+								if ($inflector instanceof Config) {
+									$inflector = $inflector->toArray();
+								}
+								$col['name'] = call_user_func($inflector, $name);
 							}
-							$col['name'] = call_user_func($inflector, $name);
 						} else {
 							// no inflector
 							$col['name'] = $name;
