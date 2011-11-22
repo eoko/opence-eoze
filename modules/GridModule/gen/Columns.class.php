@@ -190,9 +190,12 @@ class Columns {
 					
 					// then $autoName is a Config object
 					} else {
-						if ((null !== $inflector = $autoName->getValue('inflector'))
-								&& (!$autoName->getValue('inflectOnlyLcFirst', false)
-								|| !preg_match('/^[A-Z]/', $name))) {
+						if (
+							(null !== $inflector = $autoName->getValue('inflector'))
+							&& (!$autoName->getValue('inflectOnlyLcFirst', false)
+								|| !preg_match('/^[A-Z]/', $name))
+							&& (!isset($col['inflect'])  || $col['inflect'])
+						) {
 							// inflector
 							if ($inflector instanceof Config) {
 								$inflector = $inflector->toArray();
