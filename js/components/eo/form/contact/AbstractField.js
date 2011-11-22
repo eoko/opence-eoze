@@ -89,6 +89,11 @@ eo.form.contact.AbstractField = Ext.extend(Ext.form.CompositeField, {
 	 * extending {eo.form.contact.AbstractField AbstractField}, or at runtime.
 	 */
 	,defaultReservePrimaryButtonSpace: undefined
+	/**
+	 * @cfg {Boolean} autoTooltip `true` to automatically apply the {@link #emptyText}
+	 * of children fields as tooltip (on them).
+	 */
+	,autoTooltip: true
 	
 	,constructor: function(config) {
 
@@ -285,6 +290,14 @@ eo.form.contact.AbstractField = Ext.extend(Ext.form.CompositeField, {
 					if (field.name === idName) {
 						hasOwnIdField = true;
 					}
+				}
+				if (this.autoTooltip && !field.hasOwnProperty('tooltip') && field.emptyText) {
+					field.on({
+						single: true
+						,afterrender: function(field) {
+							field.el.dom['qtip'] = field.emptyText;
+						}
+					});
 				}
 			});
 			// layout
