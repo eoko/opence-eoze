@@ -160,7 +160,7 @@ eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 			this.setValue(this.value);
 		} else if (this.initialFieldNumber) {
 			for (var i=0, l=this.initialFieldNumber; i<l; i++) {
-				this.addField();
+				this.addField(true);
 			}
 		}
 	}
@@ -213,7 +213,8 @@ eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 	}
 	
 	// protected
-	,addField: function() {
+	,addField: function(preventFocus) {
+		
 		var field = this.createField();
 		field.on({
 			scope: this
@@ -252,7 +253,9 @@ eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 			this.fireEvent('fullstatechanged', this, true);
 		}
 		
-		field.focus();
+		if (preventFocus !== true) {
+			field.focus();
+		}
 		
 		return field;
 	}
@@ -333,7 +336,7 @@ eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 			}
 		} else {
 			if (this.allowBlank === false) {
-				this.addField();
+				this.addField(true);
 			} else if (this.autoHide) {
 				this.hide();
 			}
@@ -433,7 +436,7 @@ eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 		}
 		if (!Ext.isArray(data)) {
 			if (this.returnSingleValue) {
-				var field = this.addField();
+				var field = this.addField(true);
 				field.setValue(data);
 				if (field.isDefault()) {
 					this.setPrimaryField(field);
@@ -443,7 +446,7 @@ eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 			}
 		} else {
 			Ext.each(data, function(value) {
-				var field = this.addField();
+				var field = this.addField(true);
 				field.setValue(value);
 				if (field.isDefault()) {
 					this.setPrimaryField(field);
