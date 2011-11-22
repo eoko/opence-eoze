@@ -10,23 +10,6 @@
 abstract class ModelFieldBase implements ModelField {
 	
 	public function castValue($value) {
-		switch ($this->getType()) {
-			case ModelField::T_INT:
-				return (int) $value;
-			case ModelField::T_BOOL:
-				return (bool) $value;
-			case ModelField::T_FLOAT:
-				return (double) $value;
-			case ModelField::T_DATE:
-			case ModelField::T_DATETIME:
-//				throw new UnsupportedOperationException('Not implemented yet');
-			case ModelField::T_DECIMAL:
-			case ModelField::T_STRING:
-			case ModelField::T_TEXT:
-				return $value;
-			default:
-				throw new Exception('Unknown type: ' . $this->getType());
-				return $value;
-		}
+		return eoko\cqlix\ModelFieldHelper::castValue($value, $this->getType());
 	}
 }
