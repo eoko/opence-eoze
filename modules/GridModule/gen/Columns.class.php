@@ -222,7 +222,7 @@ class Columns {
 						if (!isset($col['renderer'])) {
 							$col['renderer'] = 'Oce.ext.Renderer.integer';
 						}
-						$this->setColFormItemif($col, 'vtype', 'numInt');
+						self::setColFormItemif($col, 'vtype', 'numInt');
 						self::setColStoreItemIf($col, array(
 							'type' => 'int',
 							'useNull' => true,
@@ -233,7 +233,7 @@ class Columns {
 						if (!isset($col['renderer'])) {
 							$col['renderer'] = 'Oce.ext.Renderer.float_fr_2';
 						}
-						$this->setColFormItemif($col, 'vtype', 'numFloat');
+						self::setColFormItemif($col, 'vtype', 'numFloat');
 						self::setColStoreItemIf($col, array(
 							'type' => 'float',
 							'useNull' => true,
@@ -241,6 +241,13 @@ class Columns {
 						break;
 					case ModelColumn::T_DATETIME:
 					case ModelColumn::T_DATE:
+						if (!isset($col['renderer'])) {
+							$col['renderer'] = "Oce.Format.dateRenderer('d/m/Y')";
+						}
+						if (!isset($col['type'])) {
+							$col['type'] = 'datefield';
+						}
+						self::setColFormItemif($col, 'format', 'd/m/Y');
 						self::setColStoreItemIf($col, 'type', 'date');
 						break;
 					case ModelColumn::T_BOOL:
@@ -314,7 +321,7 @@ class Columns {
 		unset($col);
 	}
 	
-	private function setColFormItemIf(&$col, $name, $value) {
+	private static function setColFormItemIf(&$col, $name, $value) {
 		if (isset($col['form'])) {
 			if ($col['form'] !== false) {
 				if (!isset($col['form']['name'])) {
