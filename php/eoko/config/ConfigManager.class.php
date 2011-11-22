@@ -236,7 +236,6 @@ class ConfigManager {
 					$nodePath = '';
 				}
 				$nodePath = "$parentNodePath$this->delimiter$nodePath";
-				dump_mark();
 			}
 			$this->addConfigFile($nodePath, $file);
 		}
