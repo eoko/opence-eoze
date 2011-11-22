@@ -128,8 +128,8 @@ createEozeDirIf(CACHE_PATH);
 createEozeDirIf(LOG_PATH);
 createEozeDirIf(TMP_PATH);
 
-require_once PHP_PATH . 'functions.php';
-require_once PHP_PATH . 'dump.php';
+require_once PHP_PATH . '_/functions.php';
+require_once PHP_PATH . '_/dump.php';
 
 if (!function_exists('lcfirst')) {
 	function lcfirst($str) {
@@ -155,27 +155,24 @@ function includeFromNamespace($ns, $filename, $require = true, $once = true) {
 // Includes which must be loaded before the class autoloader is set...
 
 //... Exceptions bases
-require_once PHP_PATH . 'router_exceptions.inc.php';
+require_once PHP_PATH . '_/router_exceptions.inc.php';
 //... Language
 //require_once PHP_PATH . 'Language.class.php'; // declares the function lang in the global namespace
 includeFromNamespace('eoko\\i18n', 'Language.class.php');
 eoko\i18n\Language::importFunctions(__NAMESPACE__);
 //require_once PHP_PATH . 'Language.class.php'; // declares the function lang in the global namespace
 //... Logger
-require_once PHP_PATH . 'Logger.class.php';
+require_once PHP_PATH . '_/Logger.class.php';
 
 // TODO: make that ondemand compliant!
-require_once PHP_PATH . 'ModelRelation.class.php';
-require_once PHP_PATH . 'ModelField.class.php';
-require_once PHP_PATH . 'ModelFieldBase.class.php';
-require_once PHP_PATH . 'ModelRelationInfo.class.php';
-
-//require_once PHP_PATH . str_replace('\\', DS, 'eoko/cqlix/Relation/Relation') . '.classes.php';
-//require_once PHP_PATH . str_replace('\\', DS, 'eoko/cqlix/Relation/RelationInfo') . '.classes.php';
+require_once PHP_PATH . '_/ModelRelation.class.php';
+require_once PHP_PATH . '_/ModelField.class.php';
+require_once PHP_PATH . '_/ModelFieldBase.class.php';
+require_once PHP_PATH . '_/ModelRelationInfo.class.php';
 
 // --- Exception handler ---
 if ((!isset($test) || !$test) && (!isset($is_script) || !$is_script)) {
-	require_once (PHP_PATH . 'ExceptionHandler.class.php');
+	require_once (PHP_PATH . '_/ExceptionHandler.class.php');
 }
 
 // --- Class loader --

@@ -7,7 +7,7 @@
  * @subpackage Query
  */
 
-require_once PHP_PATH . 'Query.class.php';
+require_once __DIR__ . '/Query.class.php';
 
 class QueryWhere {
 

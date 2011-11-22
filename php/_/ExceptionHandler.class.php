@@ -3,7 +3,7 @@
  * @author Éric Ortéga <eric@mail.com>
  */
 
-require_once (PHP_PATH . 'ExtJSResponse.class.php');
+require_once PHP_PATH . '_/ExtJSResponse.class.php';
 
 class ExceptionHandler {
 
