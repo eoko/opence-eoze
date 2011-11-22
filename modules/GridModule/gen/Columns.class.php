@@ -305,6 +305,9 @@ class Columns {
 			// Grid field
 			if (isset($col['formField'])) {
 				$ff = &$col['formField'];
+				if (!isset($ff['name'])) {
+					$ff['name'] = $col['name'];
+				}
 				if (isset($ff['xtype'])) {
 					if ($ff['xtype'] == 'gridfield') {
 						if (isset($ff['fields'])) foreach ($ff['fields'] as &$c) {
@@ -315,10 +318,10 @@ class Columns {
 							}
 						}
 					} else if ($ff['xtype'] == 'oce.foreigncombo') {
-						if (!isset($ff['column'])) $ff['column'] = $col['name'];
+						if (!isset($ff['column'])) {
+							$ff['column'] = $col['name'];
+						}
 //					} else if ($ff['xtype'] == 'htmleditor' || $ff['textfield']) {
-					} else {
-						if (!isset($ff['name'])) $ff['name'] = $col['name'];
 					}
 				}
 			} else {
