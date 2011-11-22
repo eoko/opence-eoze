@@ -594,7 +594,35 @@ MSG;
 		return true;
 	}
 
-	protected function loadOne_loadData(Model $model) {}
+	protected function loadOne_loadData(Model $model) {
+		$relations = $this->getRelationSelectionModes('form');
+		
+		$query = $this->createLoadQuery('form')->selectFirst();
+		$idField = $query->getQualifiedName($this->table->getPrimaryKeyName());
+		return $query->andWhere("$idField = ?", $model->getPrimaryKeyValue())->executeSelectFirst();
+
+		// Possible alternative implemenation:
+		//
+		//	$specs = array('*');
+		//
+		//	foreach ($relations as $mode => $values) {
+		//		switch ($mode) {
+		//			case ModelTable::LOAD_NAME:
+		//				// TODO
+		//				break;
+		//			case ModelTable::LOAD_ID:
+		//				// TODO
+		//				break;
+		//			case ModelTable::LOAD_FULL:
+		//				foreach ($values as $relation => $fields) {
+		//					$specs = array_merge($specs, array_keys($fields));
+		//				}
+		//			break;
+		//		}
+		//	}
+		// 
+		// return $model->getDataAs($specs);
+	}
 	protected function loadOne_addExtraData(array &$data, Model $model) {}
 
 	protected function load_one_createContext() {
