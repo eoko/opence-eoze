@@ -13,9 +13,9 @@ abstract class Bootstrap {
 		$this->registerModuleFactories();
 	}
 
-	protected static final function addConfigPath($path) {
+	protected static final function addConfigPath($path, $defaultNode = null) {
 		if (is_dir($path)) {
-			ConfigManager::addPath($path);
+			ConfigManager::addPath($path, $defaultNode);
 		} else {
 			Logger::get(get_called_class())->warn((file_exists($path) ? "$path does not exist ("
 				: "$path is not a directory")
