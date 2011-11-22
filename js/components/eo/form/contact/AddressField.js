@@ -45,6 +45,18 @@ eo.form.contact.AddressField = Ext.extend(eo.form.contact.AbstractField, {
 		];
 	}
 	
+//	,createExtraFields: function() {
+//		return [
+//			new Ext.form.TextField({
+//				emptyText: 'Pays'
+//			})
+//			,new Ext.form.TextArea({
+//				height: 36
+//				,emptyText: 'Commentaire'
+//			})
+//		];
+//	}
+	
 	,isValid: function() {
 		return this.streetField.getValue()
 				|| this.zipField.getValue()
