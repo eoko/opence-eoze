@@ -9,10 +9,17 @@ Ext.ns('eo');
 (function() {
 
 var spp = Ext.Panel.prototype;
-	
+
 eo.JsonPanel = Ext.extend(Ext.Panel, {
 
-	isFormField: true
+	/**
+	 * @cfg {Boolean} decode `true` to decode the passed value with
+	 * {@link Ext.util.JSON.decode}; `false` to accept a vanilla 
+	 * javascript `Object`;
+	 */
+	decode: true
+
+	,isFormField: true
 //		,height: 200
 	,autoScroll: true
 	,bodyCssClass: "eo-json-list"
@@ -76,17 +83,22 @@ eo.JsonPanel = Ext.extend(Ext.Panel, {
 			});
 		};
 
-		var decode = function(s) {
-			try {
-				return Ext.util.JSON.decode(s);
-			} catch (e) {
+		var decode;
+		if (this.decode) {
+			decode = function(s) {
 				try {
-					return Ext.util.JSON.decode(decodeURIComponent(s));
+					return Ext.util.JSON.decode(s);
 				} catch (e) {
-					return new Error('Decoding Error');
+					try {
+						return Ext.util.JSON.decode(decodeURIComponent(s));
+					} catch (e) {
+						return new Error('Decoding Error');
+					}
 				}
-			}
-		};
+			};
+		} else {
+			decode = function(v) { return v; };
+		}
 
 		var span = function(cls, html) {
 			return {tag:'span', cls:cls, html:html};
@@ -243,103 +255,7 @@ eo.JsonPanel = Ext.extend(Ext.Panel, {
 				line.code.createChild({tag:'span', cls:o.cls, html:o.value});
 				return line;
 			}
-
-			return;
-
-			if (Ext.isObject(value)) Ext.iterate(value, function(k, v) {
-
-				i++;
-
-				var line = list.createChild({tag: "div", cls: "line offset" + (i%2)});
-
-				var folder = line.createChild({tag:'span', cls: 'fold gutter'});
-				line.createChild({tag:'span', cls: 'number gutter', html: i});
-				var code = line.createChild({tag:'code', 
-						style: "margin-left: " + (40+level*offset+5) + "px;"});
-				code.createChild({tag:'span', cls: 'key', html: k});
-				code.createChild({tag:'span', cls: 'delimiter', html: ': '});
-
-				if (/^json_(.*)$/.test(k)) {
-
-					var ldelim = code.createChild({tag:'span', cls:'delimiter', html: '{ '}),
-						ellip = code.createChild({tag:'span', cls: 'value keyword', html:'&hellip;'});
-
-					ellip.createChild({tag:'span', cls:'delimiter', html: ' }'});
-
-//						ldelim.setDisplayed(false);
-//						rdelim.setDisplayed(false);
-					ellip.setDisplayed(false);
-
-					var foldList = decodeValue(list, v, level+1);
-
-					(function() {
-						i++;
-						var line = foldList.createChild({tag: "div", cls: "line offset" + (i%2)});
-						line.createChild({tag:'span', cls: 'fold gutter'});
-						line.createChild({tag:'span', cls: 'number gutter', html: i});
-						line.createChild({tag:'code', 
-								style: "margin-left: " + (40+level*offset+5) + "px;"})
-							.createChild({tag:'span', cls:'delimiter', html: ' }'});
-					})();
-
-					folder.addClass('collapse');
-					var collapsed = false;
-					folder.on('click', function() {
-						collapsed = !collapsed;
-						if (collapsed) {
-							folder.removeClass('collapse');
-							folder.addClass('expand');
-						} else {
-							folder.removeClass('expand');
-							folder.addClass('collapse');
-						}
-						ellip.setDisplayed(collapsed);
-						foldList.setDisplayed(!collapsed);
-					});
-				} else {
-					var cls = '';
-					if (Ext.isString(v)) {
-						cls = 'string';
-						code.createChild({tag:'span', cls: 'delimiter' + cls, html: '"'});
-						code.createChild({tag:'span', cls: 'value ' + cls, html: v});
-						code.createChild({tag:'span', cls: 'delimiter' + cls, html: '"'});
-					} else {
-						if (v === null || v === undefined || Ext.isBoolean(v)) {
-							cls = 'keyword';
-							v = '' + v;
-						} else if (Ext.isNumber(v)) {
-							cls = 'number';
-						} else if (Ext.isBoolean(v)) {
-							cls = 'boolean';
-						}
-						code.createChild({tag:'span', cls: 'value ' + cls, html: v});
-					}
-				}
-			});
-
-			else if (Ext.isArray(value)) (function() {
-
-				i++;
-
-				var line = list.createChild({tag: "div", cls: "line offset" + (i%2)});
-
-				var folder = line.createChild({tag:'span', cls: 'fold gutter'});
-				line.createChild({tag:'span', cls: 'number gutter', html: i});
-				var code = line.createChild({tag:'code', 
-						style: "margin-left: " + (40+level*offset+5) + "px;"});
-//					code.createChild({tag:'span', cls: 'key', html: k});
-				code.createChild({tag:'span', cls: 'delimiter', html: '[ '});
-				code.createChild({tag:'span', cls: 'value', html: value.join(', ')});
-				code.createChild({tag:'span', cls: 'delimiter', html: ' ]'});
-
-				debugger
-				Ext.each(value, function(v) {
-
-				});
-			})(); // isArray
-
-			return list;
-		}
+		};
 
 		decodeValue(dom, null, decode(value), 0);
 
