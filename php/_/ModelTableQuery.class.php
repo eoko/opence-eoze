@@ -75,7 +75,7 @@ class ModelTableQuery extends Query implements QueryAliasable {
 			}
 
 			$field = $this->table->getField($fieldName);
-
+			
 			if ($field instanceof ModelColumn) {
 				parent::select(new QuerySelect($fieldName, $fieldAlias, $this->table));
 			} else if ($field instanceof ModelRelationInfo) {
@@ -83,6 +83,8 @@ class ModelTableQuery extends Query implements QueryAliasable {
 				$field->selectFields($this, array($alias => $joinFieldName));
 			} else if ($field instanceof VirtualField) {
 				$field->select($this);
+			} else {
+				throw new IllegalStateException();
 			}
 		}
 	}

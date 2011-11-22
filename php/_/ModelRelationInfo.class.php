@@ -339,6 +339,9 @@ abstract class ModelRelationInfo extends ModelFieldBase {
 	}
 
 	public function getField($name) {
+		if ($this->targetTable->hasRelation($name)) {
+			return $this->getRelationInfo($name);
+		}
 		return new ModelRelationInfoField($this, "$this->name->$name", $name);
 	}
 
