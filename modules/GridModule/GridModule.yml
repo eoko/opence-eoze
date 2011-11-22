@@ -12,7 +12,8 @@ module:
 options:
   formPropsFromDB: false
   autoName:
-    inflector: [Inflector, camelCaseToUnderscored]
+    inflector: false
+#    inflector: [Inflector, camelCaseToUnderscored]
     inflectOnlyLcFirst: true
     inflectVirtualFields: false
 
