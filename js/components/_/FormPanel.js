@@ -369,7 +369,7 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
 //				this.afterEditFormLoaded(this.form);
 				this.loaded = true;
 				afterLoadSuccess();
-				this.fireEvent("afterload", this.form);
+				this.fireEvent("afterload", this.form, action.result, this);
 				if (callback) {
 					callback(this.form);
 				}
