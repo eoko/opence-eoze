@@ -15,12 +15,13 @@ var sp  = Ext.Panel,
  */
 eo.form.contact.ContactPanel = Ext.extend(Ext.Panel, {
 
-//	fieldSets: [
-//		{xtype: 'phonenumbersfieldset', name: 'phoneNumbers', allowBlank: false},
-//		{xtype: 'emailsfieldset', name: 'emails'},
-//		{xtype: 'addressesfieldset', name: 'addresses'},
-//		{xtype: 'organisationsfieldset', name: 'organisations'}
-//	]
+	/**
+	 * @cfg {Array} fieldSets The dynamic {@link eo.form.contact.AbstractFieldSet 
+	 * FieldSet}s to add to this panel. Optionnaly, the fieldsets can also be passed 
+	 * in the {@link #items} array; indeed, any item in the items array that appears
+	 * to be a dynamix FieldSet (that is, it posseses a xtypeChildren property) will
+	 * be treated as if passed at the beginning of the fieldSets array.
+	 */
 	fieldSets: undefined
 	
 	,autoScroll: true
