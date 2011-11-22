@@ -22,6 +22,8 @@ class ConfigManager {
 	private static $instance = null;
 
 	private static $configPaths = array();
+	private static $defaultNodes = array();
+	
 	private static $extraFiles = null;
 	private static $DELIMITERS = array('/', '\\');
 
@@ -39,14 +41,11 @@ class ConfigManager {
 	private function __construct($init = true) {
 
 		Logger::get($this)->startTimer('LOAD', 'Config loaded in {}');
-
+		
 		// Paths
 		// First, add defaults path
 		if ($init) {
 			self::addPath(EOZE_CONFIG_PATH);
-		}
-		foreach (self::$configPaths as &$path) {
-			if (substr($path, -1) !== DS) $path .= DS;
 		}
 
 		// Delimiters
@@ -57,12 +56,12 @@ class ConfigManager {
 		} else {
 			$this->altDelimiters = null;
 		}
-
+		
 		$this->loadData();
 
 		Logger::get($this)->stopTimer('LOAD');
 
-//		dump($this->data, 50);
+		dump($this->data, 50);
 
 		if ($this->modified) {
 			$this->cacheData();
@@ -122,15 +121,27 @@ class ConfigManager {
 		return new ImmutableMap($a);
 	}
 
-	public static function addPath($path) {
-		if (self::$instance) throw new IllegalStateException();
-		if (func_num_args() > 1) {
-			foreach (func_get_args() as $path) self::addPath($path);
-		} else if (is_array($path)) {
-			foreach ($path as $path) self::addPath($path);
-		} else {
-			self::$configPaths[] = $path;
+	public static function addPath($path, $defaultNode = null) {
+		if (self::$instance) {
+			throw new IllegalStateException();
 		}
+//		if (func_num_args() > 1) {
+//			foreach (func_get_args() as $path) {
+//				self::addPath($path);
+//			}
+//		} else if (is_array($path)) {
+//			foreach ($path as $path) {
+//				self::addPath($path);
+//			}
+//		} else {
+			if (substr($path, -1) !== DS) {
+				$path .= DS;
+			}
+			self::$configPaths[] = $path;
+			if ($defaultNode) {
+				self::$defaultNodes[$path] = $defaultNode;
+			}
+//		}
 	}
 
 	public static function addFile($file) {
@@ -182,7 +193,8 @@ class ConfigManager {
 		if (!self::$useCache || !$this->loadCachedData()) {
 			$this->modified = true;
 			foreach ($this->listConfigFiles() as $path => $files) {
-				$this->loadConfigDirectory('', $path, $files);
+				$parentNodePath = isset(self::$defaultNodes[$path]) ? self::$defaultNodes[$path] : '';
+				$this->loadConfigDirectory($parentNodePath, $path, $files);
 			}
 		}
 	}
@@ -219,7 +231,13 @@ class ConfigManager {
 			} else {
 				$nodePath = str_replace(DS, $this->delimiter, $nodePath);
 			}
-			if ($parentNodePath) $nodePath = "$parentNodePath$this->delimiter$nodePath";
+			if ($parentNodePath) {
+				if ($nodePath === '/') {
+					$nodePath = '';
+				}
+				$nodePath = "$parentNodePath$this->delimiter$nodePath";
+				dump_mark();
+			}
 			$this->addConfigFile($nodePath, $file);
 		}
 	}
@@ -331,7 +349,9 @@ class ConfigManager {
 	 */
 	private static function isPathAbsolute($nodePath) {
 		$c = substr($nodePath, 0, 1);
-		foreach (self::$DELIMITERS as $d) if ($c === $d) return true;
+		foreach (self::$DELIMITERS as $d) {
+			if ($c === $d) return true;
+		}
 		return false;
 	}
 
