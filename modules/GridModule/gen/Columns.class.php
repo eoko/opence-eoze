@@ -4,7 +4,8 @@ namespace eoko\modules\GridModule\gen;
 
 use eoko\config\Config;
 use ConfigInheritor;
-use ModelColumn;
+use ModelColumn, ModelField;
+use eoko\cqlix\EnumColumn;
 use ModelTable;
 
 use eoko\util\Arrays;
@@ -256,6 +257,28 @@ class Columns {
 					case ModelColumn::T_TEXT:
 					case ModelColumn::T_STRING:
 						self::setColStoreItemIf($col, 'type', 'string');
+						break;
+					case \ModelField::T_ENUM:
+						$data = array();
+						$renderer = array();
+						foreach ($f->getCodeLabels() as $code => $label) {
+							if ($code === '') {
+								$code = null;
+							}
+							$data[] = array($code, $label);
+							$renderer[$code === null ? 'null' : $code] = $label;
+						}
+						$renderer = json_encode($renderer);
+						Arrays::applyIf($col, array(
+							'rendererData' => $renderer,
+							'renderer' => "function(v) { return {$renderer}[v] || ''; }",
+						));
+						Arrays::applyIf($col['formField'], array(
+							'xtype' => 'oce.simplecombo',
+							'field' => $col['name'],
+							'value' => $f->getDefault(),
+							'data'  => $data,
+						));
 						break;
 				}
 				
