@@ -61,7 +61,7 @@ class ConfigManager {
 
 		Logger::get($this)->stopTimer('LOAD');
 
-		dump($this->data, 50);
+//		dump($this->data, 50);
 
 		if ($this->modified) {
 			$this->cacheData();
