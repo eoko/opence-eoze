@@ -1,8 +1,11 @@
 <?php
-/**
- * @author Éric Ortéga <eric@mail.com>
- */
 
+use eoko\config\ConfigManager;
+use eoko\lang\Inflect;
+
+/**
+ * @author Éric Ortéga <eric@planysphere.fr>
+ */
 class Inflector {
 
 	public static function explodeCamelCase($string, $split = '_') {
@@ -62,13 +65,18 @@ class Inflector {
 		return self::capitalizeWords(self::explodeCamelCase($string, $split),
 				$split, $newSplit);
 	}
-
+	
 	public static function plural($word) {
-		$e1 = substr($word, -1);
-		if ($e1 !== 's')
-			return $word . 's';
-		else {
-			return $word;
+		$plural = Inflect::pluralize($word);
+		if (strtolower($word) === $word) {
+			return $plural;
+		} else if (ucfirst($word) === $word) {
+			return ucfirst($plural);
+		} else {
+			// TODO
+			throw new UnsupportedOperationException('TODO');
+			dump($word);
+			dump_trace();
 		}
 	}
 
@@ -78,12 +86,29 @@ class Inflector {
 //		return $modelName . 's';
 		return self::plural($modelName);
 	}
+	
+	private static $modelsConfig = null;
+	
+	private static function getTableConfig($table, $key = null, $default = null) {
+		if (self::$modelsConfig === null) {
+			self::$modelsConfig = ConfigManager::get(
+				ConfigManager::get('eoze/application/namespace') . '/cqlix/models'
+			);
+		}
+		if (isset(self::$modelsConfig[$table][$key])) {
+			return self::$modelsConfig[$table][$key];
+		} else {
+			return $default;
+		}
+	}
 
 	public static function modelFromDB($dbTableName) {
-
-//		if (substr($dbTableName, -2, 2) == 'ys') return self::camelCase($dbTableName, true);
-//		else return self::camelCase(rtrim($dbTableName, 's'), true);
-		return self::camelCase(rtrim($dbTableName, 's'), true);
+		if (null !== $name = self::getTableConfig($dbTableName, 'modelName')) {
+			return $name;
+		} else {
+			$string = str_replace('_' , ' ', $dbTableName);
+			return self::camelCase(Inflect::singularize($string), true, ' ');
+		}
 	}
 
 	public static function modelFromController($controller) {

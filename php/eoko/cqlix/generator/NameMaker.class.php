@@ -26,13 +26,17 @@ class NameMaker extends Inflector {
 	}
 
 	public static function modelFromDB($dbTableName) {
-		if (!isset(self::$cache[$dbTableName])) self::generateTableEntries ($dbTableName);
+		if (!isset(self::$cache[$dbTableName])) {
+			self::generateTableEntries($dbTableName);
+		}
 		return self::$cache[$dbTableName]['model'];
 	}
 
 	public static function pluralizeModel($modelName) {
 		$dbTableName = self::dbFromModel($modelName);
-		if (!isset(self::$cache[$dbTableName])) self::generateTableEntries ($dbTableName);
+		if (!isset(self::$cache[$dbTableName])) {
+			self::generateTableEntries($dbTableName);
+		}
 		return self::$cache[self::dbFromModel($modelName)]['plural_model'];
 	}
 	
@@ -70,29 +74,39 @@ class NameMaker extends Inflector {
 	}
 
 	public static function tableFromDB($dbTableName) {
-		if (!isset(self::$cache[$dbTableName])) self::generateTableEntries ($dbTableName);
+		if (!isset(self::$cache[$dbTableName])) {
+			self::generateTableEntries ($dbTableName);
+		}
 		return self::$cache[$dbTableName]['table'];
 	}
 
 	public static function tableFromModel($modelName) {
 		$dbTableName = self::dbFromModel($modelName);
-		if (!isset(self::$cache[$dbTableName])) throw new IllegalStateException("$modelName => $dbTableName");
+		if (!isset(self::$cache[$dbTableName])) {
+			throw new IllegalStateException("$modelName => $dbTableName");
+		}
 		return self::$cache[$dbTableName]['table'];
 	}
 
 	public static function dbFromModel($modelName) {
-		if (!isset(self::$modelDB[$modelName])) throw new IllegalArgumentException($modelName);
+		if (!isset(self::$modelDB[$modelName])) {
+			throw new IllegalArgumentException($modelName);
+		}
 		return self::$modelDB[$modelName];
 	}
 
 	public static function dbFromTable($tableName) {
-		if (!isset(self::$tableDB[$tableName])) throw new IllegalArgumentException($tableName);
+		if (!isset(self::$tableDB[$tableName])) {
+			throw new IllegalArgumentException($tableName);
+		}
 		return self::$tableDB[$tableName];
 	}
 
 	public static function modelFromTable($tableName) {
 		$dbTableName = self::dbFromTable($tableName);
-		if (!isset(self::$cache[$dbTableName])) throw new IllegalStateException("$tableName => $dbTableName");
+		if (!isset(self::$cache[$dbTableName])) {
+			throw new IllegalStateException("$tableName => $dbTableName");
+		}
 		return self::$cache[$dbTableName]['model'];
 	}
 
