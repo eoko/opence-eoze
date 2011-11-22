@@ -25,29 +25,28 @@ Oce.MainApplication = {
 
 	,getModuleInstance: function(moduleName, callback, errorCallback) {
 		if (moduleName in this.moduleInstances) {
-			if (callback) callback(this.moduleInstances[moduleName]);
+			if (callback) {
+				callback(this.moduleInstances[moduleName]);
+			}
 		} else {
 			var me = this;
 			var previousCursor = Ext.getBody().getStyle("cursor");
-//			Ext.getBody().setStyle("cursor", "wait");
 			Oce.getModuleByName(moduleName,
 				function(module) {
-//					Ext.getBody().setStyle("cursor", previousCursor);
+					var instance = me.moduleInstances[moduleName];
+					if (!instance) {
+						instance = me.moduleInstances[moduleName] = new module()
+					}
 					if (callback) {
 						if (Ext.isChrome) {
 							// Chrome handles error correctly, but traces them
 							// to the point where they are thrown, so it's 
 							// better to not rethrow the exception
-							callback(
-								me.moduleInstances[moduleName] = new module()
-							);
+							callback(instance);
 						} else {
 							try {
-								callback(
-									me.moduleInstances[moduleName] = new module()
-								);
+								callback(instance);
 							} catch (err) {
-		//						debugger;
 								throw err;
 							}
 						}
