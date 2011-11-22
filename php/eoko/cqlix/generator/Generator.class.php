@@ -669,7 +669,12 @@ class Generator extends Script {
 	}
 
 	public static function makeEnumConstName($field, $code) {
-		if ($field instanceof TplField) $field = $field->getName();
+		if ($field instanceof TplField) {
+			$field = $field->getName();
+		}
+		if ($code == null) {
+			$code = 'NULL';
+		}
 		return 'VE_' . strtoupper($field) . "_$code";
 	}
 

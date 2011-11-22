@@ -15,6 +15,9 @@ class ModelFieldHelper {
 	private final function __construct() {}
 	
 	public static function castValue($value, $type) {
+		if ($value === null) {
+			return null;
+		}
 		switch ($type) {
 			case ModelField::T_INT:
 				return (int) $value;

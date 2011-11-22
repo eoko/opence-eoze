@@ -198,7 +198,7 @@ class TplField extends ModelColumn implements ConfigConstants {
 					. ' is illegal.');
 		}
 
-		if (!isset($this->enumCodeValues[$code])) {
+		if (!array_key_exists($code, $this->enumCodeValues)) {
 			throw new IllegalStateException();
 		} else {
 			$currentValue = $this->enumCodeValues[$code];
@@ -232,20 +232,35 @@ class TplField extends ModelColumn implements ConfigConstants {
 				dump($config);
 			}
 			foreach ($config as $code => $label) {
-				$value = $nextFreeEnumValue++;
-				$this->enumCodeValues[$code] = $value;
+				if ($code === '') {
+					$this->enumCodeValues[null] = null;
+				} else {
+					$value = $nextFreeEnumValue++;
+					$this->enumCodeValues[$code] = $value;
+				}
 			}
 		} else if ($type === self::T_STRING) {
 			foreach ($config as $code => $label) {
-				$this->enumCodeValues[$code] = "'$code'";
+				if ($code === '') {
+					$this->enumCodeValues[null] = null;
+				} else {
+					$this->enumCodeValues[$code] = "'$code'";
+				}
 			}
 		} else {
 			throw new IllegalStateException('Virtual Enum columns must either be of type INT or STRING');
 		}
+		
+//		dump($this->enumCodeValues);
+//		dump($config);
 
 		$enumConfig = array();
+		$hasDefault = false;
 		foreach ($config as $code => $label) {
 //			$cfg =& $this->enumConfig[$this->enumCodeValues[$code]];
+			if ($code === '') {
+				$code = null;
+			}
 			$cfg =& $enumConfig[$code];
 			if (is_array($label)) {
 
@@ -258,6 +273,7 @@ class TplField extends ModelColumn implements ConfigConstants {
 				if (isset($itemConfig[EnumColumn::CFG_DEFAULT]) && $itemConfig[EnumColumn::CFG_DEFAULT]) {
 					$this->default = $this->enumCodeValues[$code];
 					$default = true;
+					$hasDefault = true;
 				}
 
 				if (isset($itemConfig[EnumColumn::CFG_VALUE])) {
@@ -285,7 +301,26 @@ class TplField extends ModelColumn implements ConfigConstants {
 			}
 			unset($cfg);
 		}
-
+		
+		// Guess default
+		if (!$hasDefault) {
+			$default = $this->getDefault();
+			foreach ($enumConfig as $code => &$cfg) {
+				if ($code === '') {
+					if ($this->isNullable() && $default === null) {
+						$cfg[EnumColumn::CFG_DEFAULT] = true;
+						break;
+					} 
+				} else {
+					if ($code === $default) {
+						$cfg[EnumColumn::CFG_DEFAULT] = true;
+						break;
+					}
+				}
+			}
+			unset($cfg);
+		}
+		
 		$this->enumConfig = array();
 		foreach ($enumConfig as $code => $cfg) {
 			$this->enumConfig[$this->enumCodeValues[$code]] = $cfg;
