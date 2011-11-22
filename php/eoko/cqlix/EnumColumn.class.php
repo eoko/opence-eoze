@@ -68,4 +68,8 @@ class EnumColumn extends ModelColumn {
 		}
 		return $r;
 	}
+	
+	public function castValue($value) {
+		return ModelFieldHelper::castValue($value, $this->sqlType);
+	}
 }
