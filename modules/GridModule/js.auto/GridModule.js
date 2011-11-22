@@ -201,10 +201,6 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 
 	,initDefaults: function() {
 
-		Ext.applyIf(this.my, {
-			addWindowTitle: this.title + ' : Nouveau'
-		});
-
 		var defaults = {
 			sortable: true,
 //			width: 200,
@@ -952,13 +948,18 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 
 		kit.on('formpanelcreate', function(formPanel) {
 			formPanel.on('beforeload', this.beforeFormLoad);
-			formPanel.on('afterload', this.afterFormLoad);
+			formPanel.on('afterload', function(form, data, formPanel) {
+				if (handlers.win.refreshTitle) {
+					handlers.win.refreshTitle(data.data);
+				}
+				this.afterFormLoad.apply(this, arguments);
+			}, this);
 			handlers.notifyFormPanelCreation(formPanel);
 		}, this)
 
 		return handlers.win = kit.getWin();
 	}
-
+	
 	,createEditWindowGearTool: function(tbar, winCfg) {
 		var gearMenu = new Ext.menu.Menu({
 			id: winCfg.id ? winCfg.id + "-gear-menu" : Ext.id('gear-menu')
@@ -981,7 +982,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	}
 
 	,beforeFormLoad: function(loadParams) {}
-	,afterFormLoad: function(form) {}
+	,afterFormLoad: function(form, data, formPanel) {}
 	,onConfigureAddFormPanel: function(formConfig) {}
 
 	,getEditWindow: function(rowId, cb) {
@@ -1074,7 +1075,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 					return true;
 				}
 				,scope: this
-			})
+			});
 
 			if (cb) cb(win);
 		}.createDelegate(this);
@@ -1245,6 +1246,22 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			));
 		}
 	}
+	
+	/**
+	 * Gets the title of the module in its singular form.
+	 * @return {String}
+	 */
+	,getSingularTitle: function() {
+		var title = this.title;
+		if (!this.hasOwnProperty('singularTitle')) {
+			if (title.substr(-1) === 's') {
+				this.singularTitle = title.substr(0, title.length - 1);
+			} else {
+				this.singularTitle = title;
+			}
+		}
+		return this.singularTitle;
+	}
 
 	/**
 	 * Actually creates the edit window. This method can be overriden to
@@ -1255,11 +1272,25 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	 */
 	,createEditWindow: function(recordId, cb) {
 		
+		var moduleTitle = this.title,
+			me = this;
+		
 		var winConfig = Ext.apply({}, this.applyExtraWinConfig('edit', {
-			 title: this.my.editWindowTitle || (this.title + " : Modifier") // i18n
+			 title: this.my.editWindowTitle || (this.getSingularTitle() + " : Modifier") // i18n
 			,id: this.editWinId(recordId)
 			,layout: this.my.editWinLayout
 			,refreshable: true
+			,refreshTitle: function(data) {
+				var format = me.extra.editWindowTitleFormat,
+					re = /%([^%]+)%/,
+					matches;
+				if (format) {
+					while (matches = re.exec(format)) {
+						format = format.replace(matches[0], data[matches[1]]);
+					}
+					this.setTitle(format);
+				}
+			}
 		}));
 		
 		this.beforeCreateWindow(winConfig, "edit");
@@ -1275,7 +1306,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			}
 		);
 	}
-
+	
 	,applyExtraWinConfig: function(action, config) {
 		var cache = this.extraWinConfigCache = this.extraWinConfigCache || {};
 		if (!cache[action]) {
@@ -1333,7 +1364,9 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		this.onConfigureAddFormPanel(formConfig);
 
 		var winConfig = Ext.apply({}, this.applyExtraWinConfig('add', {
-			 title: this.my.addWindowTitle || ("Ajouter : " + this.title) // i18n
+			 title: this.my.addWindowTitle 
+					 || this.extra.addWindowTitle 
+					 || (this.getSingularTitle() + " : Nouveau") // i18n
 			,layout: this.my.addWinLayout
 			,id: this.nextAddWinId()
 		}));
