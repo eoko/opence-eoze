@@ -298,6 +298,42 @@ class Query {
 
 	/**
 	 *
+	 * The $function argument can contains placeholders in the form {} or {0}, {1}, 
+	 * etc.
+	 * 
+	 * If no placeholders are used in the $function argument, then it will be
+	 * considered as the function name. In this case, $function can be provider
+	 * as an array of string that will be nested one in the next one.
+	 * 
+	 * E.g. $function = array('ABS, 'SUM') will produce:
+	 *     ABS(SUM(`my_field`))
+	 * 
+	 * If placeholders of the form {} are used, then $field must be a single string
+	 * and $function can be either a string or an array. If $function is a string,
+	 * then the placeholder will be replaced by the fully qualified $field name 
+	 * everywhere in the $function string. Else, if $function is an array, then the 
+	 * placeholder will be replaced by the fully qualified $field name in the first 
+	 * string in the $function array, then the placeholder in the second element of 
+	 * $function will be replaced by the processed first element, and so on.
+	 * 
+	 * Fninally, if named placeholders of the form {0}, {1} or {index} are used, then
+	 * the $function argument must be a string, and the $field argument must be an
+	 * array. Placeholders will be replaced by the fully qualified field in the $field
+	 * array which index matches the index of the placeholder.
+	 * @param type $field
+	 * 
+	 * @param string|array $field
+	 * @param string|array $function
+	 * @param string $alias 
+	 * 
+	 * @return Query $this
+	 */
+	public function selectFunction($field, $fn, $alias = null) {
+		return $this->select(new QuerySelectFunctionOnField($this, $field, $fn, $alias));
+	}
+
+	/**
+	 *
 	 * @param mixed $___
 	 * @return Query
 	 */
@@ -1510,28 +1546,77 @@ class QuerySelectFunctionOnField extends QuerySelectBase {
 	private $field;
 	private $fn;
 
-	function __construct(ModelTableQuery $query, $field, $fn, $alias = null) {
+	/**
+	 * Creates a new QuerySelectFunctionOnField.
+	 * 
+	 * The $function argument can contains placeholders in the form {} or {0}, {1}, 
+	 * etc.
+	 * 
+	 * If no placeholders are used in the $function argument, then it will be
+	 * considered as the function name. In this case, $function can be provider
+	 * as an array of string that will be nested one in the next one.
+	 * 
+	 * E.g. $function = array('ABS, 'SUM') will produce:
+	 *     ABS(SUM(`my_field`))
+	 * 
+	 * If placeholders of the form {} are used, then $field must be a single string
+	 * and $function can be either a string or an array. If $function is a string,
+	 * then the placeholder will be replaced by the fully qualified $field name 
+	 * everywhere in the $function string. Else, if $function is an array, then the 
+	 * placeholder will be replaced by the fully qualified $field name in the first 
+	 * string in the $function array, then the placeholder in the second element of 
+	 * $function will be replaced by the processed first element, and so on.
+	 * 
+	 * Fninally, if named placeholders of the form {0}, {1} or {index} are used, then
+	 * the $function argument must be a string, and the $field argument must be an
+	 * array. Placeholders will be replaced by the fully qualified field in the $field
+	 * array which index matches the index of the placeholder.
+	 * 
+	 * @param ModelTableQuery $query
+	 * @param string|array $field
+	 * @param string|array $function
+	 * @param string $alias 
+	 */
+	function __construct(ModelTableQuery $query, $field, $function, $alias = null) {
 		parent::__construct($query, $alias);
 		$this->field = $field;
-		$this->fn = $fn;
+		$this->fn = $function;
 	}
 
 	protected function doBuildSql(ModelTableQuery $query, &$bindings) {
-		if (is_array($this->fn)) {
-			$r = $query->getQualifiedName($this->field);
-			foreach ($this->fn as $fn) {
-				if (!strstr($fn, '{}')) {
-					$r = "$fn($r)";
-				} else {
-					$r = str_replace('{}', $r, $fn);
-				}
+		if (is_array($this->field)) {
+			// Get aliased fields
+			$fields = array();
+			foreach ($this->field as $k => $field) {
+				$fields[$k] = $query->getQualifiedName($field);
 			}
-			return $r;
+			// Replace placeholders
+			if (is_array($this->fn)) {
+				throw new IllegalArgumentException();
+			}
+			$function = $this->fn;
+			while (preg_match('/\{(?P<index>\d+)\}/', $function, $matches)) {
+				$function = str_replace($matches[0], $fields[$matches['index']], $function);
+			}
+			return $function;
 		} else {
-			if (strstr($this->fn, '{}')) {
-				return str_replace('{}', $query->getQualifiedName($this->field), $this->fn);
+			$field = $query->getQualifiedName($this->field);
+			if (is_array($this->fn)) {
+				$r = $field;
+				foreach ($this->fn as $fn) {
+					if (strstr($fn, '{}')) {
+						$r = str_replace('{}', $r, $fn);
+					} else {
+						$r = "$fn($r)";
+					}
+				}
+				return $r;
 			} else {
-				return "$this->fn(" . $query->getQualifiedName($this->field) . ")";
+				if (strstr($this->fn, '{}')) {
+					return str_replace('{}', $field, $this->fn);
+				} else {
+					return "$this->fn($field)";
+				}
 			}
 		}
 	}
