@@ -62,12 +62,17 @@ class ClassLoader {
 
 		$classPath = str_replace('\\', DS, $class);
 		$nsPath = str_replace('\\', DS, rtrim(get_namespace($class), '\\'));
-
+		
 		foreach ($this->includePaths as $path) {
 			if (file_exists($filename = "$path$classPath$suffix.php")) {
 				require_once $filename;
 				return true;
-			} else if ($nsPath && file_exists($filename = "$path$nsPath.ns.php")) {
+			} else if (!$nsPath) {
+				if (file_exists($filename = "{$path}_/$classPath$suffix.php")) {
+					require_once $filename;
+					return true;
+				}
+			} else if (file_exists($filename = "$path$nsPath.ns.php")) {
 				require_once $filename;
 				return true;
 			}
@@ -91,7 +96,8 @@ class ClassLoader {
 		if (2 === count($parts = explode('_', $classPath, 2))) {
 			$classPath = $parts[0];
 			foreach ($this->includePaths as $path) {
-				if (file_exists($filename = "$path$classPath$suffix.php")) {
+				if (file_exists($filename = "$path$classPath$suffix.php")
+						|| file_exists($filename = "{$path}_/$classPath$suffix.php")) {
 					require_once $filename;
 					return true;
 				}

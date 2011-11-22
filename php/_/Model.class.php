@@ -1492,7 +1492,7 @@ abstract class Model {
 	final public function getRelation($name) {
 		// Instanciate
 		if (!isset($this->internal->relations[$name])) {
-			require_once PHP_PATH . 'ModelRelation.class.php';
+//			require_once PHP_PATH . '_/ModelRelation.class.php';
 			$this->internal->relations[$name] = $this->internal->relations[$name] = $this->table
 					->getRelationInfo($name)
 					->createRelation($this);
