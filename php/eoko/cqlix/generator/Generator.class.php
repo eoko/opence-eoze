@@ -308,13 +308,33 @@ class Generator extends Script {
 			if (strtolower($engine) !== 'innodb') {
 				Logger::warn('Table {} engine is not InnoDB (it is {})', $dbTable, $engine);
 			} else {
-				// Foreign key constraints
-				$pattern = '/(?:\s|,)CONSTRAINT `(\w+)` FOREIGN KEY \(`(\w+)`\) REFERENCES `(\w+)` \(`(\w+)`\)/';
-				preg_match_all($pattern, $createTable, $matches, PREG_SET_ORDER);
+				// CONSTRAINT `contact_phone_numbers_ibfk_1` FOREIGN KEY (`contact_id`) REFERENCES `contacts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 
+				// Foreign key constraints
+				$pattern = '/\bCONSTRAINT `(\w+)` FOREIGN KEY \(`(\w+)`\) '
+						. 'REFERENCES `(\w+)` \(`(\w+)`\)'
+						. '(?: ON DELETE (?P<onDelete>\w+))?'
+						. '(?: ON UPDATE (?P<onUpdate>\w+))?'
+						. '/';
+			$pattern = '/'
+					. '\bCONSTRAINT `(\w+)` FOREIGN KEY \(`(\w+)`\) '
+					. 'REFERENCES `(\w+)` \(`(\w+)`\)'
+					. '(?: ON DELETE (?P<onDelete>CASCADE|SET NULL|RESTRICT|NO ACTION))?'
+					. '(?: ON UPDATE (?P<onUpdate>CASCADE|SET NULL|RESTRICT|NO ACTION))?'
+					. '/';
+				
+				preg_match_all($pattern, $createTable, $matches, PREG_SET_ORDER);
+				
 				foreach ($matches as $matches) {
 					list($ignore, $constraintName, $localKey, $constraintTable, $otherField) = $matches;
-					$fields[$localKey]->foreignConstraint = new ModelColumnForeignConstraint($constraintTable, $otherField, $constraintName);
+					$constraint = new ModelColumnForeignConstraint($constraintTable, $otherField, $constraintName);
+					$fields[$localKey]->foreignConstraint = $constraint;
+					if (isset($matches['onDelete'])) {
+						$constraint->onDelete = $matches['onDelete'];
+					}
+					if (isset($matches['onUpdate'])) {
+						$constraint->onUpdate = $matches['onUpdate'];
+					}
 				}
 			}
 
@@ -841,16 +861,22 @@ class Generator extends Script {
 
 	private function addHasOneRelation($table, TplRelationReferencesOne $relation, $method = self::GUESS_BY_NAME) {
 
-		if (isset($this->referencesOneRelations[$method][$table][$relation->targetDBTableName][$relation->referenceField])) {
-			$current = $this->referencesOneRelations[$method][$table][$relation->targetDBTableName][$relation->referenceField];
+		if (isset($this->referencesOneRelations
+				[$method][$table][$relation->targetDBTableName][$relation->referenceField])) {
+			$current = $this->referencesOneRelations
+					[$method][$table][$relation->targetDBTableName][$relation->referenceField];
 			if (false === $current instanceof TplRelation) {
 				throw new IllegalStateException('Illegal type: ' . $current);
 			} else if (!$relation->equals($current)) {
-				$msg = 'Relation conflicts with: ' + $this->referencesOneRelations[$method][$table][$relation->targetDBTableName][$relation->referenceField];
+				$msg = 'Relation conflicts with: ' 
+						+ $this->referencesOneRelations
+						[$method][$table][$relation->targetDBTableName][$relation->referenceField];
 				throw new IllegalStateException($msg);
 			}
 		} else {
-			$this->referencesOneRelations[$method][$table][$relation->targetDBTableName][$relation->getReferenceField()] = $relation;
+			return $this->referencesOneRelations
+					[$method][$table][$relation->targetDBTableName][$relation->getReferenceField()] 
+					= $relation;
 		}
 	}
 
@@ -911,6 +937,11 @@ class Generator extends Script {
 						} else if (!$relation->equals($this->referencesOneRelations[self::GUESS_BY_NAME][$table][$otherTable][$localField])) {
 							throw new IllegalStateException('Conflict between name and constraint for relation between '
 									. "$table.$localField and $otherTable." . $this->primaryKeys[$otherTable]);
+						} else {
+							// Guesses by constraint are better than guesses by name, so let's
+							// override!
+							// (In particular, they may deliver ON_DELETE informations...)
+							$tmp[$table][$otherTable][$localField] = $relation;
 						}
 					}
 				}
@@ -1117,8 +1148,37 @@ class Generator extends Script {
 								$fieldName, 
 								$prefix);
 
-						$this->addHasOneRelation($tableName, $rel, self::GUESS_BY_CONSTRAINT);
-
+						$relation = $this->addHasOneRelation($tableName, $rel, self::GUESS_BY_CONSTRAINT);
+						
+						if ($field->foreignConstraint) {
+							switch ($field->foreignConstraint->onDelete) {
+								case 'CASCADE':
+									$relation->onDeleteAction = 'DELETE';
+									break;
+								case 'SET NULL':
+									$relation->onDeleteAction = 'SET_NULL';
+									break;
+								default:
+									// TODO
+									dump($field->foreignConstraint->onDelete);
+									dump_trace();
+								case null:
+							}
+							switch ($field->foreignConstraint->onUpdate) {
+								case 'CASCADE':
+									$relation->onUpdateAction = 'UPDATE';
+									break;
+								case 'SET NULL':
+									$relation->onUpdateAction = 'SET_NULL';
+									break;
+								default:
+									// TODO
+									dump($field->foreignConstraint->onDelete);
+									dump_trace();
+								case null:
+							}
+						}
+						
 						Logger::info('By constraints: found {}.{} as {} refers to {}.{}',
 								$tableName, $fieldName, $rel->getName(), $otherTable, $otherField);
 					}

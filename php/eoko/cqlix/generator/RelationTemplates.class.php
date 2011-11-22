@@ -38,6 +38,7 @@ abstract class TplRelation {
 	public $reciproqueName;
 
 	public $onDeleteAction = null;
+	public $onUpdateAction = null;
 
 	function __construct($alias, $localTableName, $targetTableName, $reciproque) {
 //		dump_trace();
