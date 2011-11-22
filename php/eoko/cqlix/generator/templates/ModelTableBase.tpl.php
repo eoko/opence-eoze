@@ -31,6 +31,7 @@ abstract class <?php echo $tableName ?>Base extends <?php echo $baseTableName ?>
 <?php endforeach ?>
 
 		);
+		
 		$relations = array(
 <?php $comma = "\t\t\t\t"; ?>
 <?php foreach ($relations as $relation): ?>
@@ -42,7 +43,7 @@ abstract class <?php echo $tableName ?>Base extends <?php echo $baseTableName ?>
 		);
 <?php foreach ($relations as $relation): ?>
 <?php if ($relation->onDeleteAction): ?>
-		<?php echo $relation->tplOnDeleteAction() ?>
+		<?php echo $relation->tplOnDeleteAction(), PHP_EOL ?>
 <?php endif ?>
 <?php endforeach ?>
 
