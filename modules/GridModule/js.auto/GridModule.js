@@ -1262,6 +1262,29 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		}
 		return this.singularTitle;
 	}
+	
+	/**
+	 * Builds the title for the edit window from the given data.
+	 * @param {Object} data The data from the record, or as loaded into
+	 * the form.
+	 * @protected
+	 */
+	,buildEditWindowTitle: function(data) {
+		var format = this.extra.editWindowTitleFormat,
+			re = /%([^%]+)%/,
+			matches,
+			value;
+		if (format) {
+			while ((matches = re.exec(format))) {
+				value = data[matches[1]];
+				if (!Ext.isDefined(value)) {
+					return null;
+				}
+				format = format.replace(matches[0], value);
+			}
+			return format;
+		}
+	}
 
 	/**
 	 * Actually creates the edit window. This method can be overriden to
@@ -1274,24 +1297,22 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		
 		var moduleTitle = this.title,
 			me = this;
-		
+			
 		var winConfig = Ext.apply({}, this.applyExtraWinConfig('edit', {
 			 title: this.my.editWindowTitle || (this.getSingularTitle() + " : Modifier") // i18n
 			,id: this.editWinId(recordId)
 			,layout: this.my.editWinLayout
 			,refreshable: true
 			,refreshTitle: function(data) {
-				var format = me.extra.editWindowTitleFormat,
-					re = /%([^%]+)%/,
-					matches;
-				if (format) {
-					while (matches = re.exec(format)) {
-						format = format.replace(matches[0], data[matches[1]]);
-					}
-					this.setTitle(format);
-				}
+				this.setTitle(me.buildEditWindowTitle(data));
 			}
 		}));
+
+		// Try to get record title data from the store
+		var record = this.store.getById(recordId);
+		if (record) {
+			winConfig.title = this.buildEditWindowTitle(record.data) || winConfig.title;
+		}
 		
 		this.beforeCreateWindow(winConfig, "edit");
 
