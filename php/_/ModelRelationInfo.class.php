@@ -855,7 +855,7 @@ class ModelRelationInfoReferedByMany extends ModelRelationInfoIsRefered
 		$q->where(
 			$this->targetTable->addAssocWhere(
 				$q->createWhere(
-					"`$this->referenceField`=" . $query->getQualifiedName('id')
+					"`$this->referenceField`=" . $query->getQualifiedName($this->localTable->getPrimaryKeyName())
 				)
 				,$q
 			)
