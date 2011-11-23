@@ -81,9 +81,6 @@ class Inflector {
 	}
 
 	public static function pluralizeModel($modelName) {
-		// TODO
-//		if (substr($modelName, -2) == 'ys') return $modelName;
-//		return $modelName . 's';
 		return self::plural($modelName);
 	}
 	
