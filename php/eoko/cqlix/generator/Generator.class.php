@@ -894,7 +894,7 @@ class Generator extends Script {
 	}
 
 	private function mergeRelationsFoundByNameAndByFK($guessByName = true, $guessByConstraints = true) {
-
+			
 		if ($guessByName === false) {
 			$this->referencesOneRelations = $this->referencesOneRelations[self::GUESS_BY_NAME];
 		} else if ($guessByConstraints === false) {
@@ -929,7 +929,7 @@ class Generator extends Script {
 									. "as {$constraintRelation->getAlias()}");
 						}
 
-						$tmp[$table][$otherTable][$localField] = $relation;
+						$tmp[$table][$localField] = $relation;
 					}
 				}
 			}
@@ -946,7 +946,7 @@ class Generator extends Script {
 							Logger::info('Field names with foreign key constraint mismatch: {}.{} refering {}.{}',
 									$table, $localField, $otherTable, $this->primaryKeys[$otherTable]);
 
-							$tmp[$table][$otherTable][$localField] = $relation;
+							$tmp[$table][$localField] = $relation;
 						} else if (!$relation->equals($this->referencesOneRelations[self::GUESS_BY_NAME][$table][$otherTable][$localField])) {
 							throw new IllegalStateException('Conflict between name and constraint for relation between '
 									. "$table.$localField and $otherTable." . $this->primaryKeys[$otherTable]);
@@ -954,7 +954,7 @@ class Generator extends Script {
 							// Guesses by constraint are better than guesses by name, so let's
 							// override!
 							// (In particular, they may deliver ON_DELETE informations...)
-							$tmp[$table][$otherTable][$localField] = $relation;
+							$tmp[$table][$localField] = $relation;
 						}
 					}
 				}
@@ -965,11 +965,9 @@ class Generator extends Script {
 
 		$tmp = array();
 
-		foreach ($this->referencesOneRelations as $table => $otherTableRelations) {
-			foreach ($otherTableRelations as $otherTable => $localFieldsRelations) {
-				foreach ($localFieldsRelations as $localField => $relation) {
-					$tmp[$table][] = $relation;
-				}
+		foreach ($this->referencesOneRelations as $table => $localFieldsRelations) {
+			foreach ($localFieldsRelations as $localField => $relation) {
+				$tmp[$table][] = $relation;
 			}
 		}
 
