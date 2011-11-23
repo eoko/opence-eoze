@@ -5,6 +5,7 @@ directories:
   models: models
   modules: modules
   databaseBackup: mysql
+  tests: tests
 # those 2 ones are not configurable
 #  config: config
 #  php: php
