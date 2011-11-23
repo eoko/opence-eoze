@@ -345,6 +345,12 @@ MSG
 	}
 	
 	/**
+	 * Creates an Executor for the given $type, with the given parameters.
+	 * 
+	 * @param string  $action
+	 * @param Request $request
+	 * @param bool    $internal
+	 * 
 	 * @return Executor
 	 */
 	public function createExecutor($type, $action = null, Request $request = null, $internal = false) {
