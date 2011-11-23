@@ -152,7 +152,7 @@ abstract class <?php echo $modelName ?>Base extends <?php echo $baseModelName ?>
 	 * This method always throw an UnsupportedOperationException because this
 	 * Model doesn't have a primary key.
 	 */
-	protected function setPrimaryKeyValue($value) {
+	public function setPrimaryKeyValue($value) {
 		throw new UnsupportedOperationException('The model <?php echo $modelName ?> has no primary key');
 	}
 
@@ -168,7 +168,7 @@ abstract class <?php echo $modelName ?>Base extends <?php echo $baseModelName ?>
 	 * This method always throw an UnsupportedOperationException because this
 	 * Model doesn't have a primary key.
 	 */
-	public static function load($id) {
+	public static function load($id, array $params = array()) {
 		throw new UnsupportedOperationException('The model <?php echo $modelName ?> has no primary key');
 	}
 <?php endif ?>

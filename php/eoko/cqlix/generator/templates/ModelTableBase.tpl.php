@@ -212,7 +212,7 @@ abstract class <?php echo $tableName ?>Base extends <?php echo $baseTableName ?>
 	 * This method always throws an UnsupportedOperationException because
 	 * <?php echo $dbTable ?> doesn't have a primary key.
 	 */
-	public static function findByPrimaryKey($ignored) {
+	public static function findByPrimaryKey($ignored, array $ignoredContext = array()) {
 		throw new UnsupportedOperationException('The model <?php echo $modelName ?> has no primary key');
 	}
 
@@ -220,7 +220,7 @@ abstract class <?php echo $tableName ?>Base extends <?php echo $baseTableName ?>
 	 * This method always throws an UnsupportedOperationException because
 	 * <?php echo $dbTable ?> doesn't have a primary key.
 	 */
-	public static function findFirstByPrimaryKey($ignored) {
+	public static function findFirstByPrimaryKey($ignored, array $ignoredContext = array()) {
 		throw new UnsupportedOperationException('The model <?php echo $modelName ?> has no primary key');
 	}
 <?php endif ?>
