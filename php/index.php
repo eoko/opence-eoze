@@ -14,7 +14,7 @@ call_user_func(function() {
 
 	$ds = DS;
 
-	require_once "$eoze{$ds}php{$ds}Context.class.php";
+	require_once $eoze . "php/_/Context.class.php";
 
 	$context = new eoko\context\ContextBase();
 
