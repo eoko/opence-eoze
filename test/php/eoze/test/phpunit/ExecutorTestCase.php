@@ -2,8 +2,6 @@
 
 namespace eoze\test\phpunit;
 
-//require_once __DIR__ . '/ModuleTestCase.php';
-
 use eoko\module\ModuleManager;
 use IllegalStateException;
 use ReflectionProperty;
