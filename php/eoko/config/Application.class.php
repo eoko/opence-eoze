@@ -17,9 +17,17 @@ class Application implements FileFinder {
 	
 	private function __construct() {
 		$config = ConfigManager::get('eoze/application');
-		$this->isDevMode = isset($config['devMode']) && $config['devMode'] !== 'auto'
-				? $config['devMode']
-				: ($_SERVER['HTTP_HOST'] === 'localhost');
+		$this->isDevMode = $this->findDevMode();
+	}
+	
+	private function findDevMode() {
+		if (isset($config['devMode']) && $config['devMode'] !== 'auto') {
+			return $config['devMode'];
+		} else if (isset($_SERVER['HTTP_HOST'])) {
+			return $_SERVER['HTTP_HOST'] === 'localhost';
+		} else {
+			return false;
+		}
 	}
 	
 	public function isDevMode() {
