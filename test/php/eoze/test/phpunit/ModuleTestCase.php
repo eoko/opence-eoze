@@ -110,10 +110,14 @@ abstract class ModuleTestCase extends DatabaseTestCase {
 		$baseDataSet   = $this->getModulesBaseDataset();
 		$dataSet       = $this->getDataset();
 		if ($baseDataSet) {
-			return new CompositeDataSet(array(
-				$baseDataSet,
-				$moduleDataSet,
-			));
+			if ($dataSet) {
+				return new CompositeDataSet(array(
+					$baseDataSet,
+					$dataSet,
+				));
+			} else {
+				return $baseDataSet;
+			}
 		} else if ($dataSet) {
 			return $dataSet;
 		} else {
