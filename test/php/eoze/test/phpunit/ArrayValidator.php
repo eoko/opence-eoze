@@ -17,10 +17,16 @@ class ArrayValidator {
 	
 	private $sep = '.';
 	
-	public $errors;
+	private $errors;
+	
+	private $lastError;
 	
 	public function __construct(array $format) {
 		$this->format = $format;
+	}
+	
+	public function getLastError() {
+		return $this->lastError;
 	}
 	
 	public function test(array $array) {
@@ -39,9 +45,11 @@ class ArrayValidator {
 					if (substr($path, 0, 1) === $this->sep) {
 						$path = substr($path, 1);
 					}
-					return "$path: $error";
+					$this->lastError = "$path: $error";
+					return false;
 				} else {
-					return $error;
+					$this->lastError = $error;
+					return false;
 				}
 			}
 			return false;
