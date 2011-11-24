@@ -4,6 +4,7 @@
  */
 
 use eoko\util\Json;
+use eoko\output\Output;
 
 if (!isset($GLOBALS['directAccess'])) { header('HTTP/1.0 404 Not Found'); exit('Not found'); }
 
@@ -16,6 +17,14 @@ class ExtJSResponse {
 	private static $vars = array();
 
 	private static $answerJson = true;
+	
+	public static function purge() {
+		self::$vars = array();
+	}
+	
+	private static function out($string) {
+		Output::out($string);
+	}
 
 	public static function put($name, $val) {
 		self::$vars[$name] = $val;
@@ -67,17 +76,14 @@ class ExtJSResponse {
 		self::$enabled = $on;
 	}
 
-	public static function loadGrid($result) {
-//		Logger::getLogger('ExtJSResponse')->debug('Sending grid response: {}', $result);
-//		echo utf8_encode(json_encode(array("count"=>count($result), "data" => $result)));
-		self::success($result, false, false);
-	}
-
-	public static function loadOne($result) {
-//		Logger::getLogger('ExtJSResponse')->debug('Loading one response: {}', $result[0]);
-//		echo utf8_encode(json_encode(array("success"=>"true", "data" => $result[0])));
-		self::success($result[0], false, false);
-	}
+// Probably not used anymore
+//	public static function loadGrid($result) {
+//		self::success($result, false, false);
+//	}
+//
+//	public static function loadOne($result) {
+//		self::success($result[0], false, false);
+//	}
 
 	public static function successEx($data = null, $message_s = null, $other = array(),
 			$die = true, $return = false) {
@@ -92,40 +98,39 @@ class ExtJSResponse {
 
 		if ($message_s !== null) $other['message'] = $message_s;
 
-		echo Json::encode($other);
+		self::out(Json::encode($other));
 	}
 
 	public static function success($data = null, $die = true, $return = false) {
 
-		if (!self::$enabled) return;
-
-		if ($return) ob_start();
-
-		if ($data === null) {
-	 		echo "{success: true}";
-		} else {
-			echo Json::encode((array('success'=>true, 'data' => $data)));
-//			echo '<pre>';
-//			$r = array('success'=>true, 'data' => $data);
-//			print_r($r);
-//			$r = utf8_encode($r);
-//			echo 'json_encode => ' . json_encode($r);
-////			echo utf8_encode(json_encode(array('success'=>true, 'data' => $data)));
+		if (!self::$enabled) {
+			return;
 		}
 
-		if ($return) return ob_get_clean();
+		if ($data === null) {
+	 		$out = "{success: true}";
+		} else {
+			$out = Json::encode((array('success'=>true, 'data' => $data)));
+		}
+		
+		self::out($out);
+
+		if ($return) {
+			return $out;
+		}
 
 		if ($die) die;
 	}
 
 	public static function answerRaw($responseData, $die = true, $return = false) {
-		if ($return) ob_start();
-
-		echo Json::encode($responseData);
-
-		if ($return) return ob_get_clean();
-
-		if ($die) die;
+		$out = Json::encode($responseData);
+		self::out($out);
+		if ($return) {
+			return ob_get_clean();
+		}
+		if ($die) {
+			die;
+		}
 	}
 
 	public static function answer($die = true) {
@@ -138,9 +143,11 @@ class ExtJSResponse {
 			$response['message'] = self::$messages;
 		}
 
-		echo Json::encode(ArrayHelper::apply($response, self::$vars));
+		self::out(Json::encode(ArrayHelper::apply($response, self::$vars)));
 
-		if ($die) die;
+		if ($die) {
+			die;
+		}
 	}
 
 	public static function toArray() {
@@ -198,20 +205,23 @@ class ExtJSResponse {
 
 	protected static function outputAnswer($response, $die, $return) {
 		if (self::$answerJson) {
-			if ($return && !$die) ob_start();
-			echo utf8_encode(json_encode($response));
-			if ($return && !$die) return ob_get_clean();
-			if ($die) die;
+			$out = utf8_encode(json_encode($response));
+			self::out($out);
+			if ($return && !$die) {
+				return $out;
+			}
+			if ($die) {
+				die;
+			}
 		} else {
 			if (isset($response['success']) && !$response['success']) {
-				echo isset($response['title']) ? "<h1>$response[title]</h1>"
-						: lang('Erreur');
+				self::out(isset($response['title']) ? "<h1>$response[title]</h1>" : lang('Erreur'));
 				if (isset($response['timestamp'])) {
-					echo '<p>' . lang('Informations techniques: #')
-							. $response['timestamp'] . '</p>';
+					self::out('<p>' . lang('Informations techniques: #') 
+							. $response['timestamp'] . '</p>');
 				}
 				if (isset($response['message'])) {
-					echo "<p>$response[message]</p>";
+					self::out("<p>$response[message]</p>");
 				}
 			}
 		}

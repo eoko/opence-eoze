@@ -4,11 +4,17 @@ namespace eoze\test\phpunit;
 
 use eoko\module\ModuleManager;
 use IllegalStateException;
+
 use ReflectionProperty;
+use ReflectionClass;
 
 use eoko\module\Module;
 use eoko\module\Module\executor\Executor;
 use Request;
+use ExtJSResponse;
+use eoko\util\YmlReader;
+
+use PHP_Timer;
 
 /**
  *
@@ -31,6 +37,8 @@ class ExecutorTestCase extends ModuleTestCase {
 	protected $moduleName;
 	
 	protected $controller;
+	
+	protected $testRequests = true;
 	
 	public function __construct() {
 		if (isset($this->controller)) {
@@ -136,8 +144,140 @@ class ExecutorTestCase extends ModuleTestCase {
 	 * 
 	 * @param array $request
 	 * @param bool $autoController 
+	 * 
+	 * @return array Request result data
 	 */
 	protected function runRequest(array $request) {
+		$request  = new \Request($request);
+		$executor = Module::parseRequestAction($request);
+
+		ExtJSResponse::purge();
+		$executor();
 		
+		return $executor->getData();
 	}
+	
+	private function loadRequestFile($file) {
+		$dataSet = array();
+		$data = YmlReader::loadFile($file);
+		foreach ($data as $name => $test) {
+			if (!isset($test['request']['controller'])) {
+				$test['request']['controller'] = $this->getControllerName();
+			}
+			$dataSet[$name] = $test;
+		}
+		return $dataSet;
+	}
+	
+	private $result;
+	
+	public function run(\PHPUnit_Framework_TestResult $result = null) {
+		if ($result === null) {
+			$result = new \PHPUnit_Framework_TestResult;
+		}
+		$this->result = $result;
+		
+		// Find if there are other test methods
+		$theClass = new ReflectionClass($this);
+        foreach ($theClass->getMethods() as $method) {
+            if (strpos($method->getDeclaringClass()->getName(), 'PHPUnit_') !== 0) {
+				if ($method->getName() !== 'testRequests'
+						&& \PHPUnit_Framework_TestSuite::isTestMethod($method)) {
+					return parent::run($result);
+				}
+            }
+        }
+		
+		$this->testRequests();
+		
+		return $this->result;
+	}		
+
+	public function testRequests() {
+		
+		$class = new ReflectionClass($this);
+		
+		$tests = array();
+		
+		// Load ./ClassName.requests.yml file
+		if (file_exists($file = dirname($class->getFileName()) 
+				. '/' . get_relative_classname($this) . '.requests.yml')) {
+			
+			$tests[get_relative_classname($this)] = $this->loadRequestFile($file);
+		}
+
+		$requestDir = dirname($class->getFileName()) . DS . get_relative_classname($this) 
+				. '.requests';
+
+		// Load ./ClassName.requests/*.yml files
+		if (file_exists($requestDir)) {
+			foreach (glob($requestDir . '/*.yml') as $file) {
+				$tests[substr(basename($file), 0, -4)] = $this->loadRequestFile($file);
+			}
+		}
+
+		// Run
+		foreach ($tests as $file => $data) {
+			foreach ($data as $name => $test) {
+				$this->result->startTest($this);
+				PHP_Timer::start();
+				
+				try {
+					$this->doTestRequest($file, $name, $test);
+				}
+				catch (\PHPUnit_Framework_AssertionFailedError $ex) {
+					$this->result->addFailure($this, $e, PHP_Timer::stop());
+				}
+				catch (\Exception $e) {
+					$this->result->addError($this, $e, PHP_Timer::stop());
+				}
+				
+				$this->result->endTest($this, PHP_Timer::stop());
+			}
+		}
+	}
+	
+	protected function doTestRequest($file, $name, $test) {
+		if (!isset($test['request'])) {
+			throw new IllegalStateException("Missing request in data set $name of file $file");
+		}
+		if (!isset($test['expected'])) {
+			throw new IllegalStateException("Missing expected restul in data set $name of file $file");
+		}
+		$this->assertSame(
+			$test['expected'],
+			$this->runRequest($test['request'])
+		);
+	}
+	
+//	public function testRequests() {
+//		
+//		$dataSet = array();
+//
+//		$class = new \ReflectionClass($this);
+//		
+//		$result = $this->getResult();
+////		assert($result instanceof \PHPUnit_Framework_Result);
+//		
+//		if (file_exists($file = dirname($class->getFileName()) 
+//				. '/' . get_relative_classname($this) . '.requests')) {
+//			foreach ($this->loadRequestFile($file) as $name => $file) {
+//				$result->startTest($this);
+//				PHP_Timer::start();
+//
+//				$result->endTest($this, PHP_Timer::stop());
+//			}
+//		}
+//
+////		$requestDir = dirname($class->getFileName()) . DS . get_relative_classname($this) 
+////				. '.requests';
+////
+////		if (file_exists($requestDir)) {
+////			foreach (glob($requestDir . '/*.yml') as $file) {
+////				$dataSet += $this->loadRequestFile($file);
+////			}
+////		}
+////		
+////		dump($dataSet);;
+//	}
 }
