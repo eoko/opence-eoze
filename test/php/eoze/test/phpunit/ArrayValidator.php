@@ -113,6 +113,11 @@ class ArrayValidator {
 			return $this->error($path, "Wrong required value: expected $spec[value], actual: $value");
 		}
 		if (isset($spec['range'])) {
+			if (isset($spec['type']) && in_array($spec['type'], array(
+				'seq', 'sequence', 'map', 'bool'
+			))) {
+				throw new IllegalStateException('Range not applicable with type: ' . $spec['type']);
+			}
 			if (isset($spec['range']['min']) && $value < $spec['range']['min']) {
 				return $this->error($path, "Out of range: $value < " . $spec['range']['min']);
 				if (isset($spec['range']['min-ex'])) {
@@ -130,6 +135,32 @@ class ArrayValidator {
 			}
 			if (isset($spec['range']['max-ex']) && $value >= $spec['range']['max-ex']) {
 				return $this->error($path, "Out of range: $value >= " . $spec['range']['max-ex']);
+			}
+		}
+		if (isset($spec['length'])) {
+			if (isset($spec['type']) && !in_array($spec['type'], array(
+				'str', 'text'
+			))) {
+				throw new IllegalStateException('Length not applicable with type: ' . $spec['type']);
+			}
+			$length = mb_strlen($value);
+			if (isset($spec['length']['min']) && $length < $spec['length']['min']) {
+				return $this->error($path, "Illegal length: $length < " . $spec['length']['min']);
+				if (isset($spec['length']['min-ex'])) {
+					throw new IllegalStateException('min and min-ex cannot be combined');
+				}
+			}
+			if (isset($spec['length']['max']) && $length > $spec['length']['max']) {
+				return $this->error($path, "Illegal length: $length > " . $spec['length']['max']);
+				if (isset($spec['length']['max-ex'])) {
+					throw new IllegalStateException('max and max-ex cannot be combined');
+				}
+			}
+			if (isset($spec['length']['min-ex']) && $length <= $spec['length']['min-ex']) {
+				return $this->error($path, "Illegal length: $length <= " . $spec['length']['min-ex']);
+			}
+			if (isset($spec['length']['max-ex']) && $length >= $spec['length']['max-ex']) {
+				return $this->error($path, "Illegal length: $length >= " . $spec['length']['max-ex']);
 			}
 		}
 		if (isset($spec['pattern'])
