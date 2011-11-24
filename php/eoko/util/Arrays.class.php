@@ -4,14 +4,18 @@ namespace eoko\util;
 
 class Arrays extends \ArrayHelper {
 	
-	public static function compareMap(array $left = null, array $right = null) {
+	public static function compareMap(array $left = null, array $right = null, $strict = true) {
 		if ($left === null || $right === null) {
 			return $left === $right;
 		}
 		if (self::isAssoc($left) && !self::isAssoc($right)) {
 			return false;
 		}
-		return self::orderMapAs($left, $right) === $right;
+		if ($strict) {
+			return self::orderMapAs($left, $right) === $right;
+		} else {
+			return self::orderMapAs($left, $right) == $right;
+		}
 	}
 	
 	public static function orderMapAs(array $map, array $format) {
