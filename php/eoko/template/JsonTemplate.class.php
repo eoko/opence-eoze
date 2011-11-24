@@ -5,13 +5,14 @@ namespace eoko\template;
 use \ExtJSResponse;
 use eoko\util\Json;
 
+use eoko\output\Output;
+
 class JsonTemplate extends Template {
 	
 	protected function doRender() {
-//		ExtJSResponse::mergeIn($this->vars);
 		if (!headers_sent()) {
 			header('Content-type: application/json');
 		}
-		echo Json::encode($this->vars);
+		Output::out(Json::encode($this->vars));
 	}
 }

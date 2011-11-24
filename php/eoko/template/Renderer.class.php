@@ -8,6 +8,7 @@ use \Logger;
 use \UnsupportedOperationException;
 use eoko\module\ModuleManager;
 use eoko\util\Arrays;
+use eoko\output\Output;
 
 \includeFromNamespace(__NAMESPACE__, 'functions.php');
 
@@ -124,9 +125,9 @@ abstract class Renderer {
 		} else {
 			if ($this->cachedResult !== null) {
 				Logger::get($this)->debug('Template already rendered, outputing cache');
-				echo $this->cachedResult;
+				Output::out($this->cachedResult);
 			} else if ($this->forceResultCaching) {
-				echo $this->doRenderToString($vars);
+				Output::out($this->doRenderToString($vars));
 			} else {
 				$this->performRendering();
 			}
