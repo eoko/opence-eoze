@@ -177,6 +177,8 @@ Oce.deps.wait('Ext.ux.form.TwinComboBox', function() {
 		 * and won't depend on server side processing after that.
 		 */
 		remoteOnce: false
+		
+		,triggerAction: 'all'
 
 		,constructor: function(cfg) {
 
@@ -207,7 +209,7 @@ Oce.deps.wait('Ext.ux.form.TwinComboBox', function() {
 				,autoSelect: false
 			});
 
-			if (cfg.pageSize !== undefined) {
+			if (cfg.pageSize) {
 				this.store.baseParams.limit = cfg.pageSize;
 				this.paginated = true;
 			}

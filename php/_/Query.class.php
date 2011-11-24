@@ -750,8 +750,8 @@ class Query {
 	 */
 	public function limit($limit, $start = false) {
 		if ($start === null) $start = 0;
-		$this->limitStart = (int) $start;
-		$this->limit = (int) $limit;
+		$this->limitStart = $start;
+		$this->limit = $limit;
 		return $this;
 	}
 
