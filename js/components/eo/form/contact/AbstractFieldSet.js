@@ -260,13 +260,13 @@ eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 		return field;
 	}
 
-	,add: function() {
-		eo.warn('Direct add() to eo.form.contact.AbstractFieldSet is disabled.');
-	}
-	
-	,remove: function() {
-		eo.warn('Direct remove() to eo.form.contact.AbstractFieldSet is disabled.');
-	}
+//	,add: function() {
+//		eo.warn('Direct add() to eo.form.contact.AbstractFieldSet is disabled.');
+//	}
+//	
+//	,remove: function() {
+//		eo.warn('Direct remove() to eo.form.contact.AbstractFieldSet is disabled.');
+//	}
 	
 	/**
 	 * Returns `true` if this FieldSet accept selection of one primary field in
