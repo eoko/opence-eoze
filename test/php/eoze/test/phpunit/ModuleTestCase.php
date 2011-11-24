@@ -11,6 +11,9 @@ use PHPUnit_Extensions_Database_DataSet_DefaultDataSet as DefaultDataSet;
 use UserSession;
 use eoko\security\LoginAdapter\DummyAdapter as DummyLoginAdapter;
 
+use eoko\output\Output;
+use eoko\output\Adapter\NullAdapter;
+
 use IllegalStateException;
 use eoko\config\ConfigManager;
 
@@ -39,6 +42,8 @@ abstract class ModuleTestCase extends DatabaseTestCase {
 		// My code...
 		UserSession::setLoginAdapter(new DummyLoginAdapter);
 		UserSession::login($this->username, $this->password);
+		
+		Output::setAdapter(new NullAdapter);
 	}
 
 	// Completely overriding parent's tearDown to change getDataSet

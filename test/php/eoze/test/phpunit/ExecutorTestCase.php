@@ -9,6 +9,7 @@ use ReflectionProperty;
 use eoko\module\Module;
 use eoko\module\Module\executor\Executor;
 use Request;
+use ExtJSResponse;
 
 /**
  *
@@ -136,8 +137,16 @@ class ExecutorTestCase extends ModuleTestCase {
 	 * 
 	 * @param array $request
 	 * @param bool $autoController 
+	 * 
+	 * @return array Request result data
 	 */
 	protected function runRequest(array $request) {
+		$request  = new \Request($request);
+		$executor = Module::parseRequestAction($request);
+
+		ExtJSResponse::purge();
+		$executor();
 		
+		return $executor->getData();
 	}
 }
