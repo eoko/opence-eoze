@@ -9,6 +9,8 @@ use PHPUnit_Extensions_Database_DataSet_CompositeDataSet as CompositeDataSet;
 use PHPUnit_Extensions_Database_DataSet_DefaultDataSet as DefaultDataSet;
 
 use UserSession;
+use eoko\security\LoginAdapter\DummyAdapter as DummyLoginAdapter;
+
 use IllegalStateException;
 use eoko\config\ConfigManager;
 
@@ -35,6 +37,7 @@ abstract class ModuleTestCase extends DatabaseTestCase {
         $this->getDatabaseTester()->onSetUp();
 
 		// My code...
+		UserSession::setLoginAdapter(new DummyLoginAdapter);
 		UserSession::login($this->username, $this->password);
 	}
 
