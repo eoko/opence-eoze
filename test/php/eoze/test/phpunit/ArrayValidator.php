@@ -187,18 +187,40 @@ class ArrayValidator {
 					return true;
 				}
 			case 'float':
+			case 'double':
 				if (!is_float($data)) {
 					$this->errors[$path] = "Wrong type: expected $spec[type], found: " . gettype($data);
 					return false;
 				} else {
 					return true;
 				}
-			case 'double':
-				if (!is_double($data)) {
+			case 'number':
+				if (is_integer($data) || is_float($data)) {
+					return true;
+				} else {
 					$this->errors[$path] = "Wrong type: expected $spec[type], found: " . gettype($data);
 					return false;
-				} else {
+				}
+			case 'text':
+				if (is_string($data) || is_integer($data) || is_float($data)) {
 					return true;
+				} else {
+					$this->errors[$path] = "Wrong type: expected $spec[type], found: " . gettype($data);
+					return false;
+				}
+			case 'date':
+				if (preg_match('/\d{4}-\d\d-\d\d/', $data)) {
+					return true;
+				} else {
+					$this->errors[$path] = "Not a date: " . $data;
+					return false;
+				}
+			case 'scalar':
+				if (!is_array($data)) {
+					return true;
+				} else {
+					$this->errors[$path] = "Wrong type: " . $data . ' (scalar expected)';
+					return false;
 				}
 			default:
 				if (gettype($data) !== $spec['type']) {
