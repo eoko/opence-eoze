@@ -255,7 +255,9 @@ class Columns {
 						if (!isset($col['renderer'])) {
 							$col['renderer'] = 'Oce.ext.Renderer.yesNo';
 						}
-						self::setColFormItemIf($col, 'xtype', 'checkbox');
+						if (!isset($col['formField']['xtype'])) {
+							$col['formField']['xtype'] = 'checkbox';
+						}
 						break;
 					case ModelColumn::T_TEXT:
 					case ModelColumn::T_STRING:
