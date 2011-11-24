@@ -10,9 +10,12 @@ use ReflectionClass;
 
 use eoko\module\Module;
 use eoko\module\Module\executor\Executor;
+use eoko\util\YmlReader;
+use eoko\util\Arrays;
+use eoze\test\phpunit\ArrayValidator;
+
 use Request;
 use ExtJSResponse;
-use eoko\util\YmlReader;
 
 use PHP_Timer;
 
@@ -171,27 +174,27 @@ class ExecutorTestCase extends ModuleTestCase {
 	
 	private $result;
 	
-	public function run(\PHPUnit_Framework_TestResult $result = null) {
-		if ($result === null) {
-			$result = new \PHPUnit_Framework_TestResult;
-		}
-		$this->result = $result;
-		
-		// Find if there are other test methods
-		$theClass = new ReflectionClass($this);
-        foreach ($theClass->getMethods() as $method) {
-            if (strpos($method->getDeclaringClass()->getName(), 'PHPUnit_') !== 0) {
-				if ($method->getName() !== 'testRequests'
-						&& \PHPUnit_Framework_TestSuite::isTestMethod($method)) {
-					return parent::run($result);
-				}
-            }
-        }
-		
-		$this->testRequests();
-		
-		return $this->result;
-	}		
+//	public function run(\PHPUnit_Framework_TestResult $result = null) {
+//		if ($result === null) {
+//			$result = new \PHPUnit_Framework_TestResult;
+//		}
+//		$this->result = $result;
+//		
+//		// Find if there are other test methods
+//		$theClass = new ReflectionClass($this);
+//        foreach ($theClass->getMethods() as $method) {
+//            if (strpos($method->getDeclaringClass()->getName(), 'PHPUnit_') !== 0) {
+//				if ($method->getName() !== 'testRequests'
+//						&& \PHPUnit_Framework_TestSuite::isTestMethod($method)) {
+//					return parent::run($result);
+//				}
+//            }
+//        }
+//		
+//		$this->testRequests();
+//		
+//		return $this->result;
+//	}		
 
 	public function testRequests() {
 		
@@ -219,35 +222,41 @@ class ExecutorTestCase extends ModuleTestCase {
 		// Run
 		foreach ($tests as $file => $data) {
 			foreach ($data as $name => $test) {
-				$this->result->startTest($this);
-				PHP_Timer::start();
-				
-				try {
+//				$this->result->startTest($this);
+//				PHP_Timer::start();
+//				
+//				try {
 					$this->doTestRequest($file, $name, $test);
-				}
-				catch (\PHPUnit_Framework_AssertionFailedError $ex) {
-					$this->result->addFailure($this, $e, PHP_Timer::stop());
-				}
-				catch (\Exception $e) {
-					$this->result->addError($this, $e, PHP_Timer::stop());
-				}
-				
-				$this->result->endTest($this, PHP_Timer::stop());
+//				}
+//				catch (\PHPUnit_Framework_AssertionFailedError $ex) {
+//					$this->result->addFailure($this, $e, PHP_Timer::stop());
+//				}
+//				catch (\Exception $e) {
+//					$this->result->addError($this, $e, PHP_Timer::stop());
+//				}
+//				
+//				$this->result->endTest($this, PHP_Timer::stop());
 			}
 		}
 	}
-	
+
 	protected function doTestRequest($file, $name, $test) {
 		if (!isset($test['request'])) {
 			throw new IllegalStateException("Missing request in data set $name of file $file");
 		}
-		if (!isset($test['expected'])) {
-			throw new IllegalStateException("Missing expected restul in data set $name of file $file");
+//		if (!isset($test['expected'])) {
+//			throw new IllegalStateException("Missing expected restul in data set $name of file $file");
+//		}
+		$result = $this->runRequest($test['request']);
+		if (isset($this->test['expected'])
+				&& !Arrays::compareMap($test['expected'], $results)) {
+			$this->assertEquals($test['expected'], $results);
 		}
-		$this->assertSame(
-			$test['expected'],
-			$this->runRequest($test['request'])
-		);
+		if (isset($this->test['expected-format'])) {
+			$validator = new ArrayValidator($this->test['expected-format']);
+			$success = $validator->test($results);
+			$this->assertTrue($success, $validator->getLastError());
+		}
 	}
 	
 //	public function testRequests() {
