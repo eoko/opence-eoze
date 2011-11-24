@@ -18,6 +18,7 @@ class DummyAdapter implements LoginAdapter {
 	
 	public function tryLogin($username = null, $password = null, &$reason = null) {
 		return User::create(array(
+			'id'         => -1,
 			'username'   => $username,
 			'Level'      => $this->level,
 			'end_use'    => date('Y-m-d', time() + 86400),
