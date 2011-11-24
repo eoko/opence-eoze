@@ -252,6 +252,9 @@ class Columns {
 						self::setColStoreItemIf($col, 'type', 'date');
 						break;
 					case ModelColumn::T_BOOL:
+						if (!isset($col['renderer'])) {
+							$col['renderer'] = 'Oce.ext.Renderer.yesNo';
+						}
 						self::setColStoreItemIf($col, 'type', 'boolean');
 						break;
 					case ModelColumn::T_TEXT:
