@@ -51,7 +51,8 @@ class ArrayValidator {
 	}
 	
 	private $defaults = array(
-		'strict' => false,
+		'strict'   => true,
+		'required' => false,
 	);
 	
 	private function isStrict($spec) {
@@ -63,7 +64,11 @@ class ArrayValidator {
 	}
 	
 	private function isRequired($spec) {
-		return isset($spec['required']) && $spec['required'];
+		if (!isset($spec['required'])) {
+			return $this->defaults['required'];
+		} else {
+			return !!$spec['required'];
+		}
 	}
 	
 	private function testMapping($path, array $spec, array $array) {
@@ -82,26 +87,30 @@ class ArrayValidator {
 					$this->errors["$path$this->sep$key"] = 'Missing required key';
 					return false;
 				}
-			} else {
-				if (isset($format['type'])) {
-					if (!$this->testType("$path$this->sep$key", $format, $array[$key])) {
-						return false;
-					}
-				}
-				if (isset($format['value'])) {
-					if ($array[$key] !== $format['value']) {
-						$this->errors["$path$this->sep$key"] = "Wrong required value: expected $format[value], actual: $array[name]";
-						return false;
-					}
-				}
-//				if (isset($spec['pattern'])) {
-//
-//				}
+			} else if (!$this->testRule("$path$this->sep$key", $format, $value = $array[$key])) {
+				return false;
 			}
 		}
 		if ($this->isStrict($spec) && count($keys)) {
 			$key = key($keys);
 			$this->errors["$path$this->sep$key"] = "Undefined key";
+			return false;
+		}
+		return true;
+	}
+	
+	private function testRule($path, $format, $value) {
+		if (isset($format['type'])
+				&& !$this->testType($path, $format, $value)) {
+			return false;
+		}
+		if (isset($format['value']) && $value !== $format['value']) {
+			$this->errors[$path] = "Wrong required value: expected $format[value], actual: $value";
+			return false;
+		}
+		if (isset($format['pattern'])
+				&& !preg_match($format['pattern'], $value)) {
+			$this->errors[$path] = "Does not match pattern $format[pattern] (value: $value)";
 			return false;
 		}
 		return true;
@@ -140,7 +149,7 @@ class ArrayValidator {
 						throw new IllegalStateException("Illegal specification for sequence: $path");
 					}
 					foreach ($data as $i => $v) {
-						if (!$this->testType($path . "[$i]", $spec['sequence'][0], $v)) {
+						if (!$this->testRule($path . "[$i]", $spec['sequence'][0], $v)) {
 							return false;
 						}
 					}
