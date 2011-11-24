@@ -24,16 +24,16 @@ class ArrayValidator {
 	}
 	
 	public function test(array $array) {
-//		if (!isset($this->format['type'])) {
-//			$format = array(
-//				'type' => 'map',
-//				'mapping' => $this->format,
-//			);
-//		} else {
+		if (!isset($this->format['type'])) {
+			$format = array(
+				'type' => 'map',
+				'mapping' => $this->format,
+			);
+		} else {
 			$format = $this->format;
-//		}
+		}
 		$this->errors = null;
-		if (!self::testMapping('', $format, $array)) {
+		if (!self::testType('', $format, $array)) {
 			foreach ($this->errors as $path => $error) {
 				if ($path) {
 					if (substr($path, 0, 1) === $this->sep) {
@@ -50,38 +50,59 @@ class ArrayValidator {
 		}
 	}
 	
-	private function testMapping($path, array $format, array $array) {
-		foreach ($format as $name => $spec) {
-			if (!is_array($spec)) {
-				$spec = array(
-					'value' => $spec
+	private $defaults = array(
+		'strict' => false,
+	);
+	
+	private function isStrict($spec) {
+		if (!isset($spec['strict'])) {
+			return $this->defaults['strict'];
+		} else {
+			return !!$spec['strict'];
+		}
+	}
+	
+	private function isRequired($spec) {
+		return isset($spec['required']) && $spec['required'];
+	}
+	
+	private function testMapping($path, array $spec, array $array) {
+		$keys = $array;
+		foreach ($spec['mapping'] as $key => $format) {
+			unset($keys[$key]);
+			if (!is_array($format)) {
+				$format = array(
+					'value' => $format
 				);
-			} else if (!isset($spec['value']) && !isset($spec['type'])) {
-				throw new IllegalStateException("Illegal specification for item: $path$this->sep$name");
+//			} else if (!isset($spec['value']) && !isset($spec['type'])) {
+//				throw new IllegalStateException("Illegal specification for item: $path$this->sep$name");
 			}
-			if (isset($spec['type'])) {
-				if (!array_key_exists($name, $array)) {
-					if (!isset($spec['required']) || $spec['required'] === true) {
-						$this->errors[$path] = 'Missing required: ' . $name;
-						return false;
-					}
-				} else {
-					if (!$this->testType("$path$this->sep$name", $spec, $array[$name])) {
-						return false;
-					}
-				}
-			}
-			if (isset($spec['value'])) {
-				if (!array_key_exists($name, $array)) {
-					if (!isset($spec['required']) || $spec['required'] === true) {
-						$this->errors[$path] = 'Missing required: ' . $name;
-						return false;
-					}
-				} else if ($array[$name] !== $spec['value']) {
-					$this->errors["$path$this->sep$name"] = "Wrong required value: expected $spec[value], found: $array[name]";
+			if (!array_key_exists($key, $array)) {
+				if ($this->isRequired($format)) {
+					$this->errors["$path$this->sep$key"] = 'Missing required key';
 					return false;
 				}
+			} else {
+				if (isset($format['type'])) {
+					if (!$this->testType("$path$this->sep$key", $format, $array[$key])) {
+						return false;
+					}
+				}
+				if (isset($format['value'])) {
+					if ($array[$key] !== $format['value']) {
+						$this->errors["$path$this->sep$key"] = "Wrong required value: expected $format[value], actual: $array[name]";
+						return false;
+					}
+				}
+//				if (isset($spec['pattern'])) {
+//
+//				}
 			}
+		}
+		if ($this->isStrict($spec) && count($keys)) {
+			$key = key($keys);
+			$this->errors["$path$this->sep$key"] = "Undefined key";
+			return false;
 		}
 		return true;
 	}
@@ -103,7 +124,7 @@ class ArrayValidator {
 					return false;
 				} else {
 					if (isset($spec['mapping'])) {
-						return $this->testMapping($path, $spec['mapping'], $data);
+						return $this->testMapping($path, $spec, $data);
 					} else {
 						// free mapping
 						return true;
