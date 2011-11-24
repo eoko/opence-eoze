@@ -1458,17 +1458,27 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			}
 
 			var onSuccess = function(data, response) {
+				waitBox.hide();
 				//location.href = data.url;
 				if (win) win.close();
 				if (Ext.isIE6 || Ext.isIE7) {
 					Ext.Msg.alert(
-                'Fichier',
-                String.format(
-                    "Le fichier est disponible à l'adresse suivante : "
-                    + '<a href="{0}">{0}</a>.', 
-                    response.url
-                )
-            );
+						'Fichier',
+						String.format(
+							"Le fichier est disponible à l'adresse suivante : "
+							+ '<a href="{0}">{0}</a>.', 
+							response.url
+						)
+					);
+				} else if (Ext.isGecko) {
+					Ext.DomHelper.append(document.body, {
+						tag: 'iframe',
+						frameBorder: 0,
+						width: 0,
+						height: 0,
+						css: 'display:none;visibility:hidden;height:1px;',
+						src: response.url
+					});
 				} else {
 					window.open(response.url);
 				}
@@ -1478,12 +1488,14 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				onSuccess = onSuccess.createSequence(opts.onSuccess, opts.scope);
 				delete opts.onSuccess;
 			}
+			
+			var waitBox = Ext.Msg.wait('Création du fichier');
 
 			Oce.Ajax.request(Ext.applyIf({
 				params: requestParams
-				,waitTitle: 'Veuillez patienter' // i18n
-				,waitMsg: 'Fichier en cours de création...' // i18n
-				,waitTarget: win ? win : undefined
+//				,waitTitle: 'Veuillez patienter' // i18n
+//				,waitMsg: 'Fichier en cours de création...' // i18n
+//				,waitTarget: win ? win : undefined
 				,onSuccess: onSuccess
 			}), opts);
 		}
