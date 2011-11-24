@@ -20,7 +20,11 @@ const ACTION_CANCELLED = -1;
  * @param Executor $executor 
  */
 function execute(Executor $executor, $action) {
-	return $executor->$action();
+	if (method_exists($executor, $action)) {
+		return $executor->$action();
+	} else {
+		throw new IllegalStateException("Executor $executor has no action $action");
+	}
 }
 
 abstract class Executor implements file\Finder {

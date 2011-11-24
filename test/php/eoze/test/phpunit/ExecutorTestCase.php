@@ -89,10 +89,6 @@ class ExecutorTestCase extends ModuleTestCase {
 		if (isset($this->executorType)) {
 			return $this->executorType;
 		}
-		if (isset($this->controller)) {
-			$parts = explode('.', $this->controller);
-			return $this->executorType = $parts[1];
-		}
 		$p = new ReflectionProperty($this, 'executor');
 		$comment = $p->getDocComment();
 		if ($comment 
