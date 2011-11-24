@@ -99,18 +99,23 @@ class ArrayValidator {
 		return true;
 	}
 	
-	private function testRule($path, $format, $value) {
-		if (isset($format['type'])
-				&& !$this->testType($path, $format, $value)) {
+	private function testRule($path, $spec, $value) {
+		if (isset($spec['type'])
+				&& !$this->testType($path, $spec, $value)) {
 			return false;
 		}
-		if (isset($format['value']) && $value !== $format['value']) {
-			$this->errors[$path] = "Wrong required value: expected $format[value], actual: $value";
+		if (isset($spec['value']) && $value !== $spec['value']) {
+			$this->errors[$path] = "Wrong required value: expected $spec[value], actual: $value";
 			return false;
 		}
-		if (isset($format['pattern'])
-				&& !preg_match($format['pattern'], $value)) {
-			$this->errors[$path] = "Does not match pattern $format[pattern] (value: $value)";
+		if (isset($spec['pattern'])
+				&& !preg_match($spec['pattern'], $value)) {
+			$this->errors[$path] = "Does not match pattern $spec[pattern]: '$value'";
+			return false;
+		}
+		if (isset($spec['enum'])
+				&& !in_array($value, $spec['enum'], true)) {
+			$this->errors[$path] = "Does not match enum: '$value')";
 			return false;
 		}
 		return true;
