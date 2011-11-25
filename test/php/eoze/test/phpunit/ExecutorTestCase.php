@@ -187,7 +187,7 @@ class ExecutorTestCase extends ModuleTestCase {
 		$return = array();
 		foreach ($this->getRequestTestList() as $file => $data) {
 			foreach ($data as $name => $test) {
-				$return[] = array(
+				$return["$file > $name"] = array(
 					$file,
 					$name,
 					$test
@@ -236,10 +236,10 @@ class ExecutorTestCase extends ModuleTestCase {
 		
 		if (isset($format)) {
 			$validator = new ArrayValidator($format);
-			$success = $validator->test($result);
-			
-			$this->assertTrue($success, $validator->getLastError(),
-					'Asserting that result match expected template');
+			if (!$validator->test($result)) {
+				$this->fail('Result validation failed: ' . $validator->getLastError()
+						. PHP_EOL . print_r($result, true));
+			}
 		}
 	}
 }
