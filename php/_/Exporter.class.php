@@ -92,7 +92,10 @@ class Exporter {
 		$this->directory = trim($directory, DS . '/') . DS;
 	}
 
-	private static function getAbsolutePath($filename) {
+	private function getAbsolutePath($filename) {
+		if (!file_exists($this->exportsAbsolutePath . $this->directory)) {
+			mkdir($this->exportsAbsolutePath . $this->directory);
+		}
 		return $this->exportsAbsolutePath . $this->directory . $filename;
 	}
 
