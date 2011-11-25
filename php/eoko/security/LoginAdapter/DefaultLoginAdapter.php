@@ -6,7 +6,7 @@ use eoko\security\LoginAdapter;
 
 use eoko\log\Logger;
 use Security;
-use eoko\util\date\DateHelper;
+use DateHelper;
 
 use UserTable, User;
 use LevelTable;
