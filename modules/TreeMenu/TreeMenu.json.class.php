@@ -9,8 +9,6 @@ use eoko\database\Database;
 
 class Json extends JsonExecutor {
 	
-	private static $defaultMenuUserId = -1;
-	
 	public function loadUserMenu() {
 		
 		$finder = MenuNodeTable::find('`users_id`=?', $this->getUserId());
@@ -74,6 +72,12 @@ class Json extends JsonExecutor {
 	}
 	
 	private function doCreateDefaultMenu() {
+		
+		$defaultMenuUserId = $this->getModule()->getConfig()->getValue('defaultMenuUserId');
+		
+		if (!$defaultMenuUserId) {
+			return $this->getModule()->createDefaultMenu();
+		}
 		
 		$userId = $this->getUserId();
 		
