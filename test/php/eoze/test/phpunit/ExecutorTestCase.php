@@ -43,7 +43,8 @@ class ExecutorTestCase extends ModuleTestCase {
 	
 	protected $testRequests = true;
 	
-	public function __construct() {
+    public function __construct($name = NULL, array $data = array(), $dataName = '') {
+		parent::__construct($name, $data, $dataName);
 		if (isset($this->controller)) {
 			switch (count($parts = explode('.', $this->controller))) {
 				case 2:
@@ -156,44 +157,7 @@ class ExecutorTestCase extends ModuleTestCase {
 		return $executor->getData();
 	}
 	
-	private function loadRequestFile($file) {
-		$dataSet = array();
-		$data = YmlReader::loadFile($file);
-		foreach ($data as $name => $test) {
-			if (!isset($test['request']['controller'])) {
-				$test['request']['controller'] = $this->getControllerName();
-			}
-			$dataSet[$name] = $test;
-		}
-		return $dataSet;
-	}
-	
-	private $result;
-	
-//	public function run(\PHPUnit_Framework_TestResult $result = null) {
-//		if ($result === null) {
-//			$result = new \PHPUnit_Framework_TestResult;
-//		}
-//		$this->result = $result;
-//		
-//		// Find if there are other test methods
-//		$theClass = new ReflectionClass($this);
-//        foreach ($theClass->getMethods() as $method) {
-//            if (strpos($method->getDeclaringClass()->getName(), 'PHPUnit_') !== 0) {
-//				if ($method->getName() !== 'testRequests'
-//						&& \PHPUnit_Framework_TestSuite::isTestMethod($method)) {
-//					return parent::run($result);
-//				}
-//            }
-//        }
-//		
-//		$this->testRequests();
-//		
-//		return $this->result;
-//	}		
-
-	public function testRequests() {
-		
+	protected function getRequestTestList() {
 		$class = new ReflectionClass($this);
 		
 		$tests = array();
@@ -202,7 +166,7 @@ class ExecutorTestCase extends ModuleTestCase {
 		if (file_exists($file = dirname($class->getFileName()) 
 				. '/' . get_relative_classname($this) . '.requests.yml')) {
 			
-			$tests[get_relative_classname($this)] = $this->loadRequestFile($file);
+			$tests[get_relative_classname($this)] = YmlReader::loadFile($file);
 		}
 
 		$requestDir = dirname($class->getFileName()) . DS . get_relative_classname($this) 
@@ -211,78 +175,71 @@ class ExecutorTestCase extends ModuleTestCase {
 		// Load ./ClassName.requests/*.yml files
 		if (file_exists($requestDir)) {
 			foreach (glob($requestDir . '/*.yml') as $file) {
-				$tests[substr(basename($file), 0, -4)] = $this->loadRequestFile($file);
+				$tests[substr(basename($file), 0, -4)] = YmlReader::loadFile($file);
 			}
 		}
-
+		
+		return $tests;
+	}
+	
+	public function requestsTestProvider() {
 		// Run
-		foreach ($tests as $file => $data) {
+		$return = array();
+		foreach ($this->getRequestTestList() as $file => $data) {
 			foreach ($data as $name => $test) {
-//				$this->result->startTest($this);
-//				PHP_Timer::start();
-//				
-//				try {
-					$this->doTestRequest($file, $name, $test);
-//				}
-//				catch (\PHPUnit_Framework_AssertionFailedError $ex) {
-//					$this->result->addFailure($this, $e, PHP_Timer::stop());
-//				}
-//				catch (\Exception $e) {
-//					$this->result->addError($this, $e, PHP_Timer::stop());
-//				}
-//				
-//				$this->result->endTest($this, PHP_Timer::stop());
+				$return[] = array(
+					$file,
+					$name,
+					$test
+				);
 			}
 		}
+		return $return;
 	}
 
-	protected function doTestRequest($file, $name, $test) {
+	/**
+	 * @dataProvider requestsTestProvider
+	 */
+	public function testRequests($file, $name, $test) {
+		
 		if (!isset($test['request'])) {
 			throw new IllegalStateException("Missing request in data set $name of file $file");
 		}
-//		if (!isset($test['expected'])) {
-//			throw new IllegalStateException("Missing expected restul in data set $name of file $file");
-//		}
-		$result = $this->runRequest($test['request']);
-		if (isset($this->test['expected'])
-				&& !Arrays::compareMap($test['expected'], $results)) {
-			$this->assertEquals($test['expected'], $results);
+		
+		// Shortcut form 'request' => $action
+		if (is_string($test['request'])) {
+			$test['request'] = array(
+				'action' => $test['request']
+			);
 		}
-		if (isset($this->test['expected-format'])) {
-			$validator = new ArrayValidator($this->test['expected-format']);
-			$success = $validator->test($results);
-			$this->assertTrue($success, $validator->getLastError());
+		
+		// Automatic controller
+		if (!isset($test['request']['controller'])) {
+			$test['request']['controller'] = $this->getControllerName();
+		}
+			
+		$result = $this->runRequest($test['request']);
+		
+		if (isset($test['expected'])
+				&& !Arrays::compareMap($test['expected'], $result)) {
+			
+			$this->assertEquals($test['expected'], $result, 
+					'Asserting that result match expected');
+		}
+		
+		$format = null;
+		if (isset($test['expected-format'])) {
+			$format = $test['expected-format'];
+		} else if (isset($test['format'])) {
+			$format = $test['format'];
+		}
+		
+		if (isset($format)) {
+			$validator = new ArrayValidator($format);
+			$success = $validator->test($result);
+			
+			$this->assertTrue($success, $validator->getLastError(),
+					'Asserting that result match expected template');
 		}
 	}
-	
-//	public function testRequests() {
-//		
-//		$dataSet = array();
-//
-//		$class = new \ReflectionClass($this);
-//		
-//		$result = $this->getResult();
-////		assert($result instanceof \PHPUnit_Framework_Result);
-//		
-//		if (file_exists($file = dirname($class->getFileName()) 
-//				. '/' . get_relative_classname($this) . '.requests')) {
-//			foreach ($this->loadRequestFile($file) as $name => $file) {
-//				$result->startTest($this);
-//				PHP_Timer::start();
-//
-//				$result->endTest($this, PHP_Timer::stop());
-//			}
-//		}
-//
-////		$requestDir = dirname($class->getFileName()) . DS . get_relative_classname($this) 
-////				. '.requests';
-////
-////		if (file_exists($requestDir)) {
-////			foreach (glob($requestDir . '/*.yml') as $file) {
-////				$dataSet += $this->loadRequestFile($file);
-////			}
-////		}
-////		
-////		dump($dataSet);;
-//	}
 }
