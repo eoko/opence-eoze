@@ -74,7 +74,7 @@ class Exporter {
 
 		fclose($file);
 
-		return self::getUrl($filename);
+		return $this->getUrl($filename);
 //
 //        header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
 //        header("Content-Length: " . strlen($html));
@@ -84,8 +84,12 @@ class Exporter {
 //        return $html;
     }
 
-	private static function getUrl($filename) {
-		return EXPORTS_BASE_URL . $filename;
+	private function getUrl($filename) {
+		$directory;
+		if ($this->directory) {
+			$directory = str_replace(DS, '/', $this->directory);
+		}
+		return EXPORTS_BASE_URL . $directory . $filename;
 	}
 	
 	public function setDirectory($directory) {
@@ -111,7 +115,7 @@ class Exporter {
 		$pdfExport = new PdfExport($result, $fields, $table, $title);
 		$filename = $this->getFileName('pdf');
 		$pdfExport->writeFile($this->getAbsolutePath($filename));
-		return self::getUrl($filename);
+		return $this->getUrl($filename);
     }
 
 }
