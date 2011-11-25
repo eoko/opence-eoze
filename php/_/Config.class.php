@@ -277,7 +277,7 @@ class Config implements ArrayAccess, IteratorAggregate {
 		if ($this->hasNode($path)) {
 			return $this->node($path, false, false);
 		} else {
-			return null;
+			return $default;
 		}
 	}
 
