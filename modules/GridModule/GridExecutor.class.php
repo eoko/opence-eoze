@@ -913,6 +913,15 @@ MSG;
 	protected function makePdfTitle() {
 		return $this->title;
 	}
+	
+	/**
+	 * Gets the module name in a filesystem & url friendly version.
+	 * @return string
+	 */
+	private function getSlug() {
+		return $this->getModule()->getConfig()->getValue('module/slug', 
+				$this->getModule()->getName());
+	}
 
 	public function export() {
 
@@ -983,6 +992,7 @@ MSG;
 //		}
 
 		$exporter = new \Exporter($this->makeExportFilename());
+		$exporter->setDirectory($this->getSlug());
 
 		switch ($format) {
 			case 'csv': 
