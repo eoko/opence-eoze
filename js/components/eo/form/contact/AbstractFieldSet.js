@@ -155,7 +155,19 @@ eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 		} else {
 			this.baseParams[key] = value;
 		}
-		debugger
+		// Apply on existing children
+		this.propagateBaseParams();
+	}
+	
+	// private
+	,propagateBaseParams: function() {
+		if (this.items && this.items.each && this.baseParams) {
+			this.items.each(function(item) {
+				if (item.setBaseParams) {
+					item.setBaseParams(this.baseParams);
+				}
+			});
+		}
 	}
 
 	,initComponent: function() {
@@ -182,6 +194,8 @@ eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 				this.addField(true);
 			}
 		}
+		// base params
+		this.propagateBaseParams();
 	}
 	
 	/**
@@ -235,6 +249,13 @@ eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 	,addField: function(preventFocus) {
 		
 		var field = this.createField();
+		
+		// base params
+		if (this.baseParams && field.setBaseParams) {
+			field.setBaseParams(this.baseParams);
+		}
+		
+		// track changes
 		field.on({
 			scope: this
 			,removeline: this.removeFieldHandler
@@ -423,9 +444,9 @@ eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 		}
 		if (this.maxFieldNumber === 1 && this.returnSingleValue) {
 			switch (this.items.length) {
-				case 0: return null;
-				case 1: return this.items.get(0).getValue();
-				default: throw new Error('Illegal State (not supposed to be able '
+				case 0:return null;
+				case 1:return this.items.get(0).getValue();
+				default:throw new Error('Illegal State (not supposed to be able '
 						+ 'to have more than one child)');
 			}
 		} else {
