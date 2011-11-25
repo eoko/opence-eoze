@@ -82,6 +82,13 @@ eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 	// Fields
 	,bubbleEvents: []
 	
+	/**
+	 * @property {Object} baseParams Theses params will be passed to all the 
+	 * children, either when they are created, or when the 
+	 * {@link #putBaseParam} method is called.
+	 */
+	,baseParams: undefined
+	
 	,constructor: function(config) {
 		
 		/**
@@ -137,6 +144,18 @@ eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 	,allowMultiple: function() {
 		var m = this.maxFieldNumber;
 		return m === null || m === undefined || m > 1;
+	}
+	
+	,putBaseParam: function(key, value) {
+		if (!this.baseParams) {
+			this.baseParams = {};
+		}
+		if (Ext.isObject(key)) {
+			Ext.apply(this.baseParams, key);
+		} else {
+			this.baseParams[key] = value;
+		}
+		debugger
 	}
 
 	,initComponent: function() {
