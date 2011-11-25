@@ -2,7 +2,9 @@
 <?php
 
 $class = 'eoko\\cqlix\\generator\\Generator';
-require 'doRun.php';
+require __DIR__ . '/doRun.php';
 
 $syncDbAction = 'dump';
-require 'db-sync.php';
+require __DIR__ . '/db-sync.php';
+
+require __DIR__ . '/test-database-sync.php';
