@@ -6,7 +6,10 @@ class Exporter {
 	private $saltFileNameEnd = true;
 	/** @var Controller */
 	private $controller = null;
-	private static $exportsAbsolutePath = EXPORTS_PATH;
+	
+	private $exportsAbsolutePath = EXPORTS_PATH;
+	
+	private $directory;
 
 	public function __construct($basename = 'Export', Controller $moduleController = null) {
 		$this->controller = $moduleController;
@@ -84,9 +87,13 @@ class Exporter {
 	private static function getUrl($filename) {
 		return EXPORTS_BASE_URL . $filename;
 	}
+	
+	public function setDirectory($directory) {
+		$this->directory = trim($directory, DS . '/') . DS;
+	}
 
 	private static function getAbsolutePath($filename) {
-		return self::$exportsAbsolutePath . $filename;
+		return $this->exportsAbsolutePath . $this->directory . $filename;
 	}
 
 	private function generateRandomEndSalt($nLetters) {
@@ -100,7 +107,7 @@ class Exporter {
 	public function exportPDF($result, $fields, ModelTable $table, $title) {
 		$pdfExport = new PdfExport($result, $fields, $table, $title);
 		$filename = $this->getFileName('pdf');
-		$pdfExport->writeFile(self::getAbsolutePath($filename));
+		$pdfExport->writeFile($this->getAbsolutePath($filename));
 		return self::getUrl($filename);
     }
 
