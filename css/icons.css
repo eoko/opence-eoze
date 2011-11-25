@@ -103,6 +103,9 @@
 .ico.arrow_down {
 	background-image:url(../images/icons/arrow_down.png) !important;
 }
+.ico.download {
+	background-image:url(../images/icons_fatcow/16x16/download.png) !important;
+}
 .application_form_edit {
 	background-image:url(../images/icons/application_form_edit.png) !important;
 }
@@ -113,6 +116,9 @@
 .ico.delete,
 .ico_delete {
 	background-image:url(../images/icons/delete.png) !important;
+}
+.ico.flags {
+	background-image:url(../images/icons/flags.png) !important;
 }
 .ico.collapse-all {
 	background-image:url("images/ext-tree-collapse-all.gif") !important;
