@@ -228,7 +228,11 @@ class ExecutorTestCase extends ModuleTestCase {
 		}
 		
 		$format = null;
-		if (isset($test['expected-format'])) {
+		if (isset($test['expected-schema'])) {
+			$format = $test['expected-format'];
+		} else if (isset($test['format'])) {
+			$format = $test['schema'];
+		} else if (isset($test['expected-format'])) {
 			$format = $test['expected-format'];
 		} else if (isset($test['format'])) {
 			$format = $test['format'];
