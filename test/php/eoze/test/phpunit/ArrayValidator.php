@@ -3,17 +3,22 @@
 namespace eoze\test\phpunit;
 
 use IllegalStateException;
+use IllegalArgumentException;
 use eoko\util\Arrays;
 
 /**
- *
+ * Array validator from a schema specification.
+ * 
+ * 
+ * 
+ * 
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  * @author Éric Ortega <eric@planysphere.fr>
  * @since 24 nov. 2011
  */
 class ArrayValidator {
 	
-	private $format;
+	private $schema;
 	
 	private $sep = '.';
 	
@@ -21,8 +26,68 @@ class ArrayValidator {
 	
 	private $lastError;
 	
-	public function __construct(array $format) {
-		$this->format = $format;
+	private $throwException;
+	
+	private $defaults = array(
+		'strict'   => true,
+		'required' => false,
+		'allowNull' => true,
+		'type' => 'str',
+	);
+	
+	public function __construct(array $format, $throwException = false) {
+		$this->throwException = $throwException;
+		$this->schema = $format;
+		if (isset($this->schema['defaults'])) {
+			Arrays::apply($this->defaults, $this->schema['defaults']);
+		}
+	}
+	
+	private static function testNull($spec) {
+		foreach (array('', 'allowNull') as $opt) {
+			if (isset($spec[$opt])) {
+				return $spec[$opt];
+			}
+		}
+		return null;
+	}
+	
+	private function isAllowNull($spec, $parentSpec) {
+		// The item itselff
+		if ((null !== $r = self::testNull($spec))
+				|| isset($parentSpec['defaults']) && (null !== $r = self::testNull($parentSpec['defaults']))
+				|| (null !== $r = self::testNull($this->defaults))) {
+			return $r;
+		}
+		throw new IllegalStateException('Unreachable code');
+	}
+	
+	private function isStrict($spec) {
+		if (!isset($spec['strict'])) {
+			return $this->defaults['strict'];
+		} else {
+			return !!$spec['strict'];
+		}
+	}
+	
+	private function isRequired($spec) {
+		if (!isset($spec['required'])) {
+			return $this->defaults['required'];
+		} else {
+			return !!$spec['required'];
+		}
+	}
+	
+	private function getType($spec, $parentSpec) {
+		if (array_key_exists('type', $spec)) {
+			return $spec['type'];
+		} else if (isset($parentSpec['defaults']['type'])) {
+			return $parentSpec['defaults']['type'];
+		} else if (isset($this->defaults['type'])) {
+			return $this->defaults['type'];
+		} else {
+			return null;
+		}
 	}
 	
 	public function getLastError() {
@@ -30,16 +95,28 @@ class ArrayValidator {
 	}
 	
 	public function test(array $array) {
-		if (!isset($this->format['type'])) {
-			$format = array(
-				'type' => 'map',
-				'mapping' => $this->format,
-			);
+		if (!isset($this->schema['type'])) {
+			if (isset($this->schema['mapping'])) {
+				$format = array(
+					'type' => 'map',
+				);
+				Arrays::apply($format, $this->schema);
+			} else if (isset($this->schema['sequence'])) {
+				$format = array(
+					'type' => 'seq',
+				);
+				Arrays::apply($format, $this->schema);
+			} else {
+				$format = array(
+					'type' => 'map',
+					'mapping' => $this->schema,
+				);
+			}
 		} else {
-			$format = $this->format;
+			$format = $this->schema;
 		}
 		$this->errors = null;
-		if (!self::testType('', $format, $array)) {
+		if (!self::testType('', $format, $array, $this)) {
 			foreach ($this->errors as $path => $error) {
 				if ($path) {
 					if (substr($path, 0, 1) === $this->sep) {
@@ -58,67 +135,70 @@ class ArrayValidator {
 		}
 	}
 	
-	private $defaults = array(
-		'strict'   => true,
-		'required' => false,
-	);
-	
-	private function isStrict($spec) {
-		if (!isset($spec['strict'])) {
-			return $this->defaults['strict'];
-		} else {
-			return !!$spec['strict'];
-		}
-	}
-	
-	private function isRequired($spec) {
-		if (!isset($spec['required'])) {
-			return $this->defaults['required'];
-		} else {
-			return !!$spec['required'];
-		}
-	}
-	
-	private function testMapping($path, array $spec, array &$array) {
+	private function testMapping($path, array $spec, array $array) {
 		$keys = $array;
-		foreach ($spec['mapping'] as $key => $format) {
+		foreach ($spec['mapping'] as $key => $schema) {
 			unset($keys[$key]);
-			if (!is_array($format)) {
-				$format = array(
-					'value' => $format
-				);
-//			} else if (!isset($spec['value']) && !isset($spec['type'])) {
-//				throw new IllegalStateException("Illegal specification for item: $path$this->sep$name");
+			if (!is_array($schema)) {
+				if ($schema === null) {
+					$schema = array();
+				} else {
+					$schema = array(
+						'value' => $schema
+					);
+				}
 			}
 			if (!array_key_exists($key, $array)) {
-				if ($this->isRequired($format)) {
-					$this->errors["$path$this->sep$key"] = 'Missing required key';
+				if ($this->isRequired($schema)) {
+					$this->error("$path$this->sep$key", 'Missing required key');
 					return false;
 				}
-			} else if (!$this->testRule("$path$this->sep$key", $format, $array[$key])) {
+			} else if (!$this->testRule("$path$this->sep$key", $schema, $array[$key], $spec)) {
 				return false;
 			}
 		}
 		if ($this->isStrict($spec) && count($keys)) {
 			$key = key($keys);
-			$this->errors["$path$this->sep$key"] = "Undefined key";
+			$this->error("$path$this->sep$key", "Undefined key");
 			return false;
 		}
 		return true;
 	}
 	
 	private function error($path, $msg) {
-		$this->errors[$path] = $msg;
+		if ($this->throwException) {
+			throw new ValidationException($path, $msg);
+		} else {
+			$this->errors[$path] = $msg;
+		}
 		return false;
 	}
 	
-	private function testRule($path, $spec, &$value) {
-		if (isset($spec['type'])
-				&& !$this->testType($path, $spec, $value)) {
-			return false;
+	private function testRule($path, $spec, $value, $parentSpec) {
+		if (array_key_exists('value', $spec)) {
+			if ($spec['value'] === $value) {
+				return true;
+			} else {
+				if ($spec['value'] == $value) {
+					$this->error($path, 'Wrong type: expected map, found: ' .
+							(is_array($value) ? 'seq' : gettype($value)));
+				} else {
+					return $this->error($path, "Wrong required value: expected $spec[value], actual: $value");
+				}
+			}
 		}
-		if (isset($spec['value']) && $value !== $spec['value']) {
-			return $this->error($path, "Wrong required value: expected $spec[value], actual: $value");
+		if (isset($spec['enum'])) {
+			if (in_array($value, $spec['enum'], true)) {
+				return true;
+			} else if (!in_array($value, $spec['enum']))  {
+				// If the value is in the enum array but not with the expected
+				// type, then we rely on the type option to decide if the test
+				// passes or not.
+				return $this->error($path, "Does not match enum: '$value')");
+			}
+		}
+		if (!$this->testType($path, $spec, $value, $parentSpec)) {
+			return false;
 		}
 		if (isset($spec['range'])) {
 			if (isset($spec['type']) && in_array($spec['type'], array(
@@ -175,28 +255,27 @@ class ArrayValidator {
 				&& !preg_match($spec['pattern'], $value)) {
 			return $this->error($path, "Does not match pattern $spec[pattern]: '$value'");
 		}
-		if (isset($spec['enum'])
-				&& !in_array($value, $spec['enum'], true)) {
-			return $this->error($path, "Does not match enum: '$value')");
-		}
 		return true;
 	}
 	
-	private function testType($path, $spec, &$data) {
+	private function testType($path, $spec, &$data, $parentSpec) {
 		if ($data === null) {
-			if (isset($spec['']) && !$spec['']) {
-				$this->errors[$path] = 'Forbidden NULL';
+			if (!$this->isAllowNull($spec, $parentSpec)) {
+				$this->error($path, 'Forbidden NULL');
 				return false;
 			} else {
 				return true;
 			}
 		}
-		switch ($spec['type']) {
+		if ((null === $type = $this->getType($spec, $parentSpec))
+				|| $type === 'any') { /* @uncovered: type=any */
+			return true;
+		}
+		switch ($type) {
 			case 'map':
 				if (!Arrays::isAssocArray($data)) {
-					$this->errors[$path] = 'Wrong type: expected map, found: ' .
-							(is_array($data) ? 'seq' : gettype($data));
-					return false;
+					return $this->error($path, 'Wrong type: expected map, found: ' .
+							(is_array($data) ? 'seq' : gettype($data)));
 				} else {
 					if (isset($spec['mapping'])) {
 						return $this->testMapping($path, $spec, $data);
@@ -208,14 +287,14 @@ class ArrayValidator {
 			case 'seq':
 			case 'sequence':
 				if (!Arrays::isIndexedArray($data)) {
-					$this->errors[$path] = "Wrong type: expected $spec[type], found: " . gettype($data);
-					return false;
+					return $this->error($path, "Wrong type: expected $type, found: " . 
+							(is_array(gettype($data)) ? 'map' : gettype($data)));
 				} else if (isset($spec['sequence'])) {
 					if (count($spec['sequence']) !== 1) {
 						throw new IllegalStateException("Illegal specification for sequence: $path");
 					}
 					foreach ($data as $i => &$v) {
-						if (!$this->testRule($path . "[$i]", $spec['sequence'][0], $v)) {
+						if (!$this->testRule($path . "[$i]", $spec['sequence'][0], $v, $spec)) {
 							return false;
 						}
 					}
@@ -227,7 +306,7 @@ class ArrayValidator {
 			case 'str':
 			case 'string':
 				if (!is_string($data)) {
-					$this->errors[$path] = "Wrong type: expected $spec[type], found: " . gettype($data);
+					$this->error($path, "Wrong type: expected $type, found: " . gettype($data));
 					return false;
 				} else {
 					return true;
@@ -235,7 +314,7 @@ class ArrayValidator {
 			case 'int':
 			case 'integer':
 				if (!preg_match('/^-?\d+$/', $data)) {
-					$this->errors[$path] = "Wrong type: expected $spec[type], found: " . gettype($data);
+					$this->error($path, "Wrong type: expected $type, found: " . gettype($data));
 					return false;
 				} else {
 					$data = (int) $data;
@@ -244,7 +323,7 @@ class ArrayValidator {
 			case 'bool':
 			case 'boolean':
 				if (!is_bool($data)) {
-					$this->errors[$path] = "Wrong type: expected $spec[type], found: " . gettype($data);
+					$this->error($path, "Wrong type: expected $type, found: " . gettype($data));
 					return false;
 				} else {
 					return true;
@@ -252,7 +331,7 @@ class ArrayValidator {
 			case 'float':
 			case 'double':
 				if (!is_float($data)) {
-					$this->errors[$path] = "Wrong type: expected $spec[type], found: " . gettype($data);
+					$this->error($path, "Wrong type: expected $type, found: " . gettype($data));
 					return false;
 				} else {
 					return true;
@@ -261,37 +340,54 @@ class ArrayValidator {
 				if (is_integer($data) || is_float($data)) {
 					return true;
 				} else {
-					$this->errors[$path] = "Wrong type: expected $spec[type], found: " . gettype($data);
+					$this->error($path, "Wrong type: expected $type, found: " . gettype($data));
 					return false;
 				}
 			case 'text':
 				if (is_string($data) || is_integer($data) || is_float($data)) {
 					return true;
 				} else {
-					$this->errors[$path] = "Wrong type: expected $spec[type], found: " . gettype($data);
+					$this->error($path, "Wrong type: expected $type, found: " . gettype($data));
 					return false;
 				}
 			case 'date':
 				if (preg_match('/\d{4}-\d\d-\d\d/', $data)) {
 					return true;
 				} else {
-					$this->errors[$path] = "Not a date: " . $data;
+					$this->error($path, "Not a date: " . $data);
 					return false;
 				}
 			case 'scalar':
 				if (!is_array($data)) {
 					return true;
 				} else {
-					$this->errors[$path] = "Wrong type: " . $data . ' (scalar expected)';
+					$this->error($path, "Wrong type: " . $data . ' (scalar expected)');
 					return false;
 				}
 			default:
-				if (gettype($data) !== $spec['type']) {
-					$this->errors[$path] = "Wrong type: expected $spec[type], found: " . gettype($data);
+				if (gettype($data) !== $type) {
+					$this->error($path, "Wrong type: expected $type, found: " . gettype($data));
 					return false;
 				} else {
 					return true;
 				}
 		}
+	}
+}
+
+class ValidationException extends \Exception {
+
+	public function __construct($path, $error) {
+		if ($path) {
+			if (substr($path, 0, 1) === $this->sep) {
+				$path = substr($path, 1);
+			}
+			$message = "$path: $error";
+			return false;
+		} else {
+			$message = $error;
+			return false;
+		}
+		parent::__construct($message);
 	}
 }
