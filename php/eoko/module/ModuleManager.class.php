@@ -171,17 +171,10 @@ class ModuleManager {
 	 * @return ModuleManager
 	 */
 	private static function createInstance() {
+		self::$infoLocked = false;
 		return self::$instance = new ModuleManager();
 	}
 
-	/**
-	 * @internal This method is used by tests...
-	 * @todo This should be made available for tests only...
-	 */
-	public static function destroy() {
-		self::$instance = null;
-	}
-	
 	/**
 	 * @return ModuleManager
 	 */
