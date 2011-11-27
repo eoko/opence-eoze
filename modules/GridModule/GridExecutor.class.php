@@ -199,8 +199,13 @@ abstract class GridExecutor extends JsonExecutor {
 	 // AUTOCOMPLETE
 	////////////////////////////////////////////////////////////////////////////
 
-	function auto_complete() {
+	public function auto_complete() {
+		Logger::get($this)->warn('auto_complete action is deprecated, use autoComplete');
+		return $this->autoComplete();
+	}
 	
+	public function autoComplete() {
+		
 		$table = $this->table;
 //REM		$context = array(
 //			'year' => $this->request->get('year', null)
@@ -521,7 +526,7 @@ abstract class GridExecutor extends JsonExecutor {
 ////		$path = CACHE_PATH . 'comet/' . UserSession::getUser()->id;
 //		if (!file_exists(dirname($path))) mkdir(dirname($path), 0777, true);
 //		file_put_contents($path, $cometMsg);
-
+		
 		$query = $this->createLoadQuery('grid');
 
 		$start = $this->request->get('realstart', false, true);
@@ -534,8 +539,16 @@ abstract class GridExecutor extends JsonExecutor {
 		);
 		
 		$this->beforeExecuteLoadQuery($query);
-
+		
 		$r = $query->executeSelect();
+
+		foreach ($r as &$record) {
+			foreach ($record as $field => &$value) {
+				$value = $this->table->getField($field)->castValue($value);
+			}
+			unset($value);
+		}
+		
 		if (count($r) === 0) {
 			$r = array();
 			$count = 0;
@@ -556,8 +569,6 @@ abstract class GridExecutor extends JsonExecutor {
 	//////////////////////////////////////////////////////////////////////////
 
 	public function load_one($id = null) {
-
-		$this->requestPrefix = $this->modRequestPrefix;
 
 		if ($id === null) {
 			$id = $this->request->req($this->table->getPrimaryKeyName());
@@ -799,13 +810,29 @@ MSG;
 	
 	protected function beforeDeleteMultiple($ids) {}
 	
+	public function delete() {
+		if ($this->request->has('ids')) {
+			return $this->delete_multiple();
+		} else {
+			$id = $this->request->req($this->table->getPrimaryKeyName());
+			if (is_array($id)) {
+				return $this->doDeleteMultiple($id);
+			} else {
+				return $this->doDeleteOne($id);
+			}
+		}
+	}
+	
 	public function delete_multiple() {
 		return $this->callInTransaction('doDeleteMultiple');
 	}
 	
-	protected function doDeleteMultiple() {
+	protected function doDeleteMultiple($ids = null) {
 		
-		$ids = $this->request->req('ids');
+		if ($ids === null) {
+			$ids = $this->request->req('ids');
+		}
+		
 		$count = count($ids);
 		if (false !== $this->beforeDeleteMultiple($ids)) {
 			if ($count === $n = $this->table->deleteWherePkIn($ids)) {
@@ -835,8 +862,10 @@ MSG;
 		return $this->callInTransaction('doDeleteOne');
 	}
 	
-	protected function doDeleteOne() {
-		$id = $this->request->req($this->table->getPrimaryKeyName());
+	protected function doDeleteOne($id = null) {
+		if ($id === null) {
+			$id = $this->request->req($this->table->getPrimaryKeyName());
+		}
 		if (false !== $this->beforeDeleteOne($id)) {
 			if (1 === $n = $this->table->deleteWherePkIn(array($id))) {
 				return true;
