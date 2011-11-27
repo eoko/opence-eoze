@@ -141,6 +141,20 @@ abstract class ModelRelationInfo extends ModelFieldBase {
 		else throw new UnsupportedOperationException(get_class($this) . '::getType()');
 	}
 	
+	public function castValue($value) {
+		if ($this->selectable) {
+			if ($this instanceof ModelRelationInfoHasOne) {
+				return ModelColumn::T_STRING;
+			} else if ($this instanceof ModelRelationInfoHasMany) {
+				return ModelColumn::T_INT;
+			}
+		} else {
+			throw new UnsupportedOperationException(
+				'Unsupported operation: ' . get_class($this) . '::castValue()'
+			);
+		}
+	}
+	
 	public function isNullable() {
 		return true;
 	}
