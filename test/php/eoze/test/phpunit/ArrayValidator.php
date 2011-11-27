@@ -9,8 +9,9 @@ use eoko\util\Arrays;
 /**
  * Array validator from a schema specification.
  * 
- * 
- * 
+ * This implementation is mostly compatible with 
+ * {@link http://www.kuwata-lab.com/kwalify/ruby/users-guide.01.html#schema Kwalify}'s
+ * specifications.
  * 
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  * @author Éric Ortega <eric@planysphere.fr>
@@ -364,6 +365,16 @@ class ArrayValidator {
 					$this->error($path, "Wrong type: " . $data . ' (scalar expected)');
 					return false;
 				}
+//			case 'mysql/boolean':
+//			case 'mysql/bool':
+//				if (in_array($data, array('0', '1'), true)) {
+//					return true;
+//				} else {
+//					return $this->error(
+//						$path, 
+//						"Wrong type: expected $spec[type], found: " . gettype($data) . " = $data"
+//					);
+//				}
 			default:
 				if (gettype($data) !== $type) {
 					$this->error($path, "Wrong type: expected $type, found: " . gettype($data));
