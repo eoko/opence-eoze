@@ -228,12 +228,14 @@ class ExecutorTestCase extends ModuleTestCase {
 		}
 		
 		$format = null;
-		if (isset($test['expected-schema'])) {
-			$format = $test['expected-format'];
+		if (isset($test['expectedSchema'])) {
+			$format = $test['expectedFormat'];
 		} else if (isset($test['schema'])) {
 			$format = $test['schema'];
-		} else if (isset($test['expected-format'])) {
-			$format = $test['expected-format'];
+		} else if (isset($test['responseSchema'])) {
+			$format = $test['responseSchema'];
+		} else if (isset($test['expectedFormat'])) {
+			$format = $test['expectedFormat'];
 		} else if (isset($test['format'])) {
 			$format = $test['format'];
 		}
@@ -244,6 +246,11 @@ class ExecutorTestCase extends ModuleTestCase {
 				$this->fail('Result validation failed: ' . $validator->getLastError()
 						. PHP_EOL . print_r($result, true));
 			}
+		}
+		
+		if (isset($test['after'])) {
+			$method = $test['after'];
+			$this->$method($result);
 		}
 	}
 }
