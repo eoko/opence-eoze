@@ -641,6 +641,8 @@ eo.form.contact.AbstractField = Ext.extend(Ext.form.CompositeField, {
 		}
 	}
 	
+	,setbaseParams: function(baseParams) {}
+
 });
 
 Oce.deps.reg('eo.form.contact.AbstractField');
