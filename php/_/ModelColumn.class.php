@@ -294,7 +294,6 @@ class ModelColumn extends ModelFieldBase {
 		switch ($this->type) {
 			case self::T_BOOL: return $value === null || $value === '' ? null : ($value ? 1 : 0);
 			case self::T_DATE:
-				dump_mark();
 				return DateHelper::dateExtToSql($value);
 			case self::T_INT: return $value === null || $value === '' ? null
 				: (($value === 0 ? '0' : $value));
