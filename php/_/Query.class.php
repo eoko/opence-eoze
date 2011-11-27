@@ -935,7 +935,7 @@ class Query {
 	public function executeCount($distinct = false) {
 		$this->action = self::COUNT;
 		$this->buildCount($distinct);
-		return $this->executeSql()->fetchColumn();
+		return (int) $this->executeSql()->fetchColumn();
 	}
 
 	/**
