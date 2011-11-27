@@ -166,7 +166,7 @@ eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 				if (item.setBaseParams) {
 					item.setBaseParams(this.baseParams);
 				}
-			});
+			}, this);
 		}
 	}
 
