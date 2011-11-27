@@ -150,7 +150,7 @@ abstract class ModelRelationInfo extends ModelFieldBase {
 			}
 		} else {
 			throw new UnsupportedOperationException(
-				'Unsupported operation: ' . get_class($this) . '::castValue()'
+				'Unsupported operation: ' . get_class($this) . '::castValue()' . "($this)"
 			);
 		}
 	}
@@ -548,7 +548,7 @@ class ModelRelationInfoReferencesOne extends ModelRelationInfoHasReference
 		implements ModelRelationInfoHasOne {
 
 	protected $rightField;
-
+	
 	function  __construct($name, ModelTableProxy $localTable, ModelTableProxy $targetTableProxy, $referenceField, $rightField = null) {
 		parent::__construct($name, $localTable, $targetTableProxy, $referenceField, $rightField);
 		$this->selectable = true;
@@ -841,6 +841,8 @@ class ModelRelationInfoReferencesMany extends ModelRelationInfoHasReference
 
 class ModelRelationInfoReferedByMany extends ModelRelationInfoIsRefered
 		implements ModelRelationInfoHasMany {
+	
+	protected $selectable = true;
 
 	public function createRelation(Model $parentModel) {
 		return new ModelRelationReferedByMany($this, $parentModel);
