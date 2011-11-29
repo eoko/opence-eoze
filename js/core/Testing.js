@@ -39,7 +39,7 @@ if (!eo.Testing.isUnitTestEnv()) {
 					tag: 'div'
 		//			,href: 'javascript:void(0)'
 					,html: name
-		//			,id: 'eose-openlink' + name
+					,id: 'eose-openlink-' + name
 					,style: 'border: 1px solid; padding: 5px; margin: 5px;'
 				});
 
