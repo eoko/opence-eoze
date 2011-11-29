@@ -1682,7 +1682,8 @@ class QueryFormattedSelect extends QuerySelect {
 			if ($glueParts[$i] !== '') {
 				$parts[] = "'" . str_replace("'", "\\'", $glueParts[$i]) . "'";
 			}
-			$parts[] = $query->getQualifiedName($fields[$i]);
+			$name = $query->getQualifiedName($fields[$i]);
+			$parts[] = "IFNULL($name, '?')";
 //			$parts[] = "$qTable`$fields[$i]`";
 		}
 		if (isset($glueParts[$i])) {
