@@ -27,17 +27,36 @@ eo.data.PagingMemoryProxy = Ext.extend(Ext.data.MemoryProxy, {
     }
 
 	/**
-	 * @method
 	 * Applies the query request params to the given records set.
+	 * 
 	 * @param {String} query The string being searched (the value typed in the
 	 * combo).
 	 * @param {Object} records The data block containing the records to filter.
+	 * 
 	 * @return {Object} The data block containging the records that have been 
 	 * accepted. The returned `Object` must be returned by the `filter` method
 	 * of the passed `records` object.
+	 * 
 	 * @protected
 	 */
-	,applyQuery: undefined
+	,applyQuery: function(query, records) {
+		return records.filter(this.createQueryFilter(query));
+	}
+	
+	/**
+	 * Create the filter function to be used by the {@link #applyQuery} method.
+	 * 
+	 * @param {String} query The string being search (e.g. the value typed
+	 * in the combo).
+	 * 
+	 * @return {Object} The data block containging the records that have been 
+	 * accepted. The returned `Object` must be returned by the `filter` method
+	 * of the passed `records` object.
+	 *
+	 * @protected
+	 * @method
+	 */
+	,createQueryFilter: undefined
 
     ,doRequest : function(action, rs, params, reader, callback, scope, options){
         params = params || {};
@@ -139,6 +158,10 @@ eo.data.CachingHttpProxy = Ext.extend(Ext.data.DataProxy, {
 		return this.dataProvider.applyQuery(query, records);
 	}
 	
+	,createQueryFilter: function(query) {
+		return this.dataProvider.createQueryFilter(query);
+	}
+	
     ,doRequest : function(action, rs, params, reader, callback, scope, options) {
 		var args = arguments;
 		this.dataProvider.getData(function(success, data) {
@@ -193,6 +216,10 @@ eo.data.CachingHttpProxy.DataProvider = Ext.extend(Object, {
 			})
 			delete this.waitingRequests;
 		}
+	}
+	
+	,applyQuery: function(query, records) {
+		return records.filter(this.createQueryFilter(query));
 	}
 	
 	/**
