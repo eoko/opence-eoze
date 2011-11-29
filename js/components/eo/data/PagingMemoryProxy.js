@@ -256,7 +256,9 @@ eo.data.CachingHttpProxy.DataProvider = Ext.extend(Object, {
 
 			Ext.Ajax.request({
 				url: this.url
-				,params: this.params
+				,params: Ext.apply({
+					caching: true
+				}, this.params)
 				,scope: this
 				,success: function(response) {
 					this.loadingCache = false;
