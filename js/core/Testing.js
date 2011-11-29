@@ -32,19 +32,27 @@ if (!eo.Testing.isUnitTestEnv()) {
 	})
 } else {
 	Ext.onReady(function() {
-		Ext.iterate(eo.Testing.unitTests, function(name, test) {
-			var a = Ext.getBody().createChild({
-				tag: 'div'
-	//			,href: 'javascript:void(0)'
-				,html: name
-	//			,id: 'eose-openlink' + name
-				,style: 'border: 1px solid; padding: 5px; margin: 5px;'
-			});
+		var security = new Oce.Security;
+		if (security.isIdentified()) {
+			Ext.iterate(eo.Testing.unitTests, function(name, test) {
+				var a = Ext.getBody().createChild({
+					tag: 'div'
+		//			,href: 'javascript:void(0)'
+					,html: name
+		//			,id: 'eose-openlink' + name
+					,style: 'border: 1px solid; padding: 5px; margin: 5px;'
+				});
 
-			a.on('click', function() {
-				test.fn();
-			}, {single: true});
-		});
+				a.on('click', function() {
+					test.fn();
+				}, {single: true});
+			});
+		} else {
+			security.addListener('login', function() {
+				window.location = window.location;
+			});
+			security.requestLogin(false);
+		}
 	});
 }
 
