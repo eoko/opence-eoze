@@ -93,33 +93,6 @@ eo.data.PagingMemoryProxy = Ext.extend(Ext.data.MemoryProxy, {
             });
             result.totalRecords = result.records.length;
         }
-        
-        // sorting
-        if (params.sort !== undefined) {
-            // use integer as params.sort to specify column, since arrays are not named
-            // params.sort=0; would also match a array without columns
-            var dir = String(params.dir).toUpperCase() == 'DESC' ? -1 : 1;
-            var fn = function(v1, v2){
-                return v1 > v2 ? 1 : (v1 < v2 ? -1 : 0);
-            };
-            result.records.sort(function(a, b){
-                var v = 0;
-                if (typeof(a) == 'object') {
-                    v = fn(a.data[params.sort], b.data[params.sort]) * dir;
-                }
-                else {
-                    v = fn(a, b) * dir;
-                }
-                if (v == 0) {
-                    v = (a.index < b.index ? -1 : 1);
-                }
-                return v;
-            });
-        }
-        // paging (use undefined cause start can also be 0 (thus false))
-        if (params.start !== undefined && params.limit !== undefined) {
-            result.records = result.records.slice(params.start, params.start + params.limit);
-        }
 		
         return result;
     }
@@ -127,6 +100,37 @@ eo.data.PagingMemoryProxy = Ext.extend(Ext.data.MemoryProxy, {
 	,doRequest : function(action, rs, params, reader, callback, scope, options){
 		var result = this.processRequest.apply(this, arguments);
 		if (result) {
+			
+			// paging must be done after custom processings, because result.records.length
+			// will be used as totalRecords
+        
+			// sorting
+			if (params.sort !== undefined) {
+				// use integer as params.sort to specify column, since arrays are not named
+				// params.sort=0; would also match a array without columns
+				var dir = String(params.dir).toUpperCase() == 'DESC' ? -1 : 1;
+				var fn = function(v1, v2){
+					return v1 > v2 ? 1 : (v1 < v2 ? -1 : 0);
+				};
+				result.records.sort(function(a, b){
+					var v = 0;
+					if (typeof(a) == 'object') {
+						v = fn(a.data[params.sort], b.data[params.sort]) * dir;
+					}
+					else {
+						v = fn(a, b) * dir;
+					}
+					if (v == 0) {
+						v = (a.index < b.index ? -1 : 1);
+					}
+					return v;
+				});
+			}
+			// paging (use undefined cause start can also be 0 (thus false))
+			if (params.start !== undefined && params.limit !== undefined) {
+				result.records = result.records.slice(params.start, params.start + params.limit);
+			}
+			
 			callback.call(scope, result, options, true);
 		} else {
 			callback.call(scope, null, options, false);
