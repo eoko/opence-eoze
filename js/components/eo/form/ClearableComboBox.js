@@ -16,6 +16,7 @@ eo.form.ClearableComboBox = Ext.extend(Ext.form.ComboBox, {
 	clearable: true
 	
 	,trigger1Class : 'x-form-clear-trigger'
+	,trigger2Class : 'x-form-select-trigger'
 	
 	,initComponent: function(){
 		
