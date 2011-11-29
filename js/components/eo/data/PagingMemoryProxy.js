@@ -58,7 +58,7 @@ eo.data.PagingMemoryProxy = Ext.extend(Ext.data.MemoryProxy, {
 	 */
 	,createQueryFilter: undefined
 
-    ,doRequest : function(action, rs, params, reader, callback, scope, options){
+    ,processRequest: function(action, rs, params, reader, callback, scope, options) {
         params = params || {};
         var result;
         try {
@@ -66,8 +66,7 @@ eo.data.PagingMemoryProxy = Ext.extend(Ext.data.MemoryProxy, {
         } 
         catch (e) {
             this.fireEvent('loadexception', this, options, null, e);
-            callback.call(scope, null, options, false);
-            return;
+	        return null;
         }
 		
 		// query
@@ -122,15 +121,22 @@ eo.data.PagingMemoryProxy = Ext.extend(Ext.data.MemoryProxy, {
             result.records = result.records.slice(params.start, params.start + params.limit);
         }
 		
-        callback.call(scope, result, options, true);
+        return result;
+    }
+    
+	,doRequest : function(action, rs, params, reader, callback, scope, options){
+		var result = this.processRequest.apply(this, arguments);
+		if (result) {
+			callback.call(scope, result, options, true);
+		} else {
+			callback.call(scope, null, options, false);
+		}
     }
 });
 
-eo.data.CachingHttpProxy = Ext.extend(Ext.data.DataProxy, {
+eo.data.CachingHttpProxy = Ext.extend(eo.data.PagingMemoryProxy, {
 	
-	createStoreFilter: eo.data.PagingMemoryProxy.prototype.createStoreFilter
-	
-	,constructor: function(conn) {
+	constructor: function(conn) {
 		
 		this.dataProvider = conn.dataProvider || this.dataProvider;
 		
