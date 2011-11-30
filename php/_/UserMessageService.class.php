@@ -2,6 +2,8 @@
 
 use eoko\util\Json;
 
+throw new UnsupportedOperationException('$_SESSION must not be used');
+
 class UserMessageService {
 
 	private static $SESSION_NAMESPACE = 'UserMessage';

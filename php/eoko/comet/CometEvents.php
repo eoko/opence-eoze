@@ -4,7 +4,7 @@ namespace eoko\comet;
 
 use User;
 use UserSession;
-use eoko\php\SessionSaveHandler;
+use eoko\php\SessionManager;
 use eoko\security\UserSessionHandler;
 use eoko\log\Logger;
 use eoko\config\ConfigManager;
@@ -32,7 +32,7 @@ class CometEvents {
 	 */
 	private $userSession;
 	/**
-	 * @var SessionSaveHandler
+	 * @var SessionManager
 	 */
 	private $sessionManager;
 	
@@ -40,7 +40,7 @@ class CometEvents {
 	private $channelFilename = 'channel-listeners';
 	
 	private function __construct($basePath, UserSessionHandler $userSession, 
-			SessionSaveHandler $sessionManager) {
+			SessionManager $sessionManager) {
 		
 		$this->userSession = $userSession;
 		$this->sessionManager = $sessionManager;
@@ -127,7 +127,7 @@ class CometEvents {
 	/**
 	 * @return CometEvents
 	 */
-	public static function start($varPath, UserSessionHandler $userSession, SessionSaveHandler $sessionManager) {
+	public static function start($varPath, UserSessionHandler $userSession, SessionManager $sessionManager) {
 		return self::$instance = new CometEvents($varPath, $userSession, $sessionManager);
 	}
 	

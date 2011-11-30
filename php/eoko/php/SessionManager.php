@@ -8,7 +8,7 @@ namespace eoko\php;
  * @author Éric Ortega <eric@planysphere.fr>
  * @since 30 nov. 2011
  */
-class SessionSaveHandler {
+class SessionManager {
 
 	protected $savePath;
 	protected $sessionName;

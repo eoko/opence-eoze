@@ -10,7 +10,7 @@
  */
 
 use eoko\config\ConfigManager;
-use eoko\routing\CometEvents;
+use eoko\comet\CometEvents;
 
 $directAccess = false;
 date_default_timezone_set('Europe/Paris');
@@ -235,8 +235,8 @@ loadAppConfig($classLoader);
 
 eoko\plugin\PluginManager::init();
 
-$sessionManager = new eoko\php\SessionSaveHandler();
-$userSession = new \eoko\security\UserSessionHandler\LegacyWrapper();
+$sessionManager = new eoko\php\SessionManager();
+$userSession = new \eoko\security\UserSessionHandler\LegacyWrapper($sessionManager);
 
 if (ConfigManager::get('eoko/routing', 'comet', false)) {
 	CometEvents::start(MY_EOZE_PATH, $userSession, $sessionManager);

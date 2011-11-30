@@ -2,6 +2,7 @@
 
 use eoko\security\LoginAdapter;
 use eoko\security\LoginAdapter\DefaultLoginAdapter;
+use eoko\php\SessionManager;
 
 /**
  * @author Éric Ortéga <eric@mail.com>
@@ -23,12 +24,21 @@ class UserSession {
 
 	const DEFAULT_REQ_DATA_NAME = 'sessionDataId';
 	private $data = null;
+	
+	/**
+	 * @var SessionManager
+	 */
+	private static $sessionManager;
 
 	private function __construct() {
 		$this->loggedIn = false;
 		$this->ip = getenv('REMOTE_ADDR');
 		$this->user = null;
 		$this->lastActivity = time();
+	}
+	
+	public static function setSessionManager(SessionManager $sessionManager) {
+		self::$sessionManager = $sessionManager;
 	}
 
 	/**
