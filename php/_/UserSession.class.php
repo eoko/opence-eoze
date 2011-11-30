@@ -141,14 +141,14 @@ class UserSession {
 	
 	private static function fireLoginEvent(User $user) {
 		if (self::$loginListeners) {
-			foreach (self::$loginListeners as $fn) {
-				$fn($user);
+			foreach (self::$loginListeners as $callback) {
+				call_user_func($callback, $user);
 			}
 		}
 	}
 	
-	public static function onLogin($fn) {
-		self::$loginListeners[] = $fn;
+	public static function onLogin($callback) {
+		self::$loginListeners[] = $callback;
 	}
 
 	public static function getLoginInfos($json = false) {

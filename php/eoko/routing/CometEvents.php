@@ -5,7 +5,9 @@ namespace eoko\routing;
 use User;
 use UserSession;
 use eoko\php\SessionSaveHandler;
+use eoko\security\UserSessionHandler;
 use eoko\log\Logger;
+use eoko\config\ConfigManager;
 
 /**
  *
@@ -20,34 +22,55 @@ class CometEvents {
 	private $myQueue;
 	private $othersQueue;
 
-	private $channels;
-	private $originalChannels;
+	private $channelListeners;
+	private $initialChannelListeners;
 	
-	private $dir;
+	private $basePath;
 	
-	private function __construct(SessionSaveHandler $sessionManager) {
+	/**
+	 * @var UserSessionHandler
+	 */
+	private $userSession;
+	/**
+	 * @var SessionSaveHandler
+	 */
+	private $sessionManager;
+	
+	private $directory = 'Kepler';
+	private $channelFilename = 'channel-listeners';
+	
+	private function __construct($basePath, UserSessionHandler $userSession, 
+			SessionSaveHandler $sessionManager) {
 		
-		$dir = $this->dir = MY_EOZE_PATH . 'Kepler';
-		if (!file_exists($this->dir)) {
-			mkdir($this->dir, 0700, true);
+		$this->userSession = $userSession;
+		$this->sessionManager = $sessionManager;
+		
+		// Create var dir
+		$dir = $this->basePath = "$basePath/$this->directory";
+		if (!file_exists($this->basePath)) {
+			mkdir($this->basePath, 0700, true);
 		}
 		
 		// Load channels
-		$this->channels = $this->loadChannelListeners();
-		$channels =& $this->channels;
+		$this->channelListeners = $this->loadChannelListeners();
+		$channelListeners =& $this->channelListeners;
 		
 		// make a copy
-		$this->originalChannels = $this->channels;
-
-		UserSession::onLogin(function(User $user) use(&$channels) {
-			if (UserSession::isAuthorized(UserSession::LEVEL_AUTHENTICATED)) {
-				$channels[session_id()] = true;
-			}
-		});
+		$this->initialChannelListeners = $this->channelListeners;
 		
-		$sessionManager->addListener('delete', function($sessionId) use(&$channels, $dir) {
+		$maxLevel = ConfigManager::get($this, 'userLevel');
+		
+		$userSession->addListener('login', 
+			function(User $user) use($userSession, $sessionManager, &$channelListeners, $maxLevel) {
+				if ($userSession->isAuthorized($maxLevel)) {
+					$channelListeners[$sessionManager->getId()] = true;
+				}
+			}
+		);
+		
+		$sessionManager->addListener('delete', function($sessionId) use(&$channelListeners, $dir) {
 			// update channels list
-			unset($channels[$sessionId]);
+			unset($channelListeners[$sessionId]);
 			// delete remaining session data
 			if (file_exists($file = "$dir/$sessionId")) {
 				unlink($file);
@@ -56,34 +79,44 @@ class CometEvents {
 	}
 	
 	public function __destruct() {
+		$this->commit();
+	}
+	
+	public function commit() {
 		// Commit chanel listeners modifications
-		if ($this->channels !== $this->originalChannels) {
+		if ($this->channelListeners !== $this->initialChannelListeners) {
 			$this->saveChannelListeners();
+			$this->initialChannelListeners = $this->channelListeners;
 		}
 		// Commit public queue
 		if ($this->othersQueue) {
-			$mySessionId = session_id();
-			foreach ($this->channels as $sessionId => $active) {
+			$mySessionId = $this->sessionManager->getId();
+			foreach ($this->channelListeners as $sessionId => $active) {
 				if ($active && $sessionId !== $mySessionId) {
 					$this->writeQueueIn($sessionId, $this->othersQueue);
 				}
 			}
+			$this->othersQueue = null;
 		}
 		// Commit private queue
 		if ($this->myQueue) {
-			$this->writeQueueIn(session_id(), $this->myQueue);
+			$this->writeQueueIn($this->sessionManager->getId(), $this->myQueue);
+			$this->myQueue = null;
 		}
 	}
 	
 	private function saveChannelListeners() {
-		$filename = "$this->dir/channels";
-		if (!file_put_contents($filename, serialize($this->channels))) {
+		$filename = "$this->basePath/$this->channelFilename";
+		if (!file_exists($dir = dirname($filename))) {
+			mkdir($dir, 0700, true);
+		}
+		if (!file_put_contents($filename, serialize($this->channelListeners))) {
 			Logger::get($this)->error('Cannot write channels file: ' . $filename);
 		}
 	}
 	
 	private function loadChannelListeners() {
-		$filename = "$this->dir/channels";
+		$filename = "$this->basePath/$this->channelFilename";
 		if (file_exists($filename)) {
 			return unserialize(file_get_contents($filename));
 		} else {
@@ -94,13 +127,13 @@ class CometEvents {
 	/**
 	 * @return CometEvents
 	 */
-	public static function start(SessionSaveHandler $sessionManager) {
-		return self::$instance = new CometEvents($sessionManager);
+	public static function start($varPath, UserSessionHandler $userSession, SessionSaveHandler $sessionManager) {
+		return self::$instance = new CometEvents($varPath, $userSession, $sessionManager);
 	}
 	
 	private function writeQueueIn($sessionId, $queue) {
 		
-		$filename = "$this->dir/$sessionId";
+		$filename = "$this->basePath/$sessionId";
 		$file = fopen($filename, 'a+');
 
 		foreach ($queue as $entry) {
@@ -114,13 +147,12 @@ class CometEvents {
 		if (is_object($class)) {
 			$class = get_class($class);
 		}
-		$userId = $user = UserSession::getUser() ? $user->getId() : null;
 		$queue[] = (Object) array(
 			'category' => $category,
 			'data'     => array(
 				'class' => $class,
 				'name'  => $name,
-				'user'  => $userId,
+				'user'  => $this->userSession->getUserId(false),
 				'args'  => $args,
 			),
 		);
@@ -135,11 +167,10 @@ class CometEvents {
 	}
 	
 	public static function fire($class, $name, $args = null) {
-		UserSession::requireLoggedIn();
 		self::$instance->push('events', $class, $name, array_slice(func_get_args(), 2));
 	}
 	
-	public static function publish($channel, $class, $name, $args = null) {
+	public static function publish($class, $name, $args = null) {
 		$args = array_slice(func_get_args(), 2);
 		self::$instance->push('events', $class, $name, $args);
 		self::$instance->pushToOthers('events', $class, $name, $args);
