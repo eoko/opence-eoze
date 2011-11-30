@@ -105,7 +105,8 @@ class ExecutorTestCase extends ModuleTestCase {
 				}
 			}
 		}
-		throw new IllegalStateException('Cannot determine executor type');
+		return null;
+//		throw new IllegalStateException('Cannot determine executor type');
 	}
 	
 	protected function getControllerName() {
