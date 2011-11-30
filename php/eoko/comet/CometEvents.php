@@ -1,6 +1,6 @@
 <?php
 
-namespace eoko\routing;
+namespace eoko\comet;
 
 use User;
 use UserSession;
