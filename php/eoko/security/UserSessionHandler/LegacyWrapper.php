@@ -3,6 +3,7 @@
 namespace eoko\security\UserSessionHandler;
 
 use eoko\security\UserSessionHandler;
+use eoko\php\SessionManager;
 
 use UserSession;
 use IllegalStateException;
@@ -15,7 +16,8 @@ use IllegalStateException;
  */
 class LegacyWrapper extends UserSessionHandler {
 	
-	public function __construct() {
+	public function __construct(SessionManager $sessionManager) {
+		UserSession::setSessionManager($sessionManager);
 		UserSession::onLogin(array($this, 'onLogin'));
 	}
 	

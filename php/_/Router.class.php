@@ -80,7 +80,8 @@ class Router {
 			$this->requestMonitorRecord->saveManaged();
 		}
 		
-		UserMessageService::parseRequest($this->request);
+		// $_REQUEST usage must be fixed in that
+//		UserMessageService::parseRequest($this->request);
 	}
 
 	public static function getActionTimestamp() {
