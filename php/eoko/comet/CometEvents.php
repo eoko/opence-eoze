@@ -145,7 +145,11 @@ class CometEvents {
 	
 	private function pushIn(&$queue, $category, $class, $name, array $args = null) {
 		if (is_object($class)) {
-			$class = get_class($class);
+			if ($class instanceof Observable) {
+				$class = $class->getCometObservableName();
+			} else {
+				$class = get_class($class);
+			}
 		}
 		$queue[] = (Object) array(
 			'category' => $category,
