@@ -33,6 +33,10 @@ class SessionSaveHandler {
 		);
 	}
 	
+	public function getId() {
+		return session_id();
+	}
+	
 	public function addListener($event, $fn) {
 		$this->listeners[$event][] = $fn;
 	}

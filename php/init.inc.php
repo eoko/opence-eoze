@@ -236,9 +236,10 @@ loadAppConfig($classLoader);
 eoko\plugin\PluginManager::init();
 
 $sessionManager = new eoko\php\SessionSaveHandler();
+$userSession = new \eoko\security\UserSessionHandler\LegacyWrapper();
 
 if (ConfigManager::get('eoko/routing', 'comet', false)) {
-	CometEvents::start($sessionManager);
+	CometEvents::start(MY_EOZE_PATH, $userSession, $sessionManager);
 }
 
 // Finally, start the session (must be done after the autoloader has been set,
