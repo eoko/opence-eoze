@@ -149,6 +149,11 @@ class ExecutorTestCase extends ModuleTestCase {
 	 * @return array Request result data
 	 */
 	protected function runRequest(array $request) {
+		
+		if (!array_key_exists('controller', $request)) {
+			$request['controller'] = $this->getControllerName();
+		}
+		
 		$request  = new \Request($request);
 		$executor = Module::parseRequestAction($request);
 
