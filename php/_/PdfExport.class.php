@@ -58,7 +58,7 @@ class PdfExport {
 	 */
 	function renderHtml() {
 
-		global $_SESSION;
+//		global $_SESSION;
 
 		function out($name) {
 			PdfExport::out($name);
