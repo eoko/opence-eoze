@@ -10,6 +10,7 @@
  */
 
 use eoko\config\ConfigManager;
+use eoko\routing\CometEvents;
 
 $directAccess = false;
 date_default_timezone_set('Europe/Paris');
@@ -233,6 +234,12 @@ loadAppConfig($classLoader);
 // === Configure Plugins ===
 
 eoko\plugin\PluginManager::init();
+
+$sessionManager = new eoko\php\SessionSaveHandler();
+
+if (ConfigManager::get('eoko/routing', 'comet', false)) {
+	CometEvents::start($sessionManager);
+}
 
 // Finally, start the session (must be done after the autoloader has been set,
 // so that object stored in session (notably: UserSession) can be instantiated)

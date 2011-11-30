@@ -9,6 +9,8 @@ use eoko\security\LoginAdapter\DefaultLoginAdapter;
 class UserSession {
 
 	private static $SESSION_LENGTH = 3600; // in seconds
+	
+	const LEVEL_AUTHENTICATED = 99;
 
 	/** @var UserSession */
 	private static $instance;
@@ -32,9 +34,11 @@ class UserSession {
 	/**
 	 * @return UserSession
 	 */
-	protected static function getInstance() {
+	private static function getInstance() {
 
-		if (self::$instance !== null) return self::$instance;
+		if (self::$instance !== null) {
+			return self::$instance;
+		}
 
 		if (self::$instance === null) {
 			if (isset($_SESSION['UserSession'])) {
@@ -123,6 +127,7 @@ class UserSession {
 			if ($user) {
 				self::startIdentifiedSession($user, true);
 				ExtJSResponse::put('loginInfos', self::getLoginInfos());
+				self::fireLoginEvent($user);
 				return true;
 			} else {
 				throw new LoginFailedException($reason);
@@ -131,50 +136,20 @@ class UserSession {
 			throw new LoginFailedException(lang('L\'identification a échoué.'));
 		}
 	}
-
-//	/**
-//	 *
-//	 * @param String $username
-//	 * @param String $password
-//	 * @return User  the reccord matching the given username and password if
-//	 * log in is successful, or NULL if the login failed.
-//	 */
-//	public static function login($username, $password) {
-//
-//		try {
-//			$user = UserTable::findOneWhere(
-//				'username = ? AND pwd = ?',
-//				array($username, Security::cryptPassword($password))
-//			);
-//
-//			Logger::dbg('Authentification succeeded: {}', $user);
-//
-//			if ($user == null && (null === $user = self::tryMembreLogin($username, $password))) {
-//				throw new LoginFailedException(lang('L\'identification a échoué. '
-//						. 'Veuillez vérifier votre identifiant et/ou mot de passe.'));
-//			}
-//
-//			if (!$user->isActif()) {
-//				throw new LoginFailedException(lang('Votre compte a été désactivé. '
-//						. '<br/>Veuillez contacter un responsable.'));
-//			}
-//
-//			if ($user->isExpired()) {
-//				$msg = lang('Votre compte est expiré depuis le %date%. '
-//						. '<br/>Veuillez contacter un responsable.', $user->getEndUse(DateHelper::DATETIME_LOCALE));
-//				throw new LoginFailedException($msg);
-//			}
-//
-//			self::startIdentifiedSession($user, true);
-//
-//			ExtJSResponse::put('loginInfos', self::getLoginInfos());
-//
-//			return true;
-//
-//		} catch (MissingRequiredRequestParamException $ex) {
-//			throw new LoginFailedException(lang('L\'identification a échoué.'));
-//		}
-//	}
+	
+	private static $loginListeners;
+	
+	private static function fireLoginEvent(User $user) {
+		if (self::$loginListeners) {
+			foreach (self::$loginListeners as $fn) {
+				$fn($user);
+			}
+		}
+	}
+	
+	public static function onLogin($fn) {
+		self::$loginListeners[] = $fn;
+	}
 
 	public static function getLoginInfos($json = false) {
 		if ($json) {

@@ -348,7 +348,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	}
 
 	,afterCreateGrid: function(grid) {
-
+		
 	}
 
 	,initGrid: function() {
@@ -396,6 +396,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		this.grid = new Ext.grid.GridPanel(config);
 		this.grid.ownerGridModule = this;
 
+		this.fireEvent('aftercreategrid', this, this.grid);
 		this.afterCreateGrid(this.grid);
 
 		return this.grid;
@@ -2492,15 +2493,14 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 
 		// --- Override initGrid ---
 
-		this.afterCreateGrid = this.afterCreateGrid.createSequence(function(grid) {
-
-			this.grid.on('render', function() {
-				var dragProxy = this.grid.getView().columnDrag,
+		this.on('aftercreategrid', function(me, grid) {
+			grid.on('render', function() {
+				var dragProxy = grid.getView().columnDrag,
 					ddGroup   = dragProxy.ddGroup;
 
 				this.gridTbarDroppable.addDDGroup(ddGroup);
-			}.createDelegate(this))
-		}, this)
+			}, this);
+		}, this);
 	}
 
 	,initYearPlugin: function() {
