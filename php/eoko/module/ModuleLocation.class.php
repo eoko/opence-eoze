@@ -52,6 +52,13 @@ class ModuleLocation extends Location {
 		);
 	}
 	
+	/**
+	 * @return ModulesDirectory
+	 */
+	public function getDirectory() {
+		return $this->directory;
+	}
+	
 	protected function setPrivateState(&$vals) {
 		foreach ($vals as $k => $v) {
 			$this->$k = $v;

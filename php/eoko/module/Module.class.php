@@ -71,7 +71,7 @@ class Module implements file\Finder {
 
 	public final function __construct(ModuleLocation $location) {
 		
-		$this->sessionManager = Application::getInstance()->get($name);
+		$this->sessionManager = Application::getInstance()->getSessionManager();
 		
 		$this->name = $location->moduleName;
 		$this->basePath = $location->path;
@@ -87,8 +87,8 @@ class Module implements file\Finder {
 		foreach ($lineage as $item) $lineageItems[$item] = true;
 		$lineage = array_keys($lineageItems);
 
-		$this->pathsUrl = $location->directory->getLineagePathsUrl($lineage);
-		$this->lineageLocations = $location->directory->getLineageLocations($lineage);
+		$this->pathsUrl = $location->getDirectory()->getLineagePathsUrl($lineage);
+		$this->lineageLocations = $location->getDirectory()->getLineageLocations($lineage);
 		
 		$this->construct($location);
 	}
