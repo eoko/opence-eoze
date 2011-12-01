@@ -606,7 +606,6 @@ MSG;
 	}
 
 	protected function loadOne_loadData(Model $model) {
-		$relations = $this->getRelationSelectionModes('form');
 		
 		$query = $this->createLoadQuery('form')->selectFirst();
 		$idField = $query->getQualifiedName($this->table->getPrimaryKeyName());
