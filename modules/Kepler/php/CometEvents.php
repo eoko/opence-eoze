@@ -1,6 +1,6 @@
 <?php
 
-namespace eoko\comet;
+namespace eoko\modules\Kepler;
 
 use User;
 use UserSession;

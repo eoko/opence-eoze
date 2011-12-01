@@ -6,7 +6,7 @@
  * @license http://www.planysphere.fr/licenses/psopence.txt
  */
 
-use eoko\comet\Observable as CometObservable;
+use eoko\modules\Kepler\Observable as CometObservable;
 
 /**
  * Base class of Model classes
