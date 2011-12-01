@@ -350,24 +350,125 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	,afterCreateGrid: function(grid) {
 		grid.mon(eo.Kepler, this.tableName + ':modified', function(e, ids) {
 			if (e.fromOtherSession) {
-				this.setRecordsDirty(ids);
+				this.onRecordsExternallyModified(ids);
+			}
+		}, this);
+		grid.mon(eo.Kepler, this.tableName + ':removed', function(e, ids) {
+			if (e.fromOtherSession) {
+				this.onRecordsExternallyDeleted(ids);
+			}
+		}, this);
+		grid.mon(eo.Kepler, this.tableName + ':created', function(e, id) {
+			if (e.fromOtherSession) {
+				this.onRecordsExternallyCreated(id);
 			}
 		}, this);
 	}
 	
-	,setRecordsDirty: function(ids) {
+	/**
+	 * @private
+	 */
+	,processExternallyModifiedRecords: function(ids, action, forceReload) {
+		
 		var s = this.grid.store;
+		
 		if (ids) {
-			Ext.each(ids, function(id) {
-				if (s.getById(id)) {
-					this.reload();
-					return false;
+			var i = ids.length,
+				reload = !!forceReload,
+				id, win;
+				
+			while (i--) {
+				id = ids[i];
+				win = this.editWindows[id];
+				if (s.getById(ids[i])) {
+					reload = true;
 				}
-				return true;
-			}, this);
-		} else {
+				if (win) {
+					if (this['onEditWindowExternally' + action]) {
+						this['onEditWindowExternally' + action](win);
+					}
+				}
+			}
+			
+			if (reload) {
+				this.reload();
+			}
+		}
+		
+		else {
 			this.reload();
 		}
+	}
+	
+	,onRecordsExternallyCreated: function(ids) {
+		this.processExternallyModifiedRecords(false, 'Created', true);
+	}
+	
+	,onRecordsExternallyDeleted: function(ids) {
+		this.processExternallyModifiedRecords(ids, 'Deleted', true);
+	}
+	
+	,onRecordsExternallyModified: function(ids) {
+		this.processExternallyModifiedRecords(ids, 'Modified');
+	}
+
+	,onEditWindowExternallyModified: function(win) {
+		var actionMsg, okHandler;
+
+		if (win.refresh) {
+			actionMsg = "Les données vont être rechargées.";
+			okHandler = function() {
+				this.close();
+				win.refresh(true);
+			};
+		} else {
+			actionMsg = "La fenêtre va être fermée.";
+			okHandler = function() {
+				this.close();
+				win.close();
+			}
+		}
+
+		NS.AlertWindow.show({
+
+			modalTo: win
+			,modalGroup: 'refresh'
+
+			,title: 'Modification extérieure'
+			,message: "L'enregistrement a été modifié par un autre utilisateur. " 
+					+ actionMsg
+
+			,okHandler: okHandler
+			,cancelHandler: function() {
+				// Restore the normal warning on close behavior
+				win.forceClosing = false;
+				this.close();
+			}
+		});
+	}
+	
+	,onEditWindowExternallyDeleted: function(win) {
+		NS.AlertWindow.show({
+
+			modalTo: win
+			// Same group as modified, since a deleting overrides any modifications
+			,modalGroup: 'refresh'
+
+			,title: 'Modification extérieure'
+			,message: "L'enregistrement a été supprimé par un autre utilisateur."
+					+ " La fenêtre va être fermée."
+
+			,okHandler: function() {
+				this.close();
+				win.close();
+			}
+			
+			,cancelHandler: function() {
+				// Restore the normal warning on close behavior
+				win.forceClosing = false;
+				this.close();
+			}
+		});
 	}
 
 	,initGrid: function() {
@@ -1111,59 +1212,32 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	,afterCreateEditWindow: function(win, recordId) {
 		this.parseContextHelpItems(win);
 		
-		var event = String.format('{0}#{1}:modified', this.modelName, recordId);
-		
-		// Change event
-		win.mon(eo.Kepler, event, function(e) {
-			if (e.fromOtherSession) {
-				// Do not pop a saving modified win if the user decides to
-				// close the window...
-				win.forceClosing = true;
-				
-				var actionMsg, okHandler;
-				
-				if (win.refresh) {
-					actionMsg = "La fenêtre va être rechargée";
-					okHandler = function() {
-						warnWin.close();
-						win.refresh(true);
-					};
-				} else {
-					actionMsg = "La fenêtre va être fermée.";
-					okHandler = function() {
-						warnWin.close();
-						win.close();
-					}
-				}
-				
-				var warnWin = new eo.Window({
-					width: 205
-					,height: 135
-					,modalTo: win
-					,title: 'hop hop hop'
-					,minimizable: false
-					,closable: false
-					,plain: true
-					,padding: 10
-					,bodyStyle: 'border: 0'
-					,html: "Les données ont été modifées par quelqu'un d'autre. " + actionMsg
-					,buttons: [{
-						text: "Ok"
-						,handler: okHandler
-					},{
-						text: "Annuler"
-						,handler: function() {
-							// Restore the normal warning on close behavior
-							win.forceClosing = false;
-							warnWin.close();
-						}
-					}]
-				});
-				warnWin.show();
-			}
-		}, this);
+//		var event = String.format('{0}#{1}:modified', this.modelName, recordId);
+//		
+//		// Change event
+//		win.mon(eo.Kepler, event, function(e) {
+//			if (e.fromOtherSession) {
+//				// Do not pop a saving modified win if the user decides to
+//				// close the window...
+//				win.forceClosing = true;
+//				
+//				NS.AlertWindow.show({
+//					modalTo: win
+//					,modalGroup: 'refresh'
+//					,title: 'Modification externe'
+//					,message: "Les données ont été modifées par quelqu'un d'autre. " + actionMsg
+//					
+//					,okHandler: okHandler
+//					,cancelHandler: function() {
+//						// Restore the normal warning on close behavior
+//						win.forceClosing = false;
+//						this.close();
+//					}
+//				});
+//			}
+//		}, this);
 	}
-
+	
 	,beforeCreateWindow: function(config, action) {}
 
 	,parseContextHelpItems: function(win) {
