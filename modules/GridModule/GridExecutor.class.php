@@ -23,6 +23,7 @@ use UserSession;
 use Exception;
 use UserException;
 use IllegalStateException, UnsupportedActionException, SystemException;
+use IllegalArgumentException;
 use ModelSaveException;
 
 use eoko\util\GlobalEvents;
@@ -833,40 +834,46 @@ MSG;
 	 // DELETE
 	//////////////////////////////////////////////////////////////////////////
 	
-	protected function beforeDeleteMultiple($ids) {}
+	protected function beforeDelete($ids) {}
+
+	/**
+	 * @deprecated Use {@link delete}
+	 */
+	public function delete_one() {
+		return $this->callInTransaction('doDelete');
+	}
+	
+	/**
+	 * @deprecated Use {@link delete}
+	 */
+	public function delete_multiple() {
+		return $this->callInTransaction('doDelete');
+	}
 	
 	public function delete() {
-		if ($this->request->has('ids')) {
-			return $this->delete_multiple();
-		} else {
-			$id = $this->request->req($this->table->getPrimaryKeyName());
-			if (is_array($id)) {
-				return $this->doDeleteMultiple($id);
-			} else {
-				return $this->doDeleteOne($id);
-			}
-		}
+		return $this->callInTransaction('doDelete');
 	}
 	
-	public function delete_multiple() {
-		return $this->callInTransaction('doDeleteMultiple');
-	}
-	
-	protected function doDeleteMultiple($ids = null) {
+	protected function doDelete() {
 		
-		if ($ids === null) {
-			$ids = $this->request->req('ids');
+		$ids = $this->request->requireFirst(array(
+			$this->table->getPrimaryKeyName(), 'id', 'ids'
+		));
+		
+		if (!is_array($ids)) {
+			$ids = array($ids);
 		}
 		
 		$count = count($ids);
-		if (false !== $this->beforeDeleteMultiple($ids)) {
+		
+		if (false !== $this->beforeDelete($ids)) {
 			if ($count === $n = $this->table->deleteWherePkIn($ids)) {
 				$this->deletedCount = $count;
 				return true;
 			} else {
 				if ($n < $count) {
 					throw new SystemException(
-						'Delete failed',
+						"Delete failed (expected: $count, actual: $n)",
 						lang('Une erreur a empêché la suppression de tous les enregistrements.')
 					);
 				} else if ($n > $count) {
@@ -880,34 +887,28 @@ MSG;
 			return false;
 		}
 	}
-	
-	protected function beforeDeleteOne($id) {}
 
-	public function delete_one() {
-		return $this->callInTransaction('doDeleteOne');
-	}
-	
-	protected function doDeleteOne($id = null) {
-		if ($id === null) {
-			$id = $this->request->req($this->table->getPrimaryKeyName());
-		}
-		if (false !== $this->beforeDeleteOne($id)) {
-			if (1 === $n = $this->table->deleteWherePkIn(array($id))) {
-				return true;
-			} else {
-				Logger::getLogger('GridController')->error('{} rows deleted', $n);
-				if ($n > 0) {
-					Logger::getLogger('GridController')->error('Terrible mistake, I have '
-						. 'deleted more than 1 reccord here!!! {} rows deleted', $n);
-					throw new SystemException('Terrible Mistake');
-				}
-				throw new SystemException('Delete failed');
-				return false;
-			}
-		} else {
-			return false;
-		}
-	}
+//	protected function doDeleteOne($id = null) {
+//		if ($id === null) {
+//			$id = $this->request->req($this->table->getPrimaryKeyName());
+//		}
+//		if (false !== $this->beforeDelete(array($id))) {
+//			if (1 === $n = $this->table->deleteWherePkIn(array($id))) {
+//				return true;
+//			} else {
+//				Logger::getLogger('GridController')->error('{} rows deleted', $n);
+//				if ($n > 0) {
+//					Logger::getLogger('GridController')->error('Terrible mistake, I have '
+//						. 'deleted more than 1 reccord here!!! {} rows deleted', $n);
+//					throw new SystemException('Terrible Mistake');
+//				}
+//				throw new SystemException('Delete failed');
+//				return false;
+//			}
+//		} else {
+//			return false;
+//		}
+//	}
 
 	  //////////////////////////////////////////////////////////////////////////
 	 // SUBSET
