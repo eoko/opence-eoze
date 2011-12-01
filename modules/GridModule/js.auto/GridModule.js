@@ -679,7 +679,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				params: {
 					json_ids: encodeURIComponent(Ext.util.JSON.encode(ids))
 					,controller: me.controller
-					,action: "delete_multiple"
+					,action: 'delete'
 				}
 				,onSuccess: function() {
 					if (grid && grid.el) grid.el.unmask();
@@ -3007,7 +3007,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				,handler: this.deleteSelectedRecords.createDelegate(this)
 				,text: 'Supprimer'
 				,iconCls: 'b_ico_del'
-				,actionId: "delete"
+				,actionId: 'delete'
 			}
 
 			,columns: {
