@@ -17,4 +17,8 @@ class PluginBase implements Plugin {
 	public function afterSaveModel(Model $model, $wasNew) {}
 
 	public function beforeSaveModel(Model $model, $new) {}
+	
+	public function beforeDelete(array $ids) {}
+	
+	public function afterDelete(array $ids) {}
 }
