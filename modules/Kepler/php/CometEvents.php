@@ -143,7 +143,16 @@ class CometEvents {
 		fclose($file);
 	}
 	
-	private function pushIn(&$queue, $category, $class, $name, array $args = null) {
+	/**
+	 *
+	 * @param array $queue
+	 * @param bool $fromOther `true` if the event originate from another **user**
+	 * @param type $category
+	 * @param type $class
+	 * @param type $name
+	 * @param array $args 
+	 */
+	private function pushIn(&$queue, $fromOther, $category, $class, $name, array $args = null) {
 		if (is_object($class)) {
 			if ($class instanceof Observable) {
 				$class = $class->getCometObservableName();
@@ -158,16 +167,17 @@ class CometEvents {
 				'name'  => $name,
 				'user'  => $this->userSession->getUserId(false),
 				'args'  => $args,
+				'fromOther' => $fromOther,
 			),
 		);
 	}
 	
 	private function push($category, $class, $name, array $args = null) {
-		$this->pushIn($this->myQueue, $category, $class, $name, $args);
+		$this->pushIn($this->myQueue, false, $category, $class, $name, $args);
 	}
 	
 	private function pushToOthers($category, $class, $name, array $args = null) {
-		$this->pushIn($this->othersQueue, $category, $class, $name, $args);
+		$this->pushIn($this->othersQueue, true, $category, $class, $name, $args);
 	}
 	
 	public static function fire($class, $name, $args = null) {
