@@ -14,6 +14,10 @@ class SessionManager {
 	protected $sessionName;
 	
 	private $listeners;
+
+	private $sessionId;
+	private $modified = false;
+	private $started  = false;
 	
 	public function __construct() {
 		
@@ -33,8 +37,65 @@ class SessionManager {
 		);
 	}
 	
+	public function __destruct() {
+		if ($this->modified) {
+			$this->commit();
+		}
+	}
+	
 	public function getId() {
-		return session_id();
+		if ($this->sessionId === null) {
+			$this->getData();
+		}
+		return $this->sessionId;
+	}
+	
+	public function getData() {
+		$this->start();
+		$this->data = $_SESSION;
+		$this->sessionId = session_id();
+		$this->close();
+	}
+	
+	public function commit() {
+		if ($this->sessionId !== null) {
+			session_id($this->sessionId);
+		}
+		$this->start();
+		foreach ($this->data as $k => $v) {
+			$_REQUEST[$k] = $v;
+		}
+		$this->modified = false;
+		$this->close();
+	}
+	
+	private function start() {
+		if (!$this->started) {
+			$this->started = true;
+			session_start();
+		}
+	}
+	
+	private function close() {
+		if ($this->started) {
+			session_write_close();
+			$this->started = false;
+		}
+	}
+	
+	/**
+	 * Save some data in the session.
+	 * 
+	 * @param string $key
+	 * @param string $data
+	 * @return SessionManager 
+	 */
+	public function put($key, $data) {
+		if ($this->data[$key] !== $data) {
+			$this->data[$key] = $data;
+			$this->modified = true;
+		}
+		return $this;
 	}
 	
 	public function addListener($event, $fn) {

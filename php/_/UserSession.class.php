@@ -49,11 +49,13 @@ class UserSession {
 		if (self::$instance !== null) {
 			return self::$instance;
 		}
+		
+		$session = self::$sessionManager->getData();
 
 		if (self::$instance === null) {
-			if (isset($_SESSION['UserSession'])) {
+			if (isset($session['UserSession'])) {
 
-				$storedSession = $_SESSION['UserSession'];
+				$storedSession = $session['UserSession'];
 				Logger::getLogger('UserSession')->debug('Found stored user session');
 
 				if ($storedSession instanceof UserSession) {
@@ -112,7 +114,7 @@ class UserSession {
 
 		Logger::getLogger('UserSession')->debug('Saving user session');
 
-		$_SESSION['UserSession'] = $instance;
+		self::$sessionManager->put('UserSession', $instance)->commit();
 	}
 	
 	private static $loginAdapter;

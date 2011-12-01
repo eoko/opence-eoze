@@ -244,7 +244,7 @@ if (ConfigManager::get('eoko/routing', 'comet', false)) {
 
 // Finally, start the session (must be done after the autoloader has been set,
 // so that object stored in session (notably: UserSession) can be instantiated)
-session_start();
+//session_start();
 
 //require_once 'debug.inc.php'; // there's nothing in there...
 
