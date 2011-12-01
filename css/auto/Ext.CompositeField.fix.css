@@ -1,0 +1,7 @@
+/* Prevents composite fields' background to turn white when they contains
+   invalid fields ... */
+.x-form-invalid.x-form-composite {
+	background-color: transparent;
+/*	background-image: none;
+	border: medium none;*/
+}
