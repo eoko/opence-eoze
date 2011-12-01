@@ -348,7 +348,15 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	}
 
 	,afterCreateGrid: function(grid) {
-		
+		grid.mon(eo.Kepler, this.tableName + ':datachanged', function(e) {
+			if (e.fromOtherSession) {
+				this.setDirty();
+			}
+		}, this);
+	}
+	
+	,setDirty: function() {
+		this.reload();
 	}
 
 	,initGrid: function() {
@@ -995,7 +1003,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		var fn = function(win) {
 
 			this.editWindows[rowId] = win;
-			this.afterCreateEditWindow(win);
+			this.afterCreateEditWindow(win, rowId);
 
 	//		win.on('destroy', function(){
 	//			delete this.editWindows[rowId]
@@ -1042,7 +1050,9 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 					return true;
 				}
 				,beforeclose: function() {
-					if (win.forceClosing) return true;
+					if (win.forceClosing) {
+						return true;
+					}
 					if (win.formPanel.isModified()) {
 						// i18n
 						Ext.Msg.show({
@@ -1087,8 +1097,60 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		return undefined;
 	}
 
-	,afterCreateEditWindow: function(win) {
+	,afterCreateEditWindow: function(win, recordId) {
 		this.parseContextHelpItems(win);
+		
+		var event = String.format('{0}#{1}:modified', this.modelName, recordId);
+		
+		// Change event
+		win.mon(eo.Kepler, event, function(e) {
+			if (e.fromOtherSession) {
+				// Do not pop a saving modified win if the user decides to
+				// close the window...
+				win.forceClosing = true;
+				
+				var actionMsg, okHandler;
+				
+				if (win.refresh) {
+					actionMsg = "La fenêtre va être rechargée";
+					okHandler = function() {
+						warnWin.close();
+						win.refresh(true);
+					};
+				} else {
+					actionMsg = "La fenêtre va être fermée.";
+					okHandler = function() {
+						warnWin.close();
+						win.close();
+					}
+				}
+				
+				var warnWin = new eo.Window({
+					width: 205
+					,height: 135
+					,modalTo: win
+					,title: 'hop hop hop'
+					,minimizable: false
+					,closable: false
+					,plain: true
+					,padding: 10
+					,bodyStyle: 'border: 0'
+					,html: "Les données ont été modifées par quelqu'un d'autre. " + actionMsg
+					,buttons: [{
+						text: "Ok"
+						,handler: okHandler
+					},{
+						text: "Annuler"
+						,handler: function() {
+							// Restore the normal warning on close behavior
+							win.forceClosing = false;
+							warnWin.close();
+						}
+					}]
+				});
+				warnWin.show();
+			}
+		}, this);
 	}
 
 	,beforeCreateWindow: function(config, action) {}
