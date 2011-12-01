@@ -1,6 +1,7 @@
 <?php
 
-namespace eoko\comet;
+namespace eoko\modules\Kepler;
+//namespace eoko\comet;
 
 /**
  * This interface may be implemented in order to provide custom names to 
