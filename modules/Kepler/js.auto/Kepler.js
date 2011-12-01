@@ -43,14 +43,15 @@ eo.Kepler = Ext.extend(Ext.util.Observable, {
 	}
 	
 	,processEvents: function(events) {
-		debugger
 		Ext.each(events, function(event) {
+			var c = event['class'] + ':' + event.name;
 			if (event.args) {
 				var args = event.args;
-				args.unshift(event['class'] + ':' + event.name);
+				args.unshift(event); // the raw event as the first arg
+				args.unshift(c); // name of the event to fire
 				this.fireEvent.apply(this, args);
 			} else {
-				this.fireEvent(event['class'] + ':' + event.name);
+				this.fireEvent(c, event);
 			}
 		}, this);
 	}
@@ -64,6 +65,7 @@ eo.Kepler = Ext.extend(Ext.util.Observable, {
 				me.continuePolling();
 			}, 2000);
 		} else {
+			debugger
 			// TODO handle errors
 		}
 	}
@@ -76,7 +78,12 @@ eo.Kepler = Ext.extend(Ext.util.Observable, {
 		var entries = response.entries;
 		if (response.success && entries) {
 			if (entries.events) {
-				this.processEvents(entries.events);
+				try {
+					this.processEvents(entries.events);
+				} catch (e) {
+					// TODO handle errors
+					debugger
+				}
 			}
 		}
 		this.continuePolling();
