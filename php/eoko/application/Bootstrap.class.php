@@ -11,6 +11,7 @@ abstract class Bootstrap {
 		$this->initConfigPaths();
 		$this->initModulesLocations();
 		$this->registerModuleFactories();
+		$this->initGlobalEvents();
 	}
 
 	protected static final function addConfigPath($path, $defaultNode = null) {
@@ -28,4 +29,6 @@ abstract class Bootstrap {
 	abstract protected function registerModuleFactories();
 
 	abstract protected function initModulesLocations();
+	
+	abstract protected function initGlobalEvents();
 }
