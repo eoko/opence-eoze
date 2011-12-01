@@ -47,7 +47,7 @@ eo.form.ClearableComboBox = Ext.extend(Ext.form.ComboBox, {
     ,getTriggerWidth: sppTwin.getTriggerWidth
 	
 	,onTrigger1Click : function() {
-		this.reset();
+		this.setValue();
 		this.focus();
 	}
 	
