@@ -1,5 +1,4 @@
 /**
- *
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  * @author Éric Ortega <eric@planysphere.fr>
  * @since 1 déc. 2011
@@ -11,6 +10,14 @@ Ext.ns('Oce.Modules.GridModule');
  * can be required to be unique in a given modal group to that 
  * window. This class is mainly intended to offer a common basis 
  * for future developments.
+ * 
+ * Using the {@link #modalTo} and {@link #modalGroup} options, this 
+ * class can automatically make that there there will always be only 
+ * one modal {#Oce.Modules.GridModule.AlertWindow AlertWindow} modal
+ * dialog for the given target window & group. If an event trigger
+ * the creation of another modal dialog for the same target and
+ * group, then the previous one will be closed and replaced by the
+ * new one.
  */
 Oce.Modules.GridModule.AlertWindow = Ext.extend(eo.Window, {
 	
@@ -53,51 +60,47 @@ Oce.Modules.GridModule.AlertWindow = Ext.extend(eo.Window, {
 	 * @param {String} modalGroup The arbitrary unique identifier of the
 	 * modal group for the given target window.
 	 * 
-	 * @return {Boolean} `true` if there isn't any other visible dialog
+	 * @return {Ext.Window|Boolean} `true` if there isn't any other visible dialog
 	 * already targetting the given window for the given modal group.
 	 * 
 	 * @private
 	 */
-	,isUniqueInModalGroup: function(modalTo, modalGroup) {
+	,getPreviousInModalGroup: function(modalTo, modalGroup) {
 		
+		// Set the arguments for instance call
 		if (!modalTo) {
 			modalTo = this.modalTo;
 		}
 		if (!modalGroup) {
 			modalGroup = this.modalGroup;
 		}
-						
-		if (!modalTo || !modalGroup) {
-			return true;
-		}
-		if (!modalTo.modalWindowGroups) {
-			modalTo.modalWindowGroups = {};
-			return true;
-		}
-		if (!modalTo.modalWindowGroups[modalGroup]) {
-			return true;
-		}
-		else {
-			return false;
-		}
+		
+		return modalTo 
+				&& modalGroup 
+				&& modalTo.modalWindowGroups 
+				&& modalTo.modalWindowGroups[modalGroup];
 	}
 
 	/**
-	 * Registers the dialog as the current one for the configured 
-	 * modal target window and the given modal group.
-	 * 
+	 * Overrides the `show()` method to register itself as the current modal dialog
+	 * for the configured modal target & group.
+	 *
 	 * @private
 	 */
-	,registerInModalGroup: function() {
+	,show: function() {
 		var modalTo = this.modalTo,
 			modalGroup = this.modalGroup;
 		if (modalTo && modalGroup) {
-			var group = modalTo.modalWindowGroups = modalTo.modalWindowGroups || {};
-			group[modalGroup] = this;
-			this.on('hide', function() {
-				delete group[modalGroup];
+			var groups = modalTo.modalWindowGroups = modalTo.modalWindowGroups || {};
+			groups[modalGroup] = this;
+			this.on({
+				single: true
+				,hide: function() {
+					delete groups[modalGroup];
+				}
 			});
 		}
+		return Oce.Modules.GridModule.AlertWindow.superclass.show.apply(this, arguments);
 	}
 	
 	// private
@@ -125,27 +128,34 @@ Oce.Modules.GridModule.AlertWindow = Ext.extend(eo.Window, {
 			});
 		}
 		
-		if (this.isUniqueInModalGroup()) {
-			this.registerInModalGroup();
-			Oce.Modules.GridModule.AlertWindow.superclass.initComponent.call(this);
-		} else {
-			this.hidden = true;
-			this.show = Ext.emptyFn;
-			Oce.Modules.GridModule.AlertWindow.superclass.initComponent.call(this);
-			this.destroy();
+		var previous = this.getPreviousInModalGroup();
+		if (previous) {
+			previous.close();
 		}
+		Oce.Modules.GridModule.AlertWindow.superclass.initComponent.call(this);
 	}
 });
 
+/**
+ * Construct & show method alternative to the {@link Oce.Modules.GridModule.AlertWindow
+ * AlertWindow}'s constructor.
+ * 
+ * @param {Object} config The configuration of the AlertWindow to create.
+ * 
+ * @return {AlertWindow}
+ */
 Oce.Modules.GridModule.AlertWindow.show = function(config) {
 
 	if (!config) {
 		config = {};
 	}
 	
-	if (this.prototype.isUniqueInModalGroup(config.modalTo, config.modalGroup)) {
-		var win = new this(config);
-		win.show();
-		return win;
+	var previous = this.prototype.getPreviousInModalGroup(config.modalTo, config.modalGroup);
+	if (previous) {
+		previous.close();
 	}
+	
+	var win = new this(config);
+	win.show();
+	return win;
 };
