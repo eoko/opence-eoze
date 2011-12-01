@@ -10,6 +10,7 @@
  */
 
 use eoko\config\ConfigManager;
+use eoko\config\Application;
 use eoko\comet\CometEvents;
 
 $directAccess = false;
@@ -236,6 +237,7 @@ loadAppConfig($classLoader);
 eoko\plugin\PluginManager::init();
 
 $sessionManager = new eoko\php\SessionManager();
+Application::setDefaultSessionManager($sessionManager);
 $userSession = new \eoko\security\UserSessionHandler\LegacyWrapper($sessionManager);
 
 if (ConfigManager::get('eoko/routing', 'comet', false)) {
