@@ -157,21 +157,51 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
 
 	,addFormChangeListeners: function() {
 
-		var me = this;
+		var me = this,
+			waitingToTest = false,
+			refreshDelay = 500;
 
 		var changeListener = function() {
-			if (!this.modified && !me.preventModificationEvents) {
-				this.modified = true;
-				me.fireEvent("modified");
-			}
-		}.createDelegate(this);
+			if (!me.preventModificationEvents) {
+				
+				// aggregate cumulated events
+				if (waitingToTest) {
+					return;
+				}
 
-		// This listener checks the dirty state of the field before considering
-		// to be have changed. This is to avoid false positive with special keys
-		// for example.
-		var changeListenerWithDirtyCheck = function(field) {
-			if (field.isDirty()) {
-				changeListener();
+				waitingToTest = true;
+
+				if (me.modified) {
+					setTimeout(function() {
+						if (!me.form.isDirty()) {
+							me.clearModified();
+						}
+						waitingToTest = false;
+					}, refreshDelay);
+				} else {
+					// We must let the pass finish, in order for BasicForm to 
+					// restore the fields original values. Indeed, we can get
+					// here with events fired from getValue() of the fields,
+					// and BasicForm do as follow:
+					// `
+					//		f.setValue(v.value);
+					//		if(this.trackResetOnLoad){
+					//			f.originalValue = f.getValue();
+					//		}
+					//	`
+
+					// bufferize simultaneous events
+					setTimeout(function() {
+						// ... and here, ensure that the form would still be considered
+						// diry
+						if (me.form.isDirty()) {
+							me.modified = true;
+							me.fireEvent("modified");
+						}
+
+						waitingToTest = false;
+					}, refreshDelay);
+				}
 			}
 		};
 
@@ -184,9 +214,14 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
 			// fields
 			if (item instanceof Ext.form.TextField) {
 				if (item.el) {
-					item.mon(item.el, "keyup", changeListenerWithDirtyCheck.createCallback(item));
+					item.mon(item.el, {
+						buffer: 200
+						,keyup: changeListener
+					});
 				} else {
-					item.on("afterrender", function() {addChangeListener(item)})
+					item.on("afterrender", function() {
+						addChangeListener(item);
+					});
 				}
 			}
 			if (item instanceof Ext.form.Checkbox) {
