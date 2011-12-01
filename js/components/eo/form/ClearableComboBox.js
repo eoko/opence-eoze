@@ -47,8 +47,13 @@ eo.form.ClearableComboBox = Ext.extend(Ext.form.ComboBox, {
     ,getTriggerWidth: sppTwin.getTriggerWidth
 	
 	,onTrigger1Click : function() {
-		this.setValue();
+		// The focus must be set *before* the setValue method is called,
+		// because the `startValue` of the field will be updated when it
+		// gets the focus; and after, when the field blur the `startValue`
+		// will be compared to the current value. If setValue is called
+		// before focus, `startValue` will be set to ''.
 		this.focus();
+		this.setValue();
 	}
 	
 	,onTrigger2Click : sppCombo.onTriggerClick
