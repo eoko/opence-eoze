@@ -3,6 +3,8 @@
 namespace eoko\modules\GridModule\GridExecutor;
 
 use Model;
+use ModelTable;
+use eoko\modules\GridModule\GridExecutor;
 
 /**
  *
@@ -11,6 +13,8 @@ use Model;
  * @since 1 déc. 2011
  */
 interface Plugin {
+	
+	public function configure(GridExecutor $gridExecutor, ModelTable $table);
 	
 	function beforeSaveModel(Model $model, $new);
 	

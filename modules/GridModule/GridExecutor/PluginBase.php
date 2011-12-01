@@ -3,6 +3,8 @@
 namespace eoko\modules\GridModule\GridExecutor;
 
 use Model;
+use ModelTable;
+use eoko\modules\GridModule\GridExecutor;
 
 /**
  * A base adapter implementing {@link GridExecutorPlugin}, with every method
@@ -13,6 +15,8 @@ use Model;
  * @since 1 déc. 2011
  */
 class PluginBase implements Plugin {
+	
+	public function configure(GridExecutor $gridExecutor, ModelTable $table) {}
 	
 	public function afterSaveModel(Model $model, $wasNew) {}
 
