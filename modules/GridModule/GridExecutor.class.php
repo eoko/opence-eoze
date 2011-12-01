@@ -25,12 +25,25 @@ use UserException;
 use IllegalStateException, UnsupportedActionException, SystemException;
 use ModelSaveException;
 
+use eoko\util\GlobalEvents;
+
 abstract class GridExecutor extends JsonExecutor {
 
 	/** @var \ModelTable */
 	protected $table;
 
 	protected $formTemplatePath = 'formTemplates';
+
+	private $plugins;
+	
+	protected function construct() {
+		parent::construct();
+		GlobalEvents::fire(get_class(), 'initPlugins', $this);
+	}
+	
+	public function addPlugin(GridExecutor\Plugin $plugin) {
+		$this->plugins[] = $plugin;
+	}
 
 	function get_module() {
 		// UNTESTED
@@ -144,11 +157,7 @@ abstract class GridExecutor extends JsonExecutor {
 			,$this->add_createContext($request, $setters)
 		);
 
-		$this->beforeSaveModel($model);
-
-		if (!$model->save(true)) {
-			throw new ModelSaveException('Model save error');
-		}
+		$this->saveModel($model, true);
 
 		$this->newId = $id = $model->getPrimaryKeyValue();
 //		ExtJSResponse::put('newId', $id = $model->getPrimaryKeyValue());
@@ -762,18 +771,12 @@ MSG;
 			throw new SystemException('Cannot load model with id: ' . $id);
 		}
 		
-//		array(
-//			'year' => $this->request->req('year')
-//		));
 //		dump($setters, 50);
 //		dump($model);
-//		dump($model->getInternal()->fields);
+		
 		$model->setFields($setters);
-//		$model = $this->table->createModel($setters);
 
-		$this->beforeSaveModel($model);
-
-		$model->saveManaged();
+		$this->saveModel($model, false);
 
 		return true;
 	}
@@ -801,7 +804,30 @@ MSG;
 	 // SAVE - Shared
 	//////////////////////////////////////////////////////////////////////////
 
-	protected function beforeSaveModel(&$model) {}
+	private function saveModel(Model $model, $new) {
+		
+		$this->beforeSaveModel($model, $new);
+
+		if ($this->plugins) {
+			foreach ($this->plugins as $plugin) {
+				$plugin->beforeSaveModel($model, $new);
+			}
+		}
+		
+		$model->saveManaged($new);
+		
+		$this->afterSaveModel($model, $new);
+
+		if ($this->plugins) {
+			foreach ($this->plugins as $plugin) {
+				$plugin->afterSaveModel($model, $new);
+			}
+		}
+	}
+	
+	protected function beforeSaveModel(Model $model) {}
+	
+	protected function afterSaveModel(Model $model, $wasNew) {}
 
 	  //////////////////////////////////////////////////////////////////////////
 	 // DELETE
