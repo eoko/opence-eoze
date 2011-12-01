@@ -3,6 +3,8 @@
 namespace eoko\modules\Kepler;
 
 use eoko\module\Module;
+use eoko\module\ModuleLocation;
+use eoko\util\GlobalEvents;
 
 /**
  *
@@ -41,6 +43,14 @@ class Kepler extends Module {
 			$replace[] = rtrim($rep, '\/');
 		}
 		return str_replace($search, $replace, $path);
+	}
+	
+	protected function construct(ModuleLocation $location) {
+		GlobalEvents::addListener('Browser', 'reload', array($this, 'clearWaitingEvents'));
+	}
+	
+	public function clearWaitingEvents() {
+		
 	}
 	
 	public function buildCometEntries(array $entries) {
