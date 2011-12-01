@@ -995,7 +995,12 @@ abstract class Model {
 		$table = $this->getTable();
 		$id = $this->internal->fields[$this->getPrimaryKeyName()];
 
-		$query = $table->createLoadQuery(ModelTable::LOAD_ID, $this->context);
+		// Models should not try to preload relations, that may be catastrophic
+		// in the case of a ReferredByMany relation. Eg. A Countries table may
+		// be referred by thousands of records that we generally don't want to
+		// load with the Country record.
+		$query = $table->createLoadQuery(ModelTable::LOAD_NONE, $this->context);
+		
 		$result = $query->where(
 			$query->getQualifiedName($table->getPrimaryKeyName()) . ' = ?', $id
 		)->executeSelectFirst();
