@@ -8,6 +8,8 @@ use eoko\template\RawRenderer;
 use SystemException;
 use ExtJSResponse;
 
+use eoko\util\GlobalEvents;
+
 abstract class HtmlExecutor extends HtmlTemplateExecutor {
 	
 	protected $ajax = null;
@@ -54,6 +56,7 @@ abstract class HtmlExecutor extends HtmlTemplateExecutor {
 		}
 		
 		if ($this->ajax === false || !$this->request->get('fragment', false)) {
+			GlobalEvents::fire('Browser', 'reload');
 			if (!$this->hasPartialRendering && !$this->request->get('rawFragment', false)) {
 				$this->onCreateLayout($layout = $this->createLayout($template));
 				$layout->render();
