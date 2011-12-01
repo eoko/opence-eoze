@@ -834,8 +834,6 @@ MSG;
 	 // DELETE
 	//////////////////////////////////////////////////////////////////////////
 	
-	protected function beforeDelete($ids) {}
-
 	/**
 	 * @deprecated Use {@link delete}
 	 */
@@ -854,6 +852,38 @@ MSG;
 		return $this->callInTransaction('doDelete');
 	}
 	
+	protected function afterDelete(array $ids) {}
+	
+	protected function beforeDelete(array $ids) {}
+
+	private function onAfterDelete(array $ids) {
+		
+		$this->afterDelete($ids);
+		
+		if ($this->plugins) {
+			foreach ($this->plugins as $plugin) {
+				$plugin->afterDelete($ids);
+			}
+		}
+	}
+	
+	private function onBeforeDelete(array $ids) {
+		
+		if (false === $this->beforeDelete($ids)) {
+			return false;
+		}
+		
+		if ($this->plugins) {
+			foreach ($this->plugins as $plugin) {
+				if (false === $plugin->beforeDelete($ids)) {
+					return false;
+				}
+			}
+		}
+		
+		return true;
+	}
+	
 	protected function doDelete() {
 		
 		$ids = $this->request->requireFirst(array(
@@ -866,9 +896,10 @@ MSG;
 		
 		$count = count($ids);
 		
-		if (false !== $this->beforeDelete($ids)) {
+		if ($this->onBeforeDelete($ids)) {
 			if ($count === $n = $this->table->deleteWherePkIn($ids)) {
 				$this->deletedCount = $count;
+				$this->onAfterDelete($ids);
 				return true;
 			} else {
 				if ($n < $count) {
@@ -880,8 +911,9 @@ MSG;
 					Logger::getLogger('GridController')->error('Terrible mistake, I have '
 						. 'deleted more reccords than required here!!! {} rows deleted', $n);
 					throw new SystemException('Terrible Mistake');
+				} else {
+					throw new IllegalStateException('Unreachable code');
 				}
-				return false;
 			}
 		} else {
 			return false;
