@@ -20,8 +20,14 @@ eo.Testing = {
 		};
 	}
 	
+	,currentTest: undefined
+	
 	,startUnitTest: function(name) {
-		this.unitTests[name].fn();
+		this.currentTest = new this.unitTests[name].fn;
+	}
+	
+	,nextStep: function() {
+		this.currentTest.next();
 	}
 }
 
@@ -34,6 +40,9 @@ if (!eo.Testing.isUnitTestEnv()) {
 	Ext.onReady(function() {
 		var security = new Oce.Security;
 		if (security.isIdentified()) {
+			
+			var currentTest;
+			
 			Ext.iterate(eo.Testing.unitTests, function(name, test) {
 				var a = Ext.getBody().createChild({
 					tag: 'div'
@@ -44,9 +53,20 @@ if (!eo.Testing.isUnitTestEnv()) {
 				});
 
 				a.on('click', function() {
-					test.fn();
+//					currentTest = new test.fn;
+					eo.Testing.startUnitTest(name);
 				}, {single: true});
 			});
+			
+			var next = Ext.getBody().createChild({
+				tag: 'div'
+				,style: 'float: right; border: 1px solid red; padding: 5px; margin: 10px'
+				,html: 'Next test'
+				,id: 'eoze-unit-test-next-test'
+			});
+			
+			next.on('click', eo.Testing.nextStep, eo.Testing);
+			
 		} else {
 			security.addListener('login', function() {
 				window.location = window.location;
