@@ -67,8 +67,8 @@ class UserSession {
 								getenv("REMOTE_ADDR"), $storedSession->ip);
 					}
 				} else {
-					Logger::getLogger('UserSession')->warn('Value found in $_SESSION["UserSession"'
-							. ' is not UserSession object');
+					Logger::getLogger('UserSession')->warn('Value stored in session at '
+							. '"UserSession" is not UserSession object');
 				}
 			}
 		}

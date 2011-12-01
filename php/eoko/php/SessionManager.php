@@ -15,9 +15,11 @@ class SessionManager {
 	
 	private $listeners;
 
-	private $sessionId;
+	private $sessionId = null;
 	private $modified = false;
 	private $started  = false;
+	
+	private $data = null;
 	
 	public function __construct() {
 		
@@ -51,32 +53,37 @@ class SessionManager {
 	}
 	
 	public function getData() {
-		$this->start();
-		$this->data = $_SESSION;
-		$this->sessionId = session_id();
-		$this->close();
+		if ($this->data === null) {
+			$this->start();
+			$this->data = $_SESSION;
+			$this->closeSession();
+		}
+		return $this->data;
 	}
 	
 	public function commit() {
-		if ($this->sessionId !== null) {
-			session_id($this->sessionId);
-		}
 		$this->start();
 		foreach ($this->data as $k => $v) {
-			$_REQUEST[$k] = $v;
+			$_SESSION[$k] = $v;
 		}
 		$this->modified = false;
-		$this->close();
+		$this->closeSession();
 	}
 	
 	private function start() {
 		if (!$this->started) {
+			if ($this->sessionId === null) {
+				session_start();
+				$this->sessionId = session_id();
+			} else {
+				session_id($this->sessionId);
+				session_start();
+			}
 			$this->started = true;
-			session_start();
 		}
 	}
 	
-	private function close() {
+	private function closeSession() {
 		if ($this->started) {
 			session_write_close();
 			$this->started = false;
@@ -91,7 +98,7 @@ class SessionManager {
 	 * @return SessionManager 
 	 */
 	public function put($key, $data) {
-		if ($this->data[$key] !== $data) {
+		if (!isset($this->data[$key]) || $this->data[$key] !== $data) {
 			$this->data[$key] = $data;
 			$this->modified = true;
 		}
