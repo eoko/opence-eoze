@@ -29,18 +29,21 @@ eo.form.contact.AddressField = Ext.extend(eo.form.contact.AbstractField, {
 				,emptyText: this.textStreet
 				,height: 36
 				,emptyValue: null
+				,enableKeyEvents: true
 			}),
 
 			this.zipField = new Ext.form.TextField({
 				name: this.zipCodeName
 				,emptyText: this.textZipCode
 				,emptyValue: null
+				,enableKeyEvents: true
 			}),
 
 			this.cityField = new Ext.form.TextField({
 				name: this.cityName
 				,emptyText: this.textCity
 				,emptyValue: null
+				,enableKeyEvents: true
 			})
 		];
 	}

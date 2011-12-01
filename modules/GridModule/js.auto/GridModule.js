@@ -326,7 +326,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		var win = this.getEditWindow(row.data[this.primaryKeyName], function(win) {
 			if (!win.hasBeenLoaded) {
 				win.setRow(row);
-				win.form.reset();
+//				win.form.reset();
 				win.show(el);
 				win.formPanel.refresh(function() {
 					win.hasBeenLoaded = true;
