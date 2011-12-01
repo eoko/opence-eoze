@@ -15,6 +15,8 @@ use eoko\module\executor\Executor;
 use eoko\log\Logger;
 use eoko\cache\Cache;
 
+use eoko\config\Application;
+
 class Module implements file\Finder {
 	
 	const DEFAULT_EXECUTOR           = '';
@@ -62,6 +64,8 @@ class Module implements file\Finder {
 	private $executorClassNames = null;
 
 	public final function __construct(ModuleLocation $location) {
+		
+		$this->sessionManager = Application::getInstance()->get($name);
 		
 		$this->name = $location->moduleName;
 		$this->basePath = $location->path;

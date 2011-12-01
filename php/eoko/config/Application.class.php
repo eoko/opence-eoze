@@ -5,6 +5,7 @@ namespace eoko\config;
 use eoko\file, eoko\file\Finder as FileFinder, eoko\file\FileType;
 use eoko\util\Files;
 use eoko\config\ConfigManager;
+use eoko\php\SessionManager;
 
 class Application implements FileFinder {
 	
@@ -15,9 +16,21 @@ class Application implements FileFinder {
 	
 	private $isDevMode = false;
 	
-	private function __construct() {
+	/**
+	 * @var SessionManager
+	 */
+	private $sessionManager;
+	
+	private static $defaultSessionManager;
+	
+	private function __construct(SessionManager $sessionManager) {
+		$this->sessionManager = $sessionManager;
 		$config = ConfigManager::get('eoze/application');
 		$this->isDevMode = $this->findDevMode();
+	}
+	
+	public static function setDefaultSessionManager(SessionManager $sessionManager) {
+		self::$defaultSessionManager = $staticSessionManager;
 	}
 	
 	private function findDevMode() {
@@ -38,8 +51,10 @@ class Application implements FileFinder {
 	 * @return Application
 	 */
 	public static function getInstance() {
-		if (self::$instance) return self::$instance;
-		else return self::$instance = new Application();
+		if (self::$instance) {
+			return self::$instance;
+		}
+		else return self::$instance = new Application(self::$defaultSessionManager);
 	}
 	
 	public function resolveRelativePath($relativePath, $type = null, $forbidUpward = null) {
