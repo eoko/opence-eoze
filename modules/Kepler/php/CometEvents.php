@@ -146,7 +146,8 @@ class CometEvents {
 	/**
 	 *
 	 * @param array $queue
-	 * @param bool $fromOther `true` if the event originate from another **user**
+	 * @param bool $fromOther `true` if the event originate from another **session** (could be
+	 * the same user in another browser)
 	 * @param type $category
 	 * @param type $class
 	 * @param type $name
@@ -167,7 +168,7 @@ class CometEvents {
 				'name'  => $name,
 				'user'  => $this->userSession->getUserId(false),
 				'args'  => $args,
-				'fromOther' => $fromOther,
+				'fromOtherSession' => $fromOther,
 			),
 		);
 	}
