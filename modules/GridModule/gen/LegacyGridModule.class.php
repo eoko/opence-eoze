@@ -62,6 +62,9 @@ class LegacyGridModule {
 		} else {
 			$tpl->superclass = "Oce.Modules.$config->class.$config->class";
 		}
+		
+		$tpl->modelName = json_encode($modelName);
+		$tpl->tableName = json_encode($table->getTableName());
 
 		if (isset($config['uses'])) {
 			$tpl->uses = json_encode(
