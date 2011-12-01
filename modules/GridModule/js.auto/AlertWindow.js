@@ -107,12 +107,25 @@ Oce.Modules.GridModule.AlertWindow = Ext.extend(eo.Window, {
 	,initComponent: function() {
 		
 		var buttons = this.buttons = this.buttons || [],
-			scope = this.scope || this;
+			scope = this.scope || this,
+			modalTo = this.modalTo;
 			
+		// Position relatively to modal target
+		if (modalTo) {
+			if (!Ext.isDefined(this.x)) {
+				this.x = modalTo.x + (modalTo.getWidth() - (this.width || 250)) / 2;
+			}
+			if (!Ext.isDefined(this.y)) {
+				this.y = modalTo.y + (modalTo.getHeight() - (this.height || 250)) / 2;
+			}
+		}
+
+		// Message to html content
 		if (this.message) {
 			this.html = '<p>' + this.message + '</p>';
 		}
 		
+		// Buttons
 		if (this.okHandler) {
 			buttons.push({
 				text: 'Ok'
@@ -150,7 +163,10 @@ Oce.Modules.GridModule.AlertWindow.show = function(config) {
 		config = {};
 	}
 	
-	var previous = this.prototype.getPreviousInModalGroup(config.modalTo, config.modalGroup);
+	var modalTo = config.modalTo,
+		modalGroup = config.modalGroup,
+		previous = modalTo && this.prototype.getPreviousInModalGroup(modalTo, modalGroup);
+		
 	if (previous) {
 		previous.close();
 	}
