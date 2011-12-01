@@ -348,15 +348,26 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	}
 
 	,afterCreateGrid: function(grid) {
-		grid.mon(eo.Kepler, this.tableName + ':datachanged', function(e) {
+		grid.mon(eo.Kepler, this.tableName + ':modified', function(e, ids) {
 			if (e.fromOtherSession) {
-				this.setDirty();
+				this.setRecordsDirty(ids);
 			}
 		}, this);
 	}
 	
-	,setDirty: function() {
-		this.reload();
+	,setRecordsDirty: function(ids) {
+		var s = this.grid.store;
+		if (ids) {
+			Ext.each(ids, function(id) {
+				if (s.getById(id)) {
+					this.reload();
+					return false;
+				}
+				return true;
+			}, this);
+		} else {
+			this.reload();
+		}
 	}
 
 	,initGrid: function() {
