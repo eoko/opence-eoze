@@ -27,7 +27,7 @@ class Bootstrap extends \eoko\module\executor\JsFileExecutor {
 	 * @todo LEGACY Move to the new model
 	 */
 	public function ping_session() {
-		if (UserSession::isIdentified()) {
+		if (UserSession::isIdentified(false)) {
 			ExtJSResponse::put('pong', true);
 			ExtJSResponse::put('remainingTime', UserSession::getExpirationDelay());
 		} else {
