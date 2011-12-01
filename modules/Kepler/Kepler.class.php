@@ -8,6 +8,9 @@ use eoko\util\GlobalEvents;
 
 /**
  *
+ * **Important**: currently, the reload event listener for cleaning waiting
+ * events must be registered manually in the application bootstrap!
+ * 
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  * @author Éric Ortega <eric@planysphere.fr>
  * @since 30 nov. 2011
@@ -33,6 +36,10 @@ class Kepler extends Module {
 		}
 	}
 	
+	public function getQueueFilePath() {
+		return $this->getWorkingPath($this->getSessionManager()->getId());
+	}
+	
 	private function replacePathVariables($path) {
 		$search  = array();
 		$replace = array();
@@ -45,12 +52,8 @@ class Kepler extends Module {
 		return str_replace($search, $replace, $path);
 	}
 	
-	protected function construct(ModuleLocation $location) {
-		GlobalEvents::addListener('Browser', 'reload', array($this, 'clearWaitingEvents'));
-	}
-	
 	public function clearWaitingEvents() {
-		dump('clearing waiting events');
+		unlink($this->getQueueFilePath());
 	}
 	
 	public function buildCometEntries(array $entries) {

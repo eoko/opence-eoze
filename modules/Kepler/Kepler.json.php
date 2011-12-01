@@ -17,8 +17,7 @@ class Json extends JsonExecutor {
 	public function index() {
 		
 		$module = $this->getModule();
-		$sessionId = $module->getSessionManager()->getId();
-		$path = $module->getWorkingPath($sessionId);
+		$path = $module->getQueueFilePath();
 		$refreshRate = $module->getConfig()->getValue('refreshRate', 1);
 		
 		if (null !== $timeout = $this->request->get('timeout')) {

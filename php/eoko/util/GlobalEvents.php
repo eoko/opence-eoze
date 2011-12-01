@@ -25,7 +25,7 @@ class GlobalEvents {
 		if (is_object($class)) {
 			$class = get_class($class);
 		}
-		if (self::$listeners[$class][$event]) {
+		if (isset(self::$listeners[$class][$event])) {
 			$args = array_slice(func_get_args(), 1);
 			foreach (self::$listeners[$class][$event] as $listener) {
 				call_user_func_array($listener, $args);

@@ -19,4 +19,6 @@ class BaseBootstrap extends Bootstrap {
 	}
 
 	protected function registerModuleFactories() {}
+	
+	protected function initGlobalEvents() {}
 }
