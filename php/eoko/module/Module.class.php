@@ -64,14 +64,7 @@ class Module implements file\Finder {
 	protected $defaultInternalExecutor = self::DEFAULT_EXECUTOR;
 	private $executorClassNames = null;
 	
-	/**
-	 * @var SessionManager
-	 */
-	private $sessionManager;
-
 	public final function __construct(ModuleLocation $location) {
-		
-		$this->sessionManager = Application::getInstance()->getSessionManager();
 		
 		$this->name = $location->moduleName;
 		$this->basePath = $location->path;
@@ -97,7 +90,10 @@ class Module implements file\Finder {
 	 * @return SessionManager
 	 */
 	public function getSessionManager() {
-		return $this->sessionManager;
+		// We don't keep a reference of the SessionManager because we don't
+		// want it to be serialized in the cache (because of the closures
+		// it contains)
+		return Application::getInstance()->getSessionManager();
 	}
 	
 	public static function __set_state($vals) {
