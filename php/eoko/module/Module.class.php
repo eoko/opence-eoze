@@ -16,6 +16,7 @@ use eoko\log\Logger;
 use eoko\cache\Cache;
 
 use eoko\config\Application;
+use eoko\php\SessionManager;
 
 class Module implements file\Finder {
 	
@@ -62,6 +63,11 @@ class Module implements file\Finder {
 	protected $defaultExecutor = 'html';
 	protected $defaultInternalExecutor = self::DEFAULT_EXECUTOR;
 	private $executorClassNames = null;
+	
+	/**
+	 * @var SessionManager
+	 */
+	private $sessionManager;
 
 	public final function __construct(ModuleLocation $location) {
 		
@@ -85,6 +91,13 @@ class Module implements file\Finder {
 		$this->lineageLocations = $location->directory->getLineageLocations($lineage);
 		
 		$this->construct($location);
+	}
+	
+	/**
+	 * @return SessionManager
+	 */
+	public function getSessionManager() {
+		return $this->sessionManager;
 	}
 	
 	public static function __set_state($vals) {
