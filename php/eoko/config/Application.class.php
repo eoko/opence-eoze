@@ -30,7 +30,14 @@ class Application implements FileFinder {
 	}
 	
 	public static function setDefaultSessionManager(SessionManager $sessionManager) {
-		self::$defaultSessionManager = $staticSessionManager;
+		self::$defaultSessionManager = $sessionManager;
+	}
+	
+	/**
+	 * @return SessionManager
+	 */
+	public function getSessionManager() {
+		return $this->sessionManager;
 	}
 	
 	private function findDevMode() {
