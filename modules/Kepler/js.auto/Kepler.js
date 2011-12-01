@@ -11,7 +11,11 @@ Ext.ns('eo');
 
 eo.Kepler = Ext.extend(Ext.util.Observable, {
 	
-	constructor: function() {
+	running: false
+	
+	,failureCount: 0
+	
+	,constructor: function() {
 		var me = this;
 		Oce.deps.wait('Oce.Bootstrap.start', function() {
 			if (Oce.mx.Security.isIdentified()) {
@@ -29,6 +33,7 @@ eo.Kepler = Ext.extend(Ext.util.Observable, {
 	,poll: function() {
 		if (!this.polling) {
 			this.polling = true;
+			this.running = true;
 			Ext.Ajax.request({
 //				url: "comet.php"
 				params: {
@@ -56,8 +61,6 @@ eo.Kepler = Ext.extend(Ext.util.Observable, {
 		}, this);
 	}
 	
-	,failureCount: 0
-	
 	,onPollFailure: function() {
 		if (++this.failureCount < 10) {
 			var me = this;
@@ -65,6 +68,7 @@ eo.Kepler = Ext.extend(Ext.util.Observable, {
 				me.continuePolling();
 			}, 2000);
 		} else {
+			this.running = false;
 			debugger
 			// TODO handle errors
 		}
@@ -92,6 +96,10 @@ eo.Kepler = Ext.extend(Ext.util.Observable, {
 	,continuePolling: function() {
 		this.polling = false;
 		this.poll();
+	}
+	
+	,isRunning: function() {
+		return this.running;
 	}
 });
 
