@@ -5,13 +5,6 @@ use \IllegalStateException;
 
 class HtmlRootTemplate extends HtmlTemplate {
 	
-//	/** @var HtmlPageData */
-//	public $pageData;
-//	
-//	public function __construct($filename, HtmlPageData $pageData = null, $opts = null) {
-//		parent::__construct($filename, $opts);
-//		$this->pageData = $pageData !== null ? $pageData : new HtmlPageData();
-//	}
 	public $headTemplateName = 'head';
 	
 	private static $currentRootTemplate = null;
