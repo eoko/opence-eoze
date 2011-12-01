@@ -32,7 +32,7 @@ abstract class GridExecutor extends JsonExecutor {
 
 	/** @var \ModelTable */
 	protected $table;
-
+	
 	protected $formTemplatePath = 'formTemplates';
 
 	private $plugins;
@@ -43,6 +43,7 @@ abstract class GridExecutor extends JsonExecutor {
 	}
 	
 	public function addPlugin(GridExecutor\Plugin $plugin) {
+		$plugin->configure($this, $this->table);
 		$this->plugins[] = $plugin;
 	}
 
