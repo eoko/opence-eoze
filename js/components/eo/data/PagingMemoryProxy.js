@@ -201,8 +201,20 @@ eo.data.CachingHttpProxy = Ext.extend(eo.data.PagingMemoryProxy, {
 
 eo.data.CachingHttpProxy.DataProvider = Ext.extend(Object, {
 	
+	/**
+	 * @cfg {String} keplerReloadEvent The name of a {@link eo.Kepler} event
+	 * on which the data cache must be reloaded.
+	 */
+	
 	constructor: function(config) {
 		Ext.apply(this, config);
+		
+		if (this.keplerReloadEvent) {
+			eo.Kepler.on(this.keplerReloadEvent, function() {
+				// invlid the cache
+				delete this.data;
+			}, this);
+		}
 	}
 	
 	/**
@@ -213,6 +225,11 @@ eo.data.CachingHttpProxy.DataProvider = Ext.extend(Object, {
 	 */
 	,loadingCache: false
 	
+	/**
+	 * {Object} data The raw data Object, as decoded from the server
+	 * response.
+	 * @private
+	 */
 	,data: undefined
 	
 	/**
