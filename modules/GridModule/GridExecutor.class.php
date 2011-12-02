@@ -8,6 +8,7 @@ use eoko\file\FileType;
 use eoko\template\HtmlTemplate;
 use eoko\cqlix\table_filters\TableHasFilters;
 use eoko\database\Database;
+use eoko\util\Strings;
 
 use Model;
 use ModelTable;
@@ -1007,8 +1008,11 @@ MSG;
 	 * @return string
 	 */
 	private function getSlug() {
-		return $this->getModule()->getConfig()->getValue('module/slug', 
-				$this->getModule()->getName());
+		if (null !== $slug = $this->getModule()->getConfig()->getValue('module/slug', null)) {
+			return $slug;
+		} else {
+			return Strings::slugify($this->title);
+		}
 	}
 
 	public function export() {
