@@ -840,6 +840,10 @@ class Query {
 				Logger::warn('The next line is most probably wrong and causing problem with bindings');
 				$this->order[] = $field->buildSql(false, $this->bindings);
 			} else {
+				$alias = $this->getOrderFieldAlias($field);
+				if (!$alias) {
+					throw new IllegalArgumentException("Cannot find field: `$field`");
+				}
 				$order[] = $this->getOrderFieldAlias($field) . " $dir";
 			}
 
