@@ -1906,6 +1906,9 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			this.my.editFormConfig = Ext.apply(editConfig.onConfigureForm({
 				xtype: 'oce.form'
 				,jsonFormParam: 'json_form'
+				,defaults: {
+					anchor: '100%'
+				}
 				,items: editConfig.fields
 			}), this.extra.formConfig);
 		}
@@ -1925,6 +1928,9 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		} else {
 			this.my.addFormConfig = addConfig.onConfigureForm({
 				xtype: 'oce.form'
+				,defaults: {
+					anchor: '100%'
+				}
 				,jsonFormParam: 'json_form'
 				,items: addConfig.fields
 			});
