@@ -12,13 +12,32 @@ var Buffer;
 
 /**
  * @class eo.data.Connection
+ * 
+ * This class builds upon {@link Ext.data.Connection} (but does not extend it),
+ * to offer higher level operations. Specifically, this class returns decodes
+ * the data from the server before returning them to the requester. It can also
+ * perform buffering and grouping of near simultaneous requests.
+ * 
+ * This class behaviour is closely related to Ext.data.Connection; keep in mind
+ * however that **it is slightly different in many regards**. It cannot be assumed 
+ * safely that the documentation or API of {@link Ext.data.Connection} matches
+ * this class' own behaviour.
  */
 eo.data.Connection = Ext.extend(Ext.util.Observable, {
 	
-	url: 'index.php'
+	/**
+	 * @cfg {String} [url=undefined]
+	 * The default URL to be used for request to the server.
+	 */
 	
-	,connection: null
+	/**
+	 * @private
+	 */
+	connection: null
 	
+	/**
+	 * @private
+	 */
 	,buffers: null
 	
 	/**
@@ -47,34 +66,43 @@ eo.data.Connection = Ext.extend(Ext.util.Observable, {
 			/**
 			 * @event beforerequest
 			 * Fires before a network request is made to retrieve a data object.
+			 * 
 			 * @param {Connection} conn This {@link eo.data.Connection Connection} object.
-			 * @param {Object} options The options config object passed to the {@link #request} method.
+			 * 
+			 * @param {Object} options The options config object passed to the 
+			 * {@link #request} method.
 			 */
 			'beforerequest',
 			/**
 			 * @event requestcomplete
 			 * Fires if the request was successfully completed.
+			 * 
 			 * @param {Connection} conn This {@link eo.data.Connection Connection} object.
-			 * @param {Object} response The data object returned by the server, decoded according
-			 * to the {@link #accept} option set in this Connection or passed to the {@link #request}
-			 * method.
-			 * @param {Object} options The options config object passed to the {@link #request} method.
+			 * 
+			 * @param {Object} data The data object returned by the server, decoded according
+			 * to the {@link #accept} option set in this Connection or passed to the 
+			 * {@link #request} method.
+			 * 
+			 * @param {Object} options The options config object passed to the 
+			 * {@link #request} method.
 			 */
 			'requestcomplete',
 			/**
 			 * @event requestexception
-			 * Fires if an error HTTP status was returned from the server.
-			 * See <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html">HTTP 
-			 * Status Code Definitions</a> for details of HTTP status codes.
+			 * Fires if an error HTTP status was returned from the server. See 
+			 * [HTTP Status Code Definitions][1] for details of HTTP 
+			 * status codes.
+			 * [1]: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 			 * 
 			 * @param {Connection} conn This {@link eo.data.Connection Connection} object.
+			 * 
 			 * @param {Object} response The XHR object containing the response data.
 			 * 
 			 * If the request had been bufferized with other requests, this XHR object will
 			 * be the same for all theses requests.
 			 * 
-			 * See <a href="http://www.w3.org/TR/XMLHttpRequest/">The XMLHttpRequest Object</a>
-			 * for details.
+			 * See [The XMLHttpRequest Object] [2] for details.
+			 * [2]: http://www.w3.org/TR/XMLHttpRequest
 			 * 
 			 * @param {Object} options The options config object passed to the {@link #request} 
 			 * method.
@@ -100,53 +128,90 @@ eo.data.Connection = Ext.extend(Ext.util.Observable, {
 	 * by the `accept` option (or the same {@link #accept} config option in the
 	 * {@link #eo.data.Connection} object).
 	 * 
-	 * @param {Object} options An object which may contains the following properties:
+	 * @param {Object} options An object which may contains the following properties:<ul>
 	 * 
-	 * - **url** : String/Function (Optional)<div class="sub-desc">
+	 * <li>**url** : String/Function (Optional)<div class="sub-desc">
 	 * The URL to which to send the request, or a function to call which returns a URL 
 	 * string. The scope of the function is specified by the `scope` option. Defaults 
-	 * to the configured `url`.</div>
+	 * to the configured `url`.
+	 * </div></li>
 	 * 
-	 * - **accept** : String (Optional)<div class="sub-desc">
+	 * <li>**accept** : String (Optional)<div class="sub-desc">
 	 * The type of data that must be decoded from the serverresponse. For now, the 
 	 * only accepted value is `json`. Any other value will result in using the raw 
-	 * `responseText` property of the response as the data.</div>
+	 * `responseText` property of the response as the data.
+	 * </div></li>
 	 * 
-	 * - **params** : Object (Optional)<div class="sub-desc">
+	 * <li>**params** : Object (Optional)<div class="sub-desc">
 	 * An object containing properties which are used as parameters to the request.
-	 * </div>
+	 * </div></li>
 	 * 
-	 * - **callback** : Function (Optional)<div class="sub-desc">
+	 * <li>**callback** : Function (Optional)<div class="sub-desc">
 	 * The function to be called upon receipt of the HTTP response. The callback is 
-	 * called regardless of success or failure and is passed the following parameters:
-	 *   - **options** : Object<div class="sub-desc">The parameter to the request call.</div>
-	 *   - **success** : Boolean<div class="sub-desc">`true` if the request succeeded.
-	 *   - **data** : Object<div class="sub-desc">The *decoded* data from the server
-	 *   response. The decoding method depends of the `accept` option (or the same
-	 *   {@link #accept} config option of the {@link #eo.data.Connection} object).</div>
-	 * </div>
+	 * called regardless of success or failure and is passed the following parameters:<ul>
+	 *    
+	 *   <li>**options** : Object<div class="sub-desc">
+	 *   The parameter to the request call.
+	 *   </div></li>
+	 *    
+	 *   <li>**success** : Boolean<div class="sub-desc">
+	 *   `true` if the request succeeded.
+	 *   </div></li>
+	 *    
+	 *   <li>**data** : Object<div class="sub-desc">
+	 *   If the request was _successful_: The *decoded* data from the server response. 
+	 *   The decoding method depends of the `accept` option (or the same {@link #accept} 
+	 *   config option of the {@link #eo.data.Connection} object).
+	 *   
+	 *   Else, if the request has _failed_: The XMLHttpRequest object containing the 
+	 *   response data. If the request has been {@link #buffer} buffered with other 
+	 *   requests, this response object will be shared amongst all of them.
+	 *   </div></li>
+	 * </ul></div></li>
 	 * 
-	 * - **success** : Function (Optional)<div class="sub-desc">
+	 * <li>**success** : Function (Optional)<div class="sub-desc">
 	 * The function to be called upon success of the request. The callback is passed the
-	 * following parameters:
-	 *   - **data** : Object<div class="sub-desc">The data object {@link #accept decoded}
-	 *   from the server response.</div>
-	 *   - **options** : Object<div class="sub-desc">The parameter to the request call.</div>
-	 * </div>
+	 * following parameters:<ul>
+	 *    
+	 *   <li>**data** : Object<div class="sub-desc">
+	 *   The data object {@link #accept decoded} from the server response.
+	 *   </div></li>
+	 *   
+	 *   <li>**options** : Object<div class="sub-desc">
+	 *   The parameter to the request call.
+	 *   </div></li>
+	 * </ul></div></li>
 	 * 
-	 * - **failure** : Function (Optional)<div class="sub-desc">
-	 * The function to be called upon failure of the request. The callback is passed the
-	 * following parameters:
-	 *   - **response** : Object<div class="sub-desc">The XMLHttpRequest object containing 
-	 *   the response data. If the request has been {@link #buffer} bufferized with other
-	 *   requests, this response object will be shared amongst all of them.</div>
-	 * </div>
+	 * <li>**failure** : Function (Optional)<div class="sub-desc">
+	 * The function to be called upon failure of the request, that is if the server
+	 * cannot be reached or if it returns an error HTTP status. If the data decoded
+	 * from the response indicates a higher level error, that won't trigger the
+	 * failure callback, but the success one. The callback is passed the following 
+	 * parameters:<ul>
 	 * 
-	 * - **jsonData** : Object (Optional)<div class="sub-desc">
+	 *   <li>**response** : Object<div class="sub-desc">
+	 *   The XMLHttpRequest object containing the response data. If the request has 
+	 *   been {@link #buffer} buffered with other requests, this response object will 
+	 *   be shared amongst all of them.
+	 *   </div></li>
+	 *   
+	 *   <li>**options** : Object<div class="sub-desc">
+	 *   The parameter to the request call.
+	 *   </div></li>
+	 * </ul></div></li>
+	 * 
+	 * <li>**jsonData** : Object (Optional)<div class="sub-desc">
 	 * JSON data to use as the post. Note: This will be used instead of params for the 
-	 * post data. Any params will be appended to the URL.</div>
-
+	 * post data. Any params will be appended to the URL.
+	 * </div></li>
 	 * 
+	 * <li>**bufferizable** : Boolean (Optional)<div class="sub-desc">
+	 * `false` to prevent the Connection from trying to buffer the request with other
+	 * near simultaneous requests (this is the same as calling {@link #directRequest}
+	 * directly. Defaults to `undefined`.
+	 * </div></li>
+	 * 
+	 * </ul>
 	 */
 	,request: function(options) {
 		if (this.fireEvent('beforerequest', this, options) !== false) {
@@ -155,7 +220,11 @@ eo.data.Connection = Ext.extend(Ext.util.Observable, {
 			}
 		}
 	}
-	
+
+	/**
+	 * Sends a request that won't be bufferized. This method accepts exactly the
+	 * same options as the {@link #request} method.
+	 */
 	,directRequest: function(options) {
 		
 		var accept = options.accept || this.accept,
@@ -188,112 +257,152 @@ eo.data.Connection = Ext.extend(Ext.util.Observable, {
 		
 		this.connection.request(opts);
 	}
-	
-	,handleDirectResponse: function(options, succeeded, response) {
-		var original = options.originalOptions,
-			callback = original.callback,
-			success  = original.success,
-			failure  = original.failure,
-			scope    = original.scope || this;
-			
-		this.fireEvent('requestcomplete', this, data, original);
-		
-		if (succeeded) {
-//			try {
-				var data = this.extractResponseData(response, original);
 
-				if (callback) {
-					callback.call(scope, original, true, data);
-				}
-				if (success) {
-					success.call(scope, data, original);
-				}
-//			} catch (e) {
-//				this.fireEvent('requestexception', this, response, original, e);
-//				if (callback) {
-//					callback.call(scope, original, false, e);
-//				}
-//				if (failure) {
-//					failure.call(scope, original, e);
-//				}
-//			}
-		} else {
-			this.fireEvent('requestexception', this, response, original);
-			if (callback) {
-				callback.call(scope, original, false);
-			}
-			if (failure) {
-				failure.call(scope, original);
-			}
-		}
+	// private
+	,handleDirectResponse: function(options, succeeded, response) {
+		
+		var original = options.originalOptions;
+		
+		// this is needed to access the response, in case of failure
+		// in `handleBufferedResponse`
+		this.lastResponse = response;
+		
+		this.handleResponse(
+			original, 
+			succeeded, 
+			succeeded ? this.extractResponseData(response, original) : response
+		);
+		
+		delete this.lastResponse;
 	}
 	
-	
-	,doHandleDirectResponse: function(options, succeeded, data, serverResponse) {
+	// private
+	,handleResponse: function(options, succeeded, data) {
 		
-		var original = options.originalOptions,
-			callback = original.callback,
-			success  = original.success,
-			failure  = original.failure,
-			scope    = original.scope || this;
+		var callback = options.callback,
+			success  = options.success,
+			failure  = options.failure,
+			scope    = options.scope || this;
 			
-		this.fireEvent('requestcomplete', this, data, original);
+		this.fireEvent('requestcomplete', this, data, options);
 		
 		if (succeeded) {
 			if (callback) {
-				callback.call(scope, original, true, data);
+				callback.call(scope, options, true, data);
 			}
 			if (success) {
-				success.call(scope, data, original);
+				success.call(scope, data, options);
 			}
 		} else {
-			this.fireEvent('requestexception', this, serverResponse, original);
+			this.fireEvent('requestexception', this, data, options);
 			if (callback) {
-				callback.call(scope, serverResponse, original);
+				callback.call(scope, options, false, data);
 			}
 			if (failure) {
-				failure.call(scope, serverResponse, original);
+				failure.call(scope, data, options);
 			}
 		}
 	}
 	
-	,handleBufferedResponse: function(options, succeeded, data) {
-		
-		if (data.success) {
-			var requests = options.originalRequests,
-				results = data.results,
-				// number of results that do not match a sent request
-				excessResults = 0;
-				
-			Ext.each(results, function(result) {
-				var id = result.id,
-					data = result.data,
-					request = requests[id];
-				
-				if (!request) { // server result match no sent request
-					excessResults++;
-				}
-				
-				else {
-					this.doHandleDirectResponse(request, succeeded, results[request.id], serverResponse)
-				}
-					
-			}, this);
+	// private
+	,handleBufferedResponse: function(options, success, data) {
 
-			// Check for requests that did not receive a response
-			if (requests.length !== results.length - excessResults) {
-				debugger // TODO
+		if (success) {
+			
+			// Happy path
+			if (data.success) {
+				var requests = options.originalRequests,
+					results = data.results,
+					// number of results that do not match a sent request
+					excessResults = 0,
+					unbuffered = [];
+
+				Ext.each(results, function(result) {
+					var id = result.id,
+						data = result.data,
+						request = requests[id];
+
+					// Result not matching any request
+					if (!request) {
+						excessResults++;
+					}
+					// Request not bufferizable => retry
+					else if (result.cannotBuffer) {
+						unbuffered.push(request);
+					}
+					// Individual request fail
+					else if (result.error) {
+						// TODO if sent as direct, the request would end up as a
+						// connection error, but we know for sure that this is a
+						// system error, since the server has responded... Maybe
+						// the error message could reflect that better.
+						//
+						// That could also spare the use of the flacky global
+						// response in the requestexception.
+						
+						// `lastResponse` is necessarily accurate, since we remains
+						// in the same thread from `handleDirectResponse` (for the
+						// multipart request), to here.
+						this.handleResponse(request, false, this.lastResponse);
+					}
+					// Success
+					else {
+						this.handleResponse(request, true, data);
+					}
+
+				}, this);
+
+				// Check for requests that did not receive a response
+				if (requests.length !== results.length - excessResults) {
+					Ext.Msg.alert(
+						'Erreur système',
+						"Une erreur est survenue, veuillez contacter le responsable"
+						+ " de la maintenance du système pour résoudre ce problème."
+						+ "<p>Code de l'erreur : 4c2e2</p>"
+					);
+					debugger; // ERROR
+				}
+				
+				// Launch unbefferizable requests in direct
+				Ext.each(unbuffered, function(options) {
+					this.directRequest(options);
+				}, this);
+			}
+
+			// System error
+			else {
+				Ext.Msg.alert(
+					'Erreur système',
+					"Une erreur est survenue, veuillez contacter le responsable"
+					+ " de la maintenance du système pour résoudre ce problème."
+					+ "<p>Code de l'erreur : d4e78</p>"
+				);
+				debugger; // ERROR
 			}
 		}
 		
+		// Infrastructural (connection, HTTP) error
 		else {
-			// TODO handle soft failure...
+			// TODO handle hard fail
+			// That should be done by the error manager => the todo is
+			// then implementing that...
+			
+			// Retry all requests individually... Maybe only one of them
+			// crashed the whole lot (e.g. a PHP error that the server
+			// failed to catch).
+			//
+			// TODO The general error handler should be disabled here, since
+			// individual requests will raise their own errors.
+			Ext.each(requests, function(options) {
+				this.directRequest(options);
+			}, this);
 		}
 	}
 	
+	// private
 	,bufferizeRequest: function(opts) {
 		
-		if (opts.bufferize === false) {
+		if (opts.bufferizable === false) {
 			return false;
 		}
 		
@@ -319,6 +428,7 @@ eo.data.Connection = Ext.extend(Ext.util.Observable, {
 		return true;
 	}
 	
+	// private
 	,doMultipartRequest: function(requests) {
 		
 		var n = requests.length;
@@ -361,6 +471,7 @@ eo.data.Connection = Ext.extend(Ext.util.Observable, {
 		}
 	}
 	
+	// private
 	,extractResponseData: function(response, options) {
 		switch (options.accept || this.accept) {
 			case 'json':
@@ -371,17 +482,18 @@ eo.data.Connection = Ext.extend(Ext.util.Observable, {
 	}
 });
 
+// private
 eo.data.Connection.Buffer = Ext.extend(Object, {
 	
 	delay: 10
 	
-	,currentTimer: null
+	,currentTimer: undefined
 	
-	,requests: null
+	,requests: undefined
 	
-	,callback: null
+	,callback: undefined
 	
-	,scope: window
+	,scope: undefined
 	
 	,constructor: function(config) {
 		Ext.apply(this, config);
@@ -405,194 +517,66 @@ eo.data.Connection.Buffer = Ext.extend(Object, {
 
 Buffer = eo.data.Connection.Buffer;
 
+/**
+ * @class eo.Ajax
+ * @extends eo.data.Connection
+ * @singleton
+ */
 eo.Ajax = new eo.data.Connection({
 	url: 'index.php'
 	,accept: 'json'
 });
 
-eo.Ajax.on('requestexception', function() {
+eo.Ajax.on('requestexception', function(conn, response, options) {
 	Ext.Msg.alert(
 		'Erreur de connection',
-		"Une erreur est survenu. Vérifiez votre connection internet. Si le "
-		+ "problème persiste, il peut s'agir d'un problème avec le serveur, "
+		"Vérifiez l'état de votre connection internet. Si le problème "
+		+ "persiste, il peut s'agir d'un problème avec le serveur ; "
 		+ "dans ce cas veuillez contacter la personne responsable de la "
 		+ "maintenance du système."
+		+ "<p>Code d'erreur : f0c93<p>"
 	);
+	debugger; // ERROR
+	// TODO implement retry
+	// Let's say, 2s 4s 8s 16s & 32s silent retries, then ask user action to retry
 });
 
-eo.Ajax.request({
-	
-	jsonData: {
-		controller: 'countries.json'
-		,action: 'autoComplete'
-	}
-	
-	,success: function(data) {
-		debugger
-	}
-});
-
-eo.Ajax.request({
-	
-	params: {
-		controller: 'countries.json'
-		,action: 'autoComplete'
-	}
-	
-	,success: function(data) {
-		debugger
-	}
-});
-
-//var spp = Ext.data.Connection.prototype;
-//
-//eo.Ajax = new Ext.data.Connection({
-//	
-//	bufferedRequests: []
-//	,bufferTimerId: null
-//	
-//	,url: 'index.php'
-//	
-//	,bufferDelay: 20
-//	
-//	,request: function(opts) {
-//		
-//		var me = this;
-//
-//		// Buffer only simple requests
-//		if (opts.url && opts.url !== me.url 
-//			|| opts.method 
-//			|| opts.timeout 
-//			|| opts.form 
-//			|| opts.isUpload !== undefined 
-//			|| opts.headers
-//			|| opts.xmlData 
-//			|| opts.disabled !== undefined
-//		) {
-//			return me.directRequest.call(this, opts);
-////			return spp.request.call(this, opts);
-//		}
-//		
-//		this.bufferedRequests.push(opts);
-//		
-//		if (this.bufferTimerId) {
-//			clearTimeout(this.bufferTimerId);
-//		}
-//		
-//		this.bufferTimerId = setTimeout(function() {
-//			
-//			var requests = me.bufferedRequests,
-//				n = requests.length;
-//			
-//			delete me.bufferTimerId;
-//			delete me.bufferedRequests;
-//			
-//			if (n === 1) {
-//				return me.directRequest(requests[0]);
-////				var opts = requests[0];
-////				if (opts.jsonData) {
-////					opts.params = Ext.apply({
-////						'Content-Type': 'application/json'
-////					}, opts.params);
-////				}
-////				spp.request.call(me, opts);
-//			}
-//			
-//			else {
-//				var data = [],
-//					i = 0;
-//
-//				Ext.each(requests, function(opts) {
-//					data.push({
-//						id: i++
-//						,params: opts.params
-//						,data: opts.jsonData
-//					});
-//				});
-//
-////				Ext.Ajax.request({
-//				me.directRequest({
-//					url: me.url
-//					,params: {
-//						controller: 'root.multipart'
-//						,'Content-Type': 'application/json'
-//					}
-//					,jsonData: {
-//						requests: data
-//					}
-//					,success: function(response) {
-//						var json = response.responseJson;
-//						if (json.success) {
-//							debugger
-//							Ext.each(json.results, function(result) {
-//								var opts = requests[result.id],
-//									response = {
-//										responseJson: result.response
-//										,responseJSON: result.response
-//									},
-//									scope = opts.scope || window;
-//									
-//								me.fireEvent('requestcomplete', me, response, opts);
-//									
-//								if (opts.callback) {
-//									opts.callback.call(scope, opts, true, response);
-//								}
-//								if (opts.success) {
-//									opts.success.call(scope, response, opts);
-//								}
-//							});
-//						}
-////						var o = Ext.util.JSON.decode(response.)
-//					}
-//				});
-//			}
-//		}, this.bufferDelay);
-//	}
-//	
-//	,directRequest: function(opts) {
-//		
-//		// Add content-type param for json request
-//		if (opts.jsonData) {
-//			opts.params = Ext.apply({
-//				'Content-Type': 'application/json'
-//			}, opts.params);
-//		}
-//		
-//		spp.request.call(this, opts);
-//	}
-//	
-//});
-//
-//eo.Ajax.on('requestcomplete', function(conn, response, options) {
-//	if (!response.responseJson 
-//			&& response.getResponseHeader('Content-type') === 'application/json') {
-//		response.responseJson = response.responseJSON = Ext.util.JSON.decode(response.responseText);
-//	}
-//});
-//
-//eo.Ajax.on('requestcomplete', function(conn, response, options) {
-//	response.getResponseHeader('Content-type')
-//})
-//
 //eo.Ajax.request({
-//	url: 'index.php'
-//	,params: {
+//	
+//	jsonData: {
 //		controller: 'countries.json'
 //		,action: 'autoComplete'
 //	}
-//	,jsonData: [1,2,3]
-//	,callback: function() {
+//	
+//	,success: function(data) {
 //		debugger
 //	}
 //});
-//	
+//
 //eo.Ajax.request({
-//	url: 'index.php'
-//	,params: {
+//	
+//	params: {
 //		controller: 'countries.json'
+//		,action: 'autoCompleteo'
+//	}
+//	
+//	,success: function(data) {
+//		debugger
+//	}
+//	
+//	,failure: function(data) {
+//		debugger
+//	}
+//});
+//
+//eo.Ajax.request({
+//	
+//	params: {
+//		controller: 'languages.json'
 //		,action: 'autoComplete'
 //	}
-//	,callback: function() {
+//	
+//	,success: function(data) {
 //		debugger
 //	}
 //});
