@@ -510,7 +510,10 @@ eo.data.Connection.Buffer = Ext.extend(Object, {
 		
 		var me = this;
 		this.currentTimer = setTimeout(function() {
-			me.callback.call(me.scope, me.requests);
+			var requests = me.requests;
+			delete me.currentTimer;
+			me.requests = [];
+			me.callback.call(me.scope, requests);
 		}, this.bufferDelay);
 	}
 });
