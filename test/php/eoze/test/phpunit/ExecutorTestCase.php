@@ -47,7 +47,7 @@ class ExecutorTestCase extends ModuleTestCase {
 	 * `true` to dump the result array in the failure message when schema validation fails.
 	 * @var bool
 	 */
-	protected $dumpResult = false;
+	protected $dumpResult = true;
 	
     public function __construct($name = NULL, array $data = array(), $dataName = '') {
 		parent::__construct($name, $data, $dataName);
