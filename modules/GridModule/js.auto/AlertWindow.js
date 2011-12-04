@@ -31,6 +31,8 @@ Oce.Modules.GridModule.AlertWindow = Ext.extend(eo.Window, {
 	,padding: 10
 	,bodyStyle: 'border: 0'
 	
+	,defaultButton: 0
+	
 	/**
 	 * @cfg {Ext.Window} modalTo If set, this dialog will be modal
 	 * to the given window, that is the parent window will be masked
