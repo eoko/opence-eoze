@@ -1,5 +1,7 @@
 <?php
 
+use eoko\cqlix\FieldMetadata;
+
 interface ModelRelationInfoHasOne extends ModelRelationMarkerHasOne {}
 interface ModelRelationInfoHasMany extends ModelRelationMarkerHasMany {}
 
@@ -51,6 +53,11 @@ abstract class ModelRelationInfo extends ModelFieldBase {
 //	public $buildFindModelCondition = null;
 //	public $initCreatedModel = null;
 
+	/**
+	 * @var FieldMetadata
+	 */
+	protected $metaConfig;
+
 	function __construct($name, ModelTableProxy $localTable, ModelTableProxy $targetTableProxy) {
 
 		$localTable->attach($this->localTable);
@@ -64,15 +71,24 @@ abstract class ModelRelationInfo extends ModelFieldBase {
 			'targetTable' => $this->targetTable
 		);
 	}
+	
+	public function configureMeta(array $config = null) {
+		if ($this->metaConfig) {
+			throw new IllegalStateException('Already configured');
+		}
+		$this->metaConfig = new FieldMetadata($config);
+	}
+	
+	public function getMeta() {
+		return $this->metaConfig;
+	}
 
 	public function __toString() {
 		return get_class($this) . '{' . "$this->name: " . $this->localTable->getModelName() . ' => '
 				. $this->targetTable->getModelName() . '}';
 	}
 
-	protected function configure() {
-
-	}
+	protected function configure() {}
 
 	/**
 	 * Get the name of the relation; which is also the name of the field in the
@@ -439,6 +455,20 @@ class ModelRelationInfoField extends ModelFieldBase {
 		return $this->info->targetTable->getField($this->fieldName, true)->isNullable();
 	}
 	
+	public function getMeta() {
+		return $this->info->targetTable->getField($this->fieldName, true)->getMeta();
+	}
+	
+	public function __call($method, $args) {
+		$field = $this->info->targetTable->getField($this->fieldName, true);
+		if (method_exists($field, $method)) {
+			return call_user_func_array(array($field, $method), $args);
+		} else {
+			throw new IllegalStateException('Call to undefined method ' . get_class($this)
+					. "::$method()");
+		}
+	}
+	
 }
 
 abstract class ModelRelationInfoByReference extends ModelRelationInfo {
@@ -541,6 +571,25 @@ abstract class ModelRelationInfoHasReference extends ModelRelationInfoByReferenc
 	public function getReferenceField() {
 		return $this->localTable->getColumn($this->referenceField);
 	}
+	
+	public function configureMeta(array $config = null) {
+		if ($this->metaConfig !== null) {
+			throw new IllegalStateException('Already configured');
+		}
+		if ($config === null) {
+			$this->metaConfig = false;
+		} else {
+			$this->metaConfig = new FieldMetadata($config);
+		}
+	}
+	
+	public function getMeta() {
+		if ($this->metaConfig === false) {
+			return $this->localTable->getColumn($this->referenceField)->getMeta();
+		} else {
+			return $this->metaConfig;
+		}
+	}
 
 }
 
@@ -607,7 +656,7 @@ class ModelRelationInfoIsRefered extends ModelRelationInfoByReference {
 		parent::__construct($name, $localTable, $targetTableProxy, $referenceField);
 		$this->reciproqueName = $reciproqueName;
 	}
-
+	
 	protected function addJoinWhere(QueryJoin $join) {
 		$this->targetTable->addJoinWhere($join);
 		return $join;
@@ -1005,7 +1054,7 @@ abstract class ModelRelationInfoByAssoc extends ModelRelationInfo {
 	public function getReferenceField() {
 		return $this->assocTable->getColumn($this->otherForeignKey);
 	}
-
+	
 //	public function createCqlixFieldConfig() {
 //		$cfg = parent::createCqlixFieldConfig();
 //		$cfg['fieldType'] = 'hasMany';
