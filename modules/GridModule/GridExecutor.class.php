@@ -103,6 +103,8 @@ abstract class GridExecutor extends JsonExecutor {
 		} else {
 			$request = $this->request->requireSub('form');
 		}
+		
+		$this->prepareAddData($request);
 
 		$setters = array();
 		$missingFields = array();
@@ -182,6 +184,8 @@ abstract class GridExecutor extends JsonExecutor {
 
 		return true;
 	}
+	
+	protected function prepareAddData(Request &$data) {}
 	
 	// TODO eoze cleanout (rhodia leftover)
 	protected function add_createContext(Request $form, $setters) {
