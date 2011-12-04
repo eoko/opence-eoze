@@ -5,7 +5,10 @@ if (!Oce.deps.wait(<?php echo $uses ?>, function() {
 
 var moduleClass = Ext.extend(<?php echo $superclass ?>, {
 
-	my: <?php echo $my ?> 
+	my: <?php echo $my . "\n" ?>
+	
+	,modelName: <?php echo $modelName . "\n" ?>
+	,tableName: <?php echo $tableName . "\n" ?>
 
 	,constructor: function(config) {
 		<?php echo $namespace ?>.<?php echo $controller ?>.<?php echo $name ?>Base.superclass.constructor.call(this, config);

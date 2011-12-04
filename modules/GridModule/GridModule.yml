@@ -139,14 +139,14 @@ columns-templates:
 
   email: {name: 'email', header: 'Email'}
 
-  name:
-    header: Nom
-    extra:
-      search: {select: true}
-
-  firstname:
-    header: Prenom
-    extra.search.select: true
+#  name:
+#    header: Nom
+#    extra:
+#      search: {select: true}
+#
+#  firstname:
+#    header: Prenom
+#    extra.search.select: true
 
   year:
     header: Exercice
@@ -174,11 +174,11 @@ columns-templates:
 #      width: 350
     form: { anchor: 96%, autoScroll: true, maxLength: 300, height: 70}#, width: 150 }
 
-  description:
-    type: htmleditor
-    header: Description
-    grid: false
-    form: { anchor: 96%, autoScroll: true, maxLength: 300, height: 70}#, width: 150 }
+#  description:
+#    type: htmleditor
+#    header: Description
+#    grid: false
+#    form: { anchor: 96%, autoScroll: true, maxLength: 300, height: 70}#, width: 150 }
 
   password:
     width: 100

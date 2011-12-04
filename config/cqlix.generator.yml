@@ -6,7 +6,7 @@ config.node: eoko\cqlix\generator
 #  extends: myModel
   # alternative syntaxe:
   extends:
-    model: myModel | Model
+    model: myModel | eoko\cqlix\ExtendedModel
     table: myModelTable | ModelTable
     query: myQuery | ModelTableQuery
     proxy: ModelTableProxy

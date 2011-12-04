@@ -122,7 +122,7 @@ class Application implements FileFinder {
 			foreach (Files::listFiles(JS_PATH . 'init', 'glob:*.js') as $file) {
 				$js['init/' . $file] = 1;
 			}
-			foreach (Files::listFiles(JS_PATH . 'core', 'glob:*.js') as $file) {
+			foreach (Files::listFiles(JS_PATH . 'core', 'glob:*.js', true) as $file) {
 				$js['core/' . $file] = 2;
 			}
 			return array(

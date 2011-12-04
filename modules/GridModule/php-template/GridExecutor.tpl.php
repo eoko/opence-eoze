@@ -12,8 +12,8 @@ class <?php echo $class ?> extends <?php echo $extend ?> {
 	protected $title = '<?php echo $title ?>';
 
 	protected function construct() {
-		parent::construct();
 		$this->table = <?php echo $tableName ?>::getInstance();
+		parent::construct();
 	}
 
 <?php if (isset($hasMergeMembers) && $hasMergeMembers): ?>

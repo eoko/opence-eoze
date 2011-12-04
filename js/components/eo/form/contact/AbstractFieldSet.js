@@ -187,15 +187,30 @@ eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 		if (this.autoHide && !this.items.length) {
 			this.hide();
 		}
+		// init value
 		if (this.value) {
 			this.setValue(this.value);
 		} else if (this.initialFieldNumber) {
-			for (var i=0, l=this.initialFieldNumber; i<l; i++) {
-				this.addField(true);
+			var i = this.initialFieldNumber;
+			while (i--) {
+				this.addField({
+					autoField: true
+				}, true);
 			}
 		}
+		this.originalValue = this.getValue();
 		// base params
 		this.propagateBaseParams();
+	}
+	
+	,isDirty: function() {
+		
+		// originalValue on reload is updated by BasicForm
+		// (if it has trackResetOnLoad to `true`)
+		
+		var encode = Ext.util.JSON.encode;
+
+		return encode(this.getValue()) !== encode(this.originalValue);
 	}
 	
 	/**
@@ -218,7 +233,9 @@ eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 			iconCls: 'ico add'
 			,text: NS.locale(this.fieldConfig.textKeyItem)
 			,scope: this
-			,handler: this.addField
+			,handler: function() {
+				this.addField();
+			}
 			,tooltip: tooltip
 		});
 
@@ -246,9 +263,14 @@ eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 	}
 	
 	// protected
-	,addField: function(preventFocus) {
+	,addField: function(config, preventFocus) {
 		
-		var field = this.createField();
+		if (Ext.isBoolean(config)) {
+			preventFocus = config;
+			config = undefined;
+		}
+
+		var field = this.createField(config);
 		
 		// base params
 		if (this.baseParams && field.setBaseParams) {
@@ -300,14 +322,6 @@ eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 		return field;
 	}
 
-//	,add: function() {
-//		eo.warn('Direct add() to eo.form.contact.AbstractFieldSet is disabled.');
-//	}
-//	
-//	,remove: function() {
-//		eo.warn('Direct remove() to eo.form.contact.AbstractFieldSet is disabled.');
-//	}
-	
 	/**
 	 * Returns `true` if this FieldSet accept selection of one primary field in
 	 * its children fields.
@@ -318,6 +332,7 @@ eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 		if (c) {
 			return c.prototype.hasPrimaryField();
 		}
+		return undefined;
 	}
 
 	/**
@@ -333,6 +348,7 @@ eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 		if (xtype) {
 			return Ext.ComponentMgr.types[xtype];
 		}
+		return undefined;
 	}
 	
 	/**
@@ -340,14 +356,16 @@ eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 	 * creation process.
 	 * @protected
 	 */
-	,createField: function() {
+	,createField: function(config) {
 
 		// apply defaults to the config passed to the field constructor
 		// because some defaults options are ignored (like 
 		// reservePrimaryButtonSpace)
-		var config = Ext.applyIf({
-			removable: true
-		}, this.defaults);
+		config = Ext.apply(
+			Ext.applyIf({
+				removable: true
+			}, this.defaults)
+		, config);
 		
 		if (Ext.isDefined(this.fieldsLayout)) {
 			config.fieldsLayout = this.fieldsLayout;
@@ -418,6 +436,7 @@ eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 			if (item.isDefault()) {
 				return false;
 			}
+			return true;
 		});
 	}
 	
@@ -466,10 +485,14 @@ eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 	 * children fields.
 	 */
 	,setValue: function(data) {
+		
 		if (!this.rendered) {
 			this.value = data;
 			return;
 		}
+		
+//		this.startLayoutBuffering();
+		
 		this.removeAll();
 		if (data === null || data === undefined) {
 			return;
@@ -482,18 +505,47 @@ eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 					this.setPrimaryField(field);
 				}
 			} else {
+//				this.stopLayoutBuffering();
 				throw new Error('Invalid value data: ' + data);
 			}
-		} else {
+		} 
+		
+		else if (data.length) { // don't lose time with empty arrays
 			Ext.each(data, function(value) {
-				var field = this.addField(true);
-				field.setValue(value);
+				var field = this.addField({
+					value: value
+				}, true);
 				if (field.isDefault()) {
 					this.setPrimaryField(field);
 				}
 			}, this);
 		}
+		
+//		this.stopLayoutBuffering();
 	}
+	
+//	,bufferizedLayout: function() {
+//		this.layoutCallCount++;
+//	}
+//	
+//	,startLayoutBuffering: function() {
+//		// Must do that each time, in cas someone replace the methods...
+//		this.layoutFunctions = {
+//			doLayout: this.doLayout
+//			,redoLayout: this.redoLayout
+//		};
+//		this.layoutCallCount = 0;
+//		this.doLayout = this.redoLayout = this.bufferizedLayout;
+//	}
+//	
+//	,stopLayoutBuffering: function() {
+//		// restore doLayout & redoLayout
+//		Ext.apply(this, this.layoutFunctions);
+//		// if one have been called, redo the layout
+//		if (this.layoutCallCount) {
+//			this.redoLayout();
+//		}
+//	}
 	
 	,redoLayout: function() {
 		var owner = this.ownerCt;

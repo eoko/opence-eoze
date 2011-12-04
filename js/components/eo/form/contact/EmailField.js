@@ -22,6 +22,8 @@ eo.form.contact.EmailField = Ext.extend(eo.form.contact.AbstractField, {
 			this.emailField = Ext.create({
 				name: this.emailName
 				,xtype: 'textfield'
+				,allowBlank: false
+				,enableKeyEvents: true
 				,emptyText: NS.locale(this.textKeyItem)
 				,flex: 1
 				,regex: /.+@.+\..+$/

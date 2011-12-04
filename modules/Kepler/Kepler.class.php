@@ -53,7 +53,9 @@ class Kepler extends Module {
 	}
 	
 	public function clearWaitingEvents() {
-		unlink($this->getQueueFilePath());
+		if (file_exists($file = $this->getQueueFilePath())) {
+			unlink($file);
+		}
 	}
 	
 	public function buildCometEntries(array $entries) {

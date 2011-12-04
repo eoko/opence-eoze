@@ -29,14 +29,14 @@ eo.form.contact.AbstractField = Ext.extend(Ext.form.CompositeField, {
 	 * {#getValue} to hold the value of the id field (if `undefined`, the field will 
 	 * not be created).
 	 */
-	,idField:      'id'
+	,idField: 'id'
 	/**
 	 * @cfg {String} typeField The name that will be used in the object retruned 
 	 * {#getValue} by get value to hold the value of the type combo. (if undefined, 
 	 * the type combo will not be created).
 	 * @see types
 	 */
-	,typeField:    'type'
+	,typeField: 'type'
 	/**
 	 * @cfg {Array|Object} types The data to be used to populate the combo of the
 	 * {@link #typeField}.
@@ -155,15 +155,13 @@ eo.form.contact.AbstractField = Ext.extend(Ext.form.CompositeField, {
 	/**
 	 * Adds listeners to the given fields, in order to track when they
 	 * are notified. The event type may depends on the field type, but
-	 * the listener used will generally allways be 
-	 * <code>this.fieldChangeListener</code>.
+	 * the listener used will generally allways be `this.fieldChangeListener`.
 	 *
-	 * @param {Object|Array} fields The fields to which the listener should be added.
-	 * When first called by AbstractField, this method is passed all the
-	 * <code>this.valueFields</code>. Overriding methods can call their
-	 * parent method with some other fields (but take care not to modify
-	 * the original object, which is the actual object used for the state 
-	 * of this instance.
+	 * @param {Object|Array} fields The fields to which the listener should 
+	 * be added. When first called by AbstractField, this method is passed 
+	 * all the `this.valueFields`. Overriding methods can call their parent 
+	 * method with some other fields (but take care not to modify the original 
+	 * object, which is the actual object used for the state of this instance.
 	 *
 	 * @protected
 	 */
@@ -171,11 +169,36 @@ eo.form.contact.AbstractField = Ext.extend(Ext.form.CompositeField, {
 		Oce.walk(fields, function(name, field) {
 			if (field instanceof Ext.form.Checkbox) {
 				field.on('check', this.fieldChangeListener, this);
-			} else {
+			
+			} else { // fields with change event
+				
 				field.on('change', this.fieldChangeListener, this);
+
+				if (field instanceof Ext.form.TextField && field.enableKeyEvents) {
+					field.on({
+						scope: this
+						,buffer: 200
+						,keyup: this.fieldChangeListenerIfDirty
+					});
+				}
+				if (field instanceof Ext.form.TriggerField) {
+					field.on('select', this.fieldChangeListener, this);
+				}
 			}
 		}, this);
 	}
+	
+	/**
+	 * {Boolean} autoField `true` if this field has been
+	 * automatically added to its parent fieldSet. Automatically
+	 * added fields won't fire {@link #event-change} if they are
+	 * not valid.
+	 * 
+	 * The property is set by the parent FieldSet itself.
+	 * 
+	 * @private
+	 */
+	,autoField: false
 	
 	/**
 	 * Listener to be added to children fields event that should be
@@ -184,9 +207,16 @@ eo.form.contact.AbstractField = Ext.extend(Ext.form.CompositeField, {
 	 * @protected
 	 */
 	,fieldChangeListener: function() {
-		if (this.isValid()) {
+		if (!this.autoField || this.isValid(true)) {
 			this.fireEvent('change', this);
 		}
+	}
+	
+	,fieldChangeListenerIfDirty: function(field) {
+		if (field.isDirty()) {
+			return this.fieldChangeListener.apply(this, arguments);
+		}
+		return undefined;
 	}
 	
 	/**
@@ -311,6 +341,10 @@ eo.form.contact.AbstractField = Ext.extend(Ext.form.CompositeField, {
 					}
 				});
 			}
+			// prevent mark on automatic fields
+			if (!field.hasOwnProperty('preventMark') && this.autoField) {
+				field.preventMark = true;
+			}
 		};
 		
 		return function(method) {
@@ -325,14 +359,15 @@ eo.form.contact.AbstractField = Ext.extend(Ext.form.CompositeField, {
 			return fields;
 		};
 	}() // closure
-	
+		
 	/**
 	 * Abstract method that must be implemented to create children value fields.
 	 * 
 	 * @return {Array} The `array` of **instanciated** value fields to be
 	 * added to the main container of this field.
-	 * @method
+	 * 
 	 * @protected
+	 * @method
 	 */
 	,createFields: undefined
 	
@@ -342,8 +377,9 @@ eo.form.contact.AbstractField = Ext.extend(Ext.form.CompositeField, {
 	 * 
 	 * @return {Array} The `array` of **instanciated** value fields to be
 	 * added to the main container of this field.
-	 * @method
+	 * 
 	 * @protected
+	 * @method
 	 */
 	,createExtraFields: undefined
 
@@ -375,6 +411,13 @@ eo.form.contact.AbstractField = Ext.extend(Ext.form.CompositeField, {
 		if (idName && !this.hasOwnIdField) {
 			var idField = new Ext.form.Hidden({
 				emptyValue: null
+				,getValue: function() {
+					var v = Ext.form.Hidden.prototype.getValue.call(this);
+					if (v !== undefined && v !== null) {
+						v = parseInt(v);
+					}
+					return v;
+				}
 			});
 			items.unshift(idField);
 			this.valueFields[this.idField] = idField;
@@ -387,7 +430,7 @@ eo.form.contact.AbstractField = Ext.extend(Ext.form.CompositeField, {
 			this.valueFields[typeName] = typeCombo;
 		}
 
-		// default
+		// primary
 		var reservePrimaryButtonSpace = this.reservePrimaryButtonSpace;
 		if (this.hasPrimaryField()) {
 			this.primaryButton = new Ext.Button({
@@ -409,6 +452,12 @@ eo.form.contact.AbstractField = Ext.extend(Ext.form.CompositeField, {
 				}
 				,reset: function() {
 					this.toggle(false);
+				}
+				,toggle: function(pressed) {
+					if (this.pressed !== pressed) {
+						this.fireEvent('change', this, pressed, this.pressed);
+						Ext.Button.prototype.toggle.call(this, pressed);
+					}
 				}
 			});
 			items.unshift(this.primaryButton);
@@ -585,8 +634,15 @@ eo.form.contact.AbstractField = Ext.extend(Ext.form.CompositeField, {
 		}
 	}
 
-	,isValid: function() {
-		return false;
+	,isValid: function(preventMark) {
+		var vf = this.valueFields,
+			i = vf.length;
+		while (i--) {
+			if (!vf[i].isValid(preventMark)) {
+				return false;
+			}
+		}
+		return true;
 	}
 	
 	/**
@@ -595,6 +651,9 @@ eo.form.contact.AbstractField = Ext.extend(Ext.form.CompositeField, {
 	 * @return {Object}
 	 */
 	,getValue: function() {
+		if (!this.rendered) {
+			return this.value;
+		}
 		var data = {};
 		Ext.iterate(this.valueFields, function(name, field) {
 			var value = field.getValue();
@@ -618,7 +677,9 @@ eo.form.contact.AbstractField = Ext.extend(Ext.form.CompositeField, {
 			return;
 		}
 		Ext.iterate(this.valueFields, function(name, field) {
-			field.reset();
+			if (field.rendered) {
+				field.reset();
+			}
 		});
 		if (!data) {
 			return;
@@ -636,9 +697,11 @@ eo.form.contact.AbstractField = Ext.extend(Ext.form.CompositeField, {
 	
 	,afterRender: function() {
 		spp.afterRender.apply(this, arguments);
+		// init value
 		if (this.value) {
 			this.setValue(this.value);
 		}
+		this.originalValue = this.getValue();
 	}
 	
 	,setbaseParams: function(baseParams) {}

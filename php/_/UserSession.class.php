@@ -44,51 +44,86 @@ class UserSession {
 	/**
 	 * @return UserSession
 	 */
-	private static function getInstance() {
+	private static function getInstance($updateLastActivity = true) {
 
 		if (self::$instance !== null) {
 			return self::$instance;
 		}
 		
-		$session = self::$sessionManager->getData();
+		$session = self::$sessionManager->getData(false);
 
 		if (self::$instance === null) {
 			if (isset($session['UserSession'])) {
 
 				$storedSession = $session['UserSession'];
-				Logger::getLogger('UserSession')->debug('Found stored user session');
+// PERF
+//				Logger::getLogger('UserSession')->debug('Found stored user session');
 
 				if ($storedSession instanceof UserSession) {
 					if ($storedSession->ip === getenv('REMOTE_ADDR')) {
 						self::$instance = $storedSession;
 					} else {
-						Logger::getLogger('UserSession')->warn('Request IP {} not '
-								. 'matching stored IP {} of identified user',
-								getenv("REMOTE_ADDR"), $storedSession->ip);
+// PERF
+//						Logger::getLogger('UserSession')->warn('Request IP {} not '
+//								. 'matching stored IP {} of identified user',
+//								getenv("REMOTE_ADDR"), $storedSession->ip);
 					}
 				} else {
-					Logger::getLogger('UserSession')->warn('Value stored in session at '
-							. '"UserSession" is not UserSession object');
+// PERF
+//					Logger::getLogger('UserSession')->warn('Value stored in session at '
+//							. '"UserSession" is not UserSession object');
 				}
 			}
 		}
 
+		// Session has not been started
 		if (self::$instance === null) {
-			Logger::getLogger('UserSession')->debug('No valid user session stored');
+// PERF
+//			Logger::getLogger('UserSession')->debug('No valid user session stored');
 			self::$instance = new UserSession();
 		}
 
-		if (self::$instance->isIdentified() && self::$instance->isExpired()) {
-			self::$instance->loggedIn = false;
+		// User session has expired
+		else if (self::$instance->isIdentified()) {
+			
+			if (self::$instance->isExpired()) {
+				self::$instance->loggedIn = false;
+			}
+		
+			// We should update last activity right now
+			else if ($updateLastActivity) {
+				self::$instance->lastActivity = time();
+				
+				self::$sessionManager->put('UserSession', self::$instance);
+			}
 		}
 
+		self::$sessionManager->commit();
+		
 //		Logger::dbg('Session user is: {}', self::$instance->user);
 
 		return self::$instance;
 	}
 
-	private static function isExpired(&$now = null) {
+	/**
+	 * @deprecated Not supported anymore, will throw an exception
+	 */
+	public static function updateUserLastActivity() {
+		
+		throw new DeprecatedException();
+		
 		$instance = self::getInstance();
+		if (($now = time()) - $instance->lastActivity > self::$SESSION_LENGTH) {
+			if ($instance->isIdentified()) {
+				$instance->loggedIn = false;
+			}
+		} else {
+			$instance->lastActivity = $now;
+		}
+	}
+
+	private static function isExpired(&$now = null) {
+		$instance = self::getInstance(false);
 		if (!$instance->isIdentified()) {
 			throw new IllegalStateException();
 		}
@@ -98,7 +133,7 @@ class UserSession {
 
 	public static function getExpirationDelay($now = null) {
 		if ($now === null) $now = time();
-		return self::getInstance()->lastActivity + self::$SESSION_LENGTH - $now;
+		return self::getInstance(false)->lastActivity + self::$SESSION_LENGTH - $now;
 	}
 
 	private static function startIdentifiedSession(User $user, $loggedIn) {
@@ -179,9 +214,9 @@ class UserSession {
 		session_write_close();
 	}
 
-	public static function isIdentified() {
+	public static function isIdentified($updateLastActivity = true) {
 //		self::startIdentifiedSession(User::load(84), true);
-		return self::getInstance()->loggedIn;
+		return self::getInstance($updateLastActivity)->loggedIn;
 	}
 
 	public static function isLoginRequestSet() {
@@ -190,11 +225,10 @@ class UserSession {
 	}
 
 	/**
-	 *
 	 * @return User
 	 */
-	public static function getUser() {
-		return self::getInstance()->user;
+	public static function getUser($updateLastActivity = true) {
+		return self::getInstance($updateLastActivity)->user;
 	}
 
 	public static function isAuthorized($level) {
@@ -217,17 +251,6 @@ class UserSession {
 		}
 	}
 
-	public static function updateUserLastActivity() {
-		$instance = self::getInstance();
-		if (($now = time()) - $instance->lastActivity > self::$SESSION_LENGTH) {
-			if ($instance->isIdentified()) {
-				$instance->loggedIn = false;
-			}
-		} else {
-			$instance->lastActivity = $now;
-		}
-	}
-
 	public static function requireLoggedIn() {
 		$instance = self::getInstance();
 		if (!$instance->isIdentified()) throw new UserSessionTimeout(
@@ -239,10 +262,12 @@ class UserSession {
 	}
 
 	/**
-	 * @param int $timeToLive time to live, in seconds
-	 * @return UserSessionDataItem
+	 * @deprecated Not supported anymore, will throw an Exception.
 	 */
 	public static function & createSessionData($timeToLive = 3600) {
+		
+		throw new DeprecatedException();
+		
 		$instance = self::getInstance();
 
 		do {
@@ -254,31 +279,38 @@ class UserSession {
 		return $instance->data[$id];
 	}
 
+	/**
+	 * @deprecated Not supported anymore, will throw an Exception.
+	 */
 	public static function destroySessionData($id) {
-		// We don't really want to check for teh session existance, which would
+		
+		throw new DeprecatedException();
+		
+		// We don't really want to check for the session existance, which would
 		// produce a completly meaningless error warning...
 		unset(self::getInstance()->data[$id]);
 		return true;
 	}
 
 	/**
-	 * @param string $id the id of the data to retrieve
-	 * @return UserSessionDataItem
+	 * @deprecated Not supported anymore, will throw an Exception.
 	 */
 	public static function getSessionData($id) {
+		
+		throw new DeprecatedException();
+		
 		$instance = self::getInstance();
 		return isset($instance->data[$id]) ? $instance->data[$id] : null;
 	}
 
 	/**
-	 *
-	 * @param Request $request
-	 * @param string $name
-	 * @return UserSessionDataItem
+	 * @deprecated Not supported anymore, will throw an Exception.
 	 */
 	public static function getSessionDataFromRequest(Request $request, $require = true,
 			$name = self::DEFAULT_REQ_DATA_NAME) {
 
+		throw new DeprecatedException();
+		
 		if ($require) {
 			if (null === $data = self::getSessionData($id = $request->req($name))) {
 				throw new IllegalStateException("Missing session data (id=$id)");

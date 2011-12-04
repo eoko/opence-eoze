@@ -260,6 +260,7 @@ class Columns {
 						}
 						break;
 					case ModelColumn::T_TEXT:
+						self::setColFormItemif($col, 'xtype', 'textarea');
 					case ModelColumn::T_STRING:
 						self::setColStoreItemIf($col, 'type', 'string');
 						break;
