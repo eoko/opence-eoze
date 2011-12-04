@@ -252,6 +252,10 @@ class ModelColumn extends ModelFieldBase {
 	public function isNullable() {
 		return $this->nullable;
 	}
+	
+	public function getMeta() {
+		return $this->meta;
+	}
 
 	public function isRequired($operation) {
 		return !$this->isNullable() && !$this->hasDefault() 

@@ -1,5 +1,7 @@
 <?php
 
+use eoko\cqlix\FieldMetadata;
+
 interface VirtualField extends ModelField {
 
 	function select(ModelTableQuery $query, $alias = null, QueryAliasable $aliasable = null);
@@ -9,6 +11,8 @@ interface VirtualField extends ModelField {
 	function getOrderFieldAlias(QueryAliasable $aliasable, $alias = null);
 	
 	function isCachable();
+	
+	function configureMeta($config);
 }
 
 abstract class VirtualFieldBase extends ModelFieldBase implements VirtualField {
@@ -18,6 +22,11 @@ abstract class VirtualFieldBase extends ModelFieldBase implements VirtualField {
 	
 	protected $type = null;
 	protected $defaultAlias = null;
+	
+	/**
+	 * @var FieldMetadata
+	 */
+	private $meta;
 
 	function __construct($alias = null) {
 		if ($alias !== null) {
@@ -29,6 +38,26 @@ abstract class VirtualFieldBase extends ModelFieldBase implements VirtualField {
 		} else {
 			$this->alias = $alias !== null ? $alias : $this->defaultAlias;
 		}
+	}
+	
+	public function configureMeta($config) {
+		if ($config !== null) {
+			if (!is_array($config)) {
+				if (is_string($config)) {
+					$config = array(
+						'label' => $config,
+					);
+				} else {
+					throw new IllegalStateException('Invalid virtual configuration: ' 
+							. print_r($config, true));
+				}
+			}
+		}
+		$this->meta = new FieldMetadata($config);
+	}
+	
+	public function getMeta() {
+		return $this->meta;
 	}
 	
 	private function guessAliasFromClassName() {

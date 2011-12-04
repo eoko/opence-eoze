@@ -6,6 +6,8 @@
  * @license http://www.planysphere.fr/licenses/psopence.txt
  */
 
+use eoko\config\ConfigManager;
+
 /**
  * Base class of model's tables
  *
@@ -93,11 +95,16 @@ abstract class ModelTable extends ModelTableProxy {
 	 * @param array $cols
 	 */
 	protected function __construct(&$cols, &$relations) {
+		
 		$this->cols = $cols;
 		$this->relations = $relations;
+		
 		$this->preConfigure($this->cols, $this->relations, $this->virtuals);
-		$this->configureBase();
+		
+		$this->configureBase($this->cols, $this->relations, $this->virtuals);
+		
 		$this->configure();
+		
 		$this->constructed = true;
 	}
 	
@@ -121,7 +128,26 @@ abstract class ModelTable extends ModelTableProxy {
 	}
 
 	protected function configureBase() {
+		
+		$modelConfig = ConfigManager::get(
+			ConfigManager::get('eoze/application/namespace') . "/cqlix/models/$this->dbTableName"
+		);
+		
+		foreach ($this->relations as $name => $relation) {
+			$relation->configureMeta(
+				isset($modelConfig['relations'][$name])
+					? $modelConfig['relations'][$name]
+					: null
+			);
+		}
 
+		foreach ($this->virtuals as $name => $virtual) {
+			$virtual->configureMeta(
+				isset($modelConfig['virtuals'][$name])
+					? $modelConfig['virtuals'][$name]
+					: null
+			);
+		}
 	}
 
 	protected function addVirtual(VirtualField $virtual, $name = null) {

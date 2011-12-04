@@ -1,5 +1,7 @@
 <?php
 
+use eoko\cqlix\FieldMetadata;
+
 interface ModelField {
 
 	const T_INT = 'int';
@@ -26,4 +28,9 @@ interface ModelField {
 	function isNullable();
 	
 	function castValue($value);
+	
+	/**
+	 * @return FieldMetadata
+	 */
+	function getMeta();
 }
