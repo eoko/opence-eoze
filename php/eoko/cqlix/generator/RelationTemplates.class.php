@@ -3,6 +3,8 @@
 namespace eoko\cqlix\generator;
 //use eoko\cqlix\Relation;
 
+use eoko\util\Arrays;
+
 use ModelRelationReferedByOneOnMultipleFields;
 use ModelRelationReferedByMany;
 use ModelRelationByAssoc;
@@ -39,6 +41,8 @@ abstract class TplRelation {
 
 	public $onDeleteAction = null;
 	public $onUpdateAction = null;
+	
+	public $config;
 
 	function __construct($alias, $localTableName, $targetTableName, $reciproque) {
 //		dump_trace();
@@ -97,12 +101,6 @@ new <?php echo $this->getClass() ?>(<?php echo $head ? $rTabs : '' ?>
 '<?php echo $this->getName() ?>', <?php echo 'self::getInstance()'//$this->getLocalTableName() ?>
 , <?php echo $this->getTargetTableName() ?>::getInstance(), <?php echo $head ? $rTabs
 . $this->reciproque->getDeclaration(false) : 'null' ?>
-<?php /*
-new <?php echo $this->getClass() ?>(<?php echo $head ? $rTabs : '' ?>
-'<?php echo $this->getName() ?>', <?php echo $this->getLocalTableName() ?>
-::getInstance(), <?php echo $this->getTargetTableName() ?>::getInstance(), <?php echo $head ? $rTabs
-. $this->reciproque->getDeclaration(false) : 'null' ?>
-*/ ?>
 <?php if ($additionalParams !== '') echo ($head ? ',' . $rTabs : ', ') . $additionalParams; ?>
 <?php
 		return ob_get_clean() . ($closing ? ')' : '');
@@ -208,9 +206,30 @@ new <?php echo $this->getClass() ?>(<?php echo $head ? $rTabs : '' ?>
 	 $this->reciproque = $reciproque;
 	}
 
-	public function configure($config) {
+	public function configure($config, $relationConfig) {
+		
+		$this->config = Arrays::apply($relationConfig, $config);
+		
 		if (isset($config['onDelete'])) {
 			$this->onDeleteAction = $config['onDelete'];
+		}
+	}
+	
+	public function exportConfig($pre = '') {
+		$export = var_export($this->config, true);
+		$export = str_replace("\n", "\n" . $pre, $export);
+		$export = str_replace('array (', 'array(', $export);
+		return $export;
+	}
+	
+	public function exportOnDeleteAction() {
+		switch ($this->onDeleteAction) {
+			case 'NOTHING':
+			case 'DELETE':
+			case 'SET_NULL':
+				return "ModelRelationInfoHasReference::ODA_$this->onDeleteAction";
+			default:
+				return 'NULL';
 		}
 	}
 

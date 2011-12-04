@@ -176,7 +176,7 @@ class TplField extends ModelColumn implements ConfigConstants {
 			$this->configureEnum($config[self::CFG_ENUM]);
 			unset($config[self::CFG_ENUM]);
 		}
-
+		
 		$this->meta = Arrays::apply($this->meta, $config);
 //		$this->meta = count($config) ? $config : null;
 	}
