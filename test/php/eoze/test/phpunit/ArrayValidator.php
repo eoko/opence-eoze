@@ -72,7 +72,9 @@ class ArrayValidator {
 	}
 	
 	private function isRequired($spec) {
-		if (!isset($spec['required'])) {
+		if (!is_array($spec)) {
+			dump($spec);
+		} else if (!isset($spec['required'])) {
 			return $this->defaults['required'];
 		} else {
 			return !!$spec['required'];
@@ -145,7 +147,8 @@ class ArrayValidator {
 					$schema = array();
 				} else {
 					$schema = array(
-						'value' => $schema
+						'value' => $schema,
+						'required' => true,
 					);
 				}
 			}
@@ -175,6 +178,14 @@ class ArrayValidator {
 		return false;
 	}
 	
+	private static function exportValue($value) {
+		if (is_bool($value)) {
+			return '(boolean) ' . ($value ? 'true' : 'false');
+		} else {
+			return $value;
+		}
+	}
+	
 	private function testRule($path, $spec, $value, $parentSpec) {
 		if (array_key_exists('value', $spec)) {
 			if ($spec['value'] === $value) {
@@ -184,7 +195,8 @@ class ArrayValidator {
 					$this->error($path, 'Wrong type: expected map, found: ' .
 							(is_array($value) ? 'seq' : gettype($value)));
 				} else {
-					return $this->error($path, "Wrong required value: expected $spec[value], actual: $value");
+					$expected = self::exportValue($spec['value']);
+					return $this->error($path, "Wrong required value: expected $expected, actual: $value");
 				}
 			}
 		}
