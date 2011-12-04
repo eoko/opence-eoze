@@ -291,10 +291,16 @@ class Columns {
 							'renderer' => "function(v) { return {$renderer}[v] || ''; }",
 						));
 						Arrays::applyIf($col['formField'], array(
-							'xtype' => 'oce.simplecombo',
-							'field' => $col['name'],
+							'xtype' => 'clearablecombo',
+							
+							'editable' => false,
+							'triggerAction' => 'all',
+							'hiddenField' => $col['name'],
+							
 							'value' => $f->getDefault(),
-							'data'  => $data,
+							'allowBlank' => $f->isNullable(),
+							
+							'store' => $data
 						));
 						break;
 				}
