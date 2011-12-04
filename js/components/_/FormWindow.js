@@ -15,7 +15,7 @@ eo.Window = Ext.extend(Ext.Window, {
 			,bodyStyle: 'padding:0'
 		}, config);
 
-		config.minimizable = config.minimizable !== false;
+		config.minimizable = config.minimizable !== false && this.minimizable !== false;
 
 		this.addPlugins(config);
 
@@ -78,7 +78,7 @@ eo.Window = Ext.extend(Ext.Window, {
 			doShow = function() {uber.show.apply(win, arguments)};
 
 		if (rootWin) {
-			maskEl = rootWin && rootWin.items.first();
+			maskEl = rootWin && rootWin.items && rootWin.items.first() || rootWin;
 			if (maskEl) maskEl = maskEl.el;
 
 			this.mon(rootWin, {

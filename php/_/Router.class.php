@@ -7,6 +7,7 @@
 use eoko\config\ConfigManager;
 use eoko\module\ModuleManager;
 use eoko\module\Module;
+use eoko\util\Arrays;
 
 use \MonitorRequest;
 
@@ -53,11 +54,20 @@ class Router {
 	}
 
 	private function __construct() {
+		
+		$request = $_REQUEST;
+		
+		if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_SERVER['CONTENT_TYPE'] === 'application/json'
+				|| isset($_GET['contentType']) && preg_match('/(?:^|\/)json$/i', $_GET['contentType'])) {
+		
+			Arrays::apply($request, json_decode(file_get_contents("php://input"), true));
+			
+			unset($request['contentType']);
+		}
 
 		$this->microTimeStart = self::microtime($time);
 		$this->actionTimestamp = $time;
 		
-		$request = $_REQUEST;
 		if (isset($request['route'])) {
 			\eoko\url\Maker::populateRouteRequest($request);
 		}

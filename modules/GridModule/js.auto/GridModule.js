@@ -326,7 +326,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		var win = this.getEditWindow(row.data[this.primaryKeyName], function(win) {
 			if (!win.hasBeenLoaded) {
 				win.setRow(row);
-				win.form.reset();
+//				win.form.reset();
 				win.show(el);
 				win.formPanel.refresh(function() {
 					win.hasBeenLoaded = true;
@@ -348,7 +348,127 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	}
 
 	,afterCreateGrid: function(grid) {
+		grid.mon(eo.Kepler, this.tableName + ':modified', function(e, ids) {
+			if (e.fromOtherSession) {
+				this.onRecordsExternallyModified(ids);
+			}
+		}, this);
+		grid.mon(eo.Kepler, this.tableName + ':removed', function(e, ids) {
+			if (e.fromOtherSession) {
+				this.onRecordsExternallyDeleted(ids);
+			}
+		}, this);
+		grid.mon(eo.Kepler, this.tableName + ':created', function(e, id) {
+			if (e.fromOtherSession) {
+				this.onRecordsExternallyCreated(id);
+			}
+		}, this);
+	}
+	
+	/**
+	 * @private
+	 */
+	,processExternallyModifiedRecords: function(ids, action, forceReload) {
 		
+		var s = this.grid.store;
+		
+		if (ids) {
+			var i = ids.length,
+				reload = !!forceReload,
+				id, win;
+				
+			while (i--) {
+				id = ids[i];
+				win = this.editWindows[id];
+				if (s.getById(ids[i])) {
+					reload = true;
+				}
+				if (win) {
+					if (this['onEditWindowExternally' + action]) {
+						this['onEditWindowExternally' + action](win);
+					}
+				}
+			}
+			
+			if (reload) {
+				this.reload();
+			}
+		}
+		
+		else {
+			this.reload();
+		}
+	}
+	
+	,onRecordsExternallyCreated: function(ids) {
+		this.processExternallyModifiedRecords(false, 'Created', true);
+	}
+	
+	,onRecordsExternallyDeleted: function(ids) {
+		this.processExternallyModifiedRecords(ids, 'Deleted', true);
+	}
+	
+	,onRecordsExternallyModified: function(ids) {
+		this.processExternallyModifiedRecords(ids, 'Modified');
+	}
+
+	,onEditWindowExternallyModified: function(win) {
+		var actionMsg, okHandler;
+
+		if (win.refresh) {
+			actionMsg = "Les données vont être rechargées.";
+			okHandler = function() {
+				this.close();
+				win.refresh(true);
+			};
+		} else {
+			actionMsg = "La fenêtre va être fermée.";
+			okHandler = function() {
+				this.close();
+				win.close();
+			}
+		}
+
+		NS.AlertWindow.show({
+
+			modalTo: win
+			,modalGroup: 'refresh'
+
+			,title: 'Modification extérieure'
+			,message: "L'enregistrement a été modifié par un autre utilisateur. " 
+					+ actionMsg
+
+			,okHandler: okHandler
+			,cancelHandler: function() {
+				// Restore the normal warning on close behavior
+				win.forceClosing = false;
+				this.close();
+			}
+		});
+	}
+	
+	,onEditWindowExternallyDeleted: function(win) {
+		NS.AlertWindow.show({
+
+			modalTo: win
+			// Same group as modified, since a deleting overrides any modifications
+			,modalGroup: 'refresh'
+
+			,title: 'Modification extérieure'
+			,message: "L'enregistrement a été supprimé par un autre utilisateur."
+					+ " La fenêtre va être fermée."
+
+			,okHandler: function() {
+				this.close();
+				win.close();
+			}
+			
+			,cancelHandler: function() {
+				// Restore the normal warning on close behavior
+				win.forceClosing = false;
+				this.close();
+			}
+		});
 	}
 
 	,initGrid: function() {
@@ -440,105 +560,227 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	,afterAdded: function(newId) {
 		if (this.extra.editAfterAdd) this.editRowById(newId, this.extra.editAfterAddTab);
 	}
+	
+	,onFormSaveSuccess: function(form, data, options) {
+		
+		var win = options.win,
+			onSuccess = options.onSuccess,
+			loadModelData = loadModelData;
 
+		win.formPanel.modified = false;
+		// The aftersave event must be fired *before* the win is closed
+		// or it will be considered modified and will trigger a confirmation
+		// dialog
+		win.fireEvent('aftersave', win, action);
+//				win.close();
+
+		this.reload();
+
+		if (onSuccess) {
+			var r;
+			if (!loadModelData) {
+				r = onSuccess(data.newId);
+			} else {
+				r = onSuccess(data.newId, data.data)
+			}
+			if (r !== false) {
+				win.close();
+			}
+		} else {
+			win.close();
+		}
+
+		var msg = Oce.pickFirst(data, ['message','messages','msg']);
+		if (msg !== undefined) {
+			Oce.Ajax.defaultSuccessMsgHandler(msg);
+		}
+	}
+	
+	,onFormSaveFailure: function(form, data, options) {
+
+		var win = options.win;
+		
+		// TODO form submit failure
+		// System erreur
+		if (data) {
+			this.processFormError(win, form, data, options);
+		}
+
+		// If no data is provided, that means that was
+		// an infrastructural error
+		else {
+			// TODO handle error
+			debugger
+		}
+	}
+	
+	/**
+	 * This method is called when a system error occurs during saving of a
+	 * record with the {#save method}. A system error means that the server
+	 * has responded correctly but indicated in the response object that the
+	 * request could not be processed successfuly.
+	 * 
+	 * @param {Ext.Window} win
+	 * @param {eo.data.JsonForm} form
+	 * @param {Object} data The data decoded from the server response.
+	 * @param {Object} options The options passed to the form {eo.data.JsonForm#submit}
+	 * method.
+	 *
+	 * @protected
+	 */
+	,processFormError: function(win, form, data, options) {
+		var msg = data.errorMessage,
+			errors = data.erros;
+			
+		if (errors) {
+			debugger
+		}
+		
+		if (msg) {
+			NS.AlertWindow.show({
+
+				modalTo: win
+				,modalGroup: 'save'
+
+				,title: 'Erreur'
+				,message: msg
+
+				,okHandler: function() {
+					this.close();
+				}
+			});
+		} else {
+			// TODO error handling
+			debugger
+		}
+		
+	}
+
+	/**
+	 * @param {Ext.Window} win The form window.
+	 * 
+	 * @param {String|Object} action The `action` of the request or, an object
+	 * can be passed to provide extra params for the request, in the 
+	 * form:
+	 *     {
+	 *	       action: actionName
+	 *	       ,params: extraParams
+	 *	   }
+	 *	   
+	 * @param {Function} onSuccess A function to be called when the save
+	 * action is successfuly completed.
+	 * 
+	 * @param {Boolean} loadModelData=false `true` to request the server
+	 * to include the new data of the saved record in the response.
+	 * 
+	 * @protected
+	 */
 	,save: function(win, action, onSuccess, loadModelData) {
-
-		var me = this;
+		
 		var form = win.getForm();
 
 		if (form.isValid()) {
 
-			var successHandler = function(form, action) {
-
-				win.formPanel.modified = false;
-				// The aftersave event must be fired *before* the win is closed
-				// or it will be considered modified and will trigger a confirmation
-				// dialog
-				win.fireEvent('aftersave', win, action);
-//				win.close();
-
-				this.reload();
-				
-				if (onSuccess) {
-					var r;
-					if (!loadModelData) {
-						r = onSuccess(action.result.newId);
-					} else {
-						r = onSuccess(action.result.newId, action.result.data)
-					}
-					if (r !== false) {
-						win.close();
-					}
-				} else {
-					win.close();
-				}
-				
-				var msg = Oce.pickFirst(action.result, ['message','messages','msg']);
-				if (msg !== undefined) {
-					Oce.Ajax.defaultSuccessMsgHandler(msg);
-				}
-			}.createDelegate(this);
-
 			var extraParams;
+			
 			if (Ext.isObject(action)) {
 				extraParams = action.params;
 				action = action.name;
 			}
-			var params = Ext.apply({'controller': this.controller, 'action': action}, extraParams);
+			
+			var params = Ext.apply({
+				controller: this.controller
+				,action: action
+			}, extraParams);
+
+			if (loadModelData) {
+				params.dataInResponse = true;
+			}
 
 			var opts = {
 				url: 'index.php'
-				,params: params
-				,waitTitle : 'Interrogation du serveur' // i18n
-				,waitMsg : 'Enregistrement en cours' // i18n
-				,success: successHandler
-				,failure: function(form, action) {
-					Oce.Ajax.handleFormError(
-						form,
-						action,
-						me.isForceErrorMessage(win.formPanel, action)
-					);
-				}
+				
+				// post process data
+				,win: win
+				,onSuccess: onSuccess
+				,loadModelData: loadModelData
+				
+				// request param
+				,jsonData: params
+				
+				,waitTitle: 'Interrogation du serveur' // i18n
+				,waitMsg: 'Enregistrement en cours' // i18n
+
+				,scope: this
+				,success: this.onFormSaveSuccess
+				,failure: this.onFormSaveFailure
+//				,failure: function(form, action) {
+//					Oce.Ajax.handleFormError(
+//						form,
+//						action,
+//						me.isForceErrorMessage(win.formPanel, action)
+//					);
+//				}
 			};
 
-			if (loadModelData) opts.params.dataInResponse = true;
-
 			this.beforeFormSubmit(form, opts);
+			
+			form.on({
+				single: true
+				,scope: this
+				
+				,beforesave: function() {
+					var el = win.el,
+						maskEl = el && el.query('.x-window-mc');
+					if (maskEl) {
+						Ext.get(maskEl).mask('Enregistrement', 'x-mask-loading');
+					}
+				}
+				
+				,aftersave: function() {
+					var el = win.el,
+						maskEl = el && el.query('.x-window-mc');
+					if (maskEl) {
+						Ext.get(maskEl).unmask();
+					}
+				}
+			})
 
-			this.submitForm(form, opts);
+			form.submit(opts);
+//			this.submitForm(form, opts);
 		} else {
 			Ext.MessageBox.alert("Erreur", 'Certains champs ne sont pas correctement remplis.') // i18n
 		}
 	}
 	
-	,submitForm: function(form, opts) {
-		if (this.submitMethod === 'json') {
-			var values = form.getFieldValues();
-			opts.params[form.jsonFormParam || 'json_form'] = Ext.encode(values);
-			var success = opts.success,
-				failure = opts.failure;
-			delete opts.success;
-			delete opts.failure;
-			opts.callback = function(options, succeeded, response) {
-				var action = {
-					result: Ext.decode(response.responseText)
-				};
-				if (!succeeded) {
-					failure(form, options);
-				} else {
-					if (action.result.success) {
-						success(form, action);
-					} else {
-						failure(form, action);
-					}
-				}
-				
-			};
-			Ext.Ajax.request(opts);
-		} else {
-			form.submit(opts);
-		}
-	}
+//	,submitForm: function(form, opts) {
+//		if (this.submitMethod === 'json') {
+//			var values = form.getFieldValues();
+//			opts.params[form.jsonFormParam || 'json_form'] = Ext.encode(values);
+//			var success = opts.success,
+//				failure = opts.failure;
+//			delete opts.success;
+//			delete opts.failure;
+//			opts.callback = function(options, succeeded, response) {
+//				var action = {
+//					result: Ext.decode(response.responseText)
+//				};
+//				if (!succeeded) {
+//					failure(form, options);
+//				} else {
+//					if (action.result.success) {
+//						success(form, action);
+//					} else {
+//						failure(form, action);
+//					}
+//				}
+//				
+//			};
+//			Ext.Ajax.request(opts);
+//		} else {
+//			form.submit(opts);
+//		}
+//	}
 	
 	,toggleFieldValue: function(recordId, name) {
 		var g = this.grid,
@@ -660,7 +902,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				params: {
 					json_ids: encodeURIComponent(Ext.util.JSON.encode(ids))
 					,controller: me.controller
-					,action: "delete_multiple"
+					,action: 'delete'
 				}
 				,onSuccess: function() {
 					if (grid && grid.el) grid.el.unmask();
@@ -995,7 +1237,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		var fn = function(win) {
 
 			this.editWindows[rowId] = win;
-			this.afterCreateEditWindow(win);
+			this.afterCreateEditWindow(win, rowId);
 
 	//		win.on('destroy', function(){
 	//			delete this.editWindows[rowId]
@@ -1042,7 +1284,9 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 					return true;
 				}
 				,beforeclose: function() {
-					if (win.forceClosing) return true;
+					if (win.forceClosing) {
+						return true;
+					}
 					if (win.formPanel.isModified()) {
 						// i18n
 						Ext.Msg.show({
@@ -1087,10 +1331,35 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		return undefined;
 	}
 
-	,afterCreateEditWindow: function(win) {
+	,afterCreateEditWindow: function(win, recordId) {
 		this.parseContextHelpItems(win);
+		
+//		var event = String.format('{0}#{1}:modified', this.modelName, recordId);
+//		
+//		// Change event
+//		win.mon(eo.Kepler, event, function(e) {
+//			if (e.fromOtherSession) {
+//				// Do not pop a saving modified win if the user decides to
+//				// close the window...
+//				win.forceClosing = true;
+//				
+//				NS.AlertWindow.show({
+//					modalTo: win
+//					,modalGroup: 'refresh'
+//					,title: 'Modification externe'
+//					,message: "Les données ont été modifées par quelqu'un d'autre. " + actionMsg
+//					
+//					,okHandler: okHandler
+//					,cancelHandler: function() {
+//						// Restore the normal warning on close behavior
+//						win.forceClosing = false;
+//						this.close();
+//					}
+//				});
+//			}
+//		}, this);
 	}
-
+	
 	,beforeCreateWindow: function(config, action) {}
 
 	,parseContextHelpItems: function(win) {
@@ -1759,6 +2028,9 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			this.my.editFormConfig = Ext.apply(editConfig.onConfigureForm({
 				xtype: 'oce.form'
 				,jsonFormParam: 'json_form'
+				,defaults: {
+					anchor: '100%'
+				}
 				,items: editConfig.fields
 			}), this.extra.formConfig);
 		}
@@ -1778,6 +2050,9 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		} else {
 			this.my.addFormConfig = addConfig.onConfigureForm({
 				xtype: 'oce.form'
+				,defaults: {
+					anchor: '100%'
+				}
 				,jsonFormParam: 'json_form'
 				,items: addConfig.fields
 			});
@@ -2934,7 +3209,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				,handler: this.deleteSelectedRecords.createDelegate(this)
 				,text: 'Supprimer'
 				,iconCls: 'b_ico_del'
-				,actionId: "delete"
+				,actionId: 'delete'
 			}
 
 			,columns: {

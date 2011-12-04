@@ -52,11 +52,13 @@ class SessionManager {
 		return $this->sessionId;
 	}
 	
-	public function getData() {
+	public function getData($close = true) {
 		if ($this->data === null) {
 			$this->start();
 			$this->data = $_SESSION;
-			$this->closeSession();
+			if ($close) {
+				$this->closeSession();
+			}
 		}
 		return $this->data;
 	}
@@ -98,7 +100,7 @@ class SessionManager {
 	 * @return SessionManager 
 	 */
 	public function put($key, $data) {
-		if (!isset($this->data[$key]) || $this->data[$key] !== $data) {
+		if (!isset($this->data[$key]) || is_object($data) || $this->data[$key] !== $data) {
 			$this->data[$key] = $data;
 			$this->modified = true;
 		}

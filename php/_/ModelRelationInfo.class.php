@@ -852,7 +852,7 @@ class ModelRelationInfoReferedByMany extends ModelRelationInfoIsRefered
 		return new QueryJoinLeft(
 				$query,
 				$this->targetTable,
-				$this->targetTable->getPrimaryKeyName(),
+				$this->localTable->getPrimaryKeyName(),
 				$this->referenceField,
 				$alias === null ? $this->name : $alias,  // alias
 				$leftAlias !== null ? $leftAlias : $this->localTable

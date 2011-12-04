@@ -24,11 +24,13 @@ eo.form.contact.OrganisationField = Ext.extend(eo.form.contact.AbstractField, {
 				name: this.organisationName
 				,emptyText: this.textSociety
 				,emptyValue: null
+				,enableKeyEvents: true
 			})
 			,this.titleField = new Ext.form.TextField({
 				name: this.titleName
 				,emptyText: this.textTitle
 				,emptyValue: null
+				,enableKeyEvents: true
 			})
 		]
 	}

@@ -146,16 +146,28 @@ Oce.Module.executeAction = function(action, listeners, scope) {
 	);
 };
 
-eo.getModule = function(module) {
+Oce.getModule = function(module, callback, scope) {
 	if (module.indexOf(".") == -1) {
 		module = String.format("Oce.Modules.{0}.{0}", module);
 	}
 	var registry = Oce.mx.application.moduleInstances;
+	
 	if (registry[module]) {
+		if (callback) {
+			Oce.mx.application.getModuleInstance(module, callback, scope);
+		}
 		return registry[module];
-	} else {
+	}
+	
+	else if (callback) {
+		Oce.mx.application.getModuleInstance(module, callback, scope);
+	}
+	
+	else {
 		throw new Error(String.format("Module {0} has not been loaded", module));
 	}
+	
+	return false;
 }
 
 Oce.ApplicationModule = Ext.extend(Ext.Panel, {

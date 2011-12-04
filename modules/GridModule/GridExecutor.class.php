@@ -8,6 +8,7 @@ use eoko\file\FileType;
 use eoko\template\HtmlTemplate;
 use eoko\cqlix\table_filters\TableHasFilters;
 use eoko\database\Database;
+use eoko\util\Strings;
 
 use Model;
 use ModelTable;
@@ -23,14 +24,29 @@ use UserSession;
 use Exception;
 use UserException;
 use IllegalStateException, UnsupportedActionException, SystemException;
+use IllegalArgumentException;
 use ModelSaveException;
+
+use eoko\util\GlobalEvents;
 
 abstract class GridExecutor extends JsonExecutor {
 
 	/** @var \ModelTable */
 	protected $table;
-
+	
 	protected $formTemplatePath = 'formTemplates';
+
+	private $plugins;
+	
+	protected function construct() {
+		parent::construct();
+		GlobalEvents::fire(get_class(), 'initPlugins', $this);
+	}
+	
+	public function addPlugin(GridExecutor\Plugin $plugin) {
+		$plugin->configure($this, $this->table);
+		$this->plugins[] = $plugin;
+	}
 
 	function get_module() {
 		// UNTESTED
@@ -144,11 +160,7 @@ abstract class GridExecutor extends JsonExecutor {
 			,$this->add_createContext($request, $setters)
 		);
 
-		$this->beforeSaveModel($model);
-
-		if (!$model->save(true)) {
-			throw new ModelSaveException('Model save error');
-		}
+		$this->saveModel($model, true);
 
 		$this->newId = $id = $model->getPrimaryKeyValue();
 //		ExtJSResponse::put('newId', $id = $model->getPrimaryKeyValue());
@@ -606,7 +618,6 @@ MSG;
 	}
 
 	protected function loadOne_loadData(Model $model) {
-		$relations = $this->getRelationSelectionModes('form');
 		
 		$query = $this->createLoadQuery('form')->selectFirst();
 		$idField = $query->getQualifiedName($this->table->getPrimaryKeyName());
@@ -763,18 +774,12 @@ MSG;
 			throw new SystemException('Cannot load model with id: ' . $id);
 		}
 		
-//		array(
-//			'year' => $this->request->req('year')
-//		));
 //		dump($setters, 50);
 //		dump($model);
-//		dump($model->getInternal()->fields);
+		
 		$model->setFields($setters);
-//		$model = $this->table->createModel($setters);
 
-		$this->beforeSaveModel($model);
-
-		$model->saveManaged();
+		$this->saveModel($model, false);
 
 		return true;
 	}
@@ -802,87 +807,142 @@ MSG;
 	 // SAVE - Shared
 	//////////////////////////////////////////////////////////////////////////
 
-	protected function beforeSaveModel(&$model) {}
+	private function saveModel(Model $model, $new) {
+		
+		$this->beforeSaveModel($model, $new);
+
+		if ($this->plugins) {
+			foreach ($this->plugins as $plugin) {
+				$plugin->beforeSaveModel($model, $new);
+			}
+		}
+		
+		$model->saveManaged($new);
+		
+		$this->afterSaveModel($model, $new);
+
+		if ($this->plugins) {
+			foreach ($this->plugins as $plugin) {
+				$plugin->afterSaveModel($model, $new);
+			}
+		}
+	}
+	
+	protected function beforeSaveModel(Model $model) {}
+	
+	protected function afterSaveModel(Model $model, $wasNew) {}
 
 	  //////////////////////////////////////////////////////////////////////////
 	 // DELETE
 	//////////////////////////////////////////////////////////////////////////
 	
-	protected function beforeDeleteMultiple($ids) {}
+	/**
+	 * @deprecated Use {@link delete}
+	 */
+	public function delete_one() {
+		return $this->callInTransaction('doDelete');
+	}
+	
+	/**
+	 * @deprecated Use {@link delete}
+	 */
+	public function delete_multiple() {
+		return $this->callInTransaction('doDelete');
+	}
 	
 	public function delete() {
-		if ($this->request->has('ids')) {
-			return $this->delete_multiple();
-		} else {
-			$id = $this->request->req($this->table->getPrimaryKeyName());
-			if (is_array($id)) {
-				return $this->doDeleteMultiple($id);
-			} else {
-				return $this->doDeleteOne($id);
+		return $this->callInTransaction('doDelete');
+	}
+	
+	protected function afterDelete(array $ids) {}
+	
+	protected function beforeDelete(array $ids) {}
+
+	private function onAfterDelete(array $ids) {
+		
+		$this->afterDelete($ids);
+		
+		if ($this->plugins) {
+			foreach ($this->plugins as $plugin) {
+				$plugin->afterDelete($ids);
 			}
 		}
 	}
 	
-	public function delete_multiple() {
-		return $this->callInTransaction('doDeleteMultiple');
+	private function onBeforeDelete(array $ids) {
+		
+		if (false === $this->beforeDelete($ids)) {
+			return false;
+		}
+		
+		if ($this->plugins) {
+			foreach ($this->plugins as $plugin) {
+				if (false === $plugin->beforeDelete($ids)) {
+					return false;
+				}
+			}
+		}
+		
+		return true;
 	}
 	
-	protected function doDeleteMultiple($ids = null) {
+	protected function doDelete() {
 		
-		if ($ids === null) {
-			$ids = $this->request->req('ids');
+		$ids = $this->request->requireFirst(array(
+			$this->table->getPrimaryKeyName(), 'id', 'ids'
+		));
+		
+		if (!is_array($ids)) {
+			$ids = array($ids);
 		}
 		
 		$count = count($ids);
-		if (false !== $this->beforeDeleteMultiple($ids)) {
+		
+		if ($this->onBeforeDelete($ids)) {
 			if ($count === $n = $this->table->deleteWherePkIn($ids)) {
 				$this->deletedCount = $count;
+				$this->onAfterDelete($ids);
 				return true;
 			} else {
 				if ($n < $count) {
 					throw new SystemException(
-						'Delete failed',
+						"Delete failed (expected: $count, actual: $n)",
 						lang('Une erreur a empêché la suppression de tous les enregistrements.')
 					);
 				} else if ($n > $count) {
 					Logger::getLogger('GridController')->error('Terrible mistake, I have '
 						. 'deleted more reccords than required here!!! {} rows deleted', $n);
 					throw new SystemException('Terrible Mistake');
+				} else {
+					throw new IllegalStateException('Unreachable code');
 				}
-				return false;
 			}
 		} else {
 			return false;
 		}
 	}
-	
-	protected function beforeDeleteOne($id) {}
 
-	public function delete_one() {
-		return $this->callInTransaction('doDeleteOne');
-	}
-	
-	protected function doDeleteOne($id = null) {
-		if ($id === null) {
-			$id = $this->request->req($this->table->getPrimaryKeyName());
-		}
-		if (false !== $this->beforeDeleteOne($id)) {
-			if (1 === $n = $this->table->deleteWherePkIn(array($id))) {
-				return true;
-			} else {
-				Logger::getLogger('GridController')->error('{} rows deleted', $n);
-				if ($n > 0) {
-					Logger::getLogger('GridController')->error('Terrible mistake, I have '
-						. 'deleted more than 1 reccord here!!! {} rows deleted', $n);
-					throw new SystemException('Terrible Mistake');
-				}
-				throw new SystemException('Delete failed');
-				return false;
-			}
-		} else {
-			return false;
-		}
-	}
+//	protected function doDeleteOne($id = null) {
+//		if ($id === null) {
+//			$id = $this->request->req($this->table->getPrimaryKeyName());
+//		}
+//		if (false !== $this->beforeDelete(array($id))) {
+//			if (1 === $n = $this->table->deleteWherePkIn(array($id))) {
+//				return true;
+//			} else {
+//				Logger::getLogger('GridController')->error('{} rows deleted', $n);
+//				if ($n > 0) {
+//					Logger::getLogger('GridController')->error('Terrible mistake, I have '
+//						. 'deleted more than 1 reccord here!!! {} rows deleted', $n);
+//					throw new SystemException('Terrible Mistake');
+//				}
+//				throw new SystemException('Delete failed');
+//				return false;
+//			}
+//		} else {
+//			return false;
+//		}
+//	}
 
 	  //////////////////////////////////////////////////////////////////////////
 	 // SUBSET
@@ -948,8 +1008,11 @@ MSG;
 	 * @return string
 	 */
 	private function getSlug() {
-		return $this->getModule()->getConfig()->getValue('module/slug', 
-				$this->getModule()->getName());
+		if (null !== $slug = $this->getModule()->getConfig()->getValue('module/slug', null)) {
+			return $slug;
+		} else {
+			return Strings::slugify($this->title);
+		}
 	}
 
 	public function export() {

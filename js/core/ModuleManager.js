@@ -170,7 +170,7 @@ Oce.ModuleManager = function() {
 
 		getModuleByName: function(cannonicalName, successCallback, errorCallback) {
 			Oce.NameParser.parseModule(cannonicalName, function(namespace, controller, moduleName) {
-				Oce.getModule(namespace, controller, moduleName, successCallback, errorCallback);
+				Oce.getModuleIn(namespace, controller, moduleName, successCallback, errorCallback);
 			});
 		}
 		,
@@ -178,7 +178,7 @@ Oce.ModuleManager = function() {
 			Oce.getModuleByName(cannonicalName, successCallback, errorCallback || defaultMissingModuleHandler);
 		}
 		,
-		getModule: function(namespace, controller, moduleName, successCallback, errorCallback) {
+		getModuleIn: function(namespace, controller, moduleName, successCallback, errorCallback) {
 
 			var controllerModules = Ext.namespace(namespace + '.' + controller);
 
@@ -306,7 +306,7 @@ Oce.ModuleManager = function() {
 			var props = Oce.NameParser.parse(cannonicalName);
 			if (props.isModule) {
 				if (!props.isComplete) throw new 'IllegalArgument: ' + canonicalName;
-				return this.getModule(props.namespace, props.controller, props.name, successCallback, errorCallback);
+				return this.getModuleIn(props.namespace, props.controller, props.name, successCallback, errorCallback);
 			} else {
 				return this.getFunctionnality(props.functionnalityName, successCallback, errorCallback);
 			}

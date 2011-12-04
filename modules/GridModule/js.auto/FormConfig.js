@@ -191,11 +191,10 @@ NS.FormConfig = Ext.extend(Object, {
 			fieldsThatUseOtherFields = [];
 
 		// --- Inherit
-		var config = {
-			xtype: col.type !== undefined ? col.type : defaults.type,
-			name: col.name,
-			fieldLabel: colForm.fieldLabel || col.header,
-			'allowBlank': col.allowBlank !== undefined ? col.allowBlank : defaults.allowBlank
+		var config = {}
+
+		if (Ext.isObject(col.form)) {
+			this.inherit(config, col.form);
 		}
 
 		if (action in col) {
@@ -206,9 +205,14 @@ NS.FormConfig = Ext.extend(Object, {
 			Ext.apply(config, col[action]);
 		}
 
-		if (Ext.isObject(col.form)) this.inherit(config, col.form);
-
 		this.inheritNode(config, col, 'formField');
+		
+		this.inherit(config, {
+			xtype: col.type !== undefined ? col.type : defaults.type,
+			name: col.name,
+			fieldLabel: colForm.fieldLabel || col.header,
+			'allowBlank': col.allowBlank !== undefined ? col.allowBlank : defaults.allowBlank
+		});
 
 		// --- Process
 		if ('formField' in config) {

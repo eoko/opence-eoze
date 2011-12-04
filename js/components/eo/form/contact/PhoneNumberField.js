@@ -24,6 +24,7 @@ eo.form.contact.PhoneNumberField = Ext.extend(eo.form.contact.AbstractField, {
 				name: this.numberName
 				,emptyText: this.textItem
 				,allowBlank: false
+				,enableKeyEvents: true
 				,flex: 1
 			}),
 			this.unlistedCheckbox = new Ext.form.Checkbox({
