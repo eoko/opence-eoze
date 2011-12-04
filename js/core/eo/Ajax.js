@@ -284,22 +284,23 @@ eo.data.Connection = Ext.extend(Ext.util.Observable, {
 			failure  = options.failure,
 			scope    = options.scope || this;
 			
-		this.fireEvent('requestcomplete', this, data, options);
-		
 		if (succeeded) {
-			if (callback) {
-				callback.call(scope, options, true, data);
-			}
-			if (success) {
-				success.call(scope, data, options);
+			if (false !== this.fireEvent('requestcomplete', this, data, options)) {
+				if (callback) {
+					callback.call(scope, options, true, data);
+				}
+				if (success) {
+					success.call(scope, data, options);
+				}
 			}
 		} else {
-			this.fireEvent('requestexception', this, data, options);
-			if (callback) {
-				callback.call(scope, options, false, data);
-			}
-			if (failure) {
-				failure.call(scope, data, options);
+			if (false !== this.fireEvent('requestexception', this, data, options)) {
+				if (callback) {
+					callback.call(scope, options, false, data);
+				}
+				if (failure) {
+					failure.call(scope, data, options);
+				}
 			}
 		}
 	}
@@ -401,6 +402,10 @@ eo.data.Connection = Ext.extend(Ext.util.Observable, {
 	
 	// private
 	,bufferizeRequest: function(opts) {
+		
+		if (this.buffer === false) {
+			return false;
+		}
 		
 		if (opts.bufferizable === false) {
 			return false;
@@ -528,6 +533,11 @@ Buffer = eo.data.Connection.Buffer;
 eo.Ajax = new eo.data.Connection({
 	url: 'index.php'
 	,accept: 'json'
+	
+	// Buffer is currently still posing problems, at least:
+	// - multiple requests can fire from forms submit action :/
+	// - detection of disconnexion fails
+	,buffer: false
 });
 
 eo.Ajax.on('requestexception', function(conn, response, options) {
