@@ -20,7 +20,9 @@ eo.form.JsonForm = Ext.extend(Ext.form.BasicForm, {
 			
 			url: opts.url
 			,params: opts.params
-			,jsonData: Ext.apply(values, opts.jsonData)
+			,jsonData: Ext.apply({
+				data: values
+			}, opts.jsonData)
 			
 			,scope: this
 			
