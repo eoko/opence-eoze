@@ -97,8 +97,12 @@ abstract class GridExecutor extends JsonExecutor {
 	}
 
 	protected function doAdd() {
-		
-		$request = $this->request->getSub('form');
+
+		if ($this->request->hasSub('data')) {
+			$request = $this->request->getSub('data');
+		} else {
+			$request = $this->request->requireSub('form');
+		}
 
 		$setters = array();
 		$missingFields = array();
@@ -721,7 +725,12 @@ MSG;
 
 	protected function doMod() {
 		
-		$request = $this->request->requireSub('form');
+		if ($this->request->hasSub('data')) {
+			$request = $this->request->getSub('data');
+		} else {
+			$request = $this->request->requireSub('form');
+		}
+
 		$setters = array();
 		$missingFields = array();
 
