@@ -567,12 +567,15 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			onSuccess = options.onSuccess,
 			loadModelData = loadModelData;
 
+		// TODO refactor this out of here ---
+		
 		win.formPanel.modified = false;
 		// The aftersave event must be fired *before* the win is closed
 		// or it will be considered modified and will trigger a confirmation
 		// dialog
-		win.fireEvent('aftersave', win, action);
-//				win.close();
+		win.fireEvent('aftersave', win);
+		
+		// ---
 
 		this.reload();
 
@@ -696,7 +699,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			if (loadModelData) {
 				params.dataInResponse = true;
 			}
-
+			
 			var opts = {
 				url: 'index.php'
 				
@@ -1173,8 +1176,10 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			,controller: this.controller
 
 			,content: Ext.apply({
-				submitHandler: handlers.save
-				,controller: this.controller
+// 04/12/11 07:07
+// Removed the next line because it trigger double submit, with eo.Window's own submitHandler
+//				submitHandler: handlers.save,
+				controller: this.controller
 				,autoScroll: true
 			}, formConfig)
 
