@@ -428,7 +428,8 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
 	,createForm: function() {
         var config = Ext.applyIf({listeners: {}}, this.initialConfig);
 		if (config.jsonFormParam || config.serializeForm) {
-			return new Oce.form.JsonForm(null, config);
+			return new eo.form.JsonForm(null, config);
+//			return new Oce.form.JsonForm(null, config);
 		} else {
 			return new Ext.form.BasicForm(null, config);
 		}
