@@ -1271,11 +1271,14 @@ abstract class Model {
 	 */
 	public function cbSetFieldFromModelPk_thisBeforeSave(Model $srcModel) {
 		if ($srcModel->isNew()) {
-			dumpl(array(
-				'this' => $this
-				,'srcModel' => $srcModel
-			));
-			throw new ModelSaveException(get_class($srcModel) . ' needs to be saved before');
+			// 04/12/11 08:13
+			// Save the referred model before saving this model (instead of crashing)
+			$srcModel->saveManaged(true);
+//			dumpl(array(
+//				'this' => $this
+//				,'srcModel' => $srcModel
+//			));
+//			throw new ModelSaveException(get_class($srcModel) . ' needs to be saved before');
 		}
 	}
 
