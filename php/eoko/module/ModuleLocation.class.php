@@ -123,6 +123,25 @@ class ModuleLocation extends Location {
 	public function __toString() {
 		return "$this->moduleName << $this->directory";
 	}
+	
+	private $configExtensionFiles = null;
+	
+	private function searchConfigExtensionFiles() {
+		if ($this->configExtensionFiles === null) {
+			$this->configExtensionFiles = array();
+			if ($this->isActual()) {
+				$regex = '/^' . preg_quote($this->moduleName) . '\..+\.yml$/';
+				foreach (glob($this->path . '*.yml') as $file) {
+					$basename = basename($file);
+					if (preg_match($regex, $basename)
+							&& $basename !== $this->moduleName . '.bak.yml') {
+						$this->configExtensionFiles[] = $file;
+					}
+				}
+			}
+		}
+		return $this->configExtensionFiles;
+	}
 
 	/**
 	 * Finds the module's config file path. The directory parents are not
@@ -164,6 +183,7 @@ class ModuleLocation extends Location {
 		}
 		$r = array();
 		foreach (array_reverse($this->getLocations()) as $location) {
+			$r = array_merge($r, $location->searchConfigExtensionFiles());
 			$config = $location->searchConfigFile();
 			if ($config) {
 				$r[] = $config;
@@ -339,19 +359,26 @@ class ModuleLocation extends Location {
 		
 		$ds = DIRECTORY_SEPARATOR;
 		foreach ($dirPaths as $path) {
-			$base = "$path$this->moduleName$ds";
-			
-			$paths = array(
-				"$base$this->moduleName.yml",
-				"{$base}config.yml",
-				"$path$this->moduleName.yml",
-			);
-				
-			foreach (self::getModuleClassPattern() as $mc) {
-				$paths[] = "$base$mc";
-			}
-			
-			$r = array_merge($r, $paths);
+			// add the directory with the module name
+			// (all the content will be checked)
+			$r[] = $path . $this->moduleName;
+			// and the simple module config file
+			$r[] = $path . $this->moduleName . '.yml';
+					
+//			$base = "$path$this->moduleName$ds";
+//			
+//			$paths = array(
+//				"$base$this->moduleName.yml",
+//				"{$base}config.yml",
+//				"$path$this->moduleName.yml",
+//				"$base.",
+//			);
+//				
+//			foreach (self::getModuleClassPattern() as $mc) {
+//				$paths[] = "$base$mc";
+//			}
+//			
+//			$r = array_merge($r, $paths);
 		}
 		
 		return $r;
