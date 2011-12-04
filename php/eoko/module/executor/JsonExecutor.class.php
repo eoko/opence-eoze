@@ -23,12 +23,16 @@ class JsonExecutor extends TemplateExecutor {
 		}
 	}
 	
-	protected function processResult($result) {
+	protected function processResult($result, $return = false) {
 		if (is_bool($result)) {
 			$tpl = $this->getTemplate();
 			$tpl->mergeWithWarning(ExtJSResponse::toArray(), $this);
 			$tpl->success = $result;
-			$tpl->render();
+			if ($return) {
+				return $this->getData();
+			} else {
+				$tpl->render();
+			}
 		}
 	}
 
