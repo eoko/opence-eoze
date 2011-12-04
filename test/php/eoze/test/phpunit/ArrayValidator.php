@@ -72,9 +72,7 @@ class ArrayValidator {
 	}
 	
 	private function isRequired($spec) {
-		if (!is_array($spec)) {
-			dump($spec);
-		} else if (!isset($spec['required'])) {
+		if (!isset($spec['required'])) {
 			return $this->defaults['required'];
 		} else {
 			return !!$spec['required'];
@@ -179,7 +177,9 @@ class ArrayValidator {
 	}
 	
 	private static function exportValue($value) {
-		if (is_bool($value)) {
+		if ($value === null) {
+			return 'NULL';
+		} else if (is_bool($value)) {
 			return '(boolean) ' . ($value ? 'true' : 'false');
 		} else {
 			return $value;
@@ -196,6 +196,7 @@ class ArrayValidator {
 							(is_array($value) ? 'seq' : gettype($value)));
 				} else {
 					$expected = self::exportValue($spec['value']);
+					$value = self::exportValue($value);
 					return $this->error($path, "Wrong required value: expected $expected, actual: $value");
 				}
 			}
