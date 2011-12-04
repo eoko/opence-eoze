@@ -156,6 +156,8 @@ class Columns {
 			if (!is_array($colConfig)) {
 				if ($colConfig != '' && null !== $col = $this->findTemplate($colConfig, false)) {
 				} else if (null !== $col = $this->findTemplate($name, false)) {
+				} else if ($colConfig === null) {
+					$colConfig = array();
 				} else {
 //					dump_trace(true);
 					throw new IllegalStateException("Missing template: $colConfig|$name");
@@ -188,9 +190,10 @@ class Columns {
 					if ($autoName === true) {
 						// simplest case
 						$col['name'] = $name;
+					}
 					
-					// then $autoName is a Config object
-					} else {
+					// else $autoName is a Config object
+					else {
 						if (
 							($inflector = $autoName->getValue('inflector'))
 							&& (!$autoName->getValue('inflectOnlyLcFirst', false)
@@ -218,6 +221,14 @@ class Columns {
 			}
 			
 			if (null !== $f = $this->table->getField($col['name'], false)) {
+				
+				// Auto label
+				if (null !== $label = $f->getMeta()->label) {
+					if (!isset($col['header'])) {
+						$col['header'] = $label;
+					}
+				}
+				
 				switch ($f->getType()) {
 					case ModelColumn::T_INT:
 						if (!isset($col['renderer'])) {
