@@ -239,25 +239,29 @@ class ExecutorTestCase extends ModuleTestCase {
 					'Asserting that result match expected');
 		}
 		
-		$format = null;
+		$schema = null;
 		if (isset($test['expectedSchema'])) {
-			$format = $test['expectedFormat'];
+			$schema = $test['expectedFormat'];
 		} else if (isset($test['schema'])) {
-			$format = $test['schema'];
+			$schema = $test['schema'];
 		} else if (isset($test['responseSchema'])) {
-			$format = $test['responseSchema'];
+			$schema = $test['responseSchema'];
 		} else if (isset($test['expectedFormat'])) {
-			$format = $test['expectedFormat'];
+			$schema = $test['expectedFormat'];
 		} else if (isset($test['format'])) {
-			$format = $test['format'];
+			$schema = $test['format'];
 		}
 		
-		if (isset($format)) {
-			$validator = new ArrayValidator($format);
+		$dumpResult = array_key_exists('dumpResult', $test) 
+				? $test['dumpResult'] 
+				: $this->dumpResult;
+		
+		if (isset($schema)) {
+			$validator = new ArrayValidator($schema);
 			if (!$validator->test($result)) {
 				$this->fail(
 					'Result validation failed: ' . $validator->getLastError()
-					. ($this->dumpResult ? PHP_EOL . print_r($result, true) : '')
+					. ($dumpResult ? PHP_EOL . print_r($result, true) : '')
 				);
 			}
 		}
