@@ -10,7 +10,10 @@ Ext.ns('eo.form');
 	
 var sppCombo = Ext.form.ComboBox.prototype,
 	sppTwin  = Ext.form.TwinTriggerField.prototype;
-	
+
+/**
+ * @xtype clearablecombo
+ */
 eo.form.ClearableComboBox = Ext.extend(Ext.form.ComboBox, {
     
 	clearable: true
@@ -58,4 +61,7 @@ eo.form.ClearableComboBox = Ext.extend(Ext.form.ComboBox, {
 	
 	,onTrigger2Click : sppCombo.onTriggerClick
 });
+
+Ext.reg('clearablecombo', eo.form.ClearableComboBox);
+
 })(); // closure
