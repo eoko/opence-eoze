@@ -544,6 +544,8 @@ eo.Ajax.on('requestexception', function(conn, response, options) {
 	// Let's say, 2s 4s 8s 16s & 32s silent retries, then ask user action to retry
 });
 
+eo.deps.reg('eo.Ajax');
+
 //eo.Ajax.request({
 //	
 //	jsonData: {
