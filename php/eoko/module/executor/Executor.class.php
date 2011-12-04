@@ -113,7 +113,7 @@ abstract class Executor implements file\Finder {
 		return $this->name;
 	}
 	
-	public final function __invoke() {
+	public final function __invoke($return = false) {
 		
 		if ($this->executed) {
 			throw new IllegalStateException('Already executed');
@@ -147,7 +147,7 @@ abstract class Executor implements file\Finder {
 		
 		$this->afterAction();
 		
-		return $this->processResult($result);
+		return $this->processResult($result, $return);
 	}
 	
 	private function doInvoke() {

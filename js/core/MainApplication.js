@@ -42,16 +42,16 @@
 		}
 
 		,loadConfiguration: function(callback) {
-			var me = this;
-			Oce.Ajax.request({
+			eo.Ajax.request({
 				params: {
 					controller: 'root.application'
 					,action: 'configure'
 				}
-				,onSuccess: function(data, response) {
-					var cfg = me.initialConfig = response.config;
+				,scope: this
+				,success: function(data) {
+					var cfg = this.initialConfig = data.config;
 					callback(cfg);
-				}.createDelegate(this)
+				}
 			});
 		}
 
