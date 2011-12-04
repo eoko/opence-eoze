@@ -210,8 +210,7 @@ class UserSession {
 	}
 
 	public static function logOut() {
-		session_destroy();
-		session_write_close();
+		self::$sessionManager->destroySession();
 	}
 
 	public static function isIdentified($updateLastActivity = true) {

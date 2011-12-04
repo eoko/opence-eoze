@@ -92,6 +92,12 @@ class SessionManager {
 		}
 	}
 	
+	public function destroySession() {
+		$this->start();
+		session_destroy();
+		$this->closeSession();
+	}
+	
 	/**
 	 * Save some data in the session.
 	 * 
