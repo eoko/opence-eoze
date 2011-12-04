@@ -43,6 +43,12 @@ class ExecutorTestCase extends ModuleTestCase {
 	
 	protected $testRequests = true;
 	
+	/**
+	 * `true` to dump the result array in the failure message when schema validation fails.
+	 * @var bool
+	 */
+	protected $dumpResult = false;
+	
     public function __construct($name = NULL, array $data = array(), $dataName = '') {
 		parent::__construct($name, $data, $dataName);
 		if (isset($this->controller)) {
@@ -249,8 +255,10 @@ class ExecutorTestCase extends ModuleTestCase {
 		if (isset($format)) {
 			$validator = new ArrayValidator($format);
 			if (!$validator->test($result)) {
-				$this->fail('Result validation failed: ' . $validator->getLastError()
-						. PHP_EOL . print_r($result, true));
+				$this->fail(
+					'Result validation failed: ' . $validator->getLastError()
+					. ($this->dumpResult ? PHP_EOL . print_r($result, true) : '')
+				);
 			}
 		}
 		
