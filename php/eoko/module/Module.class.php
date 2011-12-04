@@ -646,7 +646,11 @@ MSG
 			$baseClass = $this->findExecutorClassName($type, $searchNS);
 
 			if ($ns !== null) {
-				class_extend("$ns$myBaseClass", $baseClass);
+				// 04/12/11 05:51
+				// Adding if (!class_exists(...))
+				if (!class_exists("$ns$myBaseClass", false)) {
+					class_extend("$ns$myBaseClass", $baseClass);
+				}
 			} else {
 				// We are finally creating the base class for the TL executor
 				if (!$this->generateExecutorBase($type, $this->namespace, $myBaseClass, $baseClass)) {
