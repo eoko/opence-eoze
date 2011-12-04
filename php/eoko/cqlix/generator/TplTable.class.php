@@ -106,7 +106,30 @@ class TplTable implements ConfigConstants {
 				? $this->config[self::CFG_COLUMNS] : array();
 		foreach ($this->directLocalRelations as $name => $relation) {
 			if (isset($colConfig[$relation->referenceField]['relation'])) {
-				$relation->configure($colConfig[$relation->referenceField]['relation']);
+				$relation->configure(
+					$colConfig[$relation->referenceField]['relation'],
+					isset($this->config['relations'][$name])
+							? $this->config['relations'][$name]
+							: null
+				);
+			}
+		}
+		foreach ($this->relations as $name => $relation) {
+			if (isset($this->directLocalRelations[$name])
+					&& isset($colConfig[$relation->referenceField]['relation'])) {
+				$relation->configure(
+					$colConfig[$relation->referenceField]['relation'],
+					isset($this->config['relations'][$name])
+							? $this->config['relations'][$name]
+							: null
+				);
+			} else {
+				$relation->configure(
+					null,
+					isset($this->config['relations'][$name])
+							? $this->config['relations'][$name]
+							: null
+				);
 			}
 		}
 	}

@@ -46,7 +46,7 @@ abstract class <?php echo $tableName ?>Base extends <?php echo $baseTableName ?>
 		<?php echo $relation->tplOnDeleteAction(), PHP_EOL ?>
 <?php endif ?>
 <?php endforeach ?>
-
+				
 		parent::__construct($cols, $relations);
 	}
 
