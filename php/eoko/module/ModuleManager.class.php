@@ -349,6 +349,10 @@ class ModuleManager {
 		else return null;
 	}
 	
+	/**
+	 * List all directories where modules can possibly be declared.
+	 * @return string[]
+	 */
 	public function listModuleDirectories() {
 		return self::$modulesDirectories;
 	}
