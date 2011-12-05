@@ -67,11 +67,14 @@ class ExceptionHandler {
 			error_log($ex->__toString());
 			
 			if ($answer && Logger::getLogger()->isActive(Logger::DEBUG)) {
-				header('HTTP/1.1 500 Internal Server Error');
+//				header('HTTP/1.1 500 Internal Server Error');
 			}
 		}
 
 		if ($answer) {
+			if (eoko\config\Application::getInstance()->isDevMode()) {
+				$reason = "$ex";
+			}
 			ExtJSResponse::failure($reason, $systemError, $errorTitle, true, false,
 				$includeTimestamp);
 		}
