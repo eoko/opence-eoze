@@ -185,7 +185,7 @@ abstract class QueryJoin implements QueryAliasable {
 	public function getQualifiedName($fieldName, $table = QueryJoin::TABLE_RIGHT) {
 		switch ($table) {
 			case self::TABLE_LEFT:
-				return "`$this->leftDBTableName`.`$fieldName`";
+				return "`$this->leftTableAlias`.`$fieldName`";
 			case self::TABLE_RIGHT: return "`$this->foreignTableAlias`.`$fieldName`";
 			default: throw new IllegalArgumentException("Invalid mode: $table");
 		}
