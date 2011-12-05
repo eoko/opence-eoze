@@ -228,8 +228,10 @@ NS.FormConfig = Ext.extend(Object, {
 				config.xtype = 'hidden';
 				delete config.hidden;
 			} else if ('readOnly' in config) {
-				config.xtype = config.submit === false ?
-					'displayfield' : 'oce.submitdisplayfield';
+				if (!config.xtype) {
+					config.xtype = (config.submit === false || config.submitValue === false) ?
+						'displayfield' : 'oce.submitdisplayfield';
+				}
 				delete config.readOnly;
 				delete config.submit;
 			}
