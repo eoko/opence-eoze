@@ -190,13 +190,13 @@ class ExtJSResponse {
 
 		if ($reason !== null) {
 			$errors['reason'] = $reason;
-			$response['message'] = $reason;
+			$response['errorMessage'] = $reason;
 			$response['title'] = $errorTitle;
 		}
 
 		if ($includeTimestamp) $errors['timestamp'] = Router::getActionTimestamp();
 
-		$response['errors'] = $errors;
+		$response['details'] = $errors;
 
 		ArrayHelper::apply($response, self::$vars);
 
