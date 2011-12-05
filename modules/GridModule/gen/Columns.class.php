@@ -252,15 +252,18 @@ class Columns {
 						));
 						break;
 					case ModelColumn::T_DATETIME:
+						if (!isset($col['renderer'])) {
+							$col['renderer'] = "Oce.Format.dateRenderer('d/m/Y H:i:s')";
+						}
+						self::setColFormItemif($col, 'format', 'd/m/Y H:i:s');
 					case ModelColumn::T_DATE:
+						self::setColFormItemif($col, 'xtype', 
+								$f->getMeta()->readOnly === true ? 'datedisplayfield' : 'datefield');
+						self::setColStoreItemIf($col, 'type', 'date');
 						if (!isset($col['renderer'])) {
 							$col['renderer'] = "Oce.Format.dateRenderer('d/m/Y')";
 						}
-						if (!isset($col['type'])) {
-							$col['type'] = 'datefield';
-						}
 						self::setColFormItemif($col, 'format', 'd/m/Y');
-						self::setColStoreItemIf($col, 'type', 'date');
 						break;
 					case ModelColumn::T_BOOL:
 						if (!isset($col['renderer'])) {
@@ -303,6 +306,12 @@ class Columns {
 							'store' => $data
 						));
 						break;
+				}
+				
+				if ($f->getMeta()->readOnly) {
+					self::setColFormItemIf($col, 'readOnly', true);
+					self::setColFormItemIf($col, 'xtype', 'displayfield');
+					self::setColFormItemIf($col, 'submitValue', false);
 				}
 				
 				// auto set col.filter[type === list].options
@@ -373,7 +382,7 @@ class Columns {
 	private static function setColFormItemIf(&$col, $name, $value) {
 		if (isset($col['form'])) {
 			if ($col['form'] !== false) {
-				if (!isset($col['form']['name'])) {
+				if (!isset($col['form'][$name])) {
 					$col['form'][$name] = $value;
 				}
 			}
