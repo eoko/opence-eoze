@@ -2,6 +2,14 @@
 	padding: 10px;
 }*/
 
+/* Fixing grid double click selction in chrome */
+/* see: http://www.sencha.com/forum/showthread.php?88876-SOLVED-CSS-bug-in-Chrome-Air-when-dblclick-on-a-cell */
+body {
+	-webkit-user-drag: none;
+	-webkit-user-modify: read-only;
+	-webkit-user-select: none;
+}
+
 .x-form-display-field.ajax-loading,
 .ajax-loading-16x11 {
 	background: url(images/ajax-loader-16x11.gif) no-repeat 5px 50%;
