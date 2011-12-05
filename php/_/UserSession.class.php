@@ -229,6 +229,14 @@ class UserSession {
 	public static function getUser($updateLastActivity = true) {
 		return self::getInstance($updateLastActivity)->user;
 	}
+	
+	public static function getUserId($updateLastActivity = true) {
+		if (null !== $user = self::getUser($updateLastActivity)) {
+			return $user->getId();
+		} else {
+			return null;
+		}
+	}
 
 	public static function isAuthorized($level) {
 		if ($level instanceof Level) $level = $level->level;

@@ -6,6 +6,8 @@ use IllegalStateException;
 use IllegalArgumentException;
 use eoko\util\Arrays;
 
+use eoko\util\YmlReader;
+
 /**
  * Array validator from a schema specification.
  * 
@@ -36,7 +38,15 @@ class ArrayValidator {
 		'type' => 'str',
 	);
 	
-	public function __construct(array $format, $throwException = false) {
+	public function __construct($format, $throwException = false) {
+		if (is_string($format)) {
+			$format = YmlReader::load($format);
+		}
+		if (!is_array($format)) {
+			throw new IllegalArgumentException(
+				'$format must be an array'
+			);
+		}
 		$this->throwException = $throwException;
 		$this->schema = $format;
 		if (isset($this->schema['defaults'])) {
@@ -44,20 +54,20 @@ class ArrayValidator {
 		}
 	}
 	
-	private static function testNull($spec) {
-		foreach (array('', 'allowNull') as $opt) {
+	private function testNull($spec) {
+		foreach (array('', 'null', 'allowNull') as $opt) {
 			if (isset($spec[$opt])) {
 				return $spec[$opt];
 			}
 		}
-		return null;
+		return !$this->isRequired($spec);
 	}
 	
 	private function isAllowNull($spec, $parentSpec) {
 		// The item itselff
-		if ((null !== $r = self::testNull($spec))
-				|| isset($parentSpec['defaults']) && (null !== $r = self::testNull($parentSpec['defaults']))
-				|| (null !== $r = self::testNull($this->defaults))) {
+		if ((null !== $r = $this->testNull($spec))
+				|| isset($parentSpec['defaults']) && (null !== $r = $this->testNull($parentSpec['defaults']))
+				|| (null !== $r = $this->testNull($this->defaults))) {
 			return $r;
 		}
 		throw new IllegalStateException('Unreachable code');

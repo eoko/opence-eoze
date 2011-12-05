@@ -249,6 +249,9 @@ abstract class <?php echo $modelName ?>Base extends <?php echo $baseModelName ?>
 	 */
 	function set<?php echo $field->getVarName(true) ?>($<?php echo $field->getVarName() ?>
 , <?php echo $field->isNullable() ? '$ignoredArgument' : '$forceAcceptNull' ?> = false) {
+		$this->setColumn('<?php echo $field->getName() ?>', $<?php echo $field->getVarName() ?>
+, <?php echo $field->isNullable() ? '$ignoredArgument' : '$forceAcceptNull' ?>);
+<?php /*
 <?php if (!$field->isPrimary()): ?>
 		// $this->setField('<?php echo $field->getName() ?>', $<?php echo $field->getVarName() ?>
 		
@@ -257,6 +260,7 @@ abstract class <?php echo $modelName ?>Base extends <?php echo $baseModelName ?>
 <?php else: ?>
 		$this->setPrimaryKeyValue($<?php echo $field->getVarName() ?>);
 <?php endif ?>
+ */ ?>
 		return $this;
 	}
 <?php endforeach ?>

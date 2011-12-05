@@ -686,6 +686,7 @@ abstract class Model {
 	}
 	protected function afterSaveRelations($wasNew) {
 	}
+	
 	/**
 	 * Event method called unconditionnaly before any save operation, that is
 	 * even if the Model's data won't be persisted to the datastore (which
@@ -693,8 +694,7 @@ abstract class Model {
 	 * and {@link Model::afterSave} for conditionnal events.
 	 * @param boolean $new 
 	 */
-	protected function onPrepareForSave(&$new) {
-	}
+	protected function onPrepareForSave(&$new, $deleted) {}
 
 	/**
 	 * Persists the reccord in the database. If the primary key of the reccord
@@ -719,7 +719,7 @@ abstract class Model {
 //			}
 //		}
 
-		$this->onPrepareForSave($new);
+		$this->onPrepareForSave($new, $this->deleted);
 
 		$success = true;
 
@@ -830,6 +830,10 @@ abstract class Model {
 
 	public function on($eventName, $callback, $extraArgs = null) {
 		$this->events->on($eventName, $callback, $extraArgs);
+	}
+	
+	public function onOnce($eventName, $callback, $extraArgs = null) {
+		$this->events->onOnce($eventName, $callback, $extraArgs);
 	}
 
 	/**
@@ -954,7 +958,7 @@ abstract class Model {
 	}
 
 	// Set to true when the model has been actually removed from the DB.
-	// Used to prevent double actual deletion operation, most importantly in
+	// Used to prevent double actual deletion operation, primarily in
 	// order to avoid multiple firing of deletion events.
 	private $deletedFromDB = false;
 	
@@ -969,11 +973,7 @@ abstract class Model {
 			
 			$pk = Query::quoteName($this->getPrimaryKeyName());
 
-			if (1 === $this->getTable()->createQuery($this->context)
-					->delete()
-					->where("$pk = ?", $this->getPrimaryKeyValue())
-					->executeDelete()
-				) {
+			if ($this->doDeleteQuery()) {
 
 				$this->deletedFromDB = true;
 				$this->deleted = true;
@@ -990,6 +990,28 @@ abstract class Model {
 		}
 	}
 
+	/**
+	 * Implements the delete query of the model. When this method is called,
+	 * it is guaranteed that the data representing the actual model in the
+	 * database do exist.
+	 * @return bool `true` on success, `false` on failure.
+	 */
+	protected function doDeleteQuery() {
+		return  1 === $this->getTable()
+				->createQuery($this->context)
+				->delete()
+				->where("$pk = ?", $this->getPrimaryKeyValue())
+				->executeDelete();
+	}
+	
+	protected function applyLoadQueryWherePk(ModelTableQuery $query) {
+		$pkName = $this->getPrimaryKeyName();
+		$id = $this->internal->fields[$pkName];
+		return $query->where(
+			$query->getQualifiedName($pkName) . ' = ?', $id
+		);
+	}
+
 	protected function doLoad() {
 
 		$table = $this->getTable();
@@ -1001,9 +1023,11 @@ abstract class Model {
 		// load with the Country record.
 		$query = $table->createLoadQuery(ModelTable::LOAD_NONE, $this->context);
 		
-		$result = $query->where(
-			$query->getQualifiedName($table->getPrimaryKeyName()) . ' = ?', $id
-		)->executeSelectFirst();
+		$result = $this->applyLoadQueryWherePk($query)->executeSelectFirst();
+		
+//		$result = $query->where(
+//			$query->getQualifiedName($table->getPrimaryKeyName()) . ' = ?', $id
+//		)->executeSelectFirst();
 
 		if ($result == null) return null;
 
@@ -1020,7 +1044,7 @@ abstract class Model {
 			// $this->internal->fieldUpdated[$i] = false; // useless => redondant, this is already done in the constructor
 		}
 
-		foreach ($this->table->getVirtualNames() as $virtual) {
+		foreach ($table->getVirtualNames() as $virtual) {
 			if (!array_key_exists($virtual, $result)) {
 				Logger::getLogger($this)->warn('Model "{}" not synchronized: '
 						. 'missing virtual field `{}` in database result', get_class($this), $virtual);
@@ -1304,11 +1328,11 @@ abstract class Model {
 		}
 		if ($srcModel->isNew()) {
 			$this->setUndetermined($fieldName, 'setFieldFromModelPk');
-			$srcModel->on(self::EVT_AFTER_SAVE_BASE,
+			$srcModel->onOnce(self::EVT_AFTER_SAVE_BASE,
 				array($this, 'cbSetFieldFromModelPk_srcAfterSave'),
 				array($fieldName, $srcModel)
 			);
-			$this->on(self::EVT_BEFORE_SAVE_BASE,
+			$this->onOnce(self::EVT_BEFORE_SAVE_BASE,
 				array($this, 'cbSetFieldFromModelPk_thisBeforeSave'),
 				array($srcModel)
 			);

@@ -322,7 +322,7 @@ class Generator extends Script {
 						. '(?: ON DELETE (?P<onDelete>\w+))?'
 						. '(?: ON UPDATE (?P<onUpdate>\w+))?'
 						. '/';
-			$pattern = '/'
+				$pattern = '/'
 					. '\bCONSTRAINT `(\w+)` FOREIGN KEY \(`(\w+)`\) '
 					. 'REFERENCES `(\w+)` \(`(\w+)`\)'
 					. '(?: ON DELETE (?P<onDelete>CASCADE|SET NULL|RESTRICT|NO ACTION))?'
@@ -427,11 +427,11 @@ class Generator extends Script {
 		$this->hasOneReciproqueRelations = array();
 		foreach ($this->referencesOneRelations as $dbTable => $allRelations) {
 			foreach ($allRelations as $relation) {
-				$relation instanceof TplRelationReferencesOne;
+							$relation instanceof TplRelationReferencesOne;
 
 				$targetTable = $relation->targetDBTableName;
 				$field = $relation->getReferenceField();
-
+				
 				$this->tableFields[$dbTable][$field]->setForeignKeyToTable($targetTable);
 
 				// --- has one reciproques
@@ -442,8 +442,25 @@ class Generator extends Script {
 		//		$alias = ModelRelationBackHasOne::makeAlias($constraintName, $table,
 		//				$targetTable, $relation->getAlias());
 
-				$alias = $this->tableFields[$dbTable][$field]->foreignRelationAlias;
-				if ($this->tableFields[$dbTable][$field]->isUnique() || $this->tableFields[$dbTable][$field]->isPrimary()) {
+				if (isset($relation->reciproqueName)) {
+					$alias = $relation->reciproqueName;
+				} else {
+					$alias = $this->tableFields[$dbTable][$field]->foreignRelationAlias;
+				}
+				
+				// TplField will return true for isUnique if the field is a primary key
+				// (unless overriden by config or else)
+					// Primary fields cannot be considered unique safely because of 
+					// multiple fields primary keys...
+				
+				$unique = $this->tableFields[$dbTable][$field]->isUnique();
+				
+				if (isset($relation->reciproqueConfig['uniqueBy'])) {
+					$unique = true;
+				}
+				
+				if ($unique) {
+//						|| $this->tableFields[$dbTable][$field]->isPrimary()) {
 					$reciproqueRelation = new TplRelationReferedByOne($relation->targetDBTableName, $dbTable,
 							$alias, $relation, $relation->getReferenceField(), null);
 				} else if (isset($relation->prefix)) {
@@ -462,22 +479,29 @@ class Generator extends Script {
 				$reciproqueRelation->constraintName = $constraintName;
 				$reciproqueRelation->referencingTableName = $dbTable;
 				$reciproqueRelation->referencedTableName = $targetTable;
-				$reciproqueName = $reciproqueRelation->referencingAlias =
-						isset($relation->reciproqueName) ? $relation->reciproqueName
+				
+				$reciproqueName = isset($relation->reciproqueName) 
+						? $relation->reciproqueName 
 						: $relation->alias;
+				$reciproqueRelation->setReferencingAlias($reciproqueName);
 
-		//		$relation->setReciproqueFieldName($reciproqueRelation->getName());
-				$relation->reciproque = $reciproqueRelation;
+				if (isset($relation->reciproqueConfig)) {
+					$reciproqueRelation->config = $relation->reciproqueConfig;
+				}
+				
+				if ($reciproqueName !== false) {
+					$relation->reciproque = $reciproqueRelation;
 
-				Logger::dbg(
-					"RECIPROQUE: Adding reciproque ({}) $reciproqueRelation->referencingTableName -> "
-					. "$reciproqueRelation->referencedTableName as " .
-					$reciproqueRelation->getName()
-					, get_class($reciproqueRelation)
-				);
+					Logger::dbg(
+						"RECIPROQUE: Adding reciproque ({}) $reciproqueRelation->referencingTableName -> "
+						. "$reciproqueRelation->referencedTableName as " .
+						$reciproqueRelation->getName()
+						, get_class($reciproqueRelation)
+					);
 
-				$this->hasOneReciproqueRelations[$targetTable][] = $reciproqueRelation;
-				$this->tables[$targetTable]->addDirectReciproqueRelation($reciproqueRelation);
+					$this->hasOneReciproqueRelations[$targetTable][] = $reciproqueRelation;
+					$this->tables[$targetTable]->addDirectReciproqueRelation($reciproqueRelation);
+				}
 			}
 		}
 	}
@@ -886,9 +910,10 @@ class Generator extends Script {
 					[$method][$table][$relation->targetDBTableName][$relation->referenceField];
 			if (false === $current instanceof TplRelation) {
 				throw new IllegalStateException('Illegal type: ' . $current);
+//			} else if (!$relation->equals($current)) {
 			} else if (!$relation->equals($current)) {
 				$msg = 'Relation conflicts with: ' 
-						+ $this->referencesOneRelations
+						. $this->referencesOneRelations
 						[$method][$table][$relation->targetDBTableName][$relation->referenceField];
 				throw new IllegalStateException($msg);
 			}
@@ -988,11 +1013,19 @@ class Generator extends Script {
 
 			$secondaryKeyPatterns[$table] = array();
 
+//			dump($fields);
 			foreach ($fields as $field) {
 				$field instanceof TplField;
 				if ($field->isPrimary()) {
-					if (array_key_exists($table, $this->primaryKeys)) throw new IllegalStateException('Multiple primary key in table ' . $table);
-					$this->primaryKeys[$table] = $field->getName();
+					if (array_key_exists($table, $this->primaryKeys)) {
+						if (!is_array($this->primaryKeys[$table])) {
+							$this->primaryKeys[$table] = array($this->primaryKeys[$table]);
+						}
+						$this->primaryKeys[$table][] = $field->getName();
+//						throw new IllegalStateException('Multiple primary key in table ' . $table);
+					} else {
+						$this->primaryKeys[$table] = $field->getName();
+					}
 				}
 			}
 		}
@@ -1046,12 +1079,29 @@ class Generator extends Script {
 			}
 		}
 
+		$excludedFields = array();
+		foreach ($this->tables[$tableName]->getConfiguredRelations($excludedFields) as $relation) {
+			$this->addHasOneRelation($tableName, $relation);
+		}
+		
 		// Guess by column names
 		foreach ($fields as $field) {
+			
+			if (in_array($field->getName(), $excludedFields)) {
+				continue;
+			}
 
 			$field instanceof TplField;
 			$fieldName = $field->getName();
-
+			
+			if (null !== $rel = $field->getConfiguredRelation()) {
+				
+				$relation = $this->addHasOneRelation($tableName, $rel, self::GUESS_BY_CONSTRAINT);
+				
+				// cannot be overriden by guesses...
+				continue;
+			}
+			
 			if ($guessByColName) {
 
 				$found = null;
@@ -1127,12 +1177,6 @@ class Generator extends Script {
 					$prefix = null;
 					$alias = null;
 					
-//					dump(array(
-//						$tableName, $otherTable, $fieldName,
-//						preg_match("/^(?P<alias>.+)_$quotedOtherId$/", $fieldName, $matches),
-//						$matches
-//					));
-
 					// Decide what is the alias
 					if (preg_match($primaryKeyPatterns[$otherTable], $fieldName, $match)) {
 						// If the referencing field is in the form xxx_table_id,
@@ -1141,17 +1185,10 @@ class Generator extends Script {
 						if (isset($match[1])) {
 							$prefix = $match[1];
 						}
-	//REM					if (isset($match[1])) $alias = ModelRelationReferencingHasOne::makeAlias($otherTable, $match[1]);
-	//REM					else $alias = null;
 					
 					} else if (preg_match("/^(?P<alias>.+)(?:$quotedOtherTable)?_$quotedOtherId$/", $fieldName, $matches)) {
 						$alias = $matches['alias'];
 						$alias = NameMaker::camelCase($alias, true);
-//						dump($alias);
-//					} else {
-//						// Else, the whole referencing field name should be
-//						// considered the alias...
-//						$alias = $fieldName;
 					}
 
 					if ($otherField !== $this->primaryKeys[$otherTable]) {
