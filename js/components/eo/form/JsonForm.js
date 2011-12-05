@@ -14,7 +14,7 @@ eo.form.JsonForm = Ext.extend(Ext.form.BasicForm, {
 			return;
 		}
 
-		var values = this.getFieldValues();
+		var values = this.getSubmitFieldValues();
 		
 		eo.Ajax.request({
 			
@@ -53,5 +53,42 @@ eo.form.JsonForm = Ext.extend(Ext.form.BasicForm, {
 			}
 		});
 	}
+	
+    /**
+     * Retrieves the value of the submittable fields in the form as a set of key/value 
+	 * pairs, using the {@link Ext.form.Field#getValue getValue()} method. Won't be
+	 * considered as submittable fields with {@link #Ext.form.Field#submitValue} to
+	 * `false`.
+	 * 
+     * If multiple fields exist with the same name they are returned as an array.
+     * 
+	 * @param {Boolean} dirtyOnly (optional) `true` to return only fields that are dirty.
+     * @return {Object} The values in the form
+     */
+	,getSubmitFieldValues: function(dirtyOnly){
+		var o = {},
+		n,
+		key,
+		val;
+		this.items.each(function(f) {
+			if (f.submitValue && !f.disabled && (dirtyOnly !== true || f.isDirty())) {
+				n = f.getName();
+				key = o[n];
+				val = f.getValue();
+
+				if(Ext.isDefined(key)){
+					if(Ext.isArray(key)){
+						o[n].push(val);
+					}else{
+						o[n] = [key, val];
+					}
+				}else{
+					o[n] = val;
+				}
+			}
+		});
+		return o;
+	}
+
 	
 });

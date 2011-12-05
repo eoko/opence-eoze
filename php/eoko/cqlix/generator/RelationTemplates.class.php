@@ -35,12 +35,15 @@ abstract class TplRelation {
 	public $targetDBTableName;
 
 	/** @var TplRelation */
-	public $reciproque;
+	private $reciproque;
 
 	public $reciproqueName;
+	public $reciproqueConfig;
 
 	public $onDeleteAction = null;
 	public $onUpdateAction = null;
+	
+	public $uniqueBy = null;
 	
 	public $config;
 
@@ -70,11 +73,31 @@ abstract class TplRelation {
 		$table = $this->targetDBTableName !== $this->localDBTableName ?
 				$this->getTargetTableName() . 'Proxy::get()'
 				: '$this';
+		
+		$config = array(
+			'name'     => $this->getName(),
+		);
+
+		if ($this->uniqueBy) {
+			$config['uniqueBy'] = $this->uniqueBy;
+		}
+		if ($this->onDeleteAction) {
+			$config['onDeleteAction'] = '%onDeleteAction%';
+		}
+		
+		$config = var_export($config, true);
+		$config = str_replace("array (", "array(", $config);
+		$config = str_replace("\n  ", "\n\t\t\t\t\t", $config);
+		$config = str_replace("\n)", "\n\t\t\t\t)", $config);
+		
+		if ($this->onDeleteAction) {
+			$config = str_replace("'%onDeleteAction%'", $this->exportOnDeleteAction(), $config);
+		}
 
 		ob_start();
 ?>
-new <?php echo $this->getInfoClass() ?>('<?php echo $this->getName() ?>
-', $this, <?php echo $this->getTargetTableName() ?>Proxy::get()<?php
+new <?php echo $this->getInfoClass() ?>(<?php echo $config ?>
+, $this, <?php echo $this->getTargetTableName() ?>Proxy::get()<?php
 if ($additionalParams !== '') echo ', ' . $additionalParams; ?>
 <?php
 /*
@@ -89,7 +112,9 @@ if ($additionalParams !== '') echo ', ' . $additionalParams; ?>
 
 	public function getDeclaration($head = true, $additionalParams = '', $closing = true) {
 
-		if ($this->alias === null) $this->alias = $this->makeAlias();
+		if ($this->alias === null) {
+			$this->alias = $this->makeAlias();
+		}
 		$name = $this->getName();
 
 		ob_start();
@@ -124,7 +149,7 @@ new <?php echo $this->getClass() ?>(<?php echo $head ? $rTabs : '' ?>
 		if (!$this->alias) {
 			$this->alias = $this->makeAlias();
 		}
-
+		
 		if ($this->alias === null) {
 			// filter out local table prefix in target table name
 			$regex = '/^(?:' . preg_quote($this->localDBTableName)
@@ -199,19 +224,24 @@ new <?php echo $this->getClass() ?>(<?php echo $head ? $rTabs : '' ?>
 	}
 
 	public function getReciproque() {
-	 return $this->reciproque;
+		return $this->reciproque;
 	}
 
 	public function setReciproque($reciproque) {
-	 $this->reciproque = $reciproque;
+		$this->reciproque = $reciproque;
 	}
 
 	public function configure($config, $relationConfig) {
+
+		$this->config = Arrays::apply($this->config, $relationConfig);
+		Arrays::apply($this->config, $config);
 		
-		$this->config = Arrays::apply($relationConfig, $config);
-		
-		if (isset($config['onDelete'])) {
+		if (isset($this->config['onDelete'])) {
 			$this->onDeleteAction = $config['onDelete'];
+		}
+		
+		if (isset($this->config['uniqueBy'])) {
+			$this->uniqueBy = $this->config['uniqueBy'];
 		}
 	}
 	
@@ -284,7 +314,7 @@ abstract class TplRelationByReference extends TplRelation {
 				&& $this->referenceField === $other->referenceField;
 	}
 	public function getReferenceField() {
-	 return $this->referenceField;
+		return $this->referenceField;
 	}
 
 	public function setReferenceField($referenceField) {
@@ -305,12 +335,13 @@ abstract class TplRelationByReference extends TplRelation {
 class TplRelationReferencesOne extends TplRelationByReference
 		implements ModelRelationHasOne {
 
-	protected function  getInfoClass() {
+	protected function getInfoClass() {
 		return 'ModelRelationInfoReferencesOne';
 	}
 
 	protected function makeAlias() {
-		if (\property_exists($this, 'referencingAlias') && $this->referencingAlias !== null) {
+//		if (\property_exists($this, 'referencingAlias') && $this->referencingAlias !== null) {
+		if (isset($this->referencingAlias) && $this->referencingAlias !== null) {
 			return $this->referencingAlias;
 		} else if ($this->prefix === null) {
 			return null;
@@ -322,7 +353,8 @@ class TplRelationReferencesOne extends TplRelationByReference
 				if (substr($this->prefix, -1) === '_') {
 					return NameMaker::camelCase(substr($this->prefix, 0, -1), true);
 				} else {
-					return NameMaker::camelCase($this->prefix, true) . NameMaker::modelFromDB($this->targetDBTableName);
+					return NameMaker::camelCase($this->prefix, true) 
+							. NameMaker::modelFromDB($this->targetDBTableName);
 				}
 			}
 		}
@@ -331,10 +363,15 @@ class TplRelationReferencesOne extends TplRelationByReference
 
 class TplRelationReferedByOne extends TplRelationReferencesOne implements TplRelationIsRefered {
 
-	public $constraintName, $referencingTableName, $referencedTableName, $referencingAlias;
+	public $constraintName, $referencingTableName, $referencedTableName;
+	protected $referencingAlias;
 
 	protected function getInfoClass() {
 		return 'ModelRelationInfoReferedByOne';
+	}
+	
+	public function setReferencingAlias($referencingAlias) {
+		return $this->referencingAlias = $referencingAlias;
 	}
 
 //	// --- with constraints
@@ -361,7 +398,13 @@ class TplRelationReferedByOne extends TplRelationReferencesOne implements TplRel
 class TplRelationReferedByMany extends TplRelationByReference
 		implements ModelRelationHasMany, TplRelationIsRefered {
 
-	public $constraintName, $referencingTableName, $referencedTableName, $referencingAlias;
+	public $constraintName, $referencingTableName, $referencedTableName;
+	
+	protected $referencingAlias;
+
+	public function setReferencingAlias($referencingAlias) {
+		return $this->referencingAlias = $referencingAlias;
+	}
 
 	protected function makeAlias() {
 		if ($this->referencingAlias !== null) {

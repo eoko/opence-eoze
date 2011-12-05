@@ -100,7 +100,8 @@ abstract class QueryJoin implements QueryAliasable {
 		return $this->buildJoin();
 	}
 
-	public function whereAssoc($condition, $binds = null) {
+//	public function whereAssoc($condition, $binds = null) {
+	public function whereAssoc($assocField, $value = null, $boolOp = 'AND', $operator = '=') {
 		// overriden
 	}
 

@@ -313,6 +313,26 @@ class ModelRelationReferencesOne extends ModelRelationHasReference
 		$context = $overrideContext !== null ? $overrideContext : $this->parentModel->context;
 
 		if (null !== $id = $this->getAsId()) {
+			
+			if (null !== $uniqueBy = $this->info->getUniqueBy()) {
+//				dump($uniqueBy);
+				$id = array(
+					$this->targetTable->getPrimaryKeyName() => $id,
+				);
+				
+				foreach ($uniqueBy as $foreign => $local) {
+					if (is_array($local)) {
+						if (isset($local['value'])) {
+							$id[$foreign] = $local['value'];
+						} else {
+							throw new UnsupportedOperationException();
+						}
+					} else {
+						$id[$foreign] = $this->parentModel->getField($local);
+					}
+				}
+			}
+			
 			$model = $this->targetTable->loadModel($id, $context);
 		}
 

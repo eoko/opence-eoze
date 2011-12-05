@@ -53,7 +53,7 @@ class TplTable implements ConfigConstants {
 	
 	private $configured = false;
 	private $config = null;
-
+	
 	public function configure($config) {
 
 		if ($this->configured) {
@@ -104,6 +104,7 @@ class TplTable implements ConfigConstants {
 
 		$colConfig = isset($this->config[self::CFG_COLUMNS]) 
 				? $this->config[self::CFG_COLUMNS] : array();
+		
 		foreach ($this->directLocalRelations as $name => $relation) {
 			if (isset($colConfig[$relation->referenceField]['relation'])) {
 				$relation->configure(
@@ -115,6 +116,18 @@ class TplTable implements ConfigConstants {
 			}
 		}
 		foreach ($this->relations as $name => $relation) {
+//			if ($name === 'LastRevision') {
+//				dump(array(
+////					$relation,
+//////					$this->relations,
+//////					$name,
+//////					$this,
+//////					$relation,
+////					$this->config['relations'][$name],
+//					isset($this->directLocalRelations[$name]),
+//					isset($this->config['relations'][$name]) ? $this->config['relations'][$name] : null,
+//				));
+//			}
 			if (isset($this->directLocalRelations[$name])
 					&& isset($colConfig[$relation->referenceField]['relation'])) {
 				$relation->configure(
@@ -145,6 +158,42 @@ class TplTable implements ConfigConstants {
 		return $this->columns[$dbFieldName];
 	}
 	
+	/**
+	 *
+	 * @param array $excludedFields The fields used in the returned relations will be
+	 * added to this array (they should not be used to later discover any other relation
+	 * than the one returned here).
+	 */
+	public function getConfiguredRelations(array &$excludedFields) {
+		$relations = array();
+		if (isset($this->config['relations'])) {
+			foreach ($this->config['relations'] as $alias => $relation) {
+				
+				if (isset($relation['referenceField'])) { // means that is configured relation
+					
+					// exclude reference fields
+					$excludedFields[] = $relation['referenceField'];
+					
+					$relations[] = $rel = new TplRelationReferencesOne(
+						$this->dbTable,
+						NameMaker::dbFromModel($relation['target']),
+						$alias,
+						null, 
+						$relation['referenceField'], 
+						null
+					);
+					
+					$rel->reciproqueName = $relation['foreignAlias'];
+					
+					if (isset($relation['foreignConfig'])) {
+						$rel->reciproqueConfig = $relation['foreignConfig'];
+					}
+				}
+			}
+		}
+		return $relations;
+	}
+	
 	private function addRelation(TplRelation $relation) {
 		if (isset($this->relations[$relation->getName()])) {
 			$prev = $this->relations[$relation->getName()];
@@ -152,14 +201,16 @@ class TplTable implements ConfigConstants {
 			// TODO this line has been added to skip a crash with a mirror relation
 			// WebsitePages->Parent, in Rhodia.Opence... this should be investigated
 			// that this is OK, and implement a real way to handle mirror relation
-			if ($prev->localDBTableName !== $relation->localDBTableName || $prev->referenceField !== $relation->referenceField)
-
-					throw new IllegalStateException(
-				"Relation with name {$relation->getName()} already exist in table "
-				. "$this->tableName (in database: $this->dbTable).\n"
-				. "Existing relation: " . $this->relations[$relation->getName()] . PHP_EOL
-				. "Added relation: $relation"
-			);
+			if ($prev->localDBTableName !== $relation->localDBTableName 
+					|| $prev->referenceField !== $relation->referenceField) {
+				
+				throw new IllegalStateException(
+					"Relation with name {$relation->getName()} already exist in table "
+					. "$this->tableName (in database: $this->dbTable).\n"
+					. "Existing relation: " . $this->relations[$relation->getName()] . PHP_EOL
+					. "Added relation: $relation"
+				);
+			}
 		} else {
 			$this->relations[$relation->getName()] = $relation;
 		}

@@ -132,9 +132,23 @@ class TplField extends ModelColumn implements ConfigConstants {
 //REM			$this->configure($config);
 		}
 	}
+	
+	private $uniqueByConfig = null;
+	
+	public function isUnique() {
+		if ($this->uniqueByConfig !== null) {
+			return $this->uniqueByConfig;
+		} else {
+			return parent::isUnique() || $this->isPrimary();
+		}
+	}
 
 	public function configure($config = null) {
-
+		
+		if (isset($config['unique'])) {
+			$this->uniqueByConfig = $config['unique'];
+		}
+		
 		if ($this->configured) {
 			throw new IllegalStateException("Field $this->columnName already configured");
 		} else {
@@ -180,8 +194,24 @@ class TplField extends ModelColumn implements ConfigConstants {
 		$this->meta = Arrays::apply($this->meta, $config);
 //		$this->meta = count($config) ? $config : null;
 	}
+	
+	public function getConfiguredRelation() {
+		if (isset($this->relationConfig['foreignModel'])) {
+			return new TplRelationReferencesOne(
+				$this->parentTable->dbTable,
+				NameMaker::dbFromModel($this->relationConfig['foreignModel']),
+				$this->localRelationAlias,
+				null, 
+				$this->getName(), 
+				null
+			);
+		}
+	}
+	
+	private $relationConfig;
 
 	private function configureRelations($config) {
+		$this->relationConfig = $config;
 		setConfig($this->localRelationAlias, $config, 'local');
 		setConfig($this->localRelationAlias, $config, 'localAlias');
 		setConfig($this->foreignRelationAlias, $config, 'foreign');

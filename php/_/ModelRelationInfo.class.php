@@ -58,12 +58,24 @@ abstract class ModelRelationInfo extends ModelFieldBase {
 	 */
 	protected $metaConfig;
 
-	function __construct($name, ModelTableProxy $localTable, ModelTableProxy $targetTableProxy) {
+	public function __construct($name, ModelTableProxy $localTable, ModelTableProxy $targetTableProxy) {
 
 		$localTable->attach($this->localTable);
 		$targetTableProxy->attach($this->targetTable);
-
-		$this->name = $name;
+		
+		// configure
+		if (is_array($name)) {
+			foreach ($name as $k => $v) {
+				if (property_exists($this, $k)) {
+					$this->$k = $v;
+				} else {
+					throw new IllegalArgumentException('Invalid config option: ' . $k);
+				}
+			}
+		} else {
+			$this->name = $name;
+		}
+		
 		$this->configure();
 
 		$this->virtualVariables = array(
@@ -475,10 +487,35 @@ abstract class ModelRelationInfoByReference extends ModelRelationInfo {
 
 	public $referenceField;
 	public $prefix;
+	
+	protected $uniqueBy;
 
 	function  __construct($name, ModelTableProxy $localTable, ModelTableProxy $targetTableProxy, $referenceField) {
 		parent::__construct($name, $localTable, $targetTableProxy);
 		$this->referenceField = $referenceField;
+	}
+	
+	protected function addJoinWhere(QueryJoin $join) {
+		
+		if ($this->uniqueBy) {
+			foreach ($this->uniqueBy as $foreign => $local) {
+				if (is_array($local)) {
+						if (isset($local['value'])) {
+							$join->whereAssoc($foreign, $local['value']);
+						} else {
+							throw new UnsupportedOperationException();
+						}
+				} else {
+					$join->andWhere(
+						$join->getQualifiedName($local, QueryJoin::TABLE_LOCAL)
+						. ' = '
+						. $join->getQualifiedName($foreign, QueryJoin::TABLE_FOREIGN)
+					);
+				}
+			}
+		}
+		
+		return $join;
 	}
 }
 
@@ -598,10 +635,16 @@ class ModelRelationInfoReferencesOne extends ModelRelationInfoHasReference
 
 	protected $rightField;
 	
+//	protected $uniqueBy;
+	
 	function  __construct($name, ModelTableProxy $localTable, ModelTableProxy $targetTableProxy, $referenceField, $rightField = null) {
 		parent::__construct($name, $localTable, $targetTableProxy, $referenceField, $rightField);
 		$this->selectable = true;
 		$this->rightField = $rightField;
+	}
+	
+	public function getUniqueBy() {
+		return $this->uniqueBy;
 	}
 
 	protected function getDefaultOnDeleteAction() {
@@ -622,11 +665,28 @@ class ModelRelationInfoReferencesOne extends ModelRelationInfoHasReference
 		return new ModelRelationReferencesOne($this, $parentModel);
 	}
 
-	protected function addJoinWhere(QueryJoin $join) {
-		// the condition will be applied on the local (left) table by the
-		// procedure selecting the root record...
-		return $join;
-	}
+//	protected function addJoinWhere(QueryJoin $join) {
+//		
+////		if ($this->uniqueBy) {
+////			foreach ($this->uniqueBy as $foreign => $local) {
+////				if (is_array($local)) {
+////						if (isset($local['value'])) {
+////							$join->whereAssoc($foreign, $local['value']);
+////						} else {
+////							throw new UnsupportedOperationException();
+////						}
+////				} else {
+////					$join->andWhere(
+////						$join->getQualifiedName($local, QueryJoin::TABLE_LOCAL)
+////						. ' = '
+////						. $join->getQualifiedName($foreign, QueryJoin::TABLE_FOREIGN)
+////					);
+////				}
+////			}
+////		}
+//		
+//		return $join;
+//	}
 
 	/**
 	 * Create the left join representing this relation, using the given
@@ -658,6 +718,7 @@ class ModelRelationInfoIsRefered extends ModelRelationInfoByReference {
 	}
 	
 	protected function addJoinWhere(QueryJoin $join) {
+		parent::addJoinWhere($join);
 		$this->targetTable->addJoinWhere($join);
 		return $join;
 	}

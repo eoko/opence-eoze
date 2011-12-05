@@ -41,11 +41,13 @@ abstract class <?php echo $tableName ?>Base extends <?php echo $baseTableName ?>
 <?php endforeach ?>
 
 		);
+<?php /*
 <?php foreach ($relations as $relation): ?>
 <?php if ($relation->onDeleteAction): ?>
 		<?php echo $relation->tplOnDeleteAction(), PHP_EOL ?>
 <?php endif ?>
 <?php endforeach ?>
+*/ ?>
 				
 		parent::__construct($cols, $relations);
 	}
