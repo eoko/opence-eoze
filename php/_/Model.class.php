@@ -750,6 +750,8 @@ abstract class Model {
 				if ($this->hasPrimaryKey()) {
 					$this->setPrimaryKeyValue($id);
 				}
+				
+				$this->afterCommitChanges();
 
 				// afterSave event (must be fired here, see bellow)
 				$this->events->fire(self::EVT_AFTER_SAVE_BASE, $this);
@@ -763,15 +765,7 @@ abstract class Model {
 				// to preprocess the model in the beforeSave event
 				$this->testIntegrity(ModelColumn::OP_UPDATE);
 
-				$setters = $this->buildUpdatedFields(ModelColumn::OP_UPDATE);
-				unset($setters[$this->getPrimaryKeyName()]);
-
-				// don't try to save if no field has actually been updated
-				if ($setters) {
-					$affectedRows = $this->getTable()->createQuery($this->context)
-							->set($setters)
-							->where($this->getPrimaryKeyName() . ' = ?', $this->getPrimaryKeyValue())
-							->executeUpdate();
+				if ($this->commitChanges()) {
 
 					// TODO: implement the modification success check
 					// if ($affectedRows != 1) return false;
@@ -781,22 +775,6 @@ abstract class Model {
 					$this->afterSave(false);
 				}
 			}
-
-			// clear $forceNew state
-			$this->forceNew = null;
-			
-			// afterSave event
-			// The afterSave event must not be fired here, because it must be
-			// fired *only* if the model has actually been saved -- ie. if it
-			// was new, or if it was modified.
-
-			// Must be done before saving the relations (some of them may try to
-			// save their parent model -- eg. ReferencesOne)
-			$this->internal->modified = false;
-			
-			$this->internal->dbValues = null;
-			
-			$this->forcedAllFieldsUpdate = false;
 
 			// Propagate the save operation to all instanciated relations. The
 			// said relations may already have saved themselves on the afterSave
@@ -813,6 +791,51 @@ abstract class Model {
 		}
 		
 		return true;
+	}
+	
+	/**
+	 * Commits the updated fields of the model to the database.
+	 * 
+	 * @return bool `true` if the model was modified, else `false`. If the model
+	 * is not found modified, no database query will be issued.
+	 */
+	protected function commitChanges() {
+		
+		$setters = $this->buildUpdatedFields(ModelColumn::OP_UPDATE);
+		unset($setters[$this->getPrimaryKeyName()]);
+
+		// don't try to save if no field has actually been updated
+		if ($setters) {
+			$affectedRows = $this->getTable()->createQuery($this->context)
+					->set($setters)
+					->where($this->getPrimaryKeyName() . ' = ?', $this->getPrimaryKeyValue())
+					->executeUpdate();
+			
+			$this->afterCommitChanges();
+			
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	private function afterCommitChanges() {
+
+		// clear $forceNew state
+		$this->forceNew = null;
+
+		// afterSave event
+		// The afterSave event must not be fired here, because it must be
+		// fired *only* if the model has actually been saved -- ie. if it
+		// was new, or if it was modified.
+
+		// Must be done before saving the relations (some of them may try to
+		// save their parent model -- eg. ReferencesOne)
+		$this->internal->modified = false;
+
+		$this->internal->dbValues = null;
+
+		$this->forcedAllFieldsUpdate = false;
 	}
 
 	private function saveRelation(ModelRelation $relation, $parentWasNew) {
