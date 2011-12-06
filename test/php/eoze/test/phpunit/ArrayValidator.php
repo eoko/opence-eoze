@@ -381,6 +381,13 @@ class ArrayValidator {
 					$this->error($path, "Not a date: " . $data);
 					return false;
 				}
+			case 'datetime':
+				if (preg_match('/\d{4}-\d\d-\d\d(?:T| )\d\d:\d\d:\d\d/', $data)) {
+					return true;
+				} else {
+					$this->error($path, "Not a datetime: " . $data);
+					return false;
+				}
 			case 'scalar':
 				if (!is_array($data)) {
 					return true;
