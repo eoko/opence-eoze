@@ -71,7 +71,7 @@ eo.form.JsonForm = Ext.extend(Ext.form.BasicForm, {
 		key,
 		val;
 		this.items.each(function(f) {
-			if (f.submitValue && !f.disabled && (dirtyOnly !== true || f.isDirty())) {
+			if (f.submitValue !== false && !f.disabled && (dirtyOnly !== true || f.isDirty())) {
 				n = f.getName();
 				key = o[n];
 				val = f.getValue();
