@@ -29,7 +29,8 @@ class ModelFieldHelper {
 			case ModelField::T_FLOAT:
 				return (double) $value;
 			case ModelField::T_ENUM:
-				throw new UnsupportedOperationException('Not implemented type: ' . $this->getType());
+				dump_trace();
+				throw new UnsupportedOperationException('Not implemented type: ' . $type);
 			case ModelField::T_DATE:
 			case ModelField::T_DATETIME:
 //				throw new UnsupportedOperationException('Not implemented yet');

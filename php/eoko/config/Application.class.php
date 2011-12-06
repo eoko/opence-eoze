@@ -95,7 +95,9 @@ class Application implements FileFinder {
 			$js = $this->isDevMode
 				? array(
 					'ext/ext-base-debug' => -10,
-					'ext/ext-all-debug-w-comments' => -9,
+//					'ext/ext-all-debug-w-comments' => -9,
+//					'ext/ext-all-debug' => -9,
+					'ext/ext-all' => -9,
 					'ext/ext-lang-fr' => -8,
 				)
 				: array(

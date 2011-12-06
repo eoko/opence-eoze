@@ -169,6 +169,10 @@ abstract class ModelRelationInfo extends ModelFieldBase {
 		else throw new UnsupportedOperationException(get_class($this) . '::getType()');
 	}
 	
+	public function getSqlType() {
+		return $this->getType();
+	}
+
 	public function castValue($value) {
 		if ($this->selectable) {
 			if ($this instanceof ModelRelationInfoHasOne) {
@@ -461,6 +465,10 @@ class ModelRelationInfoField extends ModelFieldBase {
 
 	public function getType() {
 		return $this->info->targetTable->getField($this->fieldName, true)->getType();
+	}
+	
+	public function getSqlType() {
+		return $this->info->targetTable->getField($this->fieldName, true)->getSqlType();
 	}
 
 	public function isNullable() {
