@@ -87,6 +87,10 @@ abstract class VirtualFieldBase extends ModelFieldBase implements VirtualField {
 		}
 	}
 	
+	public function getSqlType() {
+		return $this->getType();
+	}
+
 	public function isNullable() {
 		return true;
 	}

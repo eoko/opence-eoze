@@ -24,6 +24,8 @@ interface ModelField {
 //	function orderClause($dir, $tableAlias = null);
 
 	function getType();
+	
+	function getSqlType();
 
 	function isNullable();
 	
