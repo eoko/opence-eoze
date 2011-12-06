@@ -2276,8 +2276,8 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				tabPanelItems.push({
 					expanded: true
 
-					,deferredRender:false
-					,hideMode:'offsets'
+//					,deferredRender:false
+//					,hideMode:'offsets'
 
 					,defaults:{
 						 layout:'form'
