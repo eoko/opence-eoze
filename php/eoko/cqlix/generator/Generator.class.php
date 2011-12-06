@@ -448,19 +448,21 @@ class Generator extends Script {
 					$alias = $this->tableFields[$dbTable][$field]->foreignRelationAlias;
 				}
 				
-				// TplField will return true for isUnique if the field is a primary key
-				// (unless overriden by config or else)
-					// Primary fields cannot be considered unique safely because of 
-					// multiple fields primary keys...
-				
-				$unique = $this->tableFields[$dbTable][$field]->isUnique();
-				
-				if (isset($relation->reciproqueConfig['uniqueBy'])) {
+				if (isset($relation->reciproqueConfig['unique'])) {
+					$unique = $relation->reciproqueConfig['unique'];
+				}
+				else if (isset($relation->reciproqueConfig['uniqueBy'])) {
 					$unique = true;
+				}
+				else {
+					// TplField will return true for isUnique if the field is a primary key
+					// (unless overriden by config or else)
+						// Primary fields cannot be considered unique safely because of 
+						// multiple fields primary keys...
+					$unique = $this->tableFields[$dbTable][$field]->isUnique();
 				}
 				
 				if ($unique) {
-//						|| $this->tableFields[$dbTable][$field]->isPrimary()) {
 					$reciproqueRelation = new TplRelationReferedByOne($relation->targetDBTableName, $dbTable,
 							$alias, $relation, $relation->getReferenceField(), null);
 				} else if (isset($relation->prefix)) {
@@ -899,19 +901,32 @@ class Generator extends Script {
 		return $proxyTableMethods;
 	}
 
-	const GUESS_BY_NAME = 0;
+	const GUESS_BY_NAME       = 0;
 	const GUESS_BY_CONSTRAINT = 1;
+	const BY_CONFIG           = 3;
 
 	private function addHasOneRelation($table, TplRelationReferencesOne $relation, $method = self::GUESS_BY_NAME) {
+		
+		if ($method === self::BY_CONFIG) {
+			$this->referencesOneRelations[$method][] = $relation;
+		}
 
-		if (isset($this->referencesOneRelations
+		else if (isset($this->referencesOneRelations
 				[$method][$table][$relation->targetDBTableName][$relation->referenceField])) {
 			$current = $this->referencesOneRelations
 					[$method][$table][$relation->targetDBTableName][$relation->referenceField];
 			if (false === $current instanceof TplRelation) {
 				throw new IllegalStateException('Illegal type: ' . $current);
+//			} else if ($method === self::BY_CONFIG) {
+//				$r =& $this->referencesOneRelations
+//						[$method][$table][$relation->targetDBTableName]
+//						[$relation->getReferenceField()];
+//				if (!is_array($r)) {
+//					$r = array($r);
+//				}
+//				return $r[] = $relation;
 //			} else if (!$relation->equals($current)) {
-			} else if (!$relation->equals($current)) {
+			} else {
 				$msg = 'Relation conflicts with: ' 
 						. $this->referencesOneRelations
 						[$method][$table][$relation->targetDBTableName][$relation->referenceField];
@@ -925,6 +940,8 @@ class Generator extends Script {
 	}
 
 	private function mergeRelationsFoundByNameAndByFK($guessByName = true, $guessByConstraints = true) {
+		
+		$configRelations = $this->referencesOneRelations[self::BY_CONFIG];
 			
 		if ($guessByName === false) {
 			$this->referencesOneRelations = $this->referencesOneRelations[self::GUESS_BY_NAME];
@@ -996,12 +1013,18 @@ class Generator extends Script {
 
 		$tmp = array();
 
+		if (isset($configRelations)) {
+			foreach ($configRelations as $relation) {
+				$tmp[$relation->localDBTableName][] = $relation;
+			}
+		}
+
 		foreach ($this->referencesOneRelations as $table => $localFieldsRelations) {
 			foreach ($localFieldsRelations as $localField => $relation) {
 				$tmp[$table][] = $relation;
 			}
 		}
-
+		
 		$this->referencesOneRelations = $tmp;
 	}
 
@@ -1081,7 +1104,7 @@ class Generator extends Script {
 
 		$excludedFields = array();
 		foreach ($this->tables[$tableName]->getConfiguredRelations($excludedFields) as $relation) {
-			$this->addHasOneRelation($tableName, $relation);
+			$this->addHasOneRelation($tableName, $relation, self::BY_CONFIG);
 		}
 		
 		// Guess by column names

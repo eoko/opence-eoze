@@ -231,7 +231,7 @@ new <?php echo $this->getClass() ?>(<?php echo $head ? $rTabs : '' ?>
 		$this->reciproque = $reciproque;
 	}
 
-	public function configure($config) {
+	public function configure(array $config = null) {
 
 		$this->config = Arrays::apply($this->config, $config);
 		
