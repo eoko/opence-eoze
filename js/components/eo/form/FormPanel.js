@@ -159,7 +159,7 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
 
 		var me = this,
 			waitingToTest = false,
-			refreshDelay = 500;
+			refreshDelay = 100;
 
 		var changeListener = function() {
 			if (!me.preventModificationEvents) {
@@ -215,7 +215,7 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
 			if (item instanceof Ext.form.TextField) {
 				if (item.el) {
 					item.mon(item.el, {
-						buffer: 200
+						buffer: 100
 						,keyup: changeListener
 					});
 				} else {
