@@ -237,7 +237,7 @@ eo.data.Connection = Ext.extend(Ext.util.Observable, {
 			
 			,url: options.url || this.url
 			
-			,jsonData: jsonData
+			,jsonData: jsonData || {requestType: 'AJAX'}
 		};
 		
 		if (accept) {
@@ -597,6 +597,16 @@ eo.deps.reg('eo.Ajax');
 //		debugger
 //	}
 //});
+
+// Chrome wants to have some param in the url (index.php?...) to correctly
+// interpret the Content-type...
+if (Ext.isChrome) {
+	Ext.Ajax.on('beforerequest', function(conn, opts) {
+		if (!opts.jsonData) {
+			opts.jsonData = {requestType: 'AJAX'};
+		}
+	});
+}
 
 })(); // closure
 
