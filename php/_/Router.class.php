@@ -87,7 +87,7 @@ class Router {
 				'controller' => $this->request->get('controller'),
 				'action' => $this->request->get('action'),
 			));
-			$this->requestMonitorRecord->saveManaged();
+			$this->requestMonitorRecord->save();
 		}
 		
 		// $_REQUEST usage must be fixed in that
@@ -142,7 +142,7 @@ class Router {
 				$this->requestMonitorRecord->setFinishState('OK');
 				$this->requestMonitorRecord->setFinishDatetime(date('Y-m-d H:i:s'), $time);
 				$this->requestMonitorRecord->setRunningTimeMicro($runningTime);
-				$this->requestMonitorRecord->saveManaged();
+				$this->requestMonitorRecord->save();
 			}
 		} catch (Exception $ex) {
 			if ($this->requestMonitorRecord) {
@@ -151,7 +151,7 @@ class Router {
 				$this->requestMonitorRecord->setFinishState("$ex");
 				$this->requestMonitorRecord->setFinishDatetime(date('Y-m-d H:i:s'), $time);
 				$this->requestMonitorRecord->setRunningTimeMicro($runningTime);
-				$this->requestMonitorRecord->saveManaged();
+				$this->requestMonitorRecord->save();
 			}
 			throw $ex;
 		}

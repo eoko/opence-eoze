@@ -104,7 +104,7 @@ class Json extends JsonExecutor {
 			$node->setId(null);
 			$node->setUsersId($userId);
 			$parentId = $node->getParentMenuNodesId();
-			$node->saveManaged(true);
+			$node->save(true);
 			if ($parentId !== null) {
 				$node->setParentMenuNodesId($parentId);
 				$children[] = $node;
@@ -114,7 +114,7 @@ class Json extends JsonExecutor {
 		foreach ($children as $node) {
 			$node instanceof MenuNode;
 			$node->setParentMenuNodesId($lookup[$node->getParentMenuNodesId()]->getId());
-			$node->saveManaged();
+			$node->save();
 		}
 		
 		return $nodes;
@@ -189,7 +189,7 @@ class Json extends JsonExecutor {
 			//dump("$node");
 		}
 		
-		$node->saveManaged();
+		$node->save();
 
 		return $node->id;
 	}

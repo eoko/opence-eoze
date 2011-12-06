@@ -830,7 +830,7 @@ MSG;
 			}
 		}
 		
-		$model->saveManaged($new);
+		$model->save($new);
 		
 		$this->afterSaveModel($model, $new);
 
