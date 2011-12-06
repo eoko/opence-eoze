@@ -633,6 +633,11 @@ abstract class GridExecutor extends JsonExecutor {
 	//////////////////////////////////////////////////////////////////////////
 
 	public function load_one($id = null) {
+		Logger::get($this)->warn('Deprecated, use loadOne');
+		return $this->loadOne($id);
+	}
+	
+	public function loadOne($id = null) {
 
 		if ($id === null) {
 			$id = $this->request->req($this->table->getPrimaryKeyName());
@@ -653,7 +658,7 @@ MSG;
 	protected function doLoadOne($id) {
 
 		$model = $this->table->loadModel($id, $this->load_one_createContext());
-
+		
 		$data = $this->loadOne_loadData($model);
 
 		if ($model === null) {
