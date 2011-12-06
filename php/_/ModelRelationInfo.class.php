@@ -1383,6 +1383,18 @@ abstract class ModelRelationInfoChain extends ModelRelationInfo {
 			$alias !== null ? $alias : $this->name
 		);
 	}
+	
+	public function getType() {
+		return $this->targetRelation->getType();
+	}
+	
+	public function getSqlType() {
+		return $this->targetRelation->getSqlType();
+	}
+	
+	public function getMeta() {
+		return $this->targetRelation->getMeta();
+	}
 }
 
 class ModelRelationInfoChainHasOne extends ModelRelationInfoChain
