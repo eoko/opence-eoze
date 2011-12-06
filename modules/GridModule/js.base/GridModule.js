@@ -82,7 +82,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 
 		this.initSearchPlugin();
 		this.initMultisortPlugin();
-		this.initYearPlugin();
+//		this.initYearPlugin();
 		this.initFilterPlugin();
 
 		Ext.iterate(this.extra, function(name, config) {
@@ -175,7 +175,20 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		this.getHelpFactory().view(topic);
 	}
 
-	,initPlugins: function() {}
+	,initPlugins: function() {
+		var plugins = this.extra.plugins,
+			pp = this.plugins = [];
+		if (plugins) {
+			Ext.each(plugins, function(config) {
+				var c = Oce.GridModule.ptypes[config.ptype],
+					p = new c(config);
+				pp.push(p);
+			}, this);
+			Ext.each(pp, function(p) {
+				p.init(this);
+			}, this);
+		}
+	}
 
 	// TODO REM
 	,initExtra: function() {
@@ -2783,116 +2796,6 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		}, this);
 	}
 
-	,initYearPlugin: function() {
-
-		if (!Oce.mx.application.YearManager) return;
-		
-		this.beforeFormSubmit = this.beforeFormSubmit.createSequence(function(form, opts) {
-			opts.params = Ext.apply(opts.params || {}, {
-				year: Oce.mx.application.YearManager.value
-			})
-		});
-
-		if (this.extra.year === false) {
-			this.year = false;
-			return;
-		}
-
-		// Prevent first load before year has been loaded
-		var uberDoFirstLoad = this.doFirstLoad;
-		this.doFirstLoad = function() {
-			Oce.mx.application.YearManager.waitFirstLoad(uberDoFirstLoad.createDelegate(this));
-		}
-
-		this.afterYearChanged = function(year) {};
-
-		this.setYear = function(year) {
-			if (year !== this.year) {
-				this.year = year;
-				this.store.setBaseParam('year', year);
-				this.reload();
-				this.afterYearChanged(year);
-			}
-		};
-
-		this.getYear = function() {
-			return this.year;
-		}
-
-		Oce.mx.application.YearManager.on('yearchanged', this.setYear.createDelegate(this));
-		this.year = Oce.mx.application.YearManager.value;
-
-		this.afterInitStore = this.afterInitStore.createSequence(function() {
-			this.store.setBaseParam('year', this.year);
-		}, this);
-
-		this.afterYearChanged = this.afterYearChanged.createSequence(function(year) {
-			Ext.iterate(this.activeAddWindows, function(id, win) {
-				Ext.each(win.form.items.items, function(item) {
-					if (item.name == 'year') { // TODO:rx config year field (year)
-						item.setValue(year);
-					} else if (item instanceof Oce.form.ForeignComboBox) {
-						item.store.setBaseParam('year', year);
-						item.store.load();
-						item.reset();
-					} else if (item instanceof Oce.form.GridField) {
-						item.setBaseParam('year', year, true);
-					}
-				})
-			})
-		}, this)
-
-		this.configureFormPanel = function(items, year) {
-			var yearBaseParams = {'year': year};
-			Ext.each(items, function(item) {
-				if (item instanceof Oce.form.ForeignComboBox) {
-					item.store.baseParams.year = year;
-					item.store.load();
-				} else if (item instanceof Oce.form.GridField) {
-					item.setBaseParam('year', year, true);
-				}else if (item.xtype === 'oce.foreigncombo' || item.xtype === 'gridfield') {
-					item.baseParams = !item.baseParams ? yearBaseParams
-						: Ext.apply(item.baseParams, yearBaseParams);
-				} else if (item.name == 'year') {
-					if (item instanceof Ext.Component) {
-						item.setValue(year);
-					} else {
-						item.value = year;
-					}
-				}
-			})
-		};
-
-		this.beforeFormLoad = this.beforeFormLoad.createSequence(function(params) {
-			params.year = this.year;
-		}, this);
-
-		this.afterFormLoad = this.afterFormLoad.createSequence(function(form) {
-			this.configureFormPanel(
-				form.items.items,
-				this.year
-			);
-		}, this)
-
-		this.onConfigureAddFormPanel = this.onConfigureAddFormPanel.createSequence(function(config) {
-			this.configureFormPanel(config.items, this.year);
-		}, this);
-
-		this.onEditFormItemsConfig = this.onEditFormItemsConfig.createSequence(function(items) {
-			Ext.each(items, function(item) {
-				if (item instanceof Oce.form.ForeignComboBox
-						|| item.xtype === 'oce.foreigncombo') {
-
-					Oce.form.LoadLatch.addFirstTo(item);
-				} else if (item instanceof Oce.form.GridField
-						|| item.xtype === 'gridfield') {
-
-					Oce.form.LoadLatch.addTo(item);
-				}
-			})
-		}, this)
-	}
-	
 	,open: function(destination, config, action) {
 		
 		this.opening = true;
@@ -3252,8 +3155,9 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			this.actions = actions;
 		}
 	}
-
 });
+
+Oce.GridModule.ptypes = {};
 
 // Legacy support (deprecated)
 Oce.Modules.GridModule.GridModule = Oce.GridModule;
