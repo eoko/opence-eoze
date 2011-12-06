@@ -114,4 +114,4 @@ Oce.deps.wait('Oce.form.ForeignComboBox', function() {
 
 	Oce.deps.reg('GridModuleYearCombo');
 	Oce.deps.reg('Oce.GridModule.YearCombo');
-})
+});
