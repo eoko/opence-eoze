@@ -403,7 +403,12 @@ eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 		this.fireEvent('change', this);
 		
 		this.redoLayout();
-		
+
+		this.testFullState();
+	}
+	
+	// private
+	,testFullState: function() {
 		if (Ext.isNumber(this.maxFieldNumber) && this.getFieldCount() < this.maxFieldNumber
 				&& this.alreadyFull) {
 			this.alreadyFull = false;
@@ -494,6 +499,7 @@ eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 //		this.startLayoutBuffering();
 		
 		this.removeAll();
+		this.testFullState();
 		if (data === null || data === undefined) {
 			return;
 		}

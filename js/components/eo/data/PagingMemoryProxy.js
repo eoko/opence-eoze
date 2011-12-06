@@ -157,6 +157,8 @@ eo.data.CachingHttpProxy = Ext.extend(eo.data.PagingMemoryProxy, {
 		}
 		
 		eo.data.CachingHttpProxy.superclass.constructor.call(this, conn);
+
+		this.relayEvents(this.dataProvider, ['datachanged']);
 	}
 	
 	/**
@@ -199,7 +201,7 @@ eo.data.CachingHttpProxy = Ext.extend(eo.data.PagingMemoryProxy, {
 	}
 });
 
-eo.data.CachingHttpProxy.DataProvider = Ext.extend(Object, {
+eo.data.CachingHttpProxy.DataProvider = Ext.extend(Ext.util.Observable, {
 	
 	/**
 	 * @cfg {String} keplerReloadEvent The name of a {@link eo.Kepler} event
@@ -209,10 +211,13 @@ eo.data.CachingHttpProxy.DataProvider = Ext.extend(Object, {
 	constructor: function(config) {
 		Ext.apply(this, config);
 		
+		eo.data.CachingHttpProxy.DataProvider.superclass.constructor.call(this, config);
+		
 		if (this.keplerReloadEvent) {
 			eo.Kepler.on(this.keplerReloadEvent, function() {
 				// invlid the cache
 				delete this.data;
+				this.fireEvent('datachanged', this);
 			}, this);
 		}
 	}
@@ -351,6 +356,8 @@ eo.data.ProxyJsonStore = Ext.extend(Ext.data.JsonStore, {
 		}
 		
 		eo.data.ProxyJsonStore.superclass.constructor.call(this, config);
+		
+		this.relayEvents(this.proxy, ['datachanged']);
 	}
 	
 	,getById: function(id) {
