@@ -274,7 +274,7 @@ class TplField extends ModelColumn implements ConfigConstants {
 				if ($code === '') {
 					$this->enumCodeValues[null] = null;
 				} else {
-					$this->enumCodeValues[$code] = "'$code'";
+					$this->enumCodeValues[$code] = $code;//"''";
 				}
 			}
 		} else {
