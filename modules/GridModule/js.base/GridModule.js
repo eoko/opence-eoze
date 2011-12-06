@@ -739,6 +739,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 //				}
 			};
 
+			this.fireEvent('beforeformsubmit', form, opts);
 			this.beforeFormSubmit(form, opts);
 			
 			form.on({
@@ -1592,7 +1593,10 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			,layout: this.my.editWinLayout
 			,refreshable: true
 			,refreshTitle: function(data) {
-				this.setTitle(me.buildEditWindowTitle(data));
+				var title = me.buildEditWindowTitle(data);
+				if (title) {
+					this.setTitle(title);
+				}
 			}
 		}));
 

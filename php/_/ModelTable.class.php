@@ -469,6 +469,21 @@ abstract class ModelTable extends ModelTableProxy {
 		else if ($require) throw new IllegalStateException();
 		else return null;
 	}
+	
+	/**
+	 * Creates a Query with its WHERE claused configured to match only
+	 * 
+	 * @param array $context
+	 * @return ModelTableQuery 
+	 */
+	abstract public static function createReadQuery(array $context = array());
+	
+	protected function _createReadQuery(array $context = array()) {
+		
+		$query = $this->createQuery($context);
+		
+		return $query;
+	}
 
 	const LOAD_NONE   = 0;
 	const LOAD_NAME   = 1;
@@ -485,7 +500,7 @@ abstract class ModelTable extends ModelTableProxy {
 	 */
 	protected function _createLoadQuery($relationsMode = ModelTable::LOAD_NAME, array $params = array()) {
 		
-		$query = $this->createQuery($params);
+		$query = $this->createReadQuery($params);
 
 		foreach ($this->getColumns() as $col) {
 			$col->select($query);
@@ -520,10 +535,14 @@ abstract class ModelTable extends ModelTableProxy {
 		} else {
 			switch ($relationsMode) {
 				case ModelTable::LOAD_NAME:
-					foreach ($this->relations as $relation) $relation->selectName($query);
+					foreach ($this->relations as $relation) {
+						$relation->selectName($query);
+					}
 					break;
 				case ModelTable::LOAD_ID:
-					foreach ($this->relations as $relation) $relation->selectId($query);
+					foreach ($this->relations as $relation) {
+						$relation->selectId($query);
+					}
 					break;
 				case ModelTable::LOAD_NONE: break;
 				case ModelTable::LOAD_FULL: throw new UnsupportedOperationException();

@@ -1752,7 +1752,6 @@ class QueryErrorHandler {
 	}
 
 	public static function process(Query $query = null, $error) {
-		Logger::get('QueryErrorHandler')->error("Query error message: $error[2]. ($query)");
 		switch ($error[1]) {
 			case 1062:
 				if (preg_match("/^Duplicate entry '([^']+)' for key '([^']+)'$/",
@@ -1764,6 +1763,7 @@ class QueryErrorHandler {
 					$message = lang('Une des valeur entrée doit être unique.');
 				}
 				throw new SqlUserException(
+					$error,
 					$message,
 					lang('Erreur : valeur duppliquée')
 				);
@@ -1775,11 +1775,12 @@ class QueryErrorHandler {
 				} else {
 					$message = lang('Impossible de créer la nouvelle table');
 				}
-				throw new SqlUserException($message, lang('Impossible de créer la table'));
+				throw new SqlUserException($error, $message, lang('Impossible de créer la table'));
 
 			default:
+				Logger::get('QueryErrorHandler')->error("Query error message: $error[2]. ($query)");
 				$sql = $query !== null ? PHP_EOL . $query->getSqlString() : null;
-				throw new SqlSystemException($error[2] . $sql);
+				throw new SqlSystemException($error, $error[2] . $sql);
 		}
 	}
 }

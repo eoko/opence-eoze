@@ -44,6 +44,9 @@ eo.Kepler = Ext.extend(Ext.util.Observable, {
 					controller: 'kepler' // TODO configurable controller
 //					,timeout: 5
 				}
+				,jsonData: {
+					type: 'json'
+				}
 				,scope: this
 				,success: this.onPollSuccess
 				,failure: this.onPollFailure

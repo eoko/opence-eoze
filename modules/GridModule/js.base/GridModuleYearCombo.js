@@ -66,8 +66,15 @@ Oce.deps.wait('Oce.form.ForeignComboBox', function() {
 //	})
 
 	Oce.YearCombo = Ext.extend(eo.form.DateField, {
+		
 		label: 'Date'
+		
+		,getCurrentDate: function() {
+			return this.getValue().format('Y-m-d');
+		}
+		
 		,onValueChange: function(year) {}
+		
 		,waitFirstLoad: function(callback) {
 			callback();
 		}

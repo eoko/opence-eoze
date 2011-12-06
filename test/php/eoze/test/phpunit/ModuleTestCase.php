@@ -108,7 +108,11 @@ abstract class ModuleTestCase extends DatabaseTestCase {
 	 * @return IDataSet
 	 */
 	protected function getDataSet() {
-		return null;
+		try {
+			return parent::getDataSet();
+		} catch (IllegalStateException $ex) {
+			return null;
+		}
 	}
 	
 	/**

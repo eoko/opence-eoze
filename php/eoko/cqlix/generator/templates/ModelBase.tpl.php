@@ -26,7 +26,9 @@ abstract class <?php echo $modelName ?>Base extends <?php echo $baseModelName ?>
 <?php foreach ($fields as $field): ?>
 <?php if ($field->isEnum()): ?>
 <?php foreach ($field->getEnumValues() as $enumCode => $enumVal): ?>
-	const <?php echo self::makeEnumConstName($field, $enumCode) ?> = <?php echo $enumVal === null ? 'null' : $enumVal ?>;
+	const <?php echo self::makeEnumConstName($field, $enumCode) ?> = <?php echo $enumVal === null 
+			? 'null' 
+			: is_string($enumVal) ? "'$enumVal'" : $enumVal ?>;
 <?php endforeach ?>
 <?php endif ?>
 <?php endforeach ?>
