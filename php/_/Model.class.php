@@ -669,8 +669,10 @@ abstract class Model {
 	 * @throws ModelSaveException if the model saving operation fails.
 	 */
 	public function saveManaged($new = null, $exMsg = null) {
-		if (!$this->save($new)) {
-			throw new ModelSaveException($exMsg);
+		try{
+			$this->save($new);
+		} catch (Exception $ex) {
+			throw new ModelSaveException($exMsg, null, $ex);
 		}
 	}
 
@@ -1322,7 +1324,7 @@ abstract class Model {
 		if ($srcModel->isNew()) {
 			// 04/12/11 08:13
 			// Save the referred model before saving this model (instead of crashing)
-			$srcModel->saveManaged(true);
+			$srcModel->save(true);
 //			dumpl(array(
 //				'this' => $this
 //				,'srcModel' => $srcModel
