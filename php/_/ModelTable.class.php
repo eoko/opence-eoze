@@ -126,25 +126,31 @@ abstract class ModelTable extends ModelTableProxy {
 	protected function configure() {
 		// initialization ...
 	}
+	
+	private $config;
+	
+	protected function getConfig() {
+		return $this->config;
+	}
 
 	protected function configureBase() {
 		
-		$modelConfig = ConfigManager::get(
+		$this->config = ConfigManager::get(
 			ConfigManager::get('eoze/application/namespace') . "/cqlix/models/$this->dbTableName"
 		);
 		
 		foreach ($this->relations as $name => $relation) {
 			$relation->configureMeta(
-				isset($modelConfig['relations'][$name])
-					? $modelConfig['relations'][$name]
+				isset($this->config['relations'][$name])
+					? $this->config['relations'][$name]
 					: null
 			);
 		}
 
 		foreach ($this->virtuals as $name => $virtual) {
 			$virtual->configureMeta(
-				isset($modelConfig['virtuals'][$name])
-					? $modelConfig['virtuals'][$name]
+				isset($this->config['virtuals'][$name])
+					? $this->config['virtuals'][$name]
 					: null
 			);
 		}

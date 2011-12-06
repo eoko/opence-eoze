@@ -30,4 +30,6 @@ interface Plugin {
 	function beforeDelete(array $ids);
 	
 	function afterDelete(array $ids);
+	
+	function onCreateQueryContext(array &$context);
 }
