@@ -2273,7 +2273,16 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		if (tabConfig.groupTabs) {
 //			Ext.iterate(tabItems, function(groupTabName, groupTabConfig) {
 			Ext.each(tabItems, function(groupTabConfig) {
-				tabPanelItems.push({
+				var items = groupTabConfig.items,
+					config;
+				if (items) {
+					items = iterateTabItems(items);
+					config = Ext.apply({}, groupTabConfig);
+					delete config.items;
+				} else {
+					items = iterateTabItems(groupTabConfig);
+				}
+				tabPanelItems.push(Ext.apply({
 					expanded: true
 
 //					,deferredRender:false
@@ -2286,9 +2295,9 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 						,bodyStyle:'padding:10px;  background:transparent;'
 					}
 
-					,items: iterateTabItems(groupTabConfig)
-				})
-			})
+					,items: items
+				}, config));
+			});
 		} else {
 			tabPanelItems.push(iterateTabItems(tabItems));
 		}
@@ -2310,10 +2319,11 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 
 		if (tabConfig.groupTabs) {
 			return [{
-				 xtype:'grouptabpanel'
+				 xtype: Ext.isString(tabConfig.groupTabs) ? tabConfig.groupTabs : 'grouptabpanel'
 
 				,tabWidth: 130
-				,activeGroup: 0
+				
+				,activeGroup: tabConfig.activeGroup || 0
 
 				,width: tabConfig.windowWidth
 				,height: tabConfig.windowHeight

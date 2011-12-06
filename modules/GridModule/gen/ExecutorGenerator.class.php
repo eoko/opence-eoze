@@ -67,6 +67,9 @@ class ExecutorGenerator extends GeneratorBase {
 
 					if (isset($tabConfig['groupTabs']) && $tabConfig['groupTabs']) {
 						foreach ($tabItems as $groupName => $groupItems) {
+							if (isset($groupItems['items'])) {
+								$groupItems = $groupItems['items'];
+							}
 							foreach ($groupItems as $tabName => $items) {
 								if (Arrays::isAssoc($items) && isset($items['page'])) {
 									$pages[$items['page']] = $items['page'];
@@ -83,7 +86,11 @@ class ExecutorGenerator extends GeneratorBase {
 				}
 			}
 		}
-		foreach ($pages as &$p) $p = "'" . addcslashes($p, "'") . "'";
+		foreach ($pages as &$p) {
+			$p = "'" . addcslashes($p, "'") . "'";
+		}
+		unset($p);
+		
 		$tpl->tabPages = implode(', ', $pages);
 
 		// --- Process columns infos ---
