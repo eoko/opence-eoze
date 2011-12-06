@@ -10,6 +10,8 @@ use eoko\cqlix\table_filters\TableHasFilters;
 use eoko\database\Database;
 use eoko\util\Strings;
 
+use eoko\cqlix\Exception\ModelAlreadyDeletedException;
+
 use Model;
 use ModelTable;
 use ModelTableQuery;
@@ -880,18 +882,50 @@ MSG;
 	 * @deprecated Use {@link delete}
 	 */
 	public function delete_one() {
-		return $this->callInTransaction('doDelete');
+		return $this->onDelete();
 	}
 	
 	/**
 	 * @deprecated Use {@link delete}
 	 */
 	public function delete_multiple() {
-		return $this->callInTransaction('doDelete');
+		return $this->onDelete();
 	}
 	
 	public function delete() {
-		return $this->callInTransaction('doDelete');
+		return $this->onDelete();
+	}
+	
+	private function onDelete() {
+		
+		try {
+			return $this->callInTransaction('doDelete');
+		} 
+		
+		catch (ModelAlreadyDeletedException $ex) {
+			
+			list($ids, $count) = $this->getDeleteVariables();
+
+			$alreadyDeleted = $this->table->createQuery()
+					->whereIn($this->table->getPrimaryKeyName(), $ids)
+					->andWhere('`deleted` = 1')
+					->executeCount();
+
+			if ($count === 1) {
+				$this->errorMessage = "L'enregistrement n'existe pas (peut-être a-t-il "
+						. 'été supprimé par un ature utilisateur ?)';
+			}
+			if ($alreadyDeleted === $count) {
+				$this->errorMessage = "Les enregistrements n'existent pas (peut-être ont-ils "
+						. 'été supprimés par un autre utilisateur ?)';
+			}
+			if ($alreadyDeleted < $count) {
+				$this->errorMessage = "Certains des enregistrements sélectionnés n'existent "
+						. 'pas. Peut-être ont-ils été supprimés par un autre utilisateur.';
+			}
+
+			return false;
+		}
 	}
 	
 	protected function afterDelete(array $ids) {}
@@ -926,7 +960,7 @@ MSG;
 		return true;
 	}
 	
-	protected function doDelete() {
+	private function getDeleteVariables() {
 		
 		$ids = $this->request->requireFirst(array(
 			$this->table->getPrimaryKeyName(), 'id', 'ids'
@@ -937,6 +971,13 @@ MSG;
 		}
 		
 		$count = count($ids);
+		
+		return array($ids, $count);
+	}
+	
+	protected function doDelete() {
+		
+		list($ids, $count) = $this->getDeleteVariables();
 		
 		if ($this->onBeforeDelete($ids)) {
 			if ($count === $n = $this->table->deleteWherePkIn($ids)) {

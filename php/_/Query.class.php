@@ -657,7 +657,7 @@ class Query {
 		$this->where->whereNotIn($field, $values);
 		return $this;
 	}
-
+	
 	/**
 	 * @return Query
 	 */
