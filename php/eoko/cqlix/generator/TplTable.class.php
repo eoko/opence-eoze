@@ -102,47 +102,23 @@ class TplTable implements ConfigConstants {
 		
 		if (!$this->config) return;
 
-		$colConfig = isset($this->config[self::CFG_COLUMNS]) 
-				? $this->config[self::CFG_COLUMNS] : array();
-		
-		foreach ($this->directLocalRelations as $name => $relation) {
-			if (isset($colConfig[$relation->referenceField]['relation'])) {
-				$relation->configure(
-					$colConfig[$relation->referenceField]['relation'],
-					isset($this->config['relations'][$name])
-							? $this->config['relations'][$name]
-							: null
-				);
-			}
+		$colConfig;
+		if (isset($this->config[self::CFG_COLUMNS])) {
+			$colConfig = $this->config[self::CFG_COLUMNS];
 		}
+		
 		foreach ($this->relations as $name => $relation) {
-//			if ($name === 'LastRevision') {
-//				dump(array(
-////					$relation,
-//////					$this->relations,
-//////					$name,
-//////					$this,
-//////					$relation,
-////					$this->config['relations'][$name],
-//					isset($this->directLocalRelations[$name]),
-//					isset($this->config['relations'][$name]) ? $this->config['relations'][$name] : null,
-//				));
-//			}
-			if (isset($this->directLocalRelations[$name])
-					&& isset($colConfig[$relation->referenceField]['relation'])) {
-				$relation->configure(
-					$colConfig[$relation->referenceField]['relation'],
-					isset($this->config['relations'][$name])
-							? $this->config['relations'][$name]
-							: null
-				);
+			if (isset($this->config['relations'][$name])) {
+				if (isset($colConfig[$relation->referenceField]['relation'])) {
+					throw new IllegalStateException('Relation cannot be configured both '
+							. 'in column & Relations: ' . $relation);
+				} else {
+					$relation->configure($this->config['relations'][$name]);
+				}
+			} else if (isset($colConfig[$relation->referenceField]['relation'])) {
+				$relation->configure($colConfig[$relation->referenceField]['relation']);
 			} else {
-				$relation->configure(
-					null,
-					isset($this->config['relations'][$name])
-							? $this->config['relations'][$name]
-							: null
-				);
+				$relation->configure();
 			}
 		}
 	}
@@ -188,6 +164,9 @@ class TplTable implements ConfigConstants {
 					if (isset($relation['foreignConfig'])) {
 						$rel->reciproqueConfig = $relation['foreignConfig'];
 					}
+					if (isset($relation['unique'])) {
+						$rel->reciproqueConfig['unique'] = $relation['unique'];
+					}
 				}
 			}
 		}
@@ -218,8 +197,10 @@ class TplTable implements ConfigConstants {
 
 	private function mergeRelations() {
 		$this->relations = array();
-		foreach ($this->directLocalRelations as $referenceField => $relation) {
-			$this->addRelation($relation);
+		foreach ($this->directLocalRelations as $referenceField => $relations) {
+			foreach ($relations as $relation) {
+				$this->addRelation($relation);
+			}
 		}
 		foreach ($this->directForeignRelations as $foreignTable => $relations) {
 			foreach ($relations as $relation) {
@@ -270,12 +251,12 @@ class TplTable implements ConfigConstants {
 //		//$this->relations
 //	}
 	public function addDirectRelation(TplRelationReferencesOne $relation) {
-		if (isset($this->directLocalRelations[$relation->referenceField])) {
-			throw new IllegalStateException(
-				"Relation from field $relation->referenceField in table $this->dbTable already set"
-			);
-		}
-		$this->directLocalRelations[$relation->referenceField] = $relation;
+//		if (isset($this->directLocalRelations[$relation->referenceField])) {
+//			throw new IllegalStateException(
+//				"Relation from field $relation->referenceField in table $this->dbTable already set"
+//			);
+//		}
+		$this->directLocalRelations[$relation->referenceField][] = $relation;
 	}
 
 	public function addDirectRelations($relations) {
