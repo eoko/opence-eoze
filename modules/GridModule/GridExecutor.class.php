@@ -93,7 +93,34 @@ abstract class GridExecutor extends JsonExecutor {
 	////////////////////////////////////////////////////////////////////////////
 
 	public final function add() {
-		return $this->callInTransaction('doAdd');
+		try {
+			return $this->callInTransaction('doAdd');
+		} catch (\PDOException $ex) {
+			return $this->handleSqlError($ex->errorInfo);
+		} catch (\SqlException $ex) {
+			return $this->handleSqlError($ex->errorInfo);
+		}
+	}
+	
+	protected function handleSqlError($errorInfo) {
+		list($sqlState, $errorCode, $message) = $errorInfo;
+		switch ($sqlState) {
+			case '23000':
+				if (preg_match(
+						'/^Duplicate entry \'(?P<value>[^\']+)\' for key \'(?P<key>[^\']+)/',
+						$message, $matches)) {
+
+					if (($field = $this->table->getField($matches['key']))) {
+						$label = strtolower($field->getMeta()->label);
+					}
+
+					$this->errorMessage = "La valeur '$matches[value]' "
+							. ($label ? "pour le champ <em>$label</em> " : null)
+							. 'doit être unique.';
+				} 
+				break;
+		}
+		return false;
 	}
 
 	protected function doAdd() {
@@ -231,7 +258,7 @@ abstract class GridExecutor extends JsonExecutor {
 //			'year' => $this->request->get('year', null)
 //		);
 //		$query = $table->createQuery($context);
-		$query = $table->createQuery($this->createAutoCompleteQueryContext());
+		$query = $table->createReadQuery($this->createAutoCompleteQueryContext());
 		
 		$selects = $this->getAutoCompleteSelects($query);
 

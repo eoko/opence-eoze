@@ -248,11 +248,23 @@ interface SqlException {
 }
 
 class SqlUserException extends UserException implements SqlException {
+
+	public $errorInfo;
 	
+	public function __construct($errorInfo, $message, $title, $previous = null) {
+		$this->errorInfo = $errorInfo;
+		parent::__construct($message, $title, null, $previous);
+	}
 }
 
 class SqlSystemException extends SystemException implements SqlException {
 	
+	public $errorInfo;
+
+	public function __construct($errorInfo, $message, $previous = null) {
+		$this->errorInfo = $errorInfo;
+		parent::__construct($errorInfo, $message, $previous);
+	}
 }
 
 class IllegalRequestParamException extends IllegalArgumentException {
