@@ -9,6 +9,8 @@ use PHPUnit_Extensions_Database_DataSet_YamlDataSet as YamlDataSet,
 
 use eoko\database\Database;
 
+use IllegalStateException;
+
 //class DataSetFilter extends \PHPUnit_Extensions_Database_DataSet_DataSetFilter {}
 
 abstract class DatabaseTestCase extends PHPUnit_Extensions_Database_TestCase {
@@ -30,6 +32,23 @@ abstract class DatabaseTestCase extends PHPUnit_Extensions_Database_TestCase {
 		}
 
 		return $this->conn;
+	}
+	
+	protected function getDataSet() {
+		$class = new \ReflectionClass($this);
+		$file = $class->getFileName();
+		if (substr($file, -4) === '.php') {
+			$file = substr($file, 0, -4);
+		}
+		if (substr($file, -6) === '.class') {
+			$file = substr($file, 0, -6);
+		}
+		$file .= '.fixtures.yml';
+		if (file_exists($file)) {
+			return $this->createYmlDataSet($file);
+		} else {
+			throw new IllegalStateException($file . ' does not exists, a DataSet must be provided');
+		}
 	}
 
 	/**
