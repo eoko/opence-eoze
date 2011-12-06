@@ -231,10 +231,9 @@ new <?php echo $this->getClass() ?>(<?php echo $head ? $rTabs : '' ?>
 		$this->reciproque = $reciproque;
 	}
 
-	public function configure($config, $relationConfig) {
+	public function configure($config) {
 
-		$this->config = Arrays::apply($this->config, $relationConfig);
-		Arrays::apply($this->config, $config);
+		$this->config = Arrays::apply($this->config, $config);
 		
 		if (isset($this->config['onDelete'])) {
 			$this->onDeleteAction = $config['onDelete'];
@@ -337,6 +336,12 @@ class TplRelationReferencesOne extends TplRelationByReference
 
 	protected function getInfoClass() {
 		return 'ModelRelationInfoReferencesOne';
+	}
+
+	public function __toString() {
+		$class = get_relative_classname(get_class($this));
+		return "Indirect $class relation from $this->localDBTableName on $this->referenceField "
+				. "to $this->targetDBTableName as $this->alias";
 	}
 
 	protected function makeAlias() {
