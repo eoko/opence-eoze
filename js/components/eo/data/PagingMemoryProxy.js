@@ -179,7 +179,7 @@ eo.data.CachingHttpProxy = Ext.extend(eo.data.PagingMemoryProxy, {
 		this.dataProvider.getData(function(success, data) {
 			if (success) {
 				this.data = data;
-				eo.data.PagingMemoryProxy.prototype.doRequest.apply(this, args);
+				eo.data.CachingHttpProxy.superclass.doRequest.apply(this, args);
 			} else {
 				// TODO OCU-80
 				// data references the error
