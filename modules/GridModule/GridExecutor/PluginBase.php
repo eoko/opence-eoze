@@ -25,4 +25,6 @@ class PluginBase implements Plugin {
 	public function beforeDelete(array $ids) {}
 	
 	public function afterDelete(array $ids) {}
+	
+	public function onCreateQueryContext(array &$context) {}
 }

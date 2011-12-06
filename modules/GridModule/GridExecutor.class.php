@@ -42,8 +42,11 @@ abstract class GridExecutor extends JsonExecutor {
 	
 	protected function construct() {
 		parent::construct();
+		$this->initPlugins();
 		GlobalEvents::fire(get_class(), 'initPlugins', $this);
 	}
+	
+	protected function initPlugins() {}
 	
 	public function addPlugin(GridExecutor\Plugin $plugin) {
 		$plugin->configure($this, $this->table);
@@ -278,7 +281,9 @@ abstract class GridExecutor extends JsonExecutor {
 		}
 
 		$query->select($selects);
-		if (method_exists($query, 'whereIsActif')) $query->whereIsActif(); // TODO actif
+		if (method_exists($query, 'whereIsActif')) {
+			$query->whereIsActif(); // TODO actif
+		}
 
 		if ($this->request->has('limit', true)) {
 			if ($this->request->has('start', true)) {
@@ -544,8 +549,18 @@ abstract class GridExecutor extends JsonExecutor {
 
 	protected function createLoadQuery_extra(ModelTableQuery $query) {}
 
+	protected function createQueryContext() {
+		$context = array();
+		if ($this->plugins) {
+			foreach ($this->plugins as $plugin) {
+				$plugin->onCreateQueryContext($context);
+			}
+		}
+		return $context;
+	}
+	
 	protected function getLoadQueryContext() {
-		return array();
+		return $this->createQueryContext();
 	}
 
 	/**

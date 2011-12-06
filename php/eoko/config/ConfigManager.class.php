@@ -91,6 +91,9 @@ class ConfigManager {
 		return self::$instance;
 	}
 
+	/**
+	 * @return array|scalar
+	 */
 	public static function get($node, $key = null, $default = null) {
 		$node = self::getInstance()->node($node);
 		if ($key !== null) {
