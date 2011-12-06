@@ -244,7 +244,9 @@ eo.data.Connection = Ext.extend(Ext.util.Observable, {
 			opts.params = Ext.apply({
 				accept: accept
 			}, options.params);
-		} else {
+		}
+		
+		else {
 			opts.params = options.params
 		}
 		
