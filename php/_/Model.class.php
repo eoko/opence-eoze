@@ -605,10 +605,10 @@ abstract class Model {
 	 * @return TRUE if the model has been deleted, or will be deleted on next
 	 * call to the {@link Model::save() save()} method.
 	 */
-	public function isDeleted() {
+	public function wasDeleted() {
 		return $this->deleted;
 	}
-
+	
 	public function isModified($fieldName = null) {
 		if ($fieldName === null) {
 			return $this->internal->modified;
@@ -744,7 +744,9 @@ abstract class Model {
 						->executeInsert();
 
 				// TODO: check the return of PDO lastInsertId when for tables with no id or primary key
-				if ($id === null) return false;
+				if ($id === null) {
+					throw new ModelSaveException('Cannot get last id of created model');
+				}
 				if ($this->hasPrimaryKey()) {
 					$this->setPrimaryKeyValue($id);
 				}
@@ -802,13 +804,15 @@ abstract class Model {
 			// items... So, trying to keep track of modified vs unmodified relations
 			// in the Model would only produce useless overhead.
 			foreach ($this->internal->relations as $relation) {
-				if (!$this->saveRelation($relation, $new)) $success = false;
+				if (!$this->saveRelation($relation, $new)) {
+					throw new ModelSaveException('Failed saving relation: ' . $relation);
+				}
 			}
 			
 			$this->afterSaveRelations($new);
 		}
 		
-		return $success;
+		return true;
 	}
 
 	private function saveRelation(ModelRelation $relation, $parentWasNew) {
@@ -857,7 +861,7 @@ abstract class Model {
 	 * modifications in the store itself. This method is intended to allow the
 	 * performing of delete events, when the model will be deleted by a source
 	 * other than the model self's {@link Model::delete()} or {@link
-	 * Model::setDeleted()} methods.
+	 * Model::markDeleted()} methods.
 	 *
 	 * This method will set the model in a deleted state. If the model is
 	 * already in a deleted state, nothing will happen; that is, no event will
@@ -924,7 +928,7 @@ abstract class Model {
 	 *
 	 * @return bool TRUE if the action has actually affected the database, else
 	 * FALSE.
-	 * @see Model::setDeleted() to have the model deleted on the next call to the
+	 * @see Model::markDeleted() to have the model deleted on the next call to the
 	 * {@link Model::save() save()} method.
 	 */
 	public function delete() {
@@ -945,7 +949,7 @@ abstract class Model {
 	 * new; FALSE if the Model's data exists in the DB and cannot be 
 	 * successfully removed.
 	 * 
-	 * @see Model::delete(), Model::setDeleted()
+	 * @see Model::delete(), Model::markDeleted()
 	 */
 	public function discard() {
 		if (!$this->isNew()) {
@@ -971,8 +975,6 @@ abstract class Model {
 		if (!$this->deletedFromDB) {
 			$this->beforeDelete($isSaving);
 			
-			$pk = Query::quoteName($this->getPrimaryKeyName());
-
 			if ($this->doDeleteQuery()) {
 
 				$this->deletedFromDB = true;
@@ -1000,7 +1002,7 @@ abstract class Model {
 		return  1 === $this->getTable()
 				->createQuery($this->context)
 				->delete()
-				->where("$pk = ?", $this->getPrimaryKeyValue())
+				->where("`{$this->getPrimaryKeyName()}` = ?", $this->getPrimaryKeyValue())
 				->executeDelete();
 	}
 	
