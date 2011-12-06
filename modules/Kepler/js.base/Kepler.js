@@ -15,6 +15,11 @@ eo.Kepler = Ext.extend(Ext.util.Observable, {
 	
 	,failureCount: 0
 	
+	,conn: new eo.data.Connection({
+		url: 'index.php'
+		,accept: 'json'
+	})
+	
 	,constructor: function() {
 		var me = this;
 		Oce.deps.wait('Oce.Bootstrap.start', function() {
@@ -34,8 +39,7 @@ eo.Kepler = Ext.extend(Ext.util.Observable, {
 		if (!this.polling) {
 			this.polling = true;
 			this.running = true;
-			Ext.Ajax.request({
-//				url: "comet.php"
+			this.conn.request({
 				params: {
 					controller: 'kepler' // TODO configurable controller
 //					,timeout: 5
@@ -74,13 +78,9 @@ eo.Kepler = Ext.extend(Ext.util.Observable, {
 		}
 	}
 	
-	,onPollSuccess: function(response) {
-		this.processResponse(Ext.decode(response.responseText));
-	}
-	
-	,processResponse: function(response) {
-		var entries = response.entries;
-		if (response.success && entries) {
+	,onPollSuccess: function(data) {
+		var entries = data.entries;
+		if (data.success && entries) {
 			if (entries.events) {
 				try {
 					this.processEvents(entries.events);
