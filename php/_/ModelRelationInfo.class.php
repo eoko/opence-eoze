@@ -157,16 +157,21 @@ abstract class ModelRelationInfo extends ModelFieldBase {
 	}
 
 	public function select(Query $query) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException;
 	}
 
 	protected $selectable = false;
 
 	public function getType() {
-		if (!$this->selectable) return null;
-		else if ($this instanceof ModelRelationInfoHasOne) return ModelColumn::T_STRING;
-		else if ($this instanceof ModelRelationInfoHasMany) return ModelColumn::T_INT;
-		else throw new UnsupportedOperationException(get_class($this) . '::getType()');
+		if ($this->selectable) {
+			if ($this instanceof ModelRelationInfoHasOne) {
+				return ModelField::T_STRING;
+			} else if ($this instanceof ModelRelationInfoHasMany) {
+				return ModelField::T_INT;
+			}
+		} else {
+			throw new UnsupportedOperationException;
+		}
 	}
 	
 	public function getSqlType() {
@@ -174,17 +179,14 @@ abstract class ModelRelationInfo extends ModelFieldBase {
 	}
 
 	public function castValue($value) {
-		if ($this->selectable) {
-			if ($this instanceof ModelRelationInfoHasOne) {
-				return ModelColumn::T_STRING;
-			} else if ($this instanceof ModelRelationInfoHasMany) {
-				return ModelColumn::T_INT;
-			}
-		} else {
-			throw new UnsupportedOperationException(
-				'Unsupported operation: ' . get_class($this) . '::castValue()' . "($this)"
-			);
+		if ($value === null) {
+			return null;
 		}
+		switch ($this->getType()) {
+			case ModelField::T_STRING: return (string) $value;
+			case ModelField::T_INT: return (int) $value;
+		}
+		throw new UnsupportedOperationException;
 	}
 	
 	public function isNullable() {
