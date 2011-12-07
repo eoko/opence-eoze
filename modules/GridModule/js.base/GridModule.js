@@ -1209,7 +1209,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		});
 
 		kit.on('formpanelcreate', function(formPanel) {
-			formPanel.on('beforeload', this.beforeFormLoad);
+			formPanel.on('beforeload', this.beforeFormLoad, this);
 			formPanel.on('afterload', function(form, data, formPanel) {
 				if (handlers.win.refreshTitle) {
 					handlers.win.refreshTitle(data.data);
@@ -1243,7 +1243,16 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		};
 	}
 
-	,beforeFormLoad: function(loadParams) {}
+	/**
+	 * Hook method that is called when a form load has been triggered,
+	 * before it actually occurs.
+	 * 
+	 * @param {Ext.form.BasicForm} form The form that is to be loaded.
+	 * @param {Object} options The options object that will be passed
+	 * to the {@link Ext.form.BasicForm#load load} method of the form.
+	 */
+	,beforeFormLoad: function(form, options) {}
+	
 	,afterFormLoad: function(form, data, formPanel) {}
 	,onConfigureAddFormPanel: function(formConfig) {}
 
@@ -1256,6 +1265,8 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		var fn = function(win) {
 
 			this.editWindows[rowId] = win;
+			
+			this.afterCreateWindow(win, 'edit', rowId);
 			this.afterCreateEditWindow(win, rowId);
 
 	//		win.on('destroy', function(){
@@ -1350,6 +1361,87 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		return undefined;
 	}
 
+	/**
+	 * Hook method called before a window is created.
+	 * 
+	 * @param {Object} config The configuration of the window
+	 * to be created.
+	 * 
+	 * @param {String} action The action provided by the window. 
+	 * That can be either `'add'` or `'edit'`.
+	 * 
+	 * @param {String|Integer} recordId If the action was `'edit'`,
+	 * then the id of the record being edited will passed as the
+	 * third argument.
+	 * 
+	 * @protected
+	 */
+	,beforeCreateWindow: function(config, action, recordId) {}
+	
+	/**
+	 * Hook method called before an edit window is created.
+	 * 
+	 * @param {Object} config The configuration of the window
+	 * to be created.
+	 * 
+	 * @param {String|Integer} recordId The id (primary key value)
+	 * of the record being edited.
+	 * 
+	 * @protected
+	 * 
+	 */
+	,beforeCreateEditWindow: function(config, recordId) {}
+	
+	/**
+	 * Hook method called before an add window is created.
+	 * 
+	 * @param {Object} config The configuration of the window
+	 * to be created.
+	 * 
+	 * @protected
+	 * 
+	 */
+	,beforeCreateAddWindow: function(config) {}
+	
+	/**
+	 * Hook method called after a window has been created, and
+	 * before the form data are loaded (in the case of an edit
+	 * window).
+	 * 
+	 * @param {Ext.Window} win The window that has been created.
+	 * 
+	 * @param {String} action The action provided by the window. 
+	 * That can be either `'add'` or `'edit'`.
+	 * 
+	 * @param {String|Integer} recordId If the action was `'edit'`,
+	 * then the id of the record being edited will passed as the
+	 * third argument.
+	 * 
+	 * @protected
+	 */
+	,afterCreateWindow: function(win, action, recordId) {}
+	
+	/**
+	 * Hook method called after an add window has been created.
+	 * 
+	 * @param {Ext.Window} win The window that has been created.
+	 * 
+	 * @protected
+	 */
+	,afterCreateAddWindow: function(win) {}
+
+	/**
+	 * Hook method called after a window has been created, and
+	 * before the form data are loaded.
+	 * 
+	 * @param {Ext.Window} win The window that has been created.
+	 * 
+	 * @param {String|Integer} recordId If the action was `'edit'`,
+	 * then the id of the record being edited will passed as the
+	 * third argument.
+	 * 
+	 * @protected
+	 */
 	,afterCreateEditWindow: function(win, recordId) {
 		this.parseContextHelpItems(win);
 		
@@ -1378,8 +1470,6 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 //			}
 //		}, this);
 	}
-	
-	,beforeCreateWindow: function(config, action) {}
 
 	,parseContextHelpItems: function(win) {
 		if (!this.hasHelp()) return;
@@ -1606,7 +1696,8 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			winConfig.title = this.buildEditWindowTitle(record.data) || winConfig.title;
 		}
 		
-		this.beforeCreateWindow(winConfig, "edit");
+		this.beforeCreateWindow(winConfig, 'edit', recordId);
+		this.beforeCreateEditWindow(winConfig, recordId);
 
 		return this.createFormWindow(
 			this.getEditFormConfig(),
@@ -1685,14 +1776,18 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		}));
 
 		this.beforeCreateWindow(winConfig, "add");
+		this.beforeCreateAddWindow(winConfig);
 
-		return this.createFormWindow(
+		var win = this.createFormWindow(
 			formConfig
 			,winConfig
 			,function(win) {
 				this.saveNew.call(this, win, callback, win.loadModelData);
 			}, this.addWindowToolbarAddExtra.createDelegate(this)
 		);
+			
+		this.afterCreateWindow(win, 'add');
+		this.afterCreateAddWindow(win);
 
 		return win;
 	}
@@ -2883,10 +2978,13 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	}
 	
 	,firstLoad: false
+	
+	,beforeGridStoreFirstLoad: function(store) {}
 
 	,doFirstLoad: function() {
 		if (!this.firstLoad) {
 			var store = this.store;
+			this.beforeGridStoreFirstLoad(store);
 			store.load({
 				params: {start: 0, limit: this.pageSize, action:'load'}
 // --- EXPERIMENTS ---
@@ -2949,6 +3047,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			}
 			if (this.firstLoad) {
 				this.reloadLatch = 0;
+				debugger
 				this.store.reload(o);
 			}
 		}
