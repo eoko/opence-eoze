@@ -2,115 +2,147 @@ Ext.ns('Oce.GridModule')
 
 Oce.deps.wait('Oce.form.ForeignComboBox', function() {
 
-//	Oce.YearCombo = Ext.extend(Oce.form.ForeignComboBox, {
-//
-//		label: 'Année'
-//
-//		,constructor: function(config) {
-//			
-//			this.addEvents({
-//				'yearchanged': true
-//			});
-//
-//			Ext.applyIf(config, {
-//				fieldLabel: this.label
-//				,controller: 'years'
-//				,clearable: false
-//	//			,listeners: {
-//	//				select: function(combo, record, index) {
-//	//					this.onValueChange(record.data.id);
-//	//				}.createDelegate(this)
-//	//			}
-//
-//				,forceSelection: true
-//			});
-//
-//			this.on('select', function(combo, record, index) {
-//				this.onValueChange(record.data.id);
-//			}.createDelegate(this))
-//
-//			this.addEvents('firstload');
-//
-//			this.firstLoadListener = function() {
-//				this.store.un('load', this.firstLoadListener);
-//				this.firstLoadListener = true;
-//				this.fireEvent('firstload');
-//			}.createDelegate(this);
-//
-//			Oce.YearCombo.superclass.constructor.call(this, config);
-//
-//			this.whenStoreLoaded(this.firstLoadListener);
-//
-//			this.setValue(config.year);
-//		}
-//
-//		,waitFirstLoad: function(callback) {
-//			if (this.firstLoadListener === true) {
-//				callback();
-//			} else {
-//				this.on('firstload', callback);
-//			}
-//		}
-//
-//		,onValueChange: function(year) {
-//			this.fireEvent('yearchanged', year);
-//		}
-//
-//		,setValue: function(v) {
-//			if (this.store != null) {
-//				Oce.YearCombo.superclass.setValue.call(this, v);
-//			} else {
-//				this.value = v;
-//			}
-//		}
-//	})
-
+	/**
+	 * A date selector intended to let the user choose the date on
+	 * which the presented data will be synchronized.
+	 * 
+	 * In order to ease possible changes in implementation, this class
+	 * defines custom events ({@link #beforedatechanged} and
+	 * {@link #datechanged}) on which other components can rely safely.
+	 * For the same reason, it defines a custom {@link #getDate} method.
+	 */
 	Oce.YearCombo = Ext.extend(eo.form.DateField, {
 		
 		label: 'Date'
 		
-		,getCurrentDate: function() {
-			return this.getValue().format('Y-m-d');
+		,constructor: function() {
+			Oce.YearCombo.superclass.constructor.apply(this, arguments);
+			
+			this.addEvents(
+				/**
+				 * @event beforedatechanged
+				 * Fires before the date is changed. Returning `false` will prevent
+				 * the value from actually been modified.
+				 * @param {Oce.YearCombo} this
+				 * @param {Date} date The new date value.
+				 */
+				'beforedatechanged',
+				
+				/**
+				 * @event datechanged
+				 * Fires when the date value of the selector has changed.
+				 * @param {Oce.YearCombo} this
+				 * @param {Date} date The new date value.
+				 */
+				'datechanged'
+			);
 		}
 		
-		,onValueChange: function(year) {}
+		/**
+		 * Changes the value of the field, and fire the beforedatechanged
+		 * and datechanged event as needed. This method does not test for
+		 * difference with the already set value, that is expected to be
+		 * done by {#setValue}.
+		 * 
+		 * @param {Date} v
+		 * 
+		 * @private
+		 */
+		,onSetValue: function(v) {
+			if (false !== this.fireEvent('beforedatechanged', this, v)) {
+				Oce.YearCombo.superclass.setValue.call(this, v);
+				this.fireEvent('datechanged', this, v);
+			}
+		}
 		
+		,setValue: function(v) {
+			if (!this.dateEquals(v)) {
+				if (!v.format) {
+					v = this.parseDateOrDie(v);
+				}
+				this.onSetValue(v);
+			}
+		}
+		
+		/**
+		 * Parses a date or throw an {@link Error} if the value passed cannot
+		 * be parsed to a date.
+		 * @param {String} v The value to parse to a {Date}.
+		 * @return {Date}
+		 * @private
+		 */
+		,parseDateOrDie: function(v) {
+			var r = this.parseDate(v);
+			if (!(r instanceof Date)) {
+				throw new Error('Cannot parse date: ' + v);
+			}
+			return r;
+		}
+		
+		/**
+		 * Compares the value of this field with the given date.
+		 * @param {Date|String} date The date to compare to. Can be `undefined` or
+		 * `null`. If given as a string, the date will be converted using the 
+		 * {@link eo.form.DateField#format format} of this DateField.
+		 * @param {String} [mask='Ymd'] The mask to be used to compare the
+		 * dates.
+		 * @return {Boolean}
+		 */
+		,dateEquals: function(date, mask) {
+			var v = this.getValue();
+			// test null/undefined dates
+			if (!v) {
+				if (!date) {
+					return true;
+				} else {
+					return false;
+				}
+			} else if (!date) {
+				return false;
+			}
+			
+			// convert to dates
+			if (!v.format) {
+				v = this.parseDateOrDie(v);
+			}
+			if (!date.format) {
+				date = this.parseDateOrDie(date);
+			}
+			// default mask
+			if (!mask) {
+				mask = 'Ymd';
+			}
+			// compare dates
+			return v.format(mask) === date.format(mask);
+		}
+		
+		/**
+		 * Gets the current date as a string in the format `Y-m-d`. If the
+		 * date is not set when this method is called, it will raise and Error.
+		 * This method should be used instead of {@link #getValue} in order
+		 * to ease future implementation changes.
+		 * @return {String}
+		 */
+		,getDateString: function() {
+			var v = this.getValue();
+			if (v instanceof Date) {
+				return v.format('Y-m-d');
+			} else if (!v) {
+				throw new Error('Date is not set');
+			} else {
+				return v;
+			}
+		}
+		
+		/**
+		 * @deprecated
+		 */
 		,waitFirstLoad: function(callback) {
 			callback();
 		}
 	});
 
 	Ext.reg('oce.yearcombo', Oce.YearCombo);
-
-	Oce.GridModuleYearCombo = Ext.extend(Oce.YearCombo, {
-
-//		constructor: function(config) {
-//
-//			Oce.GridModuleYearCombo.superclass.constructor.call(this, config);
-//
-//			if (false === 'module' in config) throw new 'Missing required config param: module';
-//
-//			this.module = config.module;
-//
-//			var superOnRead = this.module.store.proxy.onRead;
-//
-//			this.module.store.proxy.onRead = function(action, trans, result, res) {
-//
-//				superOnRead.apply(this.module.store.proxy, arguments);
-//
-//				var o = Ext.util.JSON.decode(result.responseText);
-//				this.setValue(o.year);
-//			}.createDelegate(this)
-//
-//			this.on('yearchanged', function(year) {
-//				this.module.store.setBaseParam('year', year);
-//				this.module.store.reload();
-//			}.createDelegate(this))
-//		}
-
-	});
-
-	Ext.reg('oce.gm.yearcombo', Oce.GridModuleYearCombo);
 
 	Oce.GlobalYearManager = Ext.extend(Oce.YearCombo, {
 
@@ -119,6 +151,5 @@ Oce.deps.wait('Oce.form.ForeignComboBox', function() {
 		}
 	})
 
-	Oce.deps.reg('GridModuleYearCombo');
 	Oce.deps.reg('Oce.GridModule.YearCombo');
 });
