@@ -237,7 +237,7 @@ eo.data.Connection = Ext.extend(Ext.util.Observable, {
 			
 			,url: options.url || this.url
 			
-			,jsonData: jsonData || {requestType: 'AJAX'}
+			,jsonData: jsonData || (Ext.isChrome ? {requestType: 'AJAX'} : undefined)
 		};
 		
 		if (accept) {
@@ -255,6 +255,16 @@ eo.data.Connection = Ext.extend(Ext.util.Observable, {
 				accept: accept
 				,contentType: 'json'
 			}, options.params);
+		}
+
+		// Converting jsonData back to params, for firefox to be able to repeat it
+		// TODO this is a debuggging facility that should be removed
+		if (opts.jsonData && Ext.isGecko) {
+			opts.params = opts.params || {};
+			Ext.iterate(opts.jsonData, function(k, v) {
+				opts.params['json_' + k] = Ext.encode(v);
+			});
+			delete opts.jsonData;
 		}
 		
 		this.connection.request(opts);
@@ -602,7 +612,7 @@ eo.deps.reg('eo.Ajax');
 // interpret the Content-type...
 if (Ext.isChrome) {
 	Ext.Ajax.on('beforerequest', function(conn, opts) {
-		if (!opts.jsonData) {
+		if (Ext.isChrome && !opts.jsonData) {
 			opts.jsonData = {requestType: 'AJAX'};
 		}
 	});
