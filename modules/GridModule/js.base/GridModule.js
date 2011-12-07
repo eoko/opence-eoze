@@ -1209,7 +1209,9 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		});
 
 		kit.on('formpanelcreate', function(formPanel) {
-			formPanel.on('beforeload', this.beforeFormLoad, this);
+			formPanel.on('beforeload', function(fp, form, options) {
+				this.beforeFormLoad(form, options);
+			}, this);
 			formPanel.on('afterload', function(form, data, formPanel) {
 				if (handlers.win.refreshTitle) {
 					handlers.win.refreshTitle(data.data);
