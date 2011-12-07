@@ -22,7 +22,10 @@ Ext.ns('eo.data');
 eo.data.PagingMemoryProxy = Ext.extend(Ext.data.MemoryProxy, {
     
 	constructor : function(data){
-        eo.data.PagingMemoryProxy.superclass.constructor.call(this);
+        
+		this.requestProcessors = [];
+		
+		eo.data.PagingMemoryProxy.superclass.constructor.call(this);
         this.data = data;
     }
 
@@ -57,7 +60,33 @@ eo.data.PagingMemoryProxy = Ext.extend(Ext.data.MemoryProxy, {
 	 * @method
 	 */
 	,createQueryFilter: undefined
+	
+	/**
+	 * {Array} requestProcessors
+	 * List of processing functions to be called in {@link #processRequest}.
+	 * @private
+	 */
+	,requestProcessors: undefined
+	
+	/**
+	 * Add a function that will be called to process requests result in
+	 * {@link #processRequest}.
+	 * 
+	 * @param {Function} fn
+	 * @param {Object} [scope=this]
+	 */
+	,addRequestProcessor: function(fn, scope) {
+		if (scope) {
+			fn = Ext.util.Functions.createDelegate(fn, scope);
+		}
+		this.requestProcessors.push(fn);
+	}
 
+	/**
+	 * Processes the given request.
+	 *
+	 * @protected
+	 */
     ,processRequest: function(action, rs, params, reader, callback, scope, options) {
         params = params || {};
         var result;
@@ -93,6 +122,13 @@ eo.data.PagingMemoryProxy = Ext.extend(Ext.data.MemoryProxy, {
             });
             result.totalRecords = result.records.length;
         }
+		
+		// Call external processors
+		var args = Array.prototype.slice.call(arguments, 0);
+		args.unshift(result);
+		Ext.each(this.requestProcessors, function(fn) {
+			fn.apply(this, args);
+		}, this);
 		
         return result;
     }
