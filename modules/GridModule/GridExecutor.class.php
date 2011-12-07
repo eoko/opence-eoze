@@ -608,9 +608,6 @@ abstract class GridExecutor extends JsonExecutor {
 
 		foreach ($r as &$record) {
 			foreach ($record as $field => &$value) {
-				if ($field === 'Employment->Agency') {
-					dumpl($value);
-				}
 				$value = $this->table->getField($field)->castValue($value);
 			}
 			unset($value);
