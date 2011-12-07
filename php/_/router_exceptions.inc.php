@@ -134,11 +134,8 @@ class NullPointerException extends SystemException {
 	
 }
 
-class UnsupportedOperationException extends SystemException {
-	function __construct($debugMessage = '', $previous = null) {
-		parent::__construct($debugMessage, '', $previous);
-	}
-}
+// Needed bellow
+require_once __DIR__ . '/UnsupportedOperationException.class.php';
 
 class SecurityException extends SystemException {
 	function __construct($debugMessage = '', $previous = null) {
