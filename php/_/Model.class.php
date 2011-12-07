@@ -524,7 +524,9 @@ abstract class Model {
 		$r = array();
 
 		// This means that no column value has been set
-		if ($this->internal->colUpdated === null) return $r;
+		if ($this->internal->colUpdated === null) {
+			return $r;
+		}
 
 		foreach ($this->getFields(self::F_COLUMN) as $k => $v) {
 //			if (($this->internal->fields[$k] !== null && $this->internal->colUpdated[$k])) {
@@ -644,6 +646,14 @@ abstract class Model {
 				}
 				
 				return $r;
+			}
+			
+			// 06/12/11 22:46
+			// Get from relation
+			$relationName = ucfirst($k);
+			if (null !== $f = $this->table->hasRelation($relationName)) {
+				$relation = $this->getForeignModel($relationName);
+				return $relation;
 			}
 		}
 		throw new Exception("Undefined method: $name()");
@@ -814,14 +824,18 @@ abstract class Model {
 					->executeUpdate();
 			
 			$this->afterCommitChanges();
-			
 			return true;
 		} else {
+			$this->afterCommitChanges();
 			return false;
 		}
 	}
 	
 	private function afterCommitChanges() {
+		
+		// Take care, do not fire events or such from here... Look, just above,
+		// commitChanges is using this to reset fields, but does not expect
+		// more.
 
 		// clear $forceNew state
 		$this->forceNew = null;
@@ -1400,7 +1414,7 @@ abstract class Model {
 				throw new IllegalArgumentException($this->getModelName() . '.' . $name . ' cannot be null');
 			}
 			
-			if ($this->internal->fields[$name] !== $v || !$testChanged) {
+			if ($this->internal->fields[$name] != $v || !$testChanged) {
 //				self::getLogger()->debug('Converted value for field {} : {} => {}', $name, $value, $v);
 				$this->internal->fields[$name] = $this->applyFieldValue($name, $v);
 				$this->internal->colUpdated[$name] = true;
