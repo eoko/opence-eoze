@@ -453,27 +453,67 @@ abstract class ModelTable extends ModelTableProxy {
 
 	abstract public static function hasRelation($name);
 
+	/**
+	 * Returns `true` if the table has a field selectable as its display
+	 * name (that is, the name that should be displayed to the user).
+	 * 
+	 * Overrides and return `false` if the table has a field that would 
+	 * be automatically selected as the display name by the
+	 * {@link getNameFieldName()} method.
+	 * 
+	 * @return bool `true` if the table has a field selectable as its
+	 * display name.
+	 */
 	abstract public static function hasName();
 
 	protected function _hasName() {
-		if (null === $name = $this->getNameFieldName(false)) {
-			return false;
-		} else {
-			return $this->hasColumn($name);
-		}
-//		return $this->hasColumn();
-//		if ($this->hasColumn('name') || $this->hasColumn('nom'))
-//				return true;
+		return !!$this->getNameFieldName(false);
 	}
 
+	/**
+	 * Get the name of the field that is considered to be the display name
+	 * of the record (that is, the one that can be recognized by the user
+	 * in order to identify the record).
+	 * 
+	 * This method will automatically detect the following fields (in this
+	 * order of precedence), if they are present in the table schema:
+	 * 
+	 * - label
+	 * - displayName
+	 * - name
+	 * 
+	 * Any type of field that has this name will be selected by this method 
+	 * (that is, an actual column, a virtual field, or other).
+	 * 
+	 * If you don't want a field with such a name to be considered as the
+	 * display name, overrides this method and/or {@link hasName()}.
+	 * 
+	 * @param {Boolean} $require If `true`, the method will throw an 
+	 * {@link IllegalStateException} if it cannot find a display name.
+	 * 
+	 * @return string
+	 */
 	abstract public static function getNameFieldName($require = true);
 
 	protected function _getNameFieldName($require = true) {
-		if ($this->hasColumn('label')) return 'label';
-		else if ($this->hasColumn('name')) return 'name';
-		else if ($this->hasColumn('nom')) return 'nom';
-		else if ($require) throw new IllegalStateException();
-		else return null;
+		foreach (array(
+			'label', 'displayName', 'name'
+		) as $field) {
+			if ($this->hasField($field)) {
+				return $field;
+			}
+		}
+		if ($require) {
+			throw new IllegalStateException("Table $this->tableName has no display name");
+		} else {
+			return null;
+		}
+//		if ($this->hasColumn('label')) return 'label';
+//		else if ($this->hasColumn('displayName')) return 'displayName';
+//		else if ($this->hasColumn('name')) return 'name';
+//		else if ($this->hasColumn('nom')) return 'nom';
+//		else if ($require) throw new IllegalStateException();
+//		else return null;
 	}
 	
 	/**
