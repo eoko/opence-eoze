@@ -361,34 +361,10 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
 
 		var me = this;
 		var win = this.win;
-
-		var params = {
-			controller: this.controller
-			,action:"load_one"
-		};
-		params[win.pkName] = win.idValue;
-
-//		this.beforeFormLoad(params);
-		this.fireEvent("beforeload", params);
-
-		this.preventModificationEvents = true;
-		var afterLoadSuccess = function() {
-
-			me.preventModificationEvents = false;
-
-			// Load grid fields
-			me.form.items.each(function(field) {
-				if (field instanceof Oce.form.GridField) {
-					field.load();
-				}
-			});
-
-			me.clearModified();
-		};
-
-		this.form.load({
+		
+		var options = {
 			url: "index.php"
-			,params: params
+//			,params: params
 			,waitMsg: "Chargement des données" // i18n
 			,waitTitle: "Veuillez patientez" // i18n
 
@@ -421,7 +397,37 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
 					callback(this.form);
 				}
 			}
-		});
+		};
+
+		var params = {
+			controller: this.controller
+			,action:"load_one"
+		};
+		params[win.pkName] = win.idValue;
+		
+		options.params = params;
+
+		// 07/12/11 02:10 changed the signature of the event from
+		// beforeLoad(params) to beforeLoad(formPanel, form, options), where 
+		// params === options.params
+		this.fireEvent('beforeload', this, this.form, options);
+
+		this.preventModificationEvents = true;
+		var afterLoadSuccess = function() {
+
+			me.preventModificationEvents = false;
+
+			// Load grid fields
+			me.form.items.each(function(field) {
+				if (field instanceof Oce.form.GridField) {
+					field.load();
+				}
+			});
+
+			me.clearModified();
+		};
+
+		this.form.load(options);
 	}
 
 	// Overridden to allow for JsonForm
