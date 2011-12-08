@@ -182,11 +182,40 @@ abstract class Model {
 	 * @return mixed
 	 */
 	private function getFieldValue($field, &$model = null, &$modelField = null) {
+		
 		if (array_key_exists($field, $this->internal->fields)) {
 			$model = $this;
 			$modelField = $field;
 			return $this->getField($field);
-		} else {
+		} 
+		
+		else if ($this->table->hasVirtual($field)
+				|| $this->table->hasVirtual($field = lcfirst($field))) {
+
+			$model = $this;
+			$modelField = $field;
+			
+			if (array_key_exists($field, $this->virtualFieldsCache)) {
+				return $this->virtualFieldsCache[$field];
+			}
+
+			$r = $this->table
+					->createQuery($this->context)
+					->select($field)
+					->where("`{$this->getPrimaryKeyName()}`=?", 
+							$this->getPrimaryKeyValue())
+					->executeSelectValue();
+
+			$r = $this->table->getVirtual($field)->castValue($r);
+					
+			if ($this->table->isVirtualCachable($field)) {
+				$this->virtualFieldsCache[$field] = $r;
+			}
+
+			return $r;
+		}
+		
+		else {
 			$relName = ucfirst($field);
 
 			if (count($parts = explode('->', $relName)) > 1) {
@@ -199,7 +228,9 @@ abstract class Model {
 				}
 				$model = $relModel;
 				$modelField = $last;
-				return $relModel->__get($last);
+				
+//				return $relModel->__get($last);
+				return $relModel->getFieldValue($last);
 			} else {
 				if ($this->getTable()->hasRelation($relName)) {
 					return $model = $this->getForeignModel($relName);
