@@ -208,11 +208,14 @@ NS.FormConfig = Ext.extend(Object, {
 		this.inheritNode(config, col, 'formField');
 		
 		this.inherit(config, {
-			xtype: col.type !== undefined ? col.type : defaults.type,
 			name: col.name,
 			fieldLabel: colForm.fieldLabel || col.header,
 			'allowBlank': col.allowBlank !== undefined ? col.allowBlank : defaults.allowBlank
 		});
+		
+		if (!config.xtype && !config.readOnly) {
+			config.xtype = col.type !== undefined ? col.type : defaults.type;
+		}
 
 		// --- Process
 		if ('formField' in config) {
