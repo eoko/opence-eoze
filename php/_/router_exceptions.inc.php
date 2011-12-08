@@ -258,9 +258,14 @@ class SqlSystemException extends SystemException implements SqlException {
 	
 	public $errorInfo;
 
-	public function __construct($errorInfo, $message, $previous = null) {
-		$this->errorInfo = $errorInfo;
-		parent::__construct($errorInfo, $message, $previous);
+	public function __construct($errorInfo, $message = null, $previous = null) {
+		if (is_array($this->errorInfo)) {
+			$this->errorInfo = $errorInfo;
+			$msg = $errorInfo[2];
+		} else {
+			$msg = $errorInfo;
+		}
+		parent::__construct($msg, $message, $previous);
 	}
 }
 
