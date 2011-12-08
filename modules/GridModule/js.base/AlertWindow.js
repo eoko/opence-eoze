@@ -62,7 +62,7 @@ Oce.Modules.GridModule.AlertWindow = Ext.extend(eo.Window, {
 	 * @param {String} modalGroup The arbitrary unique identifier of the
 	 * modal group for the given target window.
 	 * 
-	 * @return {Ext.Window|Boolean} `true` if there isn't any other visible dialog
+	 * @return {Ext.Window/Boolean} `true` if there isn't any other visible dialog
 	 * already targetting the given window for the given modal group.
 	 * 
 	 * @private
@@ -129,18 +129,48 @@ Oce.Modules.GridModule.AlertWindow = Ext.extend(eo.Window, {
 		}
 		
 		// Buttons
-		if (this.okHandler) {
+		if (Ext.isObject(buttons)) {
+			buttons = [];
+			var fn = this.fn || Ext.emptyFn;
+			Ext.iterate(this.buttons, function(name, label) {
+				buttons.push({
+					text: label
+					,name: name
+					,scope: this
+					,handler: function(b) {
+						this.close();
+						fn.call(scope, name)
+					}
+				})
+			}, this);
+			this.buttons = buttons;
+		}
+
+		else {
+			if (this.okHandler) {
+				buttons.push({
+					text: 'Ok'
+					,handler: this.okHandler
+					,scope: scope
+				});
+			}
+			if (this.cancelHandler) {
+				buttons.push({
+					text: 'Annuler'
+					,handler: this.cancelHandler
+					,scope: scope
+				});
+			}
+		}
+		
+		// If no button is configured, then let's go for a simple 'Ok' window
+		if (!buttons.length) {
 			buttons.push({
 				text: 'Ok'
-				,handler: this.okHandler
-				,scope: scope
-			});
-		}
-		if (this.cancelHandler) {
-			buttons.push({
-				text: 'Annuler'
-				,handler: this.cancelHandler
-				,scope: scope
+				,scope: this
+				,handler: function() {
+					this.close();
+				}
 			});
 		}
 		
