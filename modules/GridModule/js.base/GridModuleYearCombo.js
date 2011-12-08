@@ -22,11 +22,12 @@ Oce.deps.wait('Oce.form.ForeignComboBox', function() {
 				/**
 				 * @event beforedatechanged
 				 * Fires before the date is changed. Returning `false` will prevent
-				 * the value from actually been modified.
+				 * the {@link #datechanged} event from being fired (but the value 
+				 * will still be changed).
 				 * @param {Oce.YearCombo} this
 				 * @param {Date} date The new date value.
 				 */
-				'beforedatechanged',
+				'beforedatechange',
 				
 				/**
 				 * @event datechanged
@@ -36,6 +37,36 @@ Oce.deps.wait('Oce.form.ForeignComboBox', function() {
 				 */
 				'datechanged'
 			);
+				
+			this.on({
+				scope: this
+				,specialkey: function(me, e) {
+					if (e.getKey() === e.ENTER) {
+						e.stopEvent();
+						if (!this.dateEquals(this.startValue)) {
+							this.onSetValue(this.getValue());
+						}
+					}
+				}
+			});
+		}
+		
+		,onBlur: function() {
+			Oce.YearCombo.superclass.onBlur.call(this);
+			if (!this.dateEquals(this.startValue)) {
+				this.onSetValue(this.getValue());
+			}
+		}
+
+		// prevents the field from stealing focus on menu selection
+		,onMenuHide: Ext.emptyFn
+		
+		// prevents the field from blinking when the menu is triggered
+		,onTriggerClick: function() {
+			var orig = this.selectOnFocus;
+			this.selectOnFocus = false;
+			Oce.YearCombo.superclass.onTriggerClick.apply(this, arguments);
+			this.selectOnFocus = orig;
 		}
 		
 		/**
@@ -45,22 +76,34 @@ Oce.deps.wait('Oce.form.ForeignComboBox', function() {
 		 * done by {#setValue}.
 		 * 
 		 * @param {Date} v
+		 * @param {Boolean} skipEvent `true` to prevent the firing of the 
+		 * {@link #datechanged} event.
 		 * 
 		 * @private
 		 */
-		,onSetValue: function(v) {
-			if (false !== this.fireEvent('beforedatechanged', this, v)) {
-				Oce.YearCombo.superclass.setValue.call(this, v);
+		,onSetValue: function(v, skipEvent) {
+			var setValue = Oce.YearCombo.superclass.setValue;
+			setValue.call(this, v);
+			this.startValue = this.getValue();
+			if (false !== this.fireEvent('beforedatechange', this, v)
+					&& !skipEvent) {
 				this.fireEvent('datechanged', this, v);
 			}
 		}
 		
-		,setValue: function(v) {
+		/**
+		 * Changes the value of the field.
+		 * 
+		 * @param {Date} v
+		 * @param {Boolean} skipEvent `true` to prevent the firing of the 
+		 * {@link #datechanged} event.
+		 */
+		,setValue: function(v, skipEvent) {
 			if (!this.dateEquals(v)) {
 				if (!v.format) {
 					v = this.parseDateOrDie(v);
 				}
-				this.onSetValue(v);
+				this.onSetValue(v, skipEvent);
 			}
 		}
 		
