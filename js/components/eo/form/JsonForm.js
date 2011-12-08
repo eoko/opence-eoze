@@ -138,7 +138,7 @@ eo.form.JsonForm = Ext.extend(Ext.form.BasicForm, {
 	 * 
      * If multiple fields exist with the same name they are returned as an array.
      * 
-	 * @param {Boolean} dirtyOnly (optional) `true` to return only fields that are dirty.
+	 * @param {Boolean} [dirtyOnly=false] `true` to return only fields that are dirty.
      * @return {Object} The values in the form
      */
 	,getSubmitFieldValues: function(dirtyOnly){
