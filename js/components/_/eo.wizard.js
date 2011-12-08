@@ -1469,7 +1469,7 @@ eo.wizard.progress = {
 	 * Instanciates a progress panel of the specified category, if needed, and
 	 * wrap it with the given wizard.
 	 * @param {mixed} wizard
-	 * @param {String|Object} progress The name of a ProgressPanel flavor as a
+	 * @param {String/Object} progress The name of a ProgressPanel flavor as a
 	 * String (the panel will then be created with default options), a config
 	 * object (which must include the type option to specify the flavor), or an
 	 * already instanciated ProgressPanel object.

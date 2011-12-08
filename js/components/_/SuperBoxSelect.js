@@ -1279,7 +1279,9 @@ Ext.ux.form.SuperBoxSelect = Ext.extend(Ext.ux.form.SuperBoxSelect,Ext.form.Comb
      * Sets the value of the SuperBoxSelect component.
      * @methodOf Ext.ux.form.SuperBoxSelect
      * @name setValue
-     * @param {String|Array} value An array of item values, or a String value containing a delimited list of item values. (The list should be delimited with the {@link #Ext.ux.form.SuperBoxSelect-valueDelimiter) 
+     * @param {String/Array} value An array of item values, or a String value containing 
+	 * a delimited list of item values. (The list should be delimited with the 
+	 * {@link #Ext.ux.form.SuperBoxSelect-valueDelimiter) 
      */
     setValue : function(value){
         if(!this.rendered){

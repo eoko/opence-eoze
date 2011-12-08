@@ -38,7 +38,7 @@ eo.form.contact.AbstractField = Ext.extend(Ext.form.CompositeField, {
 	 */
 	,typeField: 'type'
 	/**
-	 * @cfg {Array|Object} types The data to be used to populate the combo of the
+	 * @cfg {Array/Object} types The data to be used to populate the combo of the
 	 * {@link #typeField}.
 	 */
 	/**
@@ -157,7 +157,7 @@ eo.form.contact.AbstractField = Ext.extend(Ext.form.CompositeField, {
 	 * are notified. The event type may depends on the field type, but
 	 * the listener used will generally allways be `this.fieldChangeListener`.
 	 *
-	 * @param {Object|Array} fields The fields to which the listener should 
+	 * @param {Object/Array} fields The fields to which the listener should 
 	 * be added. When first called by AbstractField, this method is passed 
 	 * all the `this.valueFields`. Overriding methods can call their parent 
 	 * method with some other fields (but take care not to modify the original 
