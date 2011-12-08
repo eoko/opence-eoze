@@ -167,7 +167,7 @@ NS.Model = Ext.extend(Object, {
 
 	/**
 	 * Retrieves an array of fields.
-	 * @param {String|Array|RegExp} field
+	 * @param {String/Array/RegExp} field
 	 */
 	,getFields: function(fields) {
 
@@ -404,7 +404,7 @@ NS.ModelField = Ext.extend(Object, {
 	/**
 	 * Tests whether the given string or regex matches this field's name or
 	 * alias.
-	 * @param {String|Regex} name
+	 * @param {String/Regex} name
 	 * @return Boolean TRUE if the name arugment is a String and it equals this 
 	 * field's name or alias, or if name is a RegExp and it matches this field's
 	 * name or alias; else return FALSE.

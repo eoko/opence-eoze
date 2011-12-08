@@ -328,7 +328,7 @@ Ext.grid.Column.types.datecolumn =
 	}
 
 	/**
-	 * @option {Array|Integer} rowColumns The number of items to be placed on
+	 * @option {Array/Integer} rowColumns The number of items to be placed on
 	 * each row; spacers will be added at the end of rows that haven't the max
 	 * number of items.
 	 */
