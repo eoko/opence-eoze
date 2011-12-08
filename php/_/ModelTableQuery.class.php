@@ -134,18 +134,22 @@ class ModelTableQuery extends Query implements QueryAliasable {
 
 	public function doConvertQualifiedNames($preSql,
 			QualifiedNameConverter $converter) {
-		return
+		
+		$preSql = str_replace('``', 'djzaiojdznadazijdza', $preSql);
+		
+		$preSql = preg_replace_callback(
+			'/(^|\s)([^ `]+?->[^` ]+?)([ !=]|$)/',
+//			array($this, 'cb_convertQualifiedNamesUnquoted'),
+			array($converter, 'convert'),
 			preg_replace_callback(
-				'/(^|\s)([^ `]+?->[^` ]+?)([ !=]|$)/',
-//				array($this, 'cb_convertQualifiedNamesUnquoted'),
-				array($converter, 'convert'),
-				preg_replace_callback(
-						'/(^|[^.])`([a-zA-Z0-9\-_>]*)`([^.]|$)/',
-//						array($this, 'cb_convertQualifiedNames'),
-						array($converter, 'convert'),
-						$preSql
-				)
-			);
+					'/(^|[^.])`([a-zA-Z0-9\-_>]*)`([^.]|$)/',
+//					array($this, 'cb_convertQualifiedNames'),
+					array($converter, 'convert'),
+					$preSql
+			)
+		);
+		
+		return str_replace('djzaiojdznadazijdza', '`', $preSql);
 	}
 
 	public function convertQualifiedNames($preSql, &$bindings) {
