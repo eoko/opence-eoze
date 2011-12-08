@@ -477,7 +477,7 @@ Ext.reg("oce.form", Oce.FormPanel)
  * The other properties of each element will be applied as options to the 
  * container that will be internally created for its column.
  * 
- * @cfg {Integer|String} spacing The spacing between each columns (default to 
+ * @cfg {Integer/String} spacing The spacing between each columns (default to 
  * 5). Its value can be given either as an integer, which will then be 
  * interpreted as a percentage of the total width of the container, or as a 
  * percentage string (e.g. "5%").

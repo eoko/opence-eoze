@@ -458,7 +458,7 @@ eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 
 	/**
 	 * Gets the value of the field.
-	 * @return {Object[]|Object} An array containing the values of the children
+	 * @return {Object[]/Object} An array containing the values of the children
 	 * fields. Depending on the {@link #returnSingleValue} option, this method
 	 * can also return a single `Object` value.
 	 */
