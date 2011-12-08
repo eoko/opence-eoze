@@ -619,7 +619,7 @@ abstract class GridExecutor extends JsonExecutor {
 			$r = array();
 			$count = 0;
 		} else {
-			$count = $query->executeCount(true);
+			$count = $query->executeCount();
 		}
 
 		$this->count = $count;
