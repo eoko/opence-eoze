@@ -321,6 +321,10 @@ eo.form.contact.AbstractField = Ext.extend(Ext.form.CompositeField, {
 	,createChildrenFields: function(method) {
 		
 		var initFields = function(field) {
+			if (Ext.isArray(field)) {
+				Ext.each(field, initFields, this);
+				return;
+			}
 			var idName = this.idField,
 				valueFields = this.instanceValueFields;
 			// store submit fields
