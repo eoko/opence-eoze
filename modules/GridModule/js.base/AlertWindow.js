@@ -21,7 +21,7 @@ Ext.ns('Oce.Modules.GridModule');
  */
 Oce.Modules.GridModule.AlertWindow = Ext.extend(eo.Window, {
 	
-	width: 205
+	width: 333
 	,height: 135
 	
 	,minimizable: false
@@ -32,6 +32,7 @@ Oce.Modules.GridModule.AlertWindow = Ext.extend(eo.Window, {
 	,bodyStyle: 'border: 0'
 	
 	,defaultButton: 0
+	,buttonAlign: 'center'
 	
 	/**
 	 * @cfg {Ext.Window} modalTo If set, this dialog will be modal
@@ -49,7 +50,7 @@ Oce.Modules.GridModule.AlertWindow = Ext.extend(eo.Window, {
 	 * used as the modal group. Only one modal dialog can be shown
 	 * in a given modal group at a given time.
 	 */
-	,modalGroup: undefined
+	,modalGroup: 'default'
 
 	/**
 	 * Asses whether there is already a dialog displayed for the given
