@@ -629,3 +629,14 @@ spp.initComponent = function() {
 };
 	
 })(); // closure
+
+/**
+ * Overrides Button to prevent error that can happen if the button is destroyed super 
+ * fast (which can happen, because Ext internally set a 60ms defered focus on windows
+ * default button).
+ */
+Ext.Button.prototype.focus = function () {
+	if (this.btnEl) {
+		this.btnEl.focus();
+	}
+};
