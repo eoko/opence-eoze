@@ -11,12 +11,12 @@ Oce.deps.wait('Oce.form.ForeignComboBox', function() {
 	 * {@link #datechanged}) on which other components can rely safely.
 	 * For the same reason, it defines a custom {@link #getDate} method.
 	 */
-	Oce.YearCombo = Ext.extend(eo.form.DateField, {
+	Oce.DateYearCombo = Ext.extend(eo.form.DateField, {
 		
 		label: 'Date'
 		
 		,constructor: function() {
-			Oce.YearCombo.superclass.constructor.apply(this, arguments);
+			Oce.DateYearCombo.superclass.constructor.apply(this, arguments);
 			
 			this.addEvents(
 				/**
@@ -32,7 +32,7 @@ Oce.deps.wait('Oce.form.ForeignComboBox', function() {
 				 * Note that calling {@link #setValue} while a value is waiting to be
 				 * commited will result in an {@link #Error}.
 				 * 
-				 * @param {Oce.YearCombo} this
+				 * @param {Oce.DateYearCombo} this
 				 * @param {Date} date The new date value.
 				 */
 				'beforedatechange',
@@ -40,7 +40,7 @@ Oce.deps.wait('Oce.form.ForeignComboBox', function() {
 				/**
 				 * @event datechanged
 				 * Fires when the date value of the selector has changed.
-				 * @param {Oce.YearCombo} this
+				 * @param {Oce.DateYearCombo} this
 				 * @param {Date} date The new date value.
 				 */
 				'datechanged'
@@ -63,7 +63,7 @@ Oce.deps.wait('Oce.form.ForeignComboBox', function() {
 		,beforeBlur: Ext.emptyFn
 		
 		,onBlur: function() {
-			Oce.YearCombo.superclass.onBlur.call(this);
+			Oce.DateYearCombo.superclass.onBlur.call(this);
 			if (!this.dateEquals(this.startValue)) {
 				this.onSetValue(this.getValue(), this.startValue);
 			}
@@ -76,7 +76,7 @@ Oce.deps.wait('Oce.form.ForeignComboBox', function() {
 		,onTriggerClick: function() {
 			var orig = this.selectOnFocus;
 			this.selectOnFocus = false;
-			Oce.YearCombo.superclass.onTriggerClick.apply(this, arguments);
+			Oce.DateYearCombo.superclass.onTriggerClick.apply(this, arguments);
 			this.selectOnFocus = orig;
 		}
 		
@@ -113,7 +113,7 @@ Oce.deps.wait('Oce.form.ForeignComboBox', function() {
 			if (!Ext.isDefined(this.cancelValue)) {
 				
 				this.cancelValue = lastValue;
-				Oce.YearCombo.superclass.setValue.call(this, v);
+				Oce.DateYearCombo.superclass.setValue.call(this, v);
 				this.startValue = this.getValue();
 
 				if (false !== this.fireEvent('beforedatechange', this, v)) {
@@ -132,7 +132,7 @@ Oce.deps.wait('Oce.form.ForeignComboBox', function() {
 			if (this.cancelValue) {
 				return this.cancelValue;
 			} else {
-				return Oce.YearCombo.superclass.getValue.call(this);
+				return Oce.DateYearCombo.superclass.getValue.call(this);
 			}
 		}
 		
@@ -164,7 +164,7 @@ Oce.deps.wait('Oce.form.ForeignComboBox', function() {
 		 * of sync...
 		 */
 		,cancelSetValue: function() {
-			Oce.YearCombo.superclass.setValue.call(this, this.cancelValue);
+			Oce.DateYearCombo.superclass.setValue.call(this, this.cancelValue);
 			delete this.cancelValue;
 		}
 		
@@ -248,9 +248,9 @@ Oce.deps.wait('Oce.form.ForeignComboBox', function() {
 		}
 	});
 
-	Ext.reg('oce.yearcombo', Oce.YearCombo);
+	Ext.reg('oce.yearcombo', Oce.DateYearCombo);
 
-	Oce.GlobalYearManager = Ext.extend(Oce.YearCombo, {
+	Oce.GlobalYearManager = Ext.extend(Oce.DateYearCombo, {
 
 		constructor: function(config) {
 			Oce.GlobalYearManager.superclass.constructor.call(this, config);

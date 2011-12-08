@@ -1261,6 +1261,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	,getEditWindow: function(rowId, cb) {
 
 		if (rowId in this.editWindows) {
+			if (cb) cb(this.editWindows[rowId]);
 			return this.editWindows[rowId];
 		}
 
