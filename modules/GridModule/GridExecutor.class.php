@@ -136,7 +136,9 @@ abstract class GridExecutor extends JsonExecutor {
 			$request = $this->request->requireSub('form');
 		}
 		
-		$this->prepareAddData($request);
+		if (false === $this->prepareAddData($request)) {
+			return false;
+		}
 
 		$setters = array();
 		$missingFields = array();
