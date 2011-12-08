@@ -1401,13 +1401,14 @@ class SqlBindingVariable implements SqlVar {
 
 abstract class QuerySelectBase extends SqlVariable {
 
-	/** @var ModelTableQuery */
-	protected $query;
+	/** @var QueryAliasable */
+	private $aliasable;
+	
 	private $alias = null;
 
-	function __construct(ModelTableQuery $query, $alias = null) {
+	function __construct(QueryAliasable $query, $alias = null) {
 		$this->alias = $alias;
-		$this->query = $query;
+		$this->aliasable = $query;
 	}
 
 	public function setAlias($alias) {
@@ -1416,13 +1417,17 @@ abstract class QuerySelectBase extends SqlVariable {
 	}
 
 	protected function getQualifiedName($field) {
-		return $this->query->getQualifiedName($field);
+		return $this->aliasable->getQualifiedName($field);
 	}
 
-	abstract protected function doBuildSql(ModelTableQuery $query, &$bindings);
+	abstract protected function doBuildSql(QueryAliasable $aliasable, &$bindings);
+	
+	public function __toString() {
+		return $this->buildSql(false, $bindings);
+	}
 
 	final public function buildSql($defaultTable, &$bindings) {
-		return $this->doBuildSql($this->query, $bindings)
+		return $this->doBuildSql($this->aliasable, $bindings)
 				. ($this->alias !== null ? " AS `$this->alias`" : null);
 	}
 }
@@ -1576,18 +1581,18 @@ class QuerySelectFunctionOnField extends QuerySelectBase {
 	 * array. Placeholders will be replaced by the fully qualified field in the $field
 	 * array which index matches the index of the placeholder.
 	 * 
-	 * @param ModelTableQuery $query
+	 * @param QueryAliasable $aliasable
 	 * @param string|array $field
 	 * @param string|array $function
 	 * @param string $alias 
 	 */
-	function __construct(ModelTableQuery $query, $field, $function, $alias = null) {
-		parent::__construct($query, $alias);
+	function __construct(QueryAliasable $aliasable, $field, $function, $alias = null) {
+		parent::__construct($aliasable, $alias);
 		$this->field = $field;
 		$this->fn = $function;
 	}
 
-	protected function doBuildSql(ModelTableQuery $query, &$bindings) {
+	protected function doBuildSql(QueryAliasable $query, &$bindings) {
 		if (is_array($this->field)) {
 			// Get aliased fields
 			$fields = array();
@@ -1628,8 +1633,8 @@ class QuerySelectFunctionOnField extends QuerySelectBase {
 
 class QuerySelectSum extends QuerySelectFunctionOnField {
 
-	function __construct(ModelTableQuery $query, $field, $alias = null) {
-		parent::__construct($query, $field, 'SUM', $alias);
+	function __construct(QueryAliasable $aliasable, $field, $alias = null) {
+		parent::__construct($aliasable, $field, 'SUM', $alias);
 	}
 }
 
