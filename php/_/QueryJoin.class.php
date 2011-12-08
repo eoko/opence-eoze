@@ -183,11 +183,44 @@ abstract class QueryJoin implements QueryAliasable {
 		return implode(', ', $this->select);
 	}
 
-	public function getQualifiedName($fieldName, $table = QueryJoin::TABLE_RIGHT) {
+	public function getQualifiedName($field, $table = QueryJoin::TABLE_RIGHT) {
 		switch ($table) {
 			case self::TABLE_LEFT:
-				return "`$this->leftTableAlias`.`$fieldName`";
-			case self::TABLE_RIGHT: return "`$this->foreignTableAlias`.`$fieldName`";
+				return "`$this->leftTableAlias`.`$field`";
+			case self::TABLE_RIGHT: 
+				// This implentation is copy-pasted from ModeTableQuery. If something
+				// seems wrong in here, maybe it should be sensible to go see there if
+				// the implemenation has been fixed or what...
+				if ($this->foreignTable->hasColumn($field)) {
+					return "`$this->foreignTableAlias`.`$field`";
+				} 
+				else if ($this->foreignTable->hasVirtual($field)) {
+					return $this->foreignTable->getVirtual($field)->getClause($this);
+				}
+				else {
+					if (count($parts = explode('->', $field)) > 1) {
+						$fieldName = array_pop($parts);
+						$relationName = implode('->', $parts);
+						$relation = $this->foreignTable->getRelationInfo($relationName);
+						if ($relation->targetTable->hasRelation($fieldName)) {
+							throw new UnsupportedOperationException;
+							// relation name
+							$targetRelation = $relation->getRelationInfo($fieldName);
+							return $targetRelation->getNameClause($this, $field);
+						} else if ($relation->targetTable->hasVirtual($fieldName)) {
+							throw new UnsupportedOperationException;
+							// virtual
+							return $relation->targetTable->getVirtual($fieldName)->getClause(
+								$this, $this->query->getJoin($relationName)
+							);
+						} else {
+							// field
+							return $this->query->getJoin("$this->foreignTableAlias->$relationName")
+									->getQualifiedName($fieldName);
+						}
+					}
+					throw new Exception();
+				}
 			default: throw new IllegalArgumentException("Invalid mode: $table");
 		}
 	}
