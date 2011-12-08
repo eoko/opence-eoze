@@ -761,7 +761,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 						Ext.get(maskEl).unmask();
 					}
 				}
-			})
+			});
 
 			form.submit(opts);
 //			this.submitForm(form, opts);
