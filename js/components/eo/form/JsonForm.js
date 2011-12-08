@@ -7,7 +7,11 @@
 Ext.ns('eo.form');
 
 /**
- * Extends {@link Ext.form.BasicForm}
+ * Extends {@link Ext.form.BasicForm} to change the submit method to a json
+ * request that is easier to handle and customize than the default form
+ * submission method of Ext.
+ * 
+ * This class also adds some useful events about form lifecycle.
  */
 eo.form.JsonForm = Ext.extend(Ext.form.BasicForm, {
 	
@@ -19,6 +23,9 @@ eo.form.JsonForm = Ext.extend(Ext.form.BasicForm, {
 			 * @event beforesave
 			 * 
 			 * Fires before a request to save the form is sent to the server.
+			 * 
+			 * Returning `false` from this event will cancel the submitting of
+			 * the form.
 			 * 
 			 * @param {eo.form.JsonForm} this
 			 * @param {Object} options The options object that will be passed
