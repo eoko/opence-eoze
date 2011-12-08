@@ -370,12 +370,11 @@ eo.data.CachingHttpProxy.IndexedDataProvider = Ext.extend(eo.data.CachingHttpPro
 /**
  * A {@link Ext.data.JsonStore JsonStore} that allows retrieving of records by id, even
  * if the records have been filtered out of the store. This is possible through the use
- * of an 
- * A {@link Ext.data.JsonStore JsonStore} using an {@link eo.data.IndexedCachingHttpProxy
- * IndexedCachingHttpProxy}, that can retrieve a record by its id independantly of the
- * store's last request (the record needs to have been loaded into the underlying
- * {@link eo.data.CachingHttpProxy.DataProvider DataProvider}, though). The store also
- * needs to have already been loaded before the {#getById} method is called.
+ * of an {@link eo.data.IndexedCachingHttpProxy IndexedCachingHttpProxy}, that can retrieve 
+ * a record by its id independantly of the store's last request (the record needs to have 
+ * been loaded into the underlying {@link eo.data.CachingHttpProxy.DataProvider DataProvider}, 
+ * though). The store also needs to have already been loaded before the {#getById} method 
+ * is called.
  */
 eo.data.ProxyJsonStore = Ext.extend(Ext.data.JsonStore, {
 	
@@ -396,9 +395,20 @@ eo.data.ProxyJsonStore = Ext.extend(Ext.data.JsonStore, {
 		this.relayEvents(this.proxy, ['datachanged']);
 	}
 	
-	,getById: function(id) {
+	/**
+	 * Get the Record with the specified id, event if it the record has been filtered
+	 * out of the store by the last requets (see {@link eo.data.ProxyJsonStore the
+	 * class description for more informations).
+	 *
+	 * @param {String} id
+	 * @param {Boolean} [onlyVisible=false] `true` to return only from the records
+	 * visible according to the last request made on the store.
+	 * 
+	 * @return {Ext.data.Record}
+	 */
+	,getById: function(id, onlyVisible) {
 		var record = eo.data.ProxyJsonStore.superclass.getById.call(this, id);
-		if (!record) {
+		if (!record && onlyVisible !== true) {
 			return this.proxy.getRecordById(id, this.reader);
 		} else {
 			return record;
