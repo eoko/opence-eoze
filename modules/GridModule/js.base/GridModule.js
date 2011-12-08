@@ -1258,7 +1258,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	,afterFormLoad: function(form, data, formPanel) {}
 	,onConfigureAddFormPanel: function(formConfig) {}
 
-	,getEditWindow: function(rowId, cb) {
+	,getEditWindow: function(rowId, cb, opts) { // 08/12/11 21:03 added opts
 
 		if (rowId in this.editWindows) {
 			if (cb) cb(this.editWindows[rowId]);
@@ -1269,8 +1269,8 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 
 			this.editWindows[rowId] = win;
 			
-			this.afterCreateWindow(win, 'edit', rowId);
-			this.afterCreateEditWindow(win, rowId);
+			this.afterCreateWindow(win, 'edit', rowId, opts); // 08/12/11 21:04 added opts
+			this.afterCreateEditWindow(win, rowId, opts); // 08/12/11 21:04 added opts
 
 	//		win.on('destroy', function(){
 	//			delete this.editWindows[rowId]
@@ -1360,7 +1360,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			if (cb) cb(win);
 		}.createDelegate(this);
 
-		var win = this.createEditWindow(rowId, fn);
+		var win = this.createEditWindow(rowId, fn, opts); // 08/12/11 21:03 added opts
 		if (win) fn(win);
 
 		return undefined;
