@@ -1322,8 +1322,9 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 					}
 					if (win.formPanel.isModified()) {
 						// i18n
-						Ext.Msg.show({
-							title: "Confirmer la fermeture"
+						NS.AlertWindow.show({
+							modalTo: win
+							,title: "Confirmer la fermeture"
 							,msg: "Cette fenêtre comporte des modifications qui n'ont pas été "
 								+ "enregistrées. Souhaitez-vous les enregistrer ?"
 							,buttons: {
