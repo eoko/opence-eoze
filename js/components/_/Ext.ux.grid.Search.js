@@ -522,7 +522,7 @@ Ext.extend(Ext.ux.grid.Search, Ext.util.Observable, {
 		if(this.checkIndexes instanceof Array) {
 			var find = function(items, di) {
 				var found;
-				var item = items.each(function(item) {
+				var item = items && items.each(function(item) {
 					if (item.dataIndex === di) {
 						found = item;
 						return false;
