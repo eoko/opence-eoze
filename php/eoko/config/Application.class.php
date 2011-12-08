@@ -106,7 +106,8 @@ class Application implements FileFinder {
 					)
 					: array(
 						'ext/ext-base-debug' => -10,
-						'ext/ext-all' => -9,
+						'ext/ext-all-debug' => -9,
+//						'ext/ext-all' => -9,
 						'ext/ext-lang-fr' => -8,
 					)
 				)
