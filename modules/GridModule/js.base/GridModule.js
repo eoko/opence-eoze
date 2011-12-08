@@ -675,7 +675,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	/**
 	 * @param {Ext.Window} win The form window.
 	 * 
-	 * @param {String|Object} action The `action` of the request or, an object
+	 * @param {String/Object} action The `action` of the request or, an object
 	 * can be passed to provide extra params for the request, in the 
 	 * form:
 	 *     {
@@ -1289,9 +1289,10 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				}
 				,beforerefresh: function(win) {
 					if (win.formPanel.isModified()) {
-						Ext.Msg.show({
+						NS.AlertWindow.show({
+							modalTo: win
 							// i18n
-							title: "Confirmer le rechargement"
+							,title: "Confirmer le rechargement"
 							,msg: "Cette fenêtre comporte des modifications qui n'ont pas été "
 								+ "enregistrées. Si elle est rechargée maintenant, ces "
 								+ "modifications seront perdues. Souhaitez-vous continuer "
@@ -1372,7 +1373,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	 * @param {String} action The action provided by the window. 
 	 * That can be either `'add'` or `'edit'`.
 	 * 
-	 * @param {String|Integer} recordId If the action was `'edit'`,
+	 * @param {String/Integer} recordId If the action was `'edit'`,
 	 * then the id of the record being edited will passed as the
 	 * third argument.
 	 * 
@@ -1386,7 +1387,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	 * @param {Object} config The configuration of the window
 	 * to be created.
 	 * 
-	 * @param {String|Integer} recordId The id (primary key value)
+	 * @param {String/Integer} recordId The id (primary key value)
 	 * of the record being edited.
 	 * 
 	 * @protected
@@ -1415,7 +1416,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	 * @param {String} action The action provided by the window. 
 	 * That can be either `'add'` or `'edit'`.
 	 * 
-	 * @param {String|Integer} recordId If the action was `'edit'`,
+	 * @param {String/Integer} recordId If the action was `'edit'`,
 	 * then the id of the record being edited will passed as the
 	 * third argument.
 	 * 
@@ -1438,7 +1439,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	 * 
 	 * @param {Ext.Window} win The window that has been created.
 	 * 
-	 * @param {String|Integer} recordId If the action was `'edit'`,
+	 * @param {String/Integer} recordId If the action was `'edit'`,
 	 * then the id of the record being edited will passed as the
 	 * third argument.
 	 * 
@@ -3026,7 +3027,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	}
 
 	/**
-	 * @param {Function|Object} callback (Optional) A callback or a config 
+	 * @param {Function/Object} callback (Optional) A callback or a config 
 	 * object to be passed to the store.reload() function.
 	 * @param {Object} scope (Optional) Scope with which to call the callback 
 	 * (defaults to the GridModule object). This argument is ignored if a config
