@@ -83,6 +83,32 @@ Oce.Modules.GridModule.AlertWindow = Ext.extend(eo.Window, {
 				&& modalTo.modalWindowGroups 
 				&& modalTo.modalWindowGroups[modalGroup];
 	}
+	
+	/**
+	 * @cfg {Function} onReplace
+	 * A function that will be called if the window is closed because it is replaced
+	 * by another one in the {@link #modalGroup}. The function will be called with the
+	 * following parameter:
+	 * 
+	 * -   **previous** : Oce.Modules.GridModule.AlertWindow
+	 *     
+	 *     The window that is being closed.
+	 */
+	,onReplace: undefined
+	
+	/**
+	 * Closes the previous window in the modalGroup, if any.
+	 * @protected
+	 */
+	,closePreviousInModalGroup: function(modalTo, modalGroup) {
+		var previous = this.getPreviousInModalGroup(modalTo, modalGroup);
+		if (previous) {
+			if (previous.onReplace) {
+				previous.onReplace.call(this.scope || this, previous);
+			}
+			previous.close();
+		}
+	}
 
 	/**
 	 * Overrides the `show()` method to register itself as the current modal dialog
@@ -98,7 +124,7 @@ Oce.Modules.GridModule.AlertWindow = Ext.extend(eo.Window, {
 			groups[modalGroup] = this;
 			this.on({
 				single: true
-				,hide: function() {
+				,destroy: function() {
 					delete groups[modalGroup];
 				}
 			});
@@ -140,7 +166,7 @@ Oce.Modules.GridModule.AlertWindow = Ext.extend(eo.Window, {
 					,scope: this
 					,handler: function(b) {
 						this.close();
-						fn.call(scope, name)
+						fn.call(scope, name);
 					}
 				})
 			}, this);
@@ -175,10 +201,8 @@ Oce.Modules.GridModule.AlertWindow = Ext.extend(eo.Window, {
 			});
 		}
 		
-		var previous = this.getPreviousInModalGroup();
-		if (previous) {
-			previous.close();
-		}
+		this.closePreviousInModalGroup();
+		
 		Oce.Modules.GridModule.AlertWindow.superclass.initComponent.call(this);
 	}
 });
@@ -198,12 +222,9 @@ Oce.Modules.GridModule.AlertWindow.show = function(config) {
 	}
 	
 	var modalTo = config.modalTo,
-		modalGroup = config.modalGroup,
-		previous = modalTo && this.prototype.getPreviousInModalGroup(modalTo, modalGroup);
-		
-	if (previous) {
-		previous.close();
-	}
+		modalGroup = config.modalGroup;
+	
+	this.prototype.closePreviousInModalGroup(modalTo, modalGroup);
 	
 	var win = new this(config);
 	win.show();
