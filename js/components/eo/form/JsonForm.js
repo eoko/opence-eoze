@@ -6,9 +6,78 @@
  */
 Ext.ns('eo.form');
 
+/**
+ * Extends {@link Ext.form.BasicForm}
+ */
 eo.form.JsonForm = Ext.extend(Ext.form.BasicForm, {
 	
-	submit: function(opts) {
+	constructor: function() {
+		eo.form.JsonForm.superclass.constructor.apply(this, arguments);
+		
+		this.addEvents(
+			/**
+			 * @event beforesave
+			 * 
+			 * Fires before a request to save the form is sent to the server.
+			 * 
+			 * @param {eo.form.JsonForm} this
+			 * @param {Object} options The options object that will be passed
+			 * to the {@link eo.Ajax} object to do the request.
+			 */
+			'beforesave',
+			/**
+			 * @event aftersave
+			 * 
+			 * Fires when a save request is completed, whether it is successful or not.
+			 * 
+			 * @param {eo.form.JsonForm} this
+			 * @param {Object} data
+			 *   If the request was _successful_: The *decoded* data from the server response. 
+			 *   The decoding method depends of the `accept` option (or the same {@link #accept} 
+			 *   config option of the {@link #eo.data.Connection} object).
+			 *   
+			 *   Else, if the request has _failed_: The XMLHttpRequest object containing the 
+			 *   response data. If the request has been {@link eo.data.Connection#buffer} 
+			 *   buffered with other requests, this response object will be shared amongst 
+			 *   all of them.
+			 * @param {Object} options The options object that was passed to the 
+			 * {@link eo.Ajax} object to do the request.
+			 */
+			'aftersave',
+			/**
+			 * @event savecomplete
+			 * 
+			 * Fires when a save request returns successfuly from the server
+			 * (successfuly means that the HTTP request did not fail, and the
+			 * server has returned a valid json response; the response data
+			 * itself can indicate that the operation was a failure).
+			 * 
+			 * @param {eo.form.JsonForm} this
+			 * @param {Object} data The data object decoded from the server response.
+			 * @param {Object} options The options object that was passed
+			 * to the {@link eo.Ajax} object to do the request.
+			 */
+			'savecomplete',
+			/**
+			 * @event savefailed
+			 * 
+			 * Fires when a save request failed, that is the HTTP request itself
+			 * was not successful (the server returned an error code, or did not
+			 * respond at all).
+			 * 
+			 * @param {eo.form.JsonForm} this
+			 * @param {Object} response The XMLHttpRequest object containing the 
+			 * response data. If the request has been {@link eo.data.Connection#buffer 
+			 * buffered} with other requests, this response object will be shared 
+			 * amongst all of them.
+			 * @param {Object} options The options object that was passed
+			 * to the {@link eo.Ajax} object to do the request.
+			 */
+			'savefailed'
+		);
+	}
+	
+	,submit: function(opts) {
 		
 		if (false === this.fireEvent('beforesave', this, opts)) {
 			return;
@@ -45,9 +114,9 @@ eo.form.JsonForm = Ext.extend(Ext.form.BasicForm, {
 						}
 					}
 				} else {
-					this.fireEvent('savefailed', this, null, opts);
+					this.fireEvent('savefailed', this, data, opts);
 					if (opts.failure) {
-						opts.failure.call(scope, this, null, opts);
+						opts.failure.call(scope, this, data, opts);
 					}
 				}
 			}
@@ -89,6 +158,4 @@ eo.form.JsonForm = Ext.extend(Ext.form.BasicForm, {
 		});
 		return o;
 	}
-
-	
 });
