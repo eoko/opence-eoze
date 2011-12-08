@@ -124,7 +124,7 @@ Oce.deps.wait('Oce.form.ForeignComboBox', function() {
 		
 		/**
 		 * Compares the value of this field with the given date.
-		 * @param {Date|String} date The date to compare to. Can be `undefined` or
+		 * @param {Date/String} date The date to compare to. Can be `undefined` or
 		 * `null`. If given as a string, the date will be converted using the 
 		 * {@link eo.form.DateField#format format} of this DateField.
 		 * @param {String} [mask='Ymd'] The mask to be used to compare the
