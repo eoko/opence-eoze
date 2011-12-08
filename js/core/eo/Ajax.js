@@ -36,6 +36,18 @@ eo.data.Connection = Ext.extend(Ext.util.Observable, {
 	connection: null
 	
 	/**
+	 * @cfg {Integer/Boolean} buffer
+	 * The number of millisecond to wait before firing a request, to see if 
+	 * another one comes. In this case, the wait delay will be repeated, and
+	 * all the request that have caught in this interval will be sent in one
+	 * multipart request.
+	 * 
+	 * If this option is set to `false`, then request buffering will not be
+	 * used at all.
+	 */
+	,buffer: false
+	
+	/**
 	 * @private
 	 */
 	,buffers: null
@@ -191,7 +203,7 @@ eo.data.Connection = Ext.extend(Ext.util.Observable, {
 	 * 
 	 *   <li>**response** : Object<div class="sub-desc">
 	 *   The XMLHttpRequest object containing the response data. If the request has 
-	 *   been {@link #buffer} buffered with other requests, this response object will 
+	 *   been {@link #buffer buffered} with other requests, this response object will 
 	 *   be shared amongst all of them.
 	 *   </div></li>
 	 *   
@@ -437,6 +449,7 @@ eo.data.Connection = Ext.extend(Ext.util.Observable, {
 				url: url
 				,scope: this
 				,callback: this.doMultipartRequest
+				,buffer: this.buffer // buffer delay
 			});
 		}
 		
@@ -502,7 +515,7 @@ eo.data.Connection = Ext.extend(Ext.util.Observable, {
 // private
 eo.data.Connection.Buffer = Ext.extend(Object, {
 	
-	delay: 10
+	buffer: 10
 	
 	,currentTimer: undefined
 	
@@ -531,7 +544,7 @@ eo.data.Connection.Buffer = Ext.extend(Object, {
 			delete me.currentTimer;
 			me.requests = [];
 			me.callback.call(me.scope, requests);
-		}, this.bufferDelay);
+		}, this.buffer);
 	}
 });
 
