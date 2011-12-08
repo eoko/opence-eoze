@@ -110,7 +110,8 @@ Oce.Modules.GridModule.AlertWindow = Ext.extend(eo.Window, {
 		
 		var buttons = this.buttons = this.buttons || [],
 			scope = this.scope || this,
-			modalTo = this.modalTo;
+			modalTo = this.modalTo,
+			msg = this.message || this.msg;
 			
 		// Position relatively to modal target
 		if (modalTo) {
@@ -123,8 +124,8 @@ Oce.Modules.GridModule.AlertWindow = Ext.extend(eo.Window, {
 		}
 
 		// Message to html content
-		if (this.message) {
-			this.html = '<p>' + this.message + '</p>';
+		if (msg) {
+			this.html = '<p>' + msg + '</p>';
 		}
 		
 		// Buttons

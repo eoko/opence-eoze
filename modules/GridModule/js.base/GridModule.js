@@ -3049,7 +3049,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			}
 			if (this.firstLoad) {
 				this.reloadLatch = 0;
-				debugger
+//				debugger
 				this.store.reload(o);
 			}
 		}
