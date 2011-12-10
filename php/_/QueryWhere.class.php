@@ -143,7 +143,7 @@ class QueryWhere {
 			if ($this->sql !== null) {
 				$this->sql .= " $op ";
 			}
-			$this->sql .= $this->aliasable->convertQualifiedNames($condition, $this->bindings);
+			$this->sql .= '(' . $this->aliasable->convertQualifiedNames($condition, $this->bindings) . ')';
 			if ($inputs !== null) {
 				if (is_array($inputs)) $this->bindings = array_merge($this->bindings, $inputs);
 				else array_push($this->bindings, $inputs);
