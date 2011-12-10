@@ -186,7 +186,7 @@ Oce.deps.wait('Ext.ux.form.TwinComboBox', function() {
 			
 			// inherits class config (very dirty hack, yeah... this class
 			// is doomed anyway)
-			cfg = Ext.apply(Ext.apply({}, this), cfg);
+//			cfg = Ext.apply(Ext.apply({}, this), cfg);
 			
 			var storeBaseParams = Ext.apply({
 				controller: cfg.controller,
@@ -292,7 +292,13 @@ Oce.deps.wait('Ext.ux.form.TwinComboBox', function() {
 //				Ext.data.JsonStore.prototype.load.call(this.store, options);
 			}.createDelegate(this);
 
-			var config = {
+			// Inherits this as config defaults (needed for legacy compatibility... somewhere)
+			var config = (function(p) {
+				var F = function() {};
+				F.prototype = p;
+				return new F;
+			})(this);
+			Ext.apply(config, {
 				 xtype: 'combo'
 				,store: this.store
 				,displayField: 'name'
@@ -302,7 +308,8 @@ Oce.deps.wait('Ext.ux.form.TwinComboBox', function() {
 				,editable: false
 				,triggerAction: 'all'
 				,lastQuery: ''
-			}
+				,submitValue: true
+			});
 
 			delete cfg.controller;
 			delete cfg.column;
