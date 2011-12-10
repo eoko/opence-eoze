@@ -65,13 +65,23 @@ class QueryWhere {
 		}
 		
 		$field = $this->aliasable->getQualifiedName($field);
+		
+		if ($field instanceof SqlVariable) {
+			// (?) It has not been tested that the bindings were functionnal
+			$quoted = $field->buildSql(false, $this->bindings);
+		} else {
+			$quoted = Query::quoteName($field);
+		}
 
-		if (!is_array($values)) $values = array($values);
+		if (!is_array($values)) {
+			$values = array($values);
+		}
+		
 		if (count($values) > 0) {
-			$this->sql .= Query::quoteName($field) . $not . ' IN (?' . str_repeat(',?', count($values) - 1) . ')';
+			$this->sql .= $quoted . $not . ' IN (?' . str_repeat(',?', count($values) - 1) . ')';
 			$this->bindings = array_merge($this->bindings, $values);
 		} else {
-			$this->sql .= Query::quoteName($field) . $not . ' IN ())';
+			$this->sql .= $quoted . $not . ' IN ())';
 		}
 		return $this;
 	}
