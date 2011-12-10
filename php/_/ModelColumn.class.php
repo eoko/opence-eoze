@@ -142,7 +142,7 @@ class ModelColumn extends ModelFieldBase {
 	}
 	
 	public function getSqlType() {
-		return $this->type;
+		return $this->sqlType;
 	}
 
 	public function getLength() {

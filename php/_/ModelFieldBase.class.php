@@ -1,5 +1,7 @@
 <?php
 
+use eoko\cqlix\ModelFieldHelper;
+
 /**
  * Base class implementation for {@link ModelField}.
  * 
@@ -22,8 +24,7 @@ abstract class ModelFieldBase implements ModelField {
 			case ModelField::T_FLOAT:
 				return (double) $value;
 			case ModelField::T_ENUM:
-				return $this->getSqlType();
-//				throw new UnsupportedOperationException('Not implemented type: ' . $type);
+				return ModelFieldHelper::castValue($value, $this->getSqlType());
 			case ModelField::T_DATE:
 			case ModelField::T_DATETIME:
 //				throw new UnsupportedOperationException('Not implemented yet');
