@@ -1,6 +1,10 @@
+(function() {
+
 /**
  * CheckableFieldSet is a standard FieldSet, except that it is considered a
  * submittable checkbox by BasicForm.
+ * 
+ * @xtype checkfieldset
  *
  * @author Éric Ortéga <eric@planysphere.fr>
  * @since 08/03/11 13:04
@@ -9,6 +13,7 @@ Ext.ns("eo.form").CheckableFieldSet = Ext.extend(Ext.form.FieldSet, {
 	spp: Ext.form.FieldSet.prototype
 	
 	,checked: false
+	,collapsed: true
 	
 	,isFormField: true
 	
@@ -35,11 +40,11 @@ Ext.ns("eo.form").CheckableFieldSet = Ext.extend(Ext.form.FieldSet, {
 		
 		this.checkboxToggle = true;
 		
-		this.spp.initComponent.call(this);
+		spp.initComponent.call(this);
 	}
 	
 	,onAdded: function(container, pos) {
-		this.spp.onAdded.apply(this, arguments);
+		spp.onAdded.apply(this, arguments);
 		
 		// This is needed for this to be added to a BasicForm, since FormPanel
 		// considers its items either as a field (added to the BasicForm), or as
@@ -64,6 +69,8 @@ Ext.ns("eo.form").CheckableFieldSet = Ext.extend(Ext.form.FieldSet, {
 	,initValue: function() {
 		this.originalValue = this.getValue();
 	}
+	
+	,isDirty: Ext.form.Field.prototype.isDirty
 	
 	,reset: function() {
 		this.setValue(this.originalValue);
@@ -115,10 +122,12 @@ Ext.ns("eo.form").CheckableFieldSet = Ext.extend(Ext.form.FieldSet, {
 		return true;
 	}
 	
-	,onRender: function() {
-		eo.form.CheckableFieldSet.superclass.onRender.apply(this, arguments);
-		if (this.checked) {
-			this.setValue(true);
+	,afterRender: function() {
+		eo.form.CheckableFieldSet.superclass.afterRender.apply(this, arguments);
+		var checked = this.checked
+		if (Ext.isDefined(checked)) {
+			this.checked = undefined;
+			this.setValue(checked);
 		} else {
 			this.checked = this.checkbox.dom.checked;
 		}
@@ -132,12 +141,12 @@ Ext.ns("eo.form").CheckableFieldSet = Ext.extend(Ext.form.FieldSet, {
 	}
 	
 	,onCollapse: function() {
-		this.spp.onCollapse.apply(this, arguments);
+		spp.onCollapse.apply(this, arguments);
 		this.fixOwnerCt();
 	}
 	
 	,onExpand: function() {
-		this.spp.onExpand.apply(this, arguments);
+		spp.onExpand.apply(this, arguments);
 		this.fixOwnerCt();
 	}
 	
@@ -177,7 +186,11 @@ Ext.ns("eo.form").CheckableFieldSet = Ext.extend(Ext.form.FieldSet, {
 	}()
 });
 
-Ext.reg("checkfieldset", eo.form.CheckableFieldSet);
+var spp = eo.form.CheckableFieldSet.superclass;
+
+Ext.reg('checkfieldset', eo.form.CheckableFieldSet);
+
+})(); // closure
 
 // Hack initFields method to take the CheckableFieldSet as a item of the BasicForm
 (function() {
@@ -191,8 +204,7 @@ Ext.reg("checkfieldset", eo.form.CheckableFieldSet);
 				if (formPanel.isField(c)) {
 					f.add(c);
 					// here ----------------------------------------------------
-					// Why have they put this else... A component cannot be
-					// both?
+					// Why have they put this `else` ? A component cannot be both?
 					if (c instanceof eo.form.CheckableFieldSet) {
 						c.items.each(fn, this);
 					}
