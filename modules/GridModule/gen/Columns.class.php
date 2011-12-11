@@ -266,6 +266,7 @@ class Columns {
 						self::setColFormItemif($col, 'format', 'd/m/Y');
 						break;
 					case ModelColumn::T_BOOL:
+						self::setColStoreItemIf($col, 'type', 'boolean');
 						if (!isset($col['renderer'])) {
 							$col['renderer'] = 'Oce.ext.Renderer.yesNo';
 						}
@@ -278,7 +279,7 @@ class Columns {
 					case ModelColumn::T_STRING:
 						self::setColStoreItemIf($col, 'type', 'string');
 						break;
-					case \ModelField::T_ENUM:
+					case ModelField::T_ENUM:
 						$data = array();
 						$renderer = array();
 						foreach ($f->getCodeLabels() as $code => $label) {
@@ -305,6 +306,27 @@ class Columns {
 							
 							'store' => $data
 						));
+						
+						// Columns filters
+						if (isset($col['filterable']) && $col['filterable']
+								|| isset($this->defaults['filterable']) && $this->defaults['filterable']) {
+							$filter =& $col['filterable'];
+							$filter = isset($col['filterable']) ? $col['filterable']
+									: $this->defaults['filterable'];
+							if ($filter === true) {
+								$filter = array();
+							}
+							$listOptions = $data;
+							if ($f->isNullable()) {
+								$listOptions[] = array('${null}', '<i>Inconnu</i>');
+							}
+							Arrays::apply($filter, array(
+								'type' => 'list',
+								'options' => $listOptions,
+							));
+							unset($filter);
+//							dump($col);
+						}
 						break;
 				}
 				
