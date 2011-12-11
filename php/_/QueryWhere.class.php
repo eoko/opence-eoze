@@ -65,7 +65,7 @@ class QueryWhere {
 		}
 		
 		$field = $this->aliasable->getQualifiedName($field);
-		
+
 		if ($field instanceof SqlVariable) {
 			// (?) It has not been tested that the bindings were functionnal
 			$quoted = $field->buildSql(false, $this->bindings);

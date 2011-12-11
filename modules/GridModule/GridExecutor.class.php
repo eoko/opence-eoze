@@ -17,6 +17,7 @@ use ModelTable;
 use ModelTableQuery;
 use ModelColumn;
 use Query;
+use ModelRelationInfo;
 use ModelRelationInfoReferencesOne;
 use Logger;
 use Request;
@@ -465,6 +466,12 @@ abstract class GridExecutor extends JsonExecutor {
 		'lt' => '<',
 	);
 	
+	private static $filter_acceptedOperators_date = array(
+		'eq' => '=',
+		'gt' => '>=',
+		'lt' => '<',
+	);
+	
 	private static $filter_acceptedTypes = array(
 		'boolean' => 'boolean',
 		'date' => 'date',
@@ -490,6 +497,9 @@ abstract class GridExecutor extends JsonExecutor {
 					case 'date':
 						$date = \DateTime::createFromFormat('d/m/Y', $value);
 						$value = $date->format('Y-m-d');
+						$op = self::$filter_acceptedOperators_date[$filter['comparison']];
+						$query->andWhere("`$field` $op ?", $value);
+						break;
 					case 'numeric':
 						$op = self::$filter_acceptedOperators[$filter['comparison']];
 						$query->andWhere("`$field` $op ?", $value);
@@ -500,21 +510,44 @@ abstract class GridExecutor extends JsonExecutor {
 						break;
 					
 					case 'list':
-						$query->andWhereIn(`$field`, $value);
+						// If the field points directly to a relation (not a relation
+						// field), we must specify that we aim at the id field
+						$f = $this->table->getField($field);
+						if ($f instanceof ModelRelationInfo) {
+							$field .= '->' . $f->getTargetTable()->getPrimaryKeyName();
+						}
+						
+						// Processing filter
+						$where = $query->createWhere();
+						foreach ($value as $i => $f) {
+							if ($f === '${null}') {
+								$where->orWhere("`$field` IS NULL");
+								unset($value[$i]);
+							}
+						}
+						if ($value) {
+							$where->orWhereIn($field, $value);
+						}
+						$query->andWhere($where);
 						break;
 					
 					case 'string':
-						$value = str_replace('%', 'µ§~€PLACEHOLDER_FOR_STAR', $value);
-						$value = str_replace('_', 'µ§~€PLACEHOLDER_FOR_QT', $value);
-						$value = str_replace('*', '%', $value);
-						$value = str_replace('?', '_', $value);
-						$value = str_replace('µ§~€PLACEHOLDER_FOR_STAR', '\\%', $value);
-						$value = str_replace('µ§~€PLACEHOLDER_FOR_QT', '\\_', $value);
-						$query->andWhere("`$field` LIKE ?", $value);
+						$query->andWhere("`$field` LIKE ?", 
+								$this->createLoadQuery_processColumnFilterString($value));
 						break;
 				}
 			}
 		}
+	}
+	
+	protected function createLoadQuery_processColumnFilterString($value) {
+		$value = str_replace('%', 'µ§~€PLACEHOLDER_FOR_STAR', $value);
+		$value = str_replace('_', 'µ§~€PLACEHOLDER_FOR_QT', $value);
+		$value = str_replace('*', '%', $value);
+		$value = str_replace('?', '_', $value);
+		$value = str_replace('µ§~€PLACEHOLDER_FOR_STAR', '\\%', $value);
+		$value = str_replace('µ§~€PLACEHOLDER_FOR_QT', '\\_', $value);
+		return $value;
 	}
 
 	protected function createLoadQuery_search(ModelTableQuery $query) {

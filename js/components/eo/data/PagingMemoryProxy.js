@@ -361,6 +361,8 @@ eo.data.ProxyJsonStore = Ext.extend(Ext.data.JsonStore, {
 	
 	constructor: function(config) {
 		
+		config = config || {};
+		
 		// Automatically creating proxy from dataProvider
 		var proxy = config.proxy || this.proxy,
 			dataProvider = config.dataProvider || this.dataProvider;

@@ -9,7 +9,7 @@ Oce.deps.wait([
 ], function() {
 	
 Ext.override(Ext.ux.grid.GridFilters, {
-    menuFilterText : 'Filtres'
+    menuFilterText : 'Filtrer'
 });
 Ext.override(Ext.ux.menu.ListMenu, {
     loadingText : 'Chargement...'
@@ -19,10 +19,11 @@ Ext.override(Ext.ux.grid.filter.BooleanFilter, {
 	noText : 'Non'
 });
 Ext.override(Ext.ux.grid.filter.DateFilter, {
-    afterText : 'Avant',
-    beforeText : 'Après',
+    afterText : 'Du (inclus)',
+    beforeText : 'Au (exclus)',
     dateFormat : 'd/m/Y',
-    onText : 'Le'
+    onText : 'Le',
+    menuItems : ['after', 'before', '-', 'on']
 });
 Ext.override(Ext.ux.grid.filter.NumericFilter, {
     menuItemCfgs : {
