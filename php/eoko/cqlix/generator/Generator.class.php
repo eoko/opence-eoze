@@ -448,6 +448,10 @@ class Generator extends Script {
 					$alias = $this->tableFields[$dbTable][$field]->foreignRelationAlias;
 				}
 				
+				if ($alias === false) {
+					continue;
+				}
+				
 				if (isset($relation->reciproqueConfig['unique'])) {
 					$unique = $relation->reciproqueConfig['unique'];
 				}
@@ -482,16 +486,16 @@ class Generator extends Script {
 				$reciproqueRelation->referencingTableName = $dbTable;
 				$reciproqueRelation->referencedTableName = $targetTable;
 				
-				$reciproqueName = isset($relation->reciproqueName) 
-						? $relation->reciproqueName 
-						: $relation->alias;
-				$reciproqueRelation->setReferencingAlias($reciproqueName);
-
+//				$reciproqueName = isset($relation->reciproqueName) 
+//						? $relation->reciproqueName 
+//						: $relation->alias;
+				$reciproqueRelation->setReferencingAlias($alias);
+				
 				if (isset($relation->reciproqueConfig)) {
 					$reciproqueRelation->config = $relation->reciproqueConfig;
 				}
 				
-				if ($reciproqueName !== false) {
+//				if ($reciproqueName !== false) {
 					$relation->reciproque = $reciproqueRelation;
 
 					Logger::dbg(
@@ -503,7 +507,7 @@ class Generator extends Script {
 
 					$this->hasOneReciproqueRelations[$targetTable][] = $reciproqueRelation;
 					$this->tables[$targetTable]->addDirectReciproqueRelation($reciproqueRelation);
-				}
+//				}
 			}
 		}
 	}
@@ -1296,9 +1300,10 @@ class Generator extends Script {
 	function getReciproque($table, TplRelationReferencesOne $relation) {
 
 		foreach ($this->hasOneReciproqueRelations[$relation->targetDBTableName] as $r) {
-			if ($r->targetDBTableName === $table
-					&& $r->getReferenceField() === $relation->getReferenceField()
-					) return $r;
+			if ($r->targetDBTableName === $table 
+					&& $r->getReferenceField() === $relation->getReferenceField()) {
+				return $r;
+			}
 		}
 
 		throw new IllegalStateException();
