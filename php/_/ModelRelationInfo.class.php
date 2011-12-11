@@ -989,13 +989,18 @@ class ModelRelationInfoReferedByMany extends ModelRelationInfoIsRefered
 			);
 		}
 
+		$this->parseSelectJoinAlias($relationName, $joinAlias, $leftAlias);
+		$join = $query->join($this, $joinAlias, $leftAlias);
+
 		$q = $this->targetTable->createQuery($query->context);
 		$localField = $this->localTable->getPrimaryKeyName();
+		
+		$leftField = $join->getQualifiedName(
+				$this->localTable->getPrimaryKeyName(), QueryJoin::TABLE_LEFT);
+		
 		$q->where(
 			$this->targetTable->addAssocWhere(
-				$q->createWhere(
-					"`$this->referenceField`=" . $query->getQualifiedName($this->localTable->getPrimaryKeyName())
-				)
+				$q->createWhere("`$this->referenceField`=$leftField")
 				,$q
 			)
 		);
