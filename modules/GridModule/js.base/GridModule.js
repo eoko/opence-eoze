@@ -2386,7 +2386,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 					expanded: true
 
 //					,deferredRender:false
-//					,hideMode:'offsets'
+					,hideMode:'offsets'
 
 					,defaults:{
 						 layout:'form'
