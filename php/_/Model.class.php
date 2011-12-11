@@ -1445,7 +1445,9 @@ abstract class Model {
 				throw new IllegalArgumentException($this->getModelName() . '.' . $name . ' cannot be null');
 			}
 			
-			if ($this->internal->fields[$name] != $v || !$testChanged) {
+			// 11/12/11 23:04 changed:
+			// if ($this->internal->fields[$name] != $v || !$testChanged) { 
+			if ($this->internal->fields[$name] !== $v || !$testChanged) {
 //				self::getLogger()->debug('Converted value for field {} : {} => {}', $name, $value, $v);
 				$this->internal->fields[$name] = $this->applyFieldValue($name, $v);
 				$this->internal->colUpdated[$name] = true;
