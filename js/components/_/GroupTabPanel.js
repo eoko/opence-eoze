@@ -105,6 +105,9 @@ Ext.ux.GroupTabPanel = Ext.extend(Ext.TabPanel, {
             this.setActiveGroup(group);
 // rx- (that would override activeTab config in the group...)
 //            group.setActiveTab(group.getMainItem());
+			if (!group.activeTab) {                 // rx+
+				group.setActiveTab(group.mainItem); // rx+
+			}                                       // rx+
         }
     },
 
