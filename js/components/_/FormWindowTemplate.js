@@ -58,54 +58,54 @@ Oce.win.TemplatePage = Ext.extend(Ext.Panel, {
 Ext.reg('oce.wintpl', Oce.win.TemplatePage);
 
 
-Oce.deps.wait('Ext.ux.GroupTabPanel', function() {
-	Oce.win.GroupTabFormPanel = Ext.extend(Ext.ux.GroupTabPanel, {
-
-		constructor: function(config) {
-
-			var items = [];
-
-			if (!Ext.isArray(config.items)) throw new Exception('Illegal argument, items must be an array');
-			Ext.each(config.items, function(item) {
-				Ext.applyIf(item, {
-					expanded: true
-
-					,deferredRender:false
-					,hideMode:'offsets'
-
-					,defaults:{
-						 layout:'form'
-						,autoScroll: true
-						,defaultType:'textfield'
-						,bodyStyle:'padding:10px;  background:transparent;'
-					}
-
-					//,items: iterateTabItems(groupTabConfig)
-				});
-			})
-
-			delete config.items;
-
-			Ext.applyIf(config, {
-	//			 xtype:'grouptabpanel'
-
-				tabWidth: 130
-				,activeGroup: 0
-
-	//			,width: tabConfig.windowWidth
-	//			,height: tabConfig.windowHeight
-
-				// Is this necessary with GroupTab ??
-				// this line is necessary for anchoring to work at
-				// lower level containers and for full height of tabs
-				,anchor:'100% 100%'
-
-				,items: tabPanelItems
-			});
-
-			Oce.win.GroupTabFormPanel.superclass.constructor.call(config);
-		}
-	})
-
-	Ext.reg('oce.grouptabform', Oce.win.GroupTabFormPanel);
-});
+//Oce.deps.wait('Ext.ux.GroupTabPanel', function() {
+//	Oce.win.GroupTabFormPanel = Ext.extend(Ext.ux.GroupTabPanel, {
+//
+//		constructor: function(config) {
+//
+//			var items = [];
+//
+//			if (!Ext.isArray(config.items)) throw new Exception('Illegal argument, items must be an array');
+//			Ext.each(config.items, function(item) {
+//				Ext.applyIf(item, {
+//					expanded: true
+//
+//					,deferredRender:false
+//					,hideMode:'offsets'
+//
+//					,defaults:{
+//						 layout:'form'
+//						,autoScroll: true
+//						,defaultType:'textfield'
+//						,bodyStyle:'padding:10px;  background:transparent;'
+//					}
+//
+//					//,items: iterateTabItems(groupTabConfig)
+//				});
+//			})
+//
+//			delete config.items;
+//
+//			Ext.applyIf(config, {
+//	//			 xtype:'grouptabpanel'
+//
+//				tabWidth: 130
+//				,activeGroup: 0
+//
+//	//			,width: tabConfig.windowWidth
+//	//			,height: tabConfig.windowHeight
+//
+//				// Is this necessary with GroupTab ??
+//				// this line is necessary for anchoring to work at
+//				// lower level containers and for full height of tabs
+//				,anchor:'100% 100%'
+//
+//				,items: tabPanelItems
+//			});
+//
+//			Oce.win.GroupTabFormPanel.superclass.constructor.call(config);
+//		}
+//	})
+//
+//	Ext.reg('oce.grouptabform', Oce.win.GroupTabFormPanel);
+//});
