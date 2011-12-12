@@ -439,7 +439,14 @@ class Query {
 		$this->additionnalInserts[] = $values;
 	}
 
-	public static function format($format, QueryAliasable $aliasable) {
+	/**
+	 *
+	 * @param string $format
+	 * @param QueryAliasable $aliasable
+	 * @param string $nullString The string to use to replace NULL value in fields.
+	 * @return type 
+	 */
+	public static function format($format, QueryAliasable $aliasable, $nullString = '?') {
 
 		$regex = '/%([^%]+)%/';
 
@@ -449,20 +456,17 @@ class Query {
 
 		$glueParts = preg_split($regex, $format);
 
-//		$qTable = $table !== null ? "`$table`." : null;
-
 		$parts = array();
 		for ($i=0, $l=count($fields); $i<$l; $i++) {
 			$glue = str_replace("'", "\\'", $glueParts[$i]);
-//			array_push($parts, "'$glue'", "$qTable`$fields[$i]`");
-			array_push($parts, "'$glue'", $aliasable->getQualifiedName($fields[$i]));
+			$field = $aliasable->getQualifiedName($fields[$i]);
+			array_push($parts, "'$glue'", "IF($field IS NOT NULL, $field, '$nullString')");
 		}
 		if (isset($glueParts[$i])) {
 			$parts[] = "'" . str_replace("'", "\\'", $glueParts[$i]) . "'";
 		}
 
 		return 'CONVERT(CONCAT(' . implode(', ', $parts) . ") USING utf8)";
-//		return 'CONCAT(' . implode(', ', $parts) . ")";
 	}
 
 	public static function SqlFunction($fn) {
@@ -1656,8 +1660,7 @@ class QuerySelectSub extends QuerySelect {
 		$sql = $this->query->buildSql($defaultTable, $bindings);
 		// Remove potential trailing comma ;
 		if (substr($sql, -1) === ';') $sql = substr($sql, 0, -1);
-		return "($sql)"
-				. ($this->alias !== null ? " AS `$this->alias`" : null);
+		return "($sql)" . ($this->alias !== null ? " AS `$this->alias`" : null);
 	}
 }
 
