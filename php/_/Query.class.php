@@ -443,10 +443,14 @@ class Query {
 	 *
 	 * @param string $format
 	 * @param QueryAliasable $aliasable
+	 * @param string $nullField  Name of a field that, if it is NULL, then the whole
+	 * formatted field will be considered NULL (instead of returning a string with all 
+	 * the fields replaced by the $nullString value).
 	 * @param string $nullString The string to use to replace NULL value in fields.
 	 * @return type 
 	 */
-	public static function format($format, QueryAliasable $aliasable, $nullString = '?') {
+	public static function format($format, QueryAliasable $aliasable, $nullField = null, 
+			$nullString = '?') {
 
 		$regex = '/%([^%]+)%/';
 
@@ -466,7 +470,14 @@ class Query {
 			$parts[] = "'" . str_replace("'", "\\'", $glueParts[$i]) . "'";
 		}
 
-		return 'CONVERT(CONCAT(' . implode(', ', $parts) . ") USING utf8)";
+		$formattedString = 'CONVERT(CONCAT(' . implode(', ', $parts) . ") USING utf8)";
+		
+		if ($nullField !== null) {
+			$nullField = $aliasable->getQualifiedName($nullField);
+			return "IF($nullField IS NULL, NULL, $formattedString)";
+		} else {
+			return $formattedString;
+		}
 	}
 
 	public static function SqlFunction($fn) {
