@@ -217,7 +217,7 @@ abstract class QueryJoin implements QueryAliasable {
 									->getQualifiedName($fieldName);
 						}
 					}
-					throw new Exception();
+					throw new Exception("No field '$field' in $this->foreignTable");
 				}
 			default: throw new IllegalArgumentException("Invalid mode: $table");
 		}
