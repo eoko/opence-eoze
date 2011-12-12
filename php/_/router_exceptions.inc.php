@@ -259,7 +259,7 @@ class SqlSystemException extends SystemException implements SqlException {
 	public $errorInfo;
 
 	public function __construct($errorInfo, $message = null, $previous = null) {
-		if (is_array($this->errorInfo)) {
+		if (is_array($errorInfo)) {
 			$this->errorInfo = $errorInfo;
 			$msg = $errorInfo[2];
 		} else {
