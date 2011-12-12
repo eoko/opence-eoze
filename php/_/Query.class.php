@@ -917,10 +917,14 @@ class Query {
 			$this->getLogger()->debug("($file) Executing query:\n{}", $this);
 		}
 
-		if (!$pdoStatement->execute($this->bindings)) {
-			$errorInfo = $pdoStatement->errorInfo();
-//			throw new SystemException($errorInfo[2]);
-			$this->errorHandler->process($this, $errorInfo);
+		try {
+			if (!$pdoStatement->execute($this->bindings)) {
+				$errorInfo = $pdoStatement->errorInfo();
+	//			throw new SystemException($errorInfo[2]);
+				$this->errorHandler->process($this, $errorInfo);
+			}
+		} catch (PDOException $ex) {
+			$this->errorHandler->process($this, $ex->errorInfo);
 		}
 
 		return $pdoStatement;
