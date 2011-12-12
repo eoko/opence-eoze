@@ -106,9 +106,7 @@ abstract class QueryJoin implements QueryAliasable {
 	}
 
 	public function andWhere($condition, $inputs = null) {
-		throw new UnsupportedActionException(
-			get_class($this) . '::andWhere is yet to be implemented!'
-		);
+		throw new UnsupportedOperationException();
 	}
 
 	/**
