@@ -213,11 +213,15 @@ class FormattedVirtualField extends AbstractVirtualField {
 	protected $nullable = true;
 	protected $type = ModelColumn::T_STRING;
 	
+	protected $nullField  = null;
 	protected $nullString = '?';
 
-	function __construct($format = null, $defaultAlias = null, $nullable = null, $nullString = null) {
+	function __construct($format = null, $defaultAlias = null, $nullable = null, $nullField = null, 
+			$nullString = null) {
 		parent::__construct($defaultAlias);
+		
 		$this->nullable = $nullable;
+		
 		if ($format !== null) {
 			$this->format = $format;
 		}
@@ -226,6 +230,9 @@ class FormattedVirtualField extends AbstractVirtualField {
 		}
 		if ($nullable !== null) {
 			$this->nullable = $nullable;
+		}
+		if ($nullField !== null) {
+			$this->nullField = $nullField;
 		}
 		if ($nullString !== null) {
 			$this->nullString = $nullString;
@@ -237,6 +244,6 @@ class FormattedVirtualField extends AbstractVirtualField {
 	}
 
 	protected function doGetClause(QueryAliasable $aliasable) {
-		return Query::format($this->format, $aliasable, $this->nullString);
+		return Query::format($this->format, $aliasable, $this->nullField, $this->nullString);
 	}
 }
