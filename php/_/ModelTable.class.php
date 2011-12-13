@@ -983,11 +983,6 @@ abstract class ModelTable extends ModelTableProxy {
 		$where = $query->createWhere($condition, $inputs);
 		if ($aliasingCallback !== null) {
 			call_user_func($aliasingCallback, $where, $query);
-// REM 13/12/11 04:26 The $where is not passed as ref anymore
-//			call_user_func_array(
-//				$aliasingCallback,
-//				array(&$where, $query)
-//			);
 		}
 		
 		return $query->andWhere($where);
