@@ -66,7 +66,7 @@ class TableFilterPlugin {
 	 * @param string $condition
 	 * @return TableFilter
 	 */
-	public function addFilter($filter, $label = null, $condition = null, $default = true) {
+	public function addFilter($filter, $label = null, $condition = null, $default = false) {
 
 		if (false === $filter instanceof TableFilter) {
 			$filter = new TableFilter($filter, $label, $condition, $default);
