@@ -383,21 +383,12 @@ class ModelRelationReferedByOne extends ModelRelationByReference
 		$context = $overrideContext !== null ? $overrideContext : $this->parentModel->context;
 		
 		if (!$this->parentModel->isNew()) {
-//REM			if ($this->info->buildFindModelCondition !== null) {
-//				$model = $this->targetTable->findFirstWhere(
-//					call_user_func($this->info->buildFindModelCondition, $inputs, $this->parentModel, $this),
-//					$inputs,
-//					$context,
-//					array($this->targetTable, 'addAssocWhere')
-//				);
-//			} else {
-				$model = $this->targetTable->findFirstWhere(
-					"`$this->referenceField`=?",
-					$this->parentModel->getPrimaryKeyValue(),
-					$context,
-					array($this->targetTable, 'addAssocWhere')
-				);
-//REM			}
+			$model = $this->targetTable->findFirstWhere(
+				"`$this->referenceField`=?",
+				$this->parentModel->getPrimaryKeyValue(),
+				$context,
+				array($this->targetTable, 'addAssocWhere')
+			);
 		}
 
 		if ($model === null && $createIfNone) {
