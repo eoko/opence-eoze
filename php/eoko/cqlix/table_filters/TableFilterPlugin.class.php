@@ -116,18 +116,20 @@ class TableFilterPlugin {
 	}
 
 	public function addLoadQueryFilters(ModelTableQuery $query, $filters, $baseRelation = null) {
-
+		
 		if (!$filters) return;
 		
 		$opts = helper\makeFilterHash($filters);
-
+		
 		if (!isset($opts['all'])) {
 			$conditions = null;
 
 			$myFilters = null;
 
 			foreach ($filters as $filter) {
-				if (isset($this->filters[$filter])) $myFilters[] = $filter;
+				if (isset($this->filters[$filter])) {
+					$myFilters[] = $filter;
+				}
 			}
 
 			if ($myFilters && count($myFilters) !== count($this->filters)) {
