@@ -134,11 +134,12 @@ class ModelTableQuery extends Query implements QueryAliasable {
 
 	public function doConvertQualifiedNames($preSql,
 			QualifiedNameConverter $converter) {
-		
-		$preSql = str_replace('``', 'djzaiojdznadazijdza', $preSql);
+
+		$staticPlaceHolder = '#S#T#A#T#I#C#P#H#';
+		$preSql = str_replace('``', $staticPlaceHolder, $preSql);
 		
 		$preSql = preg_replace_callback(
-			'/(^|\s)([^ `]+?->[^` ]+?)([ !=]|$)/',
+			'/(^|\s)([^ `#]+?->[^` ]+?)([ !=]|$)/',
 //			array($this, 'cb_convertQualifiedNamesUnquoted'),
 			array($converter, 'convert'),
 			preg_replace_callback(
@@ -149,7 +150,7 @@ class ModelTableQuery extends Query implements QueryAliasable {
 			)
 		);
 		
-		return str_replace('djzaiojdznadazijdza', '`', $preSql);
+		return str_replace($staticPlaceHolder, '`', $preSql);
 	}
 
 	public function convertQualifiedNames($preSql, &$bindings) {
@@ -441,7 +442,7 @@ class QualifiedNameConverter {
 			$suf = $in[3] !== '`' ? $in[3] : null;
 			return $pre . $s->buildSql($this->defaultTable, $this->bindings) . $suf;
 		} else {
-		 return "$in[1]$s$in[3]";
+			return "$in[1]$s$in[3]";
 		}
 	}
 }
