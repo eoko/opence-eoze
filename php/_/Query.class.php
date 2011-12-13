@@ -1088,6 +1088,9 @@ class Query {
 		}
 	}
 
+	/**
+	 * @return Query 
+	 */
 	public function count() {
 		$this->action = self::COUNT;
 		return $this;

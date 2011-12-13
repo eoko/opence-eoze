@@ -884,44 +884,15 @@ abstract class ModelTable extends ModelTableProxy {
 //		else return $this->createModel($result, true);
 //	}
 
-//REM	/**
-//	 * Starts a search of a single reccord in %%ModelTable%%
-//	 * @param $condition
-//	 * @param $inputs,...
-//	 * @return Model
-//	 * @ignore
-//	 */
-//	public abstract static function findFirstAssocWhere(QueryWhere $where, Model $parentModel);
-
 	public function addJoinWhere(QueryJoin $join) {
-		$join->andWhere($join->createWhere(), $join);
+		$where = $join->createWhere();
+		$this->addAssocWhere($where, $join);
+		if (!$where->isNull()) {
+			$join->andWhere($where);
+		}
 	}
-
-//REM	/**
-//	 * @return myModel
-//	 */
-//	protected function _findFirstAssocWhere(QueryWhere $where, Model $parentModel) {
-//		return $this->findFirstWhere($this->addAssocWhere($where, $parentModel->params));
-//	}
-//
-//	abstract public static function findAssocWhere(QueryWhere $where, Model $parentModel, $resultMode = ModelSet::RANDOM_ACCESS);
-//
-//	protected function _findAssocWhere(QueryWhere $where, Model $parentModel, $resultMode = ModelSet::RANDOM_ACCESS) {
-//		return $this->findWhere($this->addAssocWhere($where), null, $resultMode);
-//	}
-//
-//	abstract public static function addAssocWhere(QueryWhere $where, QueryAliasable $aliasable);
-
-	public function addAssocWhere(QueryWhere $where, QueryAliasable $aliasable) {
-//		if (null !== $extraWhere = $this->getExtraFindAssocWhere($aliasable, $aliasable->getContext())) {
-//			$where = $aliasable->createWhere($where)->andWhere($extraWhere);
-////			dumpl(array(
-////				'extraWhere' => $extraWhere->buildSql($a = array()),
-////				'where' => $where->buildSql($a)
-////			));
-//		}
-		return $where;
-	}
+	
+	public function addAssocWhere(QueryWhere $where, QueryAliasable $aliasable) {}
 
 	/**
 	 *
@@ -945,19 +916,27 @@ abstract class ModelTable extends ModelTableProxy {
 	 * @param array $context
 	 * @return Model
 	 */
-	abstract public static function findFirst(QueryWhere $where=null, array $context = array(), $aliasingCallback = null);
+	abstract public static function findFirst(QueryWhere $where = null, array $context = array(), 
+			$aliasingCallback = null);
 	/**
 	 * @param QueryWhere $where
 	 * @param array $context
 	 * @return %%Model%%
 	 */
-	protected function _findFirst(QueryWhere $where=null, array $context = array(), $aliasingCallback = null) {
+	protected function _findFirst(QueryWhere $where = null, array $context = array(), 
+			$aliasingCallback = null) {
+		
 		$query = $this->createQuery($context);
-		if ($aliasingCallback !== null) $where = call_user_func_array(
-			$aliasingCallback, 
-			array(&$where, $query)
-		);
-		if (null !== $data = $query->where($where)->executeSelectFirst()) {
+		
+		if ($aliasingCallback !== null) {
+			call_user_func($aliasingCallback, $where, $query);
+// REM 13/12/11 04:28
+//			$where = call_user_func_array(
+//				$aliasingCallback, 
+//				array(&$where, $query)
+//			);
+		}
+		if (null !== $data = $query->andWhere($where)->executeSelectFirst()) {
 			return $this->createModel($data, true, $context);
 		} else {
 			return null;
@@ -977,9 +956,10 @@ abstract class ModelTable extends ModelTableProxy {
 	protected function _findFirstWhere($condition = null, $inputs = null,
 			array $context = array(), $aliasingCallback = null) {
 
-		if (null !== $data = $this->createFindOneQuery(
-				$condition, $inputs, $context, $aliasingCallback)->executeSelectFirst()
-		) {
+		$data = $this->createFindOneQuery($condition, $inputs, $context, $aliasingCallback)
+				->executeSelectFirst();
+		
+		if ($data !== null) {
 			return $this->createModel($data, true, $context);
 		} else {
 			return null;
@@ -994,13 +974,15 @@ abstract class ModelTable extends ModelTableProxy {
 		$query = $this->createQuery($context);
 		$where = $query->createWhere($condition, $inputs);
 		if ($aliasingCallback !== null) {
-			$where = call_user_func_array(
-				$aliasingCallback,
-				array(&$where, $query)
-			);
+			call_user_func($aliasingCallback, $where, $query);
+// REM 13/12/11 04:26 The $where is not passed as ref anymore
+//			call_user_func_array(
+//				$aliasingCallback,
+//				array(&$where, $query)
+//			);
 		}
 		
-		return $query->where($where);
+		return $query->andWhere($where);
 	}
 
 	/**
@@ -1103,9 +1085,11 @@ EX
 		$query = $this->createQuery($context)->select();
 		$where = $query->createWhere($condition, $inputs);
 		if ($aliasingCallback !== null) {
-			$where = call_user_func_array($aliasingCallback, array(&$where, $query));
+			call_user_func($aliasingCallback, $where, $query);
 		}
-		$query->where($where);
+		if (!$where->isNull()) {
+			$query->andWhere($where);
+		}
 		return ModelSet::create(
 			$this,
 			$query,
@@ -1134,8 +1118,8 @@ EX
 		$query = $this->createQuery($context)->select()->whereIn($this->getPrimaryKeyName(), $ids);
 		if ($aliasingCallback !== null) {
 			$where = $query->createWhere();
-			$where = call_user_func_array($aliasingCallback, array(&$where, $query));
-			$query->where($where);
+			call_user_func($aliasingCallback, $where, $query);
+			$query->andWhere($where);
 		}
 		return ModelSet::create(
 			$this,

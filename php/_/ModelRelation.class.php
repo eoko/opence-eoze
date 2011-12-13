@@ -573,18 +573,13 @@ class ModelRelationReferedByMany extends ModelRelationByReference implements Mod
 		
 		$context = $overrideContext !== null ? $overrideContext : $this->parentModel->context;
 		
-		$query = $this->targetTable->createLoadQuery(ModelTable::LOAD_NONE, $context);
-		
-		$where = $this->targetTable->addAssocWhere(
-			QueryWhere::create(
-				$query,
-				"$this->referenceField=?", 
-				$this->parentModel->getPrimaryKeyValue()
-			)
-			,$query
-		);
-
-		$query->where($where);
+		$query = $this->targetTable
+				->createLoadQuery(ModelTable::LOAD_NONE, $context)
+				->applyAssocWhere(
+					$this->targetTable, 
+					"$this->referenceField=?", 
+					$this->parentModel->getPrimaryKeyValue()
+				);
 
 		$models = $this->targetTable->createModelSet(
 			$query, 
@@ -933,12 +928,14 @@ class ModelRelationIndirectHasMany extends ModelRelationByAssoc
 		
 		$query = $this->targetTable->createLoadQuery(ModelTable::LOAD_NONE, $context);
 		
-		$where = $this->targetTable->addAssocWhere(
-			QueryWhere::create($query)->whereIn($this->targetTable->getPrimaryKeyName(), $targetIds)
+		$this->targetTable->addAssocWhere(
+			$query->createWhere()->whereIn($this->targetTable->getPrimaryKeyName(), $targetIds)
 			,$query
 		);
 
-		$query->where($where);
+		if (!$where->isNull()) {
+			$query->where($where);
+		}
 
 		$models = $this->targetTable->createModelSet(
 			$query, 
