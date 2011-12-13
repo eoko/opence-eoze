@@ -555,7 +555,7 @@ abstract class ModelRelationInfoHasReference extends ModelRelationInfoByReferenc
 			$targetPkValue
 		);
 		if (!$ignoreAssocWhere) {
-			$where = $this->localTable->addAssocWhere($where, $query);
+			$this->localTable->addAssocWhere($where, $query);
 		}
 		return $query->where($where);
 	}
@@ -763,7 +763,7 @@ class ModelRelationInfoIsRefered extends ModelRelationInfoByReference {
 	 */
 	public function mergeDoublon($srcId, $destId, $context = null) {
 		return $this->targetTable->createQuery()
-			->whereContext($context)
+			->whereContext($context) // 13/12/11 04:22 that should probably be changed to applyAssocWhere
 			->set(
 				$this->referenceField,
 				$destId
@@ -992,19 +992,14 @@ class ModelRelationInfoReferedByMany extends ModelRelationInfoIsRefered
 		$this->parseSelectJoinAlias($relationName, $joinAlias, $leftAlias);
 		$join = $query->join($this, $joinAlias, $leftAlias);
 
-		$q = $this->targetTable->createQuery($query->context);
 		$localField = $this->localTable->getPrimaryKeyName();
 		
 		$leftField = $join->getQualifiedName(
 				$this->localTable->getPrimaryKeyName(), QueryJoin::TABLE_LEFT);
-		
-		$q->where(
-			$this->targetTable->addAssocWhere(
-				$q->createWhere("`$this->referenceField`=$leftField")
-				,$q
-			)
-		);
-		$q->count();
+
+		$q = $this->targetTable->createQuery($query->context)
+				->applyAssocWhere($this->targetTable, "`$this->referenceField`=$leftField")
+				->count();
 
 		return new QuerySelectSub($q, $alias !== null ? $alias : $this->name); // <= rev492
 	}
@@ -1022,13 +1017,15 @@ class ModelRelationInfoReferedByMany extends ModelRelationInfoIsRefered
 	}
 
 	public function createLoadQueryFor($pkValue, array $context = array(), $joinAlias = null) {
-		$query = $this->targetTable->createLoadQuery(ModelSet::ONE_PASS, $context);
-		return $query->where(
-			$this->targetTable->addAssocWhere(
-				$query->createWhere("$this->referenceField=?",$pkValue)
-				,$query
-			)
-		);
+		return $this->targetTable
+				->createLoadQuery(ModelSet::ONE_PASS, $context)
+				->applyAssocWhere($this->targetTable, "$this->referenceField=?", $pkValue);
+//		return $query->where(
+//			$this->targetTable->addAssocWhere(
+//				$query->createWhere("$this->referenceField=?",$pkValue)
+//				,$query
+//			)
+//		);
 	}
 
 	/**
@@ -1224,17 +1221,23 @@ class ModelRelationInfoIndirectHasMany extends ModelRelationInfoByAssoc
 //r		$leftTableName = $localTable->getDBTableName();
 		$leftPK = $localTable->getPrimaryKeyName();
 
-		$assocQuery = $this->assocTable->createQuery($query->context);
-		$assocQuery->setTableAlias($assocAlias);
-		$assocQuery->where(
-			$this->assocTable->addAssocWhere(
-				$assocQuery->createWhere(
+		$assocQuery = $this->assocTable->createQuery($query->context)
+				->setTableAlias($assocAlias)
+				->applyAssocWhere(
+					$this->assocTable, 
 					"`$leftTableName`.`$leftPK` = `$assocAlias`.`$this->localForeignKey`"
 				)
-				,$assocQuery
-			)
-		)
-		->count();
+				->count();
+		
+//		$assocQuery->where(
+//			$this->assocTable->addAssocWhere(
+//				$assocQuery->createWhere(
+//					"`$leftTableName`.`$leftPK` = `$assocAlias`.`$this->localForeignKey`"
+//				)
+//				,$assocQuery
+//			)
+//		)
+//		->count();
 
 		return $assocQuery->getSql(
 			true,
@@ -1262,20 +1265,12 @@ class ModelRelationInfoIndirectHasMany extends ModelRelationInfoByAssoc
 
 		$idField = $query->getQualifiedName($pk);
 
-		$assocQuery = $this->assocTable->createQuery($query->context);
-		$query->select(
-			new QuerySelectSub(
-				$assocQuery
+		$assocQuery = $this->assocTable
+				->createQuery($query->context)
 				->select(QuerySelectRaw::create("GROUP_CONCAT(`$this->otherForeignKey`)"))
-				->where(
-					$this->assocTable->addAssocWhere(
-						$assocQuery->createWhere("`$this->localForeignKey` = $idField")
-						,$assocQuery
-					)
-				)
-				, $this->name
-			)
-		);
+				->applyAssocWhere($this->assocTable, "`$this->localForeignKey` = $idField");
+		
+		$query->select(new QuerySelectSub($assocQuery, $this->name));
 
 		// <editor-fold defaultstate="collapsed" desc="Alternative Query">
 //		$query
@@ -1311,15 +1306,18 @@ class ModelRelationInfoIndirectHasMany extends ModelRelationInfoByAssoc
 
 	public function createLoadQueryFor($pkValue, array $context = array(), $joinAlias = null) {
 		$query = $this->createLoadQuery($context, $joinAlias, $join);
-		return $query->where(
-			$this->assocTable->addAssocWhere(
-				$query->createWhere(
-					$join->getQualifiedName($this->localForeignKey, QueryJoin::TABLE_FOREIGN) . ' = ?',
-					$pkValue
-				)
-				,$join
-			)
+		
+		$where = $query->createWhere(
+			$join->getQualifiedName($this->localForeignKey, QueryJoin::TABLE_FOREIGN) . ' = ?',
+			$pkValue
 		);
+		$this->assocTable->addAssocWhere($where, $join);
+		
+		if (!$where->isNull()) {
+			$query->where($where);
+		}
+		
+		return $query;
 	}
 
 }

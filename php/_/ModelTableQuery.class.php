@@ -402,6 +402,23 @@ class ModelTableQuery extends Query implements QueryAliasable {
 	public function & getContext() {
 		return $this->context;
 	}
+
+	/**
+	 *
+	 * @param ModelTable $table
+	 * @param string|QueryWhere $condition
+	 * @param array|scalar $inputs
+	 * @return ModelTableQuery 
+	 */
+	public function applyAssocWhere(ModelTable $table, $condition = null, $inputs = null) {
+		$where = $this->createWhere($condition, $inputs);
+		$table->addAssocWhere($where, $this);
+		if (!$where->isNull()) {
+			$this->andWhere($where);
+		}
+		return $this;
+	}
+	
 }
 
 class QualifiedNameConverter {
