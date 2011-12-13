@@ -893,21 +893,8 @@ abstract class ModelTable extends ModelTableProxy {
 //	 */
 //	public abstract static function findFirstAssocWhere(QueryWhere $where, Model $parentModel);
 
-	/**
-	 * @return QueryWhere
-	 */
-	public abstract static function getExtraFindAssocWhere(QueryAliasable $aliasable, array $context = null);
-
-	/**
-	 * @return QueryWhere
-	 */
-	protected function _getExtraFindAssocWhere(QueryAliasable $aliasable, array $context = null) {
-		// 2 be overriden
-		return null;
-	}
-
 	public function addJoinWhere(QueryJoin $join) {
-		// overridden
+		$join->andWhere($join->createWhere(), $join);
 	}
 
 //REM	/**
@@ -922,17 +909,17 @@ abstract class ModelTable extends ModelTableProxy {
 //	protected function _findAssocWhere(QueryWhere $where, Model $parentModel, $resultMode = ModelSet::RANDOM_ACCESS) {
 //		return $this->findWhere($this->addAssocWhere($where), null, $resultMode);
 //	}
+//
+//	abstract public static function addAssocWhere(QueryWhere $where, QueryAliasable $aliasable);
 
-	abstract public static function addAssocWhere(QueryWhere $where, QueryAliasable $aliasable);
-
-	protected function _addAssocWhere(QueryWhere $where, QueryAliasable $aliasable, array $context = null) {
-		if (null !== $extraWhere = $this->getExtraFindAssocWhere($aliasable, $context)) {
-			$where = $aliasable->createWhere($where)->andWhere($extraWhere);
-//			dumpl(array(
-//				'extraWhere' => $extraWhere->buildSql($a = array()),
-//				'where' => $where->buildSql($a)
-//			));
-		}
+	public function addAssocWhere(QueryWhere $where, QueryAliasable $aliasable) {
+//		if (null !== $extraWhere = $this->getExtraFindAssocWhere($aliasable, $aliasable->getContext())) {
+//			$where = $aliasable->createWhere($where)->andWhere($extraWhere);
+////			dumpl(array(
+////				'extraWhere' => $extraWhere->buildSql($a = array()),
+////				'where' => $where->buildSql($a)
+////			));
+//		}
 		return $where;
 	}
 
@@ -989,7 +976,7 @@ abstract class ModelTable extends ModelTableProxy {
 	 */
 	protected function _findFirstWhere($condition = null, $inputs = null,
 			array $context = array(), $aliasingCallback = null) {
-		
+
 		if (null !== $data = $this->createFindOneQuery(
 				$condition, $inputs, $context, $aliasingCallback)->executeSelectFirst()
 		) {
@@ -1009,7 +996,7 @@ abstract class ModelTable extends ModelTableProxy {
 		if ($aliasingCallback !== null) {
 			$where = call_user_func_array(
 				$aliasingCallback,
-				array(&$where, $query, $context)
+				array(&$where, $query)
 			);
 		}
 		
@@ -1115,10 +1102,9 @@ EX
 	) {
 		$query = $this->createQuery($context)->select();
 		$where = $query->createWhere($condition, $inputs);
-		if ($aliasingCallback !== null) $where = call_user_func_array(
-			$aliasingCallback, 
-			array(&$where, $query)
-		);
+		if ($aliasingCallback !== null) {
+			$where = call_user_func_array($aliasingCallback, array(&$where, $query));
+		}
 		$query->where($where);
 		return ModelSet::create(
 			$this,
@@ -1148,9 +1134,7 @@ EX
 		$query = $this->createQuery($context)->select()->whereIn($this->getPrimaryKeyName(), $ids);
 		if ($aliasingCallback !== null) {
 			$where = $query->createWhere();
-			$where = call_user_func_array($aliasingCallback, 
-				array(&$where, $query)
-			);
+			$where = call_user_func_array($aliasingCallback, array(&$where, $query));
 			$query->where($where);
 		}
 		return ModelSet::create(
@@ -1246,7 +1230,11 @@ EX
 
 	abstract static public function deleteWhereIn($field, $values);
 	protected function _deleteWhereIn($field, $values) {
-		$query = $this->createLoadQuery(self::LOAD_NONE);
+
+		// 12/12/11 22:45 changed to createQuery, to bypass context
+//		$query = $this->createLoadQuery(self::LOAD_NONE);
+		$query = $this->createQuery();
+		
 		// Create the where clause
 //		$where = $query->createWhere()->whereIn($query->getQualifiedName($field), $values);
 		$where = $query->createWhere()->whereIn($field, $values);
@@ -1264,7 +1252,11 @@ EX
 	
 	abstract static public function deleteWhereNotIn($field, $values);
 	protected function _deleteWhereNotIn($field, $values) {
-		$query = $this->createLoadQuery(self::LOAD_NONE);
+
+		// 12/12/11 22:45 changed to createQuery, to bypass context
+//		$query = $this->createLoadQuery(self::LOAD_NONE);
+		$query = $this->createQuery(self::LOAD_NONE);
+		
 		// Create the where clause
 		$where = $query->createWhere()->whereNotIn($field, $values);
 		// Notify each refering model of the end of the relationship, in order
