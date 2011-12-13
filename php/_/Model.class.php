@@ -88,7 +88,7 @@ abstract class Model {
 	public $context;
 
 	protected function __construct(&$fields, array $initValues = null, 
-			$strict = false, array $context = array()) {
+			$strict = false, array $context = null) {
 		
 		$this->events = new EventManager();
 

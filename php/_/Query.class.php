@@ -126,7 +126,7 @@ class Query {
 
 	protected $action = null;
 
-	protected function __construct($table, array $context = array()) {
+	protected function __construct($table, array $context = null) {
 
 		$this->errorHandler = new QueryErrorHandler();
 

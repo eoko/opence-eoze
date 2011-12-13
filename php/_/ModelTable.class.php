@@ -192,9 +192,11 @@ abstract class ModelTable extends ModelTableProxy {
 	 * @param boolean $strict if set to TRUE, then all field of the model will be
 	 * required to be set in $initValues, or an IllegalArgumentException will
 	 * be thrown
+	 * @param array $context     see {@link createModel()}
+	 * 
 	 * @return Model
 	 */
-	abstract static function createModel($initValues = null, $strict = false, array $params = array());
+	abstract static function createModel($initValues = null, $strict = false, array $context = null);
 
 	/**
 	 * Creates a new Model instance (see {@link createModel()}), and set the
@@ -202,11 +204,11 @@ abstract class ModelTable extends ModelTableProxy {
 	 *
 	 * @param array $initValues see {@link createModel()}
 	 * @param boolean $strict   see {@link createModel()}
-	 * @param array $params     see {@link createModel()}
+	 * @param array $context     see {@link createModel()}
 	 * @return Model
 	 */
-	protected function _createNewModel($initValues = null, $strict = false, array $params = array()) {
-		return $this->createModel($initValues, $strict, $params)->forceNew();
+	protected function _createNewModel($initValues = null, $strict = false, array $context = null) {
+		return $this->createModel($initValues, $strict, $context)->forceNew();
 	}
 
 	/**
@@ -223,9 +225,11 @@ abstract class ModelTable extends ModelTableProxy {
 	 *
 	 * @param mixed $primaryKeyValue the value of the primary key of the
 	 * reccord to load
+	 * @param array $context
+	 * 
 	 * @return Model
 	 */
-	abstract static function loadModel($primaryKeyValue, array $context = array());
+	abstract static function loadModel($primaryKeyValue, array $context = null);
 
 	/**
 	 * Create a new <?php echo $modelName ?> reccord initialized by the given $data
@@ -241,9 +245,11 @@ abstract class ModelTable extends ModelTableProxy {
 	 * declaration will not remain legal in future PHP versions...
 	 *
 	 * @param array $data
+	 * @param array $context
+	 * 
 	 * @return Model
 	 */
-	abstract static function loadModelFromData(array $data, array $params = array());
+	abstract static function loadModelFromData(array $data, array $context = null);
 
 	protected function _getDBTableName() {
 		return $this->getDBTable();
@@ -282,7 +288,7 @@ abstract class ModelTable extends ModelTableProxy {
 	/**
 	 * @return Query
 	 */
-	public abstract static function createQuery(array $params = array());
+	public abstract static function createQuery(array $params = null);
 
 	/**
 	 * Gets the default controller for CRUD operation on this table's model.
@@ -522,9 +528,9 @@ abstract class ModelTable extends ModelTableProxy {
 	 * @param array $context
 	 * @return ModelTableQuery 
 	 */
-	abstract public static function createReadQuery(array $context = array());
+	abstract public static function createReadQuery(array $context = null);
 	
-	protected function _createReadQuery(array $context = array()) {
+	protected function _createReadQuery(array $context = null) {
 		
 		$query = $this->createQuery($context);
 		
@@ -540,13 +546,15 @@ abstract class ModelTable extends ModelTableProxy {
 	/**
 	 * @return ModelTableQuery
 	 */
-	abstract public static function createLoadQuery($relationsMode = ModelTable::LOAD_NAME, array $params = array());
+	abstract public static function createLoadQuery($relationsMode = ModelTable::LOAD_NAME, 
+			array $context = null);
 	/**
 	 * @return ModelTableQuery
 	 */
-	protected function _createLoadQuery($relationsMode = ModelTable::LOAD_NAME, array $params = array()) {
+	protected function _createLoadQuery($relationsMode = ModelTable::LOAD_NAME, 
+			array $context = null) {
 		
-		$query = $this->createReadQuery($params);
+		$query = $this->createReadQuery($context);
 
 		foreach ($this->getColumns() as $col) {
 			$col->select($query);
@@ -916,14 +924,14 @@ abstract class ModelTable extends ModelTableProxy {
 	 * @param array $context
 	 * @return Model
 	 */
-	abstract public static function findFirst(QueryWhere $where = null, array $context = array(), 
+	abstract public static function findFirst(QueryWhere $where = null, array $context = null, 
 			$aliasingCallback = null);
 	/**
 	 * @param QueryWhere $where
 	 * @param array $context
 	 * @return %%Model%%
 	 */
-	protected function _findFirst(QueryWhere $where = null, array $context = array(), 
+	protected function _findFirst(QueryWhere $where = null, array $context = null, 
 			$aliasingCallback = null) {
 		
 		$query = $this->createQuery($context);
@@ -948,13 +956,13 @@ abstract class ModelTable extends ModelTableProxy {
 	 * @return Model
 	 */
 	abstract public static function findFirstWhere($condition = null, $inputs = null,
-			array $context = array(), $aliasingCallback = null);
+			array $context = null, $aliasingCallback = null);
 	/**
 	 * @param array $context
 	 * @return %%Model%%
 	 */
 	protected function _findFirstWhere($condition = null, $inputs = null,
-			array $context = array(), $aliasingCallback = null) {
+			array $context = null, $aliasingCallback = null) {
 
 		$data = $this->createFindOneQuery($condition, $inputs, $context, $aliasingCallback)
 				->executeSelectFirst();
@@ -992,7 +1000,7 @@ abstract class ModelTable extends ModelTableProxy {
 	 * @return Model
 	 */
 	abstract public static function findOneWhere($condition = null, $inputs = null,
-			array $context = array(), $aliasingCallback = null);
+			array $context = null, $aliasingCallback = null);
 	
 	/**
 	 * Find the Model corresponding the given condition, when only one result
@@ -1001,7 +1009,7 @@ abstract class ModelTable extends ModelTableProxy {
 	 * @return %%Model%%
 	 */
 	protected function _findOneWhere($condition = null, $inputs = null,
-			array $context = array(), $aliasingCallback = null) {
+			array $context = null, $aliasingCallback = null) {
 		
 		$data = $this->createFindOneQuery(
 			$condition, $inputs, $context, $aliasingCallback
@@ -1056,7 +1064,7 @@ EX
 	abstract public static function findWhere(
 		$condition = null, $inputs = null,
 		$mode = ModelSet::ONE_PASS,
-		array $context = array(),
+		array $context = null,
 		$aliasingCallback = null,
 		ModelRelationReciproqueFactory $reciproqueFactory = null
 	);
@@ -1078,7 +1086,7 @@ EX
 	protected function _findWhere(
 		$condition = null, $inputs = null,
 		$mode = ModelSet::ONE_PASS,
-		array $context = array(),
+		array $context = null,
 		$aliasingCallback = null,
 		ModelRelationReciproqueFactory $reciproqueFactory = null
 	) {
@@ -1104,14 +1112,14 @@ EX
 	abstract public static function findWherePkIn(
 		array $ids, 
 		$modelSet = ModelSet::ONE_PASS,
-		array $context = array(),
+		array $context = null,
 		$aliasingCallback = null,
 		ModelRelationReciproqueFactory $reciproqueFactory = null
 	);
 	protected function _findWherePkIn(
 		array $ids, 
 		$modelSet = ModelSet::ONE_PASS,
-		array $context = array(),
+		array $context = null,
 		$aliasingCallback = null,
 		ModelRelationReciproqueFactory $reciproqueFactory = null
 	) {
@@ -1133,13 +1141,13 @@ EX
 	 * @return Model
 	 * @ignore
 	 */
-	abstract static function findFirstByPrimaryKey($primaryKeyValue, array $context = array());
+	abstract static function findFirstByPrimaryKey($primaryKeyValue, array $context = null);
 
 	/**
 	 * @return Model
 	 * @ignore
 	 */
-	abstract static function findByPrimaryKey($primaryKeyValue, array $context = array());
+	abstract static function findByPrimaryKey($primaryKeyValue, array $context = null);
 
 	public static function  __callStatic($name, $arguments) {
 		if (substr($name, 0, 6) == 'findFirstBy') {

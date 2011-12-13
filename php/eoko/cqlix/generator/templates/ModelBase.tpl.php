@@ -45,10 +45,11 @@ abstract class <?php echo $modelName ?>Base extends <?php echo $baseModelName ?>
 <?php endif ?>
 
 	/**
-	 * @param $values an array of values ($fieldName => $value) to initially set
-	 * the <?php echo $modelName ?> with
+	 * @param array $values an array of values ($fieldName => $value) to initially set
+	 * the <?php echo $modelName ?> with.
+	 * @param array $context
 	 */
-	protected function __construct($initValues = null, $strict = false, array $params = array()) {
+	protected function __construct($initValues = null, $strict = false, array $context = null) {
 
 		$fields = array(
 <?php $comma = "\t\t\t\t"; ?>
@@ -72,7 +73,7 @@ abstract class <?php echo $modelName ?>Base extends <?php echo $baseModelName ?>
 		parent::__construct($fields, $relations, $initValues, $strict);
 */ ?>
 
-		parent::__construct($fields, $initValues, $strict, $params);
+		parent::__construct($fields, $initValues, $strict, $context);
 	}
 
 	/**
@@ -94,11 +95,13 @@ abstract class <?php echo $modelName ?>Base extends <?php echo $baseModelName ?>
 	 *
 	 * @param array $initValues an array containing values with which the
 	 * Model's fields will be initialized. This
-	 * @return <?php echo $modelName?>
-
+	 *
+	 * @param array $context
+	 * 
+	 * @return <?php echo $modelName, PHP_EOL ?>
 	 */
-	static function create($initValues = null, $strict = false, array $params = array()) {
-		return new <?php echo $modelName ?>($initValues, $strict, $params);
+	static function create($initValues = null, $strict = false, array $context = null) {
+		return new <?php echo $modelName ?>($initValues, $strict, $context);
 	}
 
 <?php if ($primaryField !== null): ?>
@@ -120,16 +123,21 @@ abstract class <?php echo $modelName ?>Base extends <?php echo $baseModelName ?>
 	/**
 	 * Create a new <?php echo $modelName ?>, and load it from the database, according to its
 	 * $primaryKey value.
-	 * @param mixed $<?php echo $primaryField->getVarName(false) ?> 
+	 * 
+	 * @param mixed $<?php echo $primaryField->getVarName(false), PHP_EOL ?>
+	 *
+	 * @param array $context
+	 * 
 	 * @return <?php echo $modelName ?> the data Model from the loaded reccord, or null if no
 	 * reccord matching the given primary key has been found
 	 */
-	public static function load($<?php echo $primaryField->getVarName(false) ?>, array $params = array()) {
+	public static function load($<?php echo $primaryField->getVarName(false) ?>, array $context = null) {
+		
 		$model = new <?php echo $modelName ?>(array(
 			'<?php echo $primaryField->getName() ?>' => $<?php echo $primaryField->getVarName(false) ?>
-		), false, $params);
+		), false, $context);
 
-		return $model->doLoad($params);
+		return $model->doLoad($context);
 	}
 
 	/**
@@ -170,7 +178,7 @@ abstract class <?php echo $modelName ?>Base extends <?php echo $baseModelName ?>
 	 * This method always throw an UnsupportedOperationException because this
 	 * Model doesn't have a primary key.
 	 */
-	public static function load($id, array $params = array()) {
+	public static function load($id, array $context = null) {
 		throw new UnsupportedOperationException('The model <?php echo $modelName ?> has no primary key');
 	}
 <?php endif ?>
@@ -181,10 +189,11 @@ abstract class <?php echo $modelName ?>Base extends <?php echo $baseModelName ?>
 	 * not-new, when being created this way.
 	 * @param ModelTable $table
 	 * @param array $data
+	 * @param array $context
 	 * @return %%Model%%
 	 * @ignore
 	 */
-	public static function loadFromData(array $data, array $context = array()) {
+	public static function loadFromData(array $data, array $context = null) {
 //		$model = new <?php echo $modelName ?>();
 //		$model->params = $model->context = $context;
 //		$model->setAllFieldsFromDatabase($data);
