@@ -45,7 +45,9 @@ class ExceptionHandler {
 
 			Logger::getLogger('ExceptionHandler')->error('UserException', $ex);
 
-		} else {
+		}
+		
+		else {
 			$systemError = true;
 			$errorTitle = lang('Erreur Système');
 			$includeTimestamp = true;
@@ -72,7 +74,7 @@ class ExceptionHandler {
 		}
 
 		if ($answer) {
-			if (eoko\config\Application::getInstance()->isDevMode()) {
+			if (!$reason && eoko\config\Application::getInstance()->isDevMode()) {
 				$reason = "$ex";
 			}
 			ExtJSResponse::failure($reason, $systemError, $errorTitle, true, false,
