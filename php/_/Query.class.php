@@ -618,7 +618,9 @@ class Query {
 	 * @return Query
 	 */
 	public function where($condition, $inputs = null) {
-		if (func_num_args() > 2) $inputs = array_splice(func_get_args(), 1);
+		if (func_num_args() > 2) {
+			$inputs = array_splice(func_get_args(), 1);
+		}
 		$this->where = $this->createWhere($condition, $inputs);
 //		if ($condition instanceof QueryWhere)
 //			$this->where = $condition;
@@ -633,7 +635,9 @@ class Query {
 	 * @see where
 	 */
 	public function andWhere($condition, $inputs = null) {
-		if (func_num_args() > 2) $inputs = array_splice(func_get_args(), 1);
+		if (func_num_args() > 2) {
+			$inputs = array_splice(func_get_args(), 1);
+		}
 		if (!$this->hasWhere()) {
 			return $this->where($condition, $inputs);
 		}
@@ -646,8 +650,12 @@ class Query {
 	 * @return Query
 	 */
 	public function orWhere($condition, $inputs = null) {
-		if (func_num_args() > 2) $inputs = array_splice(func_get_args(), 1);
-		if (!$this->hasWhere()) return $this->where($condition, $inputs);
+		if (func_num_args() > 2) {
+			$inputs = array_splice(func_get_args(), 1);
+		}
+		if (!$this->hasWhere()) {
+			return $this->where($condition, $inputs);
+		}
 		$this->where->orWhere($condition, $inputs);
 		return $this;
 	}
