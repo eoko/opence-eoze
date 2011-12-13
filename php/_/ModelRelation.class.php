@@ -666,7 +666,7 @@ class ModelRelationReferedByMany extends ModelRelationByReference implements Mod
 		}
 
 		if (count($olds) > 0) {
-			$this->targetTable->deleteWherePkIn($olds);
+			$this->targetTable->deleteWherePkIn($olds, $this->parentModel->context);
 		}
 
 		$success = true;
