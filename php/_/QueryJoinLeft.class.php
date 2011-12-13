@@ -92,9 +92,11 @@ class QueryJoinLeft extends QueryJoin {
 			$this->where[] = " $boolOp $assocField";
 		}
 	}
-
+	
 	public function andWhere($condition, $inputs = null) {
 		$where = new QueryWhere($this, $condition, $inputs);
-		$this->where[] = ' AND ' . $where->buildSql($this->bindings);
+		if (!$where->isNull()) {
+			$this->where[] = ' AND ' . $where->buildSql($this->bindings);
+		}
 	}
 }

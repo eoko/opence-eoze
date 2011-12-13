@@ -356,9 +356,9 @@ abstract class ModelRelationInfo extends ModelFieldBase {
 	 */
 	public function createJoin(ModelTableQuery $query, $alias = null, $leftAlias = null) {
 		if ($alias === null) $alias = $this->name;
-		return $this->addJoinWhere(
-			$this->doCreateJoin($query, $alias, $leftAlias)
-		);
+		$join = $this->doCreateJoin($query, $alias, $leftAlias);
+		$this->addJoinWhere($join);
+		return $join;
 	}
 
 	/**
@@ -506,6 +506,8 @@ abstract class ModelRelationInfoByReference extends ModelRelationInfo {
 	}
 	
 	protected function addJoinWhere(QueryJoin $join) {
+
+		$this->targetTable->addJoinWhere($join);
 		
 		if ($this->uniqueBy) {
 			foreach ($this->uniqueBy as $foreign => $local) {
@@ -524,8 +526,6 @@ abstract class ModelRelationInfoByReference extends ModelRelationInfo {
 				}
 			}
 		}
-		
-		return $join;
 	}
 }
 
@@ -555,7 +555,7 @@ abstract class ModelRelationInfoHasReference extends ModelRelationInfoByReferenc
 			$targetPkValue
 		);
 		if (!$ignoreAssocWhere) {
-			$where = $this->localTable->addAssocWhere($where);
+			$where = $this->localTable->addAssocWhere($where, $query);
 		}
 		return $query->where($where);
 	}
@@ -727,11 +727,11 @@ class ModelRelationInfoIsRefered extends ModelRelationInfoByReference {
 		$this->reciproqueName = $reciproqueName;
 	}
 	
-	protected function addJoinWhere(QueryJoin $join) {
-		parent::addJoinWhere($join);
-		$this->targetTable->addJoinWhere($join);
-		return $join;
-	}
+//	protected function addJoinWhere(QueryJoin $join) {
+//		parent::addJoinWhere($join);
+//		$this->targetTable->addJoinWhere($join);
+//		return $join;
+//	}
 
 	/**
 	 * @return ModelRelationInfoHasReference
@@ -895,7 +895,7 @@ class ModelRelationInfoReferredByOneAssocMirror extends ModelRelationInfoReferre
  * are created, they will be indiferently linked by any of the refField (though,
  * in practice, the first one in the list will be most oftenly picked).
  */
-class ModelRelatinInfoReferedByOneOnMultipleFields extends ModelRelationInfoReferedByOne {
+class ModelRelationInfoReferedByOneOnMultipleFields extends ModelRelationInfoReferedByOne {
 
 	public function __construct($name, ModelTableProxy $localTable, ModelTableProxy $targetTableProxy,
 			$referenceField, $reciproqueName = null) {
@@ -1025,10 +1025,7 @@ class ModelRelationInfoReferedByMany extends ModelRelationInfoIsRefered
 		$query = $this->targetTable->createLoadQuery(ModelSet::ONE_PASS, $context);
 		return $query->where(
 			$this->targetTable->addAssocWhere(
-				$query->createWhere(
-					"$this->referenceField=?",
-					$pkValue
-				)
+				$query->createWhere("$this->referenceField=?",$pkValue)
 				,$query
 			)
 		);
@@ -1067,6 +1064,8 @@ abstract class ModelRelationInfoByAssoc extends ModelRelationInfo {
 	
 	/** @var ModelRelationInfo */
 	private $assocRelationInfo = null;
+	
+	protected $whereAssoc;
 	
 	function  __construct(
 		$name,
@@ -1122,9 +1121,15 @@ abstract class ModelRelationInfoByAssoc extends ModelRelationInfo {
 		);
 	}
 
-	public function addJoinWhere(QueryJoin $join) {
+	protected function addJoinWhere(QueryJoin $join) {
+		
 		$this->assocTable->addJoinWhere($join);
-		return $join;
+		
+		if ($this->whereAssoc) {
+			foreach ($this->whereAssoc as $field => $value) {
+				$join->whereAssoc($field, $value);
+			}
+		}
 	}
 
 	public function getReferenceField() {
@@ -1264,9 +1269,7 @@ class ModelRelationInfoIndirectHasMany extends ModelRelationInfoByAssoc
 				->select(QuerySelectRaw::create("GROUP_CONCAT(`$this->otherForeignKey`)"))
 				->where(
 					$this->assocTable->addAssocWhere(
-						$assocQuery->createWhere(
-							"`$this->localForeignKey` = $idField"
-						)
+						$assocQuery->createWhere("`$this->localForeignKey` = $idField")
 						,$assocQuery
 					)
 				)

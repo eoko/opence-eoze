@@ -622,10 +622,6 @@ class Query {
 			$inputs = array_splice(func_get_args(), 1);
 		}
 		$this->where = $this->createWhere($condition, $inputs);
-//		if ($condition instanceof QueryWhere)
-//			$this->where = $condition;
-//		else
-//			$this->where = QueryWhere::create()->where($condition, $inputs);
 		return $this;
 	}
 
@@ -640,9 +636,10 @@ class Query {
 		}
 		if (!$this->hasWhere()) {
 			return $this->where($condition, $inputs);
+		} else {
+			$this->where->andWhere($condition, $inputs);
+			return $this;
 		}
-		$this->where->andWhere($condition, $inputs);
-		return $this;
 	}
 
 	/**
@@ -655,9 +652,10 @@ class Query {
 		}
 		if (!$this->hasWhere()) {
 			return $this->where($condition, $inputs);
+		} else {
+			$this->where->orWhere($condition, $inputs);
+			return $this;
 		}
-		$this->where->orWhere($condition, $inputs);
-		return $this;
 	}
 
 	/**
@@ -666,7 +664,9 @@ class Query {
 	 */
 	public function whereIn($field, $values) {
 		$this->where = $this->createWhere();
-		if (func_num_args() > 2) $values = array_splice(func_get_args(), 1);
+		if (func_num_args() > 2) {
+			$values = array_splice(func_get_args(), 1);
+		}
 		$this->where->whereIn($field, $values);
 		return $this;
 	}
@@ -676,7 +676,9 @@ class Query {
 	 */
 	public function whereNotIn($field, $values) {
 		$this->where = $this->createWhere();
-		if (func_num_args() > 2) $values = array_splice(func_get_args(), 1);
+		if (func_num_args() > 2) {
+			$values = array_splice(func_get_args(), 1);
+		}
 		$this->where->whereNotIn($field, $values);
 		return $this;
 	}
@@ -725,7 +727,7 @@ class Query {
 	 * @return Bool
 	 */
 	private function hasWhere() {
-		return $this->where !== null;
+		return $this->where !== null && !$this->where->isNull();
 	}
 
 	private function buildWhere() {
@@ -1826,7 +1828,7 @@ interface QueryAliasable {
 	function convertQualifiedNames($preSql, &$bindings);
 
 	/**
-	 * Make the given relation name relative to the alisable. The validity or
+	 * Make the given relation name relative to the aliasable. The validity or
 	 * existence of the relation itself will not be checked; all that method
 	 * does is to prepend the correct prefix to make the given name relative
 	 * to iself.
@@ -1837,19 +1839,27 @@ interface QueryAliasable {
 	 * 
 	 * @see QueryAliasable::getRelationInfo() to directly access a relation's
 	 * info object (thus, ensuring the relation actually exists).
-	 * @see 
 	 */
 	function makeRelationName($targetRelationName);
 
+	/**
+	 * @return ModelRelatinInfo
+	 */
 	function getRelationInfo($targetRelationName, $requireType = false);
 
-	/** @return QueryWhere */
+	/**
+	 * @return QueryWhere
+	 */
 	function createWhere($conditions = null, $inputs = null);
 
-	/** @return ModelTableQuery */
+	/**
+	 * @return ModelTableQuery
+	 */
 	function getQuery();
 
-	/** @return arary */
+	/**
+	 * @return array
+	 */
 	function &getContext();
 }
 

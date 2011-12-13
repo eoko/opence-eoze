@@ -141,6 +141,9 @@ class QueryWhere {
 	 */
 	private function pushCondition($condition, $inputs, $op) {
 		if ($condition instanceof QueryWhere) {
+			if ($condition->isNull()) {
+				return $this;
+			}
 			if ($this->sql !== null) {
 				$this->sql = "($this->sql) $op ";
 			}

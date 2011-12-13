@@ -355,7 +355,6 @@ class ModelTableQuery extends Query implements QueryAliasable {
 			if (is_array($join = $relation->createJoin($this, $alias, $leftAlias))) {
 				return $this->joinReferences[$index] = $join[0];
 			} else {
-				if ($this->joins === null) $this->joins = array();
 				return $this->joins[$index] = $join;
 			}
 		}
