@@ -196,8 +196,8 @@ class ModelRelationCache {
 
 	protected $cache = null;
 
-	public function __construct(array $context) {
-		$this->defaultContext = $context;
+	public function __construct(array $context = null) {
+		$this->defaultContext = $context !== null ? $context : array();
 	}
 
 	public function &get(array $overrideContext = null) {

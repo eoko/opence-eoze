@@ -6,8 +6,8 @@ class ModelTableQuery extends Query implements QueryAliasable {
 	/** @var myModelTable */
 	public $table;
 
-	function  __construct(myModelTable $table = null, array $params = array()) {
-		parent::__construct($table, $params);
+	function  __construct(myModelTable $table = null, array $context = null) {
+		parent::__construct($table, $context);
 		$this->dbTable = $table->getDBTableName();
 		$this->table = $table;
 	}

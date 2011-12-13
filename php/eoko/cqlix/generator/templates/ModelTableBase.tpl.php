@@ -93,21 +93,22 @@ abstract class <?php echo $tableName ?>Base extends <?php echo $baseTableName ?>
 	/**
 	 * @return <?php echo $modelName ?>Query
 	 */
-	public static function createQuery(array $params = array(), &$getQuery = null) {
+	public static function createQuery(array $context = null, &$getQuery = null) {
 		require_once MODEL_QUERY_PATH . '<?php echo $modelName ?>Query.class.php';
-		$getQuery = <?php echo $modelName ?>Query::create(<?php echo $tableName ?>::getInstance(), $params);
+		$getQuery = <?php echo $modelName ?>Query::create(<?php echo $tableName ?>::getInstance(), $context);
 		return $getQuery;
 	}
 
 	/**
+	 * @params array $context
 	 * @return <?php echo $modelName ?>Query
 	 */
-	public static function createQueryGet(&$getQuery, array $params = array()) {
-		return self::createQuery($params, $getQuery);
+	public static function createQueryGet(&$getQuery, array $context = null) {
+		return self::createQuery($context, $getQuery);
 	}
 
 	/**
-	 * Create a new <?php echo $modelName ?>
+	 * Create a new <?php echo $modelName ?>.
 	 *
 	 * The new reccord will be considered new until its primary key is set.
 	 *
@@ -120,12 +121,14 @@ abstract class <?php echo $tableName ?>Base extends <?php echo $baseTableName ?>
 	 *
 	 * @param Bool $strict if set to TRUE, then all field of the model will be
 	 * required to be set in $initValues, or an IllegalArgumentException will
-	 * be thrown
-
-	 * @return <?php echo $modelName ?> 
+	 * be thrown.
+	 *
+	 * @param array $context
+	 *
+	 * @return <?php echo $modelName, PHP_EOL ?>
 	 */
-	public static function createModel($initValues = null, $strict = false, array $params = array()) {
-		return <?php echo $modelName ?>::create($initValues, $strict, $params);
+	public static function createModel($initValues = null, $strict = false, array $context = null) {
+		return <?php echo $modelName ?>::create($initValues, $strict, $context);
 	}
 
 <?php if ($table->defaultController): ?>
@@ -160,13 +163,15 @@ abstract class <?php echo $tableName ?>Base extends <?php echo $baseTableName ?>
 
 	/**
 	 * Load a <?php echo $modelName ?> reccord from the database, selected by
-	 * its primary key
+	 * its primary key.
 	 *
-	 * @param mixed $<?php echo $primaryField->getVarName(false) ?> 
+	 * @param mixed $<?php echo $primaryField->getVarName(false), PHP_EOL ?>
+	 * @param array $context
+	 *
 	 * @return Model the data Model from the loaded reccord, or null if no
 	 * reccord matching the given primary key has been found
 	 */
-	public static function loadModel($<?php echo $primaryField->getVarName(false) ?>, array $context = array()) {
+	public static function loadModel($<?php echo $primaryField->getVarName(false) ?>, array $context = null) {
 		return <?php echo $modelName ?>::load($<?php echo $primaryField->getVarName(false) ?>, $context);
 	}
 
@@ -174,7 +179,7 @@ abstract class <?php echo $tableName ?>Base extends <?php echo $baseTableName ?>
 	 *
 	 * @return <?php echo $modelName ?>
 	 */
-	public static function findByPrimaryKey($<?php echo $primaryField->getVarName(false) ?>, array $context = array()) {
+	public static function findByPrimaryKey($<?php echo $primaryField->getVarName(false) ?>, array $context = null) {
 		return <?php echo $modelName ?>::load($<?php echo $primaryField->getVarName(false) ?>, $context);
 	}
 
@@ -182,7 +187,7 @@ abstract class <?php echo $tableName ?>Base extends <?php echo $baseTableName ?>
 	 *
 	 * @return <?php echo $modelName ?> 
 	 */
-	public static function findFirstByPrimaryKey($<?php echo $primaryField->getVarName(false) ?>, array $context = array()) {
+	public static function findFirstByPrimaryKey($<?php echo $primaryField->getVarName(false) ?>, array $context = null) {
 		return <?php echo $modelName ?>::load($<?php echo $primaryField->getVarName(false) ?>, $context);
 	}
 <?php else: ?>
@@ -232,7 +237,9 @@ abstract class <?php echo $tableName ?>Base extends <?php echo $baseTableName ?>
 	 * @return ModelSet
 	 */
 	public static function findAll(array $context = null, $mode = ModelSet::ONE_PASS) {
-		if ($context === null) $context = array();
+		if ($context === null) {
+			$context = array();
+		}
 		return self::findWhere('1', null, $mode, $context);
 	}
 
@@ -241,8 +248,10 @@ abstract class <?php echo $tableName ?>Base extends <?php echo $baseTableName ?>
 	 * array. All the model's fields must have a value set in the $data array.
 	 * The <?php echo $modelName ?> reccord will be considered loaded and not-new.
 	 * @param array $data
+	 * @param array $context
+	 * @return <?php echo $modelName, PHP_EOL ?>
 	 */
-	public static function loadModelFromData(array $data, array $context = array()) {
+	public static function loadModelFromData(array $data, array $context = null) {
 		return <?php echo $modelName ?>::loadFromData($data, $context);
 	}
 
