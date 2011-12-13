@@ -98,13 +98,35 @@ class Inflector {
 			return $default;
 		}
 	}
+	
+	private static $knownSingulars = null;
+	
+	private static function getKnownSingular($word, $default = null) {
+		if (self::$knownSingulars === null) {
+			self::$knownSingulars = ConfigManager::get('eoko/lang/Inflector/singulars');
+		}
+		$word = strtolower($word);
+		if (isset(self::$knownSingulars[$word])) {
+			return self::$knownSingulars[$word];
+		} else {
+			return $default;
+		}
+	}
+	
+	public static function singularize($string) {
+		if (null !== $r = self::getKnownSingular($string)) {
+			return $r;
+		} else {
+			return Inflect::singularize($string);
+		}
+	}
 
 	public static function modelFromDB($dbTableName) {
 		if (null !== $name = self::getTableConfig($dbTableName, 'modelName')) {
 			return $name;
 		} else {
 			$string = str_replace('_' , ' ', $dbTableName);
-			return self::camelCase(Inflect::singularize($string), true, ' ');
+			return self::camelCase(self::singularize($string), true, ' ');
 		}
 	}
 
