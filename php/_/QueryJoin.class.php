@@ -193,7 +193,7 @@ abstract class QueryJoin implements QueryAliasable {
 					return "`$this->foreignTableAlias`.`$field`";
 				} 
 				else if ($this->foreignTable->hasVirtual($field)) {
-					return $this->foreignTable->getVirtual($field)->getClause($this);
+					return $this->foreignTable->getVirtual($field)->getClause($this->query, $this);
 				}
 				else {
 					if (count($parts = explode('->', $field)) > 1) {
@@ -209,7 +209,7 @@ abstract class QueryJoin implements QueryAliasable {
 							throw new UnsupportedOperationException;
 							// virtual
 							return $relation->targetTable->getVirtual($fieldName)->getClause(
-								$this, $this->query->getJoin($relationName)
+								$this->query, $this->query->getJoin($relationName)
 							);
 						} else {
 							// field
