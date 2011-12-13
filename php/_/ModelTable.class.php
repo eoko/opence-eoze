@@ -1184,17 +1184,12 @@ EX
 		);
 	}
 
-	abstract public static function createWhereIs($fieldValues);
-	protected function _createWhereIs($fieldValues, &$query = null) {
-
-	}
-
 	/**
 	 * @return int the number of affected records
 	 */
 	abstract static public function deleteWhereIs($fieldValues);
-	protected function _deleteWhereIs($fieldValues) {
-		$query = $this->createQuery();
+	protected function _deleteWhereIs($fieldValues, array $context = null) {
+		$query = $this->createQuery($context);
 		// Create the where clause
 		$where = $query->createWhere();
 		foreach ($fieldValues as $field => $value) {
@@ -1212,12 +1207,12 @@ EX
 		return $this->executeDelete($query);
 	}
 
-	abstract static public function deleteWhereIn($field, $values);
-	protected function _deleteWhereIn($field, $values) {
+	abstract static public function deleteWhereIn($field, $values, $context = null);
+	protected function _deleteWhereIn($field, $values, $context = null) {
 
 		// 12/12/11 22:45 changed to createQuery, to bypass context
 //		$query = $this->createLoadQuery(self::LOAD_NONE);
-		$query = $this->createQuery();
+		$query = $this->createQuery($context);
 		
 		// Create the where clause
 //		$where = $query->createWhere()->whereIn($query->getQualifiedName($field), $values);
@@ -1234,12 +1229,12 @@ EX
 		return $this->executeDelete($query);
 	}
 	
-	abstract static public function deleteWhereNotIn($field, $values);
-	protected function _deleteWhereNotIn($field, $values) {
+	abstract static public function deleteWhereNotIn($field, $values, $context = null);
+	protected function _deleteWhereNotIn($field, $values, $context = null) {
 
 		// 12/12/11 22:45 changed to createQuery, to bypass context
 //		$query = $this->createLoadQuery(self::LOAD_NONE);
-		$query = $this->createQuery(self::LOAD_NONE);
+		$query = $this->createQuery($context);
 		
 		// Create the where clause
 		$where = $query->createWhere()->whereNotIn($field, $values);
@@ -1259,14 +1254,14 @@ EX
 		return $query->executeDelete();
 	}
 
-	abstract public static function deleteWherePkIn($values);
-	protected function _deleteWherePkIn($values) {
-		return $this->deleteWhereIn($this->getPrimaryKeyName(), $values);
+	abstract public static function deleteWherePkIn($values, $context = null);
+	protected function _deleteWherePkIn($values, $context = null) {
+		return $this->deleteWhereIn($this->getPrimaryKeyName(), $values, $context);
 	}
 	
-	abstract public static function deleteWherePkNotIn($values);
-	protected function _deleteWherePkNotIn($values) {
-		return $this->deleteWhereNotIn($this->getPrimaryKeyName(), $values);
+	abstract public static function deleteWherePkNotIn($values, $context = null);
+	protected function _deleteWherePkNotIn($values, $context = null) {
+		return $this->deleteWhereNotIn($this->getPrimaryKeyName(), $values, $context);
 	}
 
 	/**
