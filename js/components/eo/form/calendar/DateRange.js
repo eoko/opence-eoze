@@ -13,8 +13,12 @@ eo.form.calendar.DateRange = Ext.extend(Object, {
 	
 	,constructor: function(from, to) {
 		if (Ext.isArray(from)) {
-			to = from[1];
-			from = from[0];
+			if (from.length === 2) {
+				to = from[1];
+				from = from[0];
+			} else {
+				throw new Error('Invalid range spec: ' + String(from));
+			}
 		}
 		if (!(from instanceof Date)) {
 			from = new Date(from);

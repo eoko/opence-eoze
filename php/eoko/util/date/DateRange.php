@@ -27,7 +27,17 @@ class DateRange {
 	 * @param string|DateTime $from
 	 * @param string|DateTime $to 
 	 */
-	public function __construct($from, $to) {
+	public function __construct($from, $to = null) {
+		
+		if (is_array($from)) {
+			
+			if (count($from) != 2) {
+				throw new IllegalArgumentException('$from array must have a length of exactly 2');
+			}
+			
+			$to = $from[1];
+			$from = $from[0];
+		}
 		
 		$this->from = Date::parseDate($from);
 		$this->to = Date::parseDate($to);
@@ -37,6 +47,20 @@ class DateRange {
 			$to = $this->to->format('Y-m-d');
 			throw new IllegalArgumentException("Date from ($from) must be before date to ($to)");
 		}
+	}
+	
+	/**
+	 * @return Date
+	 */
+	public function getFrom() {
+		return $this->from;
+	}
+	
+	/**
+	 * @return Date
+	 */
+	public function getTo() {
+		return $this->to;
 	}
 
 	/**
@@ -68,5 +92,38 @@ class DateRange {
 	 */
 	public function toStringArray($format = 'Y-m-d') {
 		return array($this->from->format($format), $this->to->format('Y-m-d'));
+	}
+	
+	/**
+	 *
+	 * @param mixed $range
+	 * @return DateRange
+	 */
+	public static function parseRange($range) {
+		if ($range instanceof DateRange) {
+			return $range;
+		} else if (is_array($range) && count($range) == 2) {
+			return new DateRange($range);
+		} else {
+			throw new IllegalArgumentException();
+		}
+	}
+	
+	public function __toString() {
+		return 'DateRange[' . $this->from->format('Y-m-d') . ', ' 
+				. $this->to->format('Y-m-d') . ']';
+	}
+	
+	/**
+	 *
+	 * @param array $ranges
+	 * @return array
+	 */
+	public static function parseRanges($ranges) {
+		$r = array();
+		foreach ($ranges as $range) {
+			$r[] = self::parseRange($range);
+		}
+		return $r;
 	}
 }

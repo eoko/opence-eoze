@@ -115,7 +115,7 @@ var win = new Ext.Window({
 	},{
 		text: 'Set 2012'
 		,handler: function() {
-			editor.setFrom(2012, 4, 6);
+			editor.setFrom(2012, 1, 6);
 		}
 	}]
 });
