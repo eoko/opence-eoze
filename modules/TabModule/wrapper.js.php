@@ -90,6 +90,7 @@ var <?php echo $var ?> = Ext.extend(sp, {
 			,border: false
 			,closable: true
 			,iconCls: this.getIconCls()
+			,title: this.getTitle()
 		};
 	}
 	

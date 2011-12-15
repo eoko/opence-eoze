@@ -27,7 +27,9 @@ var ModuleContainer = Ext.extend(Ext.Panel, {
 			scope: this
 			,add: function(ct, cp) {
 				this.component = cp;
-				this.doLayout();
+				if (cp.ownerCt === this) { // the add event bubbles...
+					this.doLayout();
+				}
 			}
 		});
 		
