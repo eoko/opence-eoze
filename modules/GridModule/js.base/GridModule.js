@@ -380,6 +380,10 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				win.setRow(row);
 //				win.form.reset();
 				win.show(el);
+				
+				// 15/12/11 05:56 added form.record for opence's season module
+				win.formPanel.form.record = row;
+				
 				win.formPanel.refresh(function() {
 					win.hasBeenLoaded = true;
 				});
