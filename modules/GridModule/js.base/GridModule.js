@@ -64,7 +64,37 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 
 		Oce.GridModule.superclass.constructor.apply(this, arguments);
 
-		this.addEvents("open", "close");
+		this.addEvents(
+			'open', 
+			'close',
+			/**
+			 * @event aftercreatewindow
+			 * 
+			 * Fires after a window has been created, and before the form 
+			 * data are loaded (in the case of an edit window).
+			 * 
+			 * @param {Oce.GridModule} this
+			 * 
+			 * @param {Ext.Window} win The window that has been created.
+			 * 
+			 * @param {String} action The action provided by the window. 
+			 * That can be either `'add'` or `'edit'`.
+			 * 
+			 * @param {String/Integer} recordId If the action was `'edit'`,
+			 * then the id of the record being edited will passed as the
+			 * third argument.
+			 */
+			'aftercreatewindow',
+			/**
+			 * @event beforegridstorefirstload
+			 * 
+			 * Fires before the main grid store is first loaded.
+			 * 
+			 * @param {Oce.GridModule} this
+			 * @param {Ext.data.Store} store The main grid's store.
+			 */
+			'beforegridstorefirstload'
+		);
 		
 		this.model.initRelations(this.modelRelations);
 		
@@ -180,7 +210,8 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			pp = this.plugins = [];
 		if (plugins) {
 			Ext.each(plugins, function(config) {
-				var c = Oce.GridModule.ptypes[config.ptype],
+				var ptype = Ext.isString(config) ? config : config.ptype,
+					c = Oce.GridModule.ptypes[ptype],
 					p = new c(config);
 				pp.push(p);
 			}, this);
@@ -1269,6 +1300,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 
 			this.editWindows[rowId] = win;
 			
+			this.fireEvent('aftercreatewindow', this, win, 'edit', rowId, opts);
 			this.afterCreateWindow(win, 'edit', rowId, opts); // 08/12/11 21:04 added opts
 			this.afterCreateEditWindow(win, rowId, opts); // 08/12/11 21:04 added opts
 
@@ -1791,6 +1823,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			}, this.addWindowToolbarAddExtra.createDelegate(this)
 		);
 			
+		this.fireEvent('aftercreatewindow', this, win, 'add');
 		this.afterCreateWindow(win, 'add');
 		this.afterCreateAddWindow(win);
 
@@ -2984,12 +3017,22 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	
 	,firstLoad: false
 	
+	/**
+	 * Hook method that is called before the main grid's store is first loaded.
+	 * 
+	 * @param {Ext.data.Store} store The main grid's store.
+	 *
+	 * @protected
+	 */
 	,beforeGridStoreFirstLoad: function(store) {}
 
 	,doFirstLoad: function() {
 		if (!this.firstLoad) {
 			var store = this.store;
+			
+			this.fireEvent('beforegridstorefirstload', this, store);
 			this.beforeGridStoreFirstLoad(store);
+			
 			store.load({
 				params: {start: 0, limit: this.pageSize, action:'load'}
 // --- EXPERIMENTS ---
