@@ -28,6 +28,9 @@
 	background-image:url(../images/opence/32x32/add.png) !important;
 /*	background-image: url(../images/icons_fatcow/32x32/add.png) !important;*/
 }
+.icon.x32.add-vcard {
+	background-image:url(../images/opence/32x32/add+vcard.png) !important;
+}
 .b_ico_filter {
 	background-image: url(../images/icons_fatcow/32x32/filter.png) !important;
 }
