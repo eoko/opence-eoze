@@ -43,7 +43,7 @@ Ext.form.CompositeField.prototype.initComponent =
 	var spp = Ext.form.FormPanel.prototype,
 		uber = spp.isField;
 	spp.isField = function(c) {
-		return uber(c) && !(c instanceof Ext.form.CompositeField);
+		return uber(c) && (c.submitValue || !(c instanceof Ext.form.CompositeField));
 	}
 	// Add cascade() method to CompositeField
 	Ext.copyTo(Ext.form.CompositeField.prototype, Ext.Container.prototype, [
