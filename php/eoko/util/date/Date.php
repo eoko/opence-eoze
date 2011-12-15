@@ -41,4 +41,12 @@ class Date extends DateTime{
 	public function beforeOrEquals(DateTime $d) {
 		return !$this->diff($d)->invert || $this->equals($d);
 	}
+	
+	public function after(DateTime $d) {
+		return !$d->diff($this)->invert && !$this->equals($d);
+	}
+	
+	public function before(DateTime $d) {
+		return $d->after($this);
+	}
 }
