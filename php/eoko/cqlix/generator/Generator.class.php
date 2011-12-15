@@ -945,7 +945,8 @@ class Generator extends Script {
 
 	private function mergeRelationsFoundByNameAndByFK($guessByName = true, $guessByConstraints = true) {
 		
-		$configRelations = $this->referencesOneRelations[self::BY_CONFIG];
+		$configRelations = isset($this->referencesOneRelations[self::BY_CONFIG])
+				? $this->referencesOneRelations[self::BY_CONFIG] : null;
 			
 		if ($guessByName === false) {
 			$this->referencesOneRelations = $this->referencesOneRelations[self::GUESS_BY_NAME];
