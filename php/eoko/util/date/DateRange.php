@@ -21,7 +21,14 @@ class DateRange {
 	 */
 	private $to;
 	
+	/**
+	 * Constructs a new DateRange object.
+	 * 
+	 * @param string|DateTime $from
+	 * @param string|DateTime $to 
+	 */
 	public function __construct($from, $to) {
+		
 		$this->from = Date::parseDate($from);
 		$this->to = Date::parseDate($to);
 		
@@ -33,6 +40,9 @@ class DateRange {
 	}
 
 	/**
+	 * Gets the intersection of the current DateRange with the given one. All comparison
+	 * are inclusive.
+	 * 
 	 * @param DateRange $other
 	 * @return DateRange 
 	 */
@@ -49,6 +59,13 @@ class DateRange {
 		);
 	}
 	
+	/**
+	 * Gets the range as an array of which the first element is the start date
+	 * string and the second, the end date string.
+	 * 
+	 * @param string $format
+	 * @return array
+	 */
 	public function toStringArray($format = 'Y-m-d') {
 		return array($this->from->format($format), $this->to->format('Y-m-d'));
 	}
