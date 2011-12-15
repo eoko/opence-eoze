@@ -9,6 +9,10 @@
  * @since 15 déc. 2011
  */
 
+namespace rhodia\modules\GridModule {
+	class GridBase extends \eoko\modules\GridModule\GridExecutor {}
+}
+
 namespace rhodia\modules\contacts {
 	class GridBase extends \rhodia\modules\GridModule\Grid {}
 }
