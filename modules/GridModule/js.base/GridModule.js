@@ -1234,10 +1234,11 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 
 			,content: Ext.apply({
 // 04/12/11 07:07
-// Removed the next line because it trigger double submit, with eo.Window's own submitHandler
+// Removed the next line because it triggerred double submit, with eo.Window's own submitHandler
 //				submitHandler: handlers.save,
 				controller: this.controller
 				,autoScroll: true
+				,xtype: 'oce.form'
 			}, formConfig)
 
 			,winConfig: Ext.apply({
