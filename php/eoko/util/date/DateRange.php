@@ -2,6 +2,8 @@
 
 namespace eoko\util\date;
 
+use IllegalArgumentException;
+
 /**
  *
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
@@ -22,6 +24,12 @@ class DateRange {
 	public function __construct($from, $to) {
 		$this->from = Date::parseDate($from);
 		$this->to = Date::parseDate($to);
+		
+		if ($this->from->after($this->to)) {
+			$from = $this->from->format('Y-m-d');
+			$to = $this->to->format('Y-m-d');
+			throw new IllegalArgumentException("Date from ($from) must be before date to ($to)");
+		}
 	}
 
 	/**
@@ -41,4 +49,7 @@ class DateRange {
 		);
 	}
 	
+	public function toStringArray($format = 'Y-m-d') {
+		return array($this->from->format($format), $this->to->format('Y-m-d'));
+	}
 }
