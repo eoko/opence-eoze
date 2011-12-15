@@ -21,18 +21,6 @@ eo.form.calendar.ZonesEditor = Ext.extend(Ext.form.Field, {
 	
 	,initComponent: function() {
 		
-		var MonthEditor = eo.form.calendar.MonthEditor;
-		
-		var from = this.from,
-			nMonths = this.months,
-			rlw = this.rowLabelWidth;
-			
-		var month = from.month,
-			year = from.year;
-			
-		var mes = this.months = [],
-			monthEditor, i;
-			
 		// Build zones
 		var Zone = eo.form.calendar.Zone,
 			zones = this.zones = {},
@@ -52,6 +40,28 @@ eo.form.calendar.ZonesEditor = Ext.extend(Ext.form.Field, {
 		});
 			
 		// Add month editors
+		if (this.from) {
+			this.createMonthEditors();
+		}
+		
+		spp.initComponent.call(this);
+	}
+	
+	// private
+	,createMonthEditors: function(render) {
+		var MonthEditor = eo.form.calendar.MonthEditor;
+		
+		var from = this.from,
+			nMonths = from.months || this.months,
+			rlw = this.rowLabelWidth,
+			zones = this.zones;
+			
+		var month = from.month,
+			year = from.year;
+			
+		var mEds = this.monthEditors = [],
+			monthEditor, i;
+			
 		for (i=0; i<nMonths; i++) {
 			
 			monthEditor = new MonthEditor({
@@ -61,7 +71,7 @@ eo.form.calendar.ZonesEditor = Ext.extend(Ext.form.Field, {
 				,rowLabelWidth: rlw
 			});
 			
-			mes.push(monthEditor);
+			mEds.push(monthEditor);
 			
 			if (++month === 13) {
 				month = 1;
@@ -69,18 +79,50 @@ eo.form.calendar.ZonesEditor = Ext.extend(Ext.form.Field, {
 			}
 		}
 		
-		spp.initComponent.call(this);
+		// Render
+		if (render) {
+			var el = this.el;
+			Ext.each(this.monthEditors, function(me) {
+				me.render(el);
+			});
+			// Reload the value into the new rendered elements
+			if (this.value) {
+				this.applyValue();
+			}
+		}
 	}
 	
 	,setFrom: function(year, month, months) {
 		
-		Ext.each(this.months, function(med) {
-			med.destroy();
+		if (Ext.isObject(year)) {
+			month = year.month;
+			months = year.months;
+			year = year.year;
+		}
+		
+		// Clear month editors
+		if (this.monthEditors) {
+			Ext.each(this.monthEditors, function(ed) {
+				ed.destroy();
+			});
+		}
+		
+		// Reset zones
+		Ext.iterate(this.zones, function(name, zone) {
+			zone.clear();
 		});
 		
-		Ext.iterate(this.zones, function(name, zone) {
-			
+		// Init new values
+		Ext.apply(this, {
+			from: {
+				year: year
+				,month: month
+			}
+			,months: months || this.initialConfig.months
 		});
+		
+		// And finaly, rebuild the month editors
+		this.createMonthEditors(true);
 	}
 	
 	,setValue: function(v) {
@@ -91,17 +133,18 @@ eo.form.calendar.ZonesEditor = Ext.extend(Ext.form.Field, {
 		// Convert to date range
 		Ext.iterate(v, function(zone, ranges) {
 			var rr = [];
-			Ext.each(ranges, function(range) {
-				rr.push(new DR(range));
-			});
+			if (ranges.length && !Ext.isArray(ranges[0])) {
+				rr.push(new DR(ranges));
+			} else {
+				Ext.each(ranges, function(range) {
+					rr.push(new DR(range));
+				});
+			}
 			value[zone] = rr;
 		});
 		
 		if (this.rendered) {
 			this.applyValue();
-//			Ext.each(this.months, function(editor) {
-//				editor.setValue(v);
-//			});
 		}
 	}
 	
@@ -118,9 +161,12 @@ eo.form.calendar.ZonesEditor = Ext.extend(Ext.form.Field, {
 			,cls: 'eo-calendar-editor'
 		});
 		
-		Ext.each(this.months, function(me) {
-			me.render(el);
-		});
+		var eds = this.monthEditors;
+		if (eds) { // else the month editors haven't been created
+			Ext.each(eds, function(me) {
+				me.render(el);
+			});
+		}
 		
 //		spp.superclass.onRender.call(this, ct, position);
 		Ext.Component.prototype.onRender.call(this, ct, position);

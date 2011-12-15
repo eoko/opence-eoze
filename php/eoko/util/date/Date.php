@@ -3,6 +3,7 @@
 namespace eoko\util\date;
 
 use DateTime;
+use ParseRange;
 
 /**
  *
@@ -27,6 +28,14 @@ class Date extends DateTime{
 			throw new IllegalArgumentException();
 		}
 	}
+	
+	public function __construct($date, $timeZone = null) {
+		if ($date instanceof DateTime) {
+			parent::__construct($date->format('Y-m-d'), $timeZone);
+		} else {
+			parent::__construct($date, $timeZone);
+		}
+	}
 
 	public function equals(DateTime $d) {
 		$d = clone $d;
@@ -47,6 +56,18 @@ class Date extends DateTime{
 	}
 	
 	public function before(DateTime $d) {
+		$d = self::parseDate($d);
 		return $d->after($this);
+	}
+	
+	public function inRanges(array $ranges) {
+		foreach ($ranges as $range) {
+			$range = DateRange::parseRange($range);
+			if ($this->afterOrEquals($range->getFrom()) 
+					&& $this->beforeOrEquals($range->getTo())) {
+				return true;
+			}
+		}
+		return false;
 	}
 }
