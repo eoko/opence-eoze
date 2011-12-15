@@ -28,7 +28,15 @@ var NS = Ext.ns('Oce.Modules.GridModule');
  */
 Oce.GridModule = Ext.extend(Ext.util.Observable, {
 
+	// TODO remove that, that is absolutely dangerous!!!
 	spp: Ext.Panel.prototype
+	
+	/**
+	 * @cfg {String} autoExpandColumn {@link Ext.grid.Column#id} id of the column that
+	 * will be set as the grid's {@link Ext.grid.GridPanel#autoExpandColumn
+	 * autoExpandColumn}.
+	 */
+	,autoExpandColumn: undefined
 	
 	/**
 	 * True if this component fires an "open" event. Read-only.
@@ -514,7 +522,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			}
 		});
 	}
-
+	
 	,initGrid: function() {
 
 		var checkboxSel = this.gridColumns[0];
@@ -534,7 +542,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			,id: 'oce-gridmodule-grid-' + this.name
 			,columns: this.gridColumns
 			,sm:checkboxSel
-			//,autoExpandColumn: 'username'
+			,autoExpandColumn: this.autoExpandColumn
 			,loadMask: true
 			,columnLines:true
 			,border : false
@@ -2054,7 +2062,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 
 		return this.my.toolbar;
 	}
-
+	
 	,buildGridColumnsConfig: function() {
 		
 		var defaults = this.getGridColumnDefaults();
@@ -2064,7 +2072,8 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 
 			col = this.columns[i];
 
-			if (col.primary !== undefined && col.primary) {
+			// Primary
+			if (col.primary) {
 				this.primaryKeyName = col.name;
 			} else {
 				col.primary = false;
@@ -2104,6 +2113,15 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			// --- Grid ---
 
 			if (col.grid !== false && col.internal !== true) {
+			
+				// Auto expand
+				if (col.autoExpand) {
+					if (!col.id) {
+						col.id = col.dataIndex;
+					}
+					this.autoExpandColumn = col.id;
+				}
+				
 				this.gridColumns.push(col);
 			}
 
