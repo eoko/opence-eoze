@@ -16,4 +16,10 @@ interface ActionProvider {
 	 * @return MenuFamily
 	 */
 	function getFamily();
+	
+	/**
+	 * Gets the css icon class for the given $action and $module.
+	 * @return string
+	 */
+	function getIconCls($action = null, $module = null);
 }
