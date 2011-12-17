@@ -249,7 +249,7 @@ Ext.ux.GroupTabPanel = Ext.extend(Ext.TabPanel, {
         });
     },
 
-    setActiveGroup : function(group) {
+    setActiveGroup: function(group) {
         group = this.getComponent(group);
         if(!group){
             return false;
@@ -276,6 +276,13 @@ Ext.ux.GroupTabPanel = Ext.extend(Ext.TabPanel, {
             this.layout.setActiveItem(group);
             this.syncTabJoint(groupEl);
 
+            // --- <rx+> ---
+            // Showing the mainItem if no one is active yet
+            if (!group.activeTab) {
+                group.setActiveTab(group.mainItem);
+            }
+			// --- </rx+> ---
+			
             this.fireEvent('groupchange', this, group);
             return true;
         }
