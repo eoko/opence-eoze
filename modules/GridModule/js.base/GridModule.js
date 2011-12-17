@@ -438,6 +438,52 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				this.onRecordsExternallyCreated(id);
 			}
 		}, this);
+		
+		if (this.externalGridDependencies) {
+			this.addGridExternalDependencies(this.externalGridDependencies);
+		}
+		
+	}
+	
+	/**
+	 * {Array} externalGridDependencies
+	 * 
+	 * Array of kepler event names to watch, because the grid needs to be
+	 * reloaded when they happen. These events will be automatically added
+	 * with {@link addGridExternalDependencies} each time a main grid is
+	 * created.
+	 * 
+	 * Note that cares should be taken when overridding this property, since
+	 * parent modules may use it. {@link Oce.GridModule} itself won't use
+	 * it, so it is always safe *for the first direct child modules only*
+	 * to override this property directly.
+	 * 
+	 * @protected
+	 */
+	,externalGridDependencies: undefined
+	
+	/**
+	 * Adds a {@link eo.Kepler Kepler} event as a dependency of the main grid. 
+	 * The grid will be reloaded each time one of this event happens. The session 
+	 * where the event originated will not be taken into account (that is, the
+	 * event will be processed even if it originates in the current session). The
+	 * ids of the modified record will not be used to filter the events either.
+	 *
+	 * @protected
+	 */
+	,addGridExternalDependencies: function(keplerEvents) {
+		if (!Ext.isArray(keplerEvents)) {
+			this.addGridExternalDependencies([keplerEvents]);
+		}
+		
+		else {
+			var grid = this.grid;
+			Ext.each(keplerEvents, function(event) {
+				grid.mon(eo.Kepler, event, function() {
+					this.onRecordsExternallyCreated();
+				}, this);
+			}, this);
+		}
 	}
 	
 	/**
@@ -487,15 +533,43 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		this.processExternallyModifiedRecords(ids, 'Modified');
 	}
 
-	,onEditWindowExternallyModified: function(win) {
+	/**
+	 * Behaviour to produce when a window is externally modified. In this
+	 * context, externally means out of the actual window, not necessarily
+	 * from another user or session.
+	 * 
+	 * If the window's form contains unsaved modifications, then a message
+	 * will inform the user and prompt them if they want to reload the 
+	 * window, else the window will be silently reloaded.
+	 * 
+	 * If no refresh method is available in the passed `win` object, then
+	 * the window will be closed instead.
+	 * 
+	 * @param {eo.Window} window The window that is concerned.
+	 * @param {Boolean} [external=true] `true` to specify in the information
+	 * message that the modification came from another user/session.
+	 *
+	 * @protected
+	 */
+	,onEditWindowExternallyModified: function(win, external) {
+		
 		var actionMsg, okHandler;
 
 		if (win.refresh) {
-			actionMsg = "Les données vont être rechargées.";
-			okHandler = function() {
-				this.close();
+			
+			// If the form is not dirty, reload without confirmation
+			if (!win.formPanel.isModified()) {
 				win.refresh(true);
-			};
+				return;
+			}
+			
+			else {
+				actionMsg = "Les données vont être rechargées.";
+				okHandler = function() {
+					this.close();
+					win.refresh(true);
+				};
+			}
 		} else {
 			actionMsg = "La fenêtre va être fermée.";
 			okHandler = function() {
@@ -509,9 +583,10 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			modalTo: win
 			,modalGroup: 'refresh'
 
-			,title: 'Modification extérieure'
-			,message: "L'enregistrement a été modifié par un autre utilisateur. " 
-					+ actionMsg
+			,title: 'Modification' + (external ? ' extérieure' : '')
+			,message: "L'enregistrement a été modifié"  
+				+ (external ? ' par un autre utilisateur. ' : '. ')
+				+ actionMsg
 
 			,okHandler: okHandler
 			,cancelHandler: function() {
