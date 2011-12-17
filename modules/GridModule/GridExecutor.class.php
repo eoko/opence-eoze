@@ -114,8 +114,9 @@ abstract class GridExecutor extends JsonExecutor {
 			case '23000':
 				if (preg_match(
 						'/^Duplicate entry \'(?P<value>[^\']+)\' for key \'(?P<key>[^\']+)/',
-						$message, $matches)) {
-
+						$message, $matches)
+						&& $matches['key'] !== 'PRIMARY') {
+					
 					if (($field = $this->table->getField($matches['key']))) {
 						$label = strtolower($field->getMeta()->label);
 					}
@@ -222,12 +223,7 @@ abstract class GridExecutor extends JsonExecutor {
 	
 	protected function prepareAddData(Request &$data) {}
 	
-	// TODO eoze cleanout (rhodia leftover)
-	protected function add_createContext(Request $form, $setters) {
-		return array(
-			'year' => $this->request->get('year', null)
-		);
-	}
+	protected function add_createContext(Request $form, $setters) {}
 
 	protected function add_getField(Request $request, $col, &$setters, &$missingFields) {
 		if ($request->has($col->name, true)) {
@@ -691,8 +687,11 @@ MSG;
 	}
 		
 	protected function doLoadOne($id) {
-
 		$model = $this->table->loadModel($id, $this->load_one_createContext());
+		return $this->doLoadOneFromModel($model);
+	}
+	
+	protected function doLoadOneFromModel(Model $model) {
 		
 		$data = $this->loadOne_loadData($model);
 
@@ -822,25 +821,6 @@ MSG;
 		$setters = array();
 		$missingFields = array();
 
-		// Excluding auto columns, in order to get a chance to grab it from the
-		// request, if set...
-		$cols = $this->table->getColumns(false, true);
-
-		$idName = $this->table->getPrimaryKeyName();
-//		$setters[$idName] = $request->req($idName);
-		if ((null === $id = $request->get($idName))
-				&& (null === $id = $this->request->get($idName))) {
-			$id = $this->request->req('id');
-		}
-
-		unset($cols[$idName]);
-
-//REM		foreach ($cols as $col) {
-////			$col instanceof ModelColumn; // DBG
-//			if ($request->has($col->name)) {
-//				$setters[$col->name] = $request->req($col->name, false);
-//			}
-//		}
 		foreach ($request->getAll() as $k => $in) {
 			if ($this->table->hasSetter($k)) {
 				$setters[$k] = $in;
@@ -865,11 +845,7 @@ MSG;
 
 		// TODO rx add a where constraint to loadModel
 		// $table->loadModel($id, QueryWhere::create('year = ?', 2008)
-		$model = $this->table->loadModel($id, $this->load_one_createContext());
-		
-		if ($model === null) {
-			throw new SystemException('Cannot load model with id: ' . $id);
-		}
+		$model = $this->createModelForUpdate($request, $setters);
 		
 //		dump($setters, 50);
 //		dump($model);
@@ -879,6 +855,23 @@ MSG;
 		$this->saveModel($model, false);
 
 		return true;
+	}
+	
+	protected function createModelForUpdate($request, $setters) {
+
+		$idName = $this->table->getPrimaryKeyName();
+		if ((null === $id = $request->get($idName))
+				&& (null === $id = $this->request->get($idName))) {
+			$id = $this->request->req('id');
+		}
+		
+		$model = $this->table->loadModel($id, $this->load_one_createContext());
+		
+		if ($model === null) {
+			throw new SystemException('Cannot load model with id: ' . $id);
+		}
+		
+		return $model;
 	}
 
 	protected function mod_getFields(Request $request, &$setters, &$missingFields) {}
