@@ -4,12 +4,17 @@ var NS = Ext.ns('Oce.Modules.GridModule');
 
 /**
  *
- * <h3>Alias</h3>
+ * Alias
+ * -----
  * 
- * {#GridModule} is aliased as Oce.Modules.GridModule.GridModule. This alias
+ * {@link #GridModule} is aliased as `Oce.Modules.GridModule.GridModule`. This alias
  * is still supported for legacy reasons, but its usage is deprecated.
  * 
- * beforeCreateWindow(windowConfig, action): must be called before a window
+ * 
+ * Overridding
+ * -----------
+ * 
+ * {@link Oce.GridModule#beforeCreateWindow}: must be called before a window
  * is created, with the config object as argument. This is an opportunity for
  * customizing components to modify the configuration of any window (to set icon,
  * for example).
@@ -19,11 +24,29 @@ var NS = Ext.ns('Oce.Modules.GridModule');
  * functionnality providers (plugins) to easily and efficiently customize a
  * window before its creation.
  *
- * <h3>Actions</h3>
- *
+ * 
+ * Actions
+ * -------
+ * 
+ * 
+ * ### Remove and Add Actions
+ * 
  * If a GridModule has its action 'remove' disabled, then it doesn't display the 
  * button in the ribbon or the edit window. The actions are configured in the 
- * 'module.actions' config option (yaml) of the module.
+ * `module.actions` config option (yaml) of the module (see Opence's languages
+ * module, for example).
+ * 
+ * 
+ * ### Custom Actions
+ * 
+ * To add a _custom action_ accessible from the module's ribbon, two steps are needed.
+ * 
+ * 1.  First, configure the ribbon button and implement the action behaviour. This is
+ *     best done by calling the {@link #addRibbonAction} method from the 
+ *     {@link #initActions} overridden method.
+ *     
+ * 2.  Second, make the action available through the module's config. This is done in the
+ *     `extra.toolbar` config key.
  * 
  */
 Oce.GridModule = Ext.extend(Ext.util.Observable, {
@@ -276,13 +299,9 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		}
 	}
 
-	,beforeInitStore: function(storeConfig) {
+	,beforeInitStore: function(storeConfig) {}
 
-	}
-
-	,afterInitStore: function(store) {
-
-	}
+	,afterInitStore: function(store) {}
 
 	,initStore: function() {
 
@@ -711,6 +730,14 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		} else {
 			// TODO error handling
 			debugger
+			NS.AlertWindow.show({
+				modalTo: win
+				,title: 'Erreur'
+				,message: "L'enregistrement a échoué (sans dire pourquoi)."
+				,okHandler: function() {
+					this.close();
+				}
+			})
 		}
 		
 	}
@@ -3253,9 +3280,43 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				cb.initiated = true;
 			});
 		}
-
+	}
+	
+	/**
+	 * Adds an action to the module ribbon toolbar.
+	 *
+	 * This method should be called from {@link #initActions}.
+	 * 
+	 * @param {String/Object} action If called with two arguments, this should be
+	 * the unique identifier of the action (used in the `extra.toolbar` config
+	 * option of the module to identify the action) as a `string`. If called with
+	 * two arguments, this should be the config `Object` of the ribbon button.
+	 * In this case, the second argument will be ignored, and the config `Object`
+	 * **must** contain a key `action` with the unique identifier string of the
+	 * action.
+	 * 
+	 * @param {Object} buttonConfig The ribbon button configuration, if the method
+	 * is called with 2 arguments.
+	 *
+	 * @protected
+	 */
+	,addRibbonAction: function(action, buttonConfig) {
+		if (Ext.isObject(action)) {
+			buttonConfig = action;
+			action = buttonConfig.action;
+		}
+		this.actions[action] = Ext.apply({
+			xtype: 'oce.rbbutton'
+		}, buttonConfig);
 	}
 
+	/**
+	 * This method is called during the module initialization, to add extra
+	 * actions to the module's ribbon toolbar, or to implement special menu
+	 * actions.
+	 * 
+	 * @protected
+	 */
 	,initActions: function() {
 
 		var helpHandler = this.viewHelp.createDelegate(this, [this.getHelpTopic()]);
