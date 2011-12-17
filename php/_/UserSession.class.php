@@ -40,7 +40,7 @@ class UserSession {
 	public static function setSessionManager(SessionManager $sessionManager) {
 		self::$sessionManager = $sessionManager;
 	}
-
+	
 	/**
 	 * @return UserSession
 	 */
