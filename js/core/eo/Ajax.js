@@ -271,12 +271,16 @@ eo.data.Connection = Ext.extend(Ext.util.Observable, {
 
 		// Converting jsonData back to params, for firefox to be able to repeat it
 		// TODO this is a debuggging facility that should be removed
-		if (opts.jsonData && Ext.isGecko) {
+//		if (opts.jsonData && Ext.isGecko) {
+		if (opts.jsonData) {
 			opts.params = opts.params || {};
 			Ext.iterate(opts.jsonData, function(k, v) {
 				opts.params['json_' + k] = Ext.encode(v);
 			});
 			delete opts.jsonData;
+			if (Ext.isChrome) {
+				opts.jsonData = {requestType: 'AJAX'};
+			}
 		}
 		
 		this.connection.request(opts);
