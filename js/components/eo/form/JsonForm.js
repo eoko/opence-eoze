@@ -85,20 +85,29 @@ eo.form.JsonForm = Ext.extend(Ext.form.BasicForm, {
 	}
 	
 	,submit: function(opts) {
+
+		// Form date must be loaded before the beforesave event, in order to give 
+		// the listeners the opportunity to act on it.
 		
+		// Preserve existing jsonData
+		opts.jsonData = Ext.apply({
+			// Preserve existing data
+			data: Ext.apply(
+				this.getSubmitFieldValues(), 
+				opts.jsonData && opts.jsonData.data || null
+			)
+		}, opts.jsonData);
+		
+		// beforesave event
 		if (false === this.fireEvent('beforesave', this, opts)) {
 			return;
 		}
 
-		var values = this.getSubmitFieldValues();
-		
 		eo.Ajax.request({
 			
 			url: opts.url
 			,params: opts.params
-			,jsonData: Ext.apply({
-				data: values
-			}, opts.jsonData)
+			,jsonData: opts.jsonData
 			
 			,scope: this
 			
