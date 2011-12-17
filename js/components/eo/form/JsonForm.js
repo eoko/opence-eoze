@@ -14,8 +14,17 @@ Ext.ns('eo.form');
  * This class also adds some useful events about form lifecycle.
  */
 eo.form.JsonForm = Ext.extend(Ext.form.BasicForm, {
+
+	/**
+	 * @cfg {Boolean} trackResetOnSubmit
+	 * 
+	 * If set to `true`, {@link #reset} resets to the last saved data instead
+	 * of when the form was first created. This will similarly affect the result
+	 * of the {#isDirty} method.
+	 */
+	trackResetOnSubmit: true
 	
-	constructor: function() {
+	,constructor: function() {
 		eo.form.JsonForm.superclass.constructor.apply(this, arguments);
 		
 		this.addEvents(
@@ -118,6 +127,13 @@ eo.form.JsonForm = Ext.extend(Ext.form.BasicForm, {
 					opts.callback.call(scope, this, success, data, opts);
 				}
 				if (success) {
+					// Reset fields original value
+					if (this.trackResetOnSubmit) {
+						this.items.each(function(f) {
+							f.originalValue = f.getValue();
+						});
+					}
+					// Callbacks
 					if (data.success) {
 						this.fireEvent('savecomplete', this, data, opts);
 						if (opts.success) {
