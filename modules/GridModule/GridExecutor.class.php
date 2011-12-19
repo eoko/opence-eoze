@@ -1233,6 +1233,8 @@ MSG;
 
 		$this->url = $url;
 
+		header('Content-Type: application/force-download');
+		
 		return true;
 	}
 
