@@ -122,13 +122,14 @@ class UserSession {
 		}
 	}
 
-	private static function isExpired(&$now = null) {
-		$instance = self::getInstance(false);
-		if (!$instance->isIdentified()) {
+	private function isExpired(&$now = null) {
+		if (!$this->loggedIn) {
 			throw new IllegalStateException();
 		}
-		if ($now === null) $now = time();
-		return $now - $instance->lastActivity >= self::$SESSION_LENGTH;
+		if ($now === null) {
+			$now = time();
+		}
+		return $now - $this->lastActivity >= self::$SESSION_LENGTH;
 	}
 
 	public static function getExpirationDelay($now = null) {
