@@ -177,8 +177,10 @@ class Json extends JsonExecutor {
 		} else {
 			$this->childrenIds = array();
 		}
+		
+//		dump($this->request->toArray());
 
-		if (isset($data['root'])) {
+		if (isset($data['root']) && $data['root']) {
 			return 'root';
 		}
 
