@@ -73,6 +73,19 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	 * @property opened
 	 */
 	,opened: false
+	
+	/**
+	 * {Object} processedReloads Origin id string of the reloads that have already been
+	 * processed. When a reload is directly fired from the success callback of a saving
+	 * method, the origin id string is kept for a short time (as a key set to `true`in 
+	 * the `processedReloads` object), in order to prevent externally fired events
+	 * from triggering the processing again. For example, a GridModule having a declared
+	 * dependency on another table will have its reload method called twice: once from 
+	 * the success callback, and a second time from the Kepler watched event triggered
+	 * by the table it depends on.
+	 * @private
+	 */
+	,processedReloads: undefined
 
 	,constructor: function() {
 
@@ -90,6 +103,9 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		this.editWindows = {};
 		this.openActionHandlers = {};
 		this.storeBaseParams = {};
+		// reload vars
+		this.processedReloads = {};
+		this.createReloadTask();
 
 		this.pageSize = this.extra.pageSize || 30;
 
@@ -346,7 +362,40 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	}
 
 	,createStore: function(config) {
-		return new Oce.MultipleSortJsonStore(this.store);
+		var s = new Oce.MultipleSortJsonStore(this.store);
+		this.afterCreateGridStore(s);
+		return s;
+	}
+	
+	/**
+	 * Hook method called after the main grid's {@link Ext.data.Store store} is created.
+	 * (This method has some implementation in {@link Oce.GridModule}, so all children 
+	 * modules should their parent method.)
+	 * @param {Ext.data.Store} store
+	 * @protected
+	 */
+	,afterCreateGridStore: function(store) {
+		store.on({
+			scope: this
+			,beforeload: function() {
+				var t = this.my.tab;
+				if (t) {
+					t.setIconClass(this.getIconCls("loading gm-tab-loading"));
+				}
+			}
+			,load: function() {
+				var t = this.my.tab;
+				if (t) {
+					t.setIconClass(this.getIconCls());
+				}
+			}
+			,exception: function() {
+				var t = this.my.tab;
+				if (t) {
+					t.setIconClass(this.getIconCls());
+				}
+			}
+		});
 	}
 
 	,editRecord: function(recordId, startTab, cb, scope) {
@@ -479,8 +528,8 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		else {
 			var grid = this.grid;
 			Ext.each(keplerEvents, function(event) {
-				grid.mon(eo.Kepler, event, function() {
-					this.onRecordsExternallyCreated();
+				grid.mon(eo.Kepler, event, function(e, ids, origin) {
+					this.onRecordsExternallyModified(ids, origin);
 				}, this);
 			}, this);
 		}
@@ -489,7 +538,13 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	/**
 	 * @private
 	 */
-	,processExternallyModifiedRecords: function(ids, action, forceReload) {
+	,processExternallyModifiedRecords: function(ids, action, forceReload, origin) {
+		
+		// If the event has already been processed from somewhere else
+		// (most notably, the onSuccess callback that directly triggered the reload)
+		if (this.processedReloads[origin] === true) {
+			return;
+		}
 		
 		var s = this.grid.store;
 		
@@ -529,8 +584,8 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		this.processExternallyModifiedRecords(ids, 'Deleted', true);
 	}
 	
-	,onRecordsExternallyModified: function(ids) {
-		this.processExternallyModifiedRecords(ids, 'Modified');
+	,onRecordsExternallyModified: function(ids, origin) {
+		this.processExternallyModifiedRecords(ids, 'Modified', false, origin);
 	}
 
 	/**
@@ -727,7 +782,10 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		
 		// ---
 
-		this.reload();
+		// Using reloadFrom in order to prevent multiple reloading originating 
+		// from the same window savings (that might come through Kepler event
+		// external dependencies).
+		this.reloadFrom(this.makeKeplerOriginString(win));
 
 		if (onSuccess) {
 			var r;
@@ -814,7 +872,13 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				}
 			})
 		}
-		
+	}
+	
+	/**
+	 * @private
+	 */
+	,makeKeplerOriginString: function(win) {
+		return Oce.mx.application.instanceId + '/' + win.id;
 	}
 
 	/**
@@ -852,6 +916,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			var params = Ext.apply({
 				controller: this.controller
 				,action: action
+				,keplerOrigin: this.makeKeplerOriginString(win)
 			}, extraParams);
 
 			if (loadModelData) {
@@ -1597,30 +1662,18 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	,afterCreateEditWindow: function(win, recordId) {
 		this.parseContextHelpItems(win);
 		
-//		var event = String.format('{0}#{1}:modified', this.modelName, recordId);
-//		
-//		// Change event
-//		win.mon(eo.Kepler, event, function(e) {
-//			if (e.fromOtherSession) {
-//				// Do not pop a saving modified win if the user decides to
-//				// close the window...
-//				win.forceClosing = true;
-//				
-//				NS.AlertWindow.show({
-//					modalTo: win
-//					,modalGroup: 'refresh'
-//					,title: 'Modification externe'
-//					,message: "Les données ont été modifées par quelqu'un d'autre. " + actionMsg
-//					
-//					,okHandler: okHandler
-//					,cancelHandler: function() {
-//						// Restore the normal warning on close behavior
-//						win.forceClosing = false;
-//						this.close();
-//					}
-//				});
-//			}
-//		}, this);
+		var event = String.format('{0}#{1}:modified', this.modelName, recordId);
+		
+		// Change event
+		win.mon(eo.Kepler, event, function(e, origin) {
+			var instanceId = Oce.mx.application.instanceId;
+			if (origin !== instanceId + '/' + win.id) {
+				var matches = /^([^/]+)\//.exec(Oce.mx.application.instanceId),
+					external = matches && matches[0] === instanceId;
+				origin.substr(0, Oce.mx.application.instanceId.length)
+				this.onEditWindowExternallyModified(win, external)
+			}
+		}, this);
 	}
 
 	,parseContextHelpItems: function(win) {
@@ -3195,6 +3248,25 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	,releaseReloadLatch: function() {
 		this.reloadLatch--;
 	}
+	
+	/**
+	 * Triggers a reload and temporarily (for 10s) disable the
+	 * {#processExternallyModifiedRecords} method for the given origin. This
+	 * method is designed to prevent externally occuring events from triggering
+	 * the same processing as the one directly called from the success callback
+	 * of a window saving.
+	 */
+	,reloadFrom: function(origin, callback, scope) {
+		var pr = this.processedReloads,
+			prt = pr[origin];
+		if (!prt) {
+			prt = pr[origin] = new Ext.util.DelayedTask(function() {
+				delete (pr[origin]);
+			});
+		}
+		prt.delay(10000);
+		this.reload(callback, scope);
+	}
 
 	/**
 	 * @param {Function/Object} callback (Optional) A callback or a config 
@@ -3204,6 +3276,36 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	 * Object is given for callback, instead of a function.
 	 */
 	,reload: function(callback, scope) {
+		this.queueReload(callback, scope);
+	}
+	
+	/**
+	 * Creates the reload delayed task (and init the reloadQueue array).
+	 *
+	 * @private
+	 */
+	,createReloadTask: function() {
+		this.reloadQueue = [];
+		return this.reloadTask = new Ext.util.DelayedTask(function() {
+			var fn = this.doReload,
+				rq = this.reloadQueue;
+			this.reloadQueue = [];
+			Ext.each(rq, function(args) {
+				fn.apply(this, args);
+			}, this);
+		}, this);
+	}
+	
+	// private
+	,queueReload: function(callback, scope) {
+		var rt = this.reloadTask,
+			rq = this.reloadQueue;
+		rq.push(Array.prototype.slice(arguments, 0));
+		rt.delay(10);
+	}
+	
+	// private
+	,doReload: function(callback, scope) {
 		if (this.reloadLatch > 0) {
 			this.reloadLatch--;
 		} else {
@@ -3506,13 +3608,15 @@ Oce.GridModule.plugins = {
 				})
 
 				,getIconCls: function(action) {
+					var c;
 					if (!this.extra.iconCls) {
-						return action || "";
+						c = action || "";
 					} else {
-						return this.extra.iconCls
+						c = this.extra.iconCls
 								.replace("%module%", this.name)
 								.replace("%action%", action || "");
 					}
+					return c.split(' ');
 				}
 
 				// functionnality: icon
