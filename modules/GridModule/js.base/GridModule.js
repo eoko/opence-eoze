@@ -2063,8 +2063,8 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 							response.url
 						)
 					);
-				} else if (Ext.isGecko) {
-					Ext.DomHelper.append(document.body, {
+				} else {
+					var dlFrame = Ext.DomHelper.append(document.body, {
 						tag: 'iframe',
 						frameBorder: 0,
 						width: 0,
@@ -2072,6 +2072,9 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 						css: 'display:none;visibility:hidden;height:1px;',
 						src: response.url
 					});
+					setTimeout(function() {
+						Ext.fly(dlFrame).remove();
+					}, 100);
 				} else {
 					window.open(response.url);
 				}
