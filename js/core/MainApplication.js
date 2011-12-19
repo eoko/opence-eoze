@@ -22,7 +22,8 @@
 			Ext.QuickTips.init();
 
 			// Legacy
-			this.loadConfiguration(function(config) {
+			this.loadConfiguration(function(config, data) {
+				Oce.mx.application.instanceId = data.instanceId;
 
 				this.onConfigure(config);
 
@@ -50,7 +51,7 @@
 				,scope: this
 				,success: function(data) {
 					var cfg = this.initialConfig = data.config;
-					callback(cfg);
+					callback(cfg, data);
 				}
 			});
 		}
