@@ -1055,13 +1055,14 @@ eo.ui.TreeMenu.prototype.TreeNode = Ext.extend(Ext.tree.TreeNode, {
 			throw new Error();
 		}
 
+		var children = [];
 		if (this.hasChildNodes()) {
-			var i=0, children = [];
+			var i=0;
 			this.eachChild(function(n) {
 				childNodes.push(n);
 				var data = Ext.apply(Ext.apply({}, n.data), {
 					order: i++
-					,"new": n.isNew()
+					,'new': n.isNew()
 					,full: false
 					,root: !this.getDepth()
 				});
@@ -1069,11 +1070,11 @@ eo.ui.TreeMenu.prototype.TreeNode = Ext.extend(Ext.tree.TreeNode, {
 				delete data.children;
 				children.push(data);
 			});
-			data.children = children;
 		}
+		data.children = children;
 
 		Ext.apply(data, {
-			"new": this.isNew()
+			'new': this.isNew()
 			,full: true
 			,root: !this.getDepth()
 		});
@@ -1082,12 +1083,12 @@ eo.ui.TreeMenu.prototype.TreeNode = Ext.extend(Ext.tree.TreeNode, {
 		this.sjax.request({
 			params: {
 				controller: this.ownerTreeMenu.controller
-				,action: "saveNode"
+				,action: 'saveNode'
 				,json_data: Ext.encode(data)
 			}
 			,onSuccess: function(o) {
 				if (childNodes.length !== o.childrenIds.length) {
-					throw new Error("Desynchro :(");
+					throw new Error('Out of sync :(');
 				}
 				me.setId(o.id);
 				delete me.phantom;
@@ -1118,10 +1119,10 @@ eo.ui.TreeMenu.prototype.TreeNode = Ext.extend(Ext.tree.TreeNode, {
 			this.sjax.request({
 				params: {
 					controller: this.ownerTreeMenu.controller
-					,action: "saveNode"
+					,action: 'saveNode'
 					,json_data: Ext.encode(
 						Ext.apply(Ext.apply({}, this.data), {
-							"new": this.isNew()
+							'new': this.isNew()
 							,root: !this.getDepth()
 							,full: false
 						})
