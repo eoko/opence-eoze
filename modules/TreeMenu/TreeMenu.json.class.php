@@ -178,11 +178,11 @@ class Json extends JsonExecutor {
 			$this->childrenIds = array();
 		}
 
-		if ($data['root']) {
+		if (isset($data['root'])) {
 			return 'root';
 		}
 
-		if (!$data['new']) {
+		if (!isset($data['new']) || !$data['new']) {
 			$node = MenuNode::load($data['id']);
 			$node->setFields($data);
 		} else {
