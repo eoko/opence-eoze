@@ -5,6 +5,7 @@ namespace eoko\modules\GridModule\GridExecutor;
 use Model;
 use ModelTable;
 use eoko\modules\GridModule\GridExecutor;
+use Request;
 
 /**
  * A base adapter implementing {@link GridExecutorPlugin}, with every method
@@ -26,5 +27,5 @@ class PluginBase implements Plugin {
 	
 	public function afterDelete(array $ids) {}
 	
-	public function onCreateQueryContext(array &$context) {}
+	public function onCreateQueryContext(Request $request, array &$context) {}
 }

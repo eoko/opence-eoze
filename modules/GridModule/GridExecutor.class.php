@@ -584,7 +584,7 @@ abstract class GridExecutor extends JsonExecutor {
 		$context = array();
 		if ($this->plugins) {
 			foreach ($this->plugins as $plugin) {
-				$plugin->onCreateQueryContext($context);
+				$plugin->onCreateQueryContext($this->request, $context);
 			}
 		}
 		return $context;

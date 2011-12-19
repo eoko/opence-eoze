@@ -5,6 +5,7 @@ namespace eoko\modules\GridModule\GridExecutor;
 use Model;
 use ModelTable;
 use eoko\modules\GridModule\GridExecutor;
+use Request;
 
 /**
  *
@@ -31,5 +32,5 @@ interface Plugin {
 	
 	function afterDelete(array $ids);
 	
-	function onCreateQueryContext(array &$context);
+	function onCreateQueryContext(Request $request, array &$context);
 }
