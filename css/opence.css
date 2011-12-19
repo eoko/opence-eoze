@@ -1,0 +1,85 @@
+/*div.oce-form-info {
+	padding: 10px;
+}*/
+
+/* Fixing grid double click selction in chrome */
+/* see: http://www.sencha.com/forum/showthread.php?88876-SOLVED-CSS-bug-in-Chrome-Air-when-dblclick-on-a-cell */
+body {
+	-webkit-user-drag: none;
+	-webkit-user-modify: read-only;
+	-webkit-user-select: none;
+}
+
+.x-form-display-field.ajax-loading,
+.ajax-loading-16x11 {
+	background: url(images/ajax-loader-16x11.gif) no-repeat 5px 50%;
+	min-height: 14px;
+	min-width: 16px;
+}
+
+/*
+ * Fix: displayFields are not correctly aligned with their label on (at least)
+ * mozilla unbuntu.
+ * @mtest NEEDED 11/15/10 3:53 PM: confirmation/correction on all browsers
+ */
+.ext-gecko .x-form-display-field {
+	padding-top: 3px;
+}
+
+.x-form-field-wrap .x-form-clock-trigger{
+    background-image: url(images/clock-trigger.png);
+}
+
+/**
+ * Fix: window width problem when entirely masked.
+ */
+.x-window.x-masked-relative {
+	position: absolute !important;
+}
+
+
+.no-margin {
+	margin: 0 !important;
+}
+
+.x-edit-image {
+	background: url(../images/icons/image_add.png) no-repeat 0 0 !important;
+}
+.x-edit-wordpaste {
+	background: url(../images/icons/paste_word.png) no-repeat 0 0 !important;
+}
+
+p.form-caption {
+	font-style: italic;
+	color: #3F516E;
+	margin-bottom: .4em;
+}
+
+/* Fixes items of checkboxgroup that can be slightly scrolled (although they
+ * should not ! */
+.x-form-check-wrap {
+	overflow: hidden;
+	/* ... and fix the rendering of the selected boxes border, also */
+	height: 20px;
+	padding-left: 2px
+}
+
+.x-menu-item.main {
+	font-weight: bold;
+}
+
+
+label.x-form-composite-label {
+	padding: 3px 3px 3px 0;
+	display: block;
+}
+
+/* Oce.Window default button */
+.x-btn.default button {
+	font-weight: bold;
+}
+
+/* Reduce padding in first col when it is an action col */
+.x-grid3-cell-first.x-action-col-cell .x-grid3-cell-inner {
+	padding-left: 5px;
+}
