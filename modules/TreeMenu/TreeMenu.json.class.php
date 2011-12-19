@@ -174,6 +174,8 @@ class Json extends JsonExecutor {
 				$this->childrenIds = $childIds;
 			}
 			unset($data['children']);
+		} else {
+			$this->childrenIds = array();
 		}
 
 		if ($data['root']) {
