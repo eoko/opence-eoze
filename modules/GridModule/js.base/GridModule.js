@@ -2075,8 +2075,8 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 					setTimeout(function() {
 						Ext.fly(dlFrame).remove();
 					}, 100);
-				} else {
-					window.open(response.url);
+//				} else {
+//					window.open(response.url);
 				}
 			};
 
