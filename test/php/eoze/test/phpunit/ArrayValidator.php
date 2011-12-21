@@ -60,17 +60,19 @@ class ArrayValidator {
 				return $spec[$opt];
 			}
 		}
-		return !$this->isRequired($spec);
 	}
 	
 	private function isAllowNull($spec, $parentSpec) {
-		// The item itselff
+		
 		if ((null !== $r = $this->testNull($spec))
 				|| isset($parentSpec['defaults']) && (null !== $r = $this->testNull($parentSpec['defaults']))
 				|| (null !== $r = $this->testNull($this->defaults))) {
 			return $r;
 		}
-		throw new IllegalStateException('Unreachable code');
+		
+		else {
+			return !$this->isRequired($spec);
+		}
 	}
 	
 	private function isStrict($spec) {
