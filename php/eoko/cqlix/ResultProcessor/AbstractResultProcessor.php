@@ -6,7 +6,7 @@ use eoko\cqlix\ResultProcessor;
 
 use ModelTable;
 use ModelField;
-use eoko\cqlix\EnumColumn;
+use eoko\cqlix\EnumField;
 
 use IllegalArgumentException;
 use IllegalStateException;
@@ -87,10 +87,10 @@ abstract class AbstractResultProcessor implements ResultProcessor {
 				}
 				
 			case ModelField::T_ENUM:
-				if (!($field instanceof EnumColumn)) {
+				if (!($field instanceof EnumField)) {
 					$class = get_class($field);
 					throw new IllegalStateException(
-						"Field should be of class EnumColumn (actual: $class)."
+						"Field should be of class EnumField (actual: $class)."
 					);
 				}
 				return $value === null
@@ -111,7 +111,7 @@ abstract class AbstractResultProcessor implements ResultProcessor {
 
 	/**
 	 * Converts a boolean value. This method is guaranteed never to be called
-	 * with null value.
+	 * with `null` value.
 	 * @param bool $value 
 	 * @return mixed
 	 */
@@ -123,20 +123,20 @@ abstract class AbstractResultProcessor implements ResultProcessor {
 	
 	/**
 	 * Converts an enum value. This method is guaranteed never to be called
-	 * with null value.
+	 * with `null` value.
 	 * @param EnumColumn $column
 	 * @param mixed $value
 	 * @return mixed
 	 */
-	abstract protected function convertEnum(EnumColumn $column, $value);
+	abstract protected function convertEnum(EnumField $column, $value);
 	
-	protected function convertNullEnum(EnumColumn $column) {
+	protected function convertNullEnum(EnumField $column) {
 		return null;
 	}
 	
 	/**
 	 * Converts a date value. This method is guaranteed never to be called
-	 * with null value.
+	 * with `null` value.
 	 * @param string $value Date string in the format 'Y-m-d'.
 	 * @return mixed
 	 */
@@ -148,7 +148,7 @@ abstract class AbstractResultProcessor implements ResultProcessor {
 	
 	/**
 	 * Converts a datetime value. This method is guaranteed never to be called
-	 * with null value.
+	 * with `null` value.
 	 * @param string|null $value Date time string in the format 'Y-m-d H:i:s'.
 	 * @return mixed
 	 */
