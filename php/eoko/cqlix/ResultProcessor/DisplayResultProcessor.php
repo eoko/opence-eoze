@@ -2,7 +2,7 @@
 
 namespace eoko\cqlix\ResultProcessor;
 
-use eoko\cqlix\EnumColumn;
+use eoko\cqlix\EnumField;
 use DateTime;
 
 /**
