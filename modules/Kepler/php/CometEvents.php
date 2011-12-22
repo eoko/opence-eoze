@@ -3,7 +3,6 @@
 namespace eoko\modules\Kepler;
 
 use User;
-use UserSession;
 use eoko\php\SessionManager;
 use eoko\security\UserSessionHandler;
 use eoko\log\Logger;
