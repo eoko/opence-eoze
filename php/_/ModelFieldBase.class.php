@@ -37,4 +37,8 @@ abstract class ModelFieldBase implements ModelField {
 				return $value;
 		}
 	}
+	
+	public function getActualField() {
+		return $this;
+	}
 }
