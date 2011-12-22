@@ -52,24 +52,23 @@ abstract class AbstractResultProcessor implements ResultProcessor {
 	
 	public function process(array $result) {
 		
+		$return = array();
+		
 		foreach ($this->fields as $name) {
 			$field = $this->table->getField($name, true);
-			foreach ($result as &$row) {
-				$row[$name] = $this->convertValue($field, $row[$name]);
+			foreach ($result as $i => $row) {
+				$return[$i][$name] = $this->convertValue($field, $row[$name]);
 			}
 		}
 		
-		return $result;
+		return $return;
 	}
 	
 	protected function convertValue(ModelField $field, $value) {
 		
-		// NULL processing is common to every type
-		if ($value === null && !$field->isNullable()) {
-			throw new IllegalStateException(
-				"Field `{$field->getName()}` is not allowed to be NULL."
-			);
-		}
+		// It is not possible to check for NULL value based on field's
+		// nullable param, because Relation->fields may be NULL because
+		// the _relation_ itself is NULL.
 		
 		switch ($field->getType()) {
 			
@@ -87,6 +86,7 @@ abstract class AbstractResultProcessor implements ResultProcessor {
 				}
 				
 			case ModelField::T_ENUM:
+				$field = $field->getActualField();
 				if (!($field instanceof EnumField)) {
 					$class = get_class($field);
 					throw new IllegalStateException(
