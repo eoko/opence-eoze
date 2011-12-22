@@ -466,23 +466,27 @@ class ModelRelationInfoField extends ModelFieldBase {
 	}
 
 	public function getType() {
-		return $this->info->targetTable->getField($this->fieldName, true)->getType();
+		return $this->getActualField()->getType();
 	}
 	
 	public function getSqlType() {
-		return $this->info->targetTable->getField($this->fieldName, true)->getSqlType();
+		return $this->getActualField()->getSqlType();
 	}
 
 	public function isNullable() {
-		return $this->info->targetTable->getField($this->fieldName, true)->isNullable();
+		return $this->getActualField()->isNullable();
 	}
 	
 	public function getMeta() {
-		return $this->info->targetTable->getField($this->fieldName, true)->getMeta();
+		return $this->getActualField()->getMeta();
+	}
+	
+	public function getActualField() {
+		return $this->info->targetTable->getField($this->fieldName, true);
 	}
 	
 	public function __call($method, $args) {
-		$field = $this->info->targetTable->getField($this->fieldName, true);
+		$field = $this->getActualField();
 		if (method_exists($field, $method)) {
 			return call_user_func_array(array($field, $method), $args);
 		} else {
