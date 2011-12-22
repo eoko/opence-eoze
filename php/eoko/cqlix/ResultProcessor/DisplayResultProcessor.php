@@ -20,7 +20,7 @@ class DisplayResultProcessor extends AbstractResultProcessor {
 		return $value ? 'Oui' : 'Non';
 	}
 	
-	protected function convertEnum(EnumColumn $field, $value) {
+	protected function convertEnum(EnumField $field, $value) {
 		return $field->getEnumLabelForValue($value);
 	}
 	

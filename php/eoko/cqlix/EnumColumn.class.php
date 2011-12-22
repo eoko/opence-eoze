@@ -6,7 +6,7 @@ use ModelColumn;
 use IllegalStateException;
 use IllegalArgumentException;
 
-class EnumColumn extends ModelColumn {
+class EnumColumn extends ModelColumn implements EnumField {
 
 	const CFG_DEFAULT = 'default';
 	const CFG_LABEL   = 'label';
