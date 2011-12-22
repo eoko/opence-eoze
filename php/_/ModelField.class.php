@@ -35,4 +35,11 @@ interface ModelField {
 	 * @return FieldMetadata
 	 */
 	function getMeta();
+	
+	/**
+	 * Gets the actual field object. This can be different from the object being
+	 * referred, in the case of {@link ModelRelationInfoField} for example.
+	 * @return ModelField
+	 */
+	function getActualField();
 }
