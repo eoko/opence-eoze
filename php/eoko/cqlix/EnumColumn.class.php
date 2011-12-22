@@ -4,6 +4,7 @@ namespace eoko\cqlix;
 
 use ModelColumn;
 use IllegalStateException;
+use IllegalArgumentException;
 
 class EnumColumn extends ModelColumn {
 
@@ -45,7 +46,24 @@ class EnumColumn extends ModelColumn {
 	}
 
 	public function getEnumCode($value) {
-		return $this->enumCodes[$value];
+		if (isset($this->enumCodes[$value])) {
+			return $this->enumCodes[$value];
+		} else {
+			$type = gettype($value);
+			throw new IllegalArgumentException(
+				"Enum has no code associated to value: ($type) $value."
+			);
+		}
+	}
+	
+	public function getEnumLabelForValue($value) {
+		if (isset($this->labels[$value])) {
+			return $this->labels[$value];
+		} else {
+			throw new IllegalStateException(
+				"Enum has no label for value: $value."
+			);
+		}
 	}
 
 	public function isEnum() {
