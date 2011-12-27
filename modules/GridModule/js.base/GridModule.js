@@ -2344,13 +2344,16 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				this.my.editWinLayout = 'fit';
 			}
 		} else {
+			// 27/12/11 10:53
+			// Restored old values ('fit' was breaking autosizing of all other windows,
+			// eg. agencies, contracts...)
+			this.my.addWinLayout = addConfig.winLayout;
+			this.my.editWinLayout = editConfig.winLayout;
 			// 19/12/11 20:29
 			// Changed default window layout to fit because SMInstanceProducView
 			// add window was broken (content not fitting in the win).
-//			this.my.addWinLayout = addConfig.winLayout;
-//			this.my.editWinLayout = editConfig.winLayout;
-			this.my.addWinLayout = 'fit';
-			this.my.editWinLayout = 'fit';
+//			this.my.addWinLayout = 'fit';
+//			this.my.editWinLayout = 'fit';
 		}
 
 		//... Edit form
