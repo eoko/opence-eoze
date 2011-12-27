@@ -137,8 +137,6 @@ columns-templates:
 #      renderer : Oce.ext.Renderer.actif
 #      type: checkbox
 
-  email: {name: 'email', header: 'Email'}
-
 #  name:
 #    header: Nom
 #    extra:
