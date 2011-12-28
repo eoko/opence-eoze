@@ -15,21 +15,24 @@ eo.form.contact.AddressField = Ext.extend(eo.form.contact.AbstractField, {
 	,textStreet:  NS.locale('number, street')
 	,textZipCode: NS.locale('zip')
 	,textCity:    NS.locale('city')
+	,textCountry: NS.locale('country')
 	
 	,streetName:  'street'
 	,zipCodeName: 'zip'
 	,cityName:    'city'
+	,countryName: 'iso3166_alpha3'
 	
 	,fieldsLayout: 'v'
 	
 	,createFields: function() {
-		return [
+		var fields = [
 			this.streetField = new Ext.form.TextArea({
 				name: this.streetName
 				,emptyText: this.textStreet
 				,height: 36
 				,emptyValue: null
 				,enableKeyEvents: true
+				,allowBlank: true
 			}),
 
 			this.zipField = new Ext.form.TextField({
@@ -37,6 +40,7 @@ eo.form.contact.AddressField = Ext.extend(eo.form.contact.AbstractField, {
 				,emptyText: this.textZipCode
 				,emptyValue: null
 				,enableKeyEvents: true
+				,allowBlank: true
 			}),
 
 			this.cityField = new Ext.form.TextField({
@@ -44,8 +48,28 @@ eo.form.contact.AddressField = Ext.extend(eo.form.contact.AbstractField, {
 				,emptyText: this.textCity
 				,emptyValue: null
 				,enableKeyEvents: true
-			})
+				,allowBlank: true
+			}),
+			
 		];
+		
+		if (this.countryName) {
+			
+			var C = eo.form && eo.form.country && eo.form.country.CountryComboBox
+					|| Ext.form.TextField;
+			
+			fields.push(
+				this.countryField = new C({
+					name: this.countryName
+					,emptyText: this.textCountry
+					,emptyValue: null
+					,enableKeyEvents: true
+					,allowBlank: true
+				})
+			);
+		}
+		
+		return fields;
 	}
 	
 //	,createExtraFields: function() {
@@ -63,7 +87,8 @@ eo.form.contact.AddressField = Ext.extend(eo.form.contact.AbstractField, {
 	,isValid: function() {
 		return this.streetField.getValue()
 				|| this.zipField.getValue()
-				|| this.cityField.getValue();
+				|| this.cityField.getValue()
+				|| (this.countryField && this.countryField.getValue());
 	}
 	
 });
