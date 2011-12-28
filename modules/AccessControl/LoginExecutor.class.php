@@ -20,8 +20,8 @@ class LoginExecutor extends JsonExecutor {
 	}
 	
 	public function login() {
-		$username = $this->request->req('login-user', true);
-		$password = $this->request->req('login-pwd', true);
+		$username = $this->request->req('username', true);
+		$password = $this->request->req('password', true);
 		
 //		dump(array(
 //			$username, $password
