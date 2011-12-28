@@ -635,7 +635,7 @@ abstract class Model {
 	}
 
 	/**
-	 * @return TRUE if the model has been deleted, or will be deleted on next
+	 * @return bool `true` if the model has been deleted, or will be deleted on next
 	 * call to the {@link Model::save() save()} method.
 	 */
 	public function wasDeleted() {
