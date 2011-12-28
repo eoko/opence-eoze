@@ -678,8 +678,12 @@ eo.form.contact.AbstractField = Ext.extend(Ext.form.CompositeField, {
 	 * @private
 	 */
 	,testChildFieldBlank: function(f) {
-		var v = f.getValue();
-		return !v && !Ext.isBoolean(v) && !(f instanceof Ext.form.Hidden);
+		if (f.allowBlank) {
+			return false;
+		} else {
+			var v = f.getValue();
+			return !v && !Ext.isBoolean(v) && !(f instanceof Ext.form.Hidden);
+		}
 	}
 	
 	/**
