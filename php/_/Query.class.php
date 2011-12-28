@@ -1815,6 +1815,17 @@ class QueryErrorHandler {
 					$message = lang('Impossible de créer la nouvelle table');
 				}
 				throw new SqlUserException($error, $message, lang('Impossible de créer la table'));
+				
+			case 1216:
+			case 1451:
+				throw new SqlUserException(
+					$error, 
+					lang(
+						"Cet enregistrement ne peut pas être supprimé car il est référencé par "
+						. "d'autres enregistrements."
+					), 
+					lang("Contrainte d'intégrité")
+				);
 
 			default:
 				Logger::get('QueryErrorHandler')->error("Query error message: $error[2]. ($query)");
