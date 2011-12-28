@@ -26,24 +26,11 @@ eo.form.contact.EmailField = Ext.extend(eo.form.contact.AbstractField, {
 				,enableKeyEvents: true
 				,emptyText: NS.locale(this.textKeyItem)
 				,flex: 1
-				,regex: /.+@.+\..+$/
+//				,regex: /.+@.+\..+$/
 				,regexText: this.textInvalidEmail
+				,vtype: 'email'
 			})
 		];
-	}
-	
-	,isValid: function() {
-		if (!this.emailField.getValue()) {
-			return false;
-		} else {
-			return this.emailField.isValid();
-		}
-	}
-	
-	,getValue: function() {
-		var data = spp.getValue.call(this);
-		data[this.emailName]   = this.emailField.getValue();
-		return data;
 	}
 	
 });
