@@ -539,7 +539,8 @@ abstract class ModelRelationInfoHasReference extends ModelRelationInfoByReferenc
 	const ODA_SET_NULL = 0;
 	const ODA_DELETE   = 1;
 	const ODA_NOTHING  = 2;
-
+	const ODA_RESTRICT = 3;
+	
 	/**
 	 * What to do when the refered model is deleted?
 	 * @internal Each relation kind can specify its default onDeleteAction,
@@ -566,17 +567,36 @@ abstract class ModelRelationInfoHasReference extends ModelRelationInfoByReferenc
 
 	/**
 	 * Dispatches on delete processing of a record being refered by other tables.
-	 * This method could be overriden to implement custom onDelete action.
+	 * 
+	 * If the table's database engine support automatic cascadding, then nothing
+	 * will be done here.
+	 * 
 	 * @param mixed $targetPkValue the value of the primary key of the record
 	 * being removed
+	 * 
 	 * @return mixed
 	 */
-	public function onTargetDelete($targetPkValue) {
-		switch ($this->getOnDeleteAction()) {
-			case self::ODA_SET_NULL: return $this->onTargetDelete_setNull($targetPkValue);
-			case self::ODA_DELETE: return $this->onTargetDelete_delete($targetPkValue);
-			case self::ODA_NOTHING: return 0;
-			default: throw new IllegalArgumentException();
+	final public function onTargetDelete($targetPkValue) {
+		if (!$this->localTable->isAutomaticCascadeEngine()) {
+			switch ($this->getOnDeleteAction()) {
+				case self::ODA_SET_NULL:
+					return $this->onTargetDelete_setNull($targetPkValue);
+				case self::ODA_DELETE:
+					return $this->onTargetDelete_delete($targetPkValue);
+				case self::ODA_NOTHING:
+					return 0;
+				case self::ODA_RESTRICT:
+					throw new SqlUserException(
+						null, 
+						lang(
+							"Cet enregistrement ne peut pas être supprimé car il est référencé par "
+							. "d'autres enregistrements."
+						), 
+						lang("Contrainte d'intégrité")
+					);
+				default:
+					throw new IllegalArgumentException();
+			}
 		}
 	}
 
@@ -585,8 +605,9 @@ abstract class ModelRelationInfoHasReference extends ModelRelationInfoByReferenc
 	 * @return const<ODA>
 	 */
 	private function getOnDeleteAction() {
-		return $this->onDeleteAction !== null ?
-				$this->onDeleteAction : $this->getDefaultOnDeleteAction();
+		return $this->onDeleteAction !== null
+				? $this->onDeleteAction
+				: $this->getDefaultOnDeleteAction();
 	}
 
 	/**
@@ -753,10 +774,10 @@ class ModelRelationInfoIsRefered extends ModelRelationInfoByReference {
 
 	public function notifyDeleteToRefering($deletedValue) {
 		if (null !== $reciproque = $this->findReciproque()) {
-			$reciproque->onTargetDelete(
-				$deletedValue instanceof Model ?
-					$deletedValue->getPrimaryKeyValue() : $deletedValue
-			);
+			if ($deletedValue instanceof Model) {
+				$deletedValue = $deletedValue->getPrimaryKeyValue();
+			}
+			$reciproque->onTargetDelete($deletedValue);
 		} else {
 			Logger::get($this)->warn('Cannot find reciproque: ' . $this);
 		}
