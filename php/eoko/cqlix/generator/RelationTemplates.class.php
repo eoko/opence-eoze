@@ -5,6 +5,8 @@ namespace eoko\cqlix\generator;
 
 use eoko\util\Arrays;
 
+use UnsupportedOperationException;
+
 use ModelRelationReferedByOneOnMultipleFields;
 use ModelRelationReferedByMany;
 use ModelRelationByAssoc;
@@ -256,20 +258,10 @@ new <?php echo $this->getClass() ?>(<?php echo $head ? $rTabs : '' ?>
 			case 'NOTHING':
 			case 'DELETE':
 			case 'SET_NULL':
+			case 'RESTRICT':
 				return "ModelRelationInfoHasReference::ODA_$this->onDeleteAction";
 			default:
-				return 'NULL';
-		}
-	}
-
-	public function tplOnDeleteAction() {
-		switch ($this->onDeleteAction) {
-			case 'NOTHING':
-			case 'DELETE':
-			case 'SET_NULL':
-				echo <<<PHP
-\$relations['{$this->getName()}']->onDeleteAction = ModelRelationInfoHasReference::ODA_$this->onDeleteAction;
-PHP;
+				throw new UnsupportedOperationException("onDeleteAction: $this->onDeleteAction");
 		}
 	}
 

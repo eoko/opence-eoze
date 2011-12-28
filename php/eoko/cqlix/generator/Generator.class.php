@@ -315,6 +315,8 @@ class Generator extends Script {
 				Logger::warn('Table {} engine is not InnoDB (it is {})', $dbTable, $engine);
 			} else {
 				// CONSTRAINT `contact_phone_numbers_ibfk_1` FOREIGN KEY (`contact_id`) REFERENCES `contacts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+				
+				$table->setEngineAutomaticCascade(true);
 
 				// Foreign key constraints
 				$pattern = '/\bCONSTRAINT `(\w+)` FOREIGN KEY \(`(\w+)`\) '
@@ -335,12 +337,13 @@ class Generator extends Script {
 					list($ignore, $constraintName, $localKey, $constraintTable, $otherField) = $matches;
 					$constraint = new ModelColumnForeignConstraint($constraintTable, $otherField, $constraintName);
 					$fields[$localKey]->foreignConstraint = $constraint;
-					if (isset($matches['onDelete'])) {
-						$constraint->onDelete = $matches['onDelete'];
-					}
-					if (isset($matches['onUpdate'])) {
-						$constraint->onUpdate = $matches['onUpdate'];
-					}
+						
+					$constraint->onDelete = isset($matches['onDelete']) 
+							? $matches['onDelete']
+							: 'RESTRICT'; // default action, not shown in SHOW CREATE TABLE
+					$constraint->onUpdate = isset($matches['onUpdate'])
+							? $matches['onUpdate']
+							: 'RESTRICT';
 				}
 			}
 
@@ -1240,6 +1243,9 @@ class Generator extends Script {
 								case 'SET NULL':
 									$relation->onDeleteAction = 'SET_NULL';
 									break;
+								case 'RESTRICT':
+									$relation->onDeleteAction = 'RESTRICT';
+									break;
 								default:
 									// TODO
 									dump($field->foreignConstraint->onDelete);
@@ -1252,6 +1258,9 @@ class Generator extends Script {
 									break;
 								case 'SET NULL':
 									$relation->onUpdateAction = 'SET_NULL';
+									break;
+								case 'RESTRICT':
+									$relation->onUpdateAction = 'RESTRICT';
 									break;
 								default:
 									// TODO

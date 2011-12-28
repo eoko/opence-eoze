@@ -21,6 +21,8 @@ abstract class <?php echo $tableName ?>Base extends <?php echo $baseTableName ?>
 	public $modelName = '<?php echo $modelName ?>';
 	public $tableName = '<?php echo $tableName ?>';
 	public $dbTableName = '<?php echo $dbTable ?>';
+	
+	protected $engineAutomaticCascade = <?php echo $table->isEngineAutomaticCascade() ? 'true' : 'false' ?>;
 
 	protected function __construct() {
 		$cols = array(
@@ -41,13 +43,6 @@ abstract class <?php echo $tableName ?>Base extends <?php echo $baseTableName ?>
 <?php endforeach ?>
 
 		);
-<?php /*
-<?php foreach ($relations as $relation): ?>
-<?php if ($relation->onDeleteAction): ?>
-		<?php echo $relation->tplOnDeleteAction(), PHP_EOL ?>
-<?php endif ?>
-<?php endforeach ?>
-*/ ?>
 				
 		parent::__construct($cols, $relations);
 	}
