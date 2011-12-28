@@ -640,9 +640,12 @@ eo.form.contact.AbstractField = Ext.extend(Ext.form.CompositeField, {
 
 	,isValid: function(preventMark) {
 		var vf = eo.hashToArray(this.valueFields),
-			i = vf.length;
+			i = vf.length,
+			vfi;
 		while (i--) {
-			if (!vf[i].isValid(Ext.isDefined(preventMark) ? preventMark : vf[i].preventMark)) {
+			vfi = vf[i];
+			if (vfi.isValid // buttons & such that don't have isValid() are always valid...
+					&& !vfi.isValid(Ext.isDefined(preventMark) ? preventMark : vfi.preventMark)) {
 				return false;
 			}
 		}
