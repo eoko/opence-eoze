@@ -43,6 +43,7 @@ abstract class ExtendedModel extends Model implements CometObservable {
 		parent::onDelete($isSaving);
 		$id = $this->hasPrimaryKey() ? $this->getPrimaryKeyValue() : null;
 		$origin = isset($this->context['keplerOrigin']) ? $this->context['keplerOrigin'] : null;
+		CometEvents::publish($this->table, 'dataChanged', array($id), $origin);
 		CometEvents::publish($this, 'removed', $origin);
 		CometEvents::publish($this->table, 'removed', array($id), $origin);
 	}
@@ -51,6 +52,7 @@ abstract class ExtendedModel extends Model implements CometObservable {
 		parent::afterSave($new);
 		$id = $this->hasPrimaryKey() ? $this->getPrimaryKeyValue() : null;
 		$origin = isset($this->context['keplerOrigin']) ? $this->context['keplerOrigin'] : null;
+		CometEvents::publish($this->table, 'dataChanged', array($id), $origin);
 		if ($new) {
 			CometEvents::publish($this, 'created', $origin);
 			CometEvents::publish($this->table, 'created', array($id), $origin);
