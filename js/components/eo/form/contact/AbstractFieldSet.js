@@ -578,6 +578,10 @@ eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 		
 		var items = this.items;
 		
+		if (!this.rendered) {
+			return true;
+		}
+		
 		if (this.maxFieldNumber === 1 && this.returnSingleValue) {
 			switch (items.length) {
 				case 0:
