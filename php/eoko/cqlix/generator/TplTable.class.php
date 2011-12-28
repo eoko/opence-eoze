@@ -51,6 +51,16 @@ class TplTable implements ConfigConstants {
 		return $this->dbTable;
 	}
 	
+	private $engineAutomaticCascade = false;
+	
+	public function setEngineAutomaticCascade($engineAutomaticCascade) {
+		$this->engineAutomaticCascade = $engineAutomaticCascade;
+	}
+	
+	public function isEngineAutomaticCascade() {
+		return $this->engineAutomaticCascade;
+	}
+	
 	private $configured = false;
 	private $config = null;
 	

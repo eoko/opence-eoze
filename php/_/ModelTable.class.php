@@ -165,6 +165,15 @@ abstract class ModelTable extends ModelTableProxy {
 		}
 		$this->virtuals[$name] = $virtual;
 	}
+	
+	/**
+	 * Returns `true` if the underlying database engine automatically performs
+	 * ON_DELETE and ON_UPDATE actions.
+	 * @return bool
+	 */
+	public function isAutomaticCascadeEngine() {
+		return $this->engineAutomaticCascade;
+	}
 
 	/**
 	 * Creates a new Model.
@@ -1254,6 +1263,10 @@ EX
 	}
 	
 	protected function executeDelete(ModelTableQuery $query) {
+		if ($this->dbTableName === 'members') {
+			dump_trace(false);
+			throw new \Exception();
+		}
 		return $query->executeDelete();
 	}
 
