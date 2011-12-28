@@ -466,17 +466,22 @@ eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 		if (!this.rendered) {
 			return this.value;
 		}
+		var items = this.items;
 		if (this.maxFieldNumber === 1 && this.returnSingleValue) {
 			switch (this.items.length) {
-				case 0:return null;
-				case 1:return this.items.get(0).getValue();
-				default:throw new Error('Illegal State (not supposed to be able '
+				case 0:
+					return null;
+				case 1:
+					var item = items.get(0);
+					return item.isValid(true) ? item.getValue() : null;
+				default:
+					throw new Error('Illegal State (not supposed to be able '
 						+ 'to have more than one child)');
 			}
 		} else {
 			var data = [];
-			this.items.each(function(item) {
-				if (item.isValid()) {
+			items.each(function(item) {
+				if (item.isValid(true)) {
 					data.push(item.getValue());
 				}
 			});
@@ -566,7 +571,50 @@ eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 	,clearInvalid: Ext.emptyFn
 	
 	,validate: function() {
-		return true;
+		return this.isValid();
+	}
+	
+	,isValid: function(preventMark) {
+		
+		var items = this.items;
+		
+		if (this.maxFieldNumber === 1 && this.returnSingleValue) {
+			switch (items.length) {
+				case 0:
+					return true;
+				case 1:
+					var item = items.get(0);
+					if (!item.autoField) {
+						if (!item.validateNotBlank(preventMark)
+								|| !item.isValid(preventMark || false)) {
+							return false;
+						}
+					} else {
+						if (!item.isBlank() && !item.isValid(preventMark || false)) {
+							return false;
+						}
+					}
+					return true;
+				default:
+					throw new Error('Illegal State (not supposed to be able '
+						+ 'to have more than one child)');
+			}
+		} else {
+			var valid = true;
+			items.each(function(item) {
+				if (!item.autoField) {
+					if (!item.validateNotBlank(preventMark)
+							|| !item.isValid(preventMark || false)) {
+						valid = false;
+					}
+				} else {
+					if (!item.isBlank() && !item.isValid(preventMark || false)) {
+						valid = false;
+					}
+				}
+			});
+			return valid;
+		}
 	}
 	
 	,reset: function() {

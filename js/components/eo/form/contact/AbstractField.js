@@ -346,9 +346,9 @@ eo.form.contact.AbstractField = Ext.extend(Ext.form.CompositeField, {
 				});
 			}
 			// prevent mark on automatic fields
-			if (!field.hasOwnProperty('preventMark') && this.autoField) {
-				field.preventMark = true;
-			}
+//			if (!field.hasOwnProperty('preventMark') && this.autoField) {
+//				field.preventMark = true;
+//			}
 		};
 		
 		return function(method) {
@@ -639,14 +639,79 @@ eo.form.contact.AbstractField = Ext.extend(Ext.form.CompositeField, {
 	}
 
 	,isValid: function(preventMark) {
-		var vf = this.valueFields,
+		var vf = eo.hashToArray(this.valueFields),
 			i = vf.length;
 		while (i--) {
-			if (!vf[i].isValid(preventMark)) {
+			if (!vf[i].isValid(Ext.isDefined(preventMark) ? preventMark : vf[i].preventMark)) {
 				return false;
 			}
 		}
 		return true;
+	}
+	
+	/**
+	 * Returns `true` if any of this field's child fields is considered 
+	 * {@link #testChildFieldBlank blank}.
+	 * @return {Boolean}
+	 */
+	,isBlank: function() {
+		var vf = eo.hashToArray(this.valueFields),
+			i = vf.length;
+		while (i--) {
+			if (this.testChildFieldBlank(vf[i])) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Tests if the given child field should be considered blank, that is comply
+	 * with all these conditions: it has a blank value (`''` or `null` or `undefined`
+	 * -- or `NaN`, but that should really be avoided!), it does not have
+	 * {@link Ext.form.Field#allowBlank allowBlank} set to `true`, it is not 
+	 * {@link Ext.form.Field#disabled} and it is not a {@link Ext.form.Hidden hidden 
+	 * field}.
+	 * 
+	 * @return {Boolean}
+	 * 
+	 * @private
+	 */
+	,testChildFieldBlank: function(f) {
+		var v = f.getValue();
+		return !v && !Ext.isBoolean(v) && !(f instanceof Ext.form.Hidden);
+	}
+	
+	/**
+	 * Returns `true` if the field is not {@link #isBlank blank}. The field will
+	 * is considered blank if any of its child fields is blank and does not have
+	 * {@link Ext.form.Field#allowBlank allowBlank set to `true`.
+	 * 
+	 * This method will mark the child fields as invalid if they are found blank
+	 * and do not have `allowBlank` set to `true`.
+	 * 
+	 * @param {Boolean} [preventMark=false] `true` to prevents marking the child
+	 * fields as invalid if they are found blank.
+	 * 
+	 * @return {Boolean}
+	 */
+	,validateNotBlank: function(preventMark) {
+		var vf = eo.hashToArray(this.valueFields),
+			i = vf.length,
+			valid = true;
+		while (i--) {
+			var f = vf[i];
+			if (this.testChildFieldBlank(f)) {
+				valid = false;
+				if (!preventMark) {
+					f.markInvalid();
+				}
+			}
+		}
+		if (!valid && !preventMark) {
+			this.markInvalid();
+		}
+		return valid;
 	}
 	
 	/**
