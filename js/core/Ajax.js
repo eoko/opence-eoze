@@ -116,6 +116,10 @@ Oce.Ajax = function() {
 	}
 
 	function handleError(opts, errors, response, obj) {
+		
+		if (errors === null && obj.details) {
+			errors = obj.details;
+		}
 
 		clearWaitBox();
 //REM		if (waitBox !== null) {
@@ -140,10 +144,11 @@ Oce.Ajax = function() {
 				}
 			}
 
-			var reason = null, system = true, timestamp = null,
-				errorTitle = null;
+			var reason = null, 
+				system = true, 
+				timestamp = null,
+				title = 'Erreur';
 
-			var title = errorTitle !== null ? errorTitle : 'Erreur';
 			var message = "<p>Désolé, cette opération n'a pas pu être correctement "
 				+ "exécutée (le serveur ne répond pas, ou sa réponse n'est pas valide).</p>";
 
@@ -155,7 +160,7 @@ Oce.Ajax = function() {
 					'system' in errors ? errors.system : true
 				);
 				timestamp = 'timestamp' in errors ? errors.timestamp : null;
-				errorTitle = 'title' in errors ? errors.title : null;
+				title = 'title' in errors ? errors.title : null;
 
 				if (system) {
 					message = "<p>Désolé, une erreur système est survenue "
