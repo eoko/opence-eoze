@@ -2170,10 +2170,34 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 
 	,getToolbar: function() {
 		if (this.my.toolbar === undefined) {
-			var items = [];
-			Ext.iterate(this.extra.toolbar, function(name, menuItems) {
-				if (menuItems === false) return;
-				name = name.replace(/\%title\%/, this.getTitle());
+			
+			var leftItems = [],
+				rightItems = [];
+			
+			Ext.iterate(this.extra.toolbar, function(label, menuItems) {
+				
+				// Disabled group
+				if (menuItems === false) {
+					return;
+				}
+				
+				var name = label,
+					align = 'left',
+					stick = false;
+				
+				// Support for new syntax
+				if (menuItems.items) {
+					if (menuItems.label) {
+						name = label;
+						label = menuItems.label;
+					}
+					stick = !!menuItems.stick;
+					align = menuItems.align || align;
+					menuItems = menuItems.items;
+				}
+				
+				label = label.replace(/\%title\%/, this.getTitle());
+				
 				var groupItems = [];
 				Ext.each(menuItems, function(item) {
 					if (item === '-') {
@@ -2186,11 +2210,13 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 								return;
 							}
 						} else if (Ext.isObject(item)) {
-							var itemitem = item.item;
-							if (!itemitem) throw new Error('Invalid toolbar item config');
-							if (Ext.isString(itemitem)) itemitem = this.actions[itemitem];
-							if (false == itemitem instanceof Ext.Component) {
-								item = Ext.apply({}, item, itemitem);
+							var itemItem = item.item;
+							if (!itemItem) {
+								throw new Error('Invalid toolbar item config');
+							}
+							if (Ext.isString(itemItem)) itemItem = this.actions[itemItem];
+							if (false == itemItem instanceof Ext.Component) {
+								item = Ext.apply({}, item, itemItem);
 							}
 						}
 						// DEBUG INFO: dying here often means that the module
@@ -2201,13 +2227,27 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 						groupItems.push(item);
 					}
 				}, this);
-				if (groupItems.length) items.push({
-					xtype: 'buttongroup',
-					title: name,
-					align: 'bottom',
-					items: groupItems
-				});
+				
+				if (groupItems.length) {
+					var alignGroup,
+						groupConfig = {
+							xtype: 'buttongroup',
+							title: label,
+							align: 'bottom',
+							items: groupItems
+						};
+
+					(align === 'right' ? rightItems : leftItems).push(groupConfig);
+				}
 			}, this);
+			
+			var items = [];
+			if (leftItems.length) {
+				items = items.concat(leftItems);
+			}
+			if (rightItems.length) {
+				items = items.concat(['->'], rightItems);
+			}
 
 			this.my.toolbar = new Ext.Toolbar({
 				items: items
@@ -3566,16 +3606,21 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			}
 
 			,pdf: {
-				xtype: 'oce.rbbutton', handler: this.exportData.createDelegate(this, ['pdf']),
-				text: 'Export Pdf', iconCls: 'export_pdf'
+				xtype: 'oce.rbbutton'
+				,handler: this.exportData.createDelegate(this, ['pdf'])
+				,text: 'Pdf'
+				,iconCls: 'ribon icon export_pdf'
 			}
 			,csv: {
-				xtype: 'oce.rbbutton', handler: this.exportData.createDelegate(this, ['csv']),
-				text: 'Export Excel', iconCls: 'export_excel'
+				xtype: 'oce.rbbutton'
+				,handler: this.exportData.createDelegate(this, ['csv'])
+				,text: 'Excel'
+				,iconCls: 'ribon icon export_excel'
 			}
 			,help: {
 				xtype: 'oce.rbbutton', handler: helpHandler.createDelegate(this),
-				text: '- Aide -', iconCls: 'bhelp'
+//				text: 'Aide', 
+				iconCls: 'icon ribbon help'
 				,depends: this.hasHelp.createDelegate(this)
 				,actionId: "help"
 			}

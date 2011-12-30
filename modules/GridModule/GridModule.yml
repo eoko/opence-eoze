@@ -22,13 +22,15 @@ extra:
   multisort: true
   year.enabled: false
   year.selector: false
+  
   toolbar:
     %title%: [add,remove]
     Affichage: [columns]
     # the following syntax is correct, but this dependance is already declared
     # in default gridModule actions
 #    Boîte à outil: [pdf,csv,{item: help, depends: hasHelp}]
-    Boîte à outil: [pdf,csv,help]
+    Export: [pdf,csv]
+  
   help:
     factory: eoko.help.IFrameFactory # useless for now, inheritage not implemented
 
