@@ -4,11 +4,15 @@
 /* 
  * TODO: clean that, that's some very ugly namespace polution!!!
  */
+ .ribon.icon {
+	 width: 32px;
+/*	 height: 32px;*/
+ }
 
-.x-btn-text.export_pdf {
+.ribon.icon.export_pdf {
 	background-image:url(../images/opence/32x32/export_pdf.png) !important;
 }
-.x-btn-text.export_excel {
+.ribon.icon.export_excel {
 	background-image:url(../images/opence/32x32/export_excel.png) !important;
 }
 	
@@ -67,7 +71,7 @@
 	background-image:url(../images/unlicensed/icon_columns.png) !important;
 }
 
-.bhelp {
+.icon.ribbon.help {
 	background-image:url(../images/icons_fatcow/32x32/help.png) !important;
 }
 
@@ -215,7 +219,10 @@
 .ico_female {
 	background-image:url(../images/icons/female.png) !important;
 }
-.ico_send_mail {
+.ico.email {
+	background-image:url(../images/icons/email.png) !important;
+}
+.ico.email_go {
 	background-image:url(../images/icons/email_go.png) !important;
 }
 .ico.play {
