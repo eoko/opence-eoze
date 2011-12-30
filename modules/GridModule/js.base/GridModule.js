@@ -1098,6 +1098,18 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		}, this)
 		return data;
 	}
+	
+	/**
+	 * Gets the currently selected records in the main grid.
+	 * @return {Ext.data.Record[]}
+	 */
+	,getSelectedRecords: function() {
+		var records = [];
+		this.checkboxSel.each(function(reccord) {
+			records.push(reccord);
+		}, this)
+		return records;
+	}
 
 	,getSelectedRowsId: function() {
 		var ids = [];
