@@ -3621,13 +3621,13 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				xtype: 'oce.rbbutton'
 				,handler: this.exportData.createDelegate(this, ['pdf'])
 				,text: 'Pdf'
-				,iconCls: 'ribon icon export_pdf'
+				,iconCls: 'ribbon icon export_pdf'
 			}
 			,csv: {
 				xtype: 'oce.rbbutton'
 				,handler: this.exportData.createDelegate(this, ['csv'])
 				,text: 'Excel'
-				,iconCls: 'ribon icon export_excel'
+				,iconCls: 'ribbon icon export_excel'
 			}
 			,help: {
 				xtype: 'oce.rbbutton', handler: helpHandler.createDelegate(this),
