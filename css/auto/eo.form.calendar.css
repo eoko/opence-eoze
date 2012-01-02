@@ -1,0 +1,103 @@
+/* 
+    Document   : eo.form.calendar
+    Created on : 14 déc. 2011, 17:04:15
+    Author     : eric
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+/* 
+   TODO customize this sample style
+   Syntax recommendation http://www.w3.org/TR/REC-CSS2/
+*/
+
+table.eo-calendar-month {
+	font-family: monospace;
+	border-collapse: collapse;
+	margin-bottom: 4px;
+	border: 1px solid #E6E6E6;
+	border: 1px solid #FFF;
+}
+
+table.eo-calendar-month th {
+	font-weight: bold;
+	padding: 0 2px;
+}
+
+table.eo-calendar-month th,
+table.eo-calendar-month td {
+	text-align: center;
+	width: 30px;
+}
+
+table.eo-calendar-month thead {
+	border-bottom: 1px solid #FFF;
+}
+table.eo-calendar-month tr.zone.group-first {
+	border-top: 1px solid #FFF;
+}
+
+table.eo-calendar-month .day {
+	background-color: #F6F6F6;
+}
+table.eo-calendar-month .day.week-end {
+	background-color: #E6E6E6;
+}
+
+table.eo-calendar-month .row-label {
+	background-color: #AC1C73;
+	color: #fff;
+	line-height: 100%;
+	width: 40px;
+}
+table.eo-calendar-month .row-label div {
+	overflow: hidden;
+	width: 40px;
+}
+
+table.eo-calendar-month .row-label.main {
+	padding-left: 4px;
+	padding-right: 4px;
+	font-size: 13px;
+}
+
+table.eo-calendar-month tr.zone {
+	height: 16px;
+}
+
+table.eo-calendar-month tr.zone td {
+	padding: 2px 0;
+}
+
+table.eo-calendar-month tr.zone td .marker {
+	width: 100%;
+	height: 12px;
+	position: relative;
+	opacity: .7;
+}
+table.eo-calendar-month tr.zone td .marker.on {
+	background-color: red;
+	background-color: #FA7384;
+}
+
+table.eo-calendar-month tr.zone.editable th:hover,
+table.eo-calendar-month tr.zone.editable td:hover {
+	cursor: pointer;
+/*	border: 1px solid red;*/
+}
+
+/** Custom zones **/
+table.eo-calendar-month tr.zone.A .marker.on {
+	background-color: #F5B963;
+}
+table.eo-calendar-month tr.zone.B .marker.on {
+	background-color: #63B2ED;
+}
+table.eo-calendar-month tr.zone.C .marker.on {
+	background-color: #ABE200;
+}
+
+table.eo-calendar-month tr.zone.M .marker.on {
+	background-color: #FAF673;
+}
+
