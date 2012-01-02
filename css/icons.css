@@ -117,6 +117,13 @@
 .ico.book_addresses {
 	background-image:url(../images/icons/book_addresses.png) !important;
 }
+.ico.checkbox {
+	background-image:url(../images/icons/checkbox.png) !important;
+}
+.x-btn-pressed .ico.checkbox,
+.ico.checkbox.ticked {
+	background-image:url(../images/icons/checkbox_ticked_gray.png) !important;
+}
 .ico.download {
 	background-image:url(../images/icons_fatcow/16x16/download.png) !important;
 }
