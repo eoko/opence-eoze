@@ -2161,9 +2161,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		var exportParams = Ext.apply({},
 			this.grid.store.baseParams
 		);
-		Ext.apply(exportParams,
-			this.grid.store.lastOptions.params
-		);
+		Ext.apply(exportParams, this.getLastGridLoadParams());
 		Ext.apply(exportParams, {
 			controller:this.controller
 			,action:'export'
@@ -2178,6 +2176,14 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		exportParams.json = encodeURIComponent(Ext.util.JSON.encode(exportParams.json));
 
 		this.ajaxFileRequest(exportParams);
+	}
+	
+	/**
+	 * @return {Object}
+	 * @protected
+	 */
+	,getLastGridLoadParams: function() {
+		return Ext.apply({}, this.grid.store.lastOptions.params);
 	}
 
 	,getToolbar: function() {
