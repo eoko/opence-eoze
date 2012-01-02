@@ -35,8 +35,27 @@ MAIL_TEXT
 		);
 	}
 
+	/**
+	 *
+	 * @param type $to
+	 * 
+	 * @param string $from The expedient name and address. Must be either the raw
+	 * email address (e.g. eric@example.com) or the name and email in the form
+	 * 'Éric O. <eric@example.com>'. If the string doesn't contains angle brackets
+	 * (<>) they will be added around the whole string, considered in this case 
+	 * as a raw email.
+	 * 
+	 * @param type $subject
+	 * @param type $message
+	 * @param type $bcc
+	 * @param type $cc
+	 * @return type 
+	 */
 	public static function sendHTML($to, $from, $subject, $message, $bcc = null, $cc = null) {
-		if (is_array($to)) $to = implode(', ', $to);
+		
+		if (is_array($to)) {
+			$to = implode(', ', $to);
+		}
 
 		$headersExtra = '';
 		if ($cc !== null) {
@@ -48,6 +67,11 @@ MAIL_TEXT
 			$headersExtra .= "Bcc: $bcc\r\n";
 		}
 
+		// Each line should be separated with a LF (\n). Lines should not be larger 
+		// than 70 characters.
+		// http://fr.php.net/manual/en/function.mail.php
+		$message = wordwrap($message, 70, "\n", true);
+		
 		$message = <<<MAIL
 <html>
 <head>
@@ -58,13 +82,19 @@ $message
 </body>
 </html>
 MAIL;
+		
+		// From
+		if (!strstr($from, '<')) {
+			$from = "<$from>";
+		}
 
 		// Always set content-type when sending HTML email
 		$headers = "MIME-Version: 1.0" . "\r\n";
-		$headers .= "Content-type:text/html;charset=iso-8859-1" . "\r\n";
+//		$headers .= "Content-type:text/html;charset=iso-8859-1" . "\r\n";
+		$headers .= "Content-type:text/html;charset=utf-8" . "\r\n";
 
 		// More headers
-		$headers .= "From: <$from>\r\n";
+		$headers .= "From: $from\r\n";
 		$headers .= $headersExtra;
 
 //		Logger::dbg(
