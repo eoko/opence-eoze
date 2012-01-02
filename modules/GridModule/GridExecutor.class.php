@@ -416,20 +416,21 @@ abstract class GridExecutor extends JsonExecutor {
 			$relModes,
 			$this->getLoadQueryContext()
 		);
-
-		$this->createLoadQuery_sort($query);
 		
-		$this->createLoadQuery_filters($query);
-
-		$this->createLoadQuery_search($query);
-
-		$this->createLoadQuery_extra($query);
+		$this->applyLoadQueryParams($query);
 
 		if ($this->table instanceof TableHasFilters) {
 			$this->table->addLoadQueryFilters($query, $this->request->get('filters'));
 		}
 
 		return $query;
+	}
+	
+	public function applyLoadQueryParams(ModelTableQuery $query) {
+		$this->createLoadQuery_sort($query);
+		$this->createLoadQuery_filters($query);
+		$this->createLoadQuery_search($query);
+		$this->createLoadQuery_extra($query);
 	}
 
 	protected function createLoadQuery_sort(ModelTableQuery $query) {
