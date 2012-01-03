@@ -69,6 +69,13 @@ abstract class AbstractResultProcessor implements ResultProcessor {
 		// It is not possible to check for NULL value based on field's
 		// nullable param, because Relation->fields may be NULL because
 		// the _relation_ itself is NULL.
+		if ($field->getActualField() === $field) {
+			if ($value === null && !$field->isNullable()) {
+				throw new IllegalStateException(
+					"Field `{$field->getName()}` is not allowed to be NULL."
+				);
+			}
+		}
 		
 		switch ($field->getType()) {
 			
