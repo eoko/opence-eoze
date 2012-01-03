@@ -380,7 +380,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			,beforeload: function() {
 				var t = this.my.tab;
 				if (t) {
-					t.setIconClass(this.getIconCls("loading gm-tab-loading"));
+					t.setIconClass(this.getIconCls("loading gm-tab-loading").split(' '));
 				}
 			}
 			,load: function() {
@@ -3690,6 +3690,7 @@ Oce.GridModule.plugins = {
 								.replace("%module%", this.name)
 								.replace("%action%", action || "");
 					}
+					return c;
 					return c.split(' ');
 				}
 
