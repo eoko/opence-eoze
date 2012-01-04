@@ -305,8 +305,10 @@ abstract class ModelTable extends ModelTableProxy {
 	 * for example to create foreign combo fields.
 	 * @return string
 	 */
-	public static function getDefaultController() {
-		return null;
+	public function getDefaultController() {
+		return isset($this->config['defaultController'])
+				? $this->config['defaultController']
+				: null;
 	}
 
 	/**
