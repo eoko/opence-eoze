@@ -126,12 +126,12 @@ abstract class <?php echo $tableName ?>Base extends <?php echo $baseTableName ?>
 		return <?php echo $modelName ?>::create($initValues, $strict, $context);
 	}
 
-<?php if ($table->defaultController): ?>
+<?php /* if ($table->defaultController): ?>
 	public static function getDefaultController() {
 		return '<?php echo $table->defaultController ?>';
 	}
 
-<?php endif ?>
+<?php endif */ ?>
 	/**
 	 * @return Bool
 	 */
