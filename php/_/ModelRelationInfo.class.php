@@ -417,14 +417,12 @@ abstract class ModelRelationInfo extends ModelFieldBase {
 		}
 		$r = array(
 			'name' => $this->name,
-//			'fieldType' => 'hasOne',
 			'fieldType' => $this instanceof ModelRelationInfoHasOne ? 'hasOne' : 'hasMany',
 			'type' => $this->getType(),
 			'allowNull' => $this->isNullable(),
 			'hasDefault' => $referenceField->hasDefault(),
 			'allowBlank' => $referenceField->isNullable() || $referenceField->hasDefault(),
 			'defaultValue' => $referenceField->getDefault(),
-// not relevant			'length' => $referenceField->length,
 			'primaryKey' => $referenceField->isPrimary(),
 		);
 
@@ -437,6 +435,8 @@ abstract class ModelRelationInfo extends ModelFieldBase {
 				$r[$meta] = $referenceField->meta->$meta;
 			}
 		}
+		
+		$r['meta'] = $referenceField->meta->toArray();
 
 		return $r;
 	}
