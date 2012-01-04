@@ -669,6 +669,16 @@ NS.DateTimeField = Ext.extend(NS.DateField, {
 NS.RelationOneField = Ext.extend(NS.StringField, {
 	xtype: "oce.foreigncombo"
 	,doCreateField: function(config) {
+		
+		// Allow overridding by model's config xtype. This should be ported to the
+		// parent classes... TODO
+		var xtype = config.xtype || this.meta && this.meta.form && this.meta.form.xtype;
+		if (xtype) {
+			return Ext.apply(NS.RelationOneField.superclass.doCreateField.call(this, config), {
+				xtype: xtype
+			});
+		}
+		
 		var controller = config.controller || this.controller;
 		if (!controller) {
 			//throw new Error("Cannot create field without knowing the controller");
