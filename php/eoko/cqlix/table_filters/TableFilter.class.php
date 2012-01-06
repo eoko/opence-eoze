@@ -10,6 +10,7 @@ class TableFilter {
 	public $name;
 	public $label;
 	public $default;
+	private $tip = false;
 
 	private $condition;
 
@@ -23,6 +24,16 @@ class TableFilter {
 		$this->default = $default;
 
 		$this->condition = "($condition)";
+	}
+	
+	/**
+	 * Sets the user tip for this filter.
+	 * @param string $tip
+	 * @return TableFilter 
+	 */
+	public function setTip($tip) {
+		$this->tip = $tip;
+		return $this;
 	}
 
 	public function setDefault($default = true) {
@@ -70,6 +81,7 @@ class TableFilter {
 	public function toYaml() {
 		$default = $this->default ? 'true' : 'false';
 		$option = $this instanceof TableFilterOption ? 'true' : 'false';
-		return "{text: $this->label, checked: $default, isOption: $option }";
+		$tip = $this->tip ? ", tooltip: $this->tip" : null;
+		return "{text: $this->label, checked: $default, isOption: $option{$tip} }";
 	}
 }
