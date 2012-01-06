@@ -83,3 +83,11 @@ label.x-form-composite-label {
 .x-grid3-cell-first.x-action-col-cell .x-grid3-cell-inner {
 	padding-left: 5px;
 }
+
+.x-tip-body em {
+	font-style: italic;
+}
+
+.x-tip-body strong {
+	font-weight: bold;
+}
