@@ -501,7 +501,7 @@ class Columns {
 	}
 
 	static function quoteString($str) {
-		return "'" . addcslashes($str, "'") . "'";
+		return json_encode("$str");
 	}
 
 	static function convertVal($key, $val) {
