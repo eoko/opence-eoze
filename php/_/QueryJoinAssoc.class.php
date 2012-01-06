@@ -65,7 +65,7 @@ class QueryJoinAssoc extends QueryJoinLeft {
 
 	public function getQualifiedName($fieldName, $table = QueryJoin::TABLE_RIGHT) {
 		if ($table === QueryJoin::TABLE_ASSOC) {
-			return "`$this->assocTableName`.`$fieldName`";
+			return "`$this->assocTableAlias`.`$fieldName`";
 		} else {
 			return parent::getQualifiedName($fieldName, $table);
 		}
