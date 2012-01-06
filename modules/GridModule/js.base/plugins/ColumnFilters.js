@@ -3,6 +3,7 @@ Oce.deps.wait("Oce.GridModule", function() {
 var ColumnFiltersPlugin = Ext.extend(eo.Class, {
 	
 	constructor: function(gm) {
+		
 		gm.beforeCreateGrid = gm.beforeCreateGrid.createSequence(this.beforeCreateGrid, this);
 		gm.afterCreateGrid = gm.afterCreateGrid.createSequence(this.afterCreateGrid, this);
 		gm.openActionHandlers["gridFilters"] = this.openActionHandler;
