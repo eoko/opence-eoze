@@ -2910,6 +2910,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 
 		return {
 			items: items
+			,plugins: new Ext.ux.menu.TooltipPlugin
 			,listeners: {
 				scope: this
 				,beforehide: searchHandler
