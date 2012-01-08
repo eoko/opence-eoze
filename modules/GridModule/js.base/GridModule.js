@@ -157,9 +157,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			});
 		});
 
-		this.initSearchPlugin();
 		this.initMultisortPlugin();
-//		this.initYearPlugin();
 		this.initFilterPlugin();
 
 		Ext.iterate(this.extra, function(name, config) {
@@ -2266,6 +2264,8 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			if (rightItems.length) {
 				items = items.concat(['->'], rightItems);
 			}
+			
+			this.beforeCreateToolbar(items);
 
 			this.my.toolbar = new Ext.Toolbar({
 				items: items
@@ -2283,6 +2283,8 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 
 		return this.my.toolbar;
 	}
+	
+	,beforeCreateToolbar: function(items) {}
 	
 	,buildGridColumnsConfig: function() {
 		
@@ -2928,70 +2930,6 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				}
 			}
 		};
-	}
-
-	,initSearchPlugin: function() {
-
-		if (!this.extra.search) return;
-
-
-		this.beforeCreateGrid = this.beforeCreateGrid.createSequence(function(config) {
-
-			if (this.extra.search === true)
-				this.extra.search = {}
-
-			var search = this.extra.search;
-
-			Ext.applyIf(search, {
-				minChars: false
-				,iconCls:'icon-magnifier'
-				,autoFocus: false
-				,columnGroups: this.extra.columnGroups
-			})
-
-			var plugin = new Ext.ux.grid.Search(
-				Ext.apply({mode: 'remote'}, search)
-			)
-
-			if (!search.compiled) {
-
-				var searchCheckIndexes   = [],
-					enableIndexes        = [],
-					searchReadOnly       = [];
-
-				Ext.each(this.columns, function(col) {
-					var colExtra = col.extra.search;
-
-					if (colExtra && !colExtra.disabled) { // !== false && !== undefined
-
-						if (colExtra.enabled === undefined || colExtra.enabled)
-							enableIndexes.push(col.dataIndex);
-
-						if (colExtra.select)
-							searchCheckIndexes.push(col.dataIndex);
-
-						if (colExtra.readOnly)
-							searchReadOnly.push(col.dataIndex);
-
-					}
-				})
-
-				search.compiled = {
-					enableIndexes: enableIndexes
-					,checkIndexes: searchCheckIndexes
-					,readOnlyIndexes: searchReadOnly
-				}
-			}
-
-			plugin.checkIndexes = search.compiled.checkIndexes;
-			plugin.enableIndexes = search.compiled.enableIndexes;
-			plugin.readonlyIndexes = search.compiled.readOnlyIndexes;
-
-			if (config.plugins !== undefined)
-				config.plugins.push(plugin);
-			else
-				config.plugins = [plugin];
-		}, this)
 	}
 
 	,getDefaultSortColumn: function(grid) {
