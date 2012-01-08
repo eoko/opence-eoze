@@ -1026,7 +1026,10 @@ class ModelRelationInfoReferedByMany extends ModelRelationInfoIsRefered
 				->applyAssocWhere($this->targetTable, "`$this->referenceField`=$leftField")
 				->count();
 
-		return new QuerySelectSub($q, $alias !== null ? $alias : $this->name); // <= rev492
+		// This method must **NOT** append an alias if not is provided, because this clause
+		// may be used in WHERE, not necessarilly in SELECT. That is the duty of the code
+		// that calls this method to append the alias if needed.
+		return new QuerySelectSub($q, $alias);
 	}
 
 	public function selectName(ModelTableQuery $query, $alias = null, $relationName = null) {
@@ -1036,7 +1039,6 @@ class ModelRelationInfoReferedByMany extends ModelRelationInfoIsRefered
 				$query,
 				$alias !== null ? $alias : $this->name,
 				$relationName
-//				$this->name // TODO check
 			)
 		);
 	}
@@ -1401,10 +1403,12 @@ abstract class ModelRelationInfoChain extends ModelRelationInfo {
 	}
 
 	public function getNameClause(ModelTableQuery $query, $relationName = null, $alias = null) {
+		// This method must **NOT** append an alias if not is provided, because this clause
+		// may be used in WHERE, not necessarilly in SELECT. That is the duty of the code
+		// that calls this method to append the alias if needed.
 		return $this->targetRelation->getNameClause(
 			$query,
-			$relationName !== null ? $relationName : $this->name,
-			$alias !== null ? $alias : $this->name
+			$relationName !== null ? $relationName : $this->name
 		);
 	}
 
