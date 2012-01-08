@@ -112,7 +112,11 @@ abstract class VirtualFieldBase extends ModelFieldBase implements VirtualField {
 	}
 
 	public function getClause(ModelTableQuery $query, QueryAliasable $aliasable = null) {
-		return $this->doGetClause($aliasable !== null ? $aliasable : $query);
+		$clause = $this->doGetClause($aliasable !== null ? $aliasable : $query);
+		if (is_string($clause) && !preg_match('/^\(.+\)$/', $clause)) {
+			$clause = "($clause)";
+		}
+		return $clause;
 	}
 
 	protected function doGetClause(QueryAliasable $aliasable) {
