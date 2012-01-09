@@ -194,9 +194,9 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 					// overwritte the record's own id value... So, you should
 					// double check that something wrong hasn't occured that
 					// leads use here! (Thanks for attention)
-					var logger = console && (console.warn || console.log)
+					var logger = console && (console.warn || console.log);
 					if (logger) {
-						logger('Warning!!! A grid editor has a name set: '
+						logger.call(console, 'Warning!!! A grid editor has a name set: '
 								+ config.editor.name);
 //						debugger
 					}

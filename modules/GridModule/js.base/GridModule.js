@@ -372,29 +372,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	 * @param {Ext.data.Store} store
 	 * @protected
 	 */
-	,afterCreateGridStore: function(store) {
-		store.on({
-			scope: this
-			,beforeload: function() {
-				var t = this.my.tab;
-				if (t) {
-					t.setIconClass(this.getIconCls("loading gm-tab-loading").split(' '));
-				}
-			}
-			,load: function() {
-				var t = this.my.tab;
-				if (t) {
-					t.setIconClass(this.getIconCls());
-				}
-			}
-			,exception: function() {
-				var t = this.my.tab;
-				if (t) {
-					t.setIconClass(this.getIconCls());
-				}
-			}
-		});
-	}
+	,afterCreateGridStore: function(store) {}
 
 	,editRecord: function(recordId, startTab, cb, scope) {
 		// Msg syntax
@@ -3643,6 +3621,30 @@ Oce.GridModule.plugins = {
 						config.iconCls = ic;
 					}
 				}
+				
+				,afterCreateGridStore: gm.afterCreateGridStore.createSequence(function(store) {
+					store.on({
+						scope: this
+						,beforeload: function() {
+							var t = this.my.tab;
+							if (t) {
+								t.setIconClass(this.getIconCls("loading gm-tab-loading").split(' '));
+							}
+						}
+						,load: function() {
+							var t = this.my.tab;
+							if (t) {
+								t.setIconClass(this.getIconCls());
+							}
+						}
+						,exception: function() {
+							var t = this.my.tab;
+							if (t) {
+								t.setIconClass(this.getIconCls());
+							}
+						}
+					});
+				})				
 
 			});
 		}
