@@ -240,7 +240,7 @@ class HtmlTemplate extends Template {
 		}
 	}
 
-	public function set($name, $value, $htmlSpecialChars = null) {
+	public function set($name, $value = null, $htmlSpecialChars = null) {
 		if ($value instanceof HtmlTemplate) {
 			$value->setParent($this);
 		}

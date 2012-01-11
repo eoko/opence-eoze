@@ -40,7 +40,13 @@ class Template extends Renderer {
 	 * @param mixed $value
 	 * @return Template $this
 	 */
-	public function set($name, $value) {
+	public function set($name, $value = null) {
+		if (is_array($name)) {
+			foreach ($name as $k => $v) {
+				$this->set($k, $v);
+			}
+			return $this;
+		}
 		$this->vars[$name] = $value;
 		return $this;
 	}
