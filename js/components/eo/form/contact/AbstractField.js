@@ -669,10 +669,9 @@ eo.form.contact.AbstractField = Ext.extend(Ext.form.CompositeField, {
 	}
 	
 	/**
-	 * Tests if the given child field should be considered blank, that is comply
+	 * Tests if the given child field should be considered blank, that is complies
 	 * with all these conditions: it has a blank value (`''` or `null` or `undefined`
-	 * -- or `NaN`, but that should really be avoided!), it does not have
-	 * {@link Ext.form.Field#allowBlank allowBlank} set to `true`, it is not 
+	 * -- or `NaN`, but that should really be avoided!), it is not 
 	 * {@link Ext.form.Field#disabled} and it is not a {@link Ext.form.Hidden hidden 
 	 * field}.
 	 * 
@@ -681,18 +680,18 @@ eo.form.contact.AbstractField = Ext.extend(Ext.form.CompositeField, {
 	 * @private
 	 */
 	,testChildFieldBlank: function(f) {
-		if (f.allowBlank) {
-			return false;
-		} else {
+//		if (f.allowBlank) {
+//			return false;
+//		} else {
 			var v = f.getValue();
 			return !v && !Ext.isBoolean(v) && !(f instanceof Ext.form.Hidden);
-		}
+//		}
 	}
 	
 	/**
 	 * Returns `true` if the field is not {@link #isBlank blank}. The field will
-	 * is considered blank if any of its child fields is blank and does not have
-	 * {@link Ext.form.Field#allowBlank allowBlank set to `true`.
+	 * be considered blank if any of its child fields is blank and does not have
+	 * {@link Ext.form.Field#allowBlank allowBlank} set to `true`.
 	 * 
 	 * This method will mark the child fields as invalid if they are found blank
 	 * and do not have `allowBlank` set to `true`.
@@ -708,7 +707,7 @@ eo.form.contact.AbstractField = Ext.extend(Ext.form.CompositeField, {
 			valid = true;
 		while (i--) {
 			var f = vf[i];
-			if (this.testChildFieldBlank(f)) {
+			if (this.testChildFieldBlank(f) && !f.allowBlank) {
 				valid = false;
 				if (!preventMark) {
 					f.markInvalid();

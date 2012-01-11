@@ -85,10 +85,10 @@ eo.form.contact.AddressField = Ext.extend(eo.form.contact.AbstractField, {
 //	}
 	
 	,isValid: function() {
-		return this.streetField.getValue()
+		return !!(this.streetField.getValue()
 				|| this.zipField.getValue()
 				|| this.cityField.getValue()
-				|| (this.countryField && this.countryField.getValue());
+				|| (this.countryField && this.countryField.getValue()));
 	}
 	
 });
