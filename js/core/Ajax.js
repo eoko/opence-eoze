@@ -117,7 +117,7 @@ Oce.Ajax = function() {
 
 	function handleError(opts, errors, response, obj) {
 		
-		if (errors === null && obj.details) {
+		if (errors === null && obj && obj.details) {
 			errors = obj.details;
 		}
 
