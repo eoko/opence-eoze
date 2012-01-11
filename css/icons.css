@@ -5,7 +5,7 @@
  * TODO: clean that, that's some very ugly namespace polution!!!
  */
 .ribbon.icon {
-	 width: 32px;
+	 min-width: 32px;
 /*	 height: 32px;*/
  }
 
@@ -31,6 +31,7 @@
 	background-image:url(../images/opence/32x32/del.png) !important;
 /*	background-image: url(../images/icons_fatcow/32x32/delete.png) !important;*/
 }
+.ribbon.icon.add,
 .b_ico_add {
 	background-image:url(../images/opence/32x32/add.png) !important;
 /*	background-image: url(../images/icons_fatcow/32x32/add.png) !important;*/
