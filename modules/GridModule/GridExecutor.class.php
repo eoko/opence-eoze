@@ -217,9 +217,13 @@ abstract class GridExecutor extends JsonExecutor {
 			$this->data = $result;
 //			ExtJSResponse::put('data', $result);
 		}
+		
+		$this->afterAdd($model);
 
 		return true;
 	}
+	
+	protected function afterAdd(Model $model) {}
 	
 	protected function prepareAddData(Request &$data) {}
 	
