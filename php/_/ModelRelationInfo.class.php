@@ -1214,6 +1214,8 @@ class ModelRelationInfoIndirectHasOneMirror extends ModelRelationInfoIndirectHas
 
 class ModelRelationInfoIndirectHasMany extends ModelRelationInfoByAssoc
 		implements ModelRelationInfoHasMany {
+	
+	protected $selectable = true;
 
 	/**
 	 *
