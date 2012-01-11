@@ -1,5 +1,8 @@
 <?php
 
+// This must remain as much as possible dependenceless, so that it can be used in any
+// simple script used without loading eoze.
+
 namespace eoko\php;
 
 /**
@@ -108,6 +111,20 @@ class SessionManager {
 	public function put($key, $data) {
 		if (!isset($this->data[$key]) || is_object($data) || $this->data[$key] !== $data) {
 			$this->data[$key] = $data;
+			$this->modified = true;
+		}
+		return $this;
+	}
+
+	/**
+	 * Unset a key in the session data.
+	 * 
+	 * @param string $key
+	 * @return SessionManager 
+	 */
+	public function clear($key) {
+		if (array_key_exists($key, $this->data)) {
+			unset($this->data);
 			$this->modified = true;
 		}
 		return $this;
