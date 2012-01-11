@@ -74,18 +74,13 @@ class Json extends JsonExecutor {
 	private function doCreateDefaultMenu() {
 		
 		$defaultMenuUserId = $this->getModule()->getConfig()->getValue('defaultMenuUserId');
-		
-		if (!$defaultMenuUserId) {
-			return $this->getModule()->createDefaultMenu();
-		}
-		
 		$userId = $this->getUserId();
 		
-		if ($userId == self::$defaultMenuUserId) {
+		if ($defaultMenuUserId === null || $userId == $defaultMenuUserId) {
 			return $this->getModule()->createDefaultMenu();
 		}
 		
-		$finder = MenuNodeTable::find('`users_id`=?', self::$defaultMenuUserId);
+		$finder = MenuNodeTable::find('`users_id`=?', $defaultMenuUserId);
 		$finder->query
 				->orderBy('parent__menu_nodes_id')
 				->thenOrderBy('order');
