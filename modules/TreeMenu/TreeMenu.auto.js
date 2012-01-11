@@ -184,7 +184,9 @@ eo.ui.TreeMenu = Ext.extend(sp, {
 			,movenode: this.onNodeDrop
 		});
 		
-		if (this.userId) this.load(this.executeDefaultCommands, this);
+		if (Ext.isNumber(this.userId)) {
+			this.load(this.executeDefaultCommands, this);
+		}
 	} // initComponent
 	
 //	// private
@@ -914,8 +916,7 @@ eo.ui.TreeMenu.prototype.TreeNode = Ext.extend(Ext.tree.TreeNode, {
 		var fam = this.getActionFamily(arguments.callee.createDelegate(this)),
 			fic = myic || fam && fam.get("iconCls");
 		if (fic) {
-//			fam.get("actions")[0].baseIconCls
-			var fa = this.getFamilyAction(fam),
+			var fa = fam && this.getFamilyAction(fam),
 				bic = fa && fa.baseIconCls;
 			if (bic) {
 				fic = fa.baseIconCls;
