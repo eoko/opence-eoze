@@ -247,6 +247,7 @@ eo.form.GridField.ModelAction.Edit = Ext.extend(ACTION, {
 
 		this.editWin = win = new WIN_CLASS(Ext.apply({
 			formPanel: formPanel
+			,width: Ext.isChrome ? 400 : undefined
 			,title: this.winTitle || 'Modifier l\'enregistrement' // i18n
 			,minimizable: false
 			,closeAction: this.winCloseAction || 'close'

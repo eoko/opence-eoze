@@ -90,6 +90,8 @@ class Generator extends Script {
 	private $fileWritten = 0, $modelProcessed = 0;
 
 	public $addTimeVersionInGeneratedFiles = false;
+	
+	private $config;
 
 	public function __construct() {
 
@@ -100,6 +102,8 @@ class Generator extends Script {
 
 		// Includes all relation templates classes
 		RelationTemplates::load();
+		
+		$this->config = ConfigManager::get('eoko/cqlix/Generator');
 
 		$this->tplPath = dirname(__FILE__) . DS . 'templates' . DS;
 
@@ -1275,33 +1279,6 @@ class Generator extends Script {
 					}
 				}
 			}
-	// <editor-fold defaultstate="collapsed" desc="REM">
-	//		$createTable = Query::executeQuery('SHOW CREATE TABLE `' . $tableName . '`;');
-	//		$createTable = $createTable->fetchColumn(1);
-	//
-	//		preg_match('/\s+ENGINE\s*=\s*(\w+)\s+/', $createTable, $matches);
-	//		$engine = $matches[1];
-	//
-	//		if (strtolower($engine) !== 'innodb') {
-	//			Logger::warn('Table {} engine is not InnoDB (it is {})', $tableName, $engine);
-	//		} else {
-	//			$pattern = '/\sFOREIGN KEY \(`(\w+)`\) REFERENCES `(\w+)` \(`(\w+)`\)/';
-	//			preg_match_all($pattern, $createTable, $matches, PREG_SET_ORDER);
-	//
-	//			foreach ($matches as $match) {
-	//				list($ignore, $localKey, $otherTable, $otherField) = $match;
-	//
-	//				Logger::info('By constraints: found {}.{} refers to {}.{}',
-	//						$tableName, $localKey, $otherTable, $otherField);
-	//
-	//				if ($otherField !== $primaryKeys[$otherTable]) {
-	//					Logger::warn('Foreign Key constraint found on non-primary key ' + $otherField + ' in table ' + $otherTable);
-	//				} else {
-	//					$this->addHasOneRelation($tableName, new ModelRelationReferencingHasOne($otherTable, $localKey), self::GUESS_BY_CONSTRAINT);
-	//				}
-	//			}
-	//		}
-	// </editor-fold>
 		}
 
 		Logger::setDefaultContext('');

@@ -4,6 +4,7 @@ namespace eoko\cqlix\generator;
 //use eoko\cqlix\Relation;
 
 use eoko\util\Arrays;
+use eoko\config\ConfigManager;
 
 use UnsupportedOperationException;
 
@@ -140,6 +141,10 @@ new <?php echo $this->getClass() ?>(<?php echo $head ? $rTabs : '' ?>
 	protected function formatAlias($alias) {
 		return $alias;
 	}
+	
+	private function isTrimLocalTablePrefix() {
+		return ConfigManager::get('eoko/cqlix/Generator/relation', 'trimLocalTablePrefix', true);
+	}
 
 	public function getName() {
 
@@ -157,7 +162,8 @@ new <?php echo $this->getClass() ?>(<?php echo $head ? $rTabs : '' ?>
 			$regex = '/^(?:' . preg_quote($this->localDBTableName)
 					. '|' . preg_quote(NameMaker::singular($this->localDBTableName)) . ')'
 					. '_(?P<target>.+)$/';
-			if (preg_match($regex, $this->targetDBTableName, $matches)) {
+			if ($this->isTrimLocalTablePrefix() &&
+					preg_match($regex, $this->targetDBTableName, $matches)) {
 				$target = $matches['target'];
 			} else {
 				$target = $this->targetDBTableName;
