@@ -1265,10 +1265,6 @@ EX
 	}
 	
 	protected function executeDelete(ModelTableQuery $query) {
-		if ($this->dbTableName === 'members') {
-			dump_trace(false);
-			throw new \Exception();
-		}
 		return $query->executeDelete();
 	}
 
