@@ -1058,7 +1058,8 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			})
 		}
 
-		var addButton = this.getToolbar().getItemForAction("add");
+		var tb = this.getToolbar(false),
+			addButton = tb && tb.getItemForAction("add");
 		win.show(addButton ? addButton.btnEl : undefined);
 //		// init widgets waiting for init value
 //		window.form.reset();
@@ -2162,8 +2163,12 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		return Ext.apply({}, this.grid.store.lastOptions.params);
 	}
 
-	,getToolbar: function() {
+	,getToolbar: function(createIf) {
 		if (this.my.toolbar === undefined) {
+			
+			if (!createIf) {
+				return undefined;
+			}
 			
 			var leftItems = [],
 				rightItems = [];
@@ -2552,7 +2557,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	,beforeCreateTabPanel: function(config) {
 		// toolbar plugin
 		if (this.extra.toolbar !== false) {
-			config.tbar = this.getToolbar();
+			config.tbar = this.getToolbar(true);
 		}
 	}
 
