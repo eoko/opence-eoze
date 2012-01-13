@@ -489,12 +489,33 @@ NS.ModelField = Ext.extend(Object, {
 
 				return this.createReadOnlyField(config);
 
-			} else {
+			}
+			
+			else {
 
-				return this.doCreateField.call(this, config);
+				// Allow overridding by model's config xtype.
+				var form = this.form || this.meta && this.meta.form,
+					xtype = config.xtype || form && form.xtype;
+				
+				if (xtype) {
+					return this.doCreateOverridenField(xtype, Ext.apply(config, form));
+				} else {
+					return this.doCreateField(config);
+				}
 			}
 		}
 	} // createField
+	
+	/**
+	 * This method is called when the xtype is overriden in the model's config,
+	 * for the present field.
+	 * @protected
+	 */
+	,doCreateOverridenField: function(xtype, config) {
+		return Ext.apply(NS.ModelField.prototype.doCreateField.call(this, config), {
+			xtype: xtype
+		});
+	}
 
 	// protected
 	,doCreateField: function(config) {
@@ -669,16 +690,6 @@ NS.DateTimeField = Ext.extend(NS.DateField, {
 NS.RelationOneField = Ext.extend(NS.StringField, {
 	xtype: "oce.foreigncombo"
 	,doCreateField: function(config) {
-		
-		// Allow overridding by model's config xtype. This should be ported to the
-		// parent classes... TODO
-		var xtype = config.xtype || this.meta && this.meta.form && this.meta.form.xtype;
-		if (xtype) {
-			return Ext.apply(NS.RelationOneField.superclass.doCreateField.call(this, config), {
-				xtype: xtype
-			});
-		}
-		
 		var controller = config.controller || this.controller;
 		if (!controller) {
 			//throw new Error("Cannot create field without knowing the controller");
