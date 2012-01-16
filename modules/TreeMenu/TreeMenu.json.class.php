@@ -108,8 +108,10 @@ class Json extends JsonExecutor {
 		
 		foreach ($children as $node) {
 			$node instanceof MenuNode;
-			$node->setParentMenuNodesId($lookup[$node->getParentMenuNodesId()]->getId());
-			$node->save();
+			if (isset($lookup[$node->getParentMenuNodesId()])) {
+				$node->setParentMenuNodesId($lookup[$node->getParentMenuNodesId()]->getId());
+				$node->save();
+			}
 		}
 		
 		return $nodes;
