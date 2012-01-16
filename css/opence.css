@@ -91,3 +91,7 @@ label.x-form-composite-label {
 .x-tip-body strong {
 	font-weight: bold;
 }
+
+.x-form-field-wrap .x-form-cog-trigger {
+	background-image: url(../images/opence/trigger-cog.png);
+}
