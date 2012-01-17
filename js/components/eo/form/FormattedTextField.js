@@ -79,13 +79,24 @@ eo.form.FormattedTextField = Ext.extend(Ext.form.TriggerField, {
 						this.disableFormatting = !checked;
 					}
 				})]
+				,hide: function() {
+					this.forceHide.defer(150, this);
+				}
+				,forceHide: function() {
+					Ext.menu.Menu.prototype.hide.call(this);
+				}
 			});
 		}
 		return m;
 	}
 
 	,onTriggerClick: function() {
-		this.getMenu().show(this.el);
+		var m = this.getMenu();
+		if (!m.isVisible()) {
+			m.show(this.el);
+		} else {
+			m.forceHide();
+		}
 	}
 });
 
