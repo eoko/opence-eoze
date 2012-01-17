@@ -7,8 +7,6 @@ Logger::getLogger()->setLevel(Logger::ERROR);
 Logger::getLogger('eoko\cache\Cache')->setLevel(Logger::DEBUG);
 \eoko\modules\Kepler\CometEvents::disable();
 
-createVersions(MemberTable::getInstance());
-
 function setPrimaryPhoneNumbers() {
 
 	$contactIds = ContactPhoneNumberTable::createQuery()
