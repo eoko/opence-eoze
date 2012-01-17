@@ -38,6 +38,8 @@ class CometEvents {
 	private $directory = 'Kepler';
 	private $channelFilename = 'channel-listeners';
 	
+	private static $disabled = false;
+	
 	private function __construct($basePath, UserSessionHandler $userSession, 
 			SessionManager $sessionManager) {
 		
@@ -185,9 +187,15 @@ class CometEvents {
 	}
 	
 	public static function publish($class, $name, $args = null) {
-		$args = array_slice(func_get_args(), 2);
-		self::$instance->push('events', $class, $name, $args);
-		self::$instance->pushToOthers('events', $class, $name, $args);
+		if (!self::$disabled) {
+			$args = array_slice(func_get_args(), 2);
+			self::$instance->push('events', $class, $name, $args);
+			self::$instance->pushToOthers('events', $class, $name, $args);
+		}
+	}
+	
+	public static function disable() {
+		self::$disabled = true;
 	}
 	
 }
