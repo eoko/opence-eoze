@@ -17,10 +17,23 @@ class ChromePHPAdapter {
 	
 	public function __construct() {
 		// TODO this should not be hardcoded for my computer......
-		if (!is_dir('/tmp/chromelogs')) {
-			mkdir('/tmp/chromelogs');
+		$homeTmpDir = getenv('HOME') . '/tmp';
+		if (is_dir($homeTmpDir)) {
+			$tmpDir = $homeTmpDir . '/chromelogs';
+		} else {
+			$tmpDir = '/tmp/chromelogs';
 		}
-		ChromePhp::useFile('/tmp/chromelogs', 'chromelogs');
+		
+		if (!is_dir($tmpDir)) {
+			mkdir($tmpDir);
+		}
+		
+		$ln = ROOT . '/chromelogs';
+		if (!file_exists($ln)) {
+			symlink($tmpDir, $ln);
+		}
+		
+		ChromePhp::useFile($tmpDir, 'chromelogs');
 	}
 	
 	public function process(LogEntry $entry) {
