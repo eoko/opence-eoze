@@ -372,7 +372,31 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	 * @param {Ext.data.Store} store
 	 * @protected
 	 */
-	,afterCreateGridStore: function(store) {}
+	,afterCreateGridStore: function(store) {
+		store.on('beforeload', function(store, opts) {
+			var cm = this.grid.getColumnModel(),
+				vci = [];
+				
+			for (var i=0,l=cm.getColumnCount(); i<l; i++) {
+				 if (!cm.isHidden(i)) {
+					 vci.push(i);
+				 }
+			}
+			
+			var dataIndexes = [];
+
+			Ext.each(vci, function(i) {
+				var di = cm.getDataIndex(i);
+				if (di) {
+					dataIndexes.push(di);
+				}
+			});
+			
+			// put into params
+			var p = opts.params || {};
+			p.json_columns = Ext.encode(dataIndexes);
+		}, this);
+	}
 
 	,editRecord: function(recordId, startTab, cb, scope) {
 		// Msg syntax
