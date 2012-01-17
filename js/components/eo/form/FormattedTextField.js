@@ -72,7 +72,7 @@ eo.form.FormattedTextField = Ext.extend(Ext.form.TriggerField, {
 		if (!m) {
 			this.menu = m = new Ext.menu.Menu({
 				items: [new Ext.menu.CheckItem({
-					text: 'Formattage automatique'
+					text: 'Formatage automatique'
 					,checked: !this.disableFormatting
 					,scope: this
 					,checkHandler: function(item, checked) {
