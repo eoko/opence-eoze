@@ -1168,32 +1168,40 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 
 		if (this.editModule && this.edit) {
 			if (!gridConfig.listeners) gridConfig.listeners = {};
-			gridConfig.listeners['rowdblclick'] = function(grid, rowIndex) {
-				// params
-				var params = [grid.store.getAt(rowIndex).id];
-				if (me.editParams) params = params.concat(me.editParams);
-				// execute
-				Oce.mx.application.getModuleInstance(
-					me.editModule
-					,function(module) {
-						module.editRowById.apply(module, params, function(win) {
-							win.on('aftersave', function(){
-								me.store.reload(Ext.apply(me.store.lastOptions.params, {
-									reload: true
-								}));
-							});						
-						});
-					}
-				);
-			}
+			gridConfig.listeners['rowdblclick'] = function(g, rowIndex) {
+				me.editRow(rowIndex);
+			};
 		}
 
 		this.initDragDrop(gridConfig);
 
 		this.grid = new Ext.grid.EditorGridPanel(gridConfig);
 		this.grid.on('afteredit', this.onSyncValue.createDelegate(this));
+		
+		this.grid.gridField = this;
 
 		this.initDropTarget(this.grid);
+	}
+	
+	,editRow: function(rowIndex) {
+		
+		var me = this,
+			id = this.store.getAt(rowIndex).id;
+		
+		Oce.mx.application.getModuleInstance(
+			this.editModule
+			,function(module) {
+				module.editRowById(id, null, function(win) {
+					win.on('aftersave', function() {
+						var s = me.store,
+							p = s.lastOptions.params;
+						s.reload(Ext.apply(p, {
+							reload: true
+						}));
+					});						
+				});
+			}
+		);
 	}
 	
 	,initDragDrop: function(gridConfig) {

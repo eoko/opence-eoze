@@ -770,7 +770,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		
 		var win = options.win,
 			onSuccess = options.onSuccess,
-			loadModelData = loadModelData;
+			loadModelData = options.loadModelData;
 
 		// TODO refactor this out of here ---
 		
