@@ -17,7 +17,7 @@ class ChromePHPAdapter {
 	
 	public function __construct() {
 		// TODO this should not be hardcoded for my computer......
-		$homeTmpDir = getenv('HOME') . '/tmp';
+		$homeTmpDir = `echo ~` . '/tmp';
 		if (is_dir($homeTmpDir)) {
 			$tmpDir = $homeTmpDir . '/chromelogs';
 		} else {
