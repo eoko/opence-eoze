@@ -93,7 +93,7 @@ eo.form.FormattedTextField = Ext.extend(Ext.form.TriggerField, {
 	,onTriggerClick: function() {
 		var m = this.getMenu();
 		if (!m.isVisible()) {
-			m.show(this.el);
+			m.show(this.trigger, 'tr-br');
 		} else {
 			m.forceHide();
 		}
