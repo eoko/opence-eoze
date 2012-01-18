@@ -14,6 +14,8 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 
 	,createLoginWindow: function(modal, text) {
 		
+		var db;
+		
 		var formPanel = new Oce.DefaultFormPanel({
 			items: [{
 				xtype: 'box',
@@ -24,7 +26,7 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 					+ '<br /><br />'
 					+ '</div>'
 				}
-			},{
+			},db = Ext.create({
 				xtype: 'textfield',
 				name: 'username',
 				fieldLabel: 'Identifiant',
@@ -41,7 +43,7 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 						}
 					}
 				}
-			},{
+			}),{
 				xtype: 'textfield',
 				name: 'password',
 				fieldLabel: 'Mot de passe',
@@ -66,7 +68,7 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 			
 			title: 'Identification'
 			
-			,defaultButton: 'login-user'
+			,defaultButton: db
 			,width: 380
 			
 			,modal: modal
@@ -144,6 +146,9 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 								data.title || 'Erreur'
 								,data.errorMessage || data.message || data.msg 
 									|| "L'identification a échoué."
+								,function() {
+									loginWindow.defaultButton.focus();
+								}
 							);
 						}
 					} else {

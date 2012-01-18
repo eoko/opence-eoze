@@ -1570,15 +1570,20 @@ abstract class Model {
 	}
 
 	public function __toString() {
-		$fields = $this->getFields();
-		$s = $this->getModelName() . '{ ';
-		$comma = '';
-		foreach ($fields as $k => $v) {
-			$s .= "$comma'$k' => " . Debug::valueToReadable($v);
-			$comma = ', ';
+		try {
+			$fields = $this->getFields();
+			$s = $this->getModelName() . '{ ';
+			$comma = '';
+			foreach ($fields as $k => $v) {
+				$s .= "$comma'$k' => " . Debug::valueToReadable($v);
+				$comma = ', ';
+			}
+			$s .= ' }';
+			return $s;
+		} catch (Exception $ex) {
+			Logger::get($this)->error('__toString Exception: ' . $ex);
 		}
-		$s .= ' }';
-		return $s;
+		return '';
 	}
 
 	protected function getRelations() {

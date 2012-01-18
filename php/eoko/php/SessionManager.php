@@ -71,6 +71,11 @@ class SessionManager {
 		foreach ($this->data as $k => $v) {
 			$_SESSION[$k] = $v;
 		}
+		foreach ($_SESSION as $k => $v) {
+			if (!array_key_exists($k, $this->data)) {
+				unset($_SESSION[$k]);
+			}
+		}
 		$this->modified = false;
 		$this->closeSession();
 	}
@@ -123,8 +128,9 @@ class SessionManager {
 	 * @return SessionManager 
 	 */
 	public function clear($key) {
+		$this->getData(false);
 		if (array_key_exists($key, $this->data)) {
-			unset($this->data);
+			unset($this->data[$key]);
 			$this->modified = true;
 		}
 		return $this;
