@@ -85,7 +85,7 @@ abstract class Renderer {
 			$msg .= ' (cannot determine error location)';
 		}
 		
-		restore_error_handler();
+//		restore_error_handler();
 
 		throw new RenderingException(
 			$msg, $errno, $errstr, $errfile, $errline, $context
