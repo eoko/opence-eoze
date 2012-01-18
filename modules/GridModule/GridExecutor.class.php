@@ -418,7 +418,8 @@ abstract class GridExecutor extends JsonExecutor {
 //		unset($relModes[3]['Contact->Conjoint']);
 		$query = $this->table->createLoadQuery(
 			$relModes,
-			$this->getLoadQueryContext()
+			$this->getLoadQueryContext(),
+			$this->request->get('columns')
 		);
 		
 		$this->applyLoadQueryParams($query);
