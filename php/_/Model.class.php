@@ -278,6 +278,15 @@ abstract class Model {
 			} else {
 				throw new IllegalStateException('Illegal value for enum: ' . $value);
 			}
+		} else if ($value !== null) {
+			switch ($this->table->getField($field)->getType()) {
+				case ModelField::T_DATE:
+					return $value !== null ? date('d/m/Y', strtotime($value)) : $value;
+				case ModelField::T_BOOLEAN:
+					return $value ? 'Oui' : 'Non';
+				default:
+					return $value;
+			}
 		} else {
 			return $value;
 		}
