@@ -1145,10 +1145,13 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 					,action: 'delete'
 				}
 				,onSuccess: function() {
-					if (grid && grid.el) grid.el.unmask();
-					me.reload(function() {
-						if (callback) callback();
-					}, me);
+					if (grid && grid.el) {
+						grid.el.unmask();
+					}
+					if (callback) {
+						callback.call(me);
+					}
+					me.reload();
 					me.afterDelete(ids);
 				}
 				,onFailure: function() {
