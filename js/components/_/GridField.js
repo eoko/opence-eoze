@@ -749,10 +749,12 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 		}, this)
 		
 		// save value
-		var v = !this.extraData || this.extraData.length == 0 ?
-				Ext.encode(ids) : Ext.encode(extraData),
+		var v = !this.extraData || this.extraData.length == 0 ? ids : extraData,
 			el = this.el,
 			dom = el && el.dom;
+
+		this.structuredValue = v;
+		v = Ext.encode(v);
 		
 		if (dom) {
 			dom.value = v;
@@ -774,6 +776,10 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 		}
 		
 		return v;
+	}
+	
+	,getValue: function() {
+		return this.structuredValue;
 	}
 	
 	,fireModifiedEvent: function() {
