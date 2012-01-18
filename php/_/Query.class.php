@@ -742,6 +742,7 @@ class Query {
 
 	public function setTableAlias($alias) {
 		$this->tableAlias = $alias;
+		return $this;
 	}
 
 	private function buildFrom($allowOnlyOne = false) {

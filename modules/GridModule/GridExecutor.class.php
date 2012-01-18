@@ -814,14 +814,18 @@ MSG;
 	public final function mod() {
 		return $this->callInTransaction('doMod');
 	}
+	
+	protected function getFormDataRequest() {
+		if ($this->request->hasSub('data')) {
+			return $this->request->getSub('data');
+		} else {
+			return $this->request->requireSub('form');
+		}
+	}
 
 	protected function doMod() {
 		
-		if ($this->request->hasSub('data')) {
-			$request = $this->request->getSub('data');
-		} else {
-			$request = $this->request->requireSub('form');
-		}
+		$request = $this->getFormDataRequest();
 
 		$setters = array();
 		$missingFields = array();
