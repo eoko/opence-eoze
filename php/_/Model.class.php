@@ -1346,8 +1346,14 @@ abstract class Model {
 //					'value=""' => $value === '',
 //				));
 				$this->setColumnNoLoadCheck($name, $value, $forceAcceptNull);
-			} else if (false === $this->getTable()->hasVirtual($name)) {
-			} else {
+			} 
+			
+			// Let pass virtual fields... (they are loaded in certain cases and
+			// may be returned to the server as is)
+			else if ($this->getTable()->hasVirtual($name)) {
+			} 
+			
+			else {
 				throw new IllegalArgumentException("$name is not a field from " . get_class($this));
 			}
 		}
