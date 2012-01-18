@@ -778,7 +778,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		// The aftersave event must be fired *before* the win is closed
 		// or it will be considered modified and will trigger a confirmation
 		// dialog
-		win.fireEvent('aftersave', win);
+		win.fireEvent('aftersave', win, data, options);
 		
 		// ---
 
