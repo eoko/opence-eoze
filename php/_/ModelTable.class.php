@@ -558,23 +558,32 @@ abstract class ModelTable extends ModelTableProxy {
 	 * @return ModelTableQuery
 	 */
 	abstract public static function createLoadQuery($relationsMode = ModelTable::LOAD_NAME, 
-			array $context = null);
+			array $context = null, $columns = null);
 	/**
 	 * @return ModelTableQuery
 	 */
 	protected function _createLoadQuery($relationsMode = ModelTable::LOAD_NAME, 
-			array $context = null) {
+			array $context = null, $columns = null) {
 		
 		$query = $this->createReadQuery($context);
+		
+		// Makes it a hash... for speed!
+		if ($columns) {
+			$columns = array_flip($columns);
+		}
 
 		foreach ($this->getColumns() as $col) {
-			$col->select($query);
+			if ($columns === null || isset($columns[$col->getName()]) || $col->isPrimary()) {
+				$col->select($query);
+			}
 		}
 
 		$this->applyLoadQueryDefaultOrder($query);
 
 		foreach ($this->virtuals as $virtual) {
-			$virtual->select($query);
+			if ($columns === null || isset($columns[$virtual->getName()])) {
+				$virtual->select($query);
+			}
 		}
 
 		if (is_array($relationsMode)) {
@@ -582,17 +591,26 @@ abstract class ModelTable extends ModelTableProxy {
 				switch ($mode) {
 					case self::LOAD_NAME:
 						foreach ($values as $relation) {
-							$this->getRelationInfo($relation)->selectName($query);
+							if ($columns === null || isset($columns[$relation])) {
+								$this->getRelationInfo($relation)->selectName($query);
+							}
 						}
 						break;
 					case self::LOAD_ID:
 						foreach ($values as $relation) {
-							$this->getRelationInfo($relation)->selectId($query);
+							if ($columns === null || isset($columns[$relation])) {
+								$this->getRelationInfo($relation)->selectId($query);
+							}
 						}
 						break;
 					case self::LOAD_FULL:
 						foreach ($values as $relation => $fields) {
-							$this->getRelationInfo($relation)->selectFields($query, $fields);
+							if ($columns !== null) {
+								$fields = array_intersect_key($fields, $columns);
+							}
+							if ($fields) {
+								$this->getRelationInfo($relation)->selectFields($query, $fields);
+							}
 						}
 						break;
 				}
@@ -601,12 +619,16 @@ abstract class ModelTable extends ModelTableProxy {
 			switch ($relationsMode) {
 				case ModelTable::LOAD_NAME:
 					foreach ($this->relations as $relation) {
-						$relation->selectName($query);
+						if ($columns === null || isset($columns[$relation])) {
+							$relation->selectName($query);
+						}
 					}
 					break;
 				case ModelTable::LOAD_ID:
 					foreach ($this->relations as $relation) {
-						$relation->selectId($query);
+						if ($columns === null || isset($columns[$relation])) {
+							$relation->selectId($query);
+						}
 					}
 					break;
 				case ModelTable::LOAD_NONE: break;
