@@ -1,0 +1,21 @@
+abstract: true
+
+defaultMenu:
+  
+useCache: true
+
+#extra:
+#  menu:
+#    family:
+#      id: TreeMenu
+#      label: Menu
+#
+## that action cannot work, because: Oce.mx.application will try to load the
+## module Oce.Modules.menu.menu before executing on it clearCache... Problem,
+## that has to be solved!
+#    actions:
+#      - id: clearCache
+#        accessLevel: -1
+#        label: Clear Cache
+#        action: clearCache
+#        command: Oce.Modules.%module%.%module%#clearCache
