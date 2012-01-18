@@ -859,11 +859,24 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 					: form.findField(local).getValue();
 			});
 		}
+		
+		var el = me.grid.bwrap;
+		if (el) {
+			el.mask('Ajout', 'x-mask-loading');
+		}
 
 		Oce.mx.application.getModuleInstance(this.editModule,
 			function(module) {
 				module.addRecord(function(newId, data) {
-					me.add(data);
+					//me.add(data);
+					me.store.reload({
+						callback: function() {
+							var el = me.grid.bwrap;
+							if (el) {
+								el.unmask();
+							}
+						}
+					});
 				}, true, initValues);
 			}
 		);
@@ -881,15 +894,26 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 			return;
 		}
 
-		var me = this
-			;
+		var me = this,
+			el = me.grid.bwrap;
+		
+		if (el) {
+			el.mask('Suppression', 'x-mask-loading');
+		}
 
 		Oce.mx.application.getModuleInstance(this.editModule,
 			function(module) {
 				module.deleteRecord(
 					ids
 					,function() {
-						me.load()
+						me.store.reload({
+							callback: function() {
+								var el = me.grid.bwrap;
+								if (el) {
+									el.unmask();
+								}
+							}
+						});
 					}
 					,me.toolbar.delConfirm
 					,{
@@ -1193,18 +1217,25 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 		
 		var me = this,
 			id = this.store.getAt(rowIndex).id;
-		
+			
 		Oce.mx.application.getModuleInstance(
 			this.editModule
 			,function(module) {
 				module.editRowById(id, null, function(win) {
 					win.on('aftersave', function() {
-						var s = me.store,
-							p = s.lastOptions.params;
-						s.reload(Ext.apply(p, {
-							reload: true
-						}));
-					});						
+						var el = me.grid.bwrap;
+						if (el) {
+							el.mask('Synchronisation', 'x-mask-loading');
+						}
+						me.store.reload({
+							callback: function() {
+								var el = me.grid.bwrap;
+								if (el) {
+									el.unmask();
+								}
+							}
+						});
+					});
 				});
 			}
 		);
@@ -1222,7 +1253,7 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 			var me = this;
 			gridConfig.selModel.on('beforerowselect', function(sm,i,ke,row) {
 				me.grid.ddText = row.data[me.ddTextField];
-			})
+			});
 		}
 	}
 
