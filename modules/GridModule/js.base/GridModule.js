@@ -2122,6 +2122,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 
 				win = new Oce.FormWindow(Ext.apply({
 					title: opts.winTitle || 'Options'
+					,width: 320
 					,formPanel: form
 					,submitButton: 0
 					,cancelButton: 1
