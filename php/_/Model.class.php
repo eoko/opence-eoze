@@ -1354,7 +1354,8 @@ abstract class Model {
 			} 
 			
 			else {
-				throw new IllegalArgumentException("$name is not a field from " . get_class($this));
+				Logger::get($this)->debug("'$name' is not a field from " . get_class($this));
+//				throw new IllegalArgumentException("$name is not a field from " . get_class($this));
 			}
 		}
 
@@ -1491,7 +1492,8 @@ abstract class Model {
 	}
 
 	/**
-	 * Set multiple fields value
+	 * Set multiple fields value. Setter keys that do not match any field in the
+	 * model will be silently ignored.
 	 * @param array $setters
 	 */
 	public function setFields(array $setters, $forceAcceptNull = false) {
