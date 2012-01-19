@@ -124,36 +124,6 @@ Oce.form.JsonForm = Ext.extend(Ext.form.BasicForm, {
     }
 });
 
-Oce.form.DateDisplayField = Ext.extend(Ext.form.DisplayField, {
-
-	setValue: function(date) {
-		if (date == null || date == '') {
-			return Oce.form.DateDisplayField.superclass.setValue.call(this, null);
-		} else {
-			var format = this.format || eo.Locale.getDateFormat();
-			if (!(date instanceof Date) && date.split(' ').length == 2) {
-				var parts = date.split(' ')
-					,timeParts = parts[1].split(':')
-					,dateParts = parts[0].split('-')
-					;
-				return Oce.form.DateDisplayField.superclass.setValue.call(this,
-					new Date(
-						dateParts[0], dateParts[1], dateParts[2],
-						timeParts[0], timeParts[1], timeParts[2]
-					).format(format)
-				);
-			} else {
-				return Oce.form.DateDisplayField.superclass.setValue.call(this,
-					new Date(date).format(format)
-				);
-			}
-		}
-	}
-});
-
-Ext.reg('datedisplayfield', Oce.form.DateDisplayField);
-
-
 Ext.ns('Oce.form');
 
 /**
