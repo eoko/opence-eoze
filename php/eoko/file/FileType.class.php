@@ -24,7 +24,6 @@ class FileType extends Enum {
 	public $type;
 	public $extensions;
 	
-	protected static $args = null;
 	protected static function getArgs() {
 		return array(
 			self::HTML => array(
