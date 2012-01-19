@@ -1,7 +1,8 @@
 <?php
 
 namespace eoko\util;
-use \IllegalArgumentException;
+
+use IllegalArgumentException;
 
 abstract class Enum {
 	
@@ -17,18 +18,14 @@ abstract class Enum {
 		$this->value = $value;
 		
 		$class = get_class($this);
-//		if (null !== $args = property_exists($class, 'args') ? $class::$args[$value] : null) {
-//			call_user_func_array(array($this, 'construct'), $args);
-		if ($class::$args !== null) {
-			call_user_func_array(array($this, 'construct'), $class::$args[$value]);
+		if (isset(self::$args[$class][$value])) {
+			call_user_func_array(array($this, 'construct'), self::$args[$class][$value]);
 		} else {
 			$this->construct();
 		}
 	}
 	
 	protected function construct() {}
-	
-//	protected function construct() {}
 	
 	public function value() {
 		return $this->value;
@@ -57,10 +54,10 @@ abstract class Enum {
 	private static function initStatic($class) {
 		$rc = new \ReflectionClass($class);
 		foreach ($rc->getConstants() as $k => $val) {
-			self::$values[$k] = null;
+			self::$values[$class][$k] = null;
 		}
 		if (method_exists($class, 'getArgs')) {
-			$class::$args = $class::getArgs();
+			self::$args[$class] = $class::getArgs();
 		} else {
 			self::$args = null;
 		}
@@ -70,17 +67,20 @@ abstract class Enum {
 		
 		$class = get_called_class();
 		
-		if (self::$values === null) {
+		if (!isset(self::$values[$class])) {
 			self::initStatic($class);
 		}
 		
-		if (array_key_exists($v, self::$values)) {
-			if (self::$values[$v] === null) {
-				self::$values[$v] = new $class($v, constant("$class::$v"));
+		$values = self::$values[$class];
+		
+		if (array_key_exists($v, $values)) {
+			if ($values[$v] === null) {
+				$values[$v] = new $class($v, constant("$class::$v"));
 			}
-			return self::$values[$v];
+			return $values[$v];
 		} else {
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Undefined enum value: $v not in ["
+					. implode(', ', array_keys($values)) . ']');
 		}
 	}
 	
