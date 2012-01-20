@@ -23,6 +23,14 @@ eo.form.ClearableComboBox = Ext.extend(Ext.form.ComboBox, {
 	
 	,initComponent: function(){
 		
+		this.addEvents(
+			/**
+			 * @event clear
+			 * @param {eo.form.ClearableComboBox} this
+			 */
+			'clear'
+		);
+		
 		if (!this.allowBlank || !this.clearable) {
 			this.hideTrigger1 = true;
 		}
@@ -56,7 +64,10 @@ eo.form.ClearableComboBox = Ext.extend(Ext.form.ComboBox, {
 		// will be compared to the current value. If setValue is called
 		// before focus, `startValue` will be set to ''.
 		this.focus();
-		this.setValue();
+		if (this.getValue()) {
+			this.setValue();
+			this.fireEvent('clear', this);
+		}
 	}
 	
 	,onTrigger2Click : sppCombo.onTriggerClick
