@@ -17,6 +17,9 @@ Ext.ns('Oce.form');
  * -   the {@link #format} config option or {@link eo.Local#getDateFormat} if none
  * -   `'Y-m-d H:i:s'`
  * -   `'Y-m-dTH:i:s'`
+ * -   `'Y-m-d H:i'`
+ * -   `'Y-m-dTH:i'`
+ * -   `'Y-m-d'`
  * 
  * @xtype datedisplayfield
  */
@@ -28,6 +31,7 @@ Oce.form.DateDisplayField = Ext.extend(Ext.form.DisplayField, {
 	format: undefined
 
 	,setValue: function(date) {
+		this.rawValue = date;
 		var format = this.format || eo.Locale.getDateFormat(),
 			v;
 		if (date instanceof Date) {
@@ -35,7 +39,10 @@ Oce.form.DateDisplayField = Ext.extend(Ext.form.DisplayField, {
 		} else {
 			date = Date.parseDate(date, format)
 					|| Date.parseDate(date, 'Y-m-d H:i:s')
-					|| Date.parseDate(date, 'Y-m-dTH:i:s');
+					|| Date.parseDate(date, 'Y-m-dTH:i:s')
+					|| Date.parseDate(date, 'Y-m-d H:i')
+					|| Date.parseDate(date, 'Y-m-dTH:i')
+					|| Date.parseDate(date, 'Y-m-d');
 			if (date instanceof Date) {
 				v = date.format(format);
 			}
