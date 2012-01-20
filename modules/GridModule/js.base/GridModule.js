@@ -2865,7 +2865,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 						lastFilters[item.filterName] = item.checked;
 					}
 				}
-			})
+			});
 
 			if (changed) {
 				var activeFilters = [];
@@ -2921,26 +2921,27 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			}
 		});
 
-		return {
+		var menu = new Ext.menu.Menu({
 			items: items
 			,plugins: new Ext.ux.menu.TooltipPlugin
 			,listeners: {
 				scope: this
 				,beforehide: searchHandler
-				,afterrender: function(menu) {
-					checkHandler.call(this, {
-						parentMenu: menu
-					});
-					if (this.store) {
-						searchHandler.call(this, menu);
-					} else {
-						this.afterInitStore = this.afterInitStore.createSequence(function() {
-							searchHandler.call(me, menu);
-						});
-					}
-				}
 			}
-		};
+		});
+		
+		checkHandler.call(this, {
+			parentMenu: menu
+		});
+		if (this.store) {
+			searchHandler.call(this, menu);
+		} else {
+			this.afterInitStore = this.afterInitStore.createSequence(function() {
+				searchHandler.call(me, menu);
+			});
+		}
+		
+		return menu;
 	}
 
 	,getDefaultSortColumn: function(grid) {
