@@ -1,8 +1,7 @@
 <?php
 
 namespace eoko\util;
-
-use IllegalArgumentException;
+use \IllegalArgumentException;
 
 abstract class Enum {
 	
@@ -71,7 +70,7 @@ abstract class Enum {
 			self::initStatic($class);
 		}
 		
-		$values = self::$values[$class];
+		$values =& self::$values[$class];
 		
 		if (array_key_exists($v, $values)) {
 			if ($values[$v] === null) {
@@ -79,8 +78,7 @@ abstract class Enum {
 			}
 			return $values[$v];
 		} else {
-			throw new IllegalArgumentException("Undefined enum value: $v not in ["
-					. implode(', ', array_keys($values)) . ']');
+			throw new IllegalArgumentException();
 		}
 	}
 	
