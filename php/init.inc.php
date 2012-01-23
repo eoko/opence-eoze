@@ -117,6 +117,8 @@ if (defined('APP_MODULES_DIR')) {
 
 defineIf('MODULES_NAMESPACE', 'eoko\\modules\\');
 
+exec('rm -rf ' . TMP_PATH);
+
 function createEozeDirIf($path) {
 	if (!file_exists($path)) {
 		mkdir($path);
