@@ -17,6 +17,7 @@ use eoko\cache\Cache;
 
 use eoko\config\Application;
 use eoko\php\SessionManager;
+use eoko\php\ClassLoader;
 
 class Module implements file\Finder {
 	
@@ -94,6 +95,14 @@ class Module implements file\Finder {
 		// want it to be serialized in the cache (because of the closures
 		// it contains)
 		return Application::getInstance()->getSessionManager();
+	}
+	
+	/**
+	 * Gets the Eoze's class loader.
+	 * @return ClassLoader
+	 */
+	protected function getClassLoader() {
+		return ClassLoader::getInstance();
 	}
 	
 	public static function __set_state($vals) {
