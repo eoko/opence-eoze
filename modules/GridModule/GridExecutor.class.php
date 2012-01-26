@@ -1305,6 +1305,9 @@ TXT
 						'precision' => \EarlReport\Data\Format\Date::SECOND,
 					);
 					break;
+				case ModelField::T_BOOL:
+					$colFormat = \EarlReport\Data\Type::BOOL;
+					break;
 			}
 			$col = $sheet->addColumn(array(
 				'title' => $title,
