@@ -9,10 +9,12 @@ use eoko\template\HtmlTemplate;
 use eoko\cqlix\table_filters\TableHasFilters;
 use eoko\database\Database;
 use eoko\util\Strings;
+use eoko\module\ModuleManager;
 
 use eoko\cqlix\Exception\ModelAlreadyDeletedException;
 
 use Model;
+use ModelField;
 use ModelTable;
 use ModelTableQuery;
 use ModelColumn;
@@ -23,6 +25,7 @@ use Logger;
 use Request;
 use ExceptionHandler;
 use UserSession;
+use User;
 
 use Exception;
 use UserException;
@@ -402,7 +405,7 @@ abstract class GridExecutor extends JsonExecutor {
 	 // LOAD -- Shared
 	////////////////////////////////////////////////////////////////////////////
 
-	protected function createLoadQuery($selContext = 'form', $relModes = null) {
+	protected function createLoadQuery($selContext = 'form', $relModes = null, $columns = null) {
 
 		if ($relModes === null) {
 			if (null === $relModes = $this->getRelationSelectionModes($selContext)) {
@@ -416,10 +419,15 @@ abstract class GridExecutor extends JsonExecutor {
 		
 //		dump($relModes);
 //		unset($relModes[3]['Contact->Conjoint']);
+		
+		if ($columns === null) {
+			$columns = $this->request->get('columns');
+		}
+		
 		$query = $this->table->createLoadQuery(
 			$relModes,
 			$this->getLoadQueryContext(),
-			$this->request->get('columns')
+			$columns
 		);
 		
 		$this->applyLoadQueryParams($query);
@@ -1153,11 +1161,41 @@ MSG;
 			return Strings::slugify($this->title);
 		}
 	}
+	
+	private $earl;
+	
+	/**
+	 * @return EarlReport\EarlReport
+	 */
+	private function getEarl() {
+		if (!$this->earl) {
+			$earlModule = $this->getModule()->getConfig()->getValue('extra/earlReportModule');
+			if (!$earlModule) {
+				throw new IllegalStateException('Cannot export as pdf without earl report module '
+						. '(extra/earlReportModule config key) configured.');
+			}
+			$earlModule = ModuleManager::getModule($earlModule);
+			if (false == $earlModule instanceof \eoko\modules\EarlReport\EarlReport) {
+				throw new IllegalStateException('extra/earlReportModule must point to an instance '
+						. 'of class eoko\modules\EarlReport\EarlReport.');
+			}
+			$this->earl = $earlModule->getEarl();
+		}
+		return $this->earl;
+	}
 
 	public function export() {
+		
+		$allowedFormats = array(
+			'pdf', 'xls', 'ods'
+		);
 
 		$fields = $this->request->req('fields');
 		$format = $this->request->req('format');
+		
+		if (!in_array($format, $allowedFormats, true)) {
+			throw new IllegalStateException();
+		}
 
 //		dump($fields);
 
@@ -1199,16 +1237,16 @@ MSG;
 //		}
 
 		// tmp
-		$query = $this->createLoadQuery('grid');
+		$query = $this->createLoadQuery('grid', null, array_keys($fields));
 
-		$start = $this->request->get('realstart', false, true);
-		if ($start === false) $start = $this->request->get('start', 0, true);
-
-		$query->limit(
-			$this->request->get('limit', 20),
-			$start
-//			$this->request->get('start', 0, true)
-		);
+//		$start = $this->request->get('realstart', false, true);
+//		if ($start === false) $start = $this->request->get('start', 0, true);
+//
+//		$query->limit(
+//			$this->request->get('limit', 20),
+//			$start
+////			$this->request->get('start', 0, true)
+//		);
 		// /tmp
 		
 		$result = $query->execute();
@@ -1221,35 +1259,118 @@ MSG;
 //			}
 //			$row = $newRow;
 //		}
+//		dump(count($result));
+		
+//		var_export(array_slice($result, 0, 2));
+//		
+//		dump(array(
+//			$fields,
+//			array_slice($result, 0, 2),
+//		));
 
-		$exporter = new \Exporter($this->makeExportFilename());
-		$exporter->setDirectory($this->getSlug());
-
-		switch ($format) {
-			case 'csv': 
-				$url = $exporter->exportCSV($result);
-				break;
-			case 'pdf':
-				$url = $exporter->exportPDF($result, $fields, $this->table, $this->makePdfTitle());
-//				$url = $this->exportPDF(
-//					$result,
-//					$fields,
-//					$this->table,
-//					$this->makePdfTitle()
-//				);
-				break;
-			default: throw new IllegalStateException('Unreachable code');
+		$earl = $this->getEarl();
+		
+		$user = UserSession::getUser();
+		
+		$report = $earl->createReport()
+				->setAddress(<<<TXT
+CE Rhodia - Site Belle Étoile
+BP 103
+69192 SAINT FONS CEDEX
+TXT
+				)
+				->setTitle($this->makePdfTitle())
+				->setUser($user->getDisplayName(User::DNF_PRETTY))
+				->setUserEmail($user->getEmail());
+		
+		$sheet = $report->addWorksheet('Feuille 1');
+		
+		foreach ($fields as $field => $title) {
+			$colFormat = null;
+			switch ($this->table->getField($field)->getType()) {
+				case ModelField::T_INT:
+				case ModelField::T_FLOAT:
+				case ModelField::T_DECIMAL:
+					$colFormat = \EarlReport\Data\Type::FLOAT;
+					break;
+				case ModelField::T_DATE:
+					$colFormat = array(
+						'type' => \EarlReport\Data\Type::DATE,
+						'precision' => \EarlReport\Data\Format\Date::DAY,
+					);
+					break;
+				case ModelField::T_DATETIME:
+					$colFormat = array(
+						'type' => \EarlReport\Data\Type::DATE,
+						'precision' => \EarlReport\Data\Format\Date::SECOND,
+					);
+					break;
+			}
+			$col = $sheet->addColumn(array(
+				'title' => $title,
+				'format' => $colFormat,
+			));
 		}
+		
+//		$result = array_slice($result, 0, 2); // DEBUG
+		$sheet->setRows(new \EarlReport\Data\Rows\NamedFieldsArray($result, array_keys($fields)));
+		
+		$slug = $this->getSlug();
+		$slugDir = $slug ? "$slug/" : null;
+		$directory = EXPORTS_PATH . $slugDir;
+		$filename = $this->makeExportFilename($directory, $format);
+		
+		$file = $directory . $filename;
+		$url = EXPORTS_BASE_URL . $slugDir . $filename;
+		
+		$earl->createWriter($report)->write($file);
+		
+//		$exporter = new \Exporter($this->makeExportFilename());
+//		$exporter->setDirectory($this->getSlug());
+//
+//		switch ($format) {
+//			case 'csv': 
+//				$url = $exporter->exportCSV($result);
+//				break;
+//			case 'pdf':
+//				$url = $exporter->exportPDF($result, $fields, $this->table, $this->makePdfTitle());
+////				$url = $this->exportPDF(
+////					$result,
+////					$fields,
+////					$this->table,
+////					$this->makePdfTitle()
+////				);
+//				break;
+//			default: throw new IllegalStateException('Unreachable code');
+//		}
 
 		$this->url = $url;
 
-		header('Content-Type: application/force-download');
+//		header('Content-Type: application/force-download');
+//header('Content-type: application/pdf');
+//header('Content-Disposition: attachment; filename="downloaded.pdf"');
 		
 		return true;
 	}
 
-	protected function makeExportFilename() {
-		return 'Export';
+	private function makeExportFilename($directory, $ext, $date = true) {
+		$s = 'Export';
+		
+		if ($date) {
+			$s .= '_' . date('Ymd_His');
+		}
+		
+		// Ensure unicity
+		$n = null;
+		$i = 1;
+		while (file_exists("$directory$s$n.$ext")) {
+			$i++;
+			$n = "_$i";
+		}
+		
+		$s .= "$n.$ext";
+		
+		return $s;
 	}
 
 	protected function beforeWritePdf(\PdfExport $pdfExport) {}

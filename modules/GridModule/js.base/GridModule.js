@@ -2144,7 +2144,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	,exportData: function(format) {
 
 		switch (format) {
-			case 'csv': case 'pdf':break;
+			case 'xls': case 'pdf':break;
 			default:Ext.MessageBox.alert('Format Invalide', "Désolé, ce format de "
 				+ "fichier n'est pas pris en charge. Il s'agit vraisemblablement "
 				+ "d'une erreur du programme, veuillez contactez l'assistance technique.");
@@ -3580,9 +3580,9 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				,text: 'Pdf'
 				,iconCls: 'ribbon icon export_pdf'
 			}
-			,csv: {
+			,xls: {
 				xtype: 'oce.rbbutton'
-				,handler: this.exportData.createDelegate(this, ['csv'])
+				,handler: this.exportData.createDelegate(this, ['xls'])
 				,text: 'Excel'
 				,iconCls: 'ribbon icon export_excel'
 			}

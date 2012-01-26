@@ -240,6 +240,13 @@ NS.MimeTypes = {
 			record.data.url, record.data.filename
 		));
 	}
+
+	,xls: function(record) {
+		this.cmp.insertAtCursor(String.format(
+			'<a href="{0}">{1}</a>',
+			record.data.url, record.data.filename
+		));
+	}
 }
 
 Oce.deps.wait('Ext.ux.form.HtmlEditor.Image', function() {
