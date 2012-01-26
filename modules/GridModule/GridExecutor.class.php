@@ -1287,7 +1287,8 @@ TXT
 		
 		foreach ($fields as $field => $title) {
 			$colFormat = null;
-			switch ($this->table->getField($field)->getType()) {
+			$f = $this->table->getField($field);
+			switch ($f->getType()) {
 				case ModelField::T_INT:
 				case ModelField::T_FLOAT:
 				case ModelField::T_DECIMAL:
@@ -1307,6 +1308,13 @@ TXT
 					break;
 				case ModelField::T_BOOL:
 					$colFormat = \EarlReport\Data\Type::BOOL;
+					break;
+				case ModelField::T_ENUM:
+//					$f instanceof \eoko\cqlix\EnumColumn;
+					$colFormat = array(
+//						'type' => \EarlReport\Data\Type::FLOAT,
+						'renderer' => $f->getCodeLabels(),
+					);
 					break;
 			}
 			$col = $sheet->addColumn(array(
