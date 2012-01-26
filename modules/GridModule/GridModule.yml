@@ -29,7 +29,7 @@ extra:
     # the following syntax is correct, but this dependance is already declared
     # in default gridModule actions
 #    Boîte à outil: [pdf,csv,{item: help, depends: hasHelp}]
-    Export: [pdf,csv]
+    Export: [pdf,xls]
   
   help:
     factory: eoko.help.IFrameFactory # useless for now, inheritage not implemented

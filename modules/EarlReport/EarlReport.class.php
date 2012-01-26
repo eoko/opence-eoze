@@ -57,8 +57,16 @@ class EarlReport extends Module {
 	protected function configureEarl(Earl $earl) {
 		$config = $this->getConfig();
 		
-		$earl->setLogger(new LoggerProxy($earl));
+		$earl->setSofficeCommand($config->get('soffice'))
+				->setUnoconvCommand($config->get('unoconv'))
+				->setLogger(new LoggerProxy($earl));
+				
+		if (!$earl->checkDependencies()) {
+			throw new RuntimeException('Missing dependency for EarlReport.');
+		}
 		
-		$earl->getContext()->setDateFormat($config->get('dateFormat'));
+		$earl->getContext()
+				->setDateFormat($config->get('dateFormat'))
+				->setDateTimeFormat($config->get('dateTimeFormat'));
 	}
 }
