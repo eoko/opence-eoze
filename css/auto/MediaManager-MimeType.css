@@ -3,6 +3,7 @@
 	display: inline;
 }
 .img-chooser-view .thumb img.pdf,
+.img-chooser-view .thumb img.xls,
 .img-chooser-view .thumb img.csv {
 	display: none;
 }
@@ -18,7 +19,9 @@
 }
 .img-chooser-dlg span.mimeIcon.pdf,
 .img-chooser-dlg span.mimeIcon.csv,
+.img-chooser-dlg span.mimeIcon.xls,
 .img-chooser-view .thumb span.pdf,
+.img-chooser-view .thumb span.xls,
 .img-chooser-view .thumb span.csv {
 	display: block;
 	background: url("images/mime/x-office-document-64.png") center no-repeat !important;
@@ -28,6 +31,7 @@
 	display: inline;
 }
 .img-chooser-dlg img.pdf,
+.img-chooser-dlg img.xls,
 .img-chooser-dlg img.csv {
 	display: none;
 }
