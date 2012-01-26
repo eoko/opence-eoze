@@ -17,7 +17,8 @@ class ChromePHPAdapter {
 	
 	public function __construct() {
 		// TODO this should not be hardcoded for my computer......
-		$homeTmpDir = trim(`echo ~/tmp`);
+		//$homeTmpDir = trim(`echo ~/tmp`);
+		$homeTmpDir = '/home/' . trim(`/usr/bin/whoami`) . '/tmp'; // probably working best
 		if (is_dir($homeTmpDir)) {
 			$tmpDir = $homeTmpDir . '/chromelogs';
 		} else {
