@@ -656,6 +656,11 @@ abstract class ModelTable extends ModelTableProxy {
 	protected function _getRelationInfo($name, $requireType = false) {
 
 		if (count($parts = explode('->', $name, 2)) == 2) {
+			if (!isset($this->relations[$parts[0]])) {
+				throw new IllegalArgumentException(
+					get_class($this) . ' has no relation ' . $parts[0]
+				);
+			}
 			$relation = $this->relations[$parts[0]]->getRelationInfo($parts[1]);
 		} else {
 			if (!isset($this->relations[$name])) {
