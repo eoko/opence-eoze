@@ -218,14 +218,14 @@ abstract class QueryJoin implements QueryAliasable {
 					$targetRelation = $relation->getRelationInfo($fieldName);
 					return $targetRelation->getNameClause($this, $field);
 				} else if ($relation->targetTable->hasVirtual($fieldName)) {
-					throw new UnsupportedOperationException;
 					// virtual
+					$leftAlias = $table->getDBTableName() === $tableAlias ? '' : "$tableAlias->";
 					return $relation->targetTable->getVirtual($fieldName)->getClause(
-						$this->query, $this->query->getJoin($relationName)
+						$this->query, $this->query->getJoin("$leftAlias$relationName")
 					);
 				} else {
 					// field
-					return $this->query->getJoin("$tableAlias->$relationName")
+					return $this->query->getJoin("{$tableAlias}->$relationName")
 							->getQualifiedName($fieldName);
 				}
 			}
