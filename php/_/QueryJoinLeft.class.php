@@ -37,22 +37,31 @@ class QueryJoinLeft extends QueryJoin {
 	 * clause of the join with {QueryJoin::select()} which returns the original
 	 * Query.
 	 */
-	public function __construct(Query $query, $rightTable, $leftField,
+	public function __construct(Query $query, ModelTableProxy $rightTable, $leftField,
 			$rightField = null, $alias = null,
-			$leftTable = null, $buildOnClauseFn = null) {
+			ModelTableProxy $leftTable = null, $leftTableAlias = null,
+			$buildOnClauseFn = null) {
 
 		parent::__construct($query, $rightTable, $leftField, $rightField,
-				$alias, $leftTable);
+				$alias, $leftTable, $leftTableAlias);
 		
 		$this->buildOnClauseFn = $buildOnClauseFn;
 	}
 	
 	private $buildOnClauseFn = null;
 	
+	private function buildSingleField($field, $tableName, $side) {
+		if ($field instanceof QueryJoinField) {
+			return $field->buildField($tableName);
+		} else {
+			return $this->getQualifiedName($field, $side);
+		}
+	}
+	
 	protected function buildOnClause() {
 		
-		$leftField = QueryJoinField_Base::buildSingleField($this->leftField, $this->leftTableAlias);
-		$rightField = QueryJoinField_Base::buildSingleField($this->rightField, $this->foreignTableAlias);
+		$leftField = $this->buildSingleField($this->leftField, $this->leftTableAlias, QueryJoin::TABLE_LEFT);
+		$rightField = $this->buildSingleField($this->rightField, $this->foreignTableAlias, QueryJoin::TABLE_RIGHT);
 		
 		if ($this->buildOnClauseFn !== null) {
 			return call_user_func($this->buildOnClauseFn, $leftField, $rightField);

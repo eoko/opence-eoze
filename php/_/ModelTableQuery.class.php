@@ -3,6 +3,7 @@
 class ModelTableQuery extends Query implements QueryAliasable {
 
 	public $dbTable;
+	
 	/** @var myModelTable */
 	public $table;
 

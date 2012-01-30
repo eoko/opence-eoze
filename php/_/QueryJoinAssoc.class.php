@@ -25,13 +25,15 @@ class QueryJoinAssoc extends QueryJoinLeft {
 	 * @param ModelTableProxy $assocTable
 	 * @param string $leftAssocField
 	 * @param string $rightAssocField
-	 * @param string $alias
+	 * @param string $rightTableAlias
 	 * @param string $leftField
 	 */
 	function __construct(Query $query,
-			$leftTable, ModelTableProxy $rightTable, $assocTable,
+			ModelTableProxy $leftTable, $leftTableAlias,
+			ModelTableProxy $rightTable, 
+			$assocTable,
 			$leftAssocField, $rightAssocField = null,
-			$alias = null, $leftField = null, $rightField = null) {
+			$rightTableAlias = null, $leftField = null, $rightField = null) {
 
 		$this->assocTableName = $assocTable instanceof ModelTableProxy ?
 				$assocTable->getDBTableName() : $assocTable;
@@ -56,10 +58,13 @@ class QueryJoinAssoc extends QueryJoinLeft {
 		$this->assocTableAlias = $query->getNextJoinAlias($this->assocTableName);
 
 		parent::__construct(
-			$query, $rightTable,
-			$leftField, $rightField,
-			$alias,
-			$leftTable
+			$query,
+			$rightTable,
+			$leftField,
+			$rightField,
+			$rightTableAlias,
+			$leftTable,
+			$leftTableAlias
 		);
 	}
 
