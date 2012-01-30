@@ -354,9 +354,15 @@ class ModelTableQuery extends Query implements QueryAliasable {
 			return $this->joinReferences[$index];
 //		} else if (!isset($this->joins[$index])) {
 		} else {
+			// $join->buildSql() must be called before the join is added to the join list,
+			// in order to ensure that other joins required by the new join will be
+			// built before it.
+			$bindings = array();
 			if (is_array($join = $relation->createJoin($this, $alias, $leftAlias))) {
+				$join[0]->buildSql($bindings); // see upper
 				return $this->joinReferences[$index] = $join[0];
 			} else {
+				$join->buildSql($bindings); // see upper
 				return $this->joins[$index] = $join;
 			}
 		}
