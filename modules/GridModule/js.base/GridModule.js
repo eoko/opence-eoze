@@ -3317,11 +3317,14 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	}
 	
 	// private
-	,queueReload: function(callback, scope) {
+	,queueReload: function(callback, scope, delay) {
+		if (!Ext.isDefined(delay)) {
+			delay = 10;
+		}
 		var rt = this.reloadTask,
 			rq = this.reloadQueue;
 		rq.push(Array.prototype.slice(arguments, 0));
-		rt.delay(10);
+		rt.delay(delay);
 	}
 	
 	// private
@@ -3383,12 +3386,12 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				fn();
 				applying--;
 				if (!applying) {
-					me.grid.el.unmask();
+//					me.grid.el.unmask();
 					me.grid.view.refresh(true);
 				}
 			};
 			if (!applying) {
-				me.grid.el.mask('Application', 'x-mask-loading');
+//				me.grid.el.mask('&nbsp;', 'x-mask-loading');
 				run.defer(100);
 			} else {
 				run();
@@ -3452,6 +3455,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 								cm.totalWidth = null;
 								cm.config[index].hidden = !checked;
 								// cm.setHidden(index, !checked);
+								me.queueReload(undefined, undefined, 1000);
 							});
 						}
 					}.createDelegate(this, [cm], 2)
