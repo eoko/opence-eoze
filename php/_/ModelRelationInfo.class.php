@@ -737,7 +737,10 @@ class ModelRelationInfoReferencesOne extends ModelRelationInfoHasReference
 			$this->referenceField, 
 			$this->rightField,
 			$alias,
-			$leftAlias !== null ? $leftAlias : $this->localTable,
+			
+			// Left table
+			$this->localTable, $leftAlias,
+			
 			$this->buildJoinOnClauseFn
 		);
 	}
@@ -833,7 +836,9 @@ class ModelRelationInfoReferedByOne extends ModelRelationInfoIsRefered
 			$this->localTable->getPrimaryKeyName(),
 			$this->getJoinReferenceField(),
 			$alias !== null ? $alias : $this->name,
-			$leftAlias !== null ? $leftAlias : $this->localTable,
+			// Left table
+			$this->localTable, $leftAlias,
+			
 			$this->buildJoinOnClauseFn
 		);
 		return $join;
@@ -979,7 +984,8 @@ class ModelRelationInfoReferencesMany extends ModelRelationInfoHasReference
 			$this->referenceField,   // left field
 			$this->targetTable->getPrimaryKeyName(), // right field
 			$alias === null ? $this->name : $alias,  // alias
-			$leftAlias !== null ? $leftAlias : $this->localTable
+			// Left table
+			$this->localTable, $leftAlias
 		);
 	}
 }
@@ -1000,7 +1006,8 @@ class ModelRelationInfoReferedByMany extends ModelRelationInfoIsRefered
 				$this->localTable->getPrimaryKeyName(),
 				$this->referenceField,
 				$alias === null ? $this->name : $alias,  // alias
-				$leftAlias !== null ? $leftAlias : $this->localTable
+				// Left table
+				$this->localTable, $leftAlias
 		);
 	}
 
@@ -1135,7 +1142,7 @@ abstract class ModelRelationInfoByAssoc extends ModelRelationInfo {
 	protected function doCreateJoin(ModelTableQuery $query, $alias = null, $leftTableAlias = null) {
 		return new QueryJoinAssoc(
 			$query,
-			$leftTableAlias === null ? $this->localTable : $leftTableAlias,
+			$this->localTable, $leftTableAlias,
 			$this->targetTable,
 			$this->assocTable,
 			$this->localForeignKey,

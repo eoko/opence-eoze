@@ -1,11 +1,17 @@
 <?php
 
+/**
+ * @deprecated Programmed for removal from the framework.
+ */
 interface QueryJoinField {
 
 	function buildField($tableName);
 	
 }
 
+/**
+ * @deprecated Programmed for removal from the framework.
+ */
 abstract class QueryJoinField_Base implements QueryJoinField {
 
 	public static function buildSingleField($field, $tableName) {
@@ -17,6 +23,9 @@ abstract class QueryJoinField_Base implements QueryJoinField {
 	}
 }
 
+/**
+ * @deprecated Programmed for removal from the framework.
+ */
 class QueryJoinField_SimpleFunction extends QueryJoinField_Base {
 
 	private $field;
@@ -33,6 +42,9 @@ class QueryJoinField_SimpleFunction extends QueryJoinField_Base {
 	}
 }
 
+/**
+ * @deprecated Programmed for removal from the framework.
+ */
 class QueryJoinField_Multiple extends QueryJoinField_Base {
 	
 	private $fields;
