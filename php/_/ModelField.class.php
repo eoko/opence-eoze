@@ -29,6 +29,12 @@ interface ModelField {
 
 	function isNullable();
 	
+	function getDefault();
+	
+	function hasDefault();
+	
+	function isPrimary();
+	
 	function castValue($value);
 	
 	/**

@@ -6,9 +6,9 @@ if (!isset($dumpPre)) { $dumpPre = '<pre>'; $endDumpPre = '</pre>'; }
 function dump($var, $maxDeep = 50, $die = true, $deep = 0) {
 	global $dumpPre, $endDumpPre;
 	
-	while (ob_get_level()) {
-		ob_end_clean();
-	}
+//	while (ob_get_level()) {
+//		ob_end_clean();
+//	}
 	
 //	dump_trace(false);
 	$trace = debug_backtrace();

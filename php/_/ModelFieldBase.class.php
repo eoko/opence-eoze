@@ -41,4 +41,14 @@ abstract class ModelFieldBase implements ModelField {
 	public function getActualField() {
 		return $this;
 	}
+	
+	public function hasDefault() {
+		return false;
+	}
+	
+	public function getDefault() {}
+	
+	public function isPrimary() {
+		return false;
+	}
 }
