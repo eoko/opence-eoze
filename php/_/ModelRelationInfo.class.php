@@ -394,7 +394,7 @@ abstract class ModelRelationInfo extends ModelFieldBase {
 	}
 
 	/**
-	 * @return ModelColumn
+	 * @return ModelField
 	 * @todo Finish implem
 	 */
 	public function getReferenceField() {
@@ -431,12 +431,12 @@ abstract class ModelRelationInfo extends ModelFieldBase {
 		}
 
 		foreach (array('label', 'internal') as $meta) {
-			if ($referenceField->meta->$meta !== null) {
-				$r[$meta] = $referenceField->meta->$meta;
+			if ($referenceField->getMeta()->$meta !== null) {
+				$r[$meta] = $referenceField->getMeta()->$meta;
 			}
 		}
 		
-		$r['meta'] = $referenceField->meta->toArray();
+		$r['meta'] = $referenceField->getMeta()->toArray();
 
 		return $r;
 	}
@@ -641,7 +641,7 @@ abstract class ModelRelationInfoHasReference extends ModelRelationInfoByReferenc
 	}
 
 	public function getReferenceField() {
-		return $this->localTable->getColumn($this->referenceField);
+		return $this->localTable->getField($this->referenceField);
 	}
 	
 	public function configureMeta(array $config = null) {
