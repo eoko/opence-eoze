@@ -454,6 +454,7 @@ abstract class GridExecutor extends JsonExecutor {
 
 			if (is_array($sort)) {
 				foreach ($sort as $sortEntry) {
+					$query->select($sortEntry['field']);
 					$query->thenOrderBy(
 						$sortEntry['field'], $sortEntry['direction']
 //						$this->table->getField(
@@ -462,6 +463,7 @@ abstract class GridExecutor extends JsonExecutor {
 					);
 				}
 			} else {
+				$query->select($sort);
 				$query->thenOrderBy(
 					$sort, $dir
 //					$this->table->getField($sort)->orderClause($dir, $query->dbTable)
@@ -1191,6 +1193,8 @@ MSG;
 	}
 
 	public function export() {
+		
+		set_time_limit(180);
 		
 		$allowedFormats = array(
 			'pdf', 'xls', 'ods'
