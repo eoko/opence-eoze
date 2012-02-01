@@ -121,7 +121,7 @@ exec('rm -rf ' . TMP_PATH);
 
 function createEozeDirIf($path) {
 	if (!file_exists($path)) {
-		mkdir($path);
+		@mkdir($path);
 	}
 }
 createEozeDirIf(MY_EOZE_PATH);
