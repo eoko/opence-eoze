@@ -376,7 +376,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		store.on('beforeload', function(store, opts) {
 			var cm = this.grid.getColumnModel(),
 				vci = [];
-				
+			
 			for (var i=0,l=cm.getColumnCount(); i<l; i++) {
 				 if (!cm.isHidden(i)) {
 					 vci.push(i);
@@ -389,6 +389,13 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				var di = cm.getDataIndex(i);
 				if (di) {
 					dataIndexes.push(di);
+				}
+			});
+			
+			// internal columns
+			Ext.each(this.columns, function(col) {
+				if (col.internal) {
+					dataIndexes.push(col.name);
 				}
 			});
 			
@@ -3310,9 +3317,11 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			var fn = this.doReload,
 				rq = this.reloadQueue;
 			this.reloadQueue = [];
-			Ext.each(rq, function(args) {
-				fn.apply(this, args);
-			}, this);
+			this.doReload(function() {
+				Ext.each(rq, function(callback) {
+					callback.fn.apply(callback.scope, arguments);
+				});
+			});
 		}, this);
 	}
 	
@@ -3323,32 +3332,49 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		}
 		var rt = this.reloadTask,
 			rq = this.reloadQueue;
-		rq.push(Array.prototype.slice(arguments, 0));
+		if (callback) {
+			rq.push({fn: callback, scope: scope});
+		}
 		rt.delay(delay);
 	}
 	
 	// private
 	,doReload: function(callback, scope) {
-		if (this.reloadLatch > 0) {
-			this.reloadLatch--;
-		} else {
-			var o;
-			if (callback) {
-				if (Ext.isFunction(callback)) {
-					o = {
-						callback: callback
-						,scope: scope || this
-					}
-				} else {
-					o = callback;
-				}
-			}
-			if (this.firstLoad) {
-				this.reloadLatch = 0;
-//				debugger
-				this.store.reload(o);
+		var o;
+		if (callback) {
+			if (Ext.isFunction(callback)) {
+				o = {
+					callback: callback
+					,scope: scope || this
+				};
+			} else {
+				o = callback;
 			}
 		}
+		if (this.firstLoad) {
+			this.store.reload(o);
+		}
+// REM
+//		if (this.reloadLatch > 0) {
+//			this.reloadLatch--;
+//		} else {
+//			var o;
+//			if (callback) {
+//				if (Ext.isFunction(callback)) {
+//					o = {
+//						callback: callback
+//						,scope: scope || this
+//					};
+//				} else {
+//					o = callback;
+//				}
+//			}
+//			if (this.firstLoad) {
+//				this.reloadLatch = 0;
+////				debugger
+//				this.store.reload(o);
+//			}
+//		}
 	}
 	
 	// private
@@ -3455,7 +3481,11 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 								cm.totalWidth = null;
 								cm.config[index].hidden = !checked;
 								// cm.setHidden(index, !checked);
-								me.queueReload(undefined, undefined, 1000);
+								me.grid.store.removeAll();
+//								me.grid.el.mask('Chargement', 'x-mask-loading');
+								me.queueReload(function() {
+//									me.grid.el.unmask();
+								}, undefined, 1000);
 							});
 						}
 					}.createDelegate(this, [cm], 2)
