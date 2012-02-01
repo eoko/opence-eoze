@@ -2077,7 +2077,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				waitBox.hide();
 				//location.href = data.url;
 				if (win) win.close();
-				if (Ext.isIE6 || Ext.isIE7) {
+				if (true || Ext.isIE6 || Ext.isIE7) {
 					Ext.Msg.alert(
 						'Fichier',
 						String.format(
