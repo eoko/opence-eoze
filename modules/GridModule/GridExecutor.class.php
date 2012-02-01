@@ -575,17 +575,23 @@ abstract class GridExecutor extends JsonExecutor {
 //				$fields = $this->table->
 			}
 //			print_r($fields);die;
+			
+			foreach (explode(' ', $extQuery) as $word) {
+				
+				$word = strtolower($word);
+				$word = preg_quote($word);
 
-			$queryWhere = $query->createWhere();
+				$queryWhere = $query->createWhere();
 
-			foreach ($fields as $field) {
-//				$field = $query->getQualifiedName($field);
-				if (strstr($field, '`')) throw new IllegalStateException('*Injection*');
-				$extQuery = strtolower($extQuery);
-				$queryWhere->orWhere("`$field` LIKE ?", "$extQuery%");
+				foreach ($fields as $field) {
+	//				$field = $query->getQualifiedName($field);
+					if (strstr($field, '`')) throw new IllegalStateException('*Injection*');
+//					$queryWhere->orWhere("`$field` LIKE ?", "$word%");
+					$queryWhere->orWhere("`$field` REGEXP ?", "[[:<:]]$word");
+				}
+
+				$query->andWhere($queryWhere);
 			}
-
-			$query->andWhere($queryWhere);
 		}
 	}
 
@@ -1154,7 +1160,7 @@ MSG;
 	 * Gets the module name in a filesystem & url friendly version.
 	 * @return string
 	 */
-	private function getSlug() {
+	protected function getSlug() {
 		if (null !== $slug = $this->getModule()->getConfig()->getValue('module/slug', null)) {
 			return $slug;
 		} else {
