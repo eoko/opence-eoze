@@ -8,6 +8,33 @@
 		altDateFormats = "j/n/Y|j/n/y|j/n|j n Y|j n y|j n|Y-m-d|Y n j",
 		timeFormat = "H:i",
 		altTimeFormats = "G:i|G:i|G i|Gi|G|G:i:s|G i s";
+	
+	eo.datesEqual =  function(date1, date2, mask) {
+		// test null/undefined dates
+		if (!date1) {
+			if (!date2) {
+				return true;
+			} else {
+				return false;
+			}
+		} else if (!date2) {
+			return false;
+		}
+
+		// convert to dates
+		if (!date1.format) {
+			date1 = this.parseDateOrDie(date1);
+		}
+		if (!date2.format) {
+			date2 = this.parseDateOrDie(date2);
+		}
+		// default mask
+		if (!mask) {
+			mask = 'YmdHis';
+		}
+		// compare dates
+		return date1.format(mask) === date2.format(mask);
+	};
 
 	eo.form.DateField = Ext.extend(Ext.form.DateField, {
 		constructor: function(config) {
