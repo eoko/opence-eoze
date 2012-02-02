@@ -239,6 +239,9 @@
 .ico.play {
 	background-image:url(../images/icons/control_play_blue.png) !important;
 }
+.ico.play.black {
+	background-image:url(../images/icons/control_play.png) !important;
+}
 .ico.pdf,
 .ico_pdf {
 	background-image:url(../images/icons/page_white_acrobat.png) !important;
