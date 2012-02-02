@@ -8,8 +8,56 @@
 		altDateFormats = "j/n/Y|j/n/y|j/n|j n Y|j n y|j n|Y-m-d|Y n j",
 		timeFormat = "H:i",
 		altTimeFormats = "G:i|G:i|G i|Gi|G|G:i:s|G i s";
+		
+	function safeParse(value, format) {
+		if (Date.formatContainsHourInfo(format)) {
+			// if parse format contains hour information, no DST adjustment is necessary
+			return Date.parseDate(value, format);
+		} else {
+			// set time to 12 noon, then clear the time
+			var parsedDate = Date.parseDate(value + ' ' + this.initTime, format + ' ' + this.initTimeFormat);
+ 
+			if (parsedDate) {
+				return parsedDate.clearTime();
+			}
+		}
+	}
 	
-	eo.datesEqual =  function(date1, date2, mask) {
+	function parseDate(value) {
+		
+		if(!value || Ext.isDate(value)) {
+			return value;
+		}
+
+		var v = this.safeParse(value, dateFormat),
+			af = altDateFormats;
+
+		if (!v && af) {
+			var afa = af.split("|");
+			for (var i = 0, len = afa.length; i < len && !v; i++) {
+				v = this.safeParse(value, afa[i]);
+			}
+		}
+		
+		return v;
+	}
+	
+	/**
+	 * Parses a date or throw an {@link Error} if the value passed cannot
+	 * be parsed to a date.
+	 * @param {String} v The value to parse to a {Date}.
+	 * @return {Date}
+	 * @private
+	 */
+	function parseDateOrDie(v) {
+		var r = parseDate(v);
+		if (!(r instanceof Date)) {
+			throw new Error('Cannot parse date: ' + v);
+		}
+		return r;
+	}
+	
+	eo.datesEqual = function(date1, date2, mask) {
 		// test null/undefined dates
 		if (!date1) {
 			if (!date2) {
@@ -23,10 +71,10 @@
 
 		// convert to dates
 		if (!date1.format) {
-			date1 = this.parseDateOrDie(date1);
+			date1 = parseDateOrDie(date1);
 		}
 		if (!date2.format) {
-			date2 = this.parseDateOrDie(date2);
+			date2 = parseDateOrDie(date2);
 		}
 		// default mask
 		if (!mask) {
