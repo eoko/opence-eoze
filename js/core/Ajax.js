@@ -169,16 +169,20 @@ Oce.Ajax = function() {
 					if (reason !== null || timestamp !== null) {
 						// TODO
 						message += "<p>Vous pouvez rapporter les informations suivantes"
-							+ " au support technique pour aider à corriger cette erreur&nbsp;:</p>"
-							+ "<p>";
+							+ " au support technique pour aider à corriger cette erreur&nbsp;:</p>";
 
+						message += '<ul style="margin-top: 1em; margin-left: 1em;">';
+						if (errors.requestId) {
+							message += String.format('<li>Requête #{0}</li>', errors.requestId);
+						}
 						if (timestamp !== null) {
-							message += "Erreur #" + timestamp + "<br />";
+							message += String.format('<li>Erreur #{0}</li>', timestamp);
 						}
+						message += '</ul>';
+						
 						if (reason !== null) {
-							message += reason;
+							message += '<p>' + reason + '</p>';
 						}
-						message += "</p>";
 					}
 				} else {
 					if (errorMessage !== null) {
@@ -204,7 +208,8 @@ Oce.Ajax = function() {
 					msg : message,
 					buttons: Ext.MessageBox.OK,
 					bodyStyle: 'padding:10px;',
-					minWidth: Ext.MessageBox.minWidth
+					minWidth: Ext.MessageBox.minWidth,
+					width: 320
 				});
 			}
 		}
