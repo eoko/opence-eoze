@@ -176,7 +176,10 @@ class ExtJSResponse {
 
 		global $lang;
 
-		if ($includeTimestamp === null) $includeTimestamp = $systemError;
+		if ($includeTimestamp === null){
+			$includeTimestamp = $systemError;
+		}
+		
 		if ($errorTitle === null) $errorTitle = $systemError ? 
 			lang('Erreur Sytème') : lang('Erreur');
 
@@ -194,7 +197,12 @@ class ExtJSResponse {
 			$response['title'] = $errorTitle;
 		}
 
-		if ($includeTimestamp) $errors['timestamp'] = Router::getActionTimestamp();
+		if ($includeTimestamp) {
+			$errors['timestamp'] = Router::getActionTimestamp();
+			if (null !== $id = Router::getRequestId()) {
+				$errors['requestId'] = $id;
+			}
+		}
 
 		$response['details'] = $errors;
 

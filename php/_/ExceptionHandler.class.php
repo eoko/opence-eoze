@@ -75,7 +75,7 @@ class ExceptionHandler {
 
 		if ($answer) {
 			if (!$reason && eoko\config\Application::getInstance()->isDevMode()) {
-				$reason = "$ex";
+//				$reason = "$ex";
 			}
 			ExtJSResponse::failure($reason, $systemError, $errorTitle, true, false,
 				$includeTimestamp);
