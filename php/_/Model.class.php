@@ -675,6 +675,10 @@ abstract class Model {
 					return $this->virtualFieldsCache[$k];
 				}
 				
+				if ($this->isNew()) {
+					throw new UnsupportedOperationException("$name must be implemented for new models.");
+				}
+				
 				$table = $this->getTable();
 				
 				$r = $table
