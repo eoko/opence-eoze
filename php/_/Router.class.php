@@ -69,6 +69,8 @@ class Router {
 		$this->microTimeStart = self::microtime($time);
 		$this->actionTimestamp = $time;
 		
+		ExtJSResponse::put('timestamp', $this->actionTimestamp);
+		
 		if (isset($request['route'])) {
 			\eoko\url\Maker::populateRouteRequest($request);
 		}
@@ -77,26 +79,56 @@ class Router {
 		
 		Logger::getLogger($this)->info('Start action #{}', $this->actionTimestamp);
 		
-		if (class_exists('MonitorRequest') 
-				&& $this->request->get('controller') !== 'AccessControl.login') {
-			$this->requestMonitorRecord = MonitorRequest::create(array(
-				'datetime' => date('Y-m-d H:i:s', $time),
-				'action_timestamp' => $this->actionTimestamp,
-				'http_request' => serialize($request),
-				'json_request' => json_encode($request),
-				'php_request' => serialize($this->request),
-				'controller' => $this->request->get('controller'),
-				'action' => $this->request->get('action'),
-			));
-			$this->requestMonitorRecord->save();
-		}
+		$this->logRequest($request);
 		
 		// $_REQUEST usage must be fixed in that
 //		UserMessageService::parseRequest($this->request);
 	}
+	
+	private function logRequest($request) {
+		
+		if (!class_exists('MonitorRequest')) {
+			return;
+		}
+		
+		$phpRequest = $this->request;
+		$controller = $this->request->get('controller');
+		
+		if (substr($controller, 0, 14) === 'RequestMonitor') {
+			return;
+		}
+		
+		// Don't store clear passwords...
+		if ($controller === 'AccessControl.login') {
+			$request['password'] = '***';
+			$phpRequest = new Request($request);
+		}
+		
+		$this->requestMonitorRecord = MonitorRequest::create(array(
+			'datetime' => date('Y-m-d H:i:s', $this->actionTimestamp),
+			'action_timestamp' => $this->actionTimestamp,
+			'http_request' => serialize($request),
+			'json_request' => json_encode($request),
+			'php_request' => serialize($phpRequest),
+			'controller' => $controller,
+			'action' => $phpRequest->get('action'),
+		));
+		
+		$this->requestMonitorRecord->save();
+
+		ExtJSResponse::put('requestId', $this->requestMonitorRecord->getId());
+	}
 
 	public static function getActionTimestamp() {
 		return self::getInstance()->actionTimestamp;
+	}
+	
+	public static function getRequestId() {
+		if (null !== $record = self::getInstance()->requestMonitorRecord) {
+			return $record->getId();
+		} else {
+			return null;
+		}
 	}
 	
 	private function isAllowMultipleRouteCalls() {
