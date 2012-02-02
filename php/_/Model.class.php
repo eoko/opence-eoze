@@ -680,10 +680,9 @@ abstract class Model {
 				$r = $table
 						->createQuery($this->context)
 						->select($k)
-						->where("`{$this->getPrimaryKeyName()}`=?", 
-								$this->getPrimaryKeyValue())
+						->where("`{$this->getPrimaryKeyName()}` = ?", $this->getPrimaryKeyValue())
 						->executeSelectValue();
-				
+						
 				if ($table->isVirtualCachable($k)) {
 					$this->virtualFieldsCache[$k] = $r;
 				}
@@ -1298,7 +1297,18 @@ abstract class Model {
 				"The field $name is in an undetermined state"
 			);
 		}
-		return $this->table->getField($name)->castValue($this->internal->fields[$name]);
+		
+		if (array_key_exists($name, $this->internal->fields)) {
+			$v = $this->internal->fields[$name];
+		} else if (
+			$this->table->hasVirtual($name)
+			|| $this->table->hasRelation($name)
+		) {
+			$m = 'get' . ucfirst($name);
+			$v = $this->$m();
+		}
+		
+		return $this->table->getField($name)->castValue($v);
 	}
 
 	/**
