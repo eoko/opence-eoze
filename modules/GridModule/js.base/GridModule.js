@@ -872,15 +872,31 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			});
 		} else {
 			// TODO error handling
-			debugger
+			
+			var message = "<p>L'enregistrement a échoué.</p>";
+
+			message += "<p>Vous pouvez rapporter les informations suivantes"
+				+ " au support technique pour aider à corriger cette erreur&nbsp;:</p>";
+
+			message += '<ul style="margin-top: 1em; margin-left: 1em;">';
+			if (data.requestId) {
+				message += String.format('<li>Requête #{0}</li>', data.requestId);
+			}
+			if (data.timestamp !== null) {
+				message += String.format('<li>Erreur #{0}</li>', data.timestamp);
+			}
+			message += '</ul>';
+
+				
 			NS.AlertWindow.show({
 				modalTo: win
 				,title: 'Erreur'
-				,message: "L'enregistrement a échoué (sans dire pourquoi)."
+				,message: message
+				,height: 160
 				,okHandler: function() {
 					this.close();
 				}
-			})
+			});
 		}
 	}
 	
@@ -1497,7 +1513,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 
 	,getEditWindow: function(rowId, cb, opts) { // 08/12/11 21:03 added opts
 
-		if (rowId in this.editWindows) {
+		if (rowId !== null && rowId in this.editWindows) {
 			if (cb) cb(this.editWindows[rowId]);
 			return this.editWindows[rowId];
 		}
@@ -2445,7 +2461,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				this.my.editFormConfig = {
 					 xtype: 'oce.form'
 					,jsonFormParam: 'json_form'
-					,bodyStyle: 'padding:0; background:transparent'
+					,padding: 0
 					,items: editTabFormItems
 				};
 			}
@@ -2468,7 +2484,8 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				this.my.addFormConfig = {
 					 xtype: 'oce.form'
 					,jsonFormParam: 'json_form'
-					,bodyStyle: 'padding:0; background:transparent'
+					,bodyStyle: 'background:transparent'
+					,padding: 0
 					,items: addTabFormItems
 				}
 			}
@@ -2695,7 +2712,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 						 layout:'form'
 						,autoScroll: true
 						,defaultType:'textfield'
-						,bodyStyle:'padding:10px;  background:transparent;'
+//						,bodyStyle:'padding:10px;  background:transparent;'
 					}
 
 					,items: items
@@ -2756,7 +2773,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 						 layout:'form'
 						,autoScroll: true
 						,defaultType:'textfield'
-						,bodyStyle:'padding:10px;  background:transparent;'
+//						,bodyStyle:'padding:10px;  background:transparent;'
 					}
 					
 					,items: Ext.apply(tabPanelItems[0][0], {
@@ -2788,7 +2805,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 					 layout:'form'
 					,autoScroll: true
 					,defaultType:'textfield'
-					,bodyStyle:'padding:10px;  background:transparent;'
+//					,bodyStyle:'padding:10px;  background:transparent;'
 					// as we use deferredRender:false we mustn't
 					// render tabs into display:none containers
 					,hideMode:'offsets'
