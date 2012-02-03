@@ -155,56 +155,66 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
 	,isModified: function() {
 		return this.modified;
 	}
+	
+	// private
+	,formChangeListener: function() {
+		
+		var me = this,
+			waitingToTest = this.waitingToTest,
+			refreshDelay = this.refreshDelay;
+		
+		if (!me.preventModificationEvents) {
+
+			// aggregate cumulated events
+			if (waitingToTest) {
+				return;
+			}
+
+			waitingToTest = true;
+
+			if (me.modified) {
+				setTimeout(function() {
+					if (!me.form.isDirty()) {
+						me.clearModified();
+					}
+					waitingToTest = false;
+				}, refreshDelay);
+			} else {
+				// We must let the pass finish, in order for BasicForm to 
+				// restore the fields original values. Indeed, we can get
+				// here with events fired from getValue() of the fields,
+				// and BasicForm do as follow:
+				// `
+				//		f.setValue(v.value);
+				//		if(this.trackResetOnLoad){
+				//			f.originalValue = f.getValue();
+				//		}
+				//	`
+
+				// bufferize simultaneous events
+				setTimeout(function() {
+					// ... and here, ensure that the form would still be considered
+					// diry
+					if (me.form.isDirty()) {
+						me.modified = true;
+						me.fireEvent("modified");
+					}
+
+					waitingToTest = false;
+				}, refreshDelay);
+			}
+		}
+	}
 
 	,addFormChangeListeners: function() {
 
-		var me = this,
-			waitingToTest = false,
-			refreshDelay = 100;
+//		var me = this,
+//			waitingToTest = false,
+//			refreshDelay = 100;
+		this.waitingToTest = false,
+		this.refreshDelay = 100;
 
-		var changeListener = function() {
-			if (!me.preventModificationEvents) {
-				
-				// aggregate cumulated events
-				if (waitingToTest) {
-					return;
-				}
-
-				waitingToTest = true;
-
-				if (me.modified) {
-					setTimeout(function() {
-						if (!me.form.isDirty()) {
-							me.clearModified();
-						}
-						waitingToTest = false;
-					}, refreshDelay);
-				} else {
-					// We must let the pass finish, in order for BasicForm to 
-					// restore the fields original values. Indeed, we can get
-					// here with events fired from getValue() of the fields,
-					// and BasicForm do as follow:
-					// `
-					//		f.setValue(v.value);
-					//		if(this.trackResetOnLoad){
-					//			f.originalValue = f.getValue();
-					//		}
-					//	`
-
-					// bufferize simultaneous events
-					setTimeout(function() {
-						// ... and here, ensure that the form would still be considered
-						// diry
-						if (me.form.isDirty()) {
-							me.modified = true;
-							me.fireEvent("modified");
-						}
-
-						waitingToTest = false;
-					}, refreshDelay);
-				}
-			}
-		};
+		var changeListener = this.formChangeListener.createDelegate(this);
 
 		var addChangeListener = function(item) {
 
