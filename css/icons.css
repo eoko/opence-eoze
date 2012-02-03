@@ -42,6 +42,9 @@
 .icon.x32.add-wand {
 	background-image:url(../images/opence/32x32/add+wand.png) !important;
 }
+.icon.x32.add-copy {
+	background-image:url(../images/opence/32x32/add+copy.png) !important;
+}
 .b_ico_filter {
 	background-image: url(../images/icons_fatcow/32x32/filter.png) !important;
 }
