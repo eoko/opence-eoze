@@ -80,9 +80,9 @@ class Columns {
 	 * @return array
 	 */
 	protected function findTemplate($tpl, $require = false) {
-		if ($tpl === 'checkbox_YesNo') {
-			dump_mark();
-		}
+//		if ($tpl === 'checkbox_YesNo') {
+//			dump_mark();
+//		}
 		if ($tpl === false) return null;
 		$tplElt = explode('.', $tpl);
 		$n = count($tplElt);
