@@ -857,10 +857,15 @@ class Query {
 		}
 
 		if (is_array($field)) {
-			foreach ($field as $o => $dir) $this->thenOrderBy($o, $dir);
+			foreach ($field as $o => $dir) {
+				$this->thenOrderBy($o, $dir);
+			}
 		} else {
-			if ($dir === '') $dir = 'ASC';
-			else $dir = self::$dirValues[$dir]; // protect from injection
+			if ($dir === '') {
+				$dir = 'ASC';
+			} else {
+				$dir = self::$dirValues[$dir]; // protect from injection
+			}
 
 			if ($field instanceof SqlVar) {
 				Logger::warn('The next line is most probably wrong and causing problem with bindings');
@@ -870,7 +875,7 @@ class Query {
 				if (!$alias) {
 					throw new IllegalArgumentException("Cannot find field: `$field`");
 				}
-				$order[] = $this->getOrderFieldAlias($field) . " $dir";
+				$order[] = $alias . " $dir";
 			}
 
 //			// Clear previous to add new order at the end of the list
