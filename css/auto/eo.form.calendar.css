@@ -101,3 +101,12 @@ table.eo-calendar-month tr.zone.M .marker.on {
 	background-color: #FAF673;
 }
 
+table.eo-calendar-month tr.zone .marker.B {
+	background-color: #F5B963;
+}
+table.eo-calendar-month tr.zone .marker.M {
+	background-color: #FAF673;
+}
+table.eo-calendar-month tr.zone .marker.H {
+	background-color: #FA7384;
+}
