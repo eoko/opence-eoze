@@ -333,29 +333,53 @@ abstract class ModelRelationInfo extends ModelFieldBase {
 	 * @return ModelRelationInfo
 	 */
 	public function getRelationInfo($name) {
-		if (isset($this->relationInstances[$name])) return $this->relationInstances[$name];
+		
+		if (isset($this->relationInstances[$name])) {
+			return $this->relationInstances[$name];
+		}
+		
+		$relationNames = explode('->', $name);
+		$lastName = array_pop($relationNames);
 
 		// $name must be splitted here, to get the full chain (ie. we cannot
 		// just get the partial chain from the target table, because its name
 		// params will be incorrect...)
 		$relationChain = array($this);
 		$hasMany = $this instanceof ModelRelationInfoHasMany;
-		$relation = $this;
-		foreach (explode('->', $name) as $relationName) {
-			$relation = $relation->targetTable->getRelationInfo($relationName);
-			$relationChain[] = $relation;
-			if ($relation instanceof ModelRelationInfoHasMany) $hasMany = true;
+		$lastRelation = $this;
+		foreach ($relationNames as $relationName) {
+			$lastRelation = $lastRelation->targetTable->getRelationInfo($relationName);
+			$relationChain[] = $lastRelation;
+			if ($lastRelation instanceof ModelRelationInfoHasMany) {
+				$hasMany = true;
+			}
+		}
+		
+		// Last name
+		// This may be either a field (column or virtual), or a relation.
+		if (!$lastRelation->targetTable->hasColumn($lastName)
+				&& !$lastRelation->targetTable->hasVirtual($lastName)) {
+			$lastRelation = $lastRelation->targetTable->getRelationInfo($lastName);
+			$relationChain[] = $lastRelation;
+			if ($lastRelation instanceof ModelRelationInfoHasMany) {
+				$hasMany = true;
+			}
 		}
 
-		if ($hasMany) return new ModelRelationInfoChainHasMany($relationChain);
-		else return new ModelRelationInfoChainHasOne($relationChain);
+		if ($hasMany) {
+			return new ModelRelationInfoChainHasMany($relationChain);
+		} else {
+			return new ModelRelationInfoChainHasOne($relationChain);
+		}
 	}
 
 	/**
 	 * @return QueryJoin
 	 */
 	public function createJoin(ModelTableQuery $query, $alias = null, $leftAlias = null) {
-		if ($alias === null) $alias = $this->name;
+		if ($alias === null) {
+			$alias = $this->name;
+		}
 		$join = $this->doCreateJoin($query, $alias, $leftAlias);
 		$this->addJoinWhere($join);
 		return $join;
