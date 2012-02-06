@@ -23,6 +23,8 @@ eo.form.calendar.Zone = Ext.extend(Ext.util.Observable, {
 	 */
 	,days: undefined
 	
+	,selecting: null
+	
 	,constructor: function(config) {
 
 		// Init instance variables
@@ -109,28 +111,23 @@ eo.form.calendar.Zone = Ext.extend(Ext.util.Observable, {
 		if (this.editable) {
 			th.on('click', function() {
 				var i = cells.length,
-					v = false;
-				while (i--) {
-					if (!cells[i].value) {
-						v = true;
-						break;
-					}
-				}
+					v = this.getSelectingValue(v);
 				i = cells.length;
 				while (i--) {
 					cells[i].setValue(v);
 				}
-			});
+			}, this);
 		}
 	}
 	
 	,setValue: function(ranges) {
 		var days = this.days;
 		Ext.each(ranges, function(range) {
+			var v = range.value || true;
 			range.each(function(ymd) {
 				var cell = days[ymd];
 				if (cell) {
-					cell.setOn();
+					cell.setValue(v);
 				}
 			});
 		});
@@ -222,6 +219,7 @@ eo.form.calendar.Zone.Cell = Ext.extend(Object, {
 		} else if (value) {
 			return 'on';
 		}
+		return undefined;
 	}
 
 	,setValue: function(value) {
@@ -244,13 +242,5 @@ eo.form.calendar.Zone.Cell = Ext.extend(Object, {
 			
 			this.value = value;
 		}
-	}
-
-	,setOn: function() {
-		this.setValue(true);
-	}
-
-	,setOff: function() {
-		this.setValue(false);
 	}
 });
