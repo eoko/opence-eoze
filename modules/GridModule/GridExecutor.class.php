@@ -454,20 +454,12 @@ abstract class GridExecutor extends JsonExecutor {
 
 			if (is_array($sort)) {
 				foreach ($sort as $sortEntry) {
-					$query->select($sortEntry['field']);
-					$query->thenOrderBy(
-						$sortEntry['field'], $sortEntry['direction']
-//						$this->table->getField(
-//							$sortEntry['field'])->orderClause($sortEntry['direction'], $query->dbTable
-//						)
-					);
+				$query->join($this->table->getRelationInfo($sortEntry['field']));
+					$query->thenOrderBy($sortEntry['field'], $sortEntry['direction']);
 				}
 			} else {
-				$query->select($sort);
-				$query->thenOrderBy(
-					$sort, $dir
-//					$this->table->getField($sort)->orderClause($dir, $query->dbTable)
-				);
+				$query->join($this->table->getRelationInfo($sort));
+				$query->thenOrderBy($sort, $dir);
 			}
 		}
 	}
