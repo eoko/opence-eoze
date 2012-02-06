@@ -11,6 +11,8 @@ eo.form.calendar.DateRange = Ext.extend(Object, {
 	from: undefined
 	,to: undefined
 	
+	,value: null
+	
 	,constructor: function(from, to) {
 		if (Ext.isArray(from)) {
 			if (from.length === 2) {
@@ -53,6 +55,12 @@ eo.form.calendar.DateRange = Ext.extend(Object, {
 			fn.call(scope, cursor.format(f));
 			cursor = cursor.add(Date.DAY, 1);
 		}
+	}
+	
+	,isEmpty: function() {
+		var f = this.from,
+			t = this.to;
+		return !f || !t || f.format('Ymd') === t.format('Ymd');
 	}
 	
 });

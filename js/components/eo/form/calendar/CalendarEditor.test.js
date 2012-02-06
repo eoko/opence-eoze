@@ -36,12 +36,27 @@ var month = Ext.create({
 	}]
 });
 
+var palette = new eo.form.calendar.Palette({
+	values: [{
+		text: 'Basse'
+		,cellCls: 'B'
+	}, {
+		text: 'Moyenne'
+		,cellCls: 'M'
+	}, {
+		text: 'Haute'
+		,cellCls: 'H'
+	}]
+});
+
 var editor = new eo.form.calendar.ZonesEditor({
 
 	from: {
 		year: 2011
 		,month: 4
 	}
+	
+	,palette: palette
 	
 	,zones: [{
 		name: 'A'
@@ -117,7 +132,7 @@ var win = new Ext.Window({
 		,handler: function() {
 			editor.setFrom(2012, 1, 6);
 		}
-	}]
+	},'-',palette]
 });
 
 win.show();
