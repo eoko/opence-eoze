@@ -50,7 +50,7 @@ eo.form.calendar.DateRange = Ext.extend(Object, {
 		var from = this.from,
 			to = this.to.add(Date.SECOND, 1),
 			cursor = new Date(from),
-			f = 'Ymd';
+			f = 'Y-m-d';
 		while (cursor < to) {
 			fn.call(scope, cursor.format(f));
 			cursor = cursor.add(Date.DAY, 1);

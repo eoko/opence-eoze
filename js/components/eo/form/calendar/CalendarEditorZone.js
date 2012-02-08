@@ -116,6 +116,7 @@ eo.form.calendar.Zone = Ext.extend(Ext.util.Observable, {
 				while (i--) {
 					cells[i].setValue(v);
 				}
+				this.fireEvent('change', this);
 			}, this);
 		}
 	}
@@ -131,6 +132,26 @@ eo.form.calendar.Zone = Ext.extend(Ext.util.Observable, {
 				}
 			});
 		});
+	}
+	
+	,getValue: function() {
+		var last = undefined,
+			DR = eo.form.calendar.DateRange,
+			from = null,
+			ranges = [];
+		Ext.iterate(this.days, function(ymd, cell) {
+			var v = cell.value;
+			while (v.getValue) {
+				v = v.getValue();
+			}
+			if (v !== last && from && from !== ymd) {
+				var dr = new DR(from, ymd);
+				dr.value = v;
+				ranges.push(dr);
+			}
+			from = ymd;
+		});
+		return ranges;
 	}
 	
 	,clear: function() {
@@ -241,6 +262,8 @@ eo.form.calendar.Zone.Cell = Ext.extend(Object, {
 			}
 			
 			this.value = value;
+			
+			this.zone.fireEvent('change', this.zone);
 		}
 	}
 });

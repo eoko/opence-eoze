@@ -38,6 +38,8 @@ eo.form.calendar.ZonesEditor = Ext.extend(Ext.form.Field, {
 						nextIsGroup = false;
 					}
 					zones[zone.name] = z;
+					
+					this.relayEvents(z, ['change']);
 				}
 		}, this);
 			
@@ -149,6 +151,42 @@ eo.form.calendar.ZonesEditor = Ext.extend(Ext.form.Field, {
 			this.applyValue();
 		}
 	}
+	
+	,getValue: function() {
+		var r = {};
+		Ext.iterate(this.zones, function(name, zone) {
+			r[name] = zone.getValue();
+		});
+		return r;
+	}
+	
+	,isDirty: function() {
+		
+		var s = function(v) {
+			if (Ext.isObject(v)) {
+				var r = [];
+				Ext.iterate(v, function(n, v) {
+					r.push(n + ':{' + String(v) + '}');
+				});
+				return r.join(';');
+			} else {
+				return String(v);
+			}
+		};
+		
+		return function() {
+//			var r = s(this.getValue()) !== s(this.originalValue);
+//			if (r) {
+//				debugger
+//			}
+			return s(this.getValue()) !== s(this.originalValue);
+		};
+//		var r = spp.isDirty.apply(this, arguments);
+//		if (r) {
+//			debugger
+//		}
+//		return r;
+	}()
 	
 	,applyValue: function() {
 		Ext.iterate(this.value, function(zone, ranges) {
