@@ -206,6 +206,7 @@ abstract class GridExecutor extends JsonExecutor {
 		);
 
 		$this->saveModel($model, true);
+//		throw new \Exception('x');
 
 		$this->newId = $id = $model->getPrimaryKeyValue();
 //		ExtJSResponse::put('newId', $id = $model->getPrimaryKeyValue());
