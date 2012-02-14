@@ -12,7 +12,8 @@ eo.form.calendar.Palette = Ext.extend(Ext.ButtonGroup, {
 	
 	initComponent: function() {
 		
-		var items = this.items = [];
+		var items = this.items = [],
+			lu = this.valueLookup = {};
 		
 		var pressed = true;
 		
@@ -45,6 +46,8 @@ eo.form.calendar.Palette = Ext.extend(Ext.ButtonGroup, {
 				,toggleHandler: this.onButtonPress
 			});
 			
+			lu[v.getValue()] = v;
+			
 			// Next ones are not pressed
 			pressed = false;
 		}, this);
@@ -65,6 +68,14 @@ eo.form.calendar.Palette = Ext.extend(Ext.ButtonGroup, {
 	 */
 	,getCurrentValue: function() {
 		return this.currentValue;
+	}
+	
+	/**
+	 * Gets the PaletteValue for the specified raw value.
+	 * @return {eo.form.calendar.PaletteValue/Mixed}
+	 */
+	,getValueFor: function(v) {
+		return this.valueLookup[v] || v;
 	}
 });
 
@@ -97,7 +108,7 @@ eo.form.calendar.PaletteValue = Ext.extend(Object, {
 	}
 	
 	,getValue: function() {
-		return this.getValue();
+		return this.value;
 	}
 	
 	,getCellCls: function() {

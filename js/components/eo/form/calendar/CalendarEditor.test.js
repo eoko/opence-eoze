@@ -6,6 +6,8 @@
  */
 eo.Testing.addUnitTest('CalendarEditor', function() {
 
+Ext.QuickTips.init();
+
 var month = Ext.create({
 	
 	xtype: 'eo.montheditor'
@@ -40,21 +42,31 @@ var palette = new eo.form.calendar.Palette({
 	values: [{
 		text: 'Basse'
 		,cellCls: 'B'
+		,value: 1
 	}, {
 		text: 'Moyenne'
 		,cellCls: 'M'
+		,value: 2
 	}, {
 		text: 'Haute'
 		,cellCls: 'H'
+		,value: 3
 	}]
 });
 
 var editor = new eo.form.calendar.ZonesEditor({
 
-	from: {
-		year: 2011
-		,month: 4
-	}
+//	from: {
+//		year: 2011
+//		,month: 4
+//	}
+	months: [
+		{year: 2010, month: 12, editable: false},
+		{year: 2011, month: 1},
+		{year: 2011, month: 2},
+		{year: 2011, month: 3},
+		{year: 2011, month: 4},
+	]
 	
 	,palette: palette
 	
@@ -92,17 +104,26 @@ var editor = new eo.form.calendar.ZonesEditor({
 
 });
 
+var jsonPanel = new eo.JsonPanel({
+	decode: false
+	,flex: 1
+});
+
 var win = new Ext.Window({
 	
-	width: 1020
-	,height: 500
+	width: 1064
+	,height: 700
 	
-	,layout: 'form'
+	,layout: {type: 'vbox', align: 'stretch'}
 	
-	,padding: 5
-	,autoScroll: true
-	
-	,items: [editor]
+	,items: [{
+		xtype: 'container'
+		,layout: 'form'
+		,padding: 5
+		,autoScroll: true
+		,items: [editor]
+		,flex: 1
+	}, jsonPanel]
 	
 	,bodyStyle: 'background-color: white;'
 	
@@ -136,5 +157,10 @@ var win = new Ext.Window({
 });
 
 win.show();
+
+editor.on('change', function() {
+	jsonPanel.setValue(editor.getValue());
+	win.setTitle(editor.isDirty() ? 'Dirty' : 'Clean');
+});
 
 });

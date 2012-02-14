@@ -39,40 +39,85 @@ eo.form.calendar.ZonesEditor = Ext.extend(Ext.form.Field, {
 					}
 					zones[zone.name] = z;
 					
-					this.relayEvents(z, ['change']);
+					z.on('change', function() {
+						this.dirty = true;
+						this.fireEvent('change', this);
+					}, this);
+//					this.relayEvents(z, ['change']);
 				}
 		}, this);
 			
 		// Add month editors
-		if (this.from) {
+		if (this.from || Ext.isArray(this.months)) {
 			this.createMonthEditors();
 		}
 		
 		spp.initComponent.call(this);
 	}
 	
+	,lockMonthsBefore: true
+	
+	,lockable: true
+	
 	// private
-	,createMonthEditors: function(render) {
+	,onMonthLocked: function(monthEditor) {
+		if (this.lockMonthsBefore) {
+			var umb = []; // Unlocked Months Before
+			Ext.each(this.monthEditors, function(m) {
+				if (m == monthEditor) {
+					return false;
+				} else {
+					if (!m.locked) {
+						umb.push(m);
+					}
+				}
+			});
+			Ext.each(umb, function(ed) {
+				ed.setLocked(true);
+			});
+		}
+		this.dirty = true;
+		this.fireEvent('change', this);
+	}
+	
+	// private
+	,createMonthEditor: function(config) {
+		
 		var MonthEditor = eo.form.calendar.MonthEditor;
 		
+		return function(cfg) {
+			var ed = new MonthEditor(Ext.apply({
+				zones: this.zones
+				,rowLabelWidth: this.rowLabelWidth
+				,lockable: this.lockable
+			}, cfg));
+			
+			ed.on({
+				scope: this
+				,locked: this.onMonthLocked
+			});
+			
+			return ed;
+		};
+	}()
+	
+	// private
+	,createMonthEditorsFromFrom: function() {
+			
 		var from = this.from,
+		
 			nMonths = from.months || this.months,
-			rlw = this.rowLabelWidth,
-			zones = this.zones;
+			month = from.month,
+			year = from.year,
 			
-		var month = from.month,
-			year = from.year;
+			mEds = this.monthEditors = [],
+			monthEditor;
+
+		for (var i=0; i<nMonths; i++) {
 			
-		var mEds = this.monthEditors = [],
-			monthEditor, i;
-			
-		for (i=0; i<nMonths; i++) {
-			
-			monthEditor = new MonthEditor({
+			monthEditor = this.createMonthEditor({
 				year: year
 				,month: month
-				,zones: zones
-				,rowLabelWidth: rlw
 			});
 			
 			mEds.push(monthEditor);
@@ -81,6 +126,26 @@ eo.form.calendar.ZonesEditor = Ext.extend(Ext.form.Field, {
 				month = 1;
 				year++;
 			}
+		}
+	}
+	
+	// private
+	,createMonthEditorsFromMonths: function() {
+		var eds = this.monthEditors = [];
+		Ext.each(this.months, function(month) {
+			eds.push(this.createMonthEditor(month));
+		}, this);
+	}
+	
+	// private
+	,createMonthEditors: function(render) {
+		
+		if (this.from) {
+			this.createMonthEditorsFromFrom();
+		} else if (Ext.isArray(this.months)) {
+			this.createMonthEditorsFromMonths();
+		} else {
+			throw new Error('Months specification missing.');
 		}
 		
 		// Render
@@ -104,17 +169,7 @@ eo.form.calendar.ZonesEditor = Ext.extend(Ext.form.Field, {
 			year = year.year;
 		}
 		
-		// Clear month editors
-		if (this.monthEditors) {
-			Ext.each(this.monthEditors, function(ed) {
-				ed.destroy();
-			});
-		}
-		
-		// Reset zones
-		Ext.iterate(this.zones, function(name, zone) {
-			zone.clear();
-		});
+		this.clear();
 		
 		// Init new values
 		Ext.apply(this, {
@@ -129,16 +184,49 @@ eo.form.calendar.ZonesEditor = Ext.extend(Ext.form.Field, {
 		this.createMonthEditors(true);
 	}
 	
+	,clear: function() {
+		
+		// Clear month editors
+		if (this.monthEditors) {
+			Ext.each(this.monthEditors, function(ed) {
+				ed.destroy();
+			});
+		}
+		
+		// Reset zones
+		Ext.iterate(this.zones, function(name, zone) {
+			zone.clear();
+		});
+	}
+	
+	,setMonths: function(months) {
+		
+		this.clear();
+		
+		delete this.from;
+		this.months = months;
+		
+		this.createMonthEditors(true);
+	}
+	
 	,setValue: function(v) {
 		
 		var DR = eo.form.calendar.DateRange,
-			value = this.value = {};
+			value = this.value = {},
+			palette = this.palette;
 		
 		// Convert to date range
 		Ext.iterate(v, function(zone, ranges) {
 			var rr = [];
 			if (ranges.length && !Ext.isArray(ranges[0])) {
-				rr.push(new DR(ranges));
+//				rr.push(new DR(ranges));
+				Ext.each(ranges, function(range) {
+					var v = range.value;
+					if (palette) {
+						v = palette.getValueFor(v);
+					}
+					rr.push(new DR(range.from, range.to, v));
+				})
 			} else {
 				Ext.each(ranges, function(range) {
 					rr.push(new DR(range));
@@ -150,43 +238,64 @@ eo.form.calendar.ZonesEditor = Ext.extend(Ext.form.Field, {
 		if (this.rendered) {
 			this.applyValue();
 		}
+		
+		// Clean dirty state
+		this.dirty = false;
 	}
 	
 	,getValue: function() {
-		var r = {};
+		var zones = {},
+			months = [];
+			
 		Ext.iterate(this.zones, function(name, zone) {
-			r[name] = zone.getValue();
+			zones[name] = zone.getValue();
 		});
-		return r;
+		
+		Ext.each(this.monthEditors, function(ed) {
+			months.push({
+				year: ed.year
+				,month: ed.month
+				,locked: ed.locked
+			});
+		});
+		
+		return {
+			zones: zones
+			,months: months
+		};
 	}
-	
+
 	,isDirty: function() {
-		
-		var s = function(v) {
-			if (Ext.isObject(v)) {
-				var r = [];
-				Ext.iterate(v, function(n, v) {
-					r.push(n + ':{' + String(v) + '}');
-				});
-				return r.join(';');
-			} else {
-				return String(v);
-			}
-		};
-		
-		return function() {
-//			var r = s(this.getValue()) !== s(this.originalValue);
-//			if (r) {
-//				debugger
+		return this.dirty;
+	}
+//	,isDirty: function() {
+//		
+//		var s = function(v) {
+//			if (Ext.isObject(v)) {
+//				var r = [];
+//				Ext.iterate(v, function(n, v) {
+//					r.push(n + ':{' + String(v) + '}');
+//				});
+//				return r.join(';');
+//			} else {
+//				return String(v);
 //			}
-			return s(this.getValue()) !== s(this.originalValue);
-		};
-//		var r = spp.isDirty.apply(this, arguments);
-//		if (r) {
-//			debugger
-//		}
-//		return r;
-	}()
+//		};
+//		
+//		return function() {
+//			return false;
+////			var r = s(this.getValue()) !== s(this.originalValue);
+////			if (r) {
+////				debugger
+////			}
+//			return s(this.getValue()) !== s(this.originalValue);
+//		};
+////		var r = spp.isDirty.apply(this, arguments);
+////		if (r) {
+////			debugger
+////		}
+////		return r;
+//	}()
 	
 	,applyValue: function() {
 		Ext.iterate(this.value, function(zone, ranges) {

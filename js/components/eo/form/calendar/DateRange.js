@@ -13,7 +13,7 @@ eo.form.calendar.DateRange = Ext.extend(Object, {
 	
 	,value: null
 	
-	,constructor: function(from, to) {
+	,constructor: function(from, to, value) {
 		if (Ext.isArray(from)) {
 			if (from.length === 2) {
 				to = from[1];
@@ -38,6 +38,7 @@ eo.form.calendar.DateRange = Ext.extend(Object, {
 		
 		this.from = from;
 		this.to = to;
+		this.value = value || null;
 	}
 
 	// To work as expeced with Field.isDirty()
