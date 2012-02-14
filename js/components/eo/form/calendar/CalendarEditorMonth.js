@@ -15,16 +15,63 @@ eo.form.calendar.MonthEditor = Ext.extend(Ext.BoxComponent, {
 	
 	,showWeekNumber: true
 	
+	,editable: true
+	
+	,lockable: false
+	,locked: undefined
+	
 	,rowLabelWidth: 50
 	
 	,autoEl: {
-		tag: 'table'
-		,cls: 'eo-calendar-month'
+		cls: 'eo-calendar-month-ct'
 	}
 
 	,onRender: function(ct, position) {
 		
-		var table = this.el = Ext.get(Ext.DomHelper.createDom(this.autoEl));
+		var el = this.el = Ext.get(Ext.DomHelper.createDom(this.autoEl));
+		
+		if (this.editable) {
+			el.addClass('editable');
+		} else {
+			el.addClass('readOnly');
+		}
+		
+		if (this.lockable) {
+			
+			this.locked = !this.editable;
+			
+			el.addClass('lockable')
+
+			var handle = this.lockHandle = el.createChild({
+				cls: 'eo-calendar-month-handle'
+			});
+			
+			handle.on({
+				scope: this
+				,click: function() {
+					if (this.editable) {
+						this.setLocked();
+					}
+				}
+			});
+			
+			if (this.editable) {
+				Ext.QuickTips.register({
+					target: handle
+					,text: 'Cliquez pour vérouiller ce mois et les précédents.'
+				});
+			}
+		}
+
+		var wrap = el.createChild({
+			cls: 'eo-calendar-month-table-ct'
+			,style: 'float: left'
+		});
+		
+		var table = wrap.createChild({
+			tag: 'table'
+			,cls: 'eo-calendar-month'
+		});
 		
 		var y = this.year,
 			m = this.month - 1,
@@ -75,12 +122,45 @@ eo.form.calendar.MonthEditor = Ext.extend(Ext.BoxComponent, {
 		// Render zones
 		Ext.iterate(this.zones, function(name, zone) {
 			zone.render(body, dates);
-		});
+			if (handle) {
+				this.mon(zone, 'visibilitychanged', function() {
+					handle.setHeight(table.getHeight());
+				});
+			}
+		}, this);
 		
 		// Set fixed width
 		table.setWidth(nDays * 30 + this.rowLabelWidth);
 		
+		// Sync handle's height
+		(function() {
+			if (handle) {
+				handle.setHeight(table.getHeight());
+				el.setWidth(handle.getWidth() + table.getWidth());
+			}
+		}).defer(10);
+		
 		eo.form.calendar.MonthEditor.superclass.onRender.call(this, ct, position);
+		
+		this.mask = wrap.createChild({
+			cls: 'eo-calendar-month-mask'
+		});
+		
+//		this.mask.setDisplayed(!this.editable);
+	}
+	
+	,setLocked: function() {
+		var el = this.el;
+		el.editable = false;
+		el.removeClass('editable');
+		el.addClass('readOnly');
+		
+		this.locked = true;
+		
+		// Remove lock handle tooltip
+		Ext.QuickTips.unregister(this.lockHandle);
+		
+		this.fireEvent('locked', this, this.locked);
 	}
 	
 	,getNumDays: function() {

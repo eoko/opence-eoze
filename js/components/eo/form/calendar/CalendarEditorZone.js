@@ -32,6 +32,8 @@ eo.form.calendar.Zone = Ext.extend(Ext.util.Observable, {
 		
 		Ext.apply(this, config);
 		
+		this.days = this.days || {};
+		
 		eo.form.calendar.Zone.superclass.constructor.call(this, config);
 	}
 	
@@ -44,10 +46,15 @@ eo.form.calendar.Zone = Ext.extend(Ext.util.Observable, {
 	}
 	
 	,setVisible: function(visible) {
-		this.hidden = !visible;
-		Ext.each(this.tableRows, function(el) {
-			el.setDisplayed(visible);
-		});
+//		if (visible !== this.hidden) {
+			this.hidden = !visible;
+			Ext.each(this.tableRows, function(el) {
+				el.setDisplayed(visible);
+			});
+			// Fire event
+//			var event = visible ? 'show' : 'hide';
+			this.fireEvent('visibilitychanged', this);
+//		}
 	}
 	
 	,render: function(tbody, dates) {
@@ -96,7 +103,7 @@ eo.form.calendar.Zone = Ext.extend(Ext.util.Observable, {
 			});
 
 			// Save ref
-			var key = d.format('Ymd'),
+			var key = d.format('Y-m-d'),
 				cell = days[key];
 			
 			if (!cell) {
@@ -116,9 +123,20 @@ eo.form.calendar.Zone = Ext.extend(Ext.util.Observable, {
 				while (i--) {
 					cells[i].setValue(v);
 				}
+				this.changed();
+			}, this);
+		}
+	}
+	
+	// private
+	,changed: function() {
+		var t = this.changedTask;
+		if (!t) {
+			t = this.changedTask = new Ext.util.DelayedTask(function() {
 				this.fireEvent('change', this);
 			}, this);
 		}
+		t.delay(300);
 	}
 	
 	,setValue: function(ranges) {
@@ -128,29 +146,42 @@ eo.form.calendar.Zone = Ext.extend(Ext.util.Observable, {
 			range.each(function(ymd) {
 				var cell = days[ymd];
 				if (cell) {
-					cell.setValue(v);
+					cell.setValue(v, true);
 				}
 			});
 		});
 	}
 	
 	,getValue: function() {
-		var last = undefined,
-			DR = eo.form.calendar.DateRange,
-			from = null,
+		var last,
+			from,
+			lastTo,
 			ranges = [];
 		Ext.iterate(this.days, function(ymd, cell) {
+			// Get value
 			var v = cell.value;
-			while (v.getValue) {
+			while (v && v.getValue) {
 				v = v.getValue();
 			}
-			if (v !== last && from && from !== ymd) {
-				var dr = new DR(from, ymd);
-				dr.value = v;
-				ranges.push(dr);
+			// Init
+			if (!from) {
+				lastTo = from = ymd;
+				last = v;
 			}
-			from = ymd;
+			// Else if value has changed
+			else if (v !== last) {
+				if (last !== undefined) {
+					ranges.push({from: from, to: lastTo, value: last});
+				}
+				from = lastTo = ymd;
+				last = v;
+			}
+			// Last day
+			lastTo = ymd;
 		});
+		if (Ext.isDefined(last)) {
+			ranges.push({from: from, to: lastTo, value: last});
+		}
 		return ranges;
 	}
 	
@@ -176,7 +207,7 @@ eo.form.calendar.Zone = Ext.extend(Ext.util.Observable, {
 
 eo.form.calendar.Zone.Cell = Ext.extend(Object, {
 
-	value: false
+	value: undefined
 
 	,constructor: function(zone) {
 		this.zone = zone;
@@ -243,7 +274,7 @@ eo.form.calendar.Zone.Cell = Ext.extend(Object, {
 		return undefined;
 	}
 
-	,setValue: function(value) {
+	,setValue: function(value, preventEvent) {
 		if (this.value !== value) {
 			var els = this.els,
 				i = els.length;
@@ -263,7 +294,9 @@ eo.form.calendar.Zone.Cell = Ext.extend(Object, {
 			
 			this.value = value;
 			
-			this.zone.fireEvent('change', this.zone);
+			if (!preventEvent) {
+				this.zone.changed();
+			}
 		}
 	}
 });

@@ -11,12 +11,61 @@
    Syntax recommendation http://www.w3.org/TR/REC-CSS2/
 */
 
+.eo-calendar-month-ct {
+	clear: both;
+	position: relative;
+}
+
+.eo-calendar-month-handle {
+	width: 20px;
+	background-color: #0F0;
+/*	margin: 0 2px;*/
+	float: left;
+	border: 1px solid #FFF;
+	background: #Fee url(../../images/icons_fatcow/16x16/lock.png) 50% 50% no-repeat;
+}
+.eo-calendar-month-ct.editable .eo-calendar-month-handle {
+	background: #eFe url(../../images/icons_fatcow/16x16/lock_open.png) 50% 50% no-repeat;
+}
+.eo-calendar-month-ct.editable .eo-calendar-month-handle:hover {
+	cursor: pointer;
+/*	border: 1px solid #F77;*/
+	background-color: #FFe;
+	background-image: url(../../images/icons_fatcow/16x16/lock.png);
+}
+.eo-calendar-month-ct.editable .eo-calendar-month-handle:active {
+	background-color: #Fbb;
+}
+
+.eo-calendar-month-table-ct {
+	position: relative;
+	margin-bottom: 4px;
+}
+
+.eo-calendar-month-mask {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	
+	background-color: #FEE;
+	opacity: .4;
+	
+	display: none;
+}
+.eo-calendar-month-ct.readOnly .eo-calendar-month-mask {
+	display: block;
+}
+
 table.eo-calendar-month {
 	font-family: monospace;
 	border-collapse: collapse;
-	margin-bottom: 4px;
 	border: 1px solid #E6E6E6;
 	border: 1px solid #FFF;
+}
+.eo-calendar-month-ct.lockable table.eo-calendar-month {
+/*	margin-left: 21px;*/
 }
 
 table.eo-calendar-month th {
