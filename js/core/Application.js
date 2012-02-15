@@ -34,8 +34,9 @@ Oce.MainApplication = {
 			Oce.getModuleByName(moduleName,
 				function(module) {
 					
-					var cb;
-					
+					var cb,
+						instance = me.moduleInstances[moduleName];
+
 					if (callback) {
 						cb = function() {
 							if (Ext.isChrome) {
@@ -53,14 +54,17 @@ Oce.MainApplication = {
 						};
 					}
 					
-					var instance = me.moduleInstances[moduleName];
 					if (!instance) {
 						instance = me.moduleInstances[moduleName] = new module()
 						if (instance.doAsyncConstruct) {
 							instance.doAsyncConstruct(cb)
+						} else if (cb) {
+							cb();
 						}
 					} else {
-						cb();
+						if (cb) {
+							cb();
+						}
 					}
 				}
 				// error
