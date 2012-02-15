@@ -642,3 +642,20 @@ Ext.Button.prototype.focus = function () {
 };
 
 Ext.form.DisplayField.prototype.submitValue = false;
+
+// Overriding Hidden.setValue(), to prevent getValue() from returning strings "true"
+// or "false".
+(function() {
+	
+var sp = Ext.form.Hidden,
+	spp = sp.prototype,
+	uber = spp.setValue;
+	
+spp.setValue = function(v) {
+	if (Ext.isBoolean(v)) {
+		v = v ? 1 : 0;
+	}
+	uber.call(this, v);
+};
+	
+});
