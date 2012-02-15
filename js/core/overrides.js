@@ -659,3 +659,20 @@ spp.setValue = function(v) {
 };
 	
 });
+
+// Override to test that el & el.dom still exist at the time the method is called
+// (which is not guaranteed, since in ext it is wrapped in a DelayedTask).
+Ext.form.MessageTargets.qtip.mark = function(field, msg) {
+	var el = field.el,
+		dom = el && el.dom;
+	if (el) {
+		el.addClass(field.invalidClass);
+		if (dom) {
+			el.dom.qtip = msg;
+			el.dom.qclass = 'x-form-invalid-tip';
+		}
+	}
+	if(Ext.QuickTips){ // fix for floating editors interacting with DND
+		Ext.QuickTips.enable();
+	}
+};
