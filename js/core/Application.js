@@ -33,23 +33,34 @@ Oce.MainApplication = {
 			var previousCursor = Ext.getBody().getStyle("cursor");
 			Oce.getModuleByName(moduleName,
 				function(module) {
+					
+					var cb;
+					
+					if (callback) {
+						cb = function() {
+							if (Ext.isChrome) {
+								// Chrome handles error correctly, but traces them
+								// to the point where they are thrown, so it's 
+								// better to not rethrow the exception
+								callback(instance);
+							} else {
+								try {
+									callback(instance);
+								} catch (err) {
+									throw err;
+								}
+							}
+						};
+					}
+					
 					var instance = me.moduleInstances[moduleName];
 					if (!instance) {
 						instance = me.moduleInstances[moduleName] = new module()
-					}
-					if (callback) {
-						if (Ext.isChrome) {
-							// Chrome handles error correctly, but traces them
-							// to the point where they are thrown, so it's 
-							// better to not rethrow the exception
-							callback(instance);
-						} else {
-							try {
-								callback(instance);
-							} catch (err) {
-								throw err;
-							}
+						if (instance.doAsyncConstruct) {
+							instance.doAsyncConstruct(cb)
 						}
+					} else {
+						cb();
 					}
 				}
 				// error
