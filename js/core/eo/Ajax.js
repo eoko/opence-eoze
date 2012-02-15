@@ -311,6 +311,7 @@ eo.data.Connection = Ext.extend(Ext.util.Observable, {
 		
 		var callback = options.callback,
 			success  = options.success,
+			onSuccess = options.onSuccess,
 			failure  = options.failure,
 			scope    = options.scope || this;
 			
@@ -321,6 +322,13 @@ eo.data.Connection = Ext.extend(Ext.util.Observable, {
 				}
 				if (success) {
 					success.call(scope, data, options);
+				}
+				if (onSuccess) {
+					if (data.success) {
+						onSuccess.call(scope, data, options);
+					} else {
+						this.onFailure.call(scope, data, options, this);
+					}
 				}
 			}
 		} else {
@@ -333,6 +341,10 @@ eo.data.Connection = Ext.extend(Ext.util.Observable, {
 				}
 			}
 		}
+	}
+	
+	,onFailure: function(data, options, connection) {
+		throw new Error('Request error');
 	}
 	
 	// private
@@ -569,6 +581,13 @@ eo.Ajax = new eo.data.Connection({
 	// - multiple requests can fire from forms submit action :/
 	// - detection of disconnexion fails
 	,buffer: false
+	
+	,onFailure: function(data, options, connection) {
+		Ext.Msg.alert(
+			'Erreur',
+			"Impossible de charger les données."
+		);
+	}
 });
 
 eo.Ajax.on('requestexception', function(conn, response, options) {
