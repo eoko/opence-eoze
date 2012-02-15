@@ -1068,8 +1068,8 @@ class ModelRelationInfoReferedByMany extends ModelRelationInfoIsRefered
 		$query->select(
 			$this->getNameClause(
 				$query,
-				$alias !== null ? $alias : $this->name,
-				$relationName
+				$relationName,
+				$alias !== null ? $alias : $this->name
 			)
 		);
 	}
