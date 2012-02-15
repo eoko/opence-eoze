@@ -399,14 +399,17 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
 			,failure: function(form, action) {
 				me.preventModificationEvents = false;
 				if (action && action.result && action.result.cause === "sessionTimeout") {
-					Oce.mx.Security.onOnce("login", this.refresh.createDelegate(this));
+					Oce.mx.Security.onOnce("login", function() {
+						me.refresh(callback);
+					});
 				} else {
 					win.close();
 					Ext.MessageBox.alert("Erreur", "Impossible de charger les données") // i18n
 				}
-				if (callback) {
-					callback(this.form);
-				}
+				// 15/02/12 09:00 Removed:
+//				if (callback) {
+//					callback(this.form);
+//				}
 			}
 		};
 
