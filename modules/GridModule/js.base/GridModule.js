@@ -172,6 +172,16 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		this.initConfiguration();
 	}
 	
+	/**
+	 * This method will be called when an instance is created, to allow for
+	 * asynchronous operations.
+	 */
+	,doAsyncConstruct: function(callback, scope) {
+		if (callback) {
+			callback.call(scope);
+		}
+	}
+	
 	,getExtraModels: function(names, cb) {
 		var xm = this.extraModels;
 		var m = true;
