@@ -93,11 +93,12 @@ class Application implements FileFinder {
 	public function resolveFileFinderAlias($alias) {
 		if ($alias === '@ext') {
 			
-			$isChrome = isset($_SERVER['HTTP_USER_AGENT']) 
-					&& preg_match('/Chrome|Chromium/i', $_SERVER['HTTP_USER_AGENT']);
+//			$isDevBrowser = isset($_SERVER['HTTP_USER_AGENT']) 
+//					&& preg_match('/Chrome|Chromium/i', $_SERVER['HTTP_USER_AGENT']);
+			$isDevBrowser = true;
 
 			$js = $this->isDevMode
-				? ($isChrome
+				? ($isDevBrowser
 					? array(
 						'ext/ext-base-debug' => -10,
 						'ext/ext-all-debug-w-comments' => -9,
