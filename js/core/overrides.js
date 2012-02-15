@@ -640,3 +640,5 @@ Ext.Button.prototype.focus = function () {
 		this.btnEl.focus();
 	}
 };
+
+Ext.form.DisplayField.prototype.submitValue = false;
