@@ -2712,7 +2712,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 						 layout:'form'
 						,autoScroll: true
 						,defaultType:'textfield'
-//						,bodyStyle:'padding:10px;  background:transparent;'
+						,bodyStyle:'padding:10px;  background:transparent;'
 					}
 
 					,items: items
@@ -2773,7 +2773,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 						 layout:'form'
 						,autoScroll: true
 						,defaultType:'textfield'
-//						,bodyStyle:'padding:10px;  background:transparent;'
+						,bodyStyle:'padding:10px;  background:transparent;'
 					}
 					
 					,items: Ext.apply(tabPanelItems[0][0], {
@@ -2805,7 +2805,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 					 layout:'form'
 					,autoScroll: true
 					,defaultType:'textfield'
-//					,bodyStyle:'padding:10px;  background:transparent;'
+					,bodyStyle:'padding:10px; background:transparent;'
 					// as we use deferredRender:false we mustn't
 					// render tabs into display:none containers
 					,hideMode:'offsets'
