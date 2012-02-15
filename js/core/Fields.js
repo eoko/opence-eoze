@@ -119,7 +119,10 @@ Oce.Format.dateRenderer = function(format) {
 }
 
 Oce.form.SubmitDisplayField = Ext.extend(Ext.form.DisplayField, {
-	onRender: function(ct) {
+	
+	submitValue: true
+	
+	,onRender: function(ct) {
 		Oce.form.SubmitDisplayField.superclass.onRender.apply(this, arguments);
 		if (!this.wrap) {
 			this.wrap = this.el.wrap();
