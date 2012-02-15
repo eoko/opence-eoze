@@ -31,12 +31,12 @@ abstract class VirtualFieldBase extends ModelFieldBase implements VirtualField {
 	function __construct($alias = null) {
 		if ($alias !== null) {
 			$this->alias = $alias;
+		} else if ($this->defaultAlias) {
+			$this->alias = $this->defaultAlias;
 		} else if ($this->alias) {
 			if ($this->alias === true) {
 				$this->alias = $this->guessAliasFromClassName();
 			}
-		} else {
-			$this->alias = $alias !== null ? $alias : $this->defaultAlias;
 		}
 	}
 	
