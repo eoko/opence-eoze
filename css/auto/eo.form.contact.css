@@ -1,0 +1,21 @@
+/* 
+    Document   : eo.form.contact
+    Created on : 15 nov. 2011, 22:22:17
+    Author     : Éric Ortega <eric@planysphere.fr>
+*/
+
+.closer-items .x-form-item {
+	margin-bottom: 2px;
+}
+
+.x-fieldset.line {
+	border-width: 1px 0 0;
+	margin-bottom: 0;
+}
+
+.ico.contact.expand {
+	background-image: url(../../images/icons_fugue/control-270.png);
+}
+.ico.contact.collapse {
+	background-image: url(../../images/icons_fugue/control-090.png);
+}
