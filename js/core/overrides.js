@@ -658,7 +658,7 @@ spp.setValue = function(v) {
 	uber.call(this, v);
 };
 	
-});
+})();
 
 // Override to test that el & el.dom still exist at the time the method is called
 // (which is not guaranteed, since in ext it is wrapped in a DelayedTask).
