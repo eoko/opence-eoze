@@ -108,6 +108,9 @@
 .ico_accept {
 	background-image:url(../images/icons/accept.png) !important;
 }
+.ico.archive {
+	background-image:url(../images/icons_fatcow/16x16/drawer.png) !important;
+}
 .ico.add,
 .ico_add {
 	background-image:url(../images/icons/add.png) !important;
