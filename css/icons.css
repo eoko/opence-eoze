@@ -105,7 +105,7 @@
 	display: inline;
 }
 
-.ico_accept {
+.ico.accept {
 	background-image:url(../images/icons/accept.png) !important;
 }
 .ico.archive {
@@ -306,6 +306,9 @@
 }
 .ico.refresh {
 	background-image: url(../images/icons/arrow_refresh.png) !important;
+}
+.ico.reject {
+	background-image:url(../images/icons/delete.png) !important;
 }
 .ico.star {
 	background-image:url(../images/icons/star.png) !important;
