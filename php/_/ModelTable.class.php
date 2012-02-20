@@ -155,6 +155,15 @@ abstract class ModelTable extends ModelTableProxy {
 			);
 		}
 	}
+	
+	protected function addVirtuals($virtuals) {
+		if (func_num_args() > 1) {
+			$virtuals = func_get_args();
+		}
+		foreach ($virtuals as $virtual) {
+			$this->addVirtual($virtual);
+		}
+	}
 
 	protected function addVirtual(VirtualField $virtual, $name = null) {
 		if ($this->constructed) {
