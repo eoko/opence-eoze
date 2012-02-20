@@ -363,7 +363,7 @@ eo.arrayToHash = function(arr, keyIndex) {
 
 eo.pushWrap = function(o, v) {
 	if (!o) {
-		return v;
+		return [v];
 	} else if (Ext.isArray(o)) {
 		o.push(v);
 		return o;
