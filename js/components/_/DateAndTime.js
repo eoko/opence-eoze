@@ -10,17 +10,19 @@
 		altTimeFormats = "G:i|G:i|G i|Gi|G|G:i:s|G i s";
 		
 	function safeParse(value, format) {
-		if (Date.formatContainsHourInfo(format)) {
+        if (/[gGhH]/.test(format.replace(/(\\.)/g, ''))) {
 			// if parse format contains hour information, no DST adjustment is necessary
 			return Date.parseDate(value, format);
 		} else {
 			// set time to 12 noon, then clear the time
-			var parsedDate = Date.parseDate(value + ' ' + this.initTime, format + ' ' + this.initTimeFormat);
+//			var parsedDate = Date.parseDate(value + ' ' + this.initTime, format + ' ' + this.initTimeFormat);
+			var parsedDate = Date.parseDate(value + ' ' + 12, format + ' ' + 'H');
  
 			if (parsedDate) {
 				return parsedDate.clearTime();
 			}
 		}
+		return undefined;
 	}
 	
 	function parseDate(value) {
@@ -29,13 +31,13 @@
 			return value;
 		}
 
-		var v = this.safeParse(value, dateFormat),
+		var v = safeParse(value, dateFormat),
 			af = altDateFormats;
 
 		if (!v && af) {
 			var afa = af.split("|");
 			for (var i = 0, len = afa.length; i < len && !v; i++) {
-				v = this.safeParse(value, afa[i]);
+				v = safeParse(value, afa[i]);
 			}
 		}
 		
