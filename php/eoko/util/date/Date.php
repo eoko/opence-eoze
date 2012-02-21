@@ -4,6 +4,7 @@ namespace eoko\util\date;
 
 use DateTime;
 use ParseRange;
+use IllegalArgumentException;
 
 /**
  *
@@ -25,7 +26,7 @@ class Date extends DateTime{
 		} else if (is_string($d)) {
 			return new Date($d);
 		} else {
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("$d (" . gettype($d) . ')');
 		}
 	}
 	
