@@ -53,14 +53,14 @@ class DateRange {
 	 * @return Date
 	 */
 	public function getFrom() {
-		return $this->from;
+		return clone $this->from;
 	}
 	
 	/**
 	 * @return Date
 	 */
 	public function getTo() {
-		return $this->to;
+		return clone $this->to;
 	}
 
 	/**
