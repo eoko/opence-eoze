@@ -1467,6 +1467,11 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				,actionToolbar: tbar
 				,tools: [this.createEditWindowGearTool(tbar, winConfig)]
 				,submitButton: tbar.saveButton
+				,unlockSaveButton: function() {
+					if (tbar.saveButton) {
+						tbar.saveButton.enable();
+					}
+				}
 			}, winConfig)
 			
 		});
