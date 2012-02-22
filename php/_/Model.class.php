@@ -1157,7 +1157,7 @@ abstract class Model {
 	 *
 	 * @param boolean $loadFromDB determines how the initial values are acquired.
 	 * If TRUE, the data will be forcefully loaded from the datastore, throwing
-	 * an Exception if the data corresponding to this model have been removes.
+	 * an Exception if the data corresponding to this model have been removed.
 	 * If FALSE, the data will be tentatively retrieved from the initial values
 	 * stored in the Model, throw an Exception if these data
 	 * have not been filled up (which depends on the method used to fill in
