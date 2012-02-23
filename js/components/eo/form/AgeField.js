@@ -124,10 +124,19 @@ eo.form.AgeField = Ext.extend(Ext.form.TextField, {
 	,setValue: function(v) {
 		if (Ext.isObject(v)) {
 			this.age = v;
-			this.setRawValue(this.formatAge(v));
 		} else {
-			this.setRawValue(v);
-			this.beforeBlur();
+			v = this.age = this.parseValue(v);
+		}
+		if (this.rendered) {
+			this.setRawValue(v ? this.formatAge(v) : '');
+		} else {
+			this.on({
+				scope: this
+				,single: true
+				,afterrender: function() {
+					this.setRawValue(v ? this.formatAge(v) : '');
+				}
+			});
 		}
 	}
 	
