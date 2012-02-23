@@ -106,6 +106,13 @@ abstract class Executor implements file\Finder {
 	}
 	
 	/**
+	 * @return eoko\config\Config
+	 */
+	public function getModuleConfig() {
+		return $this->module->getConfig();
+	}
+	
+	/**
 	 * @deprecated
 	 * @todo Track usage
 	 */
