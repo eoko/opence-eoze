@@ -16,16 +16,6 @@ use Request;
  */
 class GridExecutorPlugin extends PluginBase {
 	
-	/**
-	 *
-	 * @var ModelTable
-	 */
-	private $table;
-	
-	public function configure(GridExecutor $gridExecutor, ModelTable $table) {
-		$this->table = $table;
-	}
-	
 //	public function afterSaveModel(Model $model, $wasNew) {
 //		// Fire comet events
 //		if ($wasNew) {

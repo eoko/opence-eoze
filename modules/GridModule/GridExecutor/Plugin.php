@@ -4,6 +4,7 @@ namespace eoko\modules\GridModule\GridExecutor;
 
 use Model;
 use ModelTable;
+use ModelTableQuery;
 use eoko\modules\GridModule\GridExecutor;
 use Request;
 
@@ -15,7 +16,7 @@ use Request;
  */
 interface Plugin {
 	
-	public function configure(GridExecutor $gridExecutor, ModelTable $table);
+	public function configure(GridExecutor $gridExecutor, ModelTable $table, Request $request);
 	
 	function beforeSaveModel(Model $model, $new);
 	
@@ -41,4 +42,6 @@ interface Plugin {
 	 * @returns true if the action was executed, else false.
 	 */
 	function executeAction($name, &$returnValue);
+	
+	function afterCreateLoadQuery(ModelTableQuery $query);
 }

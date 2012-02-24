@@ -53,7 +53,7 @@ abstract class GridExecutor extends JsonExecutor {
 	protected function initPlugins() {}
 	
 	public function addPlugin(GridExecutor\Plugin $plugin) {
-		$plugin->configure($this, $this->table);
+		$plugin->configure($this, $this->table, $this->request);
 		$this->plugins[] = $plugin;
 	}
 	
@@ -447,11 +447,17 @@ abstract class GridExecutor extends JsonExecutor {
 		if ($this->table instanceof TableHasFilters) {
 			$this->table->addLoadQueryFilters($query, $this->request->get('filters'));
 		}
+		
+		if ($this->plugins) {
+			foreach ($this->plugins as $plugin) {
+				$plugin->afterCreateLoadQuery($query);
+			}
+		}
 
 		return $query;
 	}
 	
-	public function applyLoadQueryParams(ModelTableQuery $query) {
+	private function applyLoadQueryParams(ModelTableQuery $query) {
 		$this->createLoadQuery_sort($query);
 		$this->createLoadQuery_filters($query);
 		$this->createLoadQuery_search($query);
