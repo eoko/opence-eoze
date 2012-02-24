@@ -56,7 +56,7 @@ class ExecutorGenerator extends GeneratorBase {
 		$pages = array();
 		if (isset($this->config['tabs'])) {
 			foreach (array('add','edit') as $action) {
-				if (isset($this->config['tabs'][$action])) {
+				if (isset($this->config['tabs'][$action]) && $this->config['tabs'][$action] !== false) {
 
 					$tabConfig = $this->config['tabs'][$action] === true ? array() : $this->config['tabs'][$action];
 					if (isset($this->config['tabs']['defaults'])) {
