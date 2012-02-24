@@ -490,8 +490,13 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	// private
 	,onSelectionChange: function(selectionModel) {
 		if (selectionModel.getCount() > 0) {
+			var records = this.getSelectedRecords();
 			Ext.each(this.selectionDependantItems, function(item) {
-				item.enable();
+				if (item.onRecordSelection) {
+					item.onRecordSelection.call(item.scope || item, item, records);
+				} else {
+					item.enable();
+				}
 			});
 		} else {
 			Ext.each(this.selectionDependantItems, function(item) {
