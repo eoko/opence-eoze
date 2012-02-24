@@ -18,6 +18,9 @@
 .icon.ribbon.email {
 	background-image: url(../images/icons_fatcow/32x32/email.png) !important;
 }
+.icon.ribbon.archive {
+	background-image: url(../images/icons_fatcow/32x32/drawer.png) !important;
+}
 	
 .ico32.green_ball {
 	background-image:url(../images/opence/32x32/green_ball.png) !important;
