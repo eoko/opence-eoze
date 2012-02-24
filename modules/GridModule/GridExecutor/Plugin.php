@@ -33,4 +33,12 @@ interface Plugin {
 	function afterDelete(array $ids);
 	
 	function onCreateQueryContext(Request $request, array &$context);
+	
+	/**
+	 * Execute the action with name $name.
+	 * @param Pointer $returnValue A variable that will be set to the action return
+	 * value, if the action is executed by this plugin.
+	 * @returns true if the action was executed, else false.
+	 */
+	function executeAction($name, &$returnValue);
 }

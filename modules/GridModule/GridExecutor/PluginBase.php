@@ -28,4 +28,13 @@ class PluginBase implements Plugin {
 	public function afterDelete(array $ids) {}
 	
 	public function onCreateQueryContext(Request $request, array &$context) {}
+	
+	public function executeAction($name, &$returnValue) {
+		$method = "action_$name";
+		if (method_exists($this, $method)) {
+			$returnValue = $this->$method();
+			return true;
+		}
+		return false;
+	}
 }

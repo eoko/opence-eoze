@@ -56,6 +56,17 @@ abstract class GridExecutor extends JsonExecutor {
 		$plugin->configure($this, $this->table);
 		$this->plugins[] = $plugin;
 	}
+	
+	public function executeAction($name, &$returnValue) {
+		if ($this->plugins) {
+			foreach ($this->plugins as $plugin) {
+				if ($plugin->executeAction($name, $returnValue)) {
+					return true;
+				}
+			}
+		}
+		return parent::executeAction($name, $returnValue);
+	}
 
 	function get_module() {
 		// UNTESTED
