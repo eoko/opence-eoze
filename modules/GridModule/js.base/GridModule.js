@@ -1174,7 +1174,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	}
 
 	,deleteSelectedRecords: function() {
-		var ids = this.getSelectedRowsId.call(this);
+		var ids = this.getSelectedRowsId();
 		if (ids.length > 0) {
 			this.deleteRecord(ids);
 		}
@@ -3663,14 +3663,16 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				// addRecord cannot be used as a direct callback because it
 				// wants its first argument to be a callback (but the handler
 				// will send the button as first arg...)
-				,handler: function() {this.addRecord()}.createDelegate(this)
+				,scope: this
+				,handler: function() {this.addRecord()}
 				,text: 'Ajouter'
 				,iconCls: 'b_ico_add'
 				,actionId: "add"
 			}
 			,remove: {
 				xtype: 'oce.rbbutton'
-				,handler: this.deleteSelectedRecords.createDelegate(this)
+				,scope: this
+				,handler: this.deleteSelectedRecords
 				,text: 'Supprimer'
 				,iconCls: 'b_ico_del'
 				,actionId: 'delete'
