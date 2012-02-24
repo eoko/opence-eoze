@@ -151,11 +151,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		this.initPlugins();
 
 		this.initActions();
-		Ext.iterate(this.actions, function(name, action) {
-			Ext.applyIf(action, {
-				xtype: 'oce.rbbutton'
-			});
-		});
+		this.afterInitActions();
 
 		this.initMultisortPlugin();
 		this.initFilterPlugin();
@@ -490,8 +486,29 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	,beforeCreateGrid: function(config) {
 
 	}
+	
+	// private
+	,onSelectionChange: function(selectionModel) {
+		if (selectionModel.getCount() > 0) {
+			Ext.each(this.selectionDependantItems, function(item) {
+				item.enable();
+			});
+		} else {
+			Ext.each(this.selectionDependantItems, function(item) {
+				item.disable();
+			});
+		}
+	}
 
 	,afterCreateGrid: function(grid) {
+		
+		// Install selection listener
+		grid.getSelectionModel().on({
+			scope: this
+			,selectionchange: this.onSelectionChange
+		});
+		
+		// Handle external changes
 		grid.mon(eo.Kepler, this.tableName + ':modified', function(e, ids) {
 			if (e.fromOtherSession) {
 				this.onRecordsExternallyModified(ids);
@@ -2282,7 +2299,9 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 							if (!itemItem) {
 								throw new Error('Invalid toolbar item config');
 							}
-							if (Ext.isString(itemItem)) itemItem = this.actions[itemItem];
+							if (Ext.isString(itemItem)) {
+								itemItem = this.actions[itemItem];
+							}
 							if (false == itemItem instanceof Ext.Component) {
 								item = Ext.apply({}, item, itemItem);
 							}
@@ -2620,6 +2639,8 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		// give the tab interface a chance to finish layout before launching
 		// this request, which processing will be slightly blocking
 		(function() {me.doFirstLoad();}).defer(500);
+		
+		this.afterCreateTabPanel(tab);
 
 		return tab;
 	}
@@ -2628,6 +2649,30 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		// toolbar plugin
 		if (this.extra.toolbar !== false) {
 			config.tbar = this.getToolbar(true);
+		}
+	}
+	
+	// private
+	,afterCreateTabPanel: function(tabPanel) {
+		
+		// Clear previous list
+		var l = this.selectionDependantItems = [];
+		
+		// Walk top toolbar items (recursively)
+		var tbar = tabPanel.getTopToolbar();
+		if (tbar) {
+			
+			var walk = function(item) {
+				if (item.items) {
+					item.items.each(walk);
+				}
+				if (item.dependsOnSelection) {
+					item.disable();
+					l.push(item);
+				}
+			};
+			
+			tbar.items.each(walk);
 		}
 	}
 
@@ -3629,6 +3674,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				,text: 'Supprimer'
 				,iconCls: 'b_ico_del'
 				,actionId: 'delete'
+				,dependsOnSelection: true
 			}
 
 			,columns: {
@@ -3671,7 +3717,17 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			this.actions = actions;
 		}
 	}
-});
+
+	// private
+	,afterInitActions: function() {
+		Ext.iterate(this.actions, function(name, action) {
+			Ext.applyIf(action, {
+				xtype: 'oce.rbbutton'
+			});
+		});
+	}
+	
+}); // GridModule declaration
 
 Oce.GridModule.ptypes = {};
 
