@@ -234,6 +234,8 @@ NS.FormConfig = Ext.extend(Object, {
 				if (!config.xtype) {
 					config.xtype = (config.submit === false || config.submitValue === false) ?
 						'displayfield' : 'oce.submitdisplayfield';
+				} else if (config.xtype === 'datefield') {
+					config.xtype = 'datedisplayfield';
 				}
 				delete config.readOnly;
 				delete config.submit;
