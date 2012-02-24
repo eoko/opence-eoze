@@ -22,6 +22,8 @@ const ACTION_CANCELLED = -1;
 function execute(Executor $executor, $action) {
 	if (method_exists($executor, $action)) {
 		return $executor->$action();
+	} else if ($executor->executeAction($action, $returnValue)) {
+		return $returnValue;
 	} else {
 		throw new IllegalStateException("Executor $executor has no action $action");
 	}
@@ -79,6 +81,16 @@ abstract class Executor implements file\Finder {
 	
 	private function getDefaultAction() {
 		return $this->request->get($this->actionParam, $this->defaultAction);
+	}
+	
+	/**
+	 * Execute the action with name $name.
+	 * @param Pointer $returnValue A variable that will be set to the action return
+	 * value, if the action is executed by this executor.
+	 * @returns true if the action was executed, else false.
+	 */
+	public function executeAction($name, &$returnValue) {
+		return false;
 	}
 	
 	/**
