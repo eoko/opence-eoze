@@ -1715,7 +1715,12 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	 * 
 	 * @protected
 	 */
-	,afterCreateWindow: function(win, action, recordId) {}
+	,afterCreateWindow: function(win, action, recordId) {
+		var me = this;
+		win.getKeplerOriginString = function() {
+			return me.makeKeplerOriginString(win);
+		};			
+	}
 	
 	/**
 	 * Hook method called after an add window has been created.
