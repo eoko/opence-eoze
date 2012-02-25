@@ -41,6 +41,8 @@ eo.form.ClearableComboBox = Ext.extend(Ext.form.ComboBox, {
 		}
 		
 		sppCombo.initComponent.call(this);
+		
+		this.addClass('eo-clearable-combo');
 
         this.triggerConfig = {
             tag:'span', cls:'x-form-twin-triggers', cn:[
@@ -48,6 +50,17 @@ eo.form.ClearableComboBox = Ext.extend(Ext.form.ComboBox, {
             {tag: "img", src: Ext.BLANK_IMAGE_URL, alt: "", cls: "x-form-trigger " + this.trigger2Class}
         ]};
     }
+	
+	,updateEditState: function() {
+		sppCombo.updateEditState.call(this);
+		if (this.rendered) {
+			if (this.readOnly) {
+				this.addClass('readOnly');
+			} else {
+				this.removeClass('readOnly');
+			}
+		}
+	}
 	
     ,getTrigger: sppTwin.getTrigger
     
