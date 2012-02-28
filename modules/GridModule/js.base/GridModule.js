@@ -513,21 +513,24 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			,selectionchange: this.onSelectionChange
 		});
 		
+		// 28/02/12 19:13 Commented out if (e.fromOtherSession) { ... }
+		//                Changed reload to reloadFrom(origin) in processExternallyModifiedRecords
+		
 		// Handle external changes
 		grid.mon(eo.Kepler, this.tableName + ':modified', function(e, ids) {
-			if (e.fromOtherSession) {
+//			if (e.fromOtherSession) {
 				this.onRecordsExternallyModified(ids);
-			}
+//			}
 		}, this);
 		grid.mon(eo.Kepler, this.tableName + ':removed', function(e, ids) {
-			if (e.fromOtherSession) {
+//			if (e.fromOtherSession) {
 				this.onRecordsExternallyDeleted(ids);
-			}
+//			}
 		}, this);
 		grid.mon(eo.Kepler, this.tableName + ':created', function(e, id) {
-			if (e.fromOtherSession) {
+//			if (e.fromOtherSession) {
 				this.onRecordsExternallyCreated(id);
-			}
+//			}
 		}, this);
 		
 		if (this.externalGridDependencies) {
@@ -609,12 +612,12 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			}
 			
 			if (reload) {
-				this.reload();
+				this.reloadFrom(origin);
 			}
 		}
 		
 		else {
-			this.reload();
+			this.reloadFrom(origin);
 		}
 	}
 	
@@ -3381,7 +3384,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				delete (pr[origin]);
 			});
 		}
-		prt.delay(10000);
+		prt.delay(1000);
 		this.reload(callback, scope);
 	}
 
