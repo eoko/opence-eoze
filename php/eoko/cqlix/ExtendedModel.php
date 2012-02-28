@@ -15,6 +15,8 @@ use eoko\modules\Kepler\Observable as CometObservable;
  */
 abstract class ExtendedModel extends Model implements CometObservable {
 	
+	protected $cometEvents = true;
+	
 	/**
 	 * Will return the model name, with the model id appended in the form:
 	 * 
@@ -41,24 +43,28 @@ abstract class ExtendedModel extends Model implements CometObservable {
 	
 	protected function onDelete($isSaving) {
 		parent::onDelete($isSaving);
-		$id = $this->hasPrimaryKey() ? $this->getPrimaryKeyValue() : null;
-		$origin = isset($this->context['keplerOrigin']) ? $this->context['keplerOrigin'] : null;
-		CometEvents::publish($this->table, 'dataChanged', array($id), $origin);
-		CometEvents::publish($this, 'removed', $origin);
-		CometEvents::publish($this->table, 'removed', array($id), $origin);
+		if ($this->cometEvents) {
+			$id = $this->hasPrimaryKey() ? $this->getPrimaryKeyValue() : null;
+			$origin = isset($this->context['keplerOrigin']) ? $this->context['keplerOrigin'] : null;
+			CometEvents::publish($this->table, 'dataChanged', array($id), $origin);
+			CometEvents::publish($this, 'removed', $origin);
+			CometEvents::publish($this->table, 'removed', array($id), $origin);
+		}
 	}
 	
 	protected function afterSave($new) {
 		parent::afterSave($new);
-		$id = $this->hasPrimaryKey() ? $this->getPrimaryKeyValue() : null;
-		$origin = isset($this->context['keplerOrigin']) ? $this->context['keplerOrigin'] : null;
-		CometEvents::publish($this->table, 'dataChanged', array($id), $origin);
-		if ($new) {
-			CometEvents::publish($this, 'created', $origin);
-			CometEvents::publish($this->table, 'created', array($id), $origin);
-		} else {
-			CometEvents::publish($this, 'modified', $origin);
-			CometEvents::publish($this->table, 'modified', array($id), $origin);
+		if ($this->cometEvents) {
+			$id = $this->hasPrimaryKey() ? $this->getPrimaryKeyValue() : null;
+			$origin = isset($this->context['keplerOrigin']) ? $this->context['keplerOrigin'] : null;
+			CometEvents::publish($this->table, 'dataChanged', array($id), $origin);
+			if ($new) {
+				CometEvents::publish($this, 'created', $origin);
+				CometEvents::publish($this->table, 'created', array($id), $origin);
+			} else {
+				CometEvents::publish($this, 'modified', $origin);
+				CometEvents::publish($this->table, 'modified', array($id), $origin);
+			}
 		}
 	}
 }
