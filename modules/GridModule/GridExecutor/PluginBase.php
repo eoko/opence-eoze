@@ -70,6 +70,8 @@ class PluginBase implements Plugin {
 	}
 	
 	// Empty listener implementations
+	
+	public function addModelContext(Model $model) {}
 
 	public function afterSaveModel(Model $model, $wasNew) {}
 

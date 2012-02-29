@@ -18,6 +18,8 @@ interface Plugin {
 	
 	public function configure(GridExecutor $gridExecutor, ModelTable $table, Request $request);
 	
+	function addModelContext(Model $model);
+	
 	function beforeSaveModel(Model $model, $new);
 	
 	function afterSaveModel(Model $model, $wasNew);
