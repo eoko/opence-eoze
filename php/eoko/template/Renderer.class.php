@@ -160,6 +160,7 @@ abstract class Renderer {
 			return $this->doRenderToString();
 		} catch (\Exception $e) {
 			Logger::get($this)->error('Exception in __toString: ', $e);
+			return 'Rendering error';
 		}
 	}
 	
