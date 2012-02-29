@@ -584,8 +584,8 @@ eo.Ajax = new eo.data.Connection({
 	
 	,onFailure: function(data, options, connection) {
 		Ext.Msg.alert(
-			'Erreur',
-			"Impossible de charger les données."
+			data.title || 'Erreur',
+			data.errorMessage || "Impossible de charger les données."
 		);
 	}
 });
