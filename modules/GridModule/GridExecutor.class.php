@@ -630,6 +630,14 @@ abstract class GridExecutor extends JsonExecutor {
 	protected function getLoadQueryContext() {
 		return $this->createQueryContext();
 	}
+	
+	protected function addModelContext(Model $model) {
+		if ($this->plugins) {
+			foreach ($this->plugins as $plugin) {
+				$plugin->addModelContext($model);
+			}
+		}
+	}
 
 	/**
 	 * Get an array listing relation names by loading mode (as set by config),
@@ -938,7 +946,11 @@ MSG;
 	 // SAVE - Shared
 	//////////////////////////////////////////////////////////////////////////
 
-	private function saveModel(Model $model, $new) {
+	protected function saveModel(Model $model, $new = null) {
+		
+		if ($new === null) {
+			$new = $model->isNew();
+		}
 		
 		$this->beforeSaveModel($model, $new);
 
@@ -959,7 +971,9 @@ MSG;
 		}
 	}
 	
-	protected function beforeSaveModel(Model $model) {}
+	protected function beforeSaveModel(Model $model) {
+		$this->addModelContext($model);
+	}
 	
 	protected function afterSaveModel(Model $model, $wasNew) {}
 

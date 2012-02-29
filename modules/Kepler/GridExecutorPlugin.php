@@ -44,5 +44,11 @@ class GridExecutorPlugin extends PluginBase {
 			$context['keplerOrigin'] = $origin;
 		}
 	}
+	
+	public function addModelContext(Model $model) {
+		if (null !== $origin = $this->getRequest()->get('keplerOrigin')) {
+			$model->context['keplerOrigin'] = $origin;
+		}
+	}
 
 }
