@@ -51,6 +51,14 @@ class ModelTableQuery extends Query implements QueryAliasable {
 
 		return $this;
 	}
+	
+	/**
+	 * @param string $sql
+	 * @return ModelTableQuery
+	 */
+	public function selectRaw($sql) {
+		return $this->select(new QuerySelectRaw($sql));
+	}
 
 	public function selectField($fieldName, $fieldAlias = null) {
 //		if ($fieldName instanceof QuerySelect) {
