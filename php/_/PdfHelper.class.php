@@ -1,5 +1,7 @@
 <?php
 
+use eoko\template\Template;
+
 class PdfHelper {
 
 	public static function render($src, $options = array()) {
@@ -24,7 +26,9 @@ class PdfHelper {
 			$options['margins']
 		);
 
-		if ($src instanceof Template) $src = $src->renderString();
+		if ($src instanceof Template) {
+			$src = $src->render(true);
+		}
 
 		$html2pdf->WriteHTML($src);
 
