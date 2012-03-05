@@ -271,7 +271,9 @@ eo.wizard.FormStep = Ext.extend(eo.wizard.Step, {
 				getComplete = function() {
 					var r = true;
 					form.items.each(function(field) {
-						if (!field.isValid(true)) return r = false;
+						if (!field.isValid(true)) {
+							return r = false;
+						}
 						else return undefined;
 					});
 					return r;
