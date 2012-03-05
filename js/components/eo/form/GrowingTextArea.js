@@ -7,6 +7,8 @@
 Ext.ns('eo.form');
 
 /**
+ * @todo Buggy: doesn't redo container's layout...
+ *
  * @xtype growingtextarea
  */
 eo.form.GrowingTextArea = Ext.extend(Ext.form.TextArea, {
