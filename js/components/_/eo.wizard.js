@@ -336,7 +336,8 @@ eo.wizard.FormStep = Ext.extend(eo.wizard.Step, {
 				if (field instanceof Ext.form.CompositeField) {
 					field.items.each(addListener);
 					return;
-				} else if (field instanceof Ext.form.Checkbox) {
+				} else if (field instanceof Ext.form.Checkbox
+						|| field instanceof eo.form.CheckableFieldSet) {
 					// do not wait for blur, for checkboxes and subclasses
 					// (this includes radio buttons)
 					e = "check"
