@@ -1,4 +1,6 @@
 (function() {
+	
+Ext.ns("eo.form");
 
 /**
  * CheckableFieldSet is a standard FieldSet, except that it is considered a
@@ -9,7 +11,7 @@
  * @author Éric Ortéga <eric@planysphere.fr>
  * @since 08/03/11 13:04
  */
-Ext.ns("eo.form").CheckableFieldSet = Ext.extend(Ext.form.FieldSet, {
+eo.form.CheckableFieldSet = Ext.extend(Ext.form.FieldSet, {
 	spp: Ext.form.FieldSet.prototype
 	
 	,checked: false
