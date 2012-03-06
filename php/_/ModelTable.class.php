@@ -99,6 +99,7 @@ abstract class ModelTable extends ModelTableProxy {
 		$this->cols = $cols;
 		$this->relations = $relations;
 		
+		$this->doConfigure();
 		$this->preConfigure($this->cols, $this->relations, $this->virtuals);
 		
 		$this->configureBase($this->cols, $this->relations, $this->virtuals);
@@ -107,6 +108,8 @@ abstract class ModelTable extends ModelTableProxy {
 		
 		$this->constructed = true;
 	}
+	
+	protected function doConfigure() {}
 	
 	protected function preConfigure(&$cols, &$relations, &$virtuals) {}
 
