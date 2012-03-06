@@ -933,14 +933,28 @@ class Query {
 			$this->getLogger()->debug("($file) Executing query:\n{}", $this);
 		}
 
+		$retry = true;
+		retry:
 		try {
 			if (!$pdoStatement->execute($this->bindings)) {
 				$errorInfo = $pdoStatement->errorInfo();
-	//			throw new SystemException($errorInfo[2]);
-				$this->errorHandler->process($this, $errorInfo);
+				if ($retry && $error[1] = 1213) { // deadlock, retry
+					$retry = false;
+					goto retry;
+				} else {
+					$this->errorHandler->process($this, $errorInfo);
+				}
 			}
 		} catch (PDOException $ex) {
-			$this->errorHandler->process($this, $ex->errorInfo);
+			$error = $ex->errorInfo;
+			
+			// deadlock
+			if ($retry && $error[1] == 1213) {
+				$retry = false;
+				goto retry;
+			} else {
+				$this->errorHandler->process($this, $error);
+			}
 		}
 
 		return $pdoStatement;
