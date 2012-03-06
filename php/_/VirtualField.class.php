@@ -100,13 +100,15 @@ abstract class VirtualFieldBase extends ModelFieldBase implements VirtualField {
 		
 		$clause = $this->getClause($query, $aliasable);
 		
+		$bindings = null;
 		if ($clause instanceof SqlVar) {
 			$clause = $clause->buildSql(false, $bindings);
 		}
 		
 		return $query->select(
 			new QuerySelectRaw(
-				"$clause AS `$alias`"
+				"$clause AS `$alias`",
+				$bindings
 			)
 		);
 	}
