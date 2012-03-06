@@ -1154,6 +1154,52 @@ abstract class Model {
 	abstract static public function load($id, array $context = array());
 
 	/**
+	 * Returns `true` if the given field value has changed, else `false`. If the record
+	 * is new, this method will always return `false`.
+	 * @param string $field The name of the field to be tested.
+	 * @param boolean $strict `true` to use a strict binary comparison, `false` to use
+	 * typeless comparison.
+	 * @return boolean
+	 */
+	public function hasChanged($field, $strict = true) {
+		
+		if ($this->isNew()) {
+			return false;
+		}
+		
+		$oldValue = $this->doGetStoredCopy(null)->getFieldValue($field);
+		$currentValue = $this->getFieldValue($field);
+		
+		return $strict
+				? $oldValue !== $currentValue
+				: $oldValue !=  $currentValue;
+	}
+	
+	/**
+	 * @var Model
+	 */
+	private $cachedStoredCopy = null;
+	
+	/**
+	 * @param boolean $loadFromDb
+	 * 
+	 * -   TRUE to force loading from database;
+	 * -   FALSE to never load from database (using cached copy or already loaded
+	 *     values instead;
+	 * -   NULL to load from database if data have not been loaded already.
+	 * 
+	 * @return Model
+	 */
+	protected function doGetStoredCopy($loadFromDb = false) {
+		if ($loadFromDb === true) {
+			return $this->doDoGetStoredCopy(true);
+		} else if (!$this->cachedStoredCopy) {
+			$this->cachedStoredCopy = $this->doDoGetStoredCopy($loadFromDb);
+		}
+		return $this->cachedStoredCopy;
+	}
+
+	/**
 	 *
 	 * @param boolean $loadFromDB determines how the initial values are acquired.
 	 * If TRUE, the data will be forcefully loaded from the datastore, throwing
@@ -1166,7 +1212,7 @@ abstract class Model {
 	 * throwing an Exception if no method works.
 	 * @return Model
 	 */
-	protected function doGetStoredCopy($loadFromDB = false) {
+	private function doDoGetStoredCopy($loadFromDB = false) {
 		if ($loadFromDB !== true && $this->internal->dbValues !== null) {
 			return $this->table->createModel(
 				$this->internal->dbValues, true, $this->context
