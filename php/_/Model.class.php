@@ -753,6 +753,22 @@ abstract class Model {
 	 * @param boolean $new 
 	 */
 	protected function onPrepareForSave(&$new, $deleted) {}
+	
+	/**
+	 * This flag is set to `true` when the record is being saved, else it is set
+	 * to `false`.
+	 * @var boolean
+	 */
+	private $saving = false;
+	
+	/**
+	 * This flag is set to `true` if the {@link save()} method is called when
+	 * the record is {@link isSaving() being saved} then, when the record has
+	 * been saved (including its relation), a save operation is triggered
+	 * again and this flag is turned to `false` again.
+	 * @var boolean
+	 */
+	private $saveAgain = false;
 
 	/**
 	 * Persists the reccord in the database. If the primary key of the reccord
@@ -761,6 +777,10 @@ abstract class Model {
 	 * @return Bool TRUE if succeeds, FALSE if fails.
 	 */
 	public function save($new = null) {
+		
+		if ($this->saving) {
+			$this->saveAgain = true;
+		}
 
 		$new = $new === true || $this->isNew();
 
@@ -787,7 +807,10 @@ abstract class Model {
 			}
 		} else {
 
+			$this->saving = true;
+
 			if ($new) {
+				
 				// Operation is CREATE
 				$this->events->fire(self::EVT_BEFORE_SAVE_BASE, $this);
 				$this->beforeSave(true);
@@ -846,9 +869,23 @@ abstract class Model {
 			}
 			
 			$this->afterSaveRelations($new);
+			$this->saving = false;
+			
+			if ($this->saveAgain) {
+				$this->saveAgain = false;
+				$this->save();
+			}
 		}
 		
 		return true;
+	}
+	
+	/**
+	 * Returns `true` if the model is be
+	 * @return boolean
+	 */
+	public function isSaving() {
+		return $this->saving;
 	}
 	
 	/**
