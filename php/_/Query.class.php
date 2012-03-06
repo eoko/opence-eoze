@@ -1192,7 +1192,10 @@ class Query {
 
 	public function buildSql($defaultTable, &$bindings) {
 		$this->build();
-		if (is_array($bindings) && count($this->bindings) > 0) {
+		if (!is_array($bindings)) {
+			$bindings = array();
+		}
+		if (count($this->bindings) > 0) {
 			$bindings = array_merge($bindings, $this->bindings);
 		}
 		return $this->sql;
@@ -1576,9 +1579,11 @@ class QuerySelect extends SqlVariable {
 class QuerySelectRaw extends QuerySelect {
 
 	protected $code;
+	protected $bindings;
 
-	public function __construct($code) {
+	public function __construct($code, $bindings = null) {
 		$this->code = $code;
+		$this->bindings = $bindings;
 	}
 
 	public static function create($code) {
@@ -1586,6 +1591,11 @@ class QuerySelectRaw extends QuerySelect {
 	}
 
 	function buildSql($defaultTable, &$bindings) {
+		if ($this->bindings) {
+			foreach ($this->bindings as $b) {
+				$bindings[] = $b;
+			}
+		}
 		return $this->code;
 	}
 }
