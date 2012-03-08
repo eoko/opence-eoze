@@ -87,5 +87,6 @@ eo.form.ClearableComboBox = Ext.extend(Ext.form.ComboBox, {
 });
 
 Ext.reg('clearablecombo', eo.form.ClearableComboBox);
+Oce.deps.reg('eo.form.ClearableComboBox');
 
 })(); // closure
