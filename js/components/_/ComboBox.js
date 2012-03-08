@@ -3,9 +3,9 @@
  * @copyright 2010 (c), Éric Ortéga
  */
 
-Oce.deps.wait('Ext.ux.form.TwinComboBox', function() {
+Oce.deps.wait('eo.form.ClearableComboBox', function() {
 
-	Oce.form.SimpleComboBox = Ext.extend(Ext.ux.form.TwinComboBox, {
+	Oce.form.SimpleComboBox = Ext.extend(eo.form.ClearableComboBox, {
 
 		createRenderer: function(defaultLabel) {
 			var me = this;
@@ -165,7 +165,7 @@ Oce.deps.wait('Ext.ux.form.TwinComboBox', function() {
 
 	Ext.reg('oce.simplechainedcombo', Oce.form.SimpleChainedCombo);
 
-	Oce.form.ForeignComboBox = Ext.extend(Ext.ux.form.TwinComboBox, {
+	Oce.form.ForeignComboBox = Ext.extend(eo.form.ClearableComboBox, {
 
 //REM (unused) 		hasLoading: true
 
@@ -298,7 +298,7 @@ Oce.deps.wait('Ext.ux.form.TwinComboBox', function() {
 				F.prototype = p;
 				return new F;
 			})(this);
-			Ext.apply(config, {
+			Ext.applyIf(config, {
 				 xtype: 'combo'
 				,store: this.store
 				,displayField: 'name'
@@ -369,10 +369,11 @@ Oce.deps.wait('Ext.ux.form.TwinComboBox', function() {
 			// init setValue
 			var me = this;
 			// restore initial preventMark config option
-			me.preventMark = me.initialConfig.preventMark || false;
+			this.preventMark = this.initialConfig.preventMark || false;
 			if (this.initialisationValue !== undefined) {
-				Oce.form.ForeignComboBox.superclass.setValue.call(me, me.initialisationValue);
-				me.originalValue = me.initialisationValue;
+//				Oce.form.ForeignComboBox.superclass.setValue.call(me, me.initialisationValue);
+				this.doSetValue(this.initialisationValue);
+				this.originalValue = this.initialisationValue;
 			}
 			// if the combo is paginated, then we must ensure that the
 			// server will include data for the set row each time the
@@ -408,10 +409,13 @@ Oce.deps.wait('Ext.ux.form.TwinComboBox', function() {
 								if (cb) cb();
 							}
 						})
+					} else {
+						me.doSetValue('');
 					}
 				}
 			} else {
-				me.setValue = Oce.form.ForeignComboBox.superclass.setValue;
+//				me.setValue = Oce.form.ForeignComboBox.superclass.setValue;
+				this.setValue = this.doSetValue;
 			}
 			
 			// initialisation value callback
@@ -428,6 +432,14 @@ Oce.deps.wait('Ext.ux.form.TwinComboBox', function() {
 		}
 
 		,initialisationValue: undefined
+		
+		// private
+		,doSetValue: function(v) {
+			if (v === undefined) {
+				v = ''; // needed for clear to work
+			}
+			Oce.form.ForeignComboBox.superclass.setValue.call(this, v);
+		}
 
 		,setValue: function(v, cb, scope) {
 			var me = this;
