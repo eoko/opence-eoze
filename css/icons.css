@@ -21,6 +21,9 @@
 .icon.ribbon.archive {
 	background-image: url(../images/icons_fatcow/32x32/drawer.png) !important;
 }
+.icon.ribbon.archive.view {
+	background-image: url(../images/icons_fatcow/32x32/drawer+eye.png) !important;
+}
 .icon.ribbon.unarchive {
 	background-image: url(../images/icons_fatcow/32x32/drawer_open.png) !important;
 }
