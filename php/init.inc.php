@@ -160,6 +160,7 @@ function includeFromNamespace($ns, $filename, $require = true, $once = true) {
 
 //... Exceptions bases
 require_once PHP_PATH . '_/router_exceptions.inc.php';
+require_once PHP_PATH . 'eoko/php/ErrorException.php';
 //... Language
 //require_once PHP_PATH . 'Language.class.php'; // declares the function lang in the global namespace
 includeFromNamespace('eoko\\i18n', 'Language.class.php');
