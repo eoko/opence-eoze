@@ -60,8 +60,9 @@ class Application implements FileFinder {
 	public static function getInstance() {
 		if (self::$instance) {
 			return self::$instance;
+		} else {
+			return self::$instance = new Application(self::$defaultSessionManager);
 		}
-		else return self::$instance = new Application(self::$defaultSessionManager);
 	}
 	
 	public function resolveRelativePath($relativePath, $type = null, $forbidUpward = null) {

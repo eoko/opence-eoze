@@ -5,24 +5,20 @@
 
 require_once PHP_PATH . '_/ExtJSResponse.class.php';
 
+use eoko\php\ErrorException;
+
 class ExceptionHandler {
 
 	private static $instance;
 
 	public function __construct() {
 		set_exception_handler(array($this, 'process'));
-		set_error_handler(array($this, 'wrapError'), E_ALL);
+		ErrorException::registerErrorHandler();
 		self::$instance = $this;
 	}
 
 	public function  __destruct() {
 		Logger::flush();
-	}
-
-	public function wrapError($errno, $errstr, $errfile, $errline) {
-		if (error_reporting() !== 0) {
-			$this->process(new Exception("$errstr ($errfile:$errline)", $errno));
-		}
 	}
 
 	public static function processException($ex) {
@@ -74,9 +70,9 @@ class ExceptionHandler {
 		}
 
 		if ($answer) {
-			if (!$reason && eoko\config\Application::getInstance()->isDevMode()) {
+//			if (!$reason && eoko\config\Application::getInstance()->isDevMode()) {
 //				$reason = "$ex";
-			}
+//			}
 			ExtJSResponse::failure($reason, $systemError, $errorTitle, true, false,
 				$includeTimestamp);
 		}

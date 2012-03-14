@@ -165,6 +165,11 @@ class Router {
 			);
 		}
 
+		// PHP error converted to exceptions will bypass the try/catch block
+		if ($this->requestMonitorRecord) {
+			eoko\php\ErrorException::onError(array($this, 'onRequestError'));
+		}
+
 		try {
 			$action = Module::parseRequestAction($this->request);
 			$action();
@@ -188,21 +193,15 @@ class Router {
 			}
 			throw $ex;
 		}
-		
-//		if (($controller = $this->getController()) !== null) {
-//
-//			if (($action = $this->getAction()) !== null) {
-//				$this->executeAction($controller, $action);
-//			} else {
-//				$this->executeAction($controller);
-//			}
-//
-//		} else {
-//			// Routing is done after it has been checked that user is logged
-////			throw new SystemException('Module info absent from request', lang('Module introuvable'));
-//			Logger::getLogger()->warn('No routing information available => reloading application');
-//			$this->executeAction(self::ROOT_MODULE_NAME);
-//		}
+	}
+	
+	public function onRequestError($ex) {
+		$microtime = self::microtime($time);
+		$runningTime = $microtime - $this->microTimeStart;
+		$this->requestMonitorRecord->setFinishState("$ex");
+		$this->requestMonitorRecord->setFinishDatetime(date('Y-m-d H:i:s'), $time);
+		$this->requestMonitorRecord->setRunningTimeMicro($runningTime);
+		$this->requestMonitorRecord->save();
 	}
 
 	private function getController() {
