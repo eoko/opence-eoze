@@ -146,7 +146,7 @@
 	 */
 	eo.form.DateTimeField = Ext.extend(Ext.form.CompositeField, {
 
-		dateTimeSeparator: " "
+		dateTimeSeparator: /T| /
 		,outDateFormat: 'Y-m-d'
 		,outTimeFormat: 'H:i'
 
