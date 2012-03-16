@@ -269,13 +269,20 @@ class Config implements ArrayAccess, IteratorAggregate {
 	 * Gets the value for the given path, or $default if the given config 
 	 * option is not set.
 	 * 
-	 * @param string $path   the slash-separated (/) path
-	 * @param mixed $default the default value to return if the option is not set
+	 * @param string $path      The slash-separated (/) path.
+	 * @param mixed  $default   The default value to return if the option is not set.
+	 * @param bool   $rawArrays TRUE to return raw arrays, FALSE to return Config objects.
+	 * 
 	 * @return mixed
 	 */
-	public function getValue($path, $default = null) {
+	public function getValue($path, $default = null, $rawArrays = false) {
 		if ($this->hasNode($path)) {
-			return $this->node($path, false, false);
+			$node = $this->node($path, false, false);
+			if ($rawArrays && $node instanceof Config) {
+				return $node->toArray();
+			} else {
+				return $node;
+			}
 		} else {
 			return $default;
 		}
