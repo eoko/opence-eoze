@@ -227,6 +227,7 @@ MSG
 		
 		unset($config['abstract']);
 		unset($config['line']);
+		unset($config['jsClass']);
 		
 		$config->apply($this->location->loadConfig());
 		
