@@ -315,8 +315,17 @@ class ModelTableQuery extends Query implements QueryAliasable {
 
 			if ($this->table->hasRelation($relationName)) {
 				$relation = $this->table->getRelationInfo($relationName);
-				if ($fieldName === null) $fieldName = $relation->getTargetTable()->getNameFieldName();
-				return $this->join($relation)->getQualifiedName($fieldName);
+				
+				// 16/03/12 18:00 Removed:
+				
+				// if ($fieldName === null) {
+				// 	$fieldName = $relation->getTargetTable()->getNameFieldName();
+				// }
+				// return $this->join($relation)->getQualifiedName($fieldName);
+				
+				// 16/03/12 18:00 Added:
+				
+				return $relation->getNameClause($this);
 			}
 		}
 
