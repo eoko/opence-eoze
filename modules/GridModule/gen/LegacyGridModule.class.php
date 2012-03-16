@@ -51,26 +51,32 @@ class LegacyGridModule {
 
 		// --- Generation Template ---
 		$tpl = Template::create()->setFile($tplFile);
+		
+		// uses
+		if (isset($config['uses'])) {
+			$uses = $config->uses;
+		} else {
+			$uses = array();
+		}
 
 		$tpl->merge($config->module);
 //		$tpl->controller .= '.grid';
 		if (isset($config['jsClass'])) {
-			if (preg_match('/.+\..+\..+\..+/', $config->jsClass))
+			if (preg_match('/.+\..+\..+\..+/', $config->jsClass)) {
 				$tpl->superclass = $config->jsClass;
-			else
+			} else {
 				$tpl->superclass = "Oce.Modules.$config->jsClass.$config->jsClass";
+			}
 		} else {
 			$tpl->superclass = "Oce.Modules.$config->class.$config->class";
 		}
+
+		$uses[] = $tpl->superclass;
 		
 		$tpl->modelName = json_encode($modelName);
 		$tpl->tableName = json_encode($table->getTableName());
 
-		if (isset($config['uses'])) {
-			$tpl->uses = json_encode(
-				$config->uses
-			);
-		}
+		$tpl->uses = json_encode($uses);
 
 
 		// --- Extra ---
