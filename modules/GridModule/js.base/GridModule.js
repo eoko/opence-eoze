@@ -3853,6 +3853,7 @@ Oce.GridModule.plugins = {
 }
 
 Oce.deps.reg('Oce.GridModule');
-
+// Required for inheritance dependency
+Oce.deps.reg('Oce.Modules.GridModule.GridModule');
 	
 })(); // closure
