@@ -169,12 +169,39 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	}
 	
 	/**
+	 * @protected
+	 */
+	,addAsyncConstructTask: function(fn, scope) {
+		var stack = this.asyncConstructTasks = this.asyncConstructTasks || [];
+		stack.push({
+			fn: fn
+			,scope: scope
+		});
+	}
+	
+	/**
 	 * This method will be called when an instance is created, to allow for
 	 * asynchronous operations.
 	 */
 	,doAsyncConstruct: function(callback, scope) {
-		if (callback) {
-			callback.call(scope);
+		
+		var stack = this.asyncConstructTasks;
+		
+		if (!stack) {
+			if (callback) {
+				callback.call(scope);
+			}
+		}
+		
+		else {
+			var latch = stack.length;
+			Ext.each(stack, function(task) {
+				task.fn.call(task.scope || this, function() {
+					if (--latch === 0 && callback) {
+						callback.call(scope);
+					}
+				});
+			}, this);
 		}
 	}
 	
