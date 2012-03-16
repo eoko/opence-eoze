@@ -84,4 +84,6 @@ class PluginBase implements Plugin {
 	public function onCreateQueryContext(Request $request, array &$context) {}
 	
 	public function afterCreateLoadQuery(ModelTableQuery $query) {}
+	
+	public function afterExecuteLoadQuery(ModelTableQuery $query) {}
 }

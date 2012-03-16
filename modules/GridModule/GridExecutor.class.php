@@ -693,7 +693,15 @@ abstract class GridExecutor extends JsonExecutor {
 			$r = array();
 			$count = 0;
 		} else {
-			$count = $query->executeCount();
+			$countQuery = clone $query;
+			$count = $countQuery->executeCount();
+		}
+		
+		$this->afterExecuteLoadQuery($query);
+		if ($this->plugins) {
+			foreach ($this->plugins as $plugin) {
+				$plugin->afterExecuteLoadQuery($query);
+			}
 		}
 
 		$this->count = $count;
@@ -703,6 +711,8 @@ abstract class GridExecutor extends JsonExecutor {
 	}
 	
 	protected function beforeExecuteLoadQuery(ModelTableQuery $query) {}
+	
+	protected function afterExecuteLoadQuery(ModelTableQuery $query) {}
 
 	  //////////////////////////////////////////////////////////////////////////
 	 // LOAD -- One Model

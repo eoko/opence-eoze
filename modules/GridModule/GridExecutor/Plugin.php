@@ -46,4 +46,6 @@ interface Plugin {
 	function executeAction($name, &$returnValue);
 	
 	function afterCreateLoadQuery(ModelTableQuery $query);
+	
+	function afterExecuteLoadQuery(ModelTableQuery $query);
 }
