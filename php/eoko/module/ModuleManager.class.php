@@ -124,6 +124,25 @@ class ModuleManager {
 					require_once $path;
 					return true;
 				}
+
+				// Resolution of automatic parent class ___
+				if (preg_match(
+					'/^' . preg_quote($location->namespace, '/') . '(?P<moduleName>.+)\\\\_{1,3}$/',
+					$class,
+					$matches
+				)) {
+					$moduleName = $matches['moduleName'];
+					if (null !== $config = self::getModuleConfig($moduleName)) {
+						$parentModuleName = self::getModuleConfig($moduleName)->class;
+						$parentModule = self::getModule($parentModuleName);
+						$parentClass  = get_class($parentModule);
+						class_extend($class, $parentClass);
+						return true;
+					} else {
+						throw new IllegalStateException(
+								"Cannot find configuration for module: $moduleName");
+					}
+				}
 			}
 		}
 		return false;
@@ -339,8 +358,8 @@ class ModuleManager {
 		}
 
 		// ... or do the job
-		foreach (self::$modulesDirectories as $location) {
-			if (($module = $this->tryGetModule($name, $location, $cacheDeps))) {
+		foreach (self::$modulesDirectories as $dir) {
+			if (($module = $this->tryGetModule($name, $dir, $cacheDeps))) {
 				return $module;
 			}
 		}
@@ -355,6 +374,15 @@ class ModuleManager {
 	 */
 	public function listModuleDirectories() {
 		return self::$modulesDirectories;
+	}
+	
+	private static function getModuleConfig($moduleName) {
+		foreach (self::$modulesDirectories as $dir) {
+			$location = ModuleLocation::create($dir, $moduleName);
+			if (!$location->isDisabled()) {
+				return $location->loadConfig();
+			}
+		}
 	}
 
 	/**
@@ -375,7 +403,9 @@ class ModuleManager {
 		$location = ModuleLocation::create($dir, $name);
 		$config = $location->loadConfig();
 		
-		if ($location->isDisabled()) return null;
+		if ($location->isDisabled()) {
+			return null;
+		}
 
 		if (!$location->isActual()) {
 			$namespace = "$dir->namespace$name\\";
