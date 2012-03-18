@@ -505,6 +505,11 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	}
 
 	,editReccordLine: function(grid, rowIndex) {
+		debugger // this method is deprecated (typo in its name)
+		return this.editRecordLine(grid, rowIndex);
+	}
+	
+	,editRecordLine: function(grid, rowIndex) {
 		if (this.my.recordEditable !== false) {
 			this.editRow(grid.store.getAt(rowIndex))
 		}
@@ -784,7 +789,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			}, this.extra.gridView)
 
 			,listeners: {
-				rowdblclick: this.editReccordLine.createDelegate(this)
+				rowdblclick: this.editRecordLine.createDelegate(this)
 			}
 		}, this.extra.grid);
 
