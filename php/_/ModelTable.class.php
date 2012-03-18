@@ -178,6 +178,13 @@ abstract class ModelTable extends ModelTableProxy {
 		$this->virtuals[$name] = $virtual;
 	}
 	
+	protected function addRelation(ModelRelationInfo $relation) {
+		if ($this->constructed) {
+			throw new IllegalStateException('This operation is only allowed during initialization');
+		}
+		$this->relations[$relation->getName()] = $relation;
+	}
+	
 	/**
 	 * Returns `true` if the underlying database engine automatically performs
 	 * ON_DELETE and ON_UPDATE actions.
