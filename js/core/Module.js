@@ -147,24 +147,30 @@ Oce.Module.executeAction = function(action, listeners, scope) {
 };
 
 Oce.getModule = function(module, callback, scope) {
+	
+	var app = Oce.MainApplication || Oce.mx.application;
+	
 	if (module.indexOf(".") == -1) {
 		module = String.format("Oce.Modules.{0}.{0}", module);
 	}
-	var registry = Oce.mx.application.moduleInstances;
+	var registry = app.moduleInstances;
 	
 	if (registry[module]) {
 		if (callback) {
-			Oce.mx.application.getModuleInstance(module, callback, scope);
+			app.getModuleInstance(module, callback, scope);
 		}
 		return registry[module];
 	}
 	
 	else if (callback) {
-		Oce.mx.application.getModuleInstance(module, callback, scope);
+		app.getModuleInstance(module, callback, scope);
 	}
 	
 	else {
-		throw new Error(String.format("Module {0} has not been loaded", module));
+		app.getModuleInstance(module, function(m) {
+			registry[module] = m;
+		});
+//		throw new Error(String.format("Module {0} has not been loaded", module));
 	}
 	
 	return false;
