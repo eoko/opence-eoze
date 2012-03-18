@@ -123,10 +123,10 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
 			}
 		});
 		
-		this.tabsByName = {};
-		Ext.each(this.findByType("panel"), function(item) {
-			if (item.tabName) this.tabsByName[item.tabName] = item;
-		}, this)
+		var lu = this.tabsByName = {};
+		Ext.each(this.findBy(function(o) { return !Ext.isEmpty(o.tabName) }), function(item) {
+			lu[item.tabName] = item;
+		});
 
 		this.modified = false;
 	}
@@ -353,7 +353,9 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
 	}
 
 	,setTab: function(tabName) {
-		if (this.tabsByName[tabName]) this.tabsByName[tabName].show();
+		if (this.tabsByName[tabName]) {
+			this.tabsByName[tabName].show();
+		}
 	}
 
 	,whenLoaded: function(callback, scope) {
