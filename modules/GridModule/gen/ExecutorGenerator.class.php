@@ -33,7 +33,7 @@ class ExecutorGenerator extends GeneratorBase {
 //		$tpl = Template::create($tplFile);
 //		$tpl->className = $name;
 		$tpl->merge($this->config->controllerInfo);
-		$tpl->title = str_replace("'", "\\'", $this->config['module']['title']);
+		$tpl->title = str_replace("'", "\\'", $this->config->getValue('module/title', 'Undefined Title'));
 
 //		if (
 //			(null !== $path = ModuleManager::getModulePath($name, false))
