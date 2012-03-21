@@ -29,8 +29,8 @@ class GridModule extends Module implements HasTitle {
 		);
 
 		$tpl->namespace = $namespace;
-		$tpl->class = $class;
-		$tpl->extend = $baseClass;
+		$tpl->class     = $class;
+		$tpl->extend    = $baseClass;
 		
 		$config = $this->getConfig();
 		$modelName = $config->model;
