@@ -1646,13 +1646,13 @@ class QuerySelectFunctionOnField extends QuerySelectBase {
 	 * array. Placeholders will be replaced by the fully qualified field in the $field
 	 * array which index matches the index of the placeholder.
 	 * 
-	 * @param QueryAliasable $aliasable
+	 * @param QueryAliasable $aliaser
 	 * @param string|array $field
 	 * @param string|array $function
 	 * @param string $alias 
 	 */
-	function __construct(QueryAliasable $aliasable, $field, $function, $alias = null) {
-		parent::__construct($aliasable, $alias);
+	function __construct(QueryAliasable $aliaser, $field, $function, $alias = null) {
+		parent::__construct($aliaser, $alias);
 		$this->field = $field;
 		$this->fn = $function;
 	}
