@@ -159,8 +159,13 @@ eo.form.CheckableFieldSet = Ext.extend(Ext.form.FieldSet, {
 		// va savoir pourquoi)
 		if (!Ext.isObject(this.layout)) return;
 		
-		var ct;
-		this.doLayout();
+		var ct,
+			ownerCt = this.ownerCt;
+		
+		if (ownerCt) {
+			ownerCt.doLayout();
+		}
+		
 		// fix vbox layout
 		var vboxCt = this.findParentBy(function(c) {
 			return c.layout instanceof Ext.layout.VBoxLayout
@@ -168,12 +173,16 @@ eo.form.CheckableFieldSet = Ext.extend(Ext.form.FieldSet, {
 		});
 		if (vboxCt) {
 			ct = this.ownerCt;
-			if (ct && ct.syncSize) ct.syncSize();
+			if (ct && ct.syncSize) {
+				ct.syncSize();
+			}
 			vboxCt.doLayout();
 		}
 		// fix shadow if in window
 		ct = this.findRootCt();
-		if (ct && ct.syncShadow) ct.syncShadow();
+		if (ct && ct.syncShadow) {
+			ct.syncShadow();
+		}
 	}
 	
 	,findRootCt: function() {
