@@ -303,7 +303,9 @@ abstract class GridExecutor extends JsonExecutor {
 			$query->whereIsActif(); // TODO actif
 		}
 
-		if ($this->request->has('limit', true)) {
+		$limit = $this->request->get('limit');
+		if ($limit !== null && $limit !== false && $limit !== 'false') {
+//		if ($this->request->has('limit', true)) {
 			if ($this->request->has('start', true)) {
 				$query->limit(
 					$this->request->getRaw('limit'),
@@ -672,11 +674,13 @@ abstract class GridExecutor extends JsonExecutor {
 		$start = $this->request->get('realstart', false, true);
 		if ($start === false) $start = $this->request->get('start', 0, true);
 
-		$query->limit(
-			$this->request->get('limit', 20),
-			$start
-//			$this->request->get('start', 0, true)
-		);
+		$limit = $this->request->get('limit');
+		if ($limit !== null && $limit !== false && $limit !== 'false') {
+			$query->limit(
+				$this->request->get('limit', 20),
+				$start
+			);
+		}
 		
 		$this->beforeExecuteLoadQuery($query);
 		
