@@ -4,7 +4,8 @@ namespace eoko\module\executor;
 
 use eoko\template\JsonTemplate;
 
-use \ExtJSResponse;
+use ExtJSResponse;
+use UnsupportedOperationException;
 
 class JsonExecutor extends TemplateExecutor {
 	
