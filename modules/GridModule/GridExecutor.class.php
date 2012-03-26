@@ -803,7 +803,7 @@ MSG;
 
 	// --- Form Templates ------------------------------------------------------
 
-	protected function putFormPageTemplateExtra($tpl, Model $model) {}
+	protected function putFormPageTemplateExtra($name, $tpl, Model $model) {}
 
 	protected function getFormPageNames() {
 		return array();
@@ -818,15 +818,13 @@ MSG;
 	protected function generateFormPage($name, Model $model) {
 		try {
 			if (null !== $path = $this->searchPath($name, FileType::HTML_TPL)) {
-//			if (null !== $tpl = $this->createHtmlTemplate($name)) {
 				$tpl = HtmlTemplate::create($this)->setFile($path);
 				$modelName = get_class($model);
 				$modelName = strtolower($modelName[0]) . substr($modelName, 1);
 				$tpl->model = $model;
 				$tpl->$modelName = $model;
-				$this->putFormPageTemplateExtra($tpl, $model);
+				$this->putFormPageTemplateExtra($name, $tpl, $model);
 				$this->put('pages', $name, $tpl->render(true));
-//				ExtJSResponse::pushIn('pages', $tpl->renderString(), $key = $name);
 			} else {
 				// TODO render 404
 				$this->put('pages', $name, "<h1>404 Not Found</h1>"
