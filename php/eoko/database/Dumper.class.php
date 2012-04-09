@@ -2,6 +2,9 @@
 
 namespace eoko\database;
 
+use eoko\util\collection\Map,
+	eoko\log\Logger;
+
 interface Dumper {
 	
 	const DATA = 'data';
@@ -22,6 +25,18 @@ interface Dumper {
 	 * by this type of Dumper
 	 */
 	function setOption($option, $value);
+	
+	/**
+	 * Gets the {@link Dumper}'s {@link Logger}.
+	 * @return Logger
+	 */
+	function getLogger();
+	
+	/**
+	 * Gets the {@link Dumper}'s configuration {@link Map}.
+	 * @return Map
+	 */
+	function getConfig();
 }
 
 //class Dumper {
