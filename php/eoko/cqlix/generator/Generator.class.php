@@ -247,7 +247,8 @@ class Generator extends Script {
 		}
 
 		$time = Debug::elapsedTime($startTime, microtime());
-		echo PHP_EOL . sprintf('DONE ! (%d models processed, %d files written -- %.2fs)',
+		echo PHP_EOL . sprintf('DONE ! (%d models processed, %d files written -- %.2fs)'
+				. PHP_EOL . PHP_EOL,
 				$this->modelProcessed, $this->fileWritten, $time);
 	}
 
