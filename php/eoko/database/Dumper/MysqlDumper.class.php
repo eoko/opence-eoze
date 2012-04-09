@@ -2,26 +2,13 @@
 
 namespace eoko\database\Dumper;
 
-use eoko\database\Dumper;
 use eoko\log\Logger;
-use eoko\util\collection\Map;
 
 use \IllegalStateException, \IllegalArgumentException;
 
-class MysqlDumper implements Dumper {
-	
-	/** @var Logger */
-	private $logger;
-	
-	/** @var Map */
-	private $config;
+class MysqlDumper extends AbstractDumper {
 	
 	private $dumpData = true;
-	
-	public function __construct(Map $config) {
-		$this->logger = new Logger($this);
-		$this->config = $config;
-	}
 	
 	public function hasOption($option) {
 		switch ($option) {
@@ -45,9 +32,9 @@ class MysqlDumper implements Dumper {
 		$this->dumpData = $on ? true : false;
 	}
 	
-	public function dump($dataFilename, $structureFilename = null) {
+	protected function doDump($dataFilename, $structureFilename = null) {
 		
-		$this->logger->info('Dumping database to {} (structure: {})', $dataFilename, $structureFilename);
+		$this->getLogger()->info('Dumping database to {} (structure: {})', $dataFilename, $structureFilename);
 		
 		$dir = dirname($dataFilename);
 		$dataFilename = basename($dataFilename);
@@ -61,7 +48,7 @@ class MysqlDumper implements Dumper {
 			if ($structureFilename) {
 				$structureFilename = basename($structureFilename);
 			}
-			$this->doDump($dataFilename, $structureFilename);
+			$this->_doDump($dataFilename, $structureFilename);
 		} catch (\Exception $ex) {
 			// restore original dir
 			chdir($owd);
@@ -72,18 +59,23 @@ class MysqlDumper implements Dumper {
 		chdir($owd);
 	}
 	
-	private function doDump($dataFilename, $structureFilename) {
+	private function _doDump($dataFilename, $structureFilename) {
 		
-
-		$config = $this->config;
+		$config = $this->getConfig();
+		
 		if ($dataFilename) {
+			
 			if (file_exists($dataFilename)) {
 				unlink($dataFilename);
 			}
 			
-			$cmd = "mysqldump --user $config->user --password=$config->password "
-					. "--opt $config->database | gzip > $dataFilename";
-			system($cmd);
+			system(
+				"mysqldump"
+				. " --user $config->user"
+				. " --password=$config->password"
+				. " --opt $config->database"
+				. " | gzip > $dataFilename"
+			);
 			
 			if (!file_exists($dataFilename)) {
 				throw new IllegalStateException('Error with dumping the database!');
@@ -107,13 +99,13 @@ class MysqlDumper implements Dumper {
 	
 	public function load($filename) {
 		
-		$this->logger->info('Loading database from {}', $filename);
+		$this->getLogger()->info('Loading database from {}', $filename);
 		
 		if (!file_exists($filename)) {
 			throw new IllegalArgumentException('Missing dump file: ' . $filename);
 		}
 
-		$config = $this->config;
+		$config = $this->getConfig();
 		$cmd = "gunzip < $filename | mysql --user $config->user --password=$config->password $config->database";
 		system($cmd);
 	}
