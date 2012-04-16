@@ -1238,7 +1238,7 @@ MSG;
 		set_time_limit(180);
 		
 		$allowedFormats = array(
-			'pdf', 'xls', 'ods'
+			'pdf', 'xls', 'ods', 'csv',
 		);
 
 		$fields = $this->request->req('fields');

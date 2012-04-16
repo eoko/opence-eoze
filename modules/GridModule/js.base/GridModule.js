@@ -2247,7 +2247,10 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	,exportData: function(format) {
 
 		switch (format) {
-			case 'xls': case 'pdf':break;
+			case 'xls': 
+			case 'pdf':
+			case 'csv':
+				break;
 			default:Ext.MessageBox.alert('Format Invalide', "Désolé, ce format de "
 				+ "fichier n'est pas pris en charge. Il s'agit vraisemblablement "
 				+ "d'une erreur du programme, veuillez contactez l'assistance technique.");
@@ -3747,6 +3750,13 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				,handler: this.exportData.createDelegate(this, ['xls'])
 				,text: 'Excel'
 				,iconCls: 'ribbon icon export_excel'
+			}
+			,csv: {
+				xtype: 'oce.rbbutton'
+				,handler: this.exportData.createDelegate(this, ['csv'])
+				,text: 'Texte'
+				,tooltip: "Exporter les données filtrées au format texte CSV, compatible MS Excel"
+				,iconCls: 'ribbon icon export_csv'
 			}
 			,help: {
 				xtype: 'oce.rbbutton', handler: helpHandler.createDelegate(this),
