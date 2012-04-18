@@ -47,26 +47,26 @@ class EarlReport extends Module {
 			// Register Earl's path in eoze class loader
 			$this->registerClassLoader();
 
-			$this->earl = new Earl();
+			$this->earl = new Earl($this->getConfig()->toArray());
 
-			$this->configureEarl($this->earl);
+//			$this->configureEarl($this->earl);
 		}
 		return $this->earl;
 	}
 	
-	protected function configureEarl(Earl $earl) {
-		$config = $this->getConfig();
-		
-		$earl->setSofficeCommand($config->get('soffice'))
-				->setUnoconvCommand($config->get('unoconv'))
-				->setLogger(new LoggerProxy($earl));
-				
-		if (!$earl->checkDependencies()) {
-			throw new RuntimeException('Missing dependency for EarlReport.');
-		}
-		
-		$earl->getContext()
-				->setDateFormat($config->get('dateFormat'))
-				->setDateTimeFormat($config->get('dateTimeFormat'));
-	}
+//	protected function configureEarl(Earl $earl) {
+//		$config = $this->getConfig();
+//		
+//		$earl->setSofficeCommand($config->get('soffice'))
+//				->setUnoconvCommand($config->get('unoconv'))
+//				->setLogger(new LoggerProxy($earl));
+//				
+//		if (!$earl->checkDependencies()) {
+//			throw new RuntimeException('Missing dependency for EarlReport.');
+//		}
+//		
+//		$earl->getContext()
+//				->setDateFormat($config->get('dateFormat'))
+//				->setDateTimeFormat($config->get('dateTimeFormat'));
+//	}
 }

@@ -1,10 +1,10 @@
 abstract: true
 
-# {String} soffice command
-soffice: /usr/bin/soffice
-
-# {String} unoconv command
-unoconv: /usr/bin/unoconv
-
 dateFormat: Y-m-d
 dateTimeFormat: Y-m-d H:i:s
+
+## {String} soffice command
+#soffice: /usr/bin/soffice
+#
+## {String} unoconv command
+#unoconv: /usr/bin/unoconv
