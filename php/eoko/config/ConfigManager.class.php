@@ -10,6 +10,7 @@ use eoko\log\Logger;
 use eoko\util\collection\Map, eoko\util\collection\ImmutableMap;
 
 use IllegalArgumentException, IllegalStateException;
+use InvalidConfigurationException;
 
 const NS_PROP = 'config.node';
 const CACHE_FILE = 'data';
@@ -275,6 +276,8 @@ class ConfigManager {
 	}
 
 	private function addConfigFile($parentNodePath, $filename) {
+
+		// Read yaml content of the file
 		$yml = YmlReader::loadFile($filename);
 		if (isset($yml[NS_PROP])) {
 			$nodePath = $this->cleanNodePath($yml[NS_PROP]);
@@ -285,7 +288,15 @@ class ConfigManager {
 		} else {
 			$nodePath = $parentNodePath;
 		}
-		$this->addContent($nodePath, $yml);
+        
+		// Merge config file content in global config
+        try {
+			$this->addContent($nodePath, $yml);
+		} catch (\Exception $ex) {
+			// Add the file name to the exception
+			throw new InvalidConfigurationException($filename, $nodePath,
+					'Configuration file merging raised an error.', '', $ex);
+		}
 	}
 
 	/**
