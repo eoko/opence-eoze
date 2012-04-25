@@ -660,12 +660,38 @@ abstract class GridExecutor extends JsonExecutor {
 	 // LOAD -- Multiple Rows
 	//////////////////////////////////////////////////////////////////////////
 
+	/**
+	 * Loads the grid records.
+	 * 
+	 * 
+	 * @option int|bool [limit = 20]
+	 * 
+	 * A positive integer sets the row limit to that number.
+	 * 
+	 * `false` means no limit.
+	 * 
+	 * 
+	 * @option int [start = 0]
+	 * 
+	 * Sets the index of the first record to load.
+	 * 
+	 * 
+	 * @option int [realstart = null]
+	 * 
+	 * Will be used instead of start, to set the index of the first record to loard,
+	 * if specified.
+	 * 
+	 * 
+	 * @version 1.0.0 25/04/12 22:37
+	 */
 	public function load() {
 
 		$query = $this->createLoadQuery('grid');
 
 		$start = $this->request->get('realstart', false, true);
-		if ($start === false) $start = $this->request->get('start', 0, true);
+		if ($start === false) {
+			$start = $this->request->get('start', 0, true);
+		}
 
 		$limit = $this->request->get('limit');
 		if ($limit !== null && $limit !== false && $limit !== 'false') {
