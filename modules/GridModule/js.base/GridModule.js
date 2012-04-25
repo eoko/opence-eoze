@@ -425,6 +425,12 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				}
 			});
 			
+			// If no column is displayed, we don't want to reload.
+			// Since internal columns are not displayed, but always here, we don't count them).
+			if (!dataIndexes.length) {
+				return false;
+			}
+			
 			// internal columns
 			Ext.each(this.columns, function(col) {
 				if (col.internal) {
