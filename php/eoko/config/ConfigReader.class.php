@@ -50,10 +50,18 @@ class ConfigReader {
 			if (!is_subclass_of($class, __CLASS__) && $class !== __CLASS__) {
 				throw new IllegalStateException("Config reader $class must extend " . __CLASS__);
 			}
-			return new $class;
-		} else {
-			return new ConfigReader();
+            
+            $o = new $class;
+            
+            // PHP namespaces are case-insensitive, while eoze config node namespaces
+            // are case-sensitive, so we must ensure that the class name of the ConfigReader
+            // that has been found is *really* the one expected
+            if (get_class($o) === $class) {
+                return $o;
+            }
 		}
+        
+        return new ConfigReader();
 	}
 
 }
