@@ -1,2 +1,2 @@
 modules/EarlReport/lib = ssh://hg@bitbucket.org/rixo/earlreport
-vendor/zf2 = [git]git://github.com/zendframework/zf2.git
+#vendor/zf2 = [git]git://github.com/zendframework/zf2.git
