@@ -167,9 +167,6 @@ class Columns {
 
 
 			ConfigInheritor::process($colConfig, $this);
-			
-			// 06/05/12 16:50 Apply grid meta
-			$this->applyGridMeta($colConfig, $name);
 
 			$tpl = Arrays::pickOneOf($colConfig, array('tpl', 'template'));
 
@@ -184,6 +181,9 @@ class Columns {
 			}
 
 			Arrays::apply($col, $colConfig, false);
+			
+			// 06/05/12 16:50 Apply grid meta
+			$this->applyGridMeta($col, $name);
 
 			// Automatically apply name
 			if (!isset($col['name'])) {
