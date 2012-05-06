@@ -167,6 +167,9 @@ class Columns {
 
 
 			ConfigInheritor::process($colConfig, $this);
+			
+			// 06/05/12 16:50 Apply grid meta
+			$this->applyGridMeta($colConfig, $name);
 
 			$tpl = Arrays::pickOneOf($colConfig, array('tpl', 'template'));
 
@@ -399,6 +402,24 @@ class Columns {
 			}
 		}
 		unset($col);
+	}
+
+	/**
+	 * Takes key `grid` from model's configuration (meta), and applies it to the column
+	 * configuration. Know usage include specifying tooltip of columns in model configuration.
+	 * 
+	 * @param array $colConfig
+	 * @param string $name
+	 * 
+	 * @since 06/05/12 17:05
+	 */
+	private function applyGridMeta(array &$colConfig, $name) {
+		if ($this->table->hasField($name)) {
+			$gridMeta = $this->table->getField($name)->getMeta()->grid;
+			if ($gridMeta) {
+				Arrays::applyIf($colConfig, $gridMeta);
+			}
+		}
 	}
 	
 	private static function setColFormItemIf(&$col, $name, $value) {
