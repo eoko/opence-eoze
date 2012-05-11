@@ -1010,26 +1010,60 @@ eo.WizardPanel = eo.wizard.WizardPanel = Ext.extend(Ext.Panel, {
 			Ext.each(steps, applyStepFormData);
 		}
 
-//		var params = Ext.apply({}, opts.params);
-		if (opts.jsonParam) {
-			// submit the form with a json param
-			var pp = params[opts.jsonParam];
-			params[opts.jsonParam] = encodeURIComponent(Ext.encode(
-				pp ? Ext.apply(pp, formData) : formData
-			));
-		} else {
-			// serialize the form and submit
-			Ext.apply(params, formData);
-		}
-//		opts.params = params;
+////		var params = Ext.apply({}, opts.params);
+//		if (opts.jsonParam) {
+//			// submit the form with a json param
+//			var pp = params[opts.jsonParam];
+//			params[opts.jsonParam] = encodeURIComponent(Ext.encode(
+//				pp ? Ext.apply(pp, formData) : formData
+//			));
+//		} else {
+//			// serialize the form and submit
+//			Ext.apply(params, formData);
+//		}
+////		opts.params = params;
 		
 		// Do the request
 		delete opts.jsonParam;
 		delete opts.tree;
 		delete opts.addPrefix;
 		
-		var request, successCB;
-		if (Oce.Ajax) {
+		
+		
+		// Uglyyyyyyyy
+		// Decode formData into json
+		opts.jsonData = {
+			form: (function(o) {
+
+				function decode(s) {
+					var o = Ext.isString(s) ? Ext.decode(s) : s;
+					if (Ext.isObject(o)) {
+						var r = {};
+						Ext.iterate(o, function(k, v) {
+							if (k.substr(0,5) === 'json_') {
+								r[k.substr(5)] = decode(decodeURIComponent(v));
+							} else {
+								r[k] = v;
+							}
+						});
+						return r;
+					} else {
+						return o;
+					}
+				}
+
+				return decode(o);
+
+			})(formData)
+		};
+		
+		var request,
+			successCB = "success",
+			failureCB = "failure";
+			
+		if (eo.Ajax) {
+			request = eo.Ajax.request.createDelegate(eo.Ajax);
+		} else if (Oce && Oce.Ajax) {
 			request = Oce.Ajax.request;
 			successCB = "onSuccess";
 			if (opts.waitTarget === undefined) {
@@ -1037,33 +1071,81 @@ eo.WizardPanel = eo.wizard.WizardPanel = Ext.extend(Ext.Panel, {
 			}
 		} else {
 			request = Ext.Ajax.request;
-			successCB = "success";
 		}
 		
 		var me = this;
-		var prev = opts[successCB];
-		opts[successCB] = function() {
-			if (prev) prev.apply(this, arguments);
-			me.fireEvent.apply(me, 
-					["aftersubmit", me, true].concat(Array.prototype.slice.call(arguments, 0)));
-			if (finish) finish.apply(me, arguments);
+//		var prev = opts[successCB];
+//		opts[successCB] = function() {
+//			if (prev) prev.apply(this, arguments);
+//			me.fireEvent.apply(me, 
+//					["aftersubmit", me, true].concat(Array.prototype.slice.call(arguments, 0)));
+//			if (finish) finish.apply(me, arguments);
+//		}
+		
+		// Wait message
+		var tlp = this.findParentBy(function(p){return p.owner === undefined}),
+			tlpel = tlp && tlp.el;
+			
+		if (tlpel) {
+			tlpel.mask(opts.waitMessage || "Enregistrement...", "x-mask-loading");
 		}
 		
+		// Callback
 		var prev2 = opts["callback"];
-		opts["onFailure"] = function(obj, e) {
-			if (prev2) prev2.apply(this, arguments);
+		opts.callback = function(opts, success, data) {
+			
+			if (prev2) {
+				prev2.call(this, opts, success);
+			}
+			
 			me.updateButtons();
 			
-			if (obj.errors) {
-				Ext.iterate(obj.errors, function(field, msg) {
-					var fs = me.findFieldAndStep(field);
-					if (fs) {
-						fs.field.markInvalid(msg);
-					}
-				});
+			if (tlpel) {
+				tlpel.unmask();
 			}
-			e.forceMsgBox = true;
-		}
+			
+			if (success) {
+				if (data) {
+					if (data.success) {
+						me.fireEvent.apply(me, 
+								["aftersubmit", me, true].concat(Array.prototype.slice.call(arguments, 0)));
+						if (finish) finish.apply(me, arguments);
+					} else {
+						if (data.errors) {
+							if (data.errors) {
+								Ext.iterate(data.errors, function(field, msg) {
+									var fs = me.findFieldAndStep(field);
+									if (fs) {
+										fs.field.markInvalid(msg);
+									}
+								});
+								Ext.Msg.alert("Erreur", "Certains champs ne sont pas remplis correctements.");
+							}
+						} else {
+							Ext.Msg.alert("Erreur", "Une erreur a empêché l'enregistrement.")
+						}
+					}
+				}
+			} else {
+				// error here should be handled by eo.Ajax
+			}
+		};
+
+//		var prev2 = opts["callback"];
+//		opts["onFailure"] = function(obj, e) {
+//			if (prev2) prev2.apply(this, arguments);
+//			me.updateButtons();
+//			
+//			if (obj && obj.errors) {
+//				Ext.iterate(obj.errors, function(field, msg) {
+//					var fs = me.findFieldAndStep(field);
+//					if (fs) {
+//						fs.field.markInvalid(msg);
+//					}
+//				});
+//			}
+//			e.forceMsgBox = true;
+//		}
 
 		request(opts);
 	}
