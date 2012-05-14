@@ -41,6 +41,10 @@ class Date extends DateTime{
 			parent::__construct($date);
 		}
 	}
+	
+	public function __toString() {
+		return $this->format('Y-m-d');
+	}
 
 	public function equals(DateTime $d) {
 		$d = clone $d;
