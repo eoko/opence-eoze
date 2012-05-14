@@ -4,7 +4,14 @@ namespace eoko\util\date;
 
 use IllegalArgumentException;
 
+use DateTimeZone;
+
 /**
+ * Represents an **immutable** date range, that is a date from and a date to.
+ * 
+ * The `getFrom()` and `getTo()` methods return clones of internal Date objects,
+ * so they are impossible to modify externaly. That helps preventing bugs with
+ * PHP 5.3.2 DateTime handling.
  *
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  * @author Éric Ortega <eric@planysphere.fr>
@@ -24,32 +31,41 @@ class DateRange {
 	/**
 	 * Constructs a new DateRange object.
 	 * 
-	 * @param string|DateTime $from
-	 * @param string|DateTime $to 
+	 * Accepts either two dates (either string or DateTime) as aguement, or an
+	 * array of exactly two dates (here again, strings or DateTimes).
+	 * 
+	 * @param string|DateTime|array $from
+	 * @param string|DateTime|null $to 
 	 */
 	public function __construct($from, $to = null) {
 		
-		if (is_array($from)) {
-			
-			if (count($from) != 2) {
-				throw new IllegalArgumentException('$from array must have a length of exactly 2');
+		if ($to === null) {
+			if (is_array($from)) {
+
+				if (count($from) != 2) {
+					throw new IllegalArgumentException('$from array must have a length of exactly 2');
+				}
+
+				$to = $from[1];
+				$from = $from[0];
+			} else {
+				throw new IllegalArgumentException('First argument must be an array, when called '
+						. 'with only one argument.');
 			}
-			
-			$to = $from[1];
-			$from = $from[0];
 		}
 		
 		$this->from = Date::parseDate($from);
 		$this->to = Date::parseDate($to);
 		
-		if ($this->from->after($this->to)) {
-			$from = $this->from->format('Y-m-d');
-			$to = $this->to->format('Y-m-d');
+		if ($this->getFrom()->after($this->getTo())) {
+			$from = $this->getFrom()->format('Y-m-d e');
+			$to = $this->getTo()->format('Y-m-d e');
 			throw new IllegalArgumentException("Date from ($from) must be before date to ($to)");
 		}
 	}
 	
 	/**
+	 * Returns a **clone** of the from Date.
 	 * @return Date
 	 */
 	public function getFrom() {
@@ -57,6 +73,7 @@ class DateRange {
 	}
 	
 	/**
+	 * Returns a **clone** of the to Date.
 	 * @return Date
 	 */
 	public function getTo() {
@@ -64,7 +81,7 @@ class DateRange {
 	}
 
 	/**
-	 * Gets the intersection of the current DateRange with the given one. All comparison
+	 * Gets the intersection of the current DateRange with the given one. All comparisons
 	 * are inclusive.
 	 * 
 	 * @param DateRange $other
@@ -72,14 +89,15 @@ class DateRange {
 	 */
 	public function intersect(DateRange $other) {
 		
-		if (!$this->to->afterOrEquals($other->from)
-				|| !$this->from->beforeOrEquals($other->to)) {
+		// If ranges don't intersect at all
+		if (!$this->getTo()->afterOrEquals($other->getFrom())
+				|| !$this->getFrom()->beforeOrEquals($other->getTo())) {
 			return null;
 		}
 		
 		return new DateRange(
-			$this->from->afterOrEquals($other->from) ? $this->from : $other->from,
-			$this->to->beforeOrEquals($other->to) ? $this->to : $other->to
+			$this->getFrom()->afterOrEquals($other->getFrom()) ? $this->getFrom() : $other->getFrom(),
+			$this->getTo()->beforeOrEquals($other->getTo()) ? $this->getTo() : $other->getTo()
 		);
 	}
 	
@@ -88,10 +106,10 @@ class DateRange {
 	 * string and the second, the end date string.
 	 * 
 	 * @param string $format
-	 * @return array
+	 * @return string[]
 	 */
 	public function toStringArray($format = 'Y-m-d') {
-		return array($this->from->format($format), $this->to->format('Y-m-d'));
+		return array($this->getFrom()->format($format), $this->getTo()->format('Y-m-d'));
 	}
 	
 	/**
@@ -110,8 +128,8 @@ class DateRange {
 	}
 	
 	public function __toString() {
-		return 'DateRange[' . $this->from->format('Y-m-d') . ', ' 
-				. $this->to->format('Y-m-d') . ']';
+		return 'DateRange[' . $this->getFrom()->format('Y-m-d e') . ', ' 
+				. $this->getTo()->format('Y-m-d e') . ']';
 	}
 	
 	/**
