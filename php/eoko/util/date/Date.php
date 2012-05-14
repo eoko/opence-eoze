@@ -2,7 +2,8 @@
 
 namespace eoko\util\date;
 
-use DateTime;
+use DateTime,
+    DateTimeZone;
 use ParseRange;
 use IllegalArgumentException;
 
@@ -15,18 +16,25 @@ use IllegalArgumentException;
 class Date extends DateTime{
 	
 	/**
-	 * @param DateTime|string $d
+	 * Parses a Date object.
+	 * 
+	 * If the argument is a Date or DateTime, a whole new one will be created from the
+	 * object's data, in order to workaround early PHP 5.3 versions buggy behaviour
+	 * with DateTime...
+	 * 
+	 * @param DateTime|Date|string $date
+	 * 
 	 * @return Date
 	 */
-	public static function parseDate($d) {
-		if ($d instanceof Date) {
-			return $d;
-		} else if ($d instanceof DateTime) {
-			return new Date($d->format('Y-m-d'), $d->getTimezone());
-		} else if (is_string($d)) {
-			return new Date($d);
+	public static function parseDate($date) {
+		// clone propagates PHP bugs with DateTime (in early PHP 5.3 versions)
+		// so we must create a whole new object from string
+		if ($date instanceof DateTime) {
+			return new Date($date->format('Y-m-d'), $date->getTimezone());
+		} else if (is_string($date)) {
+			return new Date($date, DefaultTimeZone::get());
 		} else {
-			throw new IllegalArgumentException("$d (" . gettype($d) . ')');
+			throw new IllegalArgumentException("$date (" . gettype($date) . ')');
 		}
 	}
 	
@@ -38,7 +46,7 @@ class Date extends DateTime{
 			parent::__construct($date, $timeZone);
 		} else {
 			// DateTime constructor won't accept NULL as a valid param for $timeZone...
-			parent::__construct($date);
+			parent::__construct($date, DefaultTimeZone::get());
 		}
 	}
 	
