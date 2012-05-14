@@ -123,6 +123,14 @@ abstract class Executor implements file\Finder {
 	public function getModuleConfig() {
 		return $this->module->getConfig();
 	}
+
+	/**
+	 * Gets the Logger for this executor's context.
+	 * @return Logger
+	 */
+	protected function getLogger() {
+		return Logger::get(get_class($this));
+	}
 	
 	/**
 	 * @deprecated

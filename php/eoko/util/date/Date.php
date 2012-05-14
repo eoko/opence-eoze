@@ -32,9 +32,13 @@ class Date extends DateTime{
 	
 	public function __construct($date, $timeZone = null) {
 		if ($date instanceof DateTime) {
-			parent::__construct($date->format('Y-m-d'), $timeZone);
-		} else {
+			$date = $date->format('Y-m-d');
+		}
+		if ($timeZone !== null) {
 			parent::__construct($date, $timeZone);
+		} else {
+			// DateTime constructor won't accept NULL as a valid param for $timeZone...
+			parent::__construct($date);
 		}
 	}
 
