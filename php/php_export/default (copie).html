@@ -1,0 +1,99 @@
+<style>
+#table {
+	border: 10px red;
+}
+#table td {
+	width: 20mm;
+}
+p.header {
+	margin: .8em 0 0 0;
+}
+p.footer {
+	margin: 0;
+	text-align: center;
+}
+h1#title {
+	margin-bottom: 0;
+	margin-left: 40mm;
+}
+hr.rule {
+	border-width: 1px;
+	margin: 0;
+}
+td.row1 {
+	background-color: #F0F2F2;
+}
+th {
+	background-color: #e7e7e7;
+	padding: .2em;
+}
+</style>
+
+<page id="page" backtop="55mm">
+	<page_header>
+		<?php imageTag('logo.jpg') ?>
+		<p class="header">
+			Comité Inter-Entreprise<br/>
+			Site Belle Étoile
+		</p>
+		<p class="header">
+			BP 103<br/>
+			69192 SAINT FONS CEDEX
+		</p>
+		<p class="header">
+			<?php out('usr.prenom') ?> <?php out('usr.nom') ?><br/>
+			Email: <?php out('usr.mail') ?>
+		</p>
+	</page_header>
+
+	<h1 id="title">Titre</h1>
+	<hr class="rule"/>
+
+	<?php if (!$hasData): ?>
+	<p class="error">Aucunes données n'ont été sélectionnées pour être exportées.</p>
+	<?php else: ?>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Coucou</th>
+      </tr>
+    </thead>
+    <tbody><tr></tr>
+    </tbody>
+  </table>
+
+	<table>
+		<?php if (isset($tableHeader)): ?>
+		<thead>
+			<tr>
+				<?php foreach ($tableHeader as $label): ?>
+				<th><?php echo $label ?></th>
+				<?php endforeach ?>
+			</tr>
+		</thead>
+		<?php endif ?>
+		<tbody>
+			<?php 
+				$iRow = 0;
+				foreach ($tableRows as $row):
+				$iRow++;
+			?>
+				<tr>
+				<?php foreach ($row as $val): ?>
+					<td class="row<?php echo ($iRow % 2 + 1) ?>"><?php echo $val ?></td>
+				<?php endforeach ?>
+				</tr>
+			<?php endforeach ?>
+		</tbody>
+	</table>
+
+	<?php // echo $body ?>
+
+	<?php endif ?>
+
+	<page_footer>
+		<hr class="rule"/>
+		<p class="footer">Pied de page</p>
+	</page_footer>
+</page>
