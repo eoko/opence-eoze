@@ -37,7 +37,9 @@ abstract class ModuleTestCase extends DatabaseTestCase {
 
         $this->getDatabaseTester()->setSetUpOperation($this->getSetUpOperation());
         $this->getDatabaseTester()->setDataSet($this->getCompositeDataSet());
+		$this->getConnection()->getConnection()->query('SET FOREIGN_KEY_CHECKS = 0;');
         $this->getDatabaseTester()->onSetUp();
+		$this->getConnection()->getConnection()->query('SET FOREIGN_KEY_CHECKS = 1;');
 
 		// My code...
 		UserSession::setLoginAdapter(new DummyLoginAdapter);
