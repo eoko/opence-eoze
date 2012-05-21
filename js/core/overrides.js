@@ -314,7 +314,13 @@ Ext.grid.Column.types.datecolumn =
 		
 		this.columns = max;
 
-		var items = [], mi = this.items;
+		// We don't want to modify original configuration
+		var mi = [];
+		Ext.each(this.items, function(item) {
+			mi.push(item instanceof Ext.Component ? item : Ext.apply({}, item));
+		});
+
+		var items = [];
 		Ext.each(cols, function(l) {
 			items = items.concat(mi.splice(0, l));
 			if (mi.length) {
@@ -325,12 +331,15 @@ Ext.grid.Column.types.datecolumn =
 		});
 		
 		this.items = items;
-	}
+	};
 
 	/**
-	 * @option {Array/Integer} rowColumns The number of items to be placed on
-	 * each row; spacers will be added at the end of rows that haven't the max
-	 * number of items.
+	 * @cfg {Array/Integer} rowColumns 
+	 * 
+	 * **Added by Éric O. (Eoko)**
+	 * 
+	 * The number of items to be placed on each row; spacers will be added at the 
+	 * end of rows that haven't the max number of items.
 	 */
 	Ext.form.CheckboxGroup.prototype.initComponent = function() {
 		if (this.rowColumns) {
@@ -338,6 +347,130 @@ Ext.grid.Column.types.datecolumn =
 		}
 		uber.call(this);
 	};
+
+	/**
+	 * @member Ext.form.CheckboxGroup
+	 * @cfg {Object} columnCtConfig 
+	 * 
+	 * **Added by Éric O. (Eoko)**
+	 * 
+	 * A config object that will override the default configuration of the 
+	 * {@link Ext.Container} created to materialize the columns configured with 
+	 * the {@link #columns} option.
+	 */
+	Ext.form.CheckboxGroup.prototype.onRender = function(ct, position) {
+        if(!this.el){
+            var panelCfg = {
+                autoEl: {
+                    id: this.id
+                },
+                cls: this.groupCls,
+                layout: 'column',
+                renderTo: ct,
+                bufferResize: false // Default this to false, since it doesn't really have a proper ownerCt.
+            };
+            var colCfg = Ext.apply({
+                xtype: 'container',
+                defaultType: this.defaultType,
+                layout: 'form',
+                defaults: {
+                    hideLabel: true,
+                    anchor: '100%'
+                }
+            }, this.columnCtConfig);
+
+            if(this.items[0].items){
+
+                // The container has standard ColumnLayout configs, so pass them in directly
+
+                Ext.apply(panelCfg, {
+                    layoutConfig: {columns: this.items.length},
+                    defaults: this.defaults,
+                    items: this.items
+                });
+                for(var i=0, len=this.items.length; i<len; i++){
+                    Ext.applyIf(this.items[i], colCfg);
+                }
+
+            }else{
+
+                // The container has field item configs, so we have to generate the column
+                // panels first then move the items into the columns as needed.
+
+                var numCols, cols = [];
+
+                if(typeof this.columns == 'string'){ // 'auto' so create a col per item
+                    this.columns = this.items.length;
+                }
+                if(!Ext.isArray(this.columns)){
+                    var cs = [];
+                    for(var i=0; i<this.columns; i++){
+                        cs.push((100/this.columns)*.01); // distribute by even %
+                    }
+                    this.columns = cs;
+                }
+
+                numCols = this.columns.length;
+
+                // Generate the column configs with the correct width setting
+                for(var i=0; i<numCols; i++){
+                    var cc = Ext.apply({items:[]}, colCfg);
+                    cc[this.columns[i] <= 1 ? 'columnWidth' : 'width'] = this.columns[i];
+                    if(this.defaults){
+                        cc.defaults = Ext.apply(cc.defaults || {}, this.defaults);
+                    }
+                    cols.push(cc);
+                };
+
+                // Distribute the original items into the columns
+                if(this.vertical){
+                    var rows = Math.ceil(this.items.length / numCols), ri = 0;
+                    for(var i=0, len=this.items.length; i<len; i++){
+                        if(i>0 && i%rows==0){
+                            ri++;
+                        }
+                        if(this.items[i].fieldLabel){
+                            this.items[i].hideLabel = false;
+                        }
+                        cols[ri].items.push(this.items[i]);
+                    };
+                }else{
+                    for(var i=0, len=this.items.length; i<len; i++){
+                        var ci = i % numCols;
+                        if(this.items[i].fieldLabel){
+                            this.items[i].hideLabel = false;
+                        }
+                        cols[ci].items.push(this.items[i]);
+                    };
+                }
+
+                Ext.apply(panelCfg, {
+                    layoutConfig: {columns: numCols},
+                    items: cols
+                });
+            }
+
+            this.panel = new Ext.Container(panelCfg);
+            this.panel.ownerCt = this;
+            this.el = this.panel.getEl();
+
+            if(this.forId && this.itemCls){
+                var l = this.el.up(this.itemCls).child('label', true);
+                if(l){
+                    l.setAttribute('htmlFor', this.forId);
+                }
+            }
+
+            var fields = this.panel.findBy(function(c){
+                return c.isFormField;
+            }, this);
+
+            this.items = new Ext.util.MixedCollection();
+            this.items.addAll(fields);
+        }
+        Ext.form.CheckboxGroup.superclass.onRender.call(this, ct, position);
+    };
+	
 })();
 
 /**
