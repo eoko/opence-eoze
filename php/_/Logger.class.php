@@ -564,7 +564,7 @@ class LoggerFileAppender implements LoggerAppender {
 				@unlink($this->filename);
 			}
 
-			$this->logFile = @fopen($this->filename, 'a');
+			$this->logFile = @fopen($this->filename, 'ab');
 
 			if ($this->logFile === false) {
 				$this->failedOpenFile = true;
