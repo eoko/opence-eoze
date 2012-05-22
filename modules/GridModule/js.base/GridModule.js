@@ -448,6 +448,12 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			var p = opts.params || {};
 			p.json_columns = Ext.encode(dataIndexes);
 		}, this);
+		
+		store.on({
+			scope: this
+			,load: this.onSelectionChange
+			,update: this.onSelectionChange
+		});
 	}
 
 	,editRecord: function(recordId, startTab, cb, scope) {
