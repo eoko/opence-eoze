@@ -3667,16 +3667,19 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	 *
 	 * This method should be called from {@link #initActions}.
 	 * 
-	 * @param {String/Object} action If called with two arguments, this should be
-	 * the unique identifier of the action (used in the `extra.toolbar` config
-	 * option of the module to identify the action) as a `string`. If called with
-	 * two arguments, this should be the config `Object` of the ribbon button.
-	 * In this case, the second argument will be ignored, and the config `Object`
-	 * **must** contain a key `action` with the unique identifier string of the
-	 * action.
+	 * @param {String/Object} action
 	 * 
-	 * @param {Object} buttonConfig The ribbon button configuration, if the method
-	 * is called with 2 arguments.
+	 * When called with two arguments, this is the unique identifier of the action 
+	 * (used in the `extra.toolbar` config option of the module to identify the 
+	 * action) as a string.
+	 * 
+	 * When called with only one arguments, this must be the config Object of the 
+	 * ribbon button. In this case, the second argument will be ignored, and the 
+	 * config Object **must** contain a key `action` with the unique identifier 
+	 * string of the action.
+	 * 
+	 * @param {Object} buttonConfig 
+	 * The ribbon button configuration, if the method is called with 2 arguments.
 	 *
 	 * @protected
 	 */
