@@ -55,35 +55,41 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	spp: Ext.Panel.prototype
 	
 	/**
-	 * @cfg {String} autoExpandColumn {@link Ext.grid.Column#id} id of the column that
-	 * will be set as the grid's {@link Ext.grid.GridPanel#autoExpandColumn
-	 * autoExpandColumn}.
+	 * @cfg {String} autoExpandColumn
+	 * 
+	 * {@link Ext.grid.Column#id} id of the column that will be set as 
+	 * the grid's {@link Ext.grid.GridPanel#autoExpandColumn  autoExpandColumn}.
 	 */
 	,autoExpandColumn: undefined
 	
 	/**
-	 * True if this component fires an "open" event. Read-only.
-	 * @type Boolean
-	 * @property openEvent
+	 * @type {Boolean}
+	 * @readonly
+	 * 
+	 * True if this component fires an 'open' event. Read-only.
 	 */
 	,openEvent: true
+	
 	/**
+	 * @type {Boolean}
+	 * @readonly
+	 * 
 	 * True if this component is opened. Read-only.
-	 * @type Boolean
-	 * @property opened
 	 */
 	,opened: false
 	
 	/**
-	 * {Object} processedReloads Origin id string of the reloads that have already been
-	 * processed. When a reload is directly fired from the success callback of a saving
-	 * method, the origin id string is kept for a short time (as a key set to `true`in 
-	 * the `processedReloads` object), in order to prevent externally fired events
-	 * from triggering the processing again. For example, a GridModule having a declared
-	 * dependency on another table will have its reload method called twice: once from 
-	 * the success callback, and a second time from the Kepler watched event triggered
-	 * by the table it depends on.
+	 * @type {Object} 
 	 * @private
+	 * 
+	 * Origin id string of the reloads that have already been processed. When a reload 
+	 * is directly fired from the success callback of a saving method, the origin id 
+	 * string is kept for a short time (as a key set to `true`in the `processedReloads` 
+	 * object), in order to prevent externally fired events from triggering the 
+	 * processing again. For example, a GridModule having a declared dependency on 
+	 * another table will have its reload method called twice: once from the success 
+	 * callback, and a second time from the Kepler watched event triggered by the table 
+	 * it depends on.
 	 */
 	,processedReloads: undefined
 
@@ -578,7 +584,8 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	}
 	
 	/**
-	 * {Array} externalGridDependencies
+	 * @type {Array}
+	 * @protected
 	 * 
 	 * Array of kepler event names to watch, because the grid needs to be
 	 * reloaded when they happen. These events will be automatically added
@@ -589,8 +596,6 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	 * parent modules may use it. {@link Oce.GridModule} itself won't use
 	 * it, so it is always safe *for the first direct child modules only*
 	 * to override this property directly.
-	 * 
-	 * @protected
 	 */
 	,externalGridDependencies: undefined
 	
@@ -1136,6 +1141,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		});
 	}
 
+	// TODO finish (or fix?) doc block
 	/**
 	 * Decides if an error message dialog must be displayed for the given action
 	 * and formPanel. The resolution goes as follow:
@@ -1824,7 +1830,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 
 		walkChildren(win.formPanel);
 
-		/**
+		/*
 		 * Wraps context help toggle button handler to avoid collisions with
 		 * properties and methods of Ext.Button (we just want to override its
 		 * toggleHandler method), and also saving the multiple creation of the
@@ -1836,7 +1842,8 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			this.helpItems = helpItems;
 			this.module = module;
 		};
-		/**
+		
+		/*
 		 * Creates a wrapper for a new ContextHelpHandler, to be applied to the
 		 * Ext.Button toggle button to override its toggleHandler method.
 		 */
@@ -3331,6 +3338,14 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		}
 	}
 	
+	/**
+	 * Registers a new module action.
+	 * 
+	 * The implementing function will be executed in the scope of this module.
+	 * 
+	 * @param {String} name Identifier of the module action.
+	 * @param {Function} fn The function implementing the action.
+	 */
 	,addModuleAction: function(name, fn) {
 		this.moduleActions = Ext.apply({}, this.moduleActions);
 		this.moduleActions[name] = fn;
