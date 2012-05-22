@@ -438,6 +438,15 @@ abstract class GridExecutor extends JsonExecutor {
 			$columns = $this->request->get('columns');
 		}
 		
+		// Add alwaysLoad columns
+		if ($columns) {
+			foreach ($this->getModuleConfig()->node('columns')->toArray() as $name => $config) {
+				if (!in_array($name, $columns) && isset($config['alwaysLoad']) && $config['alwaysLoad']) {
+					$columns[] = $name;
+				}
+			}
+		}
+		
 		$query = $this->table->createLoadQuery(
 			$relModes,
 			$this->getLoadQueryContext(),
