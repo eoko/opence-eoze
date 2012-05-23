@@ -1,4 +1,5 @@
 # The self section is not inherited by child modules
+# TODO is this really still used ???
 self:
   include:
     js:
