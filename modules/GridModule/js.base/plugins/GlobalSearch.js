@@ -1,6 +1,19 @@
 Oce.deps.wait("Oce.GridModule", function() {
 
 /**
+ * GridModule search plugin.
+ * 
+ * Configuration
+ * -------------
+ * 
+ * Set the module configuration `extra.search` to `true` to enable the search plugin.
+ * 
+ * Set the columns configuration `extra.search.enabled` to make a column searchable,
+ * and `extra.search.selected` to have the column selected by default in the search
+ * menu.
+ * 
+ * **Warning:** if no column is made searchable, then the search field will **not**
+ * be displayed.
  *
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  * @author Éric Ortega <eric@planysphere.fr>
