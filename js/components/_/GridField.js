@@ -946,6 +946,42 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 			this.el.set({name: name});
 		}
 	}
+	
+	/**
+	 * Overrides {@link Ext.form.Field#initValue}.
+	 * 
+	 * Overridden code:
+	 * 
+	 *     function (){
+     *         if(this.value !== undefined){
+     *             this.setValue(this.value);
+     *         }else if(!Ext.isEmpty(this.el.dom.value) && this.el.dom.value != this.emptyText){
+     *             this.setValue(this.el.dom.value);
+     *         }
+     *         this.originalValue = this.getValue();
+     *     }
+	 * 
+	 * Uses {@link #syncValue}, because `this.setValue(this.el.dom.value)` in the
+	 * orginal code would be called with the json-encoded value, which would not
+	 * work with {@link eo.form.GridField#setValue}, resulting in the dom element
+	 * value's to be empty.
+	 * 
+	 * @protected
+	 */
+	,initValue: function() {
+		
+		var phantom = this.phantom; // save initial value
+		this.phantom = false; // prevent the modified event from firing for new records
+		
+		// set el.dom.value
+		this.syncValue(true);
+		
+		// restore initial phantom value
+		this.phantom = phantom;
+
+		// this is set in overridden initValue... so I comply
+		this.originalValue = this.el.dom.value;
+	}
 
 	,onRender: function(ct, position) {
 		Oce.form.GridField.superclass.onRender.apply(this, arguments);
@@ -962,11 +998,6 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 //		} else {
 //			this.el.set({name: 'json_' + this.name});
 //		}
-
-		var phantom = this.phantom; // prevent the modified event from firing for new records
-		this.phantom = false;
-		this.syncValue(true);
-		this.phantom = phantom;
 
 		this.wrap = this.el.wrap({
 //            cls:'x-html-editor-wrap', cn:{cls:'x-html-editor-tb'}
