@@ -48,15 +48,15 @@ Oce.Security = function() {
 
 	this.notifyDisconnection = function(args) {
 		setIdentified(false, args);
-	}
+	};
 
 	this.isIdentified = function() {
 		return identified;
-	}
+	};
 
 	this.getLoginInfos = function() {
 		return loginInfos;
-	}
+	};
 
 	var loginModule = null;
 
