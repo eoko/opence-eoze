@@ -23,6 +23,8 @@ eo.form.FormCaption = Ext.extend(Ext.BoxComponent, {
 	 * Help text to display in the caption. The text will be wrapped in a `<p>` element.
 	 * If you don't want that or if you need a more complex HTML layout, use the
 	 * {@link #html} option.
+	 * 
+	 * If the {@link #html} option is set, then this text will be ignored.
 	 */
 	,text: null
 	
