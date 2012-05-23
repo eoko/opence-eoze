@@ -6,8 +6,8 @@
         Style definition for component eo.form.FormCaption.
 */
 
-form div.form-caption,
-form p.form-caption {
+div.form-caption,
+p.form-caption {
 	font-style: italic;
 	color: #3F516E;
 	margin-bottom: .4em;
