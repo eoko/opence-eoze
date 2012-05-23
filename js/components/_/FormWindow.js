@@ -5,40 +5,67 @@ Ext.ns('eo.window');
 
 eo.Window = Ext.extend(Ext.Window, {
 
-	constructor: function(config) {
+	constrainHeader: true
+	
+	,bodyStyle: 'padding:0'
+	
+	// private
+	,constructor: function(config) {
 
 		var me = this;
 
-		// clone the config object, and applies defaults
-		config = Ext.apply({
-			constrainHeader: true
-			,bodyStyle: 'padding:0'
-		}, config);
+		// clone or set the config object
+		var initialConfig = config || {};
 
 		config.minimizable = config.minimizable !== false && this.minimizable !== false;
 
 		this.addPlugins(config);
 
-//		if (Ext.isChrome) {
-//			Ext.applyIf(config, {
-//				autoWidth: true
-//			});
-//		}
-
 		eo.Window.superclass.constructor.call(this, config);
-
-//		if (Ext.isChrome) {
-//			this.on({
-//				scope: this
-//				,afterrender: function() {
-//					this.setWidth(this.getWidth());
-//				}
-//			});
-//		}
-//		eo.Window.superclass.constructor.call(this, config);
+		
+		// fix initialConfig
+		this.initialConfig = initialConfig;
 
 		if (this.modalTo) {
 			this.setModalTo(this.modalTo);
+		}
+	}
+	
+	// private
+	,initComponent: function() {
+		
+		// If an Ext.Window has buttons and no width set, then Chrome will incorectly
+		// calculate an extravagant width...
+		// Using autoWidth (from Ext.Panel, hidden in Ext.Window) will fix that, but
+		// the behaviour of autoWidth is unwanted (it prevents user resizing of the window).
+		var fixWidth = Ext.isChrome && this.buttons && true || false;
+		if (fixWidth) {
+			if (this.width || this.autoWidth) {
+				fixWidth = false;
+			} else {
+				this.autoWidth = true;
+			}
+		}
+
+		eo.Window.superclass.initComponent.call(this);
+
+		// If the width fix has been applied, then:
+		// - we remove autoWidth to stop it from preventing the user to resize
+		// - we ensure the window has been size at least to minWidt
+		if (fixWidth) {
+			this.on({
+				scope: this
+				,afterrender: function() {
+					delete this.autoWidth;
+					// As a matter of fact, the minWidth will be calculated correclty,
+					// event accounting for the buttons width. So, if a minWidth is set
+					// or has appeared, it is a real must to apply it. Go.
+					var mw = this.minWidth;
+					if (mw && this.getWidth() < mw) {
+						this.setWidth(mw);
+					}
+				}
+			});
 		}
 	}
 	
