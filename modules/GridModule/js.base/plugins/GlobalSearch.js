@@ -308,7 +308,10 @@ Oce.GridModule.plugins.Search = Ext.extend(Object, {
 		var walk = function(items) {
 			items.each(function(item) {
 				if (item.menu) {
-					walk(item.menu.items);
+					var mi = item.menu.items;
+					if (mi) {
+						walk(mi);
+					}
 				} else if (item instanceof Ext.menu.CheckItem) {
 					if(item.checked) {
 						fields.push(item.dataIndex);
