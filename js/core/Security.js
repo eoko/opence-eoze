@@ -57,6 +57,14 @@ Oce.Security = function() {
 	this.getLoginInfos = function() {
 		return loginInfos;
 	};
+	
+	this.whenIdentified = function(fn) {
+		if (this.isIdentified) {
+			fn();
+		} else {
+			Oce.mx.Security.onOnce('login', fn);
+		}
+	};
 
 	var loginModule = null;
 
