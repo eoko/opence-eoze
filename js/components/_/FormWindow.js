@@ -3,10 +3,26 @@ Ext.ns('eo.window');
 
 // ----<<  FormWindow  >>-------------------------------------------------------
 
+/**
+ * {@link Ext.Window Window} with extended behaviour.
+ * 
+ * Notably, this class fixes the crazy width bug that happens in Chrome with windows 
+ * that contains buttons, and do not have a width set.
+ * 
+ * It also can set modal relative to another window (see {@link #setModal}).
+ */
 eo.Window = Ext.extend(Ext.Window, {
 
+	/**
+	 * @cfg {Boolean} [constrainHeader=true]
+	 * @inheritdoc
+	 */
 	constrainHeader: true
 	
+	/**
+	 * @cfg {String} [bodyStyle='padding:0']
+	 * @inheritdoc
+	 */
 	,bodyStyle: 'padding:0'
 	
 	// private
@@ -69,6 +85,19 @@ eo.Window = Ext.extend(Ext.Window, {
 		}
 	}
 	
+	/**
+	 * When it exists in the relative window, this method is used by 
+	 * {@link #setModal} to disable the relative window, instead of {@link #disable}. 
+	 * 
+	 * It may be overridden in children classes, or provided by any component, to 
+	 * implement custom disabling behaviour. If this method exists in a component,
+	 * then this component **must** also provide a {@link #activateContent} method, 
+	 * in order to prevent random behaviour.
+	 * 
+	 * {@link eo.Window}'s implementation consists of disabling every button of the
+	 * window, and every button of the {@link #getTopToolbar top toolbar} and of the 
+	 * {@link #getBottomToolbar bottom toolbar}.
+	 */
 	,deactivateContent: function() {
 		Ext.each(this.buttons, function(bt) {
 			if (!bt.disabled) {
@@ -76,12 +105,27 @@ eo.Window = Ext.extend(Ext.Window, {
 				bt.wasEnabled = true;
 			}
 		});
+		
+		// Toolbar buttons
+		var tbar = this.getTopToolbar(),
+			bbar = this.getBottomToolbar();
 		// cannot use toolbar, 'cause the button container is a toolbar and it
 		// is quite ugly when masked ...
-		if (this.tbar) this.tbar.mask();
-		if (this.bbar) this.bbar.mask();
+		if (tbar) {
+			tbar.mask();
+		}
+		if (bbar) {
+			bbar.mask();
+		}
 	}
-	
+
+	/**
+	 * When it exists in the relative window, this method is used by {@link #setModal} 
+	 * to enable the relative window, instead of {@link #enable}.
+	 * 
+	 * It may be overridden in children classes, or provided by any component, to
+	 * implement some custom behaviour.
+	 */
 	,activateContent: function() {
 		Ext.each(this.buttons, function(bt) {
 			if (bt.wasEnabled) {
@@ -93,7 +137,19 @@ eo.Window = Ext.extend(Ext.Window, {
 		if (this.bbar) this.bbar.unmask();
 	}
 
-	,setModalTo: function(rootWin) {
+	/**
+	 * Sets the window modal to another {@link Ext.Window Window}. That is, when this
+	 * window is visible, then the other window is applied a disabled mask.
+	 * 
+	 * If the other window has a {@link #deactivateContent} method, then it will be used
+	 * instead of the {@link Ext.Window#disable} method. In that case, a matching
+	 * {@link #activateContent} method **must** also be provided to prevent random
+	 * behaviour.
+	 * 
+	 * @param {Ext.Component} relativeWindow The window (or in fact any wanted component) to
+	 * deactivate when this window is visible.
+	 */
+	,setModalTo: function(relativeWindow) {
 
 		var maskEl;
 		var win = this;
@@ -104,11 +160,11 @@ eo.Window = Ext.extend(Ext.Window, {
 			doHide = function() {uber.hide.apply(win, arguments)},
 			doShow = function() {uber.show.apply(win, arguments)};
 
-		if (rootWin) {
-			maskEl = rootWin && rootWin.items && rootWin.items.first() || rootWin;
+		if (relativeWindow) {
+			maskEl = relativeWindow && relativeWindow.items && relativeWindow.items.first() || relativeWindow;
 			if (maskEl) maskEl = maskEl.el;
 
-			this.mon(rootWin, {
+			this.mon(relativeWindow, {
 				scope: this
 				,beforehide: function() {
 					var v = !hidding;
@@ -193,16 +249,16 @@ eo.Window = Ext.extend(Ext.Window, {
 				doShow();
 			}
 
-			if (rootWin) {
+			if (relativeWindow) {
 				// win content
 				if (maskEl) maskEl.mask();
 				
-				if (rootWin.deactivateContent) {
-					rootWin.deactivateContent();
+				if (relativeWindow.deactivateContent) {
+					relativeWindow.deactivateContent();
 				} else {
-					rootWin.disable();
+					relativeWindow.disable();
 				}
-				rootWin.on('activate', onRootActivate);
+				relativeWindow.on('activate', onRootActivate);
 			}
 			hidding = false;
 		}
@@ -214,16 +270,16 @@ eo.Window = Ext.extend(Ext.Window, {
 
 			this.el.stopFx();
 
-			if (rootWin) {
+			if (relativeWindow) {
 				// unmask win content
 				if (maskEl) maskEl.unmask();
 				
-				if (rootWin.activateContent) {
-					rootWin.activateContent();
+				if (relativeWindow.activateContent) {
+					relativeWindow.activateContent();
 				} else {
-					rootWin.enable();
+					relativeWindow.enable();
 				}
-				rootWin.un('activate', onRootActivate);
+				relativeWindow.un('activate', onRootActivate);
 				doHide.apply(this, arguments);
 				//maskEl.unmask();
 				//rootWin.enable();
