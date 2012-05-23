@@ -1,3 +1,41 @@
+(function() {
+
+var deferedRegistering = false;
+
+/*
+ * Defered registering
+ * ===================
+ * 
+ * This facility allows children classes to have async implementation (that is, that have
+ * to asynchronously require other classes, or whatever).
+ * 
+ * Children classes which implementation may require async loadings, must call the
+ * deferRegistering() method to prevent post class creation operations to happen just after
+ * the implementation file is included. This call must, of course, be done outside of the
+ * aynchronously called functions.
+ * 
+ * When everything is loaded and the child class declaration has been done, then the function
+ * completeRegistering() must be called.
+ */
+var deferRegistering = function() {
+	deferedRegistering = true;
+};
+
+/**
+ * @internal
+ * Will be called immediatly after the child class file has been included, or when it is
+ * called in the child class implementation if the code in the class file has already
+ * called the deferRegistering() function.
+ */
+var completeRegistering = function() {
+	// Copy renderers
+	<?php echo $namespace ?>.<?php echo $controller ?>.<?php echo $name ?>.renderers =
+	<?php echo $namespace ?>.<?php echo $controller ?>.<?php echo $name ?>Base.renderers;
+
+	// Register dependency key
+	Oce.deps.reg('<?php echo $namespace ?>.<?php echo $controller ?>.<?php echo $name ?>');
+};
+
 <?php if (isset($uses)): ?>
 if (!Oce.deps.wait(<?php echo $uses ?>, function() {
 <?php endif // uses ?>
@@ -95,15 +133,15 @@ return moduleClass;
 }); // closure
 
 <?php if (isset($extraJS)): ?>
-<?php echo $extraJS ?>;
+<?php echo $extraJS ?>
+; // in case the last line in the extra js is not terminated (by a semicolon)
 <?php else: ?>
 <?php echo $namespace ?>.<?php echo $controller ?>.<?php echo $name ?> = <?php echo $namespace ?>.<?php echo $controller ?>.<?php echo $name ?>Base;
 <?php endif ?>
 
-<?php echo $namespace ?>.<?php echo $controller ?>.<?php echo $name ?>.renderers =
-<?php echo $namespace ?>.<?php echo $controller ?>.<?php echo $name ?>Base.renderers;
-
-Oce.deps.reg("<?php echo $namespace ?>.<?php echo $controller ?>.<?php echo $name ?>");
+if (!deferedRegistering) {
+	completeRegistering();
+}
 
 <?php if (isset($uses)): ?>
 }) // Oce.deps.wait 
@@ -111,3 +149,4 @@ Oce.deps.reg("<?php echo $namespace ?>.<?php echo $controller ?>.<?php echo $nam
 	Oce.getModules(<?php echo $uses ?>);
 }
 <?php endif ?>
+})(); // closure
