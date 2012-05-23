@@ -1,0 +1,14 @@
+/* 
+    Document   : eo.form.HelpCaption
+    Created on : 23 mai 2012, 20:51:56
+    Author     : Éric Ortega <eric@planysphere.fr>
+    Description:
+        Style definition for component eo.form.FormCaption.
+*/
+
+form div.form-caption,
+form p.form-caption {
+	font-style: italic;
+	color: #3F516E;
+	margin-bottom: .4em;
+}

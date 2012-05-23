@@ -49,13 +49,6 @@ body {
 	background: url(../images/icons/paste_word.png) no-repeat 0 0 !important;
 }
 
-div.form-caption,
-p.form-caption {
-	font-style: italic;
-	color: #3F516E;
-	margin-bottom: .4em;
-}
-
 /* Fixes items of checkboxgroup that can be slightly scrolled (although they
  * should not ! */
 .x-form-check-wrap {
