@@ -133,8 +133,18 @@ eo.Window = Ext.extend(Ext.Window, {
 				delete bt.wasEnabled;
 			}
 		});
-		if (this.tbar) this.tbar.unmask();
-		if (this.bbar) this.bbar.unmask();
+		
+		// Toolbar buttons
+		var tbar = this.getTopToolbar(),
+			bbar = this.getBottomToolbar();
+		// cannot use toolbar, 'cause the button container is a toolbar and it
+		// is quite ugly when masked ...
+		if ((tbar = tbar && tbar.el)) {
+			tbar.unmask();
+		}
+		if ((bbar = bbar && bbar.el)) {
+			bbar.unmask();
+		}
 	}
 
 	/**
