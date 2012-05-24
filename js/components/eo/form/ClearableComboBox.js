@@ -1,12 +1,11 @@
 /**
- *
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  * @author Éric Ortega <eric@planysphere.fr>
  * @since 29 nov. 2011
  */
-Ext.ns('eo.form');
+Oce.deps.wait('eo.form.ComboBox', function() {
 
-(function() {
+Ext.ns('eo.form');
 	
 var sppCombo = Ext.form.ComboBox.prototype,
 	sppTwin  = Ext.form.TwinTriggerField.prototype;
@@ -14,7 +13,7 @@ var sppCombo = Ext.form.ComboBox.prototype,
 /**
  * @xtype clearablecombo
  */
-eo.form.ClearableComboBox = Ext.extend(Ext.form.ComboBox, {
+eo.form.ClearableComboBox = Ext.extend(eo.form.ComboBox, {
     
 	clearable: true
 	
@@ -89,4 +88,4 @@ eo.form.ClearableComboBox = Ext.extend(Ext.form.ComboBox, {
 Ext.reg('clearablecombo', eo.form.ClearableComboBox);
 Oce.deps.reg('eo.form.ClearableComboBox');
 
-})(); // closure
+}); // deps
