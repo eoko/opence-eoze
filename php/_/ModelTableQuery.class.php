@@ -65,7 +65,6 @@ class ModelTableQuery extends Query implements QueryAliasable {
 	}
 
 	public function selectField($fieldName, $fieldAlias = null) {
-//		if ($fieldName instanceof QuerySelect) {
 		if ($fieldName instanceof SqlVar) {
 			$this->select[] = $fieldName;
 		} else {
