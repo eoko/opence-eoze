@@ -107,14 +107,14 @@ eo.Window = Ext.extend(Ext.Window, {
 		});
 		
 		// Toolbar buttons
-		var tbar = this.getTopToolbar() && tbar.el,
-			bbar = this.getBottomToolbar() && bbar.el;
+		var tbar = this.getTopToolbar(),
+			bbar = this.getBottomToolbar();
 		// cannot use toolbar, 'cause the button container is a toolbar and it
 		// is quite ugly when masked ...
-		if (tbar) {
+		if ((tbar = tbar && tbar.el)) {
 			tbar.mask();
 		}
-		if (bbar) {
+		if ((bbar = bbar && bbar.el)) {
 			bbar.mask();
 		}
 	}
