@@ -242,10 +242,17 @@ abstract class ModelRelationInfo extends ModelFieldBase {
 
 //r	public function selectName(ModelTableQuery $query, $alias = null, $sqlAlias = false) {
 	public function selectName(ModelTableQuery $query, $alias = null, $relationName = null) {
-		if (!$this->selectable) return $query;
+		
+		if (!$this->selectable) {
+			return $query;
+		}
 
-		if ($relationName === null) $relationName = $this->name;
-		if ($alias === null) $alias = $relationName;
+		if ($relationName === null) {
+			$relationName = $this->name;
+		}
+		if ($alias === null) {
+			$alias = $relationName;
+		}
 		
 		$this->parseSelectJoinAlias($relationName, $joinAlias, $leftAlias);
 
