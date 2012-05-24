@@ -10,9 +10,29 @@ Ext.ns('eo.form');
  */
 eo.form.ComboBox = Ext.extend(Ext.form.ComboBox, {
 	
+	/**
+	 * @cfg {Boolean}
+	 * True to expand the combo when its text input is clicked.
+	 */
+	expandOnFieldCLick: true
 	
-    initEvents: function() {
+    ,initEvents: function() {
 		eo.form.ComboBox.superclass.initEvents.apply(this, arguments);
+		this.initEnterKeyEvents();
+		this.initExpandOnFieldClickEvents();
+	}
+	
+	// private
+	,initExpandOnFieldClickEvents: function() {
+		this.el.on('click', function() {
+			if (!this.isExpanded()) {
+				this.expand();
+			}
+		}, this);
+	}
+	
+	// private
+	,initEnterKeyEvents: function() {
 		
 		var isClosingKey = false;
 		
