@@ -65,37 +65,59 @@ class ModelTableQuery extends Query implements QueryAliasable {
 	}
 
 	public function selectField($fieldName, $fieldAlias = null) {
+		
+		// SqlVar will select itself as it intends
 		if ($fieldName instanceof SqlVar) {
 			$this->select[] = $fieldName;
-		} else {
+		} 
+
+		// So, we've got a string...
+		else {
+			// Is this a multipart relation?
 			if (count($fieldParts = explode('->', $fieldName)) > 1) {
 				$fieldAlias = $fieldAlias !== null ? "$fieldAlias" : "$fieldName";
 				$joinFieldName = array_pop($fieldParts);
 				$fieldName = implode('->', $fieldParts);
-
+			}
+			
 			// Process assoc relations (in the type <AssocRelationName>fieldName)
-			} else if (ModelTable::parseAssocRelationField($fieldName, $relation, $field)) {
+			else if (ModelTable::parseAssocRelationField($fieldName, $relation, $field)) {
 				$this->table->getRelationInfo($relation)->getAssocRelationInfo()
 						->selectAssocFields(
 							$this,
 							array($fieldAlias !== null ? "$fieldAlias" : "$fieldName" => $field)
 						);
 				return;
-			} else {
-				// eg. Contact
-				$joinFieldName = $fieldName;
 			}
+			
+			// else, $fieldName must point to a raw relation (eg. Contact) or a known
+			// column
 
 			$field = $this->table->getField($fieldName);
 			
+			// ModelColumn
 			if ($field instanceof ModelColumn) {
 				parent::select(new QuerySelect($fieldName, $fieldAlias, $this->table));
-			} else if ($field instanceof ModelRelationInfo) {
+			}
+			// ModelRelationInfo
+			else if ($field instanceof ModelRelationInfo) {
 				$alias = $fieldAlias !== null ? $fieldAlias : $fieldName;
-				$field->selectFields($this, array($alias => $joinFieldName));
-			} else if ($field instanceof VirtualField) {
+				// 
+				if (isset($joinFieldName)) {
+					$field->selectFields($this, array($alias => $joinFieldName));
+				}
+				// If $fieldName point to a plain relation (eg. Contact), then use
+				// ModelRelationInfo::selectName
+				else {
+					$field->selectName($this, $alias);
+				}
+			}
+			// VirtualField
+			else if ($field instanceof VirtualField) {
 				$field->select($this);
-			} else {
+			}
+			// Unexpected...
+			else {
 				throw new IllegalStateException();
 			}
 		}
