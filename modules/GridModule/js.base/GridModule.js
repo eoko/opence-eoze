@@ -2834,6 +2834,11 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 
 //					,deferredRender:false
 					,hideMode:'offsets'
+//					,autoScroll: true
+					,style: {
+						'overflow-x': 'hidden',
+						'overflow-y': 'auto'
+					}
 
 					,defaults:{
 						 layout:'form'
