@@ -702,6 +702,19 @@ Ext.override(Ext.Element, {
 
 Ext.form.TextField.prototype.selectOnFocus = true;
 
+// Overrides Ext.form.TextField#filterValidation to stop if the dom element
+// doesn't exist anymore.
+(function(uber) {
+	Ext.override(Ext.form.TextField, {
+		filterValidation: function() {
+			var dom = this.el && this.el.dom;
+			if (dom) {
+				uber.apply(this, arguments);
+			}
+		}
+	});
+})(Ext.form.TextField.prototype.filterValidation);
+
 // Fix Int data type to actually return NULL if the value cannot be parsed
 Ext.data.Types.INT.convert = function(v) {
 	var r = v !== undefined && v !== null && v !== '' ?
