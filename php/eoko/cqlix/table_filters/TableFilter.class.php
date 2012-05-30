@@ -49,8 +49,12 @@ class TableFilter {
 		$br = $baseRelation ? $baseRelation . '->' : '';
 
 		$condition = str_replace(array(
-			TOKEN_BASE_RELATION, TOKEN_BASE_RELATION_SHORTCUT
+			TOKEN_BASE_RELATION . '->', TOKEN_BASE_RELATION_SHORTCUT . '->'
 		), $br, $this->getConditionString($opts));
+
+		$condition = str_replace(array(
+			TOKEN_BASE_RELATION, TOKEN_BASE_RELATION_SHORTCUT
+		), $br, $condition);
 
 		return preg_replace_callback(
 			'/%%([\w:]+)%%/',
