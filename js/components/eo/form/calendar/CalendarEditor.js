@@ -82,24 +82,20 @@ eo.form.calendar.ZonesEditor = Ext.extend(Ext.form.Field, {
 	
 	// private
 	,createMonthEditor: function(config) {
-		
-		var MonthEditor = eo.form.calendar.MonthEditor;
-		
-		return function(cfg) {
-			var ed = new MonthEditor(Ext.apply({
-				zones: this.zones
-				,rowLabelWidth: this.rowLabelWidth
-				,lockable: this.lockable
-			}, cfg));
-			
-			ed.on({
-				scope: this
-				,locked: this.onMonthLocked
-			});
-			
-			return ed;
-		};
-	}()
+
+		var ed = new eo.form.calendar.MonthEditor(Ext.apply({
+			zones: this.zones
+			,rowLabelWidth: this.rowLabelWidth
+			,lockable: this.lockable
+		}, cfg));
+
+		ed.on({
+			scope: this
+			,locked: this.onMonthLocked
+		});
+
+		return ed;
+	}
 	
 	// private
 	,createMonthEditorsFromFrom: function() {

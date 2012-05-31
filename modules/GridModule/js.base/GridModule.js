@@ -2171,10 +2171,9 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		var doRequest = function() {
 			
 			var requestParams = Ext.applyIf(
-				Ext.apply({}, params)
-				,{
+				Ext.apply({
 					controller: me.controller
-				}
+				}, params)
 			);
 
 			// Retrieve values from options window
