@@ -1648,7 +1648,19 @@ class ModelTableFinder extends QueryWhere {
 //		if ($condition !== null) $this->where($condition, $inputs);
 	}
 
+	/**
+	 * Accesses the query used internally by the Finder.
+	 * @return ModelTableQuery
+	 */
 	public function getQuery() {
+		return $this->query;
+	}
+	
+	/**
+	 * Gets a clone of the finder's query.
+	 * @return ModelTableQuery
+	 */
+	public function cloneQuery() {
 		$q = clone $this->query;
 		$q->where($this)->select();
 		return $q;
