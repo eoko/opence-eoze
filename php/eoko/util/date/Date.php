@@ -54,25 +54,28 @@ class Date extends DateTime{
 		return $this->format('Y-m-d');
 	}
 
-	public function equals(DateTime $d) {
-		$d = clone $d;
+	public function equals($d) {
+		$d = self::parseDate($d);
 		$d->setTimezone($d->getTimezone());
 		return $this->format('Ymd') === $d->format('Ymd');
 	}
 	
-	public function afterOrEquals(DateTime $d) {
+	public function afterOrEquals($d) {
+		$d = self::parseDate($d);
 		return !$d->diff($this)->invert || $this->equals($d);
 	}
 	
-	public function beforeOrEquals(DateTime $d) {
+	public function beforeOrEquals($d) {
+		$d = self::parseDate($d);
 		return !$this->diff($d)->invert || $this->equals($d);
 	}
 	
-	public function after(DateTime $d) {
+	public function after($d) {
+		$d = self::parseDate($d);
 		return !$d->diff($this)->invert && !$this->equals($d);
 	}
 	
-	public function before(DateTime $d) {
+	public function before($d) {
 		$d = self::parseDate($d);
 		return $d->after($this);
 	}
