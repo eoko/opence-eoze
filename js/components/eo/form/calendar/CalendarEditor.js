@@ -83,7 +83,7 @@ eo.form.calendar.ZonesEditor = Ext.extend(Ext.form.Field, {
 	// private
 	,createMonthEditor: function(config) {
 
-		var ed = new MonthEditor(Ext.apply({
+		var ed = new eo.form.calendar.MonthEditor(Ext.apply({
 			zones: this.zones
 			,rowLabelWidth: this.rowLabelWidth
 			,lockable: this.lockable
