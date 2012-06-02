@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/bcround.php';
+
 const GET_NAMESPACE_RETURN_ABSOLUTE_CLASSNAME = 1;
 const GET_NAMESPACE_RET_ABS_CLASS             = GET_NAMESPACE_RETURN_ABSOLUTE_CLASSNAME;
 const GET_NAMESPACE_RTRIM                     = 2;
