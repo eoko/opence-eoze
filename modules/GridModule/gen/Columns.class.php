@@ -237,7 +237,7 @@ class Columns {
 						if (!isset($col['renderer'])) {
 							$col['renderer'] = 'Oce.ext.Renderer.integer';
 						}
-						self::setColFormItemif($col, 'vtype', 'numInt');
+						self::setColFormItemIf($col, 'vtype', 'numInt');
 						self::setColStoreItemIf($col, array(
 							'type' => 'int',
 							'useNull' => true,
@@ -248,7 +248,7 @@ class Columns {
 						if (!isset($col['renderer'])) {
 							$col['renderer'] = 'Oce.ext.Renderer.float_fr_2';
 						}
-						self::setColFormItemif($col, 'vtype', 'numFloat');
+						self::setColFormItemIf($col, 'vtype', 'numFloat');
 						self::setColStoreItemIf($col, array(
 							'type' => 'float',
 							'useNull' => true,
@@ -258,15 +258,15 @@ class Columns {
 						if (!isset($col['renderer'])) {
 							$col['renderer'] = "Oce.Format.dateRenderer('d/m/Y H:i:s')";
 						}
-						self::setColFormItemif($col, 'format', 'd/m/Y H:i:s');
+						self::setColFormItemIf($col, 'format', 'd/m/Y H:i:s');
 					case ModelColumn::T_DATE:
-						self::setColFormItemif($col, 'xtype', 
+						self::setColFormItemIf($col, 'xtype', 
 								$f->getMeta()->readOnly === true ? 'datedisplayfield' : 'datefield');
 						self::setColStoreItemIf($col, 'type', 'date');
 						if (!isset($col['renderer'])) {
 							$col['renderer'] = "Oce.Format.dateRenderer('d/m/Y')";
 						}
-						self::setColFormItemif($col, 'format', 'd/m/Y');
+						self::setColFormItemIf($col, 'format', 'd/m/Y');
 						break;
 					case ModelColumn::T_BOOL:
 						self::setColStoreItemIf($col, 'type', 'boolean');
@@ -278,7 +278,7 @@ class Columns {
 						}
 						break;
 					case ModelColumn::T_TEXT:
-						self::setColFormItemif($col, 'xtype', 'textarea');
+						self::setColFormItemIf($col, 'xtype', 'textarea');
 					case ModelColumn::T_STRING:
 						self::setColStoreItemIf($col, 'type', 'string');
 						break;
