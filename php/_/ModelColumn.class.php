@@ -429,5 +429,34 @@ class ModelColumn extends ModelFieldBase {
 
 		return $r;
 	}
-	
+
+	public function validateLength($value, &$len, &$maxLength) {
+		$maxLength = $this->getLength();
+		if ($maxLength !== null) {
+			$len = strlen($value);
+			switch ($this->getType()) {
+				default:
+				case ModelField::T_INT:
+				case ModelField::T_STRING:
+				case ModelField::T_TEXT:
+					return $len <= $maxLength;
+					
+				case ModelField::T_DECIMAL:
+				case ModelField::T_FLOAT:
+					$maxDecimalLength = $this->meta->get('decimals');
+					$maxIntLength = $maxLength - $maxDecimalLength;
+					$maxLength .= ",$maxDecimalLength";
+					
+					$re = '/^(?P<int>\d+)?(?:.(?P<decimals>\d+))?$/';
+					if (!preg_match($re, "$value", $matches)) {
+						throw new IllegalStateException();
+					}
+					
+					return strlen($matches['int']) <= $maxIntLength
+							&& strlen($matches['decimals']) <= $maxDecimalLength;
+			}
+		} else {
+			return true;
+		}
+	}
 }

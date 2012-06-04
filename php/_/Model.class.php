@@ -535,6 +535,29 @@ abstract class Model {
 						}
 					}
 				}
+			} else {
+				if ($col instanceof ModelColumn) {
+					if (!$col->validateLength($value, $len, $maxLength)) {
+						
+						$label = $col->getMeta()->get('label', $col->getName());
+						$label = lcfirst($label);
+						
+						if (strstr($maxLength, ',')) {
+							list($maxInt, $maxDec) = explode(',', $maxLength);
+							$maxInt = max(0, $maxInt - $maxDec);
+							$humanMaxLength = "$maxInt chiffre" . ($maxInt > 1 ? 's' : '')
+									. " et $maxDec chiffre" . ($maxDec > 1 ? 's' : '')
+									. " après la virgule";
+						} else {
+							$humanMaxLength = "$maxLength chiffre" . ($maxLength > 1 ? 's' : '');
+						}
+						
+						throw new UserException(
+							"La valeur du champ <em>$label</em> dépasse la longueur maximale "
+							. "autorisée de $humanMaxLength."
+						);
+					}
+				}
 			}
 		}
 		return true;
