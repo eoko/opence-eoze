@@ -284,11 +284,11 @@ eo.form.calendar.Zone.Cell = Ext.extend(Object, {
 					cls;
 				// previous value
 				if ((cls = this.getMarkerCssClass(this.value))) {
-					mel.removeClass(cls);
+					mel.removeClass(cls.split(" "));
 				}
 				// new value
 				if ((cls = this.getMarkerCssClass(value))) {
-					mel.addClass(cls);
+					mel.addClass(cls.split(" "));
 				}
 			}
 			
