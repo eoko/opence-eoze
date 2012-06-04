@@ -111,13 +111,13 @@ eo.form.AgeField = Ext.extend(Ext.form.TextField, {
 		function text(n, w) {
 			return n + ' ' + (Ext.isString(w) ? w : (w[0+(n>1)]));
 		}
-		if (y) {
+		if (!Ext.isEmpty(y)) {
 			r += text(y, lt.year);
 		}
-		if (m) {
+		if (!Ext.isEmpty(m)) {
 			r += (r !== '' ? ' ' : '') + text(m, lt.month);
 		}
-		if (d) {
+		if (!Ext.isEmpty(d)) {
 			r += (r !== '' ? ' ' : '') + text(d, lt.day);
 		}
 		return r;
