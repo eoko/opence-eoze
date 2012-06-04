@@ -66,7 +66,7 @@ eo.form.AgeField = Ext.extend(Ext.form.TextField, {
 				matches = v.match(/\d+(?:\s*[a-z]+)?/ig),
 				order = ['years', 'months', 'days'],
 				i = 0,
-				age = {years: 0, months: 0, days: 0};
+				age = {years: null, months: null, days: null};
 				
 			if (matches) {
 				Ext.each(matches, function(m) {
@@ -94,7 +94,9 @@ eo.form.AgeField = Ext.extend(Ext.form.TextField, {
 				return null;
 			}
 			delete age['undefined']; // just in case...
-			return age.years || age.months || age.days ? age : null;
+			return age.years !== null || age.months !== null || age.days !== null
+					? age
+					: null;
 		}
 		return null;
 	}
@@ -146,9 +148,9 @@ eo.form.AgeField = Ext.extend(Ext.form.TextField, {
 			return a;
 		} else if (a) {
 			return 'P'
-					+ (a.years ? a.years + 'Y' : '')
-					+ (a.months ? a.months + 'M' : '')
-					+ (a.days ? a.days + 'D' : '');
+					+ (a.years !== null ? a.years + 'Y' : '')
+					+ (a.months !== null ? a.months + 'M' : '')
+					+ (a.days !== null ? a.days + 'D' : '');
 		} else {
 			return null;
 		}
@@ -156,7 +158,7 @@ eo.form.AgeField = Ext.extend(Ext.form.TextField, {
 	
 	,beforeBlur: function() {
 		var age = this.age = this.parseValue(this.getRawValue());
-		if (age) {
+		if (!Ext.isEmpty(age)) {
 			this.setRawValue(this.formatAge(age));
 		}
 	}
