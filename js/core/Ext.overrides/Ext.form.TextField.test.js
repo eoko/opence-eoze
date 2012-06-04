@@ -1,0 +1,40 @@
+/**
+ *
+ * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ * @author Éric Ortega <eric@planysphere.fr>
+ * @since 4 juin 2012
+ */
+eo.Testing.addUnitTest('TextField.overrides', function() {
+Oce.deps.wait('Ext.form.Field.overrides', function() {
+	
+	var items = [{
+		fieldLabel: 'Test 1'
+		,msgTarget: 'side'
+		,allowBlank: false
+		,maxLength: 4
+		,enforceMaxLength: true
+	},{
+		fieldLabel: 'Test 2'
+		,msgTarget: 'side'
+	}];
+
+	var win = new Ext.Window({
+		width: 300
+		,height: 400
+		,layout: 'fit'
+		,items: [{
+			xtype: 'form'
+			,defaultType: 'textfield'
+			,defaults: {
+				anchor: '100%'
+				,msgTarget: 'side'
+			}
+			,padding: 15
+			,items: items
+		}]
+	});
+	
+	win.show();
+	
+}); // wait deps
+}); // test
