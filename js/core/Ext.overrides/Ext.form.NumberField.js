@@ -80,7 +80,11 @@ Ext.override(Ext.form.NumberField, {
 
 			if (!this.regex || this.regex === spp.regex) {
 				// build regex string
-				var res = '^(?:\\\d';
+				var res = '^(?:';
+				if (this.allowNegative) {
+					res += '-?';
+				}
+				res = '\\\d';
 				if (!Ext.isEmpty(maxInt)) {
 					res += '{0,' + maxInt + '}'
 				} else {
