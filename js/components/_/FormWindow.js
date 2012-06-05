@@ -240,12 +240,12 @@ eo.Window = Ext.extend(Ext.Window, {
 		,onRootActivate = function() {
 			onRootActivateFn.defer(50);
 		};
-
-		this.doShow = function() {
+		
+		var initModal = function(force) {
 
 			modal = true;
 
-			if (this.isVisible()) {
+			if (this.isVisible() && !force) {
 				doShow();
 				return;
 			}
@@ -271,7 +271,11 @@ eo.Window = Ext.extend(Ext.Window, {
 				relativeWindow.on('activate', onRootActivate);
 			}
 			hidding = false;
-		}
+		};
+
+		this.doShow = function() {
+			initModal.call(this, false);
+		};
 
 		this.doHide = function() {
 
@@ -294,6 +298,10 @@ eo.Window = Ext.extend(Ext.Window, {
 				//maskEl.unmask();
 				//rootWin.enable();
 			}
+		};
+		
+		if (this.isVisible()) {
+			initModal.call(this, true);
 		}
 	}
 
