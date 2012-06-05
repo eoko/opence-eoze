@@ -253,6 +253,16 @@ class Columns {
 							'type' => 'float',
 							'useNull' => true,
 						));
+						// Max length
+						$maxLength = $f->getLength();
+						if ($maxLength !== null) {
+							$maxDec = $f->getMeta()->get('decimals');
+							$maxInt = $maxLength - $maxDec;
+							self::setColFormItemIf($col, array(
+								'xtype' => 'numberfield',
+								'maxDecimalPrecision' => "$maxInt,$maxDec",
+							));
+						}
 						break;
 					case ModelColumn::T_DATETIME:
 						if (!isset($col['renderer'])) {
@@ -422,17 +432,26 @@ class Columns {
 		}
 	}
 	
-	private static function setColFormItemIf(&$col, $name, $value) {
-		if (isset($col['form'])) {
-			if ($col['form'] !== false) {
-				if (!isset($col['form'][$name])) {
-					$col['form'][$name] = $value;
-				}
+	private static function setColFormItemIf(&$col, $name, $value = null) {
+		// 2 args
+		if (is_array($name)) {
+			foreach ($name as $k => $v) {
+				self::setColFormItemIf($col, $k, $v);
 			}
-		} else {
-			$col['form'] = array(
-				$name => $value
-			);
+		}
+		// 3 args
+		else {
+			if (isset($col['form'])) {
+				if ($col['form'] !== false) {
+					if (!isset($col['form'][$name])) {
+						$col['form'][$name] = $value;
+					}
+				}
+			} else {
+				$col['form'] = array(
+					$name => $value
+				);
+			}
 		}
 	}
 	
