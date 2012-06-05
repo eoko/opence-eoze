@@ -102,14 +102,15 @@ Ext.override(Ext.form.NumberField, {
 			}
 			
 			// replace the default text
-			var maxValue = this.makeMaxValue(maxInt, maxDec);
+			var maxValue = this.makeMaxValue(maxInt, maxDec),
+				hsMaxValue = maxValue.toString().replace('.', this.decimalSeparator);
 			if (this.regexText === spp.regexText) {
-				this.regexText = String.format(this[msg], maxValue, maxDec);
+				this.regexText = String.format(this[msg], hsMaxValue, maxDec);
 			}
 
 			// maxValue
 			if (this.maxValue === spp.maxValue) {
-				this.maxValue = parseFloat(maxValue.replace(',', '.'));
+				this.maxValue = maxValue;
 			}
 		}
 		
@@ -139,17 +140,7 @@ Ext.override(Ext.form.NumberField, {
 
 	// private
 	,makeMaxValue: function(maxInt, maxDec) {
-		var r = '', i;
-		for (i=0; i<maxInt; i++) {
-			r += '9';
-		}
-		if (!Ext.isEmpty(maxDec) && maxDec > 0) {
-			r += this.decimalSeparator || '.'; // don't know... just to be sure
-			for (i=0; i<maxDec; i++) {
-				r += '9';
-			}
-		}
-		return r;
+		return (Math.pow(10, maxInt) - 1/Math.pow(10, maxDec)).toFixed(maxDec);
 	}
 });
 
