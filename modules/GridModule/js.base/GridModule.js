@@ -92,6 +92,14 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	 * it depends on.
 	 */
 	,processedReloads: undefined
+	
+	/**
+	 * @cfg {Object} extra
+	 * 
+	 * @cfg {Object} winConfig
+	 * @cfg {Object} editWinConfig
+	 * @cfg {Object} addWinConfig
+	 */
 
 	,constructor: function() {
 
