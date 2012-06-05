@@ -16,10 +16,13 @@ eo.form.MoneyField = Ext.extend(Ext.form.NumberField, {
 	}
 	
 	,setValue: function(v) {
-		v = parseFloat(v);
-		v = Ext.isNumber(v) ? v.toFixed(this.precision) : "";
-		if (this.displayEl) this.displayEl.update(v);
 		Ext.form.TextField.prototype.setValue.call(this, v);
+		if (this.isValid(true)) {
+			v = this.getValue();
+			if (Ext.isNumber(v)) {
+				Ext.form.TextField.prototype.setValue.call(this, v.toFixed(this.precision));
+			}
+		}
 	}
 	
 	,setReadOnly: function(readOnly) {
