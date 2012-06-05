@@ -13,7 +13,7 @@ Oce.deps.wait('Ext.form.Field.overrides', function() {
 		,allowBlank: false
 		,maxLength: 4
 		,enforceMaxLength: true
-	},{
+	},{ // This second field has been used as playfield...
 		fieldLabel: 'Test 2'
 		,msgTarget: 'side'
 		,xtype: 'numberfield'
