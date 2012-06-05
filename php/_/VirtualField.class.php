@@ -21,6 +21,7 @@ abstract class VirtualFieldBase extends ModelFieldBase implements VirtualField {
 	protected $cachable = true;
 	
 	protected $type = null;
+	protected $maxLength = null;
 	protected $defaultAlias = null;
 	
 	/**
@@ -58,6 +59,18 @@ abstract class VirtualFieldBase extends ModelFieldBase implements VirtualField {
 	
 	public function getMeta() {
 		return $this->meta;
+	}
+	
+	/**
+	 * Implementation of the {@link ModelField::getLength()} method.
+	 * 
+	 * This method will return the value of {@link maxLength}, which is `null`
+	 * by default.
+	 * 
+	 * @return int|null
+	 */
+	public function getLength() {
+		return $this->maxLength;
 	}
 	
 	private function guessAliasFromClassName() {

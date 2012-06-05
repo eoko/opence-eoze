@@ -51,4 +51,13 @@ abstract class ModelFieldBase implements ModelField {
 	public function isPrimary() {
 		return false;
 	}
+
+	/**
+	 * Default implementation for {@link ModelField::getLength()}. This 
+	 * implementation always return `null`.
+	 * @return null
+	 */
+	public function getLength() {
+		return null;
+	}
 }

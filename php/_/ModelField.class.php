@@ -25,6 +25,24 @@ interface ModelField {
 
 	function getType();
 	
+	/**
+	 * Gets the maximum length of the field's value.
+	 * 
+	 * For decimals (including floats) fields, this method will return the total
+	 * number of allowed digits. The number of decimal digits can be retrieved
+	 * with:
+	 * 
+	 *     $field->getMeta()->get('decimals')
+	 * 
+	 * Example: for a MySQL column FLOAT of length 7,2, `getLength()` will return 7
+	 * and `getMeta()->get('decimals')` will return 2.
+	 * 
+	 * `null` should be interpreted as no limit.
+	 * 
+	 * @return int\null
+	 */
+	function getLength();
+	
 	function getSqlType();
 
 	function isNullable();
