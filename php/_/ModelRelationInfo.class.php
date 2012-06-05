@@ -512,6 +512,10 @@ class ModelRelationInfoField extends ModelFieldBase {
 		return $this->getActualField()->getMeta();
 	}
 	
+	public function getLength() {
+		return $this->getActualField()->getLength();
+	}
+	
 	public function getActualField() {
 		return $this->info->targetTable->getField($this->fieldName, true);
 	}
