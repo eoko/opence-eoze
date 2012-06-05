@@ -8,6 +8,7 @@
 
 var spp = Ext.form.NumberField.prototype,
 	initComponent = spp.initComponent,
+	initEvents = spp.initEvents,
 	onRender = spp.onRender;
 
 /**
@@ -25,19 +26,16 @@ var spp = Ext.form.NumberField.prototype,
 Ext.override(Ext.form.NumberField, {
 	
 	/**
-	 * @cfg
-	 * @inheritdoc
-	 * Allow for both "," and "." as input decimal separators.
-	 */
-	maskRe: /[0123456789,.\-]/
-	
-	/**
 	 * @cfg {String/Object} [maxDecimalPrecision=undefined]
-	 * @cfg {Integer} maxDecimalPrecision.maxInteger The maximum number of digits in the integer part
-	 * @cfg {Integer} maxDecimalPrecision.maxDecimal The maximum number of digits in the decimal part
+	 * @cfg {Integer} maxDecimalPrecision.integer The maximum number of digits in the integer part
+	 * @cfg {Integer} maxDecimalPrecision.decimal The maximum number of digits in the decimal part
 	 * 
-	 * This option will configure the {@link #regex} and {@link #regexText} options to validate
-	 * a decimal number with a maximum number of digits in the integer part and the decimal part.
+	 * This option will configure the {@link #regex} and {@link #regexText}, and the 
+	 * {@link #maxValue} options to validate a decimal number with a maximum number 
+	 * of digits in the integer part and the decimal part.
+	 * 
+	 * The options will be configured only if they are the default ones (i.e. the same
+	 * as the prototype's ones).
 	 * 
 	 * A String of the form "maxInt,maxDec" can be used.
 	 * 
@@ -49,15 +47,15 @@ Ext.override(Ext.form.NumberField, {
 	/**
 	 * @cfg
 	 * Text that will be used by {@link #maxDecimalPrecision} as the field error text when the
-	 * regex fails. If and only if {@link #maxDecimalPrecision.maxDecimal} is 0, then
+	 * regex fails. If and only if {@link #maxDecimalPrecision.decimal} is 0, then
 	 * {@link #maxDecimalPrecisionZeroText} will be used instead.
 	 */
-	,maxDecimalPrecisionText: "La valeur maximale de ce champ est {0} avec une précision de {1} "
+	maxDecimalPrecisionText: "La valeur maximale de ce champ est {0} avec une précision de {1} "
 			+ "chiffres après la virgule"
 	/**
 	 * @cfg
 	 * Text that will be used by {@link #maxDecimalPrecision} instead of 
-	 * {@link #maxDecimalPrecisionText}, if {@link #maxDecimalPrecision.maxDecimal} is
+	 * {@link #maxDecimalPrecisionText}, if {@link #maxDecimalPrecision.decimal} is
 	 * exactly 0 (that is, no decimals are allowed).
 	 */
 	,maxDecimalPrecisionZeroText: "La valeur maximale de ce champ est {0}"
@@ -70,19 +68,19 @@ Ext.override(Ext.form.NumberField, {
 		if (Ext.isString(mdp)) {
 			var parts = mdp.split(',');
 			mdp = {
-				maxInteger: parts[0]
-				,maxDecimals: parts[1]
+				integer: parts[0]
+				,decimal: parts[1]
 			};
 		}
 		
 		if (Ext.isObject(mdp)) {
-			var maxInt = mdp.maxInteger || mdp.maxInt,
-				maxDec = mdp.maxDecimal || mdp.maxDecimals || mdp.maxDec,
+			var maxInt = mdp.integer,
+				maxDec = mdp.decimal || mdp.decimals,
 				msg = 'maxDecimalPrecisionText';
 
 			if (!this.regex || this.regex === spp.regex) {
 				// build regex string
-				var res = '^(?:\d';
+				var res = '^(?:\\\d';
 				if (!Ext.isEmpty(maxInt)) {
 					res += '{0,' + maxInt + '}'
 				} else {
@@ -91,12 +89,12 @@ Ext.override(Ext.form.NumberField, {
 				res += ')?';
 				if (!Ext.isEmpty(maxDec)) {
 					if (maxDec > 0) {
-						res += '(?:[,.]\d{0,' + maxDec + '})?';
+						res += '(?:[,.]\\\d{0,' + maxDec + '})?';
 					} else { // decimals are forbidden
 						msg = 'maxDecimalPrecisionZeroText';
 					}
 				} else {
-					res += '(?:[,.]\d*)?'
+					res += '(?:[,.]\\\d*)?'
 				}
 				res += '$';
 				// Ext3
@@ -104,14 +102,40 @@ Ext.override(Ext.form.NumberField, {
 			}
 			
 			// replace the default text
+			var maxValue = this.makeMaxValue(maxInt, maxDec);
 			if (this.regexText === spp.regexText) {
-				var maxValue = this.makeMaxValue(maxInt, maxDec);
 				this.regexText = String.format(this[msg], maxValue, maxDec);
+			}
+
+			// maxValue
+			if (this.maxValue === spp.maxValue) {
+				this.maxValue = parseFloat(maxValue.replace(',', '.'));
 			}
 		}
 		
 		initComponent.call(this);
 	}
+
+	// overridden to allow for both "." and "," as input decimal separator
+	// private
+    ,initEvents: function() {
+        var allowed = this.baseChars + '';
+        if (this.allowDecimals) {
+            // allowed += this.decimalSeparator;
+			// allow for both "." and "," as input decimal separator
+            allowed += ',.';
+        }
+        if (this.allowNegative) {
+            allowed += '-';
+        }
+        allowed = Ext.escapeRe(allowed);
+        this.maskRe = new RegExp('[' + allowed + ']');
+        if (this.autoStripChars) {
+            this.stripCharsRe = new RegExp('[^' + allowed + ']', 'gi');
+        }
+        
+        Ext.form.NumberField.superclass.initEvents.call(this);
+    }
 
 	// private
 	,makeMaxValue: function(maxInt, maxDec) {
