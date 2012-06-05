@@ -17,11 +17,18 @@ eo.form.MoneyField = Ext.extend(Ext.form.NumberField, {
 	
 	,setValue: function(v) {
 		Ext.form.TextField.prototype.setValue.call(this, v);
+		var hv = '';
 		if (this.isValid(true)) {
 			v = this.getValue();
 			if (Ext.isNumber(v)) {
-				Ext.form.TextField.prototype.setValue.call(this, v.toFixed(this.precision));
+				hv = v.toFixed(this.precision);
+				Ext.form.TextField.prototype.setValue.call(this, hv);
 			}
+		}
+		// Update display el
+		var el = this.displayEl;
+		if (el) {
+			el.update(hv);
 		}
 	}
 	
