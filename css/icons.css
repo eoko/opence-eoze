@@ -146,6 +146,10 @@
 .ico.checkbox.ticked {
 	background-image: url("../images/icons/checkbox_ticked_green.png") !important;
 }
+.ico.settings,
+.ico.cog {
+	background-image: url("../images/icons/cog.png") !important;
+}
 .ico.download {
 	background-image: url("../images/icons_fatcow/16x16/download.png") !important;
 }
