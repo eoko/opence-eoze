@@ -248,18 +248,12 @@ NS.FormConfig = Ext.extend(Object, {
 			]);
 		}
 
-		if ('regex' in config) {
-			config.getErrors = function(regex) {
-				return function(v) {
-					if (regex.test(v)) return [];
-					else return [
-						config.validationError || 'Champ invalide' // i18n
-					]
-				}
-			}(
-				config.regex instanceof RegExp ? config.regex
-					: new RegExp(config.regex.replace(/\\/g,'\\\\'))
-			);
+		// RegExp
+		var regex = config.regex;
+		if (regex) {
+			if (Ext.isString(regex)) {
+				config.regex = new RegExp(regex.replace(/\\/g, '\\\\'));
+			}
 		}
 
 		// --- Store result
