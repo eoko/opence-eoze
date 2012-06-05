@@ -259,13 +259,15 @@ NS.FormConfig = Ext.extend(Object, {
 		// --- Store result
 		this.originalIndexes.push(config);
 
-		if ('stick' in config) {
-			if (config.stick == 'top') {
+		// Sticking fields
+		var stick = config.stick;
+		if (stick) {
+			if (stick === 'top') {
 				this.stickingTop.push(config);
-			} else if (config.stick == 'bottom') {
+			} else if (stick === 'bottom') {
 				this.stickingBottom.push(config);
 			} else {
-				throw 'Invalid stick config (must be top|bottom): ' + config.stick;
+				throw new Error('Invalid stick config (must be top|bottom): ' + stick);
 			}
 			delete config.stick;
 		} else {
