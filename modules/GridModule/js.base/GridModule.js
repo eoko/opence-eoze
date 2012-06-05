@@ -3747,15 +3747,15 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				// will send the button as first arg...)
 				,scope: this
 				,handler: function() {this.addRecord()}
-				,text: 'Ajouter'
+				,text: "Ajouter" // i18n
 				,iconCls: 'b_ico_add'
-				,actionId: "add"
+				,actionId: 'add'
 			}
 			,remove: {
 				xtype: 'oce.rbbutton'
 				,scope: this
 				,handler: this.deleteSelectedRecords
-				,text: 'Supprimer'
+				,text: "Supprimer" // i18n
 				,iconCls: 'b_ico_del'
 				,actionId: 'delete'
 				,dependsOnSelection: true
@@ -3763,7 +3763,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 
 			,columns: {
 				xtype: 'oce.rbbutton'
-				,text: 'Colonnes'
+				,text: "Colonnes" // i18n
 				,iconCls : 'b_ico_columns'
 				,menu: {
 					listeners: {
@@ -3776,20 +3776,20 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			,pdf: {
 				xtype: 'oce.rbbutton'
 				,handler: this.exportData.createDelegate(this, ['pdf'])
-				,text: 'Pdf'
+				,text: "Pdf" // i18n
 				,iconCls: 'ribbon icon export_pdf'
 			}
 			,xls: {
 				xtype: 'oce.rbbutton'
 				,handler: this.exportData.createDelegate(this, ['xls'])
-				,text: 'Excel'
+				,text: "Excel" // i18n
 				,iconCls: 'ribbon icon export_excel'
 			}
 			,csv: {
 				xtype: 'oce.rbbutton'
 				,handler: this.exportData.createDelegate(this, ['csv'])
-				,text: 'Texte'
-				,tooltip: "Exporter les données filtrées au format texte CSV, compatible MS Excel"
+				,text: "Texte" // i18n
+				,tooltip: "Exporter les données filtrées au format texte CSV, compatible MS Excel" // i18n
 				,iconCls: 'ribbon icon export_csv'
 			}
 			,help: {
@@ -3797,7 +3797,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 //				text: 'Aide', 
 				iconCls: 'icon ribbon help'
 				,depends: this.hasHelp.createDelegate(this)
-				,actionId: "help"
+				,actionId: 'help'
 			}
 
 		}
