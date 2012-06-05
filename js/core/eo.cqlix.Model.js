@@ -623,17 +623,17 @@ NS.NumberField = Ext.extend(NS.ModelField, {
 	xtype: "numberfield"
 	,constructor: function(config) {
 		NS.NumberField.superclass.constructor.apply(this, arguments);
-		var dc;
-		if (this.length) {
-			//(this.defaultConfig = this.defaultConfig || {}).maxLength = this.length;
-			dc = this.defaultConfig = this.defaultConfig || {};
-			if (this.decimals) {
-				var length = this.decimals ? this.length : this.length - this.decimals;
-				dc.maxValue = Math.pow(length, 10) - 1;
-				dc.maxLength = this.length + 1; // 1 for the decimal separator
+		var l = this.length,
+			d = this.decimals;
+		if (l) {
+			var dc = this.defaultConfig = this.defaultConfig || {};
+			if (Ext.isNumber(d)) {
+				dc.maxDecimalPrecision = {
+					integer: Ext.isNumber(d) ? l - d : l
+					,decimal: d
+				}
 			} else {
-				dc.maxValue = Math.pow(this.length, 10) - 1;
-				dc.maxLength = this.length; // 1 for the decimal separator
+				dc.maxValue = Math.pow(l, 10) - 1;
 			}
 		}
 	}
