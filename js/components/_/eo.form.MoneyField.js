@@ -1,5 +1,8 @@
 Ext.ns('eo.form');
 
+/**
+ * @xtype moneyfield
+ */
 eo.form.MoneyField = Ext.extend(Ext.form.NumberField, {
 	
 	precision: 2
