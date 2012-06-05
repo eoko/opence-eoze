@@ -452,8 +452,15 @@ class ModelColumn extends ModelFieldBase {
 						throw new IllegalStateException();
 					}
 					
-					return strlen($matches['int']) <= $maxIntLength
-							&& strlen($matches['decimals']) <= $maxDecimalLength;
+					if (isset($matches['int']) && strlen($matches['int']) > $maxIntLength) {
+						return false;
+					}
+					
+					if (isset($matches['decimals']) && strlen($matches['decimals']) > $maxDecimalLength) {
+						return false;
+					}
+					
+					return true;
 			}
 		} else {
 			return true;
