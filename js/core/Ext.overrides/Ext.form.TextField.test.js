@@ -16,6 +16,11 @@ Oce.deps.wait('Ext.form.Field.overrides', function() {
 	},{
 		fieldLabel: 'Test 2'
 		,msgTarget: 'side'
+		,xtype: 'numberfield'
+		,regex: /^\d{0,5}([.,]\d{0,2})?$/
+		,regexText: 'La valeur maximale de ce champ est de xxx'
+//		,fullMaskRe: true
+//		,plugin :  [new Ext.ux.InputTextMask('99/99/9999 99:99', true)]
 	}];
 
 	var win = new Ext.Window({
@@ -27,7 +32,7 @@ Oce.deps.wait('Ext.form.Field.overrides', function() {
 			,defaultType: 'textfield'
 			,defaults: {
 				anchor: '100%'
-				,msgTarget: 'side'
+//				,msgTarget: 'side'
 			}
 			,padding: 15
 			,items: items
