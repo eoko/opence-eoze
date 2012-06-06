@@ -245,8 +245,10 @@ class LegacyGridModule {
 			} else if ($convertAll) {
 				// removes the <p>...</p>
 				$text = Markdown($text);
-				$text = substr($text, 3);
-				$text = substr($text, 0, -5);
+				if (!strstr($text, "\n\n")) {
+					$text = substr($text, 3);
+					$text = substr($text, 0, -5);
+				}
 				$htmlTexts[$k] = $text;
 			} else {
 				$htmlTexts[$k] = $text;

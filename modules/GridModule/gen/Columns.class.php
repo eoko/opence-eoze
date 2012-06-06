@@ -30,6 +30,8 @@ class Columns {
 	/** @var ModelTable */
 	protected $table;
 
+	private $langTexts = null;
+	
 	protected static $specialStringPrefixes = array(
 		'__'
 	);
@@ -69,6 +71,9 @@ class Columns {
 				->apply($config->node('columns-defaults'), false)
 				->applyIf(array('extra' => array()), false)
 				;
+		
+		// Lang texts
+		$this->langTexts = $this->config->node('i18n')->toArray();
 
 		$this->init();
 	}
@@ -543,8 +548,17 @@ class Columns {
 	static function quoteString($str) {
 		return json_encode("$str");
 	}
+	
+	private function getLangValue($key) {
+		if (isset($this->langTexts[$key])) {
+			return $this->langTexts[$key];
+		} else {
+			Logger::get($this)->warn('Missing lang key: ' . $key);
+			return '';
+		}
+	}
 
-	static function convertVal($key, $val) {
+	private function convertVal($key, $val) {
 		if (is_string($val)) {
 
 			foreach (self::$specialStringPrefixes as $prefix) {
@@ -556,6 +570,10 @@ class Columns {
 					|| array_search($val, self::$specialStringVals, true) !== false) {
 				return $val;
 			}
+			
+			if (preg_match('/^\$lang\.(?P<key>.+)$/', $val, $matches)) {
+				$val = $this->getLangValue($matches['key']);
+			}
 
 			return self::quoteString($val);
 
@@ -565,27 +583,27 @@ class Columns {
 			return 'null';
 
 		} else if (is_array($val)) {
-			return self::renderArray($val);
+			return $this->renderArray($val);
 		} else {
 			return $val;
 		}
 	}
 
-	static function renderArray($arr, $assoc = null) {
+	private function renderArray($arr, $assoc = null) {
 
 		$assoc = $assoc === null ? Arrays::isAssoc($arr) : $assoc;
 		$parts = array();
 
 		if ($assoc) {
 			foreach ($arr as $k => &$v) {
-				$v = self::convertVal($k, $v);
+				$v = $this->convertVal($k, $v);
 				$k = self::quoteString($k);
 				$parts[] = "$k: $v";
 			}
 			return '{' . implode(', ', $parts) . '}';
 		} else {
 			foreach ($arr as $k => $v) {
-				$v = self::convertVal($k, $v);
+				$v = $this->convertVal($k, $v);
 				$parts[] = "$v";
 			}
 			return '[' . implode(', ', $parts) . ']';
@@ -598,7 +616,7 @@ class Columns {
 			if (!is_array($col)) {
 				$lines[] = "Oce.defaultField('$col')";
 			} else {
-				$lines[] = self::renderArray($col, true);
+				$lines[] = $this->renderArray($col, true);
 			}
 		}
 		if (count($lines) > 0) $lines[0] = "\t\t $lines[0]";
