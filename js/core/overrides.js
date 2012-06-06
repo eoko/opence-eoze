@@ -307,10 +307,7 @@ Ext.grid.Column.types.datecolumn =
 			return;
 		}
 		
-		max = 0;
-		Ext.each(cols, function(l) {
-			max = Math.max(max, l);
-		});
+		max = Math.max.apply(Math, cols);
 		
 		this.columns = max;
 
@@ -325,7 +322,7 @@ Ext.grid.Column.types.datecolumn =
 			items = items.concat(mi.splice(0, l));
 			if (mi.length) {
 				for (var i=0; i<max-l; i++) {
-					items.push({xtype:"container"}); // spacer
+					items.push({xtype:'container', cls: 'x-form-item x-form-check-wrap'}); // spacer
 				}
 			}
 		});
