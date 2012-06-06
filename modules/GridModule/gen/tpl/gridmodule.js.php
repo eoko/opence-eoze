@@ -78,6 +78,10 @@ var moduleClass = Ext.extend(<?php echo $superclass ?>, {
 	,enums: new eo.cqlix.Enums(<?php echo $enumsConfig ?>)
 <?php endif ?>
  */ ?>
+	
+<?php if (isset($i18n)): ?>
+	,i18n: <?php echo $i18n ?>
+<?php endif ?>
 
 <?php if (isset($modelConfig)): ?>
 	,model: new eo.cqlix.Model(<?php echo $modelConfig ?>)
