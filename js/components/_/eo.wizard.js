@@ -1237,7 +1237,7 @@ eo.wizard.Progress= Ext.extend(Ext.Panel, {
 						,finish: finish && (!parent || !parent.getNext())
 							&& (!rootParent || rootParent === parent || !rootParent.getNext())
 						,unresolved: !finish && !step.getResolvedNext()
-						,desc: step.desc || step.shortDesc
+						,desc: step.desc || step.shortDesc || step.subtitle
 						,explain: step.explain || step.explaination || step.longDesc
 					};
 
