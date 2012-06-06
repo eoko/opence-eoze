@@ -50,7 +50,7 @@ Ext.apply(Ext.form.VTypes, {
 	,numIntText: /*lang(*/"Doit être un nombre entier"/*)*/ // i18n
 
 	,numFloat: function(v) {
-		return /^(?:\d+(?:[,.]\d*)|\d*(?:[,.]\d+))$/.test(v);
+		return /^-?(?:\d+(?:[,.]\d*)?|\d*(?:[,.]\d+))$/.test(v);
 	}
 
 	,numFloatText: /*lang(*/"Doit être un nombre"/*)*/ // i18n
