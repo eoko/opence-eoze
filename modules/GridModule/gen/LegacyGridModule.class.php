@@ -81,10 +81,10 @@ class LegacyGridModule {
 		// --- i18n ---
 		
 		if (isset($config['i18n'])) {
-			$tpl->i18n = self::toJSTemplate($config['i18n']);
+			$tpl->i18n = self::generateI18n($config['i18n'],
+					isset($config['i18nOptions']) && $config['i18nOptions']);
 		}
 		
-
 		// --- Extra ---
 		$extra = $config->node('extra')
 				->applyIf($parentConfig->get('extra', null))
@@ -227,6 +227,33 @@ class LegacyGridModule {
 
 //		dump("$tpl");
 		return $tpl;
+	}
+	
+	private static function generateI18n($texts, $convertAll = false) {
+		
+		require_once LIBS_PATH . 'markdown.php';
+		
+		$htmlTexts = array();
+		
+		foreach ($texts as $k => $text) {
+			if (substr($k, 0, 1) === '>') {
+				// removes the <p>...</p>
+				$text = Markdown($text);
+				$text = substr($text, 3);
+				$text = substr($text, 0, -5);
+				$htmlTexts[substr($k, 1)] = $text;
+			} else if ($convertAll) {
+				// removes the <p>...</p>
+				$text = Markdown($text);
+				$text = substr($text, 3);
+				$text = substr($text, 0, -5);
+				$htmlTexts[$k] = $text;
+			} else {
+				$htmlTexts[$k] = $text;
+			}
+		}
+		
+		return self::toJSTemplate($htmlTexts);
 	}
 
 	private static function valueToJSTemplate($v) {
