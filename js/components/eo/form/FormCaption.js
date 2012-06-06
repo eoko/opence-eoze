@@ -32,7 +32,11 @@ eo.form.FormCaption = Ext.extend(Ext.BoxComponent, {
 		
 		if (this.text && !this.html) {
 			// ext3.4 String.format does not exists in ext4+
-			this.html = String.format("<p>{0}</p>", this.text);
+			if (/^\s*<p>/.test(this.text)) {
+				this.html = this.text;
+			} else {
+				this.html = String.format("<p>{0}</p>", this.text);
+			}
 		}
 		
 		self.superclass.initComponent.call(this);
