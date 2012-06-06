@@ -78,6 +78,12 @@ class LegacyGridModule {
 
 		$tpl->uses = json_encode($uses);
 
+		// --- i18n ---
+		
+		if (isset($config['i18n'])) {
+			$tpl->i18n = self::toJSTemplate($config['i18n']);
+		}
+		
 
 		// --- Extra ---
 		$extra = $config->node('extra')
