@@ -1107,9 +1107,14 @@ eo.WizardPanel = eo.wizard.WizardPanel = Ext.extend(Ext.Panel, {
 			if (success) {
 				if (data) {
 					if (data.success) {
-						me.fireEvent.apply(me, 
-								["aftersubmit", me, true].concat(Array.prototype.slice.call(arguments, 0)));
-						if (finish) finish.apply(me, arguments);
+						// 07/06/12 02:07
+						me.fireEvent('aftersubmit', me, true, data, opts);
+						// instead of
+						//	me.fireEvent.apply(me, 
+						//			["aftersubmit", me, true].concat(Array.prototype.slice.call(arguments, 0)));
+						if (finish) {
+							finish.apply(me, arguments);
+						}
 					} else {
 						if (data.errors) {
 							if (data.errors) {
