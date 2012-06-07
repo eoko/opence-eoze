@@ -2204,7 +2204,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 						'Fichier',
 						String.format(
 							"Le fichier est disponible à l'adresse suivante : "
-							+ '<a href="{0}">{0}</a>.', 
+							+ '<a href="{0}" target="_blank">{0}</a>.', 
 							response.url
 						)
 					);
