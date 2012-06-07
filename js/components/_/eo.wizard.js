@@ -1155,6 +1155,70 @@ eo.WizardPanel = eo.wizard.WizardPanel = Ext.extend(Ext.Panel, {
 		request(opts);
 	}
 	
+	/**
+	 * Gets the wizard panel's root window.
+	 * @return eo.Window/null
+	 */
+	,getWindow: function() {
+		return this.findParentBy(function(p) {
+			return p instanceof eo.Window;
+		});
+	}
+	
+	/**
+	 * Closes the wizard panel's {@link #getWindow root window}.
+	 */
+	,close: function() {
+		var w = this.getWindow();
+		if (w) {
+			w.close();
+		}
+	}
+	
+	/**
+	 * Mask the wizard and set it in loading mode, or unset the loading mode
+	 * (and unmask the wizard, then).
+	 */
+	,setLoading: function(waitMessage) {
+		
+		var root = this.getRootWizard();
+
+		// if we are the root wizard
+		if (root === this) {
+			var tlp = this.findParentBy(function(p){return p.owner === undefined}),
+				el = tlp && tlp.el;
+
+			// set loading on
+			if (waitMessage === true || Ext.isString(waitMessage)) {
+				if (tlp.deactivateContent) {
+					tlp.deactivateContent();
+				}
+				if (el) {
+					this.loadingMaskedEl = el;
+					// i18n
+					el.mask(
+						Ext.isString(waitMessage) ? waitMessage : "Chargement...",
+						'x-mask-loading'
+					);
+				}
+			}
+			// set loading off
+			else {
+				if (tlp.activateContent) {
+					tlp.activateContent();
+				}
+				if (el && this.loadingMaskedEl) {
+					el.unmask();
+				}
+				delete this.loadingMaskedEl;
+			}
+		}
+		// pass to root wizard
+		else {
+			root.setLoading(waitMessage);
+		}
+	}
+	
 	// private
 	,finishActions: {
 		close: function() {
@@ -1651,7 +1715,9 @@ eo.WizardWindow = eo.wizard.Window = Ext.extend(eo.wizard.WindowBase, {
 		wizard.on({
 			scope: this
 			,updatebuttons: this.updateButtons
-			,complete: this.onComplete
+			,complete: function() {
+				this.onComplete();
+			}
 			,close: function() {
 				if (!wizard.cancellable) return false;
 			}
