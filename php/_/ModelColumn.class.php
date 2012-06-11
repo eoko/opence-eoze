@@ -447,7 +447,7 @@ class ModelColumn extends ModelFieldBase {
 					$maxIntLength = $maxLength - $maxDecimalLength;
 					$maxLength .= ",$maxDecimalLength";
 					
-					$re = '/^(?P<int>\d+)?(?:.(?P<decimals>\d+))?$/';
+					$re = '/^-?(?P<int>\d+)?(?:.(?P<decimals>\d+))?$/';
 					if (!preg_match($re, "$value", $matches)) {
 						throw new IllegalStateException();
 					}
