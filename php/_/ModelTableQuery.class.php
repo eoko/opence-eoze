@@ -375,8 +375,10 @@ class ModelTableQuery extends Query implements QueryAliasable {
 
 	/**
 	 * @return QueryJoin
+	 * 
+	 * 11/06/12 12:25 Changed 3rd param $leftAlias to $leftTableName
 	 */
-	public function join(ModelRelationInfo $relation, $alias = null, $leftAlias = null) {
+	public function join(ModelRelationInfo $relation, $alias = null, $leftTableName = null) {
 		$index = $alias !== null ? $alias : $relation->name;
 //		dump_after(func_get_args());
 //		dump_after(array("$relation", $alias, $leftAlias));
@@ -390,6 +392,37 @@ class ModelTableQuery extends Query implements QueryAliasable {
 //			));
 //			dump_mark();
 //		}
+
+		// Scans the existing joins to find the alias of the join for the specified
+		// $leftTableName.
+		// 
+		// Experience has shown that things that call this method tend to know only
+		// the db name of the table they use, not the possible alias that has been
+		// applied to create the join.
+		// 
+		// This becomes a problem specifically in the case that the join is not made
+		// on the FROM table, but on another joined table instead. Indeed, the table
+		// name will have been aliased by the join (eg. MyFirstTable->MyTargetTable for
+		// my_target_table_records in the db), but the caller of this method will
+		// use the db table name.
+		// 
+		// So, what we do here is scanning all existing relation to see if there is
+		// already a join (and so an alias) to the left table.
+		// 
+		//     $this->dbTable !== $leftTableName
+		//     // As said, the problem never happens with the FROM table
+		//     
+		//     isset($this->joins) // $this->joins is null at initialization
+		//
+		if ($this->dbTable !== $leftTableName && isset($this->joins)) {
+			foreach ($this->joins as $joinAlias => $join) {
+				assert('$join instanceof QueryJoin');
+				if ($join->getForeignTableName() === $leftTableName) {
+					$leftTableName = $join->getForeignTableAlias();
+				}
+			}
+		}
+		
 		if (isset($this->joins[$index])) {
 			return $this->joins[$index];
 		} else if (isset($this->joinReferences[$index])) {
@@ -400,7 +433,7 @@ class ModelTableQuery extends Query implements QueryAliasable {
 			// in order to ensure that other joins required by the new join will be
 			// built before it.
 			$bindings = array();
-			if (is_array($join = $relation->createJoin($this, $alias, $leftAlias))) {
+			if (is_array($join = $relation->createJoin($this, $alias, $leftTableName))) {
 				$join[0]->buildSql($bindings); // see upper
 				return $this->joinReferences[$index] = $join[0];
 			} else {
