@@ -1,0 +1,7 @@
+config.node: eoze\Eoze
+
+register():
+  
+  eoze\Dependency\Registry: eoze\Dependency\Registry
+  
+  eoze\I18n\LocaleHelper: eoze\I18n\LocaleHelper\IntlOrDummyServiceFactory
