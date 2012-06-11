@@ -29,12 +29,12 @@ eo.ui.TreeMenu = Ext.extend(sp, {
 			,autoScroll: true
 
 			,tools: [{
-				id: "gear"
+				id: 'gear'
 				,handler: function(e, btn) {
 					this.gearMenu.show(btn);
 				}
 				,scope: this
-				,menu: "xx"
+				,menu: 'xx'
 			}]
 			,gearMenu: new Ext.menu.Menu({
 				items: [{
@@ -58,33 +58,33 @@ eo.ui.TreeMenu = Ext.extend(sp, {
 			,contextMenu: new Ext.menu.Menu({
 				items: [{
 					text: "Propriétés..."
-					,iconCls: "ico application_form_edit"
+					,iconCls: 'ico application_form_edit'
 					,handler: this.onNodeEdit
 					,scope: this
-				},"-",{
+				},'-',{
 					text: "Ajouter..."
-					,iconCls: "ico add"
+					,iconCls: 'ico add'
 					,handler: this.onNodeAdd
 					,scope: this
 				},{
 					text: "Supprimer"
-					,iconCls: "ico delete"
+					,iconCls: 'ico delete'
 					,handler: this.onNodeRemove
 					,scope: this
 				}]
 			})
 			
 			,iconStore: new Ext.ux.data.PagingStore({
-				url: "index.php"
+				url: 'index.php'
 				,autoLoad: false
 				,baseParams: {
 					controller: this.controller
-					,action: "listIcons"
+					,action: 'listIcons'
 				}
 				
 				,reader: new Ext.data.JsonReader({
-					fields: ["id", "class", "label"]
-					,root: "data"
+					fields: ['id', 'class', 'label']
+					,root: 'data'
 				})
 				
 				,whenLoaded: function(cb, scope) {
