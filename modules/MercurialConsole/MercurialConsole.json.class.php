@@ -7,7 +7,7 @@ use eoko\module\executor\JsonExecutor;
 class Json extends JsonExecutor {
 	
 	public function id() {
-		$hg = '/usr/bin/hg';
+		$hg = exec("which hg ");
 		$id = trim(`$hg id -ibt`);
 		$log = `$hg log -l 1`;
 		preg_match('/\ndate:\s+([^\n]+)\n/', $log, $m);
