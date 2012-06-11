@@ -284,6 +284,22 @@ abstract class QueryJoin implements QueryAliasable {
 	public function getQuery() {
 		return $this->query;
 	}
+	
+	/**
+	 * Get the db name of the foreign table.
+	 * @return string
+	 */
+	public function getForeignTableName() {
+		return $this->foreignDBTableName;
+	}
+	
+	/**
+	 * Gets the foreign table alias.
+	 * @return string
+	 */
+	public function getForeignTableAlias() {
+		return $this->foreignTableAlias;
+	}
 
 	public function &getContext() {
 		return $this->query->context;
