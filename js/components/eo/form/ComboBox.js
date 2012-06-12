@@ -24,7 +24,7 @@ eo.form.ComboBox = Ext.extend(Ext.form.ComboBox, {
 	
 	// private
 	,initExpandOnFieldClickEvents: function() {
-		if (this.expandOnFieldCLick) {
+		if (this.expandOnFieldCLick && this.editable) {
 			this.el.on('click', this.onTriggerClick, this);
 		}
 	}
