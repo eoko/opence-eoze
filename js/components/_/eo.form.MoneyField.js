@@ -25,23 +25,17 @@ eo.form.MoneyField = Ext.extend(Ext.form.NumberField, {
 				Ext.form.TextField.prototype.setValue.call(this, hv);
 			}
 		}
-		// Update display el
-		var el = this.displayEl;
-		if (el) {
-			el.update(hv);
-		}
 	}
 	
 	,setReadOnly: function(readOnly) {
+		// superclass will add the readonly attribute to the input element
+		eo.form.MoneyField.superclass.setReadOnly.apply(this, arguments);
+		
 		if (this.el && this.wrap) {
 			if (readOnly) {
-				this.wrap.addClass("readonly");
-				this.el.addClass("x-hidden");
-				this.displayEl.removeClass("x-hidden");
+				this.wrap.addClass('readonly');
 			} else {
-				this.wrap.removeClass("readonly");
-				this.displayEl.addClass("x-hidden");
-				this.el.removeClass("x-hidden");
+				this.wrap.removeClass('readonly');
 			}
 		} else {
 			this.readOnly = readOnly;
@@ -57,7 +51,6 @@ eo.form.MoneyField = Ext.extend(Ext.form.NumberField, {
 			var wrap = this.wrap = this.el.wrap({cls: "x-input-money-wrap"});
 			var c = wrap.createChild({tag:"span", cls:"x-input-money symbol euro", html: this.symbol});
 			wrap.insertFirst(c);
-			this.displayEl = wrap.createChild({tag:"div", cls:"x-input-money x-hidden"});
 			this.resizeEl = this.positionEl = this.wrap;
 		}
 		this.setReadOnly(this.readOnly);
@@ -65,10 +58,7 @@ eo.form.MoneyField = Ext.extend(Ext.form.NumberField, {
 	
 	,onResize: function(w, h) {
 		eo.form.MoneyField.superclass.onResize.apply(this, arguments);
-//		this.el.setWidth(w-13);
-//		this.displayEl.setWidth(w-13);
 		this.el.setWidth(w-17);
-		this.displayEl.setWidth(w-17);
 	}
 	
 	,onDestroy: function() {
