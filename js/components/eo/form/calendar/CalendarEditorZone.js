@@ -273,6 +273,20 @@ eo.form.calendar.Zone.Cell = Ext.extend(Object, {
 		}
 		return undefined;
 	}
+	
+	/**
+	 * Gets the raw value from a {@link eo.form.calendar.PaletteValue PaletteValue}
+	 * or a raw value.
+	 * @param {eo.form.calendar.PaletteValue/mixed} v
+	 * @return {mixed}
+	 * @private
+	 */
+	,getRawValue: function(v) {
+		while (v && v.getValue) {
+			v = v.getValue();
+		}
+		return v;
+	}
 
 	,setValue: function(value, preventEvent) {
 		if (this.value !== value) {
@@ -290,6 +304,11 @@ eo.form.calendar.Zone.Cell = Ext.extend(Object, {
 				if ((cls = this.getMarkerCssClass(value))) {
 					mel.addClass(cls.split(" "));
 				}
+			}
+			
+			// if the value has not changed, no change event
+			if (!preventEvent && this.getRealValue(this.value) === this.getRawValue(value)) {
+				preventEvent = true;
 			}
 			
 			this.value = value;
