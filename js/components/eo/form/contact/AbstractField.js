@@ -467,6 +467,15 @@ eo.form.contact.AbstractField = Ext.extend(Ext.form.CompositeField, {
 			items.unshift(this.primaryButton);
 			
 			this.valueFields[this.primaryField] = this.primaryButton;
+		} else if (this.cardinalField) {
+			items.unshift(this.cardinalField = Ext.create({
+				xtype: 'button'
+				,width: 22
+				,text: '1/n'
+				,setValue: function(i) {
+					this.setText(i);
+				}
+			}));
 		} else if (Ext.isDefined(reservePrimaryButtonSpace) ? reservePrimaryButtonSpace 
 				: this.defaultReservePrimaryButtonSpace) {
 			items.unshift({
@@ -562,6 +571,13 @@ eo.form.contact.AbstractField = Ext.extend(Ext.form.CompositeField, {
 	
 	,setDefault: function(on) {
 		this.primaryButton && this.primaryButton.toggle(on);
+	}
+	
+	,setCardinality: function(i) {
+		var f = this.cardinalField;
+		if (f) {
+			f.setValue(i);
+		}
 	}
 	
 	// protected
