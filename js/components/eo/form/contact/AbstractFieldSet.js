@@ -294,6 +294,9 @@ eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 			field.setDefault(true);
 		}
 		
+		// cardinality
+		field.setCardinality(this.items.length);
+		
 		// collapse
 		if (this.collapsed) {
 			this.expand();
@@ -402,9 +405,18 @@ eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 		
 		this.fireEvent('change', this);
 		
+		this.updateCardinality();
 		this.redoLayout();
 
 		this.testFullState();
+	}
+	
+	// private
+	,updateCardinality: function() {
+		var i = 1;
+		this.items.each(function(item) {
+			item.setCardinality(i++);
+		});
 	}
 	
 	// private
