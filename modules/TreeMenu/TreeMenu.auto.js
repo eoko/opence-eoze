@@ -1082,10 +1082,10 @@ eo.ui.TreeMenu.prototype.TreeNode = Ext.extend(Ext.tree.TreeNode, {
 
 		var me = this;
 		this.sjax.request({
-			params: {
+			jsonData: {
 				controller: this.ownerTreeMenu.controller
 				,action: 'saveNode'
-				,json_data: Ext.encode(data)
+				,data: data
 			}
 			,onSuccess: function(o) {
 				if (childNodes.length !== o.childrenIds.length) {
@@ -1118,16 +1118,14 @@ eo.ui.TreeMenu.prototype.TreeNode = Ext.extend(Ext.tree.TreeNode, {
 			delete this.futureParentNode;
 		} else {
 			this.sjax.request({
-				params: {
+				jsonData: {
 					controller: this.ownerTreeMenu.controller
 					,action: 'saveNode'
-					,json_data: Ext.encode(
-						Ext.apply(Ext.apply({}, this.data), {
-							'new': this.isNew()
-							,root: !this.getDepth()
-							,full: false
-						})
-					)
+					,data: Ext.apply(Ext.apply({}, this.data), {
+						'new': this.isNew()
+						,root: !this.getDepth()
+						,full: false
+					})
 				}
 				,onSuccess: function() {
 					delete this.phantom;
