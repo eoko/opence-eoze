@@ -15,6 +15,9 @@ if (!function_exists('bcround')) {
 	 * @author http://php.net/manual/en/function.bcscale.php
 	 */
 	function bcround($number, $scale = 0) {
+		if (substr($number, 0, 1) === '-') {
+			return '-' . bcround(substr($number, 1), $scale);
+		}
 		$fix = '5';
 		for ($i = 0; $i < $scale; $i++) {
 			$fix = "0$fix";
