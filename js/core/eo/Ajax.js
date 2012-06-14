@@ -590,19 +590,30 @@ eo.Ajax = new eo.data.Connection({
 	}
 });
 
-eo.Ajax.on('requestexception', function(conn, response, options) {
-	Ext.Msg.alert(
-		'Erreur de connection',
-		"Vérifiez l'état de votre connection internet. Si le problème "
-		+ "persiste, il peut s'agir d'un problème avec le serveur ; "
-		+ "dans ce cas veuillez contacter la personne responsable de la "
-		+ "maintenance du système."
-		+ "<p>Code d'erreur : f0c93<p>"
-	);
-	debugger; // ERROR
-	// TODO implement retry
-	// Let's say, 2s 4s 8s 16s & 32s silent retries, then ask user action to retry
-});
+(function() {
+	
+	var leaving = false;
+	
+	Ext.getDoc().on('unload', function() {
+		leaving = true;
+	});
+	
+	eo.Ajax.on('requestexception', function(conn, response, options) {
+		if (!leaving) {
+			Ext.Msg.alert(
+				'Erreur de connection',
+				"Vérifiez l'état de votre connection internet. Si le problème "
+				+ "persiste, il peut s'agir d'un problème avec le serveur ; "
+				+ "dans ce cas veuillez contacter la personne responsable de la "
+				+ "maintenance du système."
+				+ "<p>Code d'erreur : f0c93<p>"
+			);
+			debugger; // ERROR
+			// TODO implement retry
+			// Let's say, 2s 4s 8s 16s & 32s silent retries, then ask user action to retry
+		}
+	});
+})(); // closure
 
 eo.deps.reg('eo.Ajax');
 
