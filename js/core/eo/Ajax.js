@@ -594,9 +594,9 @@ eo.Ajax = new eo.data.Connection({
 	
 	var leaving = false;
 	
-	Ext.getDoc().on('unload', function() {
+	window.addEventListener('beforeunload', function() {
 		leaving = true;
-	});
+	}, false);
 	
 	eo.Ajax.on('requestexception', function(conn, response, options) {
 		if (!leaving) {
