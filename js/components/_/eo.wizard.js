@@ -1041,7 +1041,12 @@ eo.WizardPanel = eo.wizard.WizardPanel = Ext.extend(Ext.Panel, {
 						var r = {};
 						Ext.iterate(o, function(k, v) {
 							if (k.substr(0,5) === 'json_') {
-								r[k.substr(5)] = decode(decodeURIComponent(v));
+								try {
+									v = decodeURIComponent(v);
+								} catch (e) {
+									// some custom code forget to encodeURIComponent...
+								}
+								r[k.substr(5)] = decode(v);
 							} else {
 								r[k] = v;
 							}
