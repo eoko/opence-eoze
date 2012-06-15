@@ -80,9 +80,11 @@ class LegacyGridModule {
 
 		// --- i18n ---
 		
+		$i18n = null;
 		if (isset($config['i18n'])) {
-			$tpl->i18n = self::generateI18n($config['i18n'],
+			$i18n = self::generateI18n($config['i18n'],
 					isset($config['i18nOptions']) && $config['i18nOptions']);
+			$tpl->i18n = self::toJSTemplate($i18n);
 		}
 		
 		// --- Extra ---
@@ -138,7 +140,7 @@ class LegacyGridModule {
 
 
 		// --- Tabs ---
-		self::buildTabsConfig($config, $tpl);
+		self::buildTabsConfig($config, $i18n, $tpl);
 
 		// --- Renderer ---
 
@@ -255,7 +257,7 @@ class LegacyGridModule {
 			}
 		}
 		
-		return self::toJSTemplate($htmlTexts);
+		return $htmlTexts;
 	}
 
 	private static function valueToJSTemplate($v) {
@@ -295,7 +297,7 @@ class LegacyGridModule {
 		return $braces[0] . implode(',', $parts) . $braces[1];
 	}
 
-	private static function buildTabsConfig(Config $config, Template &$tpl = null) {
+	private static function buildTabsConfig(Config $config, $i18n, Template &$tpl = null) {
 
 		if (isset($config['tabs'])) {
 			$tabs = array();
@@ -326,9 +328,27 @@ class LegacyGridModule {
 			}
 
 			if ($tpl !== null) {
+				if (isset($i18n)) {
+					self::convertLangItems($i18n, $tabs);
+				}
 				$tpl->tabs = self::toJSTemplate($tabs);
 			}
 			return $tabs;
+		}
+	}
+	
+	private static function convertLangItems($langKeys, &$array) {
+		foreach ($array as $k => &$v) {
+			if (is_array($v)) {
+				self::convertLangItems($langKeys, $v);
+			} else if (is_string($v) && preg_match('/^\$lang\.(?P<key>.+)$/', $v, $matches)) {
+				if (isset($langKeys[$matches['key']])) {
+					$v = $langKeys[$matches['key']];
+				} else {
+					Logger::get(get_called_class())->warn('Missing lang key: ' . $matches['key']);
+					$v = '';
+				}
+			}
 		}
 	}
 
