@@ -7,6 +7,7 @@ use ConfigInheritor;
 use ModelColumn, ModelField;
 use eoko\cqlix\EnumColumn;
 use ModelTable;
+use eoko\log\Logger;
 
 use eoko\util\Arrays;
 
