@@ -25,7 +25,54 @@ eo.form.ComboBox = Ext.extend(Ext.form.ComboBox, {
 	// private
 	,initExpandOnFieldClickEvents: function() {
 		if (this.expandOnFieldCLick && this.editable) {
-			this.el.on('click', this.onTriggerClick, this);
+			this.el.on('click', function() {
+//				this.preventNextSelectOnLoad = true
+				this.onTriggerClick();
+			}, this);
+		}
+	}
+
+	// Overridden to prevent selection of the whole text if the combo
+	// element was clicked (and not the trigger)
+	//
+	// private
+	,onLoad: function(){
+		if(!this.hasFocus){
+			return;
+		}
+		if(this.store.getCount() > 0 || this.listEmptyText){
+			this.expand();
+			this.restrictHeight();
+			// 16/06/12 19:07
+			// realLastQuery is a workaround for a bug induced by AbstractJsonCombo
+			// which clears lastQuery on its datachanged event.
+			if(this.lastQuery === this.allQuery || this.realLastQuery == this.allQuery){
+				if(this.editable){
+					// we must let pass the possible click on the input element,
+					// that will immediately after clear the selection of the whole
+					// text
+					var me = this;
+					setTimeout(function() {
+						var dom = me.el.dom;
+						if (dom) {
+							dom.select();
+						}
+					}, 50);
+				}
+				
+				if(this.autoSelect !== false && !this.selectByValue(this.value, true)){
+					this.select(0, true);
+				}
+			}else{
+				if(this.autoSelect !== false){
+					this.selectNext();
+				}
+				if(this.typeAhead && this.lastKey != Ext.EventObject.BACKSPACE && this.lastKey != Ext.EventObject.DELETE){
+					this.taTask.delay(this.typeAheadDelay);
+				}
+			}
+		}else{
+			this.collapse();
 		}
 	}
 	
