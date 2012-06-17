@@ -185,7 +185,7 @@ eo.form.JsonForm = Ext.extend(Ext.form.BasicForm, {
 		
 		this.items.each(function(f) {
 			if (f.submitValue !== false && !f.disabled && (dirtyOnly !== true || f.isDirty())) {
-				// checkboxgroup
+				// checkbox groups
 				if (f instanceof Ext.form.CheckboxGroup) {
 					f.eachItem(function(cb) {
 						pushValue(cb.getName(), cb.getValue());
@@ -196,6 +196,17 @@ eo.form.JsonForm = Ext.extend(Ext.form.BasicForm, {
 				
 				// all other field types
 				else {
+					var v = f.getValue();
+					
+					// radio groups
+					//
+					// The following is a *tentative* to handle radio group.
+					// Copied from another component, but never tested, so
+					// it may or may not work.
+					if (v.getGroupValue) {
+						v = v.getGroupValue();
+					}
+					
 					pushValue(f.getName(), f.getValue());
 				}
 			}
