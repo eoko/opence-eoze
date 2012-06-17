@@ -166,25 +166,37 @@ eo.form.JsonForm = Ext.extend(Ext.form.BasicForm, {
 	 * @param {Boolean} [dirtyOnly=false] `true` to return only fields that are dirty.
      * @return {Object} The values in the form
      */
-	,getSubmitFieldValues: function(dirtyOnly){
+	,getSubmitFieldValues: function(dirtyOnly) {
 		var o = {},
-		n,
-		key,
-		val;
+		key;
+		
+		var pushValue = function(n, val) {
+			key = o[n];
+			if (Ext.isDefined(key)) {
+				if (Ext.isArray(key)) {
+					o[n].push(val);
+				} else {
+					o[n] = [key, val];
+				}
+			} else {
+				o[n] = val;
+			}
+		};
+		
 		this.items.each(function(f) {
 			if (f.submitValue !== false && !f.disabled && (dirtyOnly !== true || f.isDirty())) {
-				n = f.getName();
-				key = o[n];
-				val = f.getValue();
-
-				if(Ext.isDefined(key)){
-					if(Ext.isArray(key)){
-						o[n].push(val);
-					}else{
-						o[n] = [key, val];
-					}
-				}else{
-					o[n] = val;
+				// checkboxgroup
+				if (f instanceof Ext.form.CheckboxGroup) {
+					f.eachItem(function(cb) {
+						pushValue(cb.getName(), cb.getValue());
+					});
+				}
+				// Most probably, radiogroup should be handled specifically, too.
+				// Maybe even other field types...
+				
+				// all other field types
+				else {
+					pushValue(f.getName(), f.getValue());
 				}
 			}
 		});
