@@ -486,7 +486,7 @@ eo.ui.TreeMenu = Ext.extend(sp, {
 		
 		var win = new Oce.FormWindow(Ext.apply({
 			formPanel: formPanel
-			,width: 400
+			,width: 640
 			
 			,maximizable: false
 			,minimizable: false
