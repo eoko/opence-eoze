@@ -203,7 +203,7 @@ eo.form.JsonForm = Ext.extend(Ext.form.BasicForm, {
 					// The following is a *tentative* to handle radio group.
 					// Copied from another component, but never tested, so
 					// it may or may not work.
-					if (v.getGroupValue) {
+					if (v && v.getGroupValue) {
 						v = v.getGroupValue();
 					}
 					
