@@ -307,7 +307,7 @@ eo.form.calendar.Zone.Cell = Ext.extend(Object, {
 			}
 			
 			// if the value has not changed, no change event
-			if (!preventEvent && this.getRealValue(this.value) === this.getRawValue(value)) {
+			if (!preventEvent && this.getRawValue(this.value) === this.getRawValue(value)) {
 				preventEvent = true;
 			}
 			
