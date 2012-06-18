@@ -164,9 +164,17 @@ eo.form.ComboBox = Ext.extend(Ext.form.ComboBox, {
 		}
 	}
 	
+	// overridden to update selectedId on setValue
+	,setValue: function() {
+		var r = eo.form.ComboBox.superclass.setValue.apply(this, arguments);
+		this.selectedId = this.getValue();
+		return r;
+	}
+	
 	// for getSelectedId()
 	// private
     ,onSelect: function(record, index){
+		debugger
 		this.selectedId = record && record.id;
 		eo.form.ComboBox.superclass.onSelect.apply(this, arguments);
     }
