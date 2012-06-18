@@ -1160,6 +1160,12 @@ abstract class Model {
 	}
 
 	protected function doLoad() {
+		
+		if ($this->isNew()) {
+			throw new IllegalStateException(
+				'Cannot load a new record that has never been stored in the database.'
+			);
+		}
 
 		$table = $this->getTable();
 		$id = $this->internal->fields[$this->getPrimaryKeyName()];
