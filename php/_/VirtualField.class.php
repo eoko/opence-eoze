@@ -131,6 +131,9 @@ abstract class VirtualFieldBase extends ModelFieldBase implements VirtualField {
 		if (is_string($clause) && !preg_match('/^\(.+\)$/', $clause)) {
 			$clause = "($clause)";
 		}
+		else if ($clause instanceof Query) {
+			return new QuerySelectSub($clause);
+		}
 		return $clause;
 	}
 
