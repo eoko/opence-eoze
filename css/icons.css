@@ -160,6 +160,9 @@
 .ico.download {
 	background-image: url("../images/icons_fatcow/16x16/download.png") !important;
 }
+.ico.eye {
+	background-image: url("../images/icons/eye.png") !important;
+}
 .application_form_edit {
 	background-image: url("../images/icons/application_form_edit.png") !important;
 }
@@ -278,6 +281,7 @@
 .ico_pdf {
 	background-image: url("../images/icons/page_white_acrobat.png") !important;
 }
+.ico.edit,
 .ico_edit,
 .ico_pencil {
 	background-image: url("../images/icons/pencil.png") !important;
