@@ -190,6 +190,9 @@ class Columns {
 			
 			// 06/05/12 16:50 Apply grid meta
 			$this->applyGridMeta($col, $name);
+			
+			// 19/06/12 06:08 Apply model form config
+			$this->applyFormMeta($col, $name);
 
 			// Automatically apply name
 			if (!isset($col['name'])) {
@@ -434,6 +437,15 @@ class Columns {
 			$gridMeta = $this->table->getField($name)->getMeta()->grid;
 			if ($gridMeta) {
 				Arrays::applyIf($colConfig, $gridMeta);
+			}
+		}
+	}
+	
+	private function applyFormMeta(array &$colConfig, $name) {
+		if ($this->table->hasField($name)) {
+			$formMeta = $this->table->getField($name)->getMeta()->form;
+			if ($formMeta) {
+				self::setColFormItemIf($colConfig, $formMeta);
 			}
 		}
 	}
