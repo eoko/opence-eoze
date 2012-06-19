@@ -54,9 +54,9 @@ eo.form.FormattedTextField = Ext.extend(Ext.form.TriggerField, {
 				return this.formatUCFirst(s);
 		}
 	}
-
+	
 	// private
-	,onBlur: function() {
+	,applyFormat: function() {
 		if (!this.disableFormatting) {
 			var v = this.getValue(),
 				fv = !v ? v : this.doFormat(v);
@@ -64,7 +64,20 @@ eo.form.FormattedTextField = Ext.extend(Ext.form.TriggerField, {
 				this.setValue(fv);
 			}
 		}
+	}
+
+	// private
+	,onBlur: function() {
+		this.applyFormat();
 		eo.form.FormattedTextField.superclass.onBlur.apply(this, arguments);
+	}
+	
+	/**
+	 * Enable or disable automatic formatting.
+	 * @param {Boolean} enabled
+	 */
+	,setFormattingEnabled: function(enabled) {
+		this.disableFormatting = !enabled;
 	}
 	
 	,getMenu: function() {
@@ -77,6 +90,9 @@ eo.form.FormattedTextField = Ext.extend(Ext.form.TriggerField, {
 					,scope: this
 					,checkHandler: function(item, checked) {
 						this.disableFormatting = !checked;
+						if (checked) {
+							this.applyFormat();
+						}
 					}
 				})]
 				,hide: function() {
@@ -101,3 +117,4 @@ eo.form.FormattedTextField = Ext.extend(Ext.form.TriggerField, {
 });
 
 Ext.reg('formattedtextfield', eo.form.FormattedTextField);
+Oce.deps.reg('eo.form.FormattedTextField');
