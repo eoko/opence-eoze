@@ -613,6 +613,13 @@ eo.Ajax = new eo.data.Connection({
 			// Let's say, 2s 4s 8s 16s & 32s silent retries, then ask user action to retry
 		}
 	});
+	
+	eo.Ajax.on('requestcomplete', function(conn, data, options) {
+		if (!data.success) {
+			eo.handleResponseError(data, options);
+			return false;
+		}
+	});
 })(); // closure
 
 eo.deps.reg('eo.Ajax');
