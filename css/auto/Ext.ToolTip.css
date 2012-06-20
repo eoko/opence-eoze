@@ -1,0 +1,16 @@
+/* 
+    Document   : Ext.ToolTip
+    Created on : 20 juin 2012, 22:33:27
+    Author     : Éric O.
+*/
+
+.x-tip.eo-help li {
+    list-style-type: disc;
+    list-style-position: inside;
+    margin-left: 10px
+}
+
+.x-tip.eo-help p {
+    margin-bottom: .5em;
+    margin-top: .5em;
+}
