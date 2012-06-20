@@ -1,11 +1,8 @@
 (function() {
 
 var NS = Ext.ns("Oce.Modules.MediaManager");
-
-var sp = Oce.BaseModule,
-	spp = sp.prototype;
-
-NS.MediaManager = Ext.extend(sp, {
+	
+Oce.Modules.MediaManager.MediaManager = Ext.extend(Oce.Modules.MediaManager.MediaManagerBase, {
 
 	constructor: function() {
 		spp.constructor.apply(this, arguments);
@@ -266,5 +263,7 @@ Oce.deps.wait('Ext.ux.form.HtmlEditor.Image', function() {
 		}
 	});
 });
+
+var spp = Oce.Modules.MediaManager.MediaManager.superclass;
 
 })(); // closure
