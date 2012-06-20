@@ -54,6 +54,79 @@ eo.form.AgeField = Ext.extend(Ext.form.TextField, {
 	 * The regular expression that will be used to test if the input is a length in days.
 	 */
 	,dayRe: /^d|j/i
+	
+	// i18n
+	/**
+	 * @cfg {String/null} The html to be displayed in the help tooltip. Set to null to 
+	 * disable help tooltip.
+	 */
+	,helpHtml: "<h1>Aide</h1>"
+			+ "<p>Utilisez les lettres 'a', 'm' et 'j' pour indiquer les années, jours "
+			+ "et mois, ou indiquez les en toutes lettres.</p>"
+			+ "<p>Exemples&nbsp;:</p>"
+			+ "<ul>"
+			+ "<li>'1 2 3' pour 1 an 2 mois 3 jours</li>"
+			+ "<li>'2 mois' ou '2m'</li>"
+			+ "<li>'2 ans 3 jours' ou '2m3j'</li>"
+			+ "</ul>"
+			+ "<p>Vous pouvez également entrer dans l'ordre le nombre d'années, de jours "
+			+ "et de mois, séparés par des espaces.</p>"
+			+ "<p>Exemple&nbsp;:</p>"
+			+ "<ul>"
+			+ "<li>'1 2 3' pour 1 an 2 mois 3 jours</li>"
+			+ "</ul>"
+	
+	,onRender: function() {
+		eo.form.AgeField.superclass.onRender.apply(this, arguments);
+		var html = this.helpHtml;
+		if (html) {
+			var w = this.el.wrap();
+			this.resizeEl = this.positionEl = w;
+
+			var helpEl = w.createChild({
+				tag: 'img'
+				,src: Ext.BLANK_IMAGE_URL
+				,cls: 'eo-form-agefield fugico_question-frame'
+				,style: 'position: absolute; top: 2px; right: 0; cursor: pointer;'
+				,width: 16
+				,height: 16
+			});
+			
+			new Ext.ToolTip({
+				html: html
+				,cls: 'eo-help'
+				,showDelay: 0
+				,dismissDelay: 0
+				,trackMouse: true
+				,target: helpEl
+			});
+			
+//			helpEl.on({
+//				mouseenter: function() {
+//					tip.showBy(helpEl);
+//				}
+//				,mouseleave: function() {
+//					tip.hide();
+//				}
+//			});
+			
+//			debugger
+//			
+//			Ext.QuickTips.register({
+//				target: helpEl
+//				,title: "Aide"
+//				,text: "Bla bla bla"
+//			})
+		}
+	}
+	
+	,onResize: function(w, h){
+		eo.form.AgeField.superclass.onResize.call(this, w, h);
+		if(Ext.isNumber(w)){
+			this.el.setWidth(w - 20);
+		}
+		this.getResizeEl().setWidth(w);
+	}
 
 	// private
 	,parseValue: function(v) {
