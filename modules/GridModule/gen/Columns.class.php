@@ -303,21 +303,21 @@ class Columns {
 						break;
 					case ModelField::T_ENUM:
 						// Form combo
-						if (!isset($col['formField']['xtype']) && !isset($col['form']['xtype'])) {
-							$data = array();
-							$renderer = array();
-							foreach ($f->getCodeLabels() as $code => $label) {
-								if ($code === '') {
-									$code = null;
-								}
-								$data[] = array($code, $label);
-								$renderer[$code === null ? 'null' : $code] = $label;
+						$data = array();
+						$renderer = array();
+						foreach ($f->getCodeLabels() as $code => $label) {
+							if ($code === '') {
+								$code = null;
 							}
-							$renderer = json_encode($renderer);
-							Arrays::applyIf($col, array(
-								'rendererData' => $renderer,
-								'renderer' => "function(v) { return {$renderer}[v] || ''; }",
-							));
+							$data[] = array($code, $label);
+							$renderer[$code === null ? 'null' : $code] = $label;
+						}
+						$encRenderer = json_encode($renderer);
+						Arrays::applyIf($col, array(
+							'rendererData' => $renderer,
+							'renderer' => "function(v) { return {$encRenderer}[v] || ''; }",
+						));
+						if (!isset($col['formField']['xtype']) && !isset($col['form']['xtype'])) {
 							Arrays::applyIf($col['formField'], array(
 								'xtype' => 'clearablecombo',
 
