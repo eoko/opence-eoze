@@ -23,26 +23,49 @@ eo.handleResponseError = function(responseData, options) {
 	
 	var sc = options.sourceComponent,
 		cb = options.callback,
-		scope = options.scope;
+		scope = options.scope,
+		title, msg;
 	
 	if (responseData.errorMessage) {
-		var title = responseData.title || "Erreur", // i18n
-			msg = responseData.errorMessage;
-
-		var win = Oce.Modules.GridModule.AlertWindow.show({
-			title: title
-			,message: msg
-			,modalTo: sc
-			,okHandler: function() {
-				win.close();
-				if (cb) {
-					cb.call(scope);
-				}
-			}
-		});
+		title = responseData.title || "Erreur"; // i18n
+		msg = responseData.errorMessage;
+	}
+	
+	else if (responseData.details) {
+		var d = responseData.details,
+			rid = d.requestId,
+			ts = d.timestamp,
+			msg = d.msg || d.message;
 		
-	} else {
+		title = d.title || "Erreur"; // i18n
+		
+		if (!msg) {
+			// i18n
+			msg = "<p>Désolé, une erreur système est survenue "
+					+ "et a empêché l'exécution correcte de cette opération.</p>";
+		}
+			
+		if (rid) {
+			msg += "<li>Requête #" + rid + "</li>";
+		} else if (ts) {
+			msg += "<li>Erreur #" + ts + "</li>";
+		}
+	}
+	
+	else {
 		debugger // TODO
 		throw new Error('TODO');
 	}
+
+	var win = Oce.Modules.GridModule.AlertWindow.show({
+		title: title
+		,message: msg
+		,modalTo: sc
+		,okHandler: function() {
+			win.close();
+			if (cb) {
+				cb.call(scope);
+			}
+		}
+	});
 }

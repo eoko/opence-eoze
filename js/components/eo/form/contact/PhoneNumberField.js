@@ -20,7 +20,7 @@ eo.form.contact.PhoneNumberField = Ext.extend(eo.form.contact.AbstractField, {
 
 	,createFields: function(layout) {
 		return [
-			this.numberFormField = new Ext.form.TextField({
+			this.numberFormField = new eo.form.FormattedPhoneNumberField({
 				name: this.numberName
 				,emptyText: this.textItem
 				,allowBlank: false
@@ -45,5 +45,6 @@ eo.form.contact.PhoneNumberField = Ext.extend(eo.form.contact.AbstractField, {
 });
 
 Ext.reg('phonenumberfield', NS.PhoneNumberField);
+Oce.deps.reg('eo.form.contact.PhoneNumberField');
 
 }); // deps
