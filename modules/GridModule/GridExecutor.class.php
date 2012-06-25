@@ -663,6 +663,8 @@ abstract class GridExecutor extends JsonExecutor {
 	  //////////////////////////////////////////////////////////////////////////
 	 // LOAD -- Multiple Rows
 	//////////////////////////////////////////////////////////////////////////
+	
+	protected function beforeLoad() {}
 
 	/**
 	 * Loads the grid records.
@@ -689,6 +691,8 @@ abstract class GridExecutor extends JsonExecutor {
 	 * @version 1.0.0 25/04/12 22:37
 	 */
 	public function load() {
+		
+		$this->beforeLoad();
 
 		$query = $this->createLoadQuery('grid');
 

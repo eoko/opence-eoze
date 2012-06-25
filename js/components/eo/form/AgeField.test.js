@@ -6,6 +6,8 @@
  */
 eo.Testing.addUnitTest('AgeField', function() {
 	
+	Ext.QuickTips.init();
+	
 	var jsonPanel = new eo.JsonPanel({
 		decode: false
 		,flex: 1
@@ -13,11 +15,20 @@ eo.Testing.addUnitTest('AgeField', function() {
 	
 	var field = new eo.form.AgeField({
 		name: 'age'
+		,fieldLabel: 'Le champ'
 		,flex: 1
 	});
 	
 	var fp = new Ext.FormPanel({
-		items: [field]
+		defaultType: 'textfield'
+		,defaults: {
+			anchor: '100%'
+		}
+		,items: [
+			field
+			,{fieldLabel: 'Un autre'}
+			,{fieldLabel: 'Et encore un'}
+		]
 	});
 	
 	var form = fp.form;
@@ -25,7 +36,7 @@ eo.Testing.addUnitTest('AgeField', function() {
 	var win = new Ext.Window({
 		
 		height: 200
-		,width: 300
+		,width: 400
 		
 		,layout: {
 			type: 'vbox'

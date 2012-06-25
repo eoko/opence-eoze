@@ -215,7 +215,20 @@ class ModelColumn extends ModelFieldBase {
 	 */
 	public function getAutoValueId($operation) {
 		if ($this->autoValue === null) {
-			return null;
+			$auto = $this->meta->auto;
+			if (isset($auto)) {
+				if (is_array($auto)) {
+					switch ($operation) {
+						case self::OP_CREATE:
+							return isset($auto['create']) ? $auto['create'] : false;
+						case self::OP_UPDATE:
+							return isset($auto['update']) ? $auto['update'] : false;
+					}
+				} else {
+					return $auto;
+				}
+			}
+			return $this->meta->auto;
 		} else {
 			if (is_array($this->autoValue)) {
 				return $this->autoValue[$operation];

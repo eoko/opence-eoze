@@ -71,7 +71,7 @@ div.details div.details-info-image-ct {
 }
 .img-chooser-view .x-view-over{
     border:1px solid #dddddd;
-    background: #efefef url(../../resources/images/default/grid/row-over.gif) repeat-x left top;
+    background: #efefef url(../../images/default/grid/row-over.gif) repeat-x left top;
     padding: 4px;
 }
 .img-chooser-view .x-view-selected{
@@ -88,7 +88,7 @@ div.details div.details-info-image-ct {
 }
 .img-chooser-view .loading-indicator {
     font-size:11px;
-    background-image:url('../../resources/images/grid/loading.gif');
+    background-image:url('../../images/grid/loading.gif');
     background-repeat: no-repeat;
     background-position: left;
     padding-left:20px;

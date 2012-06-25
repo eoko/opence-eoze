@@ -457,10 +457,18 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			p.json_columns = Ext.encode(dataIndexes);
 		}, this);
 		
+		// Update selection on store changes
+		// onSelectionChange must not be called directly, because it expects
+		// the selection model as argument
+		var callSelectionChange = function() {
+			var g = this.grid,
+				sm = g && g.getSelectionModel();
+			return this.onSelectionChange(sm);
+		}
 		store.on({
 			scope: this
-			,load: this.onSelectionChange
-			,update: this.onSelectionChange
+			,load: callSelectionChange
+			,update: callSelectionChange
 		});
 	}
 

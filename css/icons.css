@@ -8,30 +8,34 @@
 	 min-width: 32px;
 /*	 height: 32px;*/
  }
+ 
+.ribbon.icon.loading {
+	background-image: url("../images/opence/ribbon-ajax-loader.gif") !important;
+ }
 
 .ribbon.icon.export_pdf {
-	background-image: url("../images/opence/32x32/export_pdf.png") !important;
+	background-image: url("../images/opence/32x32/export_pdf.png");
 }
 .ribbon.icon.export_excel {
-	background-image: url("../images/opence/32x32/export_excel.png") !important;
+	background-image: url("../images/opence/32x32/export_excel.png");
 }
 .ribbon.icon.export_csv {
-	background-image: url("../images/opence/32x32/export_csv.png") !important;
+	background-image: url("../images/opence/32x32/export_csv.png");
 }
 .icon.ribbon.email {
-	background-image: url("../images/icons_fatcow/32x32/email.png") !important;
+	background-image: url("../images/icons_fatcow/32x32/email.png");
 }
 .icon.ribbon.archive {
-	background-image: url("../images/icons_fatcow/32x32/drawer.png") !important;
+	background-image: url("../images/icons_fatcow/32x32/drawer.png");
 }
 .icon.ribbon.archive.view {
-	background-image: url("../images/icons_fatcow/32x32/drawer+eye.png") !important;
+	background-image: url("../images/icons_fatcow/32x32/drawer+eye.png");
 }
 .icon.ribbon.nuke {
-	background-image: url("../images/unlicensed/nuke.png") !important;
+	background-image: url("../images/unlicensed/nuke.png");
 }
 .icon.ribbon.unarchive {
-	background-image: url("../images/icons_fatcow/32x32/drawer_open.png") !important;
+	background-image: url("../images/icons_fatcow/32x32/drawer_open.png");
 }
 	
 .ico32.green_ball {
@@ -156,6 +160,9 @@
 .ico.download {
 	background-image: url("../images/icons_fatcow/16x16/download.png") !important;
 }
+.ico.eye {
+	background-image: url("../images/icons/eye.png") !important;
+}
 .application_form_edit {
 	background-image: url("../images/icons/application_form_edit.png") !important;
 }
@@ -274,6 +281,7 @@
 .ico_pdf {
 	background-image: url("../images/icons/page_white_acrobat.png") !important;
 }
+.ico.edit,
 .ico_edit,
 .ico_pencil {
 	background-image: url("../images/icons/pencil.png") !important;

@@ -190,6 +190,9 @@ class Columns {
 			
 			// 06/05/12 16:50 Apply grid meta
 			$this->applyGridMeta($col, $name);
+			
+			// 19/06/12 06:08 Apply model form config
+			$this->applyFormMeta($col, $name);
 
 			// Automatically apply name
 			if (!isset($col['name'])) {
@@ -299,6 +302,7 @@ class Columns {
 						self::setColStoreItemIf($col, 'type', 'string');
 						break;
 					case ModelField::T_ENUM:
+						// Form combo
 						$data = array();
 						$renderer = array();
 						foreach ($f->getCodeLabels() as $code => $label) {
@@ -308,23 +312,25 @@ class Columns {
 							$data[] = array($code, $label);
 							$renderer[$code === null ? 'null' : $code] = $label;
 						}
-						$renderer = json_encode($renderer);
+						$encRenderer = json_encode($renderer);
 						Arrays::applyIf($col, array(
 							'rendererData' => $renderer,
-							'renderer' => "function(v) { return {$renderer}[v] || ''; }",
+							'renderer' => "function(v) { return {$encRenderer}[v] || ''; }",
 						));
-						Arrays::applyIf($col['formField'], array(
-							'xtype' => 'clearablecombo',
-							
-							'editable' => false,
-							'triggerAction' => 'all',
-							'hiddenField' => $col['name'],
-							
-							'value' => $f->getDefault(),
-							'allowBlank' => $f->isNullable(),
-							
-							'store' => $data
-						));
+						if (!isset($col['formField']['xtype']) && !isset($col['form']['xtype'])) {
+							Arrays::applyIf($col['formField'], array(
+								'xtype' => 'clearablecombo',
+
+								'editable' => false,
+								'triggerAction' => 'all',
+								'hiddenField' => $col['name'],
+
+								'value' => $f->getDefault(),
+								'allowBlank' => $f->isNullable(),
+
+								'store' => $data
+							));
+						}
 						
 						// Columns filters
 						if (isset($col['filterable']) && $col['filterable']
@@ -430,10 +436,21 @@ class Columns {
 	 * @since 06/05/12 17:05
 	 */
 	private function applyGridMeta(array &$colConfig, $name) {
-		if ($this->table->hasField($name)) {
-			$gridMeta = $this->table->getField($name)->getMeta()->grid;
+		$field = $this->table->getField($name, false);
+		if ($field) {
+			$gridMeta = $field->getMeta()->grid;
 			if ($gridMeta) {
 				Arrays::applyIf($colConfig, $gridMeta);
+			}
+		}
+	}
+	
+	private function applyFormMeta(array &$colConfig, $name) {
+		$field = $this->table->getField($name, false);
+		if ($field) {
+			$formMeta = $field->getMeta()->form;
+			if ($formMeta) {
+				self::setColFormItemIf($colConfig, $formMeta);
 			}
 		}
 	}
