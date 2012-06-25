@@ -57,9 +57,14 @@ class Router {
 		
 		$request = $_REQUEST;
 		
-		if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' 
-				&& $_SERVER['CONTENT_TYPE'] === 'application/json' || isset($_GET['contentType']) 
-				&& preg_match('/(?:^|\/)json$/i', $_GET['contentType'])) {
+		if (
+			isset($_SERVER['REQUEST_METHOD'])
+				&& $_SERVER['REQUEST_METHOD'] === 'POST' 
+				&& isset($_SERVER['CONTENT_TYPE'])
+				&& preg_match('/(?:\bapplication\/|\/)json(?:\b|;)/', $_SERVER['CONTENT_TYPE']) 
+			|| isset($_GET['contentType'])
+				&& preg_match('/(?:^|\/)json$/i', $_GET['contentType'])
+		) {
 		
 			Arrays::apply($request, json_decode(file_get_contents("php://input"), true));
 			
