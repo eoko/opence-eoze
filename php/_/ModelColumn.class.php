@@ -220,9 +220,9 @@ class ModelColumn extends ModelFieldBase {
 				if (is_array($auto)) {
 					switch ($operation) {
 						case self::OP_CREATE:
-							return isset($auto['create']) ? $auto['create'] : false;
+							return isset($auto['create']) ? $auto['create'] : null;
 						case self::OP_UPDATE:
-							return isset($auto['update']) ? $auto['update'] : false;
+							return isset($auto['update']) ? $auto['update'] : null;
 					}
 				} else {
 					return $auto;
