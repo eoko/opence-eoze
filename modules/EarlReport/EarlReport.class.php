@@ -39,19 +39,40 @@ class EarlReport extends Module {
 		}
 	}
 	
+	private $customEarlClassesCache = null;
+	
 	/**
+	 * Creates a new Earl (or a subclass) object.
+	 * 
+	 * @param string $class A custom class to be used. If an instance of this class
+	 * has already been created by this module, this instance will be returned, instead
+	 * of creating a new one.
+	 * 
 	 * @return Earl
 	 */
-	public function getEarl() {
-		if (!$this->earl) {
-			// Register Earl's path in eoze class loader
-			$this->registerClassLoader();
-
-			$this->earl = new Earl($this->getConfig()->toArray());
-
-//			$this->configureEarl($this->earl);
+	public function getEarl($class = null) {
+		
+		// Default class
+		if ($class === null) {
+			if (!$this->earl) {
+				// Register Earl's path in eoze class loader
+				$this->registerClassLoader();
+				// Create & config
+				$this->earl = new Earl($this->getConfig()->toArray());
+			}
+			return $this->earl;
 		}
-		return $this->earl;
+		
+		// Creates with a custom class
+		else {
+			if (!isset($this->customEarlClassesCache[$class])) {
+				// Register Earl's path in eoze class loader
+				$this->registerClassLoader();
+				// Create
+				$this->customEarlClassesCache[$class] = new $class($this->getConfig()->toArray());
+			}
+			return $this->customEarlClassesCache[$class];
+		}
 	}
 	
 //	protected function configureEarl(Earl $earl) {
