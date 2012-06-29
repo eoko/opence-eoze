@@ -247,6 +247,7 @@
 .ico.lock {
 	background-image: url("../images/icons/lock.png") !important;
 }
+.ico.lock.open,
 .ico.lock_open {
 	background-image: url("../images/icons/lock_open.png") !important;
 }
