@@ -2194,10 +2194,11 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 
 			// Retrieve values from options window
 			if (win) {
+                var values = win.form.getFieldValues();
 				if (opts.jsonOptions) {
-					requestParams.json_options = encodeURIComponent(Ext.util.JSON.encode(win.form.getValues()));
+					requestParams.json_options = encodeURIComponent(Ext.util.JSON.encode(values));
 				} else {
-					Ext.iterate(win.form.getValues(), function(k,v) {
+					Ext.iterate(values, function(k,v) {
 						requestParams[k] = v;
 					});
 				}
