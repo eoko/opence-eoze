@@ -111,6 +111,18 @@ eo.form.CheckableFieldSet = Ext.extend(Ext.form.FieldSet, {
 	,setEditable: function(editable) {
 		this.checkbox.setDisplayed(editable);
 	}
+    
+    ,setReadOnly: function(readOnly) {
+        var d = this.checkbox.dom;
+        this.readOnly = readOnly;
+        if (d) {
+            if (readOnly) {
+                d.setAttribute('disabled', 'disabled');
+            } else {
+                d.removeAttribute('disabled');
+            }
+        }
+    }
 	
 	// TODO Maybe that's fast expedient, and the isValid method should try to
 	// integrate more gracefuly with Ext's validation process... A bit of
@@ -133,6 +145,8 @@ eo.form.CheckableFieldSet = Ext.extend(Ext.form.FieldSet, {
 		} else {
 			this.checked = this.checkbox.dom.checked;
 		}
+        // readOnly
+        this.setReadOnly(this.readOnly);
 	}
 	
 	,onCheckClick: function() {
