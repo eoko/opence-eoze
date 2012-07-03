@@ -197,7 +197,7 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
                     // diry
                     if (me.form.isDirty()) {
                         me.modified = true;
-                        me.fireEvent("modified");
+                        me.fireEvent('modified');
                     }
 
                     waitingToTest = false;
