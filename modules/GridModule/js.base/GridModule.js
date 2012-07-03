@@ -158,6 +158,22 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		);
 		
 		this.model.initRelations(this.modelRelations);
+        
+        // Column groups merge
+        // 
+        // lastItems are merged at the end of columnGroups.items
+        // 
+        var x = this.extra = this.extra || {},
+            cg = x && x.columnGroups,
+            cgi = cg && cg.items,
+            lcgi = cg && cg.lastItems;
+        if (lcgi) {
+            cg = x.columnGroups = x.columnGroups || {};
+            cgi = cg.items = (cgi || {});
+            Ext.iterate(lcgi, function(name, items) {
+                cgi[name] = items;
+            });
+        }
 		
 		// Init plugins
 		// Must be done before initActions, to give plugins the opportunity to
