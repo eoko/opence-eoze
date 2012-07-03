@@ -431,14 +431,15 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
         this.preventModificationEvents = true;
         var afterLoadSuccess = function() {
 
-            me.preventModificationEvents = false;
+// Removed on 03/07/12 18:57 to prevent double grid loading
+//            // Load grid fields
+//            me.form.items.each(function(field) {
+//                if (field instanceof Oce.form.GridField) {
+//                    field.load();
+//                }
+//            });
 
-            // Load grid fields
-            me.form.items.each(function(field) {
-                if (field instanceof Oce.form.GridField) {
-                    field.load();
-                }
-            });
+            me.preventModificationEvents = false;
 
             me.clearModified();
         };
