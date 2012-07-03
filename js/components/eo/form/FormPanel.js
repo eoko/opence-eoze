@@ -4,468 +4,468 @@ Ext.ns("Oce");
 
 Oce.FormPanel = Ext.extend(Ext.FormPanel, {
 
-	idValue: undefined
-	,initFormItems: undefined
+    idValue: undefined
+    ,initFormItems: undefined
 
-	,constructor: function(config) {
+    ,constructor: function(config) {
 
-		this.addEvents({
-			modificationcleared: true
-			,modified: true
-		});
+        this.addEvents({
+            modificationcleared: true
+            ,modified: true
+        });
 
-		config = Ext.applyIf(config || {}, {
-			 url:"index.php"
-			,bodyStyle: "background:transparent"
-			,padding: 10
-			,border: false
-			,waitMsg: "Chargement des données"
-			,waitTitle: "Veuillez patientez"
-			,trackResetOnLoad: true
-		});
+        config = Ext.applyIf(config || {}, {
+             url:"index.php"
+            ,bodyStyle: "background:transparent"
+            ,padding: 10
+            ,border: false
+            ,waitMsg: "Chargement des données"
+            ,waitTitle: "Veuillez patientez"
+            ,trackResetOnLoad: true
+        });
 
-//KEEP n' SEE		// --- Foreign combo stores loading callback ---
-//		var foreignComboStoreLatch = 0;
-//		var formPanel = this;
+//KEEP n' SEE        // --- Foreign combo stores loading callback ---
+//        var foreignComboStoreLatch = 0;
+//        var formPanel = this;
 //
-//		var countForeignComboDown = function() {
-//			if (--foreignComboStoreLatch === 0) {
-//				formPanel.fireEvent('allstoresloaded');
-//			}
-//		}
+//        var countForeignComboDown = function() {
+//            if (--foreignComboStoreLatch === 0) {
+//                formPanel.fireEvent('allstoresloaded');
+//            }
+//        }
 //
-//		this.onAllStoreLoaded = function(fn) {
-//			if (foreignComboStoreLatch === 0) {
-//				fn();
-//			} else {
-//				formPanel.on('allstoresloaded', fn);
-//			}
-//		}
+//        this.onAllStoreLoaded = function(fn) {
+//            if (foreignComboStoreLatch === 0) {
+//                fn();
+//            } else {
+//                formPanel.on('allstoresloaded', fn);
+//            }
+//        }
 //
-//		Ext.each(config.items, function(item) {
-//			if (item.xtype === 'oce.foreigncombo') {
-//				foreignComboStoreLatch++;
-//				Oce.pushListener(config.items, 'storefirstloaded', countForeignComboDown);
-//			} else if (item instanceof Oce.form.ForeignComboBox) {
-//				foreignComboStoreLatch++;
-////				item.on('storeloaded', countForeignComboDown);
-//				item.whenStoreLoaded(countForeignComboDown);
-//			}
-//		})
+//        Ext.each(config.items, function(item) {
+//            if (item.xtype === 'oce.foreigncombo') {
+//                foreignComboStoreLatch++;
+//                Oce.pushListener(config.items, 'storefirstloaded', countForeignComboDown);
+//            } else if (item instanceof Oce.form.ForeignComboBox) {
+//                foreignComboStoreLatch++;
+////                item.on('storeloaded', countForeignComboDown);
+//                item.whenStoreLoaded(countForeignComboDown);
+//            }
+//        })
 
-		// --- Default Keys ---
+        // --- Default Keys ---
 
-		var keys = new Array();
+        var keys = new Array();
 
-//		if ('submitHandler' in config) {
+//        if ('submitHandler' in config) {
 //
-//			var listener = function(field, el) {
-//				if (el.getKey() == Ext.EventObject.ENTER) config.submitHandler();
-//			}
+//            var listener = function(field, el) {
+//                if (el.getKey() == Ext.EventObject.ENTER) config.submitHandler();
+//            }
 //
-////			for (var i in config.items) {
-//			Ext.each(config.items, function(item) {
-//				if ((item.xtype !== undefined && !/combo/.test(item.xtype))
-//					|| (item instanceof Ext.Component && !(item instanceof Ext.form.ComboBox))) {
+////            for (var i in config.items) {
+//            Ext.each(config.items, function(item) {
+//                if ((item.xtype !== undefined && !/combo/.test(item.xtype))
+//                    || (item instanceof Ext.Component && !(item instanceof Ext.form.ComboBox))) {
 //
-//					if (!item.listeners) item.listeners = {};
-//					
-//					if (!item.listeners.specialkey) {
-//						item.listeners.specialkey = listener;
-////					} else if (Ext.isArray(item.listeners.specialkey)) {
-////						item.listeners.specialkey = item.listeners.specialkey.concat([listener]);
-////					} else {
-////						item.listeners.specialkey = [item.listeners.specialkey, listener]
-//					}
-//				}
-//			});
-//		}
+//                    if (!item.listeners) item.listeners = {};
+//                    
+//                    if (!item.listeners.specialkey) {
+//                        item.listeners.specialkey = listener;
+////                    } else if (Ext.isArray(item.listeners.specialkey)) {
+////                        item.listeners.specialkey = item.listeners.specialkey.concat([listener]);
+////                    } else {
+////                        item.listeners.specialkey = [item.listeners.specialkey, listener]
+//                    }
+//                }
+//            });
+//        }
 
-//		if ('cancelButtonIndex' in config) {
-//			var cancelButtonHandler = config.buttons[config.cancelButtonIndex].handler;
-//			keys.push({
-//				key: Ext.EventObject.ESC,
-//				scope: this,
-//				fn: function(key, e) {
-//					cancelButtonHandler();
-//				}
-//			})
-//		}
+//        if ('cancelButtonIndex' in config) {
+//            var cancelButtonHandler = config.buttons[config.cancelButtonIndex].handler;
+//            keys.push({
+//                key: Ext.EventObject.ESC,
+//                scope: this,
+//                fn: function(key, e) {
+//                    cancelButtonHandler();
+//                }
+//            })
+//        }
 
-		if (keys.length > 0) {
-			if ("keys" in config) {
-				var previous;
-				if (keys.config instanceof Array) {
-					previous = keys.config;
-				} else {
-					previous = [keys.config];
-				}
-				config.keys = previous.concat(keys);
-			} else {
-				config.keys = keys;
-			}
-		}
+        if (keys.length > 0) {
+            if ("keys" in config) {
+                var previous;
+                if (keys.config instanceof Array) {
+                    previous = keys.config;
+                } else {
+                    previous = [keys.config];
+                }
+                config.keys = previous.concat(keys);
+            } else {
+                config.keys = keys;
+            }
+        }
 
-		Oce.FormPanel.superclass.constructor.call(this, config);
+        Oce.FormPanel.superclass.constructor.call(this, config);
 
-		if (this.formListeners) {
-			this.form.on(this.formListeners);
-		}
-		
-		// Mark the form as unmodified, after a successful submit action
-		this.form.on({
-			scope: this
-			,actioncomplete: function(form, action) {
-				if (action.type === "submit"
-						&& action.result.success) {
-					this.clearModified();
-				}
-			}
-		});
-		
-		var lu = this.tabsByName = {};
-		Ext.each(this.findBy(function(o) { return !Ext.isEmpty(o.tabName) }), function(item) {
-			lu[item.tabName] = item;
-		});
+        if (this.formListeners) {
+            this.form.on(this.formListeners);
+        }
+        
+        // Mark the form as unmodified, after a successful submit action
+        this.form.on({
+            scope: this
+            ,actioncomplete: function(form, action) {
+                if (action.type === "submit"
+                        && action.result.success) {
+                    this.clearModified();
+                }
+            }
+        });
+        
+        var lu = this.tabsByName = {};
+        Ext.each(this.findBy(function(o) { return !Ext.isEmpty(o.tabName) }), function(item) {
+            lu[item.tabName] = item;
+        });
 
-		this.modified = false;
-	}
-	
-	,initComponent: function() {
-		Oce.FormPanel.superclass.initComponent.apply(this, arguments);
-		
-		if (this.submitHandler) {
-			
-			var h = this.submitHandler,
-				l = function(field, el) {
-					if (el.getKey() == Ext.EventObject.ENTER) h();
-				};
-			
-			this.items.each(function(item) {
-				item.on("specialkey", l);
-			});
-		}
-	}
-	
-	,afterRender: function() {
-		Oce.FormPanel.superclass.afterRender.apply(this, arguments);
-		this.addFormChangeListeners();
-	}
+        this.modified = false;
+    }
+    
+    ,initComponent: function() {
+        Oce.FormPanel.superclass.initComponent.apply(this, arguments);
+        
+        if (this.submitHandler) {
+            
+            var h = this.submitHandler,
+                l = function(field, el) {
+                    if (el.getKey() == Ext.EventObject.ENTER) h();
+                };
+            
+            this.items.each(function(item) {
+                item.on("specialkey", l);
+            });
+        }
+    }
+    
+    ,afterRender: function() {
+        Oce.FormPanel.superclass.afterRender.apply(this, arguments);
+        this.addFormChangeListeners();
+    }
 
-	,isModified: function() {
-		return this.modified;
-	}
-	
-	// private
-	,formChangeListener: function() {
-		
-		var me = this,
-			waitingToTest = this.waitingToTest,
-			refreshDelay = this.refreshDelay;
-		
-		if (!me.preventModificationEvents) {
+    ,isModified: function() {
+        return this.modified;
+    }
+    
+    // private
+    ,formChangeListener: function() {
+        
+        var me = this,
+            waitingToTest = this.waitingToTest,
+            refreshDelay = this.refreshDelay;
+        
+        if (!me.preventModificationEvents) {
 
-			// aggregate cumulated events
-			if (waitingToTest) {
-				return;
-			}
+            // aggregate cumulated events
+            if (waitingToTest) {
+                return;
+            }
 
-			waitingToTest = true;
+            waitingToTest = true;
 
-			if (me.modified) {
-				setTimeout(function() {
-					if (!me.form.isDirty()) {
-						me.clearModified();
-					}
-					waitingToTest = false;
-				}, refreshDelay);
-			} else {
-				// We must let the pass finish, in order for BasicForm to 
-				// restore the fields original values. Indeed, we can get
-				// here with events fired from getValue() of the fields,
-				// and BasicForm do as follow:
-				// `
-				//		f.setValue(v.value);
-				//		if(this.trackResetOnLoad){
-				//			f.originalValue = f.getValue();
-				//		}
-				//	`
+            if (me.modified) {
+                setTimeout(function() {
+                    if (!me.form.isDirty()) {
+                        me.clearModified();
+                    }
+                    waitingToTest = false;
+                }, refreshDelay);
+            } else {
+                // We must let the pass finish, in order for BasicForm to 
+                // restore the fields original values. Indeed, we can get
+                // here with events fired from getValue() of the fields,
+                // and BasicForm do as follow:
+                // `
+                //        f.setValue(v.value);
+                //        if(this.trackResetOnLoad){
+                //            f.originalValue = f.getValue();
+                //        }
+                //    `
 
-				// bufferize simultaneous events
-				setTimeout(function() {
-					// ... and here, ensure that the form would still be considered
-					// diry
-					if (me.form.isDirty()) {
-						me.modified = true;
-						me.fireEvent("modified");
-					}
+                // bufferize simultaneous events
+                setTimeout(function() {
+                    // ... and here, ensure that the form would still be considered
+                    // diry
+                    if (me.form.isDirty()) {
+                        me.modified = true;
+                        me.fireEvent("modified");
+                    }
 
-					waitingToTest = false;
-				}, refreshDelay);
-			}
-		}
-	}
+                    waitingToTest = false;
+                }, refreshDelay);
+            }
+        }
+    }
 
-	,addFormChangeListeners: function() {
+    ,addFormChangeListeners: function() {
 
-//		var me = this,
-//			waitingToTest = false,
-//			refreshDelay = 100;
-		this.waitingToTest = false,
-		this.refreshDelay = 100;
+//        var me = this,
+//            waitingToTest = false,
+//            refreshDelay = 100;
+        this.waitingToTest = false,
+        this.refreshDelay = 100;
 
-		var changeListener = this.formChangeListener.createDelegate(this);
+        var changeListener = this.formChangeListener.createDelegate(this);
 
-		var addChangeListener = function(item) {
+        var addChangeListener = function(item) {
 
-			// Defaults on the change event to cover the max of corner cases
-			item.on("change", changeListener);
+            // Defaults on the change event to cover the max of corner cases
+            item.on("change", changeListener);
 
-			// But tries to find more appropriate events for specific types of
-			// fields
-			if (item instanceof Ext.form.TextField) {
-				if (item.el) {
-					item.mon(item.el, {
-						buffer: 100
-						,keyup: changeListener
-					});
-				} else {
-					item.on("afterrender", function() {
-						addChangeListener(item);
-					});
-				}
-			}
-			if (item instanceof Ext.form.Checkbox) {
-				item.on("check", changeListener);
-			}
-			if (item instanceof Ext.form.TriggerField) {
-				item.on("select", changeListener);
-			}
-			if (item instanceof Oce.form.GridField) {
-				item.on("modified", changeListener);
-			}
-			if (item instanceof Ext.form.HtmlEditor) {
-//				item.on("sync", changeListener);
-				item.on("change", changeListener);
-			}
-			if (item instanceof Ext.form.CompositeField) {
-				item.items.each(addChangeListener);
-			}
-			if (item instanceof Ext.ux.form.SpinnerField) {
-				item.on("spin", changeListener);
-			}
-			if (item instanceof Ext.form.RadioGroup) {
-				// we've got a problem here... RadioGroup will bufferize the
-				// events of its children for 10ms before firing its own change
-				// event; as a consequences, this event won't be in the same
-				// thread as the one launching the loading action of the 
-				// underlying form, and so it won't be blocked here. However, it
-				// needs to be, in order to prevent the initial value setting of
-				// the form, when it's loaded, to intenpestively trigger this
-				// FormPanel's own modification event...
+            // But tries to find more appropriate events for specific types of
+            // fields
+            if (item instanceof Ext.form.TextField) {
+                if (item.el) {
+                    item.mon(item.el, {
+                        buffer: 100
+                        ,keyup: changeListener
+                    });
+                } else {
+                    item.on("afterrender", function() {
+                        addChangeListener(item);
+                    });
+                }
+            }
+            if (item instanceof Ext.form.Checkbox) {
+                item.on("check", changeListener);
+            }
+            if (item instanceof Ext.form.TriggerField) {
+                item.on("select", changeListener);
+            }
+            if (item instanceof Oce.form.GridField) {
+                item.on("modified", changeListener);
+            }
+            if (item instanceof Ext.form.HtmlEditor) {
+//                item.on("sync", changeListener);
+                item.on("change", changeListener);
+            }
+            if (item instanceof Ext.form.CompositeField) {
+                item.items.each(addChangeListener);
+            }
+            if (item instanceof Ext.ux.form.SpinnerField) {
+                item.on("spin", changeListener);
+            }
+            if (item instanceof Ext.form.RadioGroup) {
+                // we've got a problem here... RadioGroup will bufferize the
+                // events of its children for 10ms before firing its own change
+                // event; as a consequences, this event won't be in the same
+                // thread as the one launching the loading action of the 
+                // underlying form, and so it won't be blocked here. However, it
+                // needs to be, in order to prevent the initial value setting of
+                // the form, when it's loaded, to intenpestively trigger this
+                // FormPanel's own modification event...
 
-				// ... so, first, let's remove the faulty event listener
-				item.un("change", changeListener);
-				
-				// ... and listen on the source instead!
-				// (to make it even funnier, the eachItem method only works when 
-				// items have already been constructed)
-				if (item.items && item.items.each) {
-					item.eachItem(function(item) {
-						item.on("check", changeListener);
-					});
-				} else {
-					item.on({
-						single: true
-						,afterrender: function(item) {
-							item.eachItem(function(item) {
-								item.on("check", changeListener);
-							});
-						}
-					});
-				}
-			}
-		};
+                // ... so, first, let's remove the faulty event listener
+                item.un("change", changeListener);
+                
+                // ... and listen on the source instead!
+                // (to make it even funnier, the eachItem method only works when 
+                // items have already been constructed)
+                if (item.items && item.items.each) {
+                    item.eachItem(function(item) {
+                        item.on("check", changeListener);
+                    });
+                } else {
+                    item.on({
+                        single: true
+                        ,afterrender: function(item) {
+                            item.eachItem(function(item) {
+                                item.on("check", changeListener);
+                            });
+                        }
+                    });
+                }
+            }
+        };
 
-		this.form.items.each(addChangeListener);
+        this.form.items.each(addChangeListener);
 
-		// Search for fieldset with a checkbox with some name (meaning it is
-		// probably intended to be sent as form data)
-		var walkItems = function(container) {
+        // Search for fieldset with a checkbox with some name (meaning it is
+        // probably intended to be sent as form data)
+        var walkItems = function(container) {
 
-			if (!container.items) return;
+            if (!container.items) return;
 
-			container.items.each(function(item) {
+            container.items.each(function(item) {
 
-				if (item instanceof Ext.form.FieldSet
-						&& item.checkboxName) {
+                if (item instanceof Ext.form.FieldSet
+                        && item.checkboxName) {
 
-					var addCheckListener = function(fs) {
-						fs.checkbox.on("click", changeListener);
-					}
-					
-					if (item.checkbox) addCheckListener(item);
-					else item.on("afterrender", addCheckListener.createCallback(item));
-				}
+                    var addCheckListener = function(fs) {
+                        fs.checkbox.on("click", changeListener);
+                    }
+                    
+                    if (item.checkbox) addCheckListener(item);
+                    else item.on("afterrender", addCheckListener.createCallback(item));
+                }
 
-				if (item instanceof Ext.Container) {
-					walkItems(item);
-				}
-			});
-		}
+                if (item instanceof Ext.Container) {
+                    walkItems(item);
+                }
+            });
+        }
 
-		walkItems(this);
-	}
+        walkItems(this);
+    }
 
-	,clearModified: function() {
-		this.modified = false;
+    ,clearModified: function() {
+        this.modified = false;
 
-		// clear dirty mark on form items
-		var clearItemDirty = function(item) {
-			if (Ext.isFunction(item.clearDirty)) {
-				item.clearDirty();
-			}
-			if (item instanceof Ext.form.CompositeField) {
-				item.items.each(clearItemDirty);
-			}
-		};
-		this.form.items.each(clearItemDirty);
-		
-		this.fireEvent("modificationcleared");
-	}
+        // clear dirty mark on form items
+        var clearItemDirty = function(item) {
+            if (Ext.isFunction(item.clearDirty)) {
+                item.clearDirty();
+            }
+            if (item instanceof Ext.form.CompositeField) {
+                item.items.each(clearItemDirty);
+            }
+        };
+        this.form.items.each(clearItemDirty);
+        
+        this.fireEvent("modificationcleared");
+    }
 
-	,setWindow: function(win) {
-		if (this.win !== win) {
+    ,setWindow: function(win) {
+        if (this.win !== win) {
 
-			// remove previous event
-			if (this.windowSaveListener) {
-				this.win.un("aftersave", this.windowSaveListener);
-				delete this.windowSaveListener;
-			}
+            // remove previous event
+            if (this.windowSaveListener) {
+                this.win.un("aftersave", this.windowSaveListener);
+                delete this.windowSaveListener;
+            }
 
-			this.win = win;
-			// shortcuts
-			win.setTab = this.setTab.createDelegate(this);
+            this.win = win;
+            // shortcuts
+            win.setTab = this.setTab.createDelegate(this);
 
-			// clearing modified state on successful save
-			win.on("aftersave", this.windowSaveListener = this.clearModified.createDelegate(this));
-		}
-	}
+            // clearing modified state on successful save
+            win.on("aftersave", this.windowSaveListener = this.clearModified.createDelegate(this));
+        }
+    }
 
-	,setTab: function(tabName) {
-		if (this.tabsByName[tabName]) {
-			this.tabsByName[tabName].show();
-		}
-	}
+    ,setTab: function(tabName) {
+        if (this.tabsByName[tabName]) {
+            this.tabsByName[tabName].show();
+        }
+    }
 
-	,whenLoaded: function(callback, scope) {
-		if (this.loaded) {
-			callback(this.form);
-		} else {
-			var me = this;
-			this.on("afterload", function() {
-				callback(me.form);
-				callback.call(scope || me, me.form);
-			});
-		}
-	}
+    ,whenLoaded: function(callback, scope) {
+        if (this.loaded) {
+            callback(this.form);
+        } else {
+            var me = this;
+            this.on("afterload", function() {
+                callback(me.form);
+                callback.call(scope || me, me.form);
+            });
+        }
+    }
 
-	,refresh: function(callback) {
+    ,refresh: function(callback) {
 
-		var me = this;
-		var win = this.win;
-		
-		var options = {
-			url: "index.php"
-//			,params: params
-			,waitMsg: "Chargement des données" // i18n
-			,waitTitle: "Veuillez patientez" // i18n
+        var me = this;
+        var win = this.win;
+        
+        var options = {
+            url: "index.php"
+//            ,params: params
+            ,waitMsg: "Chargement des données" // i18n
+            ,waitTitle: "Veuillez patientez" // i18n
 
-			,scope: this
-			,success: function(response, action, type) {
-				win.formPages = action.result.pages;
-				for (var i=0,l=win.formRefreshers.length; i<l; i++) {
-					win.formRefreshers[i]();
-				}
-				if (this.initFormItems) {
-					this.initFormItems(action.result);
-				}
-//				this.afterEditFormLoaded(this.form);
-				this.loaded = true;
-				afterLoadSuccess();
-				this.fireEvent("afterload", this.form, action.result, this);
-				if (callback) {
-					callback(this.form);
-				}
-			}
-			,failure: function(form, action) {
-				me.preventModificationEvents = false;
-				if (action && action.result && action.result.cause === "sessionTimeout") {
-					Oce.mx.Security.onOnce("login", function() {
-						me.refresh(callback);
-					});
-				} else {
-					win.close();
-					Ext.MessageBox.alert("Erreur", "Impossible de charger les données") // i18n
-				}
-				// 15/02/12 09:00 Removed:
-//				if (callback) {
-//					callback(this.form);
-//				}
-			}
-		};
+            ,scope: this
+            ,success: function(response, action, type) {
+                win.formPages = action.result.pages;
+                for (var i=0,l=win.formRefreshers.length; i<l; i++) {
+                    win.formRefreshers[i]();
+                }
+                if (this.initFormItems) {
+                    this.initFormItems(action.result);
+                }
+//                this.afterEditFormLoaded(this.form);
+                this.loaded = true;
+                afterLoadSuccess();
+                this.fireEvent("afterload", this.form, action.result, this);
+                if (callback) {
+                    callback(this.form);
+                }
+            }
+            ,failure: function(form, action) {
+                me.preventModificationEvents = false;
+                if (action && action.result && action.result.cause === "sessionTimeout") {
+                    Oce.mx.Security.onOnce("login", function() {
+                        me.refresh(callback);
+                    });
+                } else {
+                    win.close();
+                    Ext.MessageBox.alert("Erreur", "Impossible de charger les données") // i18n
+                }
+                // 15/02/12 09:00 Removed:
+//                if (callback) {
+//                    callback(this.form);
+//                }
+            }
+        };
 
-		var params = {
-			controller: this.controller
-			,action:"load_one"
-		};
-		params[win.pkName] = win.idValue;
-		
-		options.params = params;
+        var params = {
+            controller: this.controller
+            ,action:"load_one"
+        };
+        params[win.pkName] = win.idValue;
+        
+        options.params = params;
 
-		// 07/12/11 02:10 changed the signature of the event from
-		// beforeLoad(params) to beforeLoad(formPanel, form, options), where 
-		// params === options.params
-		this.fireEvent('beforeload', this, this.form, options);
+        // 07/12/11 02:10 changed the signature of the event from
+        // beforeLoad(params) to beforeLoad(formPanel, form, options), where 
+        // params === options.params
+        this.fireEvent('beforeload', this, this.form, options);
 
-		this.preventModificationEvents = true;
-		var afterLoadSuccess = function() {
+        this.preventModificationEvents = true;
+        var afterLoadSuccess = function() {
 
-			me.preventModificationEvents = false;
+            me.preventModificationEvents = false;
 
-			// Load grid fields
-			me.form.items.each(function(field) {
-				if (field instanceof Oce.form.GridField) {
-					field.load();
-				}
-			});
+            // Load grid fields
+            me.form.items.each(function(field) {
+                if (field instanceof Oce.form.GridField) {
+                    field.load();
+                }
+            });
 
-			me.clearModified();
-		};
+            me.clearModified();
+        };
 
-		this.form.load(options);
-	}
+        this.form.load(options);
+    }
 
-	// Overridden to allow for JsonForm
-	,createForm: function() {
+    // Overridden to allow for JsonForm
+    ,createForm: function() {
         var config = Ext.applyIf({listeners: {}}, this.initialConfig);
-		if (config.jsonFormParam || config.serializeForm) {
-			return new eo.form.JsonForm(null, config);
-//			return new Oce.form.JsonForm(null, config);
-		} else {
-			return new Ext.form.BasicForm(null, config);
-		}
-	}
+        if (config.jsonFormParam || config.serializeForm) {
+            return new eo.form.JsonForm(null, config);
+//            return new Oce.form.JsonForm(null, config);
+        } else {
+            return new Ext.form.BasicForm(null, config);
+        }
+    }
 
-	,onRender:function() {
+    ,onRender:function() {
         // call parent
         Oce.FormPanel.superclass.onRender.apply(this, arguments);
 
-		// set wait message target
-		this.getForm().waitMsgTarget = this.getEl();
+        // set wait message target
+        this.getForm().waitMsgTarget = this.getEl();
 
-		// loads form after initial layout
-		// this.on('afterlayout', this.onLoadClick, this, {single:true});
+        // loads form after initial layout
+        // this.on('afterlayout', this.onLoadClick, this, {single:true});
     }
 
 }); // << FormPanel
@@ -511,130 +511,130 @@ Ext.reg("oce.form", Oce.FormPanel)
  */
 Oce.ColumnContainer = Ext.extend(Ext.Container, {
 
-	constructor: function(config) {
+    constructor: function(config) {
 
-		var cfg = Ext.apply({
-			layout: "column"
-			,labelAlign: "top"
-			,frame: true
-			,spacing: 10
-			,columns: 2
-		}, config);
-		delete cfg.cols;
-		delete cfg.items;
-		delete cfg.columns;
-		
-		var defaults = Ext.apply({
-			xtype: "container"
-			,layout: "form"
-		}, config.defaults);
-		
-		var cols = (function(){
-			if (config.cols) {
-				return config.cols;
-			} else if (config.columns === undefined || !config.items) {
-				throw new Error("Invalid config options: cols || (columns && items)");
-			}
-			var n = config.columns;
-			var colItems = []; 
-			
-			var i;
-			for (i=0;i<n; i++) {
-				colItems.push([]);
-			}
-			
-			var tabIndex = config.tabIndex;
-			i=0;
-			Ext.each(config.items, function(item) {
-				if (tabIndex) {
-					colItems[i%n].push(Ext.apply({
-						tabIndex: tabIndex
-					}, item));
-					tabIndex++;
-				} else {
-					colItems[i%n].push(item);
-				}
-				i++;
-			});
-			
-			cols = [];
-			Ext.each(colItems, function(items) {
-				cols.push({items: items});
-			});
-			
-			return cols;
-		})();
+        var cfg = Ext.apply({
+            layout: "column"
+            ,labelAlign: "top"
+            ,frame: true
+            ,spacing: 10
+            ,columns: 2
+        }, config);
+        delete cfg.cols;
+        delete cfg.items;
+        delete cfg.columns;
+        
+        var defaults = Ext.apply({
+            xtype: "container"
+            ,layout: "form"
+        }, config.defaults);
+        
+        var cols = (function(){
+            if (config.cols) {
+                return config.cols;
+            } else if (config.columns === undefined || !config.items) {
+                throw new Error("Invalid config options: cols || (columns && items)");
+            }
+            var n = config.columns;
+            var colItems = []; 
+            
+            var i;
+            for (i=0;i<n; i++) {
+                colItems.push([]);
+            }
+            
+            var tabIndex = config.tabIndex;
+            i=0;
+            Ext.each(config.items, function(item) {
+                if (tabIndex) {
+                    colItems[i%n].push(Ext.apply({
+                        tabIndex: tabIndex
+                    }, item));
+                    tabIndex++;
+                } else {
+                    colItems[i%n].push(item);
+                }
+                i++;
+            });
+            
+            cols = [];
+            Ext.each(colItems, function(items) {
+                cols.push({items: items});
+            });
+            
+            return cols;
+        })();
 
-		Ext.each(cols, function(col) {
-			var items = col.items;
-			for (var i=0,l=items.length; i<l; i++) {
-				var item = items[i];
-				if (item === " ") {
-					items[i] = {
-						xtype: "displayfield"
-						,fieldLabel: ""
-						,value: ""
-						,hideLabel: true
-					}
-				}
-			}
-		});
-		
-		var n = cols.length,
-			items = [],
-			spacing = cfg.spacing,
-			percent = false;
-		
-		defaults.columnWidth = 1/n;
-			
-		if (Ext.isString(spacing)) {
-			var m = /^(\d+)(%?)$/.exec(spacing);
-			if (m === null) throw new Error("Invalid config option value for spacing: " + spacing);
-			spacing = parseInt(m[1]);
-			percent = !!(m[2]);
-		}
+        Ext.each(cols, function(col) {
+            var items = col.items;
+            for (var i=0,l=items.length; i<l; i++) {
+                var item = items[i];
+                if (item === " ") {
+                    items[i] = {
+                        xtype: "displayfield"
+                        ,fieldLabel: ""
+                        ,value: ""
+                        ,hideLabel: true
+                    }
+                }
+            }
+        });
+        
+        var n = cols.length,
+            items = [],
+            spacing = cfg.spacing,
+            percent = false;
+        
+        defaults.columnWidth = 1/n;
+            
+        if (Ext.isString(spacing)) {
+            var m = /^(\d+)(%?)$/.exec(spacing);
+            if (m === null) throw new Error("Invalid config option value for spacing: " + spacing);
+            spacing = parseInt(m[1]);
+            percent = !!(m[2]);
+        }
 
-		var lw = (100 - (n-1) * spacing) / n,
-			ow = (100 - lw)/(n-1),
-			anchor = (100 - spacing*n) + "%";
+        var lw = (100 - (n-1) * spacing) / n,
+            ow = (100 - lw)/(n-1),
+            anchor = (100 - spacing*n) + "%";
 
-		lw /= 100;
-		ow /= 100;
+        lw /= 100;
+        ow /= 100;
 
-		for (var i=0,l=cols.length; i<l-1; i++) {
-			var ct = Ext.apply({
-				defaults: Ext.apply({
-					anchor: '100%'
-				}, defaults.defaults)
-				,items: cols[i].items
-			}, defaults);
-			items.push(ct);
-			if (percent) {
-				items.push({
-					xtype: 'container'
-					,columnWidth: spacing
-					,html: '&nbsp;'
-				});
-			} else {
-				items.push({
-					xtype: 'container'
-					,width: spacing
-					,html: '&nbsp;'
-				});
-			}
-		}
-		// last col
-		items.push(Ext.apply({
-			defaults: Ext.apply({
-				anchor: "100%"
-			}, defaults.defaults)
-			,items: cols[cols.length - 1].items
-		}, defaults));
-		
-		cfg.items = items;
+        for (var i=0,l=cols.length; i<l-1; i++) {
+            var ct = Ext.apply({
+                defaults: Ext.apply({
+                    anchor: '100%'
+                }, defaults.defaults)
+                ,items: cols[i].items
+            }, defaults);
+            items.push(ct);
+            if (percent) {
+                items.push({
+                    xtype: 'container'
+                    ,columnWidth: spacing
+                    ,html: '&nbsp;'
+                });
+            } else {
+                items.push({
+                    xtype: 'container'
+                    ,width: spacing
+                    ,html: '&nbsp;'
+                });
+            }
+        }
+        // last col
+        items.push(Ext.apply({
+            defaults: Ext.apply({
+                anchor: "100%"
+            }, defaults.defaults)
+            ,items: cols[cols.length - 1].items
+        }, defaults));
+        
+        cfg.items = items;
 
-		Oce.ColumnContainer.superclass.constructor.call(this, cfg);
-	}
+        Oce.ColumnContainer.superclass.constructor.call(this, cfg);
+    }
 });
 
 Ext.reg("colcontainer", Oce.ColumnContainer);
