@@ -1,0 +1,104 @@
+/*!
+ * Ext JS Library 3.3.1
+ * Copyright(c) 2006-2010 Sencha Inc.
+ * licensing@sencha.com
+ * http://www.sencha.com/license
+ */
+.img-chooser-dlg .details{
+    padding: 10px;
+    text-align: center;
+}
+.img-chooser-dlg .details-info {
+    border-top: 1px solid #cccccc;
+    font: 11px Arial, Helvetica, sans-serif;
+    margin-top: 5px;
+    padding-top: 5px;
+    text-align: left;
+}
+
+.img-chooser-dlg .details-info b {
+    color: #555555;
+    display: block;
+    margin-bottom: 4px;
+}
+.img-chooser-dlg .details-info span {
+    display: block;
+    margin-bottom: 5px;
+    margin-left: 5px;
+}
+.img-chooser-dlg img {
+	max-width: 90%;
+	max-height: 115px;
+}
+.img-chooser-view .thumb div.ct,
+div.details div.details-info-image-ct div.ct {
+	position: absolute;
+	bottom: 0;
+	text-align: center;
+	width: 100%;
+}
+div.details div.details-info-image-ct {
+	height: 115px;
+	position: relative;
+}
+
+.img-chooser-view{
+/*    background: white;*/
+    font: 11px Arial, Helvetica, sans-serif;
+}
+.img-chooser-view .thumb{
+/*    background: #dddddd;*/
+    padding: 3px;
+	text-align: center;
+    height: 64px;
+    width: 80px;
+	position: relative;
+}
+.img-chooser-view .thumb img{
+    max-height: 64px;
+    max-width: 80px;
+}
+.img-chooser-view .thumb-wrap{
+    float: left;
+    margin: 4px;
+    margin-right: 0;
+    padding: 5px;
+}
+.img-chooser-view .thumb-wrap span{
+    display: block;
+    overflow: hidden;
+    text-align: center;
+}
+.img-chooser-view .x-view-over{
+    border:1px solid #dddddd;
+    background: #efefef url(../../images/default/grid/row-over.gif) repeat-x left top;
+    padding: 4px;
+}
+.img-chooser-view .x-view-selected{
+    background: #DFEDFF;
+    border: 1px solid #6593cf;
+    padding: 4px;
+/*	padding-right: 8px;*/
+}
+.img-chooser-view .x-view-selected .thumb{
+    background:transparent;
+}
+.img-chooser-view .x-view-selected span{
+    color:#1A4D8F;
+}
+.img-chooser-view .loading-indicator {
+    font-size:11px;
+    background-image:url('../../images/grid/loading.gif');
+    background-repeat: no-repeat;
+    background-position: left;
+    padding-left:20px;
+    margin:10px;
+}
+
+.img-chooser-tree-folder {
+	background-image: url("../../images/default/tree/folder.gif") !important;
+}
+.img-chooser-tree-folder.open {
+	background-image: url("../../images/default/tree/folder-open.gif") !important;
+}
+
