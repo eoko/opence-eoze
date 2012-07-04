@@ -2,6 +2,9 @@ Ext.ns("Oce");
 
 // ----<<  FormPanel  >>--------------------------------------------------------
 
+/**
+ * @xtype oce.form
+ */
 Oce.FormPanel = Ext.extend(Ext.FormPanel, {
 
     idValue: undefined
