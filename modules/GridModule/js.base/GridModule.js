@@ -194,7 +194,10 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				this[name + "Plugin"] = new pg(this, config);
 			}
 		}, this);
-
+	}
+	
+    // private
+	,afterAsyncConstruct: function() {
 		this.initConfiguration();
 	}
 	
@@ -215,11 +218,13 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	 */
 	,doAsyncConstruct: function(callback, scope) {
 		
-		var stack = this.asyncConstructTasks;
+		var me = this,
+			stack = this.asyncConstructTasks;
 		
 		if (!stack) {
 			if (callback) {
-				callback.call(scope);
+                this.afterAsyncConstruct();
+				callback.call(scope); // this callback is from module manager
 			}
 		}
 		
@@ -228,7 +233,8 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			Ext.each(stack, function(task) {
 				task.fn.call(task.scope || this, function() {
 					if (--latch === 0 && callback) {
-						callback.call(scope);
+						me.afterAsyncConstruct();
+						callback.call(scope); // this callback is from module manager
 					}
 				});
 			}, this);
