@@ -3866,6 +3866,9 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 }); // GridModule declaration
 
 Oce.GridModule.ptypes = {};
+Oce.GridModule.registerPlugin = function(name, constructor) {
+    Oce.GridModule.ptypes[name] = constructor;
+};
 
 // Legacy support (deprecated)
 Oce.Modules.GridModule.GridModule = Oce.GridModule;
