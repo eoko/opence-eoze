@@ -122,6 +122,9 @@ Oce.GridModule.plugins.Search = Ext.extend(Object, {
 			,onTrigger1Click: this.onTriggerClear.createDelegate(this)
 			,onTrigger2Click: this.onTriggerSearch.createDelegate(this)
 		});
+        
+        // store mainSearchField
+        this.gridModule.mainSearchField = searchField;
 		
 		// initialize menu
 		var menu = this.fieldsMenu = new Ext.menu.Menu({
@@ -378,6 +381,20 @@ Oce.GridModule.plugins.Search = Ext.extend(Object, {
 		this.doSearch(this.getSelectedFields());
 	}
 	
+});
+
+// TODO shortcut
+var map = new Ext.KeyMap(document, {
+    key: Ext.EventObject.F
+    ,ctrl: true
+    ,fn: function() {
+        var m = Oce.getFrontModule(),
+            f = m && m.mainSearchField;
+        if (f) {
+            f.focus();
+        }
+    }
+    ,stopEvent: true
 });
 
 }); // deps
