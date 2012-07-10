@@ -186,8 +186,10 @@ Oce.GridModule.plugins.Search = Ext.extend(Object, {
         colMenu.add(checkAllItem,'-');
 
         // --- Items ---
-        var checkAllSelected = true,
-            hasItems = false;
+        var anySelected = false,
+            checkAllSelected = true,
+            hasItems = false,
+            leafItems = [];
 
         var cg = gm.extra.columnGroups,
             groups = {},
@@ -255,6 +257,8 @@ Oce.GridModule.plugins.Search = Ext.extend(Object, {
                 
                 if (!select) {
                     checkAllSelected = false;
+                } else {
+                    anySelected = true;
                 }
                 
                 var dest = (groups[colConfig.dataIndex] || colMenu);
@@ -263,7 +267,7 @@ Oce.GridModule.plugins.Search = Ext.extend(Object, {
                     groupSep.show();
                 }
                 
-                dest.add(new Ext.menu.CheckItem({
+                var item = new Ext.menu.CheckItem({
                     text: cm.getColumnHeader(i)
                     ,dataIndex: di
                     ,checked: select
@@ -272,8 +276,17 @@ Oce.GridModule.plugins.Search = Ext.extend(Object, {
                     ,checkHandler: function() {
                         refreshSearch.delay(this.delayAfterSelect);
                     }
-                }));
+                });
+                leafItems.push(item);
+                dest.add(item);
             }
+        }
+        
+        // if none selected, check all
+        if (!anySelected) {
+            Ext.each(leafItems, function(item) {
+                item.setChecked(true);
+            });
         }
 
         checkAllItem.setChecked(checkAllSelected);
@@ -296,7 +309,7 @@ Oce.GridModule.plugins.Search = Ext.extend(Object, {
                 cb.initiated = true;
             });
         }
-            
+        
         return hasItems;
     }
     
