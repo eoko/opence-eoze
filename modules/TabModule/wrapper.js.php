@@ -72,6 +72,10 @@ var <?php echo $var ?> = Ext.extend(sp, {
 		}
 		this.tab = tab;
 		tab.on('close', this.onClose, this);
+        tab.module = this;
+        tab.getActiveModule = function() {
+            return this.module;
+        };
 		return tab;
 	}
 

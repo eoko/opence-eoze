@@ -92,7 +92,20 @@ Oce.MainApplication = {
 	,getMainDestination: function() {
 		return Ext.getCmp('main-destination');
 	}
-	
+    
+    ,getFrontModule: function() {
+        var md = this.getMainDestination(),
+            t = md && md.getActiveTab();
+        if (t && t.getActiveModule) {
+            return t.getActiveModule();
+        } else {
+            return t.module;
+        }
+    }
+};
+
+Oce.getFrontModule = function() {
+    return Oce.mx.application.getFrontModule();
 };
 
 var parseCmdRegex = /^(.+)#(.+?)(?:\((.+)\))?$/;
