@@ -2711,7 +2711,13 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		// --- Main Panel ----------------------------------------------------------
 
 		var tabPanelConfig = Ext.apply({
-			title: this.my.title
+            
+            module: this
+            ,getActiveModule: function() {
+                return this.module;
+            }
+            
+			,title: this.my.title
 			,header: false
 			,closable : true
 			,layout: 'fit'

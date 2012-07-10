@@ -118,14 +118,20 @@ var o = {
 	}
 	
 	,createTab: function() {
-		var r = spp.createTab.apply(this, arguments);
+		var tab = spp.createTab.apply(this, arguments);
 
-		r.on({
+		tab.on({
 			scope: this
 			,tabchange: this.onTabChange
 		});
+        
+        tab.getActiveModule = function() {
+            var at = tab && tab.activeTab,
+                c = at && at.component;
+            return c && c.module;
+        };
 		
-		return r;
+		return tab;
 	}
 	
 	// private
