@@ -222,8 +222,8 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			stack = this.asyncConstructTasks;
 		
 		if (!stack) {
+            this.afterAsyncConstruct();
 			if (callback) {
-                this.afterAsyncConstruct();
 				callback.call(scope); // this callback is from module manager
 			}
 		}
@@ -232,8 +232,8 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			var latch = stack.length;
 			Ext.each(stack, function(task) {
 				task.fn.call(task.scope || this, function() {
+                    me.afterAsyncConstruct();
 					if (--latch === 0 && callback) {
-						me.afterAsyncConstruct();
 						callback.call(scope); // this callback is from module manager
 					}
 				});
