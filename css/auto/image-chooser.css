@@ -56,7 +56,7 @@ div.details div.details-info-image-ct {
 }
 .img-chooser-view .thumb img{
     max-height: 64px;
-/*    max-width: 80px;*/
+    max-width: 80px;
 }
 .img-chooser-view .thumb-wrap{
 /*    float: left;*/
