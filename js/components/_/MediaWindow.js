@@ -25,21 +25,35 @@ eo.MediaPanel = Ext.extend(Ext.Panel, {
 		});
 
 		var onDelete = config.onDelete || this.onDelete;
-		var store;
-		var view = this.view = new eo.MediaPanel.ImageView({
-			region: "center"
-			,store: store = new Ext.data.JsonStore({
-				url: "index.php"
-				,baseParams: {
-					controller: "media.grid"
-					,action: "load"
-				}
-				,root: 'data'
-				,totalProperty: 'count'
-				,fields: [
-					"filename", "url", "size", "extension", "filemtime", "mime"
-				]
+		
+		// Store
+		var store = new Ext.data.JsonStore({
+			url: "index.php"
+			,baseParams: {
+				controller: "media.grid"
+				,action: "load"
+			}
+			,root: 'data'
+			,totalProperty: 'count'
+			,fields: [
+				"filename", "url", "imageUrl", "size", "extension", "filemtime", "mime", "type"
+			]
+		});
+		
+		// Context menu
+		var contextMenu = new Ext.menu.Menu();
+		if (onDelete) {
+			contextMenu.add({
+				text: "Supprimer"
+				,iconCls: "ico cross"
+				,handler: onDelete
 			})
+		}
+		
+		// MediaPanel
+		this.view = this.iconPanel = new eo.MediaPanel.ImageView({
+			region: "center"
+			,store: store
 			,listeners: {
 				selectionchange: {
 					fn: this.showDetails
@@ -51,36 +65,87 @@ eo.MediaPanel = Ext.extend(Ext.Panel, {
 				}
 				,contextmenu: function(view, index, node, event) {
 					view.select(node, false);
-					var menu1 = new Ext.menu.Menu({
-//						items: [{
-//							text: 'Delete'
-//							,handler: function() {
-//								debugger
-////								me.fireEvent("delete", me, view.getRecord(node));
-//							}
-////						}, {
-////							text: "View"
-////							,handler: function() {
-////								eo.doc.view(view.getRecord(node));
-////							}
-//						}]
-					});
-					if (onDelete) {
-						menu1.add({
-							text: "Supprimer"
-							,iconCls: "ico cross"
-							,handler: onDelete
-						})
-					}
-					menu1.showAt([
-		                event.browserEvent.clientX
-				        ,event.browserEvent.clientY
+					contextMenu.showAt([
+						event.browserEvent.clientX
+						,event.browserEvent.clientY
 					]);
 					event.preventDefault();
 				}
 			}
 		});
-
+		
+		// List Grid
+		var grid = this.listGrid = new Ext.grid.GridPanel({
+			
+			columns: [{
+				dataIndex: 'filename'
+				,id: 'filename'
+				,header: "Nom" // i18n
+				,width: 200
+				,sortable: true
+			},{
+				dataIndex: 'size'
+				,header: "Taille" // i18n
+				,width: 50
+				,sortable: true
+			},{
+				dataIndex: 'type'
+				,header: "Type" // i18n
+				,width: 80
+				,sortable: true
+			},{
+				dataIndex: 'filemtime'
+				,header: "Date de modification" // i18n
+				,width: 80
+				,sortable: true
+			}]
+		
+			,sm: new Ext.grid.RowSelectionModel({
+				singleSelect: true
+				,listeners: {
+					selectionchange: {
+						fn: this.showDetails
+						,scope: this
+						,buffer: 100
+					}
+				}
+			})
+			
+			,autoExpandColumn: 'filename'
+			,viewConfig: {
+				autoFill: true
+			}
+		
+			,store: store
+			
+			,listeners: {
+				rowcontextmenu: function(grid, row, e) {
+					// Select row
+					var r = grid.store.getAt(row);
+					grid.select(r);
+					
+					// Show menu
+					if (r) {
+						contextMenu.showAt([
+							e.browserEvent.clientX
+							,e.browserEvent.clientY
+						]);
+					}
+					
+					e.preventDefault();
+				}
+			}
+		
+			,getSelectedRecord: function() {
+				return this.getSelectionModel().getSelected();
+			}
+			
+			,select: function(record) {
+				this.getSelectionModel().selectRecords([record])
+			}
+		});
+		
+		// Detail panel
 		var detailPanel = this.detailPanel = new Ext.Panel({
 			region: "east"
 			,split: true
@@ -115,7 +180,14 @@ eo.MediaPanel = Ext.extend(Ext.Panel, {
 			layout: "border"
 //			,items: [dirTree, view, detailPanel]
 			,border: false
-			,items: [leftPane, view]
+//			,items: [leftPane, view]
+			,items: [leftPane, this.viewCardCt = Ext.create({
+				xtype: 'container'
+				,region: 'center'
+				,layout: 'card'
+				,activeItem: 0
+				,items: [this.iconPanel, this.listGrid]
+			})]
 		});
 		
 		eo.MediaPanel.superclass.constructor.call(this, config);
@@ -134,6 +206,29 @@ eo.MediaPanel = Ext.extend(Ext.Panel, {
 
 		dirTree.load({expand: true});
 	}
+	
+	,setViewType: function(type) {
+		var ct = this.viewCardCt,
+			layout = ct && ct.getLayout(),
+			view,
+			sr = this.getSelectedRecord();
+		
+		switch (type) {
+			case 'list':
+				view = this.listGrid;
+				break;
+			case 'icons':
+				view = this.iconPanel;
+				break;
+		}
+		
+		this.view = view;
+		this.view.select(sr);
+		
+		if (layout) {
+			layout.setActiveItem(view.id);
+		}
+	}
 
 	,reload: function(reloadDetails) {
 		var me = this,
@@ -148,9 +243,7 @@ eo.MediaPanel = Ext.extend(Ext.Panel, {
 	}
 
 	,getSelectedRecord: function() {
-		var records = this.view.getSelectedRecords();
-		if (!records.length) return null;
-		return records[0];
+		return this.view.getSelectedRecord();
 	}
 	
 	,getDirectoryPath: function() {
@@ -176,7 +269,7 @@ eo.MediaPanel = Ext.extend(Ext.Panel, {
 				'<tpl for=".">',
 					'<div class="details-info-image-ct">',
 						'<div class="ct">',
-							'<img src="{url}" class="{mime}" />',
+							'<img src="{imageUrl}" class="{mime}" />',
 							'<span class="mimeIcon {mime}"></span>',
 						'</div>',
 					'</div>',
@@ -195,13 +288,11 @@ eo.MediaPanel = Ext.extend(Ext.Panel, {
 	}
 
 	,showDetails: function() {
-		var selNode = this.view.getSelectedNodes();
-		var detailEl = this.detailPanel.body;
-		if (selNode && selNode.length) {
-			selNode = selNode[0];
-			var data = this.view.lookup[selNode.id];
+		var detailEl = this.detailPanel.body,
+			r = this.getSelectedRecord();
+		if (r) {
 			detailEl.hide();
-			this.detailsTemplate.overwrite(detailEl, data);
+			this.detailsTemplate.overwrite(detailEl, r.data);
 			detailEl.slideIn('l', {stopFx: true, duration:.2});
 		} else {
 			detailEl.update("<br/>")
@@ -214,34 +305,20 @@ eo.MediaPanel = Ext.extend(Ext.Panel, {
  * MediaPanel's view.
  */
 eo.MediaPanel.ImageView = Ext.extend(Ext.DataView, {
-    
-    /**
-     * @cfg {Integer}
-     * Maximum label height. If the actual height of the rendered label would 
-     * exceed that height, then the text will be truncated and an ellipsis
-     * will be appended to its end.
-     */
-    maxLabelHeight: 40
+	
+	/**
+	 * @cfg {Integer}
+	 * Maximum label height. If the actual height of the rendered label would 
+	 * exceed that height, then the text will be truncated and an ellipsis
+	 * will be appended to its end.
+	 */
+	maxLabelHeight: 40
 
 	,constructor: function(config) {
 
-		var lookupNeedsUpdate = false;
-		this.lookup = {};
-
 		var prepareData = function(data) {
-
-			if (lookupNeedsUpdate) {
-				this.lookup = {};
-				lookupNeedsUpdate = false;
-			}
-
-			data.shortName = data.filename;
-			var nodeId = data.nodeId = this.getId() + "_" + data.filename;
-			this.lookup[nodeId] = data;
-
 			var mtime = Date.parseDate(data.filemtime, "Y-m-d H:i");
 			data.dateString = mtime ? mtime.format("d/m/Y H:i") : "Inconnue"; // i18n
-
 			return data;
 		};
 
@@ -256,14 +333,17 @@ eo.MediaPanel.ImageView = Ext.extend(Ext.DataView, {
 		});
 
 		eo.MediaPanel.ImageView.superclass.constructor.call(this, config);
-
-		this.store.on({
-			scope: this
-			,beforeload: function() {
-				lookupNeedsUpdate = true;
-				this.el.mask("Chargement", "x-mask-loading"); // i18n
-			}
-		});
+	}
+	
+	,getSelectedRecord: function() {
+		var records = this.getSelectedRecords();
+		if (!records.length) return null;
+		return records[0];
+	}
+	
+	,onBeforeLoad: function() {
+		eo.MediaPanel.ImageView.superclass.onBeforeLoad.apply(this, arguments);
+		this.el.mask("Chargement", "x-mask-loading"); // i18n
 	}
 
 	,createTemplate: function() {
@@ -272,36 +352,36 @@ eo.MediaPanel.ImageView = Ext.extend(Ext.DataView, {
 				'<div class="thumb-wrap" id="{nodeId}">',
 					'<div class="thumb">',
 						'<div class="ct">',
-							'<img src="{url}" title="{filename}" class="{mime}" />',
+							'<img src="{imageUrl}" title="{filename}" class="{mime}" />',
 							'<span class="{mime}"></span>',
 						'</div>',
 					'</div>',
-					'<span class="label">{shortName}</span>',
+					'<span class="label">{filename}</span>',
 				'</div>',
 			'</tpl>'
 		);
 		tpl.compile();
 		return tpl;
 	}
-    
-    // private
-    //
-    // overridden to implement maxLabelHeight
-    //
-    ,refresh: function() {
-        eo.MediaPanel.ImageView.superclass.refresh.apply(this, arguments);
-        var mh = this.maxLabelHeight;
-        if (mh) {
-            Ext.each(this.el.query('.thumb-wrap > span'), function(span) {
-                var t = span.innerText,
-                    w = span.offsetWidth;
-                while (span.offsetHeight > mh) {
-                    t = t.substr(0, t.length-1);
-                    span.innerText = t + '\u2026';
-                }
-            });
-        }
-    }
+	
+	// private
+	//
+	// overridden to implement maxLabelHeight
+	//
+	,refresh: function() {
+		eo.MediaPanel.ImageView.superclass.refresh.apply(this, arguments);
+		var mh = this.maxLabelHeight;
+		if (mh) {
+			Ext.each(this.el.query('.thumb-wrap > span'), function(span) {
+				var t = span.innerText,
+					w = span.offsetWidth;
+				while (span.offsetHeight > mh) {
+					t = t.substr(0, t.length-1);
+					span.innerText = t + '\u2026';
+				}
+			});
+		}
+	}
 });
 
 eo.MediaPanel.TreePanel = Ext.extend(Ext.tree.TreePanel, {

@@ -29,6 +29,9 @@ Oce.Modules.MediaManager.MediaManager = Ext.extend(Oce.Modules.MediaManager.Medi
     }
 
     ,createMediaPanel: function() {
+        
+        var viewToggleGroup = Ext.id(null, 'view-toggle-group');
+        
         var mediaPanel = this.mediaPanel = new eo.MediaPanel({
             title: "Media Manager" // i18n
             ,closable: true
@@ -66,6 +69,27 @@ Oce.Modules.MediaManager.MediaManager = Ext.extend(Oce.Modules.MediaManager.Medi
                     ,text: "Télécharger" // i18n
                     ,iconCls: 'ico download'
                     ,handler: this.downloadSelected.createDelegate(this)
+                }, '->', {
+                    xtype: 'button'
+                    ,iconCls: 'ico application_view_tile'
+                    ,tooltip: "Affichage détaillé" // i18n
+                    ,allowToggle: true
+                    ,allowDepress: false
+                    ,toggleGroup: viewToggleGroup
+                    ,viewType: 'icons'
+                    ,pressed: true
+                    ,scope: this
+                    ,toggleHandler: this.onViewChange
+                }, {
+                    xtype: 'button'
+                    ,iconCls: 'ico application_view_list'
+                    ,tooltip: "Affichage liste"
+                    ,allowToggle: true
+                    ,allowDepress: false
+                    ,toggleGroup: viewToggleGroup
+                    ,viewType: 'list'
+                    ,scope: this
+                    ,toggleHandler: this.onViewChange
                 }]
             })
             ,listeners: {
@@ -80,6 +104,17 @@ Oce.Modules.MediaManager.MediaManager = Ext.extend(Oce.Modules.MediaManager.Medi
         this.uploadForm = this.uploadFormPanel.getForm();
 
         return this.mediaPanel;
+    }
+    
+    /**
+     * Handler for view change buttons.
+     * @private
+     */
+    ,onViewChange: function(button, state) {
+        var mp = this.mediaPanel;
+        if (mp && state) {
+            mp.setViewType(button.viewType);
+        }
     }
     
     ,deleteSelected: function() {
