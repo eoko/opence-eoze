@@ -41,10 +41,20 @@ eo.MediaPanel = Ext.extend(Ext.Panel, {
             ]
             ,createSortFunction: function(field, direction) {
                 var createSortFunction = Ext.data.JsonStore.prototype.createSortFunction,
-                    defaultFn = createSortFunction.call(this, field, direction);
+                    baseFn = createSortFunction.call(this, field, direction);
+
+                // Account for virtual items (.. directory)
+                var defaultFn = function(r1, r2) {
+                    var v1 = r1.data.virtual,
+                        v2 = r2.data.virtual;
+                    return v1
+                            ? (v2 ? baseFn(r1, r2) : -1)
+                            : (v2 ? 1 : baseFn(r1, r2));
+                };
+                    
                 switch (field) {
                     case 'size':
-                        defaultFn = createSortFunction.call(this, 'bytesize', direction);
+                        baseFn = createSortFunction.call(this, 'bytesize', direction);
                     case 'type':
                         return function(r1, r2) {
                             var m1 = r1.data.mime === 'folder',
@@ -55,8 +65,37 @@ eo.MediaPanel = Ext.extend(Ext.Panel, {
                             
                         };
                     default:
-                        return defaultFn
+                        return defaultFn;
                 }
+            }
+            ,loadRecords: function(o, options, success) {
+                if (this.isDestroyed === true) {
+                    return;
+                }
+                if (!o || success === false){
+                    if(success !== false){
+                        this.fireEvent('load', this, [], options);
+                    }
+                    if(options.callback){
+                        options.callback.call(options.scope || this, [], options, false, o);
+                    }
+                    return;
+                }
+                // add parent directory item (if not root node)
+                var sn = dirTree.getSelectionModel().getSelectedNode(),
+                    root = !sn || sn.isRoot;
+                if (!root) {
+                    var r = o.records;
+                    r.unshift(
+                        new this.recordType({
+                            virtual: true
+                            ,filename: ".."
+                            ,mime: 'folder'
+                            ,type: 'Dossier'})
+                    );
+                    o.totalRecords = r.length;
+                }
+                Ext.data.JsonStore.prototype.loadRecords.apply(this, arguments);
             }
         });
         
@@ -86,10 +125,13 @@ eo.MediaPanel = Ext.extend(Ext.Panel, {
                 }
                 ,contextmenu: function(view, index, node, event) {
                     view.select(node, false);
-                    contextMenu.showAt([
-                        event.browserEvent.clientX
-                        ,event.browserEvent.clientY
-                    ]);
+                    var r = view.getRecord(node);
+                    if (r && !r.data.virtual) {
+                        contextMenu.showAt([
+                            event.browserEvent.clientX
+                            ,event.browserEvent.clientY
+                        ]);
+                    }
                     event.preventDefault();
                 }
             }
@@ -99,6 +141,8 @@ eo.MediaPanel = Ext.extend(Ext.Panel, {
         var grid = this.listGrid = new Ext.grid.GridPanel({
             
             cls: 'x-list-view'
+            
+            ,border: false
             
             ,columns: [{
                 dataIndex: 'filename'
@@ -145,6 +189,9 @@ eo.MediaPanel = Ext.extend(Ext.Panel, {
             }
         
             ,store: store
+            ,loadMask: {
+                msg: "Chargement..." // i18n
+            }
             
             ,listeners: {
                 scope: this
@@ -154,7 +201,7 @@ eo.MediaPanel = Ext.extend(Ext.Panel, {
                     grid.select(r);
                     
                     // Show menu
-                    if (r) {
+                    if (r && !r.data.virtual) {
                         contextMenu.showAt([
                             e.browserEvent.clientX
                             ,e.browserEvent.clientY
@@ -518,7 +565,12 @@ eo.MediaPanel.TreePanel = Ext.extend(Ext.tree.TreePanel, {
     ,changeDirectory: function(directory) {
         var sm = this.getSelectionModel(),
             node = sm.getSelectedNode(),
+            targetNode;
+        if (directory === '..') {
+            targetNode = node.parentNode;
+        } else {
             targetNode = node.findChild('directory', directory);
+        }
         if (targetNode) {
             targetNode.select();
         }
