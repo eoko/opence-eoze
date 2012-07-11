@@ -81,7 +81,8 @@ eo.MediaPanel = Ext.extend(Ext.Panel, {
                     ,buffer: 100
                 }
                 ,dblclick: function(view, index, node, e) {
-                    me.fireEvent("dblclick", me, view.getRecord(node));
+                    me.onRecordDblClick(view.getRecord(node));
+                    e.preventDefault();
                 }
                 ,contextmenu: function(view, index, node, event) {
                     view.select(node, false);
@@ -146,7 +147,8 @@ eo.MediaPanel = Ext.extend(Ext.Panel, {
             ,store: store
             
             ,listeners: {
-                rowcontextmenu: function(grid, row, e) {
+                scope: this
+                ,rowcontextmenu: function(grid, row, e) {
                     // Select row
                     var r = grid.store.getAt(row);
                     grid.select(r);
@@ -159,6 +161,10 @@ eo.MediaPanel = Ext.extend(Ext.Panel, {
                         ]);
                     }
                     
+                    e.preventDefault();
+                }
+                ,rowdblclick: function(grid, row, e) {
+                    this.onRecordDblClick(grid.store.getAt(row));
                     e.preventDefault();
                 }
             }
@@ -233,6 +239,20 @@ eo.MediaPanel = Ext.extend(Ext.Panel, {
         });
 
         dirTree.load({expand: true});
+    }
+    
+    // private
+    ,onRecordDblClick: function(r) {
+        if (r) {
+            var d = r && r.data,
+                folder = d && d.mime === 'folder' && d.filename,
+                dt = this.dirTree;
+            if (folder) {
+                dt.changeDirectory(folder);
+            } else {
+                this.fireEvent('dblclick', this, r);
+            }
+        }
     }
     
     ,setViewType: function(type) {
@@ -436,8 +456,13 @@ eo.MediaPanel.TreePanel = Ext.extend(Ext.tree.TreePanel, {
         this.relayEvents(sm, ["selectionchange"]);
 
         sm.on("selectionchange", function(me, node, old) {
-            if (old && !old.isExpanded() && old.iconElement) old.iconElement.removeClass("open");
-            if (node && node.iconElement) node.iconElement.addClass("open");
+            if (old && !old.isExpanded() && old.iconElement) {
+                old.iconElement.removeClass("open");
+            }
+            if (node && node.iconElement) {
+                node.expand();
+                node.iconElement.addClass("open");
+            }
         });
     }
 
@@ -447,6 +472,7 @@ eo.MediaPanel.TreePanel = Ext.extend(Ext.tree.TreePanel, {
             Ext.each(dirs, function(dir) {
                 var child = new Ext.tree.TreeNode({
                     text: dir.name
+                    ,directory: dir.name
                     ,path: dir.path
                     ,iconCls: "img-chooser-tree-folder"
 //                    ,expandable: true
@@ -482,6 +508,20 @@ eo.MediaPanel.TreePanel = Ext.extend(Ext.tree.TreePanel, {
                 me.getRootNode().select();
             }
         }));
+    }
+    
+    /**
+     * Changes the current selected directory to the specified one, relative
+     * to the currently selected node.
+     * @param {String} directory
+     */
+    ,changeDirectory: function(directory) {
+        var sm = this.getSelectionModel(),
+            node = sm.getSelectedNode(),
+            targetNode = node.findChild('directory', directory);
+        if (targetNode) {
+            targetNode.select();
+        }
     }
 });
 

@@ -16,10 +16,10 @@
 	display: none;
 }
 
-.x-eo-media-panel .img-chooser-view .thumb-wrap.folder:hover {
+/*.x-eo-media-panel .img-chooser-view .thumb-wrap.folder:hover {
     cursor: pointer;
     text-decoration: underline;
-}
+}*/
 
 .x-eo-media-panel .mime-64 {
 	display: block;
@@ -98,5 +98,3 @@
 .x-eo-media-panel .img-chooser-dlg span.image {
 	display: none;
 }
-
-
