@@ -58,6 +58,41 @@ class Grid extends GridBase {
 		$nextId = 1;
 		$urlPath = str_replace(DS, '/', $dir);
 		if (substr($dir, -1) !== '/') $urlPath .= '/';
+        
+        $formatDate = function($time) {
+//            return strftime('%a %d %b %Y %T', $time);
+            return strftime('%c', $time);
+        };
+        if (!setlocale(LC_ALL, "fr_FR.utf8")) {
+            if (!setlocale(LC_ALL, "fr_FR")) {
+                $formatDate = function($time) {
+                    return date('d/m/Y H:i:s', $time);
+                };
+            }
+        }
+        
+        // Directories
+        foreach(Files::listDirs($path, Files::LF_PATH_ABS_REL) as $entry) {
+            list($rel, $abs) = $entry;
+			$url = self::$baseUrl . "$urlPath$rel";
+			$rows[] = array(
+				'id' => $nextId++,
+//				'name' => "<a href=\"$url\">$rel</a>",
+				'filename' => $rel,
+				'url' => $url,
+                'imageUrl' => null,
+				'bytesize' => null,
+				'size' => count(glob("$abs/*")) . ' éléments',
+//				'datetime' => date('d-m-Y H:i', filemtime($abs)),
+				'filemtime' => date('Y-m-d H:i:s', filemtime($abs)),
+                'hsFilemtime' => $formatDate(filemtime($abs)),
+				'extension' => null,
+				'mime' => 'folder',
+                'type' => 'Dossier',
+			);
+        }
+        
+        // Files
 		foreach (Files::listFiles($path, '/^[^.]/', false, Files::LF_PATH_ABS_REL) as $entry) {
 			list($rel, $abs) = $entry;
 			//$url = $baseUrl . $rel;
@@ -70,13 +105,13 @@ class Grid extends GridBase {
                 'imageUrl' => FileType::IMAGE()->testFilename($rel) ? $url : null,
 				'bytesize' => $size = filesize($abs),
 				'size' => Files::formatSize($size),
-				'datetime' => date('d-m-Y H:i', filemtime($abs)),
+//				'datetime' => date('d-m-Y H:i', filemtime($abs)),
 				'filemtime' => date('Y-m-d H:i', filemtime($abs)),
+                'hsFilemtime' => $formatDate(filemtime($abs)),
 				'extension' => Files::getExtension($rel),
 				'mime' => FileType::IMAGE()->testFilename($rel) ? 'image' : Files::getExtension($rel),
                 'type' => self::getFileTypeName(Files::getExtension($rel)),
 			);
-
 		}
 		return $rows;
 	}
