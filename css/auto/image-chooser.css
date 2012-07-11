@@ -51,23 +51,32 @@ div.details div.details-info-image-ct {
     padding: 3px;
 	text-align: center;
     height: 64px;
-    width: 80px;
+/*    width: 80px;*/
 	position: relative;
 }
 .img-chooser-view .thumb img{
     max-height: 64px;
-    max-width: 80px;
+/*    max-width: 80px;*/
 }
 .img-chooser-view .thumb-wrap{
-    float: left;
+/*    float: left;*/
+    display: inline-block;
+    vertical-align: top;
+    width: 100px;
     margin: 4px;
     margin-right: 0;
     padding: 5px;
+    word-wrap: break-word;
 }
 .img-chooser-view .thumb-wrap span{
     display: block;
     overflow: hidden;
     text-align: center;
+}
+.img-chooser-view .thumb-wrap .label {
+/*    text-overflow: ellipsis;*/
+/*    max-height: 3em;*/
+    overflow: visible;
 }
 .img-chooser-view .x-view-over{
     border:1px solid #dddddd;

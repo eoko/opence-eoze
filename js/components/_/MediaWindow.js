@@ -214,15 +214,6 @@ eo.MediaPanel.ImageView = Ext.extend(Ext.DataView, {
 
 	constructor: function(config) {
 
-		var me = this;
-
-		var stringEllipse = function(s, maxLength) {
-			if(s.length > maxLength){
-				return s.substr(0, maxLength-3) + '...';
-			}
-			return s;
-		};
-
 		var lookupNeedsUpdate = false;
 		this.lookup = {};
 
@@ -233,7 +224,7 @@ eo.MediaPanel.ImageView = Ext.extend(Ext.DataView, {
 				lookupNeedsUpdate = false;
 			}
 
-			data.shortName = stringEllipse(data.filename, 15);
+			data.shortName = data.filename;
 			var nodeId = data.nodeId = this.getId() + "_" + data.filename;
 			this.lookup[nodeId] = data;
 
@@ -241,7 +232,7 @@ eo.MediaPanel.ImageView = Ext.extend(Ext.DataView, {
 			data.dateString = mtime ? mtime.format("d/m/Y H:i") : "Inconnue"; // i18n
 
 			return data;
-		}
+		};
 
 		config = Ext.apply({}, config, {
 			tpl: this.createTemplate()
@@ -274,13 +265,36 @@ eo.MediaPanel.ImageView = Ext.extend(Ext.DataView, {
 							'<span class="{mime}"></span>',
 						'</div>',
 					'</div>',
-					'<span>{shortName}</span>',
+					'<span class="label">{shortName}</span>',
 				'</div>',
 			'</tpl>'
 		);
 		tpl.compile();
 		return tpl;
 	}
+    
+    /**
+     * @cfg {Integer}
+     * Maximum label height. If the actual height of the rendered label would 
+     * exceed that height, then the text will be truncated and an ellipsis
+     * will be appended to its end.
+     */
+    ,maxLabelHeight: 40
+    
+    ,refresh: function() {
+        eo.MediaPanel.ImageView.superclass.refresh.apply(this, arguments);
+        var mh = this.maxLabelHeight;
+        if (mh) {
+            Ext.each(this.el.query('.thumb-wrap > span'), function(span) {
+                var t = span.innerText,
+                    w = span.offsetWidth;
+                while (span.offsetHeight > mh) {
+                    t = t.substr(0, t.length-1);
+                    span.innerText = t + '\u2026';
+                }
+            });
+        }
+    }
 });
 
 eo.MediaPanel.TreePanel = Ext.extend(Ext.tree.TreePanel, {
