@@ -187,8 +187,27 @@ class Grid extends GridBase {
 		$dir = $this->request->get('path', '');
 		$dir = str_replace('/', DS, $dir);
 		if ($dir && substr($dir, -1) !== DS) $dir .= DS;
-		$filename = MEDIA_PATH . $dir . $this->request->req('file');
-		return unlink($filename);;
+        $file = $this->request->req('file');
+        if ($file === '..') {
+            return false;
+        }
+		$filename = MEDIA_PATH . $dir . $file;
+        return self::recursiveDelete($filename);
 	}
+    
+    /**
+     * @author http://fr2.php.net/manual/en/function.unlink.php
+     */
+    private static function recursiveDelete($file){
+        if (is_file($file)) {
+            return @unlink($file);
+        } else if (is_dir($file)) {
+            $scan = glob(rtrim($file,'/').'/*');
+            foreach ($scan as $index => $path) {
+                self::recursiveDelete($path);
+            }
+            return @rmdir($file);
+        }
+    }
 
 }
