@@ -145,6 +145,10 @@ eo.form.calendar.MonthEditor = Ext.extend(Ext.BoxComponent, {
 		this.mask = wrap.createChild({
 			cls: 'eo-calendar-month-mask'
 		});
+        
+        if (this.maskText) {
+            this.mask.update(this.maskText);
+        }
 		
 //		this.mask.setDisplayed(!this.editable);
 	}
