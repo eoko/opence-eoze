@@ -111,3 +111,9 @@ div.details div.details-info-image-ct {
 	background-image: url("../../images/default/tree/folder-open.gif") !important;
 }
 
+.x-eo-media-panel .x-list-view .x-grid3-row {
+    border: 0;
+}
+.x-eo-media-panel .x-list-view .x-grid3-row-alt {
+    background-color: #F7F7F7;
+}

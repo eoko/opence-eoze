@@ -1,42 +1,101 @@
 
-.img-chooser-view .thumb img.image {
+.x-eo-media-panel .img-chooser-view .thumb img {
+    display: none;
+}
+.x-eo-media-panel .img-chooser-view .thumb img.image {
 	display: inline;
 }
-.img-chooser-view .thumb img.pdf,
-.img-chooser-view .thumb img.xls,
-.img-chooser-view .thumb img.csv {
-	display: none;
-}
 
-.img-chooser-dlg span.mimeIcon,
-.img-chooser-view .thumb span {
+.x-eo-media-panel .img-chooser-dlg span.mimeIcon,
+.x-eo-media-panel .img-chooser-view .thumb span {
 	width: 64px;
 	height: 64px;
 	margin: auto;
 }
-.img-chooser-view .thumb span.image {
+.x-eo-media-panel .img-chooser-view .thumb span.image {
 	display: none;
 }
-.img-chooser-dlg span.mimeIcon.pdf,
-.img-chooser-dlg span.mimeIcon.csv,
-.img-chooser-dlg span.mimeIcon.xls,
-.img-chooser-view .thumb span.pdf,
-.img-chooser-view .thumb span.xls,
-.img-chooser-view .thumb span.csv {
-	display: block;
-	background: url("images/mime/x-office-document-64.png") center no-repeat !important;
+
+.x-eo-media-panel .img-chooser-view .thumb-wrap.folder:hover {
+    cursor: pointer;
+    text-decoration: underline;
 }
 
-.img-chooser-dlg img.image {
+.x-eo-media-panel .mime-64 {
+	display: block;
+	background: url("images/mime/64x64/file.png") center no-repeat !important;
+}
+.x-eo-media-panel .mime-64.folder {
+	background: url("images/mime/64x64/folder.png") center no-repeat !important;
+}
+.x-eo-media-panel .mime-64.ods,
+.x-eo-media-panel .mime-64.xls,
+.x-eo-media-panel .mime-64.xlsx,
+.x-eo-media-panel .mime-64.csv {
+	background: url("images/mime/64x64/calc.png") center no-repeat !important;
+}
+.x-eo-media-panel .mime-64.xls,
+.x-eo-media-panel .mime-64.xlsx {
+	background: url("images/mime/64x64/excel.png") center no-repeat !important;
+}
+.x-eo-media-panel .mime-64.odt,
+.x-eo-media-panel .mime-64.doc,
+.x-eo-media-panel .mime-64.docx {
+	background: url("images/mime/64x64/doc.png") center no-repeat !important;
+}
+.x-eo-media-panel .mime-64.doc,
+.x-eo-media-panel .mime-64.docx {
+	background: url("images/mime/64x64/word.png") center no-repeat !important;
+}
+.x-eo-media-panel .mime-64.pdf {
+	background: url("images/mime/64x64/pdf.png") center no-repeat !important;
+}
+
+.x-eo-media-panel .mime-16 {
+	display: block;
+    float: left;
+    width: 16px;
+    height: 16px;
+    margin-top: -2px;
+    margin-right: 5px;
+	background: url("images/mime/16x16/file.png") center no-repeat !important;
+}
+.x-eo-media-panel .mime-16.folder {
+	background: url("images/mime/16x16/folder.png") center no-repeat !important;
+}
+.x-eo-media-panel .mime-16.ods,
+.x-eo-media-panel .mime-16.xls,
+.x-eo-media-panel .mime-16.xlsx,
+.x-eo-media-panel .mime-16.csv {
+	background: url("images/mime/16x16/calc.png") center no-repeat !important;
+}
+.x-eo-media-panel .mime-16.xls,
+.x-eo-media-panel .mime-16.xlsx {
+	background: url("images/mime/16x16/excel.png") center no-repeat !important;
+}
+.x-eo-media-panel .mime-16.odt,
+.x-eo-media-panel .mime-16.doc,
+.x-eo-media-panel .mime-16.docx {
+	background: url("images/mime/16x16/doc.png") center no-repeat !important;
+}
+.x-eo-media-panel .mime-16.doc,
+.x-eo-media-panel .mime-16.docx {
+	background: url("images/mime/16x16/word.png") center no-repeat !important;
+}
+.x-eo-media-panel .mime-16.pdf {
+	background: url("images/mime/16x16/pdf.png") center no-repeat !important;
+}
+.x-eo-media-panel .mime-16.image {
+	background: url("images/mime/16x16/image.png") center no-repeat !important;
+}
+
+.x-eo-media-panel .img-chooser-dlg img {
+    display: none;
+}
+.x-eo-media-panel .img-chooser-dlg img.image {
 	display: inline;
 }
-.img-chooser-dlg img.pdf,
-.img-chooser-dlg img.xls,
-.img-chooser-dlg img.csv {
-	display: none;
-}
-
-.img-chooser-dlg span.image {
+.x-eo-media-panel .img-chooser-dlg span.image {
 	display: none;
 }
 

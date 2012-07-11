@@ -36,8 +36,28 @@ eo.MediaPanel = Ext.extend(Ext.Panel, {
 			,root: 'data'
 			,totalProperty: 'count'
 			,fields: [
-				"filename", "url", "imageUrl", "size", "extension", "filemtime", "mime", "type"
+				"filename", "url", "imageUrl", "bytesize", "size", "extension", "filemtime", 
+                "hsFilemtime", "mime", "type"
 			]
+            ,createSortFunction: function(field, direction) {
+                var createSortFunction = Ext.data.JsonStore.prototype.createSortFunction,
+                    defaultFn = createSortFunction.call(this, field, direction);
+                switch (field) {
+                    case 'size':
+                        defaultFn = createSortFunction.call(this, 'bytesize', direction);
+                    case 'type':
+                        return function(r1, r2) {
+                            var m1 = r1.data.mime === 'folder',
+                                m2 = r2.data.mime === 'folder';
+                            return m1
+                                    ? (m2 ? defaultFn(r1, r2) : -1)
+                                    : (m2 ? 1 : defaultFn(r1, r2));
+                            
+                        };
+                    default:
+                        return defaultFn
+                }
+            }
 		});
 		
 		// Context menu
@@ -77,12 +97,18 @@ eo.MediaPanel = Ext.extend(Ext.Panel, {
 		// List Grid
 		var grid = this.listGrid = new Ext.grid.GridPanel({
 			
-			columns: [{
+            cls: 'x-list-view'
+            
+			,columns: [{
 				dataIndex: 'filename'
 				,id: 'filename'
 				,header: "Nom" // i18n
 				,width: 200
 				,sortable: true
+                ,renderer: function(value, md, record) {
+                    return '<span class="mime-16 ' + record.data.mime + '"></span>'
+                            + value;
+                }
 			},{
 				dataIndex: 'size'
 				,header: "Taille" // i18n
@@ -94,7 +120,7 @@ eo.MediaPanel = Ext.extend(Ext.Panel, {
 				,width: 80
 				,sortable: true
 			},{
-				dataIndex: 'filemtime'
+				dataIndex: 'hsFilemtime'
 				,header: "Date de modification" // i18n
 				,width: 80
 				,sortable: true
@@ -111,6 +137,7 @@ eo.MediaPanel = Ext.extend(Ext.Panel, {
 				}
 			})
 			
+            ,stripeRows: true
 			,autoExpandColumn: 'filename'
 			,viewConfig: {
 				autoFill: true
@@ -181,6 +208,7 @@ eo.MediaPanel = Ext.extend(Ext.Panel, {
 //			,items: [dirTree, view, detailPanel]
 			,border: false
 //			,items: [leftPane, view]
+            ,cls: 'x-eo-media-panel'
 			,items: [leftPane, this.viewCardCt = Ext.create({
 				xtype: 'container'
 				,region: 'center'
@@ -270,7 +298,7 @@ eo.MediaPanel = Ext.extend(Ext.Panel, {
 					'<div class="details-info-image-ct">',
 						'<div class="ct">',
 							'<img src="{imageUrl}" class="{mime}" />',
-							'<span class="mimeIcon {mime}"></span>',
+							'<span class="mime-64 mimeIcon {mime}"></span>',
 						'</div>',
 					'</div>',
 					'<div class="details-info">',
@@ -279,7 +307,7 @@ eo.MediaPanel = Ext.extend(Ext.Panel, {
 						'<b>Taille : </b>', // i18n
 						'<span>{size}</span>',
 						'<b>Dernière modification :</b>', // i18n
-						'<span>{dateString}</span>',
+						'<span>{hsFilemtime}</span>',
 					'</div>',
 				'</tpl>',
 			'</div>'
@@ -316,11 +344,11 @@ eo.MediaPanel.ImageView = Ext.extend(Ext.DataView, {
 
 	,constructor: function(config) {
 
-		var prepareData = function(data) {
-			var mtime = Date.parseDate(data.filemtime, "Y-m-d H:i");
-			data.dateString = mtime ? mtime.format("d/m/Y H:i") : "Inconnue"; // i18n
-			return data;
-		};
+//		var prepareData = function(data) {
+//			var mtime = Date.parseDate(data.filemtime, "Y-m-d H:i");
+//			data.dateString = mtime ? mtime.format("d/m/Y H:i") : "Inconnue"; // i18n
+//			return data;
+//		};
 
 		config = Ext.apply({}, config, {
 			tpl: this.createTemplate()
@@ -329,7 +357,7 @@ eo.MediaPanel.ImageView = Ext.extend(Ext.DataView, {
 			,itemSelector: 'div.thumb-wrap'
 			,singleSelect: true
 			,emptyText : '<div style="padding:10px;">Dossier vide</div>'
-			,prepareData: prepareData.createDelegate(this)
+//			,prepareData: prepareData.createDelegate(this)
 		});
 
 		eo.MediaPanel.ImageView.superclass.constructor.call(this, config);
@@ -349,11 +377,11 @@ eo.MediaPanel.ImageView = Ext.extend(Ext.DataView, {
 	,createTemplate: function() {
 		var tpl = new Ext.XTemplate(
 			'<tpl for=".">',
-				'<div class="thumb-wrap" id="{nodeId}">',
+				'<div class="thumb-wrap {mime}" id="{nodeId}">',
 					'<div class="thumb">',
 						'<div class="ct">',
 							'<img src="{imageUrl}" title="{filename}" class="{mime}" />',
-							'<span class="{mime}"></span>',
+							'<span class="mime-64 {mime}"></span>',
 						'</div>',
 					'</div>',
 					'<span class="label">{filename}</span>',
