@@ -54,6 +54,12 @@
 	
 	display: none;
 }
+.eo-calendar-month-mask {
+    text-align: center;
+    font-size: 25px;
+    font-weight: bold;
+    padding-top: 43px;
+}
 .eo-calendar-month-ct.readOnly .eo-calendar-month-mask {
 	display: block;
 }
