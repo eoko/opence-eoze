@@ -210,9 +210,20 @@ eo.MediaPanel = Ext.extend(Ext.Panel, {
 
 }); // eo.MediaPanel
 
+/**
+ * MediaPanel's view.
+ */
 eo.MediaPanel.ImageView = Ext.extend(Ext.DataView, {
+    
+    /**
+     * @cfg {Integer}
+     * Maximum label height. If the actual height of the rendered label would 
+     * exceed that height, then the text will be truncated and an ellipsis
+     * will be appended to its end.
+     */
+    maxLabelHeight: 40
 
-	constructor: function(config) {
+	,constructor: function(config) {
 
 		var lookupNeedsUpdate = false;
 		this.lookup = {};
@@ -273,14 +284,10 @@ eo.MediaPanel.ImageView = Ext.extend(Ext.DataView, {
 		return tpl;
 	}
     
-    /**
-     * @cfg {Integer}
-     * Maximum label height. If the actual height of the rendered label would 
-     * exceed that height, then the text will be truncated and an ellipsis
-     * will be appended to its end.
-     */
-    ,maxLabelHeight: 40
-    
+    // private
+    //
+    // overridden to implement maxLabelHeight
+    //
     ,refresh: function() {
         eo.MediaPanel.ImageView.superclass.refresh.apply(this, arguments);
         var mh = this.maxLabelHeight;
