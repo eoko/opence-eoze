@@ -61,23 +61,41 @@ class Grid extends GridBase {
 		foreach (Files::listFiles($path, '/^[^.]/', false, Files::LF_PATH_ABS_REL) as $entry) {
 			list($rel, $abs) = $entry;
 			//$url = $baseUrl . $rel;
-			$url = self::$baseUrl . "/$urlPath$rel";
+			$url = self::$baseUrl . "$urlPath$rel";
 			$rows[] = array(
 				'id' => $nextId++,
 				'name' => "<a href=\"$url\">$rel</a>",
 				'filename' => $rel,
 				'url' => $url,
+                'imageUrl' => FileType::IMAGE()->testFilename($rel) ? $url : null,
 				'bytesize' => $size = filesize($abs),
 				'size' => Files::formatSize($size),
 				'datetime' => date('d-m-Y H:i', filemtime($abs)),
 				'filemtime' => date('Y-m-d H:i', filemtime($abs)),
 				'extension' => Files::getExtension($rel),
 				'mime' => FileType::IMAGE()->testFilename($rel) ? 'image' : Files::getExtension($rel),
+                'type' => self::getFileTypeName(Files::getExtension($rel)),
 			);
 
 		}
 		return $rows;
 	}
+    
+    protected static function getFileTypeName($extension) {
+        switch (strtolower($extension)) {
+            case 'odt': return 'Texte OpenDocument';
+            case 'ods': return 'Classeur OpenDocument';
+            case 'xls': return 'Feuille de calcul Microsoft Excel';
+            case 'xlsx': return 'Feuille de calcul Microsoft Excel 2007';
+            case 'doc': return 'Document Microshoft Word';
+            case 'docx': return 'Document Microshoft Word 2007';
+            case 'gz': return 'Archive gzip';
+            case 'png':
+            case 'jpg':
+                return 'Image ' . strtoupper($extension);
+            default: return 'Document ' . strtoupper($extension);
+        }
+    }
 
 	public function load() {
 
