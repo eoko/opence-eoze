@@ -127,6 +127,12 @@
 .ico.accept {
 	background-image: url("../images/icons/accept.png") !important;
 }
+.ico.application_view_list {
+    background-image: url("../images/icons/application_view_list.png") !important;
+}
+.ico.application_view_tile {
+    background-image: url("../images/icons/application_view_tile.png") !important;
+}
 .ico.archive {
 	background-image: url("../images/icons_fatcow/16x16/drawer.png") !important;
 }
