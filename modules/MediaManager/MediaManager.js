@@ -30,41 +30,41 @@ Oce.Modules.MediaManager.MediaManager = Ext.extend(Oce.Modules.MediaManager.Medi
 
     ,createMediaPanel: function() {
         var mediaPanel = this.mediaPanel = new eo.MediaPanel({
-            title: "Media Manager"
+            title: "Media Manager" // i18n
             ,closable: true
             ,tbar: new Ext.Toolbar({
                 items: [this.uploadFormPanel = Ext.create({
-                    xtype: "form"
+                    xtype: 'form'
                     ,fileUpload: true
 //                    ,padding: 0
 //                    ,margin: 0
                     ,border: false
-                    ,bodyStyle: "background: none;"
+                    ,bodyStyle: 'background: none;'
                     ,hideLabels: true
-                    ,itemCls: "no-margin"
+                    ,itemCls: 'no-margin'
                     ,items: this.uploadButton = Ext.create({
-                        xtype: "fileuploadfield"
-                        ,name: "image"
+                        xtype: 'fileuploadfield'
+                        ,name: 'image'
                         ,buttonOnly: true
-//                        ,buttonText: "Envoyer un fichier"
+//                        ,buttonText: 'Envoyer un fichier'
                         ,buttonCfg: {
-                            text: "Envoyer un fichier"
-                            ,iconCls: "ico add"
+                            text: "Envoyer un fichier" // i18n
+                            ,iconCls: 'ico add'
                         }
                         ,listeners: {
                             fileselected: this.uploadFile
                             ,scope: this
                         }
                     })
-                }), "-", {
-                    xtype: "button"
-                    ,text: "Supprimer"
-                    ,iconCls: "ico cross"
+                }), '-', {
+                    xtype: 'button'
+                    ,text: "Supprimer" // i18n
+                    ,iconCls: 'ico cross'
                     ,handler: this.deleteSelected.createDelegate(this)
-                }, "-", {
-                    xtype: "button"
-                    ,text: "Télécharger"
-                    ,iconCls: "ico download"
+                }, '-', {
+                    xtype: 'button'
+                    ,text: "Télécharger" // i18n
+                    ,iconCls: 'ico download'
                     ,handler: this.downloadSelected.createDelegate(this)
                 }]
             })
