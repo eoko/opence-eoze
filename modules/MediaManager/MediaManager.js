@@ -72,7 +72,7 @@ Oce.Modules.MediaManager.MediaManager = Ext.extend(Oce.Modules.MediaManager.Medi
                 }, '->', {
                     xtype: 'button'
                     ,iconCls: 'ico application_view_tile'
-                    ,tooltip: "Affichage détaillé" // i18n
+                    ,tooltip: "Affichage en icônes" // i18n
                     ,allowToggle: true
                     ,allowDepress: false
                     ,toggleGroup: viewToggleGroup
@@ -83,7 +83,7 @@ Oce.Modules.MediaManager.MediaManager = Ext.extend(Oce.Modules.MediaManager.Medi
                 }, {
                     xtype: 'button'
                     ,iconCls: 'ico application_view_list'
-                    ,tooltip: "Affichage liste"
+                    ,tooltip: "Affichage en liste"
                     ,allowToggle: true
                     ,allowDepress: false
                     ,toggleGroup: viewToggleGroup
