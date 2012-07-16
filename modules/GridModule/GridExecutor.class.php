@@ -453,26 +453,33 @@ abstract class GridExecutor extends JsonExecutor {
 			$columns
 		);
 		
-		$this->applyLoadQueryParams($query);
+		$this->configureLoadQuery($query);
+		
+		if ($this->plugins) {
+			foreach ($this->plugins as $plugin) {
+				$plugin->configureLoadQuery($query);
+			}
+		}
 
 		if ($this->table instanceof TableHasFilters) {
 			$this->table->addLoadQueryFilters($query, $this->request->get('filters'));
 		}
 		
         $this->afterCreateLoadQuery($query);
-		
-		if ($this->plugins) {
-			foreach ($this->plugins as $plugin) {
-				$plugin->afterCreateLoadQuery($query);
-			}
-		}
 
 		return $query;
 	}
 	
 	protected function afterCreateLoadQuery(ModelTableQuery $query) {}
 	
-	private function applyLoadQueryParams(ModelTableQuery $query) {
+    /**
+     * Applies filters, sort, search, etc. It is strongly recommanded to use
+     * this method instead of afterCreateLoadQuery for such tasks, because
+     * some query not created with the createLoadQuery method may use this
+     * method.
+     * @param ModelTableQuery $query
+     */
+	protected function configureLoadQuery(ModelTableQuery $query) {
 		$this->createLoadQuery_sort($query);
 		$this->createLoadQuery_filters($query);
 		$this->createLoadQuery_search($query);

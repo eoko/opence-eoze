@@ -45,7 +45,16 @@ interface Plugin {
 	 */
 	function executeAction($name, &$returnValue);
 	
-	function afterCreateLoadQuery(ModelTableQuery $query);
+	/**
+	 * Applies filters, sort, search, etc.
+	 * @param ModelTableQuery $query
+	 */
+	function configureLoadQuery(ModelTableQuery $query);
+	
+	// 16/07/12 23:06
+	// Best not to use that, to avoid problems with plugin forgetting to
+	// configure the query with their own filters, etc.
+	// function afterCreateLoadQuery(ModelTableQuery $query);
 	
 	function afterExecuteLoadQuery(ModelTableQuery $query);
 }
