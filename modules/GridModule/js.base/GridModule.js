@@ -2351,7 +2351,12 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	 * @protected
 	 */
 	,getLastGridLoadParams: function() {
-		return Ext.apply({}, this.grid.store.lastOptions.params);
+		var s = this.grid.store,
+			o = Ext.apply({}, s.lastOptions.params);
+		Ext.apply(o, s.baseParams);
+		delete o.controller;
+		delete o.action;
+		return o;
 	}
 
 	,getToolbar: function(createIf) {
