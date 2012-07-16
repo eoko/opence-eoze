@@ -459,6 +459,8 @@ abstract class GridExecutor extends JsonExecutor {
 			$this->table->addLoadQueryFilters($query, $this->request->get('filters'));
 		}
 		
+        $this->afterCreateLoadQuery($query);
+		
 		if ($this->plugins) {
 			foreach ($this->plugins as $plugin) {
 				$plugin->afterCreateLoadQuery($query);
@@ -467,6 +469,8 @@ abstract class GridExecutor extends JsonExecutor {
 
 		return $query;
 	}
+	
+	protected function afterCreateLoadQuery(ModelTableQuery $query) {}
 	
 	private function applyLoadQueryParams(ModelTableQuery $query) {
 		$this->createLoadQuery_sort($query);
