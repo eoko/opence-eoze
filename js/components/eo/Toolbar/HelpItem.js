@@ -21,7 +21,9 @@ eo.toolbar.HelpItem = Ext.extend(Ext.Toolbar.TextItem, {
      * @cfg {String} iconCls
      */
     
-    onRender: function(ct, position) {
+    helpWidth: 300
+    
+    ,onRender: function(ct, position) {
         this.autoEl = {cls: 'xtb-text xtb-help', html: this.text || ''};
         Ext.Toolbar.TextItem.superclass.onRender.call(this, ct, position);
         if (this.iconCls) {
@@ -37,6 +39,8 @@ eo.toolbar.HelpItem = Ext.extend(Ext.Toolbar.TextItem, {
 				,dismissDelay: 0
 				,trackMouse: true
 				,target: this.el
+                // From Ext.QuickTip: The maximum supported value is 500
+                ,width: Math.min(500, this.helpWidth)
 			});
         }
     }
