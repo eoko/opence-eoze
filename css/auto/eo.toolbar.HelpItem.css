@@ -9,6 +9,7 @@
 .x-toolbar .xtb-help {
     color: #657CC0;
     font-style: italic;
+    margin-left: 5px;
 }
 
 .xtb-help.x-icon {
