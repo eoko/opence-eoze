@@ -187,6 +187,9 @@
 .ico.flags {
 	background-image: url("../images/icons/flags.png") !important;
 }
+.ico.help {
+	background-image: url("../images/icons_fugue/question-frame.png") !important;
+}
 .ico.collapse-all {
 	background-image: url("images/ext-tree-collapse-all.gif") !important;
 }
