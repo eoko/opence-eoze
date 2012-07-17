@@ -1,0 +1,21 @@
+/* 
+    Document   : eo.toolbar.HelpItem
+    Created on : 17 juil. 2012, 17:20:47
+    Author     : Éric Ortega
+    Description:
+        Styles for eo.toolbar.HelpItem.
+*/
+
+.x-toolbar .xtb-help {
+    color: #657CC0;
+    font-style: italic;
+}
+
+.xtb-help.x-icon {
+    padding-left: 18px !important;
+    height: 16px;
+}
+
+.xtb-help:hover {
+    cursor: pointer;
+}
