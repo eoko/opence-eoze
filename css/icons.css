@@ -124,6 +124,10 @@
 	display: inline;
 }
 
+.ico.loading {
+	background-image: url("../images/default/grid/loading.gif") !important;
+}
+
 .ico.accept {
 	background-image: url("../images/icons/accept.png") !important;
 }
