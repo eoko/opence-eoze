@@ -11,6 +11,8 @@ class Application implements FileFinder {
 	
 	private static $instance = null;
 
+	private $config;
+
 	/** @var FileFinder */
 	private $fileFinder = null;
 	
@@ -27,6 +29,13 @@ class Application implements FileFinder {
 		$this->sessionManager = $sessionManager;
 		$this->isDevMode = $this->findDevMode();
 	}
+
+	private function getConfig() {
+		if (!$this->config) {
+			$this->config = ConfigManager::get('eoze/application');
+		}
+		return new Config($this->config);
+	}
 	
 	public static function setDefaultSessionManager(SessionManager $sessionManager) {
 		self::$defaultSessionManager = $sessionManager;
@@ -40,7 +49,7 @@ class Application implements FileFinder {
 	}
 	
 	private function findDevMode() {
-		$config = ConfigManager::get('eoze/application');
+		$config = $this->getConfig();
 		if (isset($config['devMode']) && $config['devMode'] !== 'auto') {
 			return $config['devMode'];
 		} else if (isset($_SERVER['HTTP_HOST'])) {
@@ -50,7 +59,12 @@ class Application implements FileFinder {
 			return false;
 		}
 	}
-	
+
+	/**
+	 * Shortcut for `$this->isMode('dev')`.
+	 * @see isMode()
+	 * @return bool
+	 */
 	public function isDevMode() {
 		return $this->isDevMode;
 	}
@@ -216,6 +230,30 @@ class Application implements FileFinder {
 				)
 			)
 		);
+	}
+
+	/**
+	 * Gets the application internal name (that is, its code friendly name,
+	 * not meant to be displayed to users).
+	 * @return string
+	 */
+	public function getName() {
+		return $this->getConfig()->get('name');
+	}
+
+	/**
+	 * Gets the code base version unique identifier.
+	 * @return string
+	 */
+	public function getVersionId() {
+		try {
+			$hg = new \eoko\hg\Mercurial(ROOT);
+			return $hg->getId();
+		} catch (\Exception $ex) {
+			Logger::get($this)->error($ex);
+			// TODO implement a fallback if no repo is available
+			throw $ex;
+		}
 	}
 
 }
