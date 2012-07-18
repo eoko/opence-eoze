@@ -49,6 +49,15 @@ Oce.form.DateDisplayField = Ext.extend(Ext.form.DisplayField, {
 		}
 		return Oce.form.DateDisplayField.superclass.setValue.call(this, v);
 	}
+    
+    /**
+     * @override Fixes raw value. Without this override, the method will and
+     * pick the innerHTML of the element as its value (which, in our case is
+     * the formatted date, not the raw one).
+     */
+    ,getRawValue: function() {
+        return this.rawValue;
+    }
 });
 
 Ext.reg('datedisplayfield', Oce.form.DateDisplayField);
