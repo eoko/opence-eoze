@@ -54,6 +54,23 @@ class Application implements FileFinder {
 	public function isDevMode() {
 		return $this->isDevMode;
 	}
+
+	/**
+	 * Returns `true` if the specified tag matches an active execution mode.
+	 * A unique execution mode may have multiple aliases tags.
+	 *
+	 * 19/07/12 00:46 : only 'dev' and 'development' are currently supported.
+	 *
+	 * @param string $tag
+	 * @return bool
+	 */
+	public function isMode($tag) {
+		if ($tag === 'dev' || $tag === 'development') {
+			return $this->isDevMode();
+		} else {
+			return false; // only dev currently supported
+		}
+	}
 	
 	/**
 	 * @return Application
