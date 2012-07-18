@@ -1,5 +1,5 @@
 /**
- * @author Éric Ortéga <eric@mail.com>
+ * @author Éric Ortéga <eric@plansyphere.fr>
  */
 
 Ext.namespace('Oce');
