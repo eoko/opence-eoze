@@ -8,7 +8,6 @@ use SystemException, SecurityException, UnsupportedOperationException,
 
 use eoko\util\Files;
 use eoko\file, eoko\file\FileType;
-use eoko\config\Application as ApplicationConfig;
 use eoko\config\Config;
 use eoko\template\PHPCompiler;
 use eoko\module\executor\Executor;
@@ -86,6 +85,14 @@ class Module implements file\Finder {
 		
 		$this->construct($location);
 	}
+    
+    /**
+     * Gets the application config used by this Module.
+     * @return Application
+     */
+    public function getApplicationConfig() {
+        return Application::getInstance();
+    }
 	
 	/**
 	 * @return SessionManager
@@ -94,7 +101,7 @@ class Module implements file\Finder {
 		// We don't keep a reference of the SessionManager because we don't
 		// want it to be serialized in the cache (because of the closures
 		// it contains)
-		return Application::getInstance()->getSessionManager();
+		return $this->getApplicationConfig()->getSessionManager();
 	}
 	
 	/**
@@ -904,7 +911,7 @@ MSG
 	
 	protected function createFileFinder() {
 		
-		$fallbackFinder = ApplicationConfig::getInstance();
+		$fallbackFinder = $this->getApplicationConfig();
 		
 		$upperPathsUrl = array_reverse($this->pathsUrl, true);
 		if ($this->basePath) array_pop($upperPathsUrl);
