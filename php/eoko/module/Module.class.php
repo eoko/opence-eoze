@@ -18,6 +18,26 @@ use eoko\config\Application;
 use eoko\php\SessionManager;
 use eoko\php\ClassLoader;
 
+/**
+ * Base class for Eoze modules.
+ *
+ * Configuration
+ * =============
+ *
+ * Conditionnal configuration
+ * --------------------------
+ *
+ * Conditionnal configuration allows for overrides depending on the execution
+ * mode. Any configuration key beginning with a dot (e.g. .dev .prod) will be
+ * considered conditionnal configuration. If the name (without the dot) matches
+ * an active mode tag (as decided in {@link eoko\config\Application::isMode()}),
+ * then it will be applied to the rest of the module config.
+ *
+ * Every condition configuration keys, applied or not, will be removed from the
+ * actual module config, after it has been constructed.
+ *
+ * @see eoko\config\Application::isMode()
+ */
 class Module implements file\Finder {
 	
 	const DEFAULT_EXECUTOR           = '';
@@ -226,18 +246,32 @@ MSG
 			return $this->config;
 		}
 		
-		$config = new Config();
+		// generate
+		$this->config = $this->onConfig();
+
+		// cache
+		$this->cacheConfig($this->config);
 		
+		return $this->config;
+	}
+
+	/**
+	 * Builds module configuration.
+	 * @return Config
+	 */
+	protected function onConfig() {
+		$config = new Config();
+
 		if (null !== $parent = $this->getParentModule()) {
 			$config->apply($parent->getConfig());
 		}
-		
+
 		unset($config['abstract']);
 		unset($config['line']);
 		unset($config['jsClass']);
-		
+
 		$config->apply($this->location->loadConfig());
-		
+
 		if ($this->extraConfig) {
 			if (!$config) {
 				$config = $this->extraConfig;
@@ -245,10 +279,20 @@ MSG
 				$config->apply($this->extraConfig);
 			}
 		}
-		
-		$this->cacheConfig($config);
-		
-		return $this->config = $config;
+
+		// Conditionnal configuration
+		if (isset($config[''])) {
+			$app = $this->getApplicationConfig();
+			foreach ($config[''] as $tag => $envConfig) {
+				if ($app->isMode($tag)) {
+					$config->apply($envConfig);
+				}
+			}
+			// clear
+			unset($config['']);
+		}
+
+		return $config;
 	}
 	
 	private function useCache() {
