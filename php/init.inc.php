@@ -35,8 +35,8 @@ if (file_exists($filename = ROOT . '../config.php')
 }
 
 // Config
-defineIf('APP_NAME', 'Opence');
-defineIf('APP_TITLE', 'OpenCE!');
+defineIf('APP_NAME', 'opence');
+defineIf('APP_TITLE', 'Open.CE');
 
 // removed on 2/26/11 2:27 PM
 //$phpSubDirs = array(
@@ -52,6 +52,10 @@ defineIf('APP_TITLE', 'OpenCE!');
 //		,'password' => 'root'
 //	);
 //}
+
+defineIf('WEB_DIR', 'public');
+defineIf('WEB_DIR_URL', SITE_BASE_URL . WEB_DIR . '/');
+defineIf('WEB_DIR_PATH', ROOT . WEB_DIR . DS);
 
 defineIf('USE_CONTROLLER_CACHE', false);
 
@@ -131,6 +135,9 @@ if (!file_exists(MY_EOZE_PATH . '.htaccess')) {
 createEozeDirIf(CACHE_PATH);
 createEozeDirIf(LOG_PATH);
 createEozeDirIf(TMP_PATH);
+
+// web dir
+createEozeDirIf(WEB_DIR_PATH);
 
 require_once PHP_PATH . '_/functions.php';
 require_once PHP_PATH . '_/dump.php';
