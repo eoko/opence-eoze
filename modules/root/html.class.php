@@ -37,6 +37,9 @@ JS;
 				'target' => $this->request->get('target'),
 			));
 		}
+
+        $layout->setCompileOptions($this->getModuleConfig()->get('compilation', false));
+		$layout->setApplicationConfig($this->getModule()->getApplicationConfig());
 	}
 
 	protected function pushLayoutExtraJs(HtmlRootTemplate $layout) {
