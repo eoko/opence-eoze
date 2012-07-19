@@ -3,6 +3,14 @@
 namespace eoko\template\HtmlRootTemplate;
 
 /**
+ * Base implementation for included file compiler.
+ *
+ * YUI Compressor
+ * ==============
+ * Compression of CSS and javascript files require YUI Compressor.
+ *
+ * On Ubuntu:
+ *     sudo apt-get install yui-compressor
  *
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  * @author Éric Ortega <eric@planysphere.fr>
