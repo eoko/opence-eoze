@@ -6,6 +6,12 @@ use \IllegalStateException;
 class HtmlRootTemplate extends HtmlTemplate {
 	
 	public $headTemplateName = 'head';
+
+	private $compileOptions = false;
+	/**
+	 * @var \eoko\config\Application
+	 */
+	private $applicationConfig;
 	
 	private static $currentRootTemplate = null;
 	
@@ -106,11 +112,107 @@ MSG
 				$head->clearCache();
 				//$head->render(true);
 			}
+
+			// javascript & css compilation
+			if ($this->compileOptions) {
+				$this->onCompileIncludes($head, $this->compileOptions);
+			}
 		}
 		
 		self::$currentRootTemplate = null;
 		
 		parent::doRender();
 	}
-	
+
+	/**
+	 * Compiles javascript and css files to be included in the head section,
+	 * according to the specified options.
+	 * @param array $options
+	 * @see setCompileOptions()
+	 */
+	private function onCompileIncludes(Renderer $headRenderer, $options) {
+
+		$yui = isset($options['yuiCompressorCommand'])
+				? $options['yuiCompressorCommand']
+				: false;
+
+		$app = $this->applicationConfig;
+
+		if (isset($options['javascript']) && $options['javascript']) {
+
+			$compiler = new HtmlRootTemplate\JavascriptCompiler(
+				$options['javascript'],
+				$yui,
+				$app->getName(),
+				$app->getVersionId());
+
+			if ($compiler->compile($this->jsIncludes)) {
+				$headRenderer->js = $compiler->getUrls();
+				$headRenderer->clearCache();
+			}
+		}
+
+		if (isset($options['css']) && $options['css']) {
+
+			$compiler = new HtmlRootTemplate\CssCompiler(
+				$options['css'],
+				$yui,
+				$app->getName(),
+				$app->getVersionId());
+
+			if ($compiler->compile($this->cssIncludes)) {
+				$headRenderer->css = $compiler->getUrls();
+				$headRenderer->clearCache();
+			}
+		}
+	}
+
+	/**
+	 * Sets options for merging/compilation of javascript and css includes.
+	 *
+	 * Supported options are the following:
+	 *
+	 * -   *yuiCompressorCommand* (required to enable compression)
+	 * -   *javascript* (options or `false`)
+	 * -   *css* (options or `false`)
+	 *
+	 * The type (js or css) specific options are the following:
+	 *
+	 * -   *merge*: (bool)
+	 *     Merge all included files into one.
+	 *
+	 * -   *compress*: (bool)
+	 *     Compress the file resulting of the merge using.
+	 *     yui-compressor. If the command is not configured, or if the
+	 *	   merge option is `false`, then this option will be ignored.
+	 *
+	 * -   *version*: (bool)
+	 *     Add the codebase unique version to the merged
+	 *     file name (this option will also be ignored if merge is set to
+	 *     `false`).
+	 *
+	 * -   *preserveRemoteUrl*: (bool)
+	 *     If set to `true`, then URLs with a query string or not under
+	 *     the site base url won't be merged. This option is available
+	 *     for javascript only, since remote CSS files will never be
+	 *     merged.
+	 *
+	 * @param type $options
+	 * @return HtmlRootTemplate
+	 */
+	public function setCompileOptions($options) {
+		$this->compileOptions = $options;
+		return $this;
+	}
+
+	/**
+	 * Sets the application config used during merging of javascript/css
+	 * files (needs the application name and the code base version id).
+	 * @param \eoko\config\Application $application
+	 * @return HtmlRootTemplate
+	 */
+	public function setApplicationConfig(\eoko\config\Application $application) {
+		$this->applicationConfig = $application;
+		return $this;
+	}
 }
