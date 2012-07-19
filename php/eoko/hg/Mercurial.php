@@ -9,7 +9,7 @@ use RuntimeException;
  * Adapter to retrieve information about a mercurial repository.
  *
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
- * @author Ã‰ric Ortega <eric@planysphere.fr>
+ * @author Éric Ortega <eric@planysphere.fr>
  * @since 28 mars 2012
  *
  * @version 0.1.0 12/04/12 18:31
