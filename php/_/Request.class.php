@@ -31,7 +31,9 @@ class Request implements Message {
 	 * @return Request
 	 */
 	public static function getHttpRequest() {
-		if (self::$httpRequest !== null) return self::$httpRequest;
+		if (self::$httpRequest !== null) {
+			return self::$httpRequest;
+		}
 		return Router::getInstance()->request;
 	}
 
