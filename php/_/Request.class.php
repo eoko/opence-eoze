@@ -14,11 +14,9 @@ use eoze\util\Data\DataArray;
 
 class Request implements Message {
 
-	private $request;
+	private $params;
 
-	private static $httpRequest = null;
-	
-	private $originalRequest = null;
+	private $originalParams = null;
 	
 	/**
 	 * @return Logger
@@ -48,47 +46,44 @@ class Request implements Message {
 
 	public function __construct($request) {
 		
-		$this->request = $this->cleanRequestArray($request);
+		$this->params = $this->cleanRequestArray($request);
 
-		foreach ($this->request as $key => $param) {
+		foreach ($this->params as $key => $param) {
 			if (substr($key, 0, 5) === 'json_') {
 				$k = substr($key, 5);
-				if (isset($this->request[$k])) {
+				if (isset($this->params[$k])) {
 					$this->getLogger()->warn(
 						'Json param in request overriding existing one: {}',
 						$k
 					);
 				}
-				$this->request[$k] = Json::decode($param);
-				unset($this->request[$key]);
+				$this->params[$k] = Json::decode($param);
+				unset($this->params[$key]);
 			}
 		}
 
-		if (isset($this->request['json'])) {
+		if (isset($this->params['json'])) {
 
-//			$this->getLogger()->debug('Retrieving json from Request: "{}"', $this->request['json']);
+			$jsonData = json_decode(urldecode($this->params['json']), true);
 
-			$jsonData = json_decode(urldecode($this->request['json']), true);
-
-//			$this->getLogger()->debug('Json retrieved from request: {}', $jsonData);
 			$this->getLogger()->debug('Json retrieved from request: {}', json_encode($jsonData)); // TODO rx DBG remove
 
 			foreach ($jsonData as $k => $v) {
 
-				if (isset($this->request[$k])) {
+				if (isset($this->params[$k])) {
 					$this->getLogger()->warn('Json param in request overriding existing one: {}', $k);
 				}
 
-				$this->request[$k] = $v;
+				$this->params[$k] = $v;
 			}
 
-			unset($this->request['json']);
+			unset($this->params['json']);
 		}
 	}
 	
 	public function buildUrl() {
 		$params = array();
-		foreach ($this->request as $k => $v) {
+		foreach ($this->params as $k => $v) {
 			if ($v !== null && $v !== '') {
 				if (is_bool($v)) $v = $v ? 1 : 0;
 				$params[$k] = $v;
@@ -98,7 +93,7 @@ class Request implements Message {
 	}
 
 	public function toArray() {
-		return $this->request;
+		return $this->params;
 	}
 	
 	private $messageBody = null;
@@ -115,7 +110,7 @@ class Request implements Message {
 		if ($return) ob_start();
 
 		if ($preFormatted) echo '<pre>';
-		print_r($this->request);
+		print_r($this->params);
 		if ($preFormatted) echo '</pre>';
 
 		if ($return) return ob_get_clean();
@@ -129,10 +124,7 @@ class Request implements Message {
 	 * @return Boolean
 	 */
 	public function has($key, $excludeEmptyString = false) {
-//		Logger::tmp('{} => {} : {}', $key, $this->request[$key] === '',
-//				array_key_exists($key, $this->request)
-//						&& (!$excludeEmptyString || $this->request[$key] !== ''));
-		return isset($this->request[$key]) && (!$excludeEmptyString || $this->request[$key] !== '');
+		return isset($this->params[$key]) && (!$excludeEmptyString || $this->params[$key] !== '');
 	}
 
 	/**
@@ -152,7 +144,7 @@ class Request implements Message {
 	}
 
 	public function getRaw($key) {
-		return $this->request[$key];
+		return $this->params[$key];
 	}
 
 	/**
@@ -201,7 +193,7 @@ class Request implements Message {
 		$r = array();
 
 		$originalKeys = $keys;
-		if ($keys === null) $keys = array_keys($this->request);
+		if ($keys === null) $keys = array_keys($this->params);
 		
 		foreach ($keys as $k => $v) {
 
@@ -254,12 +246,12 @@ class Request implements Message {
 	}
 
 	public function hasSub($key) {
-		return isset($this->request[$key]) && is_array($this->request[$key]);
+		return isset($this->params[$key]) && is_array($this->params[$key]);
 	}
 
 	public function getSub($key, $default = array()) {
 		if ($this->hasSub($key)) {
-			return new Request($this->request[$key]);
+			return new Request($this->params[$key]);
 		} else {
 			return new Request($default);
 		}
@@ -267,28 +259,28 @@ class Request implements Message {
 
 	public function requireSub($key) {
 		if (!$this->hasSub($key)) throw new MissingRequiredRequestParamException($key);
-		return new Request($this->request[$key]);
+		return new Request($this->params[$key]);
 	}
 	
 	public function override($override, $value = null) {
 		
-		if ($this->originalRequest === null) {
-			$this->originalRequest = $this->request;
+		if ($this->originalParams === null) {
+			$this->originalParams = $this->params;
 		}
 		
 		if ($value === null) {
-			Arrays::apply($this->request, $override);
+			Arrays::apply($this->params, $override);
 		} else {
-			$this->request[$override] = $value;
+			$this->params[$override] = $value;
 		}
 	}
 	
 	public function remove() {
-		if ($this->originalRequest === null) {
-			$this->originalRequest = $this->request;
+		if ($this->originalParams === null) {
+			$this->originalParams = $this->params;
 		}
 		foreach (func_get_args() as $name) {
-			unset($this->request[$name]);
+			unset($this->params[$name]);
 		}
 	}
 
@@ -296,13 +288,13 @@ class Request implements Message {
 	 * @return boolean
 	 */
 	public function isOverriden() {
-		return $this->originalRequest !== null;
+		return $this->originalParams !== null;
 	}
 	
 	/**
 	 * @return Request 
 	 */
 	public function getOriginal() {
-		return new Request($this->originalRequest);
+		return new Request($this->originalParams);
 	}
 }
