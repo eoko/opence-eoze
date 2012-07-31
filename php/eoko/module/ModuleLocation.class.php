@@ -314,7 +314,8 @@ class ModuleLocation extends Location {
 		return array(
 			"$this->moduleName.class.php", 
 			'module.class.php', 
-			"{$this->moduleName}Module.class.php"
+			"{$this->moduleName}Module.class.php",
+			"$this->moduleName.php", 
 		);
 	}
 
