@@ -358,7 +358,6 @@ class ModuleLocation extends Location {
 			$dirPaths[] = $dir->path;
 		}
 		
-		$ds = DIRECTORY_SEPARATOR;
 		foreach ($dirPaths as $path) {
 			// add the directory with the module name
 			// (all the content will be checked)
