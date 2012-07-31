@@ -142,6 +142,9 @@ createEozeDirIf(WEB_DIR_PATH);
 require_once PHP_PATH . '_/functions.php';
 require_once PHP_PATH . '_/dump.php';
 
+// Vendors
+require_once EOZE_PATH . 'vendor' . DS . 'autoload.php';
+
 if (!function_exists('lcfirst')) {
 	function lcfirst($str) {
 		return strtolower($str[0]) . substr($str, 1);
