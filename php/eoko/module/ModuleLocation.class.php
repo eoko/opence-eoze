@@ -365,21 +365,6 @@ class ModuleLocation extends Location {
 			$r[] = $path . $this->moduleName;
 			// and the simple module config file
 			$r[] = $path . $this->moduleName . '.yml';
-					
-//			$base = "$path$this->moduleName$ds";
-//			
-//			$paths = array(
-//				"$base$this->moduleName.yml",
-//				"{$base}config.yml",
-//				"$path$this->moduleName.yml",
-//				"$base.",
-//			);
-//				
-//			foreach (self::getModuleClassPattern() as $mc) {
-//				$paths[] = "$base$mc";
-//			}
-//			
-//			$r = array_merge($r, $paths);
 		}
 		
 		return $r;
