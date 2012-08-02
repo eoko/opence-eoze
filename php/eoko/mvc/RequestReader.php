@@ -3,6 +3,7 @@
 namespace eoko\mvc;
 
 use Zend\Http\Request;
+use Zend\Mvc\Router\RouteMatch;
 
 /**
  * Marker class for legitimate Request data readers.
@@ -13,7 +14,13 @@ use Zend\Http\Request;
  */
 interface RequestReader {
 	
-	function __construct(Request $request);
+	/**
+	 * 
+	 * @param \Zend\Http\Request $request
+	 * @param \Zend\Mvc\Router\RouteMatch $routeMatch
+	 * @return \Request
+	 */
+	function __construct(Request $request, RouteMatch $routeMatch);
 	
 	function createRequest();
 }
