@@ -312,10 +312,10 @@ class ModuleLocation extends Location {
 	
 	private function getModuleClassPattern() {
 		return array(
-			"$this->moduleName.class.php", 
-			'module.class.php', 
+			"$this->moduleName.class.php",
+			'module.class.php',
 			"{$this->moduleName}Module.class.php",
-			"$this->moduleName.php", 
+			"$this->moduleName.php",
 		);
 	}
 
