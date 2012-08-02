@@ -9,6 +9,7 @@ use eoko\module\ModuleManager;
 use eoko\module\traits\HasRoutes;
 use eoko\cache\Cache;
 use Zend\Http\PhpEnvironment\Request as HttpRequest;
+use Zend\Stdlib\ArrayUtils;
 
 use \MonitorRequest;
 
@@ -97,26 +98,29 @@ class Router {
 
 		// Retrieve route stack config from cache, or build it from modules
 		if (!($routesConfig = Cache::getCachedData($routesConfigCacheKey))) {
-			$routesConfig = array();
+			
+			$assembler = new Router_RouteConfigAssembler;
+			
 			$monitors = array();
 			foreach (ModuleManager::listModules() as $module) {
 				if ($module instanceof HasRoutes) {
 					if (null !== $routes = $module->getRoutesConfig()) {
-						$routesConfig[] = $routes;
+						$assembler->addRoutes($routes);
 					}
 				}
 				$monitors = array_merge($monitors, $module->getCacheMonitorFiles());
 			}
+			
+			$routesConfig = $assembler->assembleRoutes();
+			
 			Cache::cacheObject($routesConfigCacheKey, $routesConfig);
 			Cache::monitorFiles($routesConfigCacheKey, $monitors);
 		}
 		
 		// Create route stack
 		$stack = new Zend\Mvc\Router\Http\TreeRouteStack;
-		foreach ($routesConfig as $routes) {
-			$stack->addRoutes($routes);
-		}
-		
+		$stack->addRoutes($routesConfig);
+
 		return $stack->match($this->httpRequest);
 	}
 	
@@ -261,5 +265,96 @@ class Router {
 		$this->requestMonitorRecord->setFinishDatetime(date('Y-m-d H:i:s'), $time);
 		$this->requestMonitorRecord->setRunningTimeMicro($runningTime);
 		$this->requestMonitorRecord->save();
+	}
+}
+
+class Router_RouteConfigAssembler {
+	
+	private $routes;
+	
+	private $childRoutes;
+	
+	public function addRoutes($routes) {
+		foreach ($routes as $name => $route) {
+			if ($route instanceof Traversable) {
+				$route = ArrayUtils::iteratorToArray($route);
+			}
+			if (is_array($route)) {
+				// Extract children routes
+				if (isset($route['parent_segment'])) {
+					// Trim parent segment name from route name beginning
+					$parentSegment = $route['parent_segment'];
+					if (strpos($name, $parentSegment . '/') === 0) {
+						$name = substr($name, strlen($parentSegment) + 1);
+					}
+					// Remove eoze custom parent_segment option
+					unset($route['parent_segment']);
+					// Store
+					$this->childRoutes[$parentSegment][$name] = $route; 
+				} else {
+					$this->routes[$name] = $route;
+				}
+			} else {
+				$this->routes[$name] = $route;
+			}
+		}
+	}
+
+	/**
+	 * Construct an array of references to route configs that have a 
+	 * 'child_routes' key (that is, parent routes), indexed with their
+	 * fully qualified names.
+	 * @param array $routes
+	 * @param string $prefix
+	 * @return array
+	 */
+	private static function mapParentRoutes(&$routes, $prefix = null) {
+		$map = array();
+		if (!$routes) {
+			return $map;
+		}
+		foreach ($routes as $name => &$route) {
+			if ($route instanceof Traversable) {
+				$route = ArrayUtils::iteratorToArray($route);
+			}
+			if (is_array($route)) {
+				if (isset($route['child_routes'])) {
+					$fqRouteName = $prefix . $name;
+					$map[$fqRouteName] =& $route;
+					$map += self::mapParentRoutes($route['child_routes'], $fqRouteName . '/');
+				}
+			}
+		}
+		return $map;
+	}
+
+	public function assembleRoutes() {
+		if ($this->childRoutes) {
+			// Build parent name map
+			$map = self::mapParentRoutes($this->routes);
+			foreach ($this->childRoutes as &$routes) {
+				$map += self::mapParentRoutes($routes);
+			}
+			unset($routes);
+			
+			// Assemble
+			foreach ($this->childRoutes as $parent => $children) {
+				foreach ($children as $name => $route) {
+					if (isset($map[$parent])) {
+						$map[$parent]['child_routes'][$name] = $route;
+					} else {
+						throw new RuntimeException(
+							"Invalid 'parent_segment' value: cannot find a parent "
+							+ "route named $parent."
+						);
+					}
+				}
+			}
+			
+			// prevent reprocessing if the method is called again
+			unset($this->childRoutes);
+		}
+		
+		return $this->routes;
 	}
 }
