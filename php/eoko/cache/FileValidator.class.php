@@ -44,7 +44,7 @@ class FileValidator {
 	public function test() {
 		foreach ($this->fileList as $file => $mtime) {
 			if (file_exists($file)) {
-				if (filemtime($file) !== $mtime) {
+				if (self::filemtime($file) !== $mtime) {
 					Logger::get($this)->debug(
 						'File {} has changed (previously: {})',
 						$file,
