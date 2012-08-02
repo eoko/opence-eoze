@@ -24,7 +24,7 @@ abstract class AbstractRequestReader implements RequestReader {
 	protected $routeMatch;
 	
 	public function __construct(Request $request, RouteMatch $routeMatch) {
-		$this->httpRequest = $request;
+		$this->request = $request;
 		$this->routeMatch = $routeMatch;
 	}
 }
