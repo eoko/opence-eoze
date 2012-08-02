@@ -6,8 +6,9 @@
 
 use eoko\config\ConfigManager;
 use eoko\module\ModuleManager;
-use eoko\module\Module;
-use eoko\util\Arrays;
+use eoko\module\traits\HasRoutes;
+use eoko\cache\Cache;
+use Zend\Http\PhpEnvironment\Request as HttpRequest;
 
 use \MonitorRequest;
 
@@ -27,13 +28,21 @@ if (!isset($GLOBALS['directAccess'])) { header('HTTP/1.0 404 Not Found'); exit('
  */
 class Router {
 
-	const CONFIG_NODE = 'eoko/router';
+	private $defaultRequestReaderClass = 'eoko\mvc\LegacyRequestReader';
+	private $defaultRouterClass = 'eoko\mvc\LegacyRouter';
 
 	/** @var Router */
 	private static $instance = null;
-
-//	const ROOT_MODULE_NAME = 'root';
-//	protected $rootModuleName = 'root';
+	
+	/**
+	 * @var HttpRequest
+	 */
+	private $httpRequest;
+	
+	/**
+	 * @var Zend\Mvc\Router\RouteMatch
+	 */
+	private $routeMatch;
 
 	public $request;
 	public $actionTimestamp;
@@ -54,43 +63,97 @@ class Router {
 	}
 
 	private function __construct() {
-		
-		$request = $_REQUEST;
-		
-		if (
-			isset($_SERVER['REQUEST_METHOD'])
-				&& $_SERVER['REQUEST_METHOD'] === 'POST' 
-				&& isset($_SERVER['CONTENT_TYPE'])
-				&& preg_match('/(?:\bapplication\/|\/)json(?:\b|;)/', $_SERVER['CONTENT_TYPE']) 
-			|| isset($_GET['contentType'])
-				&& preg_match('/(?:^|\/)json$/i', $_GET['contentType'])
-		) {
-		
-			Arrays::apply($request, json_decode(file_get_contents("php://input"), true));
-			
-			unset($request['contentType']);
-		}
 
+		// Debug infos
 		$this->microTimeStart = self::microtime($time);
 		$this->actionTimestamp = $time;
 		
 		ExtJSResponse::put('timestamp', $this->actionTimestamp);
+
+		// HTTP request
+		$this->httpRequest = new HttpRequest();
 		
-		if (isset($request['route'])) {
-			\eoko\url\Maker::populateRouteRequest($request);
-		}
+		// Route match
+		$this->routeMatch = $this->getRouteMatch();
 		
-		$this->request = new Request($request);
-		
+		// Legacy eoze Request
+		$requestReader = $this->createRequestReader();
+		$this->request = $requestReader->createRequest();
+
+		// Monitor
 		Logger::getLogger($this)->info('Start action #{}', $this->actionTimestamp);
-		
-		$this->logRequest($request);
+		$this->logRequest($this->request->toArray());
 		
 		// $_REQUEST usage must be fixed in that
 //		UserMessageService::parseRequest($this->request);
 	}
 	
-	private function logRequest($request) {
+	/**
+	 * @return Zend\Mvc\Router\RouteMatch
+	 */
+	private function getRouteMatch() {
+		
+		$routesConfigCacheKey = get_class($this) . '-RoutesConfig';
+
+		// Retrieve route stack config from cache, or build it from modules
+		if (!($routesConfig = Cache::getCachedData($routesConfigCacheKey))) {
+			$routesConfig = array();
+			$monitors = array();
+			foreach (ModuleManager::listModules() as $module) {
+				if ($module instanceof HasRoutes) {
+					if (null !== $routes = $module->getRoutesConfig()) {
+						$routesConfig[] = $routes;
+					}
+				}
+				$monitors = array_merge($monitors, $module->getCacheMonitorFiles());
+			}
+			Cache::cacheObject($routesConfigCacheKey, $routesConfig);
+			Cache::monitorFiles($routesConfigCacheKey, $monitors);
+		}
+		
+		// Create route stack
+		$stack = new Zend\Mvc\Router\Http\TreeRouteStack;
+		foreach ($routesConfig as $routes) {
+			$stack->addRoutes($routes);
+		}
+		
+		return $stack->match($this->httpRequest);
+	}
+	
+	/**
+	 * @return eoko\mvc\RequestReader
+	 */
+	private function createRequestReader() {
+		
+		$readerClass = $this->routeMatch !== null
+				? $this->routeMatch->getParam('_RequestReader', $this->defaultRequestReaderClass)
+				: $this->defaultRequestReaderClass;
+		
+		if (!class_exists($readerClass)) {
+			throw new IllegalStateException('Cannot find reader class: ' . $readerClass);
+		}
+
+		if (!array_key_exists('eoko\mvc\RequestReader', class_implements($readerClass))) {
+			throw new IllegalStateException('Illegal reader class: ' . $readerClass);
+		}
+
+		return new $readerClass($this->httpRequest);
+	}
+	
+	private function createRouter() {
+		
+		$routerClass = $this->routeMatch !== null
+			? $this->routeMatch->getParam('_Router', $this->defaultRouterClass)
+			: $this->defaultRouterClass;
+		
+		if (!class_exists($routerClass)) {
+			throw new IllegalStateException('Cannot find router class: ' . $routerClass);
+		}
+
+		return new $routerClass($this->request, $this->routeMatch);
+	}
+	
+	private function logRequest($requestData) {
 		
 		if (!class_exists('MonitorRequest')) {
 			return;
@@ -105,15 +168,15 @@ class Router {
 		
 		// Don't store clear passwords...
 		if ($controller === 'AccessControl.login') {
-			$request['password'] = '***';
-			$phpRequest = new Request($request);
+			$requestData['password'] = '***';
+			$phpRequest = new Request($requestData);
 		}
 		
 		$this->requestMonitorRecord = MonitorRequest::create(array(
 			'datetime' => date('Y-m-d H:i:s', $this->actionTimestamp),
 			'action_timestamp' => $this->actionTimestamp,
-			'http_request' => serialize($request),
-			'json_request' => json_encode($request),
+			'http_request' => serialize($requestData),
+			'json_request' => json_encode($requestData),
 			'php_request' => serialize($phpRequest),
 			'controller' => $controller,
 			'action' => $phpRequest->get('action'),
@@ -161,23 +224,14 @@ class Router {
 	public function route() {
 		
 		$this->testMultipleRouteCall();
-        
-		if (!$this->request->has('controller')) {
-			$this->request->override(
-				'controller',
-				ConfigManager::get(self::CONFIG_NODE, 'indexModule')
-//				defined('APP_INDEX_MODULE') ? APP_INDEX_MODULE : self::ROOT_MODULE_NAME
-			);
-		}
-
+		
 		// PHP error converted to exceptions will bypass the try/catch block
 		if ($this->requestMonitorRecord) {
 			eoko\php\ErrorException::onError(array($this, 'onRequestError'));
 		}
 
 		try {
-			$action = Module::parseRequestAction($this->request);
-			$action();
+			$this->createRouter()->route();
 
 			if ($this->requestMonitorRecord) {
 				$microtime = self::microtime($time);
@@ -208,102 +262,4 @@ class Router {
 		$this->requestMonitorRecord->setRunningTimeMicro($runningTime);
 		$this->requestMonitorRecord->save();
 	}
-
-	private function getController() {
-		if (false !== $key = $this->request->hasAny(array('controller', 'module', 'mod'), true)) {
-			if ($key != 'controller') {
-				Logger::getLogger($this)->warn('"module" used instead of "controller" in request');
-			}
-			$controller = $this->request->getRaw($key);
-		} else {
-			$controller = defined('APP_INDEX_MODULE') ? 
-				APP_INDEX_MODULE : self::ROOT_MODULE_NAME;
-		}
-		
-		Logger::getLogger('router')->debug('Controller is: {}', $controller);
-		return $controller;
-	}
-
-	private function getAction() {
-		$action = $this->request->getFirst(array('action', 'act'), 'index', true);
-		Logger::getLogger('router')->debug('Action is: {}', $action);
-		return $action;
-	}
-
-	/**
-	 * Force the routing to the 'login' action of the root module, that is the
-	 * action that process login requests.
-	 */
-	public function executeLogin() {
-
-		$module = $this->getController();
-		$action = $this->getAction();
-
-		if ($module !== 'root' && $action !== 'login') {
-			Logger::getLogger('Router')->warn('Forcing routing to Login module.'
-					. 'Request params are: module={} action={}', $module, $action);
-		}
-
-		$this->executeAction('root', 'login');
-	}
-
-	/**
-	 * Force the routing to the 'get_login_page' action of the 'root' module,
-	 * that is the action which presents the user with the page where they can
-	 * log in.
-	 */
-	public function loadLoginPage() {
-
-		$module = $this->getController();
-		$action = $this->getAction();
-
-		if ($module !== 'root' && $action !== 'get_login_module') {
-			Logger::getLogger('Router')->warn('Forcing routing to Login module.'
-					. 'Request params are: module={} action={}', $module, $action);
-		}
-
-		$this->executeAction(self::ROOT_MODULE_NAME, 'get_login_module');
-	}
-
-	/**
-	 * Execute the given action of the specified module.
-	 * @param String $module name of the module
-	 * @param String $action name of the action
-	 */
-	public function executeAction($module, $action = 'index', $request = null) {
-
-		if ($request !== null) {
-			$request = is_array($request) ? new Request($request) : $request;
-		} else {
-			$request = $this->request;
-		}
-
-		if (preg_match('/^([^.]+)\.(.+)$/', $module, $m)) {
-			$module = $m[1];
-			$this->request->override('executor', $m[2]);
-		}
-
-		ModuleManager::getModule($module)->executeRequest($request);
-		
-//REM		$module = ModuleManager::createController($module, $action, $request);
-//		
-//		if ($module instanceof eoko\module\Module) {
-//			$module->execute($request);
-//		} else {
-//			// Execute action
-//			$module->beforeAction($action);
-//
-//	//		if (is_bool($r = $controller->$action())) {
-//			if (is_bool($r = $module->execute($action))) {
-//				if ($r) {
-//					ExtJSResponse::answer();
-//				} else {
-//					ExtJSResponse::failure();
-//				}
-//			} else if ($r instanceof TemplateHtml) {
-//				$module->engine->processHtmlFragment($r);
-//			}
-//		}
-	}
-	
 }

@@ -15,8 +15,12 @@ RewriteRule ^jsod/([^/]*)/([^/]*).js$	            index.php?controller=$1&action
 # Modules images
 RewriteRule ^modules/(?:[^/]*)/_images/(.*)$	    eoze/images/$1
 
-RewriteRule .sql$                                   eoze/php/error404.php
-RewriteRule .yml$                                   eoze/php/error404.php
-RewriteRule (^|/)config(/|$)                        eoze/php/error404.php
+# Protect configuration files
+RewriteRule \.(sql|yml|ini|xml)$                    eoze/php/error404.php [L]
+RewriteRule (^|/)config(/|$)                        eoze/php/error404.php [L]
+
+# Route medias directory downloads through the application
+#RewriteRule ^medias/?(.*)$                          index.php/medias/$1 [L]
 
 RewriteRule ^$                                      index.php
+RewriteRule !\.(js|ico|gif|jpg|png|css)$            index.php
