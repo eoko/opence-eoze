@@ -350,7 +350,8 @@ class ModuleLocation extends Location {
 			if (file_exists($file = "$this->path$file")) {
 				require_once $file;
 				if (is_array($cacheDeps)) {
-					$cacheDeps[] = "require_once '$file';";
+					$ns = rtrim($this->namespace, '\\');
+					$cacheDeps[] = "namespace $ns { require_once '$file'; }";
 				}
 				foreach ($this->getAllowedModuleClassName() as $class) {
 					$class = $this->namespace . $class;
