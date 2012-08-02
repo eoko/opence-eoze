@@ -141,7 +141,7 @@ class Router {
 			throw new IllegalStateException('Illegal reader class: ' . $readerClass);
 		}
 
-		return new $readerClass($this->httpRequest);
+		return new $readerClass($this->httpRequest, $this->routeMatch);
 	}
 	
 	private function createRouter() {
