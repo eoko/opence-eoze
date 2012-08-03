@@ -12,7 +12,7 @@ compilation:
     compress: true
     version: true
 
-#.dev:
-#  compilation:
-#    javascript: false
-#    css: false
+.dev:
+  compilation:
+    javascript: false
+    css: false
