@@ -203,6 +203,10 @@ eo.form.JsonForm = Ext.extend(Ext.form.BasicForm, {
 						});
 					}
 				}
+				// DateTimeField
+				else if (f instanceof eo.form.DateTimeField) {
+					v = f.getRawValue();
+				}
 				// all other field types
 				else {
 					pushValue(n, v);
