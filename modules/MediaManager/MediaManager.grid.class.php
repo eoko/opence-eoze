@@ -5,9 +5,14 @@ namespace eoko\modules\MediaManager;
 use DataStore;
 use eoko\util\Files;
 use eoko\file\FileType;
+use eoko\log\Logger;
 
 use SecurityException;
+use RuntimeException;
 
+/**
+ * @method MediaManager getModule
+ */
 class Grid extends GridBase {
 
 	private static $path;
@@ -18,17 +23,14 @@ class Grid extends GridBase {
 
 	protected function construct() {
 		parent::construct();
-		if (null !== $path = $this->getConfig()->get('basePath')) {
-			self::$path = ROOT . $path . DS;
-		} else if (defined(MEDIA_PATH)) {
-			Logger::get($this)->error('Deprecated feature flagged for imminent removal');
-			self::$path = MEDIA_PATH;
-		}
-		if (null !== $url = $this->getConfig()->get('baseUrl')) {
+		self::$path = $this->getModule()->getDownloadPath();
+		if (null !== $url = $this->getConfig()->get('downloadUrl')) {
 			self::$baseUrl = SITE_BASE_URL . $url . '/';
 		} else if (defined(MEDIA_BASE_URL)) {
 			Logger::get($this)->error('Deprecated feature flagged for imminent removal');
 			self::$baseUrl = MEDIA_BASE_URL;
+		} else {
+			throw new RuntimeException('Missing configuration: downloadUrl');
 		}
 	}
 	
@@ -143,6 +145,10 @@ class Grid extends GridBase {
 			$path = realpath(self::$path . $path) . DS;
 			// ensure the resulting path is a subdir of the media dir
 			if (substr($path, 0, strlen(self::$path)) !== self::$path) {
+				dump(array(
+					$path,
+					self::$path,
+				));
 				throw new SecurityException('GRAVE security exception (probable forbidden files access tentative)');
 			}
 		}
