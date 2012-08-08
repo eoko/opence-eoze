@@ -1,0 +1,18 @@
+
+compilation:
+  yuiCompressorCommand: /usr/bin/yui-compressor
+  javascript:
+    merge: true
+    compress: true
+    version: true
+    # remote urls will be downladed and merged too
+    preserveRemoteUrls: false
+  css:
+    merge: true
+    compress: true
+    version: true
+
+#.dev:
+#  compilation:
+#    javascript: false
+#    css: false

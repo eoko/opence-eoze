@@ -1,0 +1,11 @@
+abstract: true
+class: BaseModule
+
+wrapper: wrapper.js.php
+main: %module%.main
+
+jsNamespace: Oce.Modules
+moduleJsVarName: MODULE
+
+extra:
+  iconCls: ico %module% %action%
