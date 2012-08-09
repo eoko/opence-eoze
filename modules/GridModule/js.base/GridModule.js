@@ -3670,7 +3670,8 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		for(var i = 0; i < colCount; i++){
 			if(cm.config[i].hideable !== false){
 				checkAllSelected = checkAllSelected || !cm.isHidden(i);
-				(groups[cm.config[i].dataIndex] || colMenu).add(new Ext.menu.CheckItem({
+				var dest = groups[cm.config[i].dataIndex] || colMenu;
+				dest.add(new Ext.menu.CheckItem({
 					itemId: 'col-'+cm.getColumnId(i),
 					text: cm.getColumnHeader(i),
 					checked: !cm.isHidden(i),
@@ -3714,7 +3715,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 						if (item.checked) checked = true;
 					});
 				} else {
-					cb.disable();
+					colMenu.remove(cb);
 				}
 				cb.setChecked(checked);
 				cb.initiated = true;
