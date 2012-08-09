@@ -159,6 +159,7 @@ eo.form.ComboBox = Ext.extend(Ext.form.ComboBox, {
 				}
 				this.setValue(val);
 			} else {
+				// skip to superclass's setValue
 				eo.form.ComboBox.superclass.setValue.call(this, val);
 			}
 		}
