@@ -16,7 +16,7 @@ eo.form.ComboBox = Ext.extend(Ext.form.ComboBox, {
 	 */
 	expandOnFieldCLick: true
 	
-    ,initEvents: function() {
+	,initEvents: function() {
 		eo.form.ComboBox.superclass.initEvents.apply(this, arguments);
 		this.initEnterKeyEvents();
 		this.initExpandOnFieldClickEvents();
@@ -115,15 +115,15 @@ eo.form.ComboBox = Ext.extend(Ext.form.ComboBox, {
 	// for getSelectedId()
 	// private
 	,assertValue: function() {
-        var val = this.getRawValue(),
-            rec;
+		var val = this.getRawValue(),
+			rec;
 
-        if(this.valueField && Ext.isDefined(this.value)){
-            rec = this.findRecord(this.valueField, this.value);
-        }
-        if(!rec || rec.get(this.displayField) != val){
-            rec = this.findRecord(this.displayField, val);
-        }
+		if (this.valueField && Ext.isDefined(this.value)){
+			rec = this.findRecord(this.valueField, this.value);
+		}
+		if (!rec || rec.get(this.displayField) != val){
+			rec = this.findRecord(this.displayField, val);
+		}
 		
 		this.selectedId = rec && rec.id;
 		
@@ -174,10 +174,10 @@ eo.form.ComboBox = Ext.extend(Ext.form.ComboBox, {
 	
 	// for getSelectedId()
 	// private
-    ,onSelect: function(record, index){
+	,onSelect: function(record, index){
 		this.selectedId = record && record.id;
 		eo.form.ComboBox.superclass.onSelect.apply(this, arguments);
-    }
+	}
 
 	/**
 	 * Gets the id of the selected record, or null if none is selected.
