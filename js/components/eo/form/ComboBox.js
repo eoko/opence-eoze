@@ -161,7 +161,7 @@ eo.form.ComboBox = Ext.extend(Ext.form.ComboBox, {
 	// overridden to update selectedId on setValue
 	,setValue: function(v) {
 		var r = eo.form.ComboBox.superclass.setValue.apply(this, arguments);
-		this.selectedId = v;
+		this.selectedId = Ext.isEmpty(v) ? null : v;
 		return r;
 	}
 	
