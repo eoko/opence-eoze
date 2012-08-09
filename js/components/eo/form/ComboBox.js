@@ -118,17 +118,6 @@ eo.form.ComboBox = Ext.extend(Ext.form.ComboBox, {
 		var val = this.getRawValue(),
 			rec;
 
-		if (this.valueField && Ext.isDefined(this.value)){
-			rec = this.findRecord(this.valueField, this.value);
-		}
-		if (!rec || rec.get(this.displayField) != val){
-			rec = this.findRecord(this.displayField, val);
-		}
-		
-		this.selectedId = rec && rec.id;
-		
-//		eo.form.ComboBox.superclass.assertValue.apply(this, arguments);
-
 		// The following is the code from Ext.form.ComboBox.assertValue,
 		// slightly modified to prevent converting integer input to record
 		// ids...
@@ -139,6 +128,10 @@ eo.form.ComboBox = Ext.extend(Ext.form.ComboBox, {
 		if (!rec || rec.get(this.displayField) != val) {
 			rec = this.findRecord(this.displayField, val);
 		}
+		
+		// added selectedId
+		this.selectedId = rec && rec.id;
+		
 		if (!rec && this.forceSelection) {
 			if (val.length > 0 && val != this.emptyText) {
 				this.el.dom.value = Ext.value(this.lastSelectionText, '');
