@@ -89,6 +89,21 @@ eo.form.calendar.MonthEditor = Ext.extend(Ext.BoxComponent, {
 			dates.push(new Date(y, m, i));
 		}
 
+		// DisabledDays
+		var disabledDays = this.disabledDays,
+			disabledDayMap = {};
+		if (disabledDays) {
+			Ext.each(disabledDays, function(day) {
+				if (Ext.isArray(day)) {
+					for (var i=day[0], to=day[1]; i<=to; i++) {
+						disabledDayMap[i] = true;
+					}
+				} else {
+					disabledDayMap[day] = true;
+				}
+			});
+		}
+		
 		// Dates
 		var trDates = head.createChild({tag: 'tr'}),
 			trDays = head.createChild({tag: 'tr'});
@@ -106,6 +121,11 @@ eo.form.calendar.MonthEditor = Ext.extend(Ext.BoxComponent, {
 				date = d.getDate(),
 				cls = 'day ' + (day === 0 || day === 6 ? 'week-end' : 'week');
 				
+			// Disabled days
+			if (disabledDayMap[date]) {
+				cls += ' disabled';
+			}
+				
 			trDates.createChild({
 				tag: 'th'
 				,cls: cls
@@ -121,6 +141,9 @@ eo.form.calendar.MonthEditor = Ext.extend(Ext.BoxComponent, {
 		
 		// Render zones
 		Ext.iterate(this.zones, function(name, zone) {
+			
+			zone.setDisabledDayMap(disabledDayMap);
+			
 			zone.render(body, dates);
 			if (handle) {
 				this.mon(zone, 'visibilitychanged', function() {

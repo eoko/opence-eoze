@@ -57,6 +57,10 @@ eo.form.calendar.Zone = Ext.extend(Ext.util.Observable, {
 //		}
 	}
 	
+	,setDisabledDayMap: function(map) {
+		this.disabledDayMap = map;
+	}
+	
 	,render: function(tbody, dates) {
 		
 		var name = this.name,
@@ -89,7 +93,8 @@ eo.form.calendar.Zone = Ext.extend(Ext.util.Observable, {
 		
 		var days = this.days,
 			Cell = eo.form.calendar.Zone.Cell,
-			cells = [];
+			cells = [],
+			ddm = this.disabledDayMap || {};
 		
 		Ext.each(dates, function(d) {
 
@@ -110,6 +115,10 @@ eo.form.calendar.Zone = Ext.extend(Ext.util.Observable, {
 				cell = days[key] = new Cell(this);
 			}
 
+			if (ddm[date]) {
+				cell.setEditable(false);
+			}
+				
 			cell.add(td);
 			cells.push(cell);
 		}, this);
@@ -208,16 +217,26 @@ eo.form.calendar.Zone = Ext.extend(Ext.util.Observable, {
 eo.form.calendar.Zone.Cell = Ext.extend(Object, {
 
 	value: undefined
+	
+	,editable: true
 
 	,constructor: function(zone) {
 		this.zone = zone;
 		this.els = [];
+	}
+	
+	,setEditable: function(editable) {
+		this.editable = editable;
 	}
 
 	,add: function(td) {
 
 		// Save ref
 		this.els.push(td);
+		
+		if (!this.editable) {
+			td.addClass('disabled');
+		}
 
 		// Create marker
 		td.createChild({
@@ -237,6 +256,11 @@ eo.form.calendar.Zone.Cell = Ext.extend(Object, {
 
 	// private
 	,onMouseDown: function() {
+		
+		if (!this.editable) {
+			return;
+		}
+		
 		var z = this.zone,
 			v = z.getSelectingValue(this.value);
 		// Register out event
@@ -258,6 +282,11 @@ eo.form.calendar.Zone.Cell = Ext.extend(Object, {
 
 	// private
 	,onMouseIn: function() {
+		
+		if (!this.editable) {
+			return;
+		}
+		
 		var s = this.zone.selecting;
 		if (s !== null) {
 			this.setValue(s);

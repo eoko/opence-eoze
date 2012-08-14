@@ -85,6 +85,22 @@ table.eo-calendar-month td {
 	width: 30px;
 }
 
+/**
+ * Disabled cells (TD & TH)
+ */
+table.eo-calendar-month th.disabled.day.week-end,
+table.eo-calendar-month td.disabled.day.week-end {
+	background-color: #F0DFDF;
+}
+table.eo-calendar-month th.disabled,
+table.eo-calendar-month td.disabled {
+	background-color: #F9EDED;
+}
+table.eo-calendar-month tr.zone td.disabled .marker {
+	opacity: .3;
+}
+/**************************************************************************************************/
+
 table.eo-calendar-month thead {
 	border-bottom: 1px solid #FFF;
 }
