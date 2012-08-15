@@ -258,6 +258,6 @@ Ext.extend = function() {
 	};
 	
 	return c;
-}
+};
 	
 })();
