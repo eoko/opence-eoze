@@ -234,5 +234,30 @@ eo.warn = function() {
 	if (console) {
 		(console.warn || console.log).apply(console, arguments);
 	}
-}
+};
 
+(function() {
+	
+var extend = Ext.extend,
+	noArgs = [];
+
+Ext.extend = function() {
+	
+	var c = extend.apply(this, arguments);
+	
+	Ext.iterate(c.prototype, function(k, e) {
+		if (Ext.isFunction(e)) {
+			e.$name = k;
+			e.$owner = c;
+		}
+	});
+	
+	c.prototype.callParent = function(args) {
+		var m = this.callParent.caller;
+		return m.$owner.superclass[m.$name].apply(this, args || noArgs);
+	};
+	
+	return c;
+}
+	
+})();
