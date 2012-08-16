@@ -37,7 +37,7 @@ eo.toolbar.HelpItem = Ext.extend(Ext.Toolbar.TextItem, {
 				,cls: 'eo-help'
 				,showDelay: 0
 				,dismissDelay: 0
-				,trackMouse: true
+				,trackMouse: false
 				,target: this.el
                 // From Ext.QuickTip: The maximum supported value is 500
                 ,width: Math.min(500, this.helpWidth)
