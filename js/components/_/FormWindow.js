@@ -76,10 +76,17 @@ eo.Window = Ext.extend(Ext.Window, {
 					// As a matter of fact, the minWidth will be calculated correclty,
 					// event accounting for the buttons width. So, if a minWidth is set
 					// or has appeared, it is a real must to apply it. Go.
-					var mw = this.minWidth;
-					if (mw && this.getWidth() < mw) {
-						this.setWidth(mw);
-					}
+					var mw = this.minWidth,
+					// Don't know why but the fix may break the buttons footer width
+					// (making it too small). Resizing the window fixes this.
+						w = this.getWidth() + 1;
+					// So, we always resize...
+					this.setWidth(mw && mw > w && mw || w);
+					// ... instead if resizing only if minWidth is not obtained
+					// 
+					// if (mw && this.getWidth() < mw) {
+					//	this.setWidth(mw);
+					// }
 				}
 			});
 		}
