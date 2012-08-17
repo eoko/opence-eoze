@@ -59,7 +59,7 @@ Oce.Security = function() {
 	};
 	
 	this.whenIdentified = function(fn) {
-		if (this.isIdentified) {
+		if (this.isIdentified()) {
 			fn();
 		} else {
 			Oce.mx.Security.onOnce('login', fn);
