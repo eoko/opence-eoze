@@ -2450,6 +2450,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 
 			this.my.toolbar = new Ext.Toolbar({
 				items: items
+				,forbidHiddenLayout: true
 			});
 
 			this.my.toolbar.getItemForAction = function(actionId) {
@@ -3362,9 +3363,10 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		
 		this.my.tab.show();
 
-		if (this.my.toolbar) {
-			this.my.toolbar.doLayout();
-		}
+		// 06/09/12 20:31 Removed that, seems highly useless:
+		// if (this.my.toolbar) {
+		// 	this.my.toolbar.doLayout();
+		// }
 		
 		this.beforeFinishOpen(function() {
 			

@@ -104,6 +104,10 @@
 					,id:'main-destination'
 					,flex: 1
 					,enableTabScroll: true
+					// needed to avoid a slight flickering after a resize
+					// (the module main tab resizing itself 50ms after they
+					// are shown)
+					,layoutOnTabChange: true
 				}, Oce.mx.TaskBar = new Oce.TaskBarToolbar({
 					height: 26
 					,id:"window-dock"
