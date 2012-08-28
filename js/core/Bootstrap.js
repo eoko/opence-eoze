@@ -53,4 +53,4 @@ Ext.onReady(function() {
 	if (!eo.Testing.isUnitTestEnv()) {
 		new Oce.Bootstrap().start();
 	}
-})
+});
