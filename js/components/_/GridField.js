@@ -536,13 +536,17 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 	,clear: function() {
 		this.addedIds = [];
 		this.store.removeAll();
-		if (this.addCombo) this.addCombo.reset();
+		if (this.addCombo) {
+			this.addCombo.reset();
+		}
 	}
 
 	,setBaseParam: function(name, value, reload) {
 		this.store.setBaseParam(name, value);
 		if (this.addStore) this.addStore.setBaseParam(name, value);
-		if (reload) this.load();
+		if (reload) {
+			this.load();
+		}
 		this.clear();
 	}
 	
