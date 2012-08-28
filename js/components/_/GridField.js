@@ -839,7 +839,7 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 		if (this.checkboxSel) {
 			this.checkboxSel.each(function(reccord) {
 				this.removeById(reccord.data[this.pkName]);
-			}, this)
+			}, this);
 		}
 	}
 //
