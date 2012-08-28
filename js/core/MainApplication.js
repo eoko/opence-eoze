@@ -103,6 +103,7 @@
 					,deferredRender: false
 					,id:'main-destination'
 					,flex: 1
+					,enableTabScroll: true
 				}, Oce.mx.TaskBar = new Oce.TaskBarToolbar({
 					height: 26
 					,id:"window-dock"
