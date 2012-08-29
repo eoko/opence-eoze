@@ -105,8 +105,8 @@ class LegacyGridModule {
 				foreach ($extra['filters'] as $filter) {
 					$filters[$filter['name']] = $filter;
 				}
+				$extra['filters'] = $filters;
 			}
-			$extra['filters'] = $filters;
 		}
 
 		// --- Year ---
