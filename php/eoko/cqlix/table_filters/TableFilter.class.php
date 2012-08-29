@@ -11,6 +11,7 @@ class TableFilter {
 	public $label;
 	public $default;
 	private $tip = false;
+	private $flags = array();
 
 	private $condition;
 
@@ -34,6 +35,19 @@ class TableFilter {
 	public function setTip($tip) {
 		$this->tip = $tip;
 		return $this;
+	}
+	
+	public function setFlag($flag, $override = true) {
+		$this->flags[$flag] = $override;
+		return $this;
+	}
+	
+	public function hasFlags() {
+		return !empty($this->flags);
+	}
+	
+	public function isFlag($name) {
+		return array_key_exists($name, $this->flags);
 	}
 
 	public function setDefault($default = true) {
@@ -82,10 +96,20 @@ class TableFilter {
 		);
 	}
 
-	public function toYaml() {
-		$default = $this->default ? 'true' : 'false';
+	public function toYaml($flag = false) {
+		
+		$label = $this->label;
+		$tip = $this->tip;
+		$default = $this->default;
+		
+		if ($flag && isset($this->flags[$flag]) && is_array($this->flags[$flag])) {
+			extract($this->flags[$flag]);
+		}
+		
+		$default = $default ? 'true' : 'false';
 		$option = $this instanceof TableFilterOption ? 'true' : 'false';
-		$tip = $this->tip ? ", tooltip: $this->tip" : null;
-		return "{text: $this->label, checked: $default, isOption: $option{$tip} }";
+		$tip = $tip ? ", tooltip: $tip" : null;
+		
+		return "{text: $label, checked: $default, isOption: $option{$tip}, name: $this->name }";
 	}
 }
