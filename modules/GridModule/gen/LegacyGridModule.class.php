@@ -99,17 +99,6 @@ class LegacyGridModule {
 		
 		// --- Filters ---
 		if (isset($extra['filters'])) {
-			// Adding support for filter config as indexed array, and $clear command
-			$filters = $extra['filters'];
-			foreach ($extra['filters'] as $filter) {
-				if ($filter === '$clear') {
-					$filters = array();
-				} else {
-					$filters[] = $filter;
-				}
-			}
-			$extra['filters'] = $filters;
-		
 			// Converting to assoc array (legacy expectation)
 			if (!Arrays::isAssocArray($extra['filters'])) {
 				$filters = array();
