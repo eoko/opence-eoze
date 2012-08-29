@@ -160,7 +160,9 @@ class Columns {
 				throw new IllegalStateException("Cannot redefine column $name");
 
 			if (!is_array($colConfig)) {
-				if ($colConfig != '' && null !== $col = $this->findTemplate($colConfig, false)) {
+				if ($colConfig === false) {
+					continue;
+				} else if ($colConfig != '' && null !== $col = $this->findTemplate($colConfig, false)) {
 				} else if (null !== $col = $this->findTemplate($name, false)) {
 				} else if ($colConfig === null) {
 					$colConfig = array();
