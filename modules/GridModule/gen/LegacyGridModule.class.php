@@ -96,6 +96,18 @@ class LegacyGridModule {
 		$forms = $config->node('forms')
 				->applyIf($parentConfig->get('forms', null))
 				->toArray();
+		
+		// --- Filters ---
+		if (isset($extra['filters'])) {
+			// Converting to assoc array (legacy expectation)
+			if (!Arrays::isAssocArray($extra['filters'])) {
+				$filters = array();
+				foreach ($extra['filters'] as $filter) {
+					$filters[$filter['name']] = $filter;
+				}
+			}
+			$extra['filters'] = $filters;
+		}
 
 		// --- Year ---
 		if (method_exists($table, 'isAnnualized')) {
