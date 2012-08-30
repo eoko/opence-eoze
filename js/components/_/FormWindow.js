@@ -32,6 +32,8 @@ eo.Window = Ext.extend(Ext.Window, {
 
 		// clone or set the config object
 		var initialConfig = config || {};
+		
+		config = config || {};
 
 		config.minimizable = config.minimizable !== false && this.minimizable !== false;
 
