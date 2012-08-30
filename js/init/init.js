@@ -263,13 +263,12 @@ Ext.extend = function() {
 			if (!e.$name) {
 				e.$name = k;
 			}
-			e.$owner = c;
 		}
 	});
 	
 	c.prototype.callParent = function(args) {
 		var m = this.callParent.caller;
-		return m.$owner.superclass[m.$name].apply(this, args || noArgs);
+		return c.superclass[m.$name].apply(this, args || noArgs);
 	};
 	
 	return c;
