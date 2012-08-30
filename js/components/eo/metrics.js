@@ -10,7 +10,7 @@ eo.metrics = {
 	
 	calcActionColumnWidth: function(itemsNumber, iconWidth, margin) {
 		var n = Ext.isDefined(itemsNumber) ? itemsNumber : 1,
-			w = Ext.isDefined(iconWidth) ? iconWidth : 16,
+			w = (Ext.isDefined(iconWidth) ? iconWidth : 16) + 2,
 			m = Ext.isDefined(margin) ? margin : 5;
 		return n * (w + m) + m;
 	}
