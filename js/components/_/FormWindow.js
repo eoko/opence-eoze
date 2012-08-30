@@ -615,6 +615,8 @@ Oce.FormWindow = Ext.extend(eo.Window, {
 
 });
 
+Oce.deps.reg('Oce.FormWindow');
+
 eo.Window.MinimizePlugin = eo.Object.create({
 
 	init: function(win) {
