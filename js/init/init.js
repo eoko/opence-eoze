@@ -247,7 +247,22 @@ Ext.extend = function() {
 	
 	Ext.iterate(c.prototype, function(k, e) {
 		if (Ext.isFunction(e)) {
-			e.$name = k;
+			// This test is needed to support aliasing of functions as a class member
+			// 
+			// Like in:
+			// 
+			// MyClass = Ext.extend(AnotherClass, {
+			// 
+			//   AliasedClass: com.demo.AliasedClass
+			// 
+			// });
+			// 
+			// Without the test, the $name for com.demo.AliasedClass will be changed
+			// to AliasedClass (instead of expected 'constructor').
+			//
+			if (!e.$name) {
+				e.$name = k;
+			}
 			e.$owner = c;
 		}
 	});
