@@ -3677,6 +3677,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 					checked: !cm.isHidden(i),
 					hideOnClick:false,
 					disabled: cm.config[i].hideable === false,
+					tooltip: cm.config[i].tooltip,
 					checkHandler: function(item, checked, cm) {
 						var index = cm.getIndexById(item.itemId.substr(4));
 						if(index != -1){
