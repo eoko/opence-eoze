@@ -605,6 +605,32 @@ Ext.form.ComboBox.override({
 			if(this.syncFont !== false){
 				this.list.setStyle('font-size', this.el.getStyle('font-size'));
 			}
+
+			// <rx> Allow toolbar
+			var tb = this.toolbar;
+			if (tb) {
+				this.header = this.list.createChild({cls:cls+'-hd-toolbar', html: this.title});
+				// required for the header height to be taken into account by expand()
+				this.title = true;
+				if (!(tb instanceof Ext.Component)) {
+					// convert array
+					if (Ext.isArray(tb)) {
+						tb = {
+							items: tb
+						};
+					}
+					// create component
+					this.toolbar = Ext.create(Ext.apply({
+						xtype: 'toolbar'
+						,renderTo: this.header
+					}, tb));
+				} else {
+					// render
+					tb.render(this.header);
+				}
+				this.assetHeight += this.header.getHeight();
+			} else
+			// </rx>
 			if(this.title){
 				this.header = this.list.createChild({cls:cls+'-hd', html: this.title});
 				this.assetHeight += this.header.getHeight();
