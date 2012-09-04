@@ -232,9 +232,8 @@ eo.data.CachingHttpProxy.DataProvider = Ext.extend(Ext.util.Observable, {
 		
 		if (this.keplerReloadEvent) {
 			eo.Kepler.on(this.keplerReloadEvent, function() {
-				// invlid the cache
-				delete this.data;
-				this.fireEvent('datachanged', this);
+				// invalid the cache
+				this.refresh();
 			}, this);
 		}
 	}
@@ -320,6 +319,11 @@ eo.data.CachingHttpProxy.DataProvider = Ext.extend(Ext.util.Observable, {
 				}
 			});
 		}
+	}
+
+	,refresh: function(reload) {
+		delete this.data;
+		this.fireEvent('datachanged', this);
 	}
 });
 
