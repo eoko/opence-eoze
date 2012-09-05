@@ -29,6 +29,7 @@ eo.app.Application = Ext.extend(Ext.util.Observable, {
 		
 		eo.app.Application.superclass.constructor.apply(this, arguments);
 		
+		// set login manager
 		this.loginManager = new eo.app.LoginManager.LegacyLoginManager;
 	}
 	
@@ -50,9 +51,6 @@ eo.app.Application = Ext.extend(Ext.util.Observable, {
 			// set year manager
 			this.yearManager = Oce.mx.application.YearManager;
 			this.relayEvents(this.yearManager, ['datechanged']);
-			
-			// set login manager
-			
 		}, this);
 
 		app.afterStart = app.afterStart.createSequence(function() {
