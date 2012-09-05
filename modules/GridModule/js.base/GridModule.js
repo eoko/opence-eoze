@@ -353,8 +353,8 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	,destroy: function() {
 		this.my.tab.hide();
 		this.my.tab.destroy();
-		this.my.toolbar = undefined;
-		this.my.tab = null;
+		delete this.my.toolbar;
+		delete this.my.tab;
 	}
 
 	,initDefaults: function() {
@@ -2360,7 +2360,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	}
 
 	,getToolbar: function(createIf) {
-		if (this.my.toolbar === undefined) {
+		if (!this.my.toolbar) {
 			
 			if (!createIf) {
 				return undefined;
@@ -3355,14 +3355,16 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		
 		if (!destination) destination = Oce.mx.application.getMainDestination();
 
-		if (this.my.tab === null) {
+		if (!this.my.tab) {
 			this.my.tab = this.create(config);
 			destination.add(this.my.tab);
 		}
 		
 		this.my.tab.show();
 
-		if (this.my.toolbar) this.my.toolbar.doLayout();
+		if (this.my.toolbar) {
+			this.my.toolbar.doLayout();
+		}
 		
 		this.beforeFinishOpen(function() {
 			
