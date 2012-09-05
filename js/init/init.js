@@ -276,3 +276,10 @@ Ext.extend = function() {
 };
 	
 })();
+
+// Must be in init, very first, as to not override eo.app namespace
+eo.app = function(callback, scope) {
+	Oce.deps.wait('eo.app.Application', function() {
+		callback.call(scope || window, eo.getApplication());
+	});
+};
