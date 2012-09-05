@@ -247,6 +247,7 @@ Ext.extend = function() {
 	
 	Ext.iterate(c.prototype, function(k, e) {
 		if (Ext.isFunction(e)) {
+			e.$owner = c;
 			// This test is needed to support aliasing of functions as a class member
 			// 
 			// Like in:
@@ -268,7 +269,7 @@ Ext.extend = function() {
 	
 	c.prototype.callParent = function(args) {
 		var m = this.callParent.caller;
-		return c.superclass[m.$name].apply(this, args || noArgs);
+		return m.$owner.superclass[m.$name].apply(this, args || noArgs);
 	};
 	
 	return c;
