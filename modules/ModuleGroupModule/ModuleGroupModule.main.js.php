@@ -107,7 +107,7 @@ var o = {
 							,open: function() {
 								this.tab.setActiveTab(childIndex);
 							}
-						})
+						});
 					}
 				}
 			}
