@@ -102,6 +102,8 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	 */
 
 	,constructor: function() {
+		
+		this.addAsyncConstructTask(this.onApplyPreferences, this);
 
 		this.my = Ext.applyIf({
 			selectAllText: "Tout sélectionner"
@@ -232,13 +234,67 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			var latch = stack.length;
 			Ext.each(stack, function(task) {
 				task.fn.call(task.scope || this, function() {
-                    me.afterAsyncConstruct();
-					if (--latch === 0 && callback) {
-						callback.call(scope); // this callback is from module manager
+					if (--latch === 0) {
+	                    me.afterAsyncConstruct();
+						if (callback) {
+							callback.call(scope); // this callback is from module manager
+						}
 					}
 				});
 			}, this);
 		}
+	}
+	
+	/**
+	 * This method can be used to allow for multiple prefs contexts for the same module.
+	 * @private
+	 */
+	,getPrefsKey: function(path) {
+		var root = 'modules.' + this.name;
+		if (path) {
+			return root + '.' + path;
+		} else {
+			return root;
+		}
+	}
+	
+	// private
+	,onApplyPreferences: function(cb, scope) {
+		eo.app(function(app) {
+			app.getPreferences(this.getPrefsKey(), function() {
+				this.doApplyPreferences.apply(this, arguments);
+				cb.call(scope)
+			}, this);
+		}, this);
+	}
+	
+	// private
+	,savePrefs: function(path, value) {
+		this.prefsManager.set(this.getPrefsKey(path), value)
+	}
+	
+	// private
+	,doApplyPreferences: function(manager, prefs) {
+		
+		this.prefsManager = manager;
+		
+		// build map
+		var map = {};
+		Ext.each(this.columns, function(col) {
+			map[col.name] = col;
+		});
+		
+		// config
+		var cols = prefs.columns;
+		if (cols) {
+			// apply prefs
+			Ext.iterate(cols, function(name, config) {
+				Ext.apply(map[name], config);
+			});
+		}
+		
+		// position
+		this.columnPositions = prefs.columnPositions;
 	}
 	
 	,getExtraModels: function(names, cb) {
@@ -601,6 +657,14 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			,selectionchange: this.onSelectionChange
 		});
 		
+		// prefs
+		grid.getColumnModel().on({
+			scope: this
+			,columnmoved: this.onUpdateColumnsPrefs
+			,bulkhiddenchange: this.onUpdateColumnsPrefs
+			,hiddenchange: this.onUpdateColumnsPrefs
+		});
+		
 		// 28/02/12 19:13 Commented out if (e.fromOtherSession) { ... }
 		//                Changed reload to reloadFrom(origin) in processExternallyModifiedRecords
 		
@@ -624,7 +688,26 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		if (this.externalGridDependencies) {
 			this.addGridExternalDependencies(this.externalGridDependencies);
 		}
-		
+	}
+	
+	/**
+	 * Handler for updating column prefs.
+	 * @private
+	 */
+	,onUpdateColumnsPrefs: function(cm) {
+		var config = {},
+			positions = [];
+		Ext.each(cm.config, function(col) {
+			var n = col.name;
+			if (n) {
+				positions.push(n);
+				config[n] = {
+					hidden: col.hidden
+				};
+			}
+		});
+		this.savePrefs('columns', config);
+		this.savePrefs('columnPositions', positions);
 	}
 	
 	/**
@@ -2470,6 +2553,13 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	,buildGridColumnsConfig: function() {
 		
 		var defaults = this.getGridColumnDefaults();
+		
+		var columnConfigMap = {},
+			initialColumns = [];
+		// copy initial columns to initialColumns
+		Ext.each(this.gridColumns, function(col) {
+			initialColumns.push(col);
+		});
 
 		var col;
 		for (var i=0,l=this.columns.length; i<l; i++) {
@@ -2527,12 +2617,21 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				}
 				
 				this.gridColumns.push(col);
+				columnConfigMap[col.name] = col;
 			}
 
 			// --- Grid Store
 			this.storeColumns.push(Ext.apply({
 				name: col.dataIndex || col.name
 			}, col.store));
+		}
+		
+		if (this.columnPositions) {
+			var ordered = initialColumns;
+			Ext.each(this.columnPositions, function(name) {
+				ordered.push(columnConfigMap[name]);
+			});
+			this.gridColumns = ordered;
 		}
 	}
 
@@ -2682,7 +2781,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 
 		// Columns ---
 
-		if (this.gridColumns === undefined) {
+		if (!Ext.isDefined(this.gridColumns)) {
 
 			this.checkboxSel = new Ext.grid.CheckboxSelectionModel();
 			this.gridColumns = [this.checkboxSel];
@@ -3619,12 +3718,16 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			applying = 0;
 		var apply = function(fn) {
 			var run = function() {
+				var g = me.grid,
+					view = g.view,
+					cm = g.getColumnModel();
 				applying++;
 				fn();
 				applying--;
 				if (!applying) {
 //					me.grid.el.unmask();
-					me.grid.view.refresh(true);
+					view.refresh(true);
+					cm.fireEvent('bulkhiddenchange', cm);
 				}
 			};
 			if (!applying) {

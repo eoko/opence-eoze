@@ -4,7 +4,10 @@
  * @author Éric Ortega <eric@planysphere.fr>
  * @since 4 sept. 2012
  */
-Oce.deps.wait('eo.app.LoginManager.LegacyLoginManager', function() {
+Oce.deps.wait([
+	'eo.app.LoginManager.LegacyLoginManager',
+	'eo.modules.prefs.Manager'
+], function() {
 	
 Ext.ns('eo.app');
 
@@ -18,6 +21,12 @@ eo.app.Application = Ext.extend(Ext.util.Observable, {
 	 * @private
 	 */
 	loginManager: undefined
+	
+	/**
+	 * @property {eo.modules.prefs.Manager}
+	 * @private
+	 */
+	,prefsManager: undefined
 
 	,constructor: function() {
 		
@@ -31,6 +40,9 @@ eo.app.Application = Ext.extend(Ext.util.Observable, {
 		
 		// set login manager
 		this.loginManager = new eo.app.LoginManager.LegacyLoginManager;
+		
+		// pref manager
+		this.prefsManager = new eo.modules.prefs.Manager;
 	}
 	
 	/**
@@ -64,6 +76,10 @@ eo.app.Application = Ext.extend(Ext.util.Observable, {
 
 	,getDate: function() {
 		return this.getYearManager().getDate();
+	}
+	
+	,getPreferences: function(path, callback, scope) {
+		this.prefsManager.get(path, callback, scope);
 	}
 
 });
