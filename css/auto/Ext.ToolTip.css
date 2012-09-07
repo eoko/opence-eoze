@@ -1,0 +1,36 @@
+/* 
+    Document   : Ext.ToolTip
+    Created on : 20 juin 2012, 22:33:27
+    Author     : Éric O.
+*/
+
+.x-tip.eo-help li {
+    list-style-type: disc;
+    list-style-position: inside;
+    margin-left: 10px
+}
+
+.x-tip.eo-help h1 {
+    margin-bottom: 1em;
+    font-size: 125%;
+/*    color: #15428B;*/
+}
+.x-tip.eo-help h2 {
+    padding-top: .9em;
+    color: #15428B;
+/*    margin-bottom: .5em;*/
+}
+.x-tip.eo-help h3 {
+    padding-top: .5em;
+/*    font-style: oblique;
+    color: #555;*/
+}
+
+.x-tip.eo-help p {
+/*    margin-bottom: .5em;*/
+    margin-top: .5em;
+}
+
+.x-tip.eo-help strong {
+    font-weight: bold;
+}
