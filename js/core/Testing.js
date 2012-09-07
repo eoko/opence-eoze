@@ -85,4 +85,4 @@ Ext.onReady(function() {
 	}
 });
 
-Oce.deps('eo.Testing');
+Oce.deps.reg('eo.Testing');
