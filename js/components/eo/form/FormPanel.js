@@ -394,8 +394,23 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
                     this.initFormItems(action.result);
                 }
 //                this.afterEditFormLoaded(this.form);
+
+                // Only force refresh after initial load
+                if (this.loaded) {
+					// Load grid fields
+					this.form.items.each(function(field) {
+						if (field instanceof Oce.form.GridField) {
+							field.load();
+						}
+					});
+                }
+
                 this.loaded = true;
-                afterLoadSuccess();
+
+				this.preventModificationEvents = false;
+
+				this.clearModified();
+				
                 this.fireEvent("afterload", this.form, action.result, this);
                 if (callback) {
                     callback(this.form);
@@ -432,20 +447,6 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
         this.fireEvent('beforeload', this, this.form, options);
 
         this.preventModificationEvents = true;
-        var afterLoadSuccess = function() {
-
-// Removed on 03/07/12 18:57 to prevent double grid loading
-//            // Load grid fields
-//            me.form.items.each(function(field) {
-//                if (field instanceof Oce.form.GridField) {
-//                    field.load();
-//                }
-//            });
-
-            me.preventModificationEvents = false;
-
-            me.clearModified();
-        };
 
         this.form.load(options);
     }
