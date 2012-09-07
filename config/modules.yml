@@ -28,3 +28,4 @@ used:
     - DirectGridModule
     - Prolix
     - Kepler
+    - UserPreferences
