@@ -4,8 +4,8 @@
  * @author Éric Ortega <eric@planysphere.fr>
  * @since 4 juin 2012
  */
+Oce.deps.wait(['eo.Testing', 'Ext.form.Field.overrides'], function() {
 eo.Testing.addUnitTest('TextField.overrides', function() {
-Oce.deps.wait('Ext.form.Field.overrides', function() {
 	
 	var items = [{
 		fieldLabel: 'Test 1'
@@ -41,5 +41,5 @@ Oce.deps.wait('Ext.form.Field.overrides', function() {
 	
 	win.show();
 	
-}); // wait deps
 }); // test
+}); // wait deps
