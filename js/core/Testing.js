@@ -84,3 +84,5 @@ Ext.onReady(function() {
 		eo.Testing.startUnitTest(matches[1]);
 	}
 });
+
+Oce.deps('eo.Testing');
