@@ -2155,7 +2155,8 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		}));
 
 		// Try to get record title data from the store
-		var record = this.store.getById(recordId);
+		var s = this.store,
+			record = s && s.getById(recordId);
 		if (record) {
 			winConfig.title = this.buildEditWindowTitle(record.data) || winConfig.title;
 		}
