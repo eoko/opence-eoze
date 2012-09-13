@@ -308,6 +308,9 @@ eo.data.CachingHttpProxy.DataProvider = Ext.extend(Ext.util.Observable, {
 					caching: true
 				}, this.params)
 				,scope: this
+				,failure: function() {
+					this.loadingCache = false;
+				}
 				,success: function(data) {
 					this.loadingCache = false;
 					try {
