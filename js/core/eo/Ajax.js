@@ -250,6 +250,7 @@ eo.data.Connection = Ext.extend(Ext.util.Observable, {
 			,originalOptions: options
 			
 			,url: options.url || this.url
+			,timeout: options.timeout || this.timeout
 			
 			,jsonData: jsonData || (Ext.isChrome ? {requestType: 'AJAX'} : undefined)
 		};
@@ -576,6 +577,8 @@ Buffer = eo.data.Connection.Buffer;
 eo.Ajax = new eo.data.Connection({
 	url: 'index.php'
 	,accept: 'json'
+	,timeout: 45000
+	,maxRetries: 3
 	
 	// Buffer is currently still posing problems, at least:
 	// - multiple requests can fire from forms submit action :/
@@ -600,17 +603,40 @@ eo.Ajax = new eo.data.Connection({
 	
 	eo.Ajax.on('requestexception', function(conn, response, options) {
 		if (!leaving) {
-			Ext.Msg.alert(
-				'Erreur de connection',
-				"Vérifiez l'état de votre connection internet. Si le problème "
-				+ "persiste, il peut s'agir d'un problème avec le serveur ; "
-				+ "dans ce cas veuillez contacter la personne responsable de la "
-				+ "maintenance du système."
-				+ "<p>Code d'erreur : f0c93<p>"
-			);
-			debugger; // ERROR
-			// TODO implement retry
-			// Let's say, 2s 4s 8s 16s & 32s silent retries, then ask user action to retry
+			var warn = function(msg) {
+				if (window.console) {
+					if (console.warn) {
+						console.warn(msg);
+					} else if (console.log) {
+						console.log("WARNING: " + msg);
+					}
+				} 
+			};
+			// retries
+			var retries = options.maxRetries || conn.maxRetries;
+			options.retryCount = options.retryCount || 0;
+			if (retries && options.retryCount < retries) {
+				options.retryCount++;
+				conn.request(options);
+				warn("Retrying failed request ("+options.retryCount+"/"+retries+")...");
+				return false;
+			}
+			// no more retry
+			else {
+				// info
+				warn("Aborting request after " + options.retryCount + " trials: "
+						+ Ext.encode(options.params));
+				// message
+				Ext.Msg.alert(
+					'Erreur de connection',
+					"Vérifiez l'état de votre connection internet. Si le problème "
+					+ "persiste, il peut s'agir d'un problème avec le serveur ; "
+					+ "dans ce cas veuillez contacter la personne responsable de la "
+					+ "maintenance du système."
+					+ "<p>Code d'erreur : f0c93<p>"
+				);
+				debugger; // ERROR
+			}
 		}
 	});
 	
