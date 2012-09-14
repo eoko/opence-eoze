@@ -39,6 +39,9 @@ var completeRegistering = function() {
 <?php if (isset($uses)): ?>
 if (!Oce.deps.wait(<?php echo $uses ?>, function() {
 <?php endif // uses ?>
+
+Ext.namespace('<?php echo $namespace ?>.<?php echo $controller ?>');
+
 <?php echo $namespace ?>.<?php echo $controller ?>.<?php echo $name ?>Base = (function(renderers) {
 
 var moduleClass = Ext.extend(<?php echo $superclass ?>, {
