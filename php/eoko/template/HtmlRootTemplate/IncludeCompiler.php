@@ -2,6 +2,8 @@
 
 namespace eoko\template\HtmlRootTemplate;
 
+use eoko\log\Logger;
+
 /**
  * Base implementation for included file compiler.
  *
@@ -109,8 +111,10 @@ abstract class IncludeCompiler {
 			$inArg = escapeshellarg($in);
 			$outArg = escapeshellarg($out);
 			$cmd = "$this->yui --charset UTF-8 -o $outArg $inArg 2>&1";
+			putenv('JAVA_CMD=/usr/bin/java');
 			exec($cmd, $output, $result);
 			if ($result !== 0) {
+				Logger::warn('YUI Compressor failed: ' . $output);
 				return false;
 			}
 		}
