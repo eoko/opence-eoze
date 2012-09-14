@@ -4,6 +4,7 @@ namespace eoko\modules\GridModule;
 
 use eoko\module\Module;
 use eoko\module\HasTitle;
+use eoko\module\HasJavascript;
 use eoko\module\ModulesLocation;
 use eoko\template\PHPCompiler;
 use eoko\php\generator\ClassGeneratorManager;
@@ -16,7 +17,7 @@ use \ModelTable;
 
 //dump_trace();
 
-class GridModule extends Module implements HasTitle {
+class GridModule extends Module implements HasTitle, HasJavascript {
 	
 	private $codeTemplatePath = 'php-template/';
 	
@@ -50,5 +51,12 @@ class GridModule extends Module implements HasTitle {
 			return null;
 		}
 	}
-	
+
+	public function getJavascriptAsString() {
+		if (!$this->isAbstract()
+				|| $this->getConfig()->getValue('private/generateAbstractJavascriptModule', false)) {
+			require_once dirname(__FILE__) . DS . 'gen' . DS . 'LegacyGridModule.class.php';
+			return \LegacyGridModule::generateModule($this)->render(true);
+		}
+	}
 }

@@ -3,10 +3,13 @@
 namespace eoko\modules\TabModule;
 
 use eoko\_getModule\BaseModule as BaseModule;
+use eoko\module\HasJavascript;
 //use eoko\module\Module;
 use eoko\module\HasTitle;
 use eoko\modules\TreeMenu\HasMenuActions;
 use eoko\modules\TreeMenu\ActionProvider\ModuleProvider;
+
+use eoko\template\Template;
 
 /**
  * Base class for modules with a main tab.
@@ -43,8 +46,58 @@ use eoko\modules\TreeMenu\ActionProvider\ModuleProvider;
  * @package Modules\Eoko\TabModule
  * @author Éric Ortéga <eric@planysphere.fr>
  */
-class TabModule extends BaseModule {
+class TabModule extends BaseModule implements HasJavascript {
 	
 	protected $defaultExecutor = 'js';
 	
+	public function createModuleJavascriptTemplate() {
+		
+		$config = $this->getConfig();
+		$moduleName = $this->getName();
+		
+		$wrapper = $config->get('wrapper');
+		$main = $config->get('main');
+		
+		if (!$wrapper) {
+			throw new MissingConfigurationException(
+					$this->getName() . '.yml', 'wrapper');
+		}
+		
+		$tpl = Template::create()->setFile($this->findFilenameInLineage($wrapper));
+		
+		$tpl->namespace = $config->get('jsNamespace');
+		$tpl->module = $moduleName;
+		$tpl->var = $config->get('moduleJsVarName');
+		$tpl->iconCls = $this->getIconCls(false);
+		$tpl->title = $this->getTitle();
+		
+		$cfg = $config->get('config');
+		if ($cfg) {
+			$tpl->config = json_encode($cfg);
+		}
+		
+		if ($main) {
+			$tpl->main = Template::create()->setFile($this->findFilenameInLineage($main, array(
+				'js', 'js.php'
+			)));
+		}
+		
+		return $tpl;
+	}
+	
+	private function findFilenameInLineage($pattern, $type = null) {
+		foreach ($this->getParentNames(true) as $name) {
+			$r = $this->searchPath(str_replace('%module%', $name, $pattern), $type);
+			if (null !== $r) {
+				return $r;
+			}
+		}
+		throw new \eoko\file\CannotFindFileException($pattern);
+	}
+	
+	public function getJavascriptAsString() {
+		if (!$this->isAbstract()) {
+			return $this->createModuleJavascriptTemplate()->render(true);
+		}
+	}
 }
