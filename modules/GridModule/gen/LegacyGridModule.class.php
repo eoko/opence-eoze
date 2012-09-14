@@ -33,7 +33,7 @@ class LegacyGridModule {
 		$modelName = $config->model;
 		$table = ModelTable::getModelTable($modelName);
 
-		$config->module = $moduleConfig = $config->node('module')
+		$moduleConfig = $config->node('module')
 				// Inherit parent module
 				->applyIf($parentConfig->get('module', null), false)
 				// Defaults
@@ -59,8 +59,7 @@ class LegacyGridModule {
 			$uses = array();
 		}
 
-		$tpl->merge($config->module);
-//		$tpl->controller .= '.grid';
+		$tpl->merge($moduleConfig);
 		if (isset($config['jsClass'])) {
 			if (preg_match('/.+\..+\..+\..+/', $config->jsClass)) {
 				$tpl->superclass = $config->jsClass;
