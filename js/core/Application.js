@@ -13,9 +13,10 @@ Oce.MainApplication = {
 				Oce.Environments[env]();
 			}
 		} else {
-			Oce.ClassLoader.require('root', 'ApplicationBootstrap', function(success) {
-				if (success) eo.root.MainApplication.start();
-			});
+			eo.root.MainApplication.start();
+//			Oce.ClassLoader.require('root', 'ApplicationBootstrap', function(success) {
+//				if (success) eo.root.MainApplication.start();
+//			});
 		}
 	}
 
