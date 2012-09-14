@@ -266,6 +266,7 @@ MSG
 			$config->apply($parent->getConfig());
 		}
 
+		unset($config['private']);
 		unset($config['abstract']);
 		unset($config['line']);
 		unset($config['jsClass']);
