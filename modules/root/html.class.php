@@ -65,11 +65,16 @@ JS;
 				$content = $module->getJavascriptAsString();
 				if ($content) {
 					$modulesJavascriptContents[] = str_pad('// --- ' . $module->getName() . ' ', 100, '-');
-					$modulesJavascriptContents[] = 'try {';
-					$modulesJavascriptContents[] = $content;
-					$modulesJavascriptContents[] = '} catch (e) {';
-					$modulesJavascriptContents[] = "	console.log('Error in module\'s javascript: {$module->getName()}');";
-					$modulesJavascriptContents[] = '}';
+					// We want errors to be crashy in dev mode
+					if (\eoko\config\Application::getInstance()->isDevMode()) {
+						$modulesJavascriptContents[] = $content;
+					} else {
+						$modulesJavascriptContents[] = 'try {';
+						$modulesJavascriptContents[] = $content;
+						$modulesJavascriptContents[] = '} catch (e) {';
+						$modulesJavascriptContents[] = "	window.console && console.error('Error in module\'s javascript: {$module->getName()}');";
+						$modulesJavascriptContents[] = '}';
+					}
 				}
 			}
 			
