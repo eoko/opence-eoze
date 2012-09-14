@@ -153,7 +153,9 @@ if (!deferedRegistering) {
 <?php if (isset($uses)): ?>
 }) // Oce.deps.wait 
 ){ // if must wait, trigger dep loading
-//	Oce.getModules(<?php echo $uses ?>);
+	Ext.onReady(function() {
+		Oce.getModules(<?php echo $uses ?>);
+	});
 }
 <?php endif ?>
 })(); // closure
