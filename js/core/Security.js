@@ -38,8 +38,8 @@ Oce.Security = function() {
 		
 		if (identified) {
 			appLoaded = true;
-			eventManager.fire('login');
 			loginInfos = args;
+			eventManager.fire('login');
 			setTimeout(pingSession, sessionPingInterval);
 		} else {
 			eventManager.fire('logout', args);
