@@ -1,3 +1,4 @@
+Ext.ns('Oce.Modules.AccessControl');
 Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 
 	namespace: 'Oce.Modules'
