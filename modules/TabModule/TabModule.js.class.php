@@ -21,52 +21,9 @@ class Js extends \eoko\module\executor\ExecutorBase {
 	}
 	
 	public function get_module() {
-		
-		$module = $this->getModule();
-		$config = $module->getConfig();
-		$moduleName = $module->getName();
-		
-		$wrapper = $config->get('wrapper');
-		$main = $config->get('main');
-		
-		if (!$wrapper) {
-			throw new MissingConfigurationException(
-					$this->getName() . '.yml', 'wrapper');
-		}
-		
-		$tpl = Template::create()->setFile($this->findFilenameInLineage($wrapper));
-		
-		$tpl->namespace = $config->get('jsNamespace');
-		$tpl->module = $moduleName;
-		$tpl->var = $config->get('moduleJsVarName');
-		$tpl->iconCls = $module->getIconCls(false);
-		$tpl->title = $module->getTitle();
-		
-		$cfg = $config->get('config');
-		if ($cfg) {
-			$tpl->config = json_encode($cfg);
-		}
-		
-		if ($main) {
-			$tpl->main = Template::create()->setFile($this->findFilenameInLineage($main, array(
-				'js', 'js.php'
-			)));
-		}
-		
 		if (!headers_sent()) {
 			header('Content-type: application/javascript');
 		}
-		
-		return $tpl;
-	}
-	
-	private function findFilenameInLineage($pattern, $type = null) {
-		foreach ($this->getModule()->getParentNames(true) as $name) {
-			$r = $this->searchPath(str_replace('%module%', $name, $pattern), $type);
-			if (null !== $r) {
-				return $r;
-			}
-		}
-		throw new \eoko\file\CannotFindFileException($pattern);
+		return $this->getModule()->createModuleJavascriptTemplate();
 	}
 }

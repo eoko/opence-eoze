@@ -118,4 +118,33 @@ class ModuleGroupModule extends TabModule {
 		return $r;
 	}
 	
+	public function createModuleJavascriptTemplate() {
+		
+		$config = $this->getConfig()->get('config');
+		
+		$modules = array();
+		
+		foreach ($config['modules'] as $module) {
+			$module = ModuleManager::getModule($module);
+			$moduleName = $module->getName();
+			// first try to see if a special title has been prepared for us
+			$extra = $module->getConfig()->get('extra');
+			if (isset($extra['groupModuleTitle'])) {
+				$title = $extra['groupModuleTitle'];
+			} else if (method_exists($module, 'getTitle')) {
+				$title = $module->getTitle();
+			} else {
+				$title = $moduleName;
+			}
+			$modules[] = json_encode(array(
+				'title' => $title,
+				'name' => $moduleName,
+				'cmd' => "Oce.Modules.$moduleName.$moduleName",
+			));
+		}
+		
+		$tpl = parent::createModuleJavascriptTemplate();
+		$tpl->main->modules = $modules;
+		return $tpl;
+	}	
 }
