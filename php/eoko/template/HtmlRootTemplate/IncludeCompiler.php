@@ -21,6 +21,7 @@ use eoko\log\Logger;
 abstract class IncludeCompiler {
 
 	private $yui;
+	private $javaCommand = '/usr/bin/java'; // TODO by config...
 
 	private $baseName;
 
@@ -111,7 +112,7 @@ abstract class IncludeCompiler {
 			$inArg = escapeshellarg($in);
 			$outArg = escapeshellarg($out);
 			$cmd = "$this->yui --charset UTF-8 -o $outArg $inArg 2>&1";
-			putenv('JAVA_CMD=/usr/bin/java');
+			putenv("JAVA_CMD=$this->javaCommand");
 			exec($cmd, $output, $result);
 			if ($result !== 0) {
 				Logger::warn('YUI Compressor failed: ' . $output);
