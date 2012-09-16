@@ -105,11 +105,10 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		
 		this.addAsyncConstructTask(this.onApplyPreferences, this);
 
-		this.my = Ext.applyIf({
+		this.my = Ext.apply({
 			selectAllText: "Tout sélectionner"
 			,showAllColsText: "Toutes"
-			,tab: null
-		}, this.my || {})
+		}, this.my);
 		
 		// Init toolbar
 		this.toolbarConfig = Ext.clone(this.extra.toolbar, true);
