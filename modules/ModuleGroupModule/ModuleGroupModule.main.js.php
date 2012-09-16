@@ -83,9 +83,23 @@ var o = {
 			}
 			// preload module code
 			cmd(function(module) {
+				
+				// replace module open method
+				var open = module.open;
+				module.open = function(destination) {
+					if (destination instanceof ModuleContainer) {
+						open.apply(module, arguments);
+					} else {
+						me.open(destination, module.name);
+					}
+				};
+
+				// iconCls
 				if (module.getIconCls) {
 					m.iconCls = module.getIconCls();
 				}
+				
+				// latch
 				releaseLatch();
 			});
 		});
