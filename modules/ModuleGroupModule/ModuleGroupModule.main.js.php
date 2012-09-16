@@ -85,6 +85,7 @@ var o = {
 			cmd(function(module) {
 				
 				// replace module open method
+				// TODO this works but only once the group module has been opened once >_<
 				var open = module.open;
 				module.open = function(destination) {
 					if (destination instanceof ModuleContainer) {
