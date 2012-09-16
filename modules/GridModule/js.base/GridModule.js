@@ -110,6 +110,9 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			,showAllColsText: "Toutes"
 			,tab: null
 		}, this.my || {})
+		
+		// Init toolbar
+		this.toolbarConfig = Ext.clone(this.extra.toolbar, true);
 
 		Ext.apply(this, this.my);
 		this.sc = this.extra.shortcuts;
@@ -407,10 +410,10 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	}
 
 	,destroy: function() {
-		this.my.tab.hide();
-		this.my.tab.destroy();
-		delete this.my.toolbar;
-		delete this.my.tab;
+		this.tab.hide();
+		this.tab.destroy();
+		delete this.toolbar;
+		delete this.tab;
 	}
 
 	,initDefaults: function() {
@@ -2444,7 +2447,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	}
 
 	,getToolbar: function(createIf) {
-		if (!this.my.toolbar) {
+		if (!this.toolbar) {
 			
 			if (!createIf) {
 				return undefined;
@@ -2453,7 +2456,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			var leftItems = [],
 				rightItems = [];
 			
-			Ext.iterate(this.extra.toolbar, function(label, menuItems) {
+			Ext.iterate(this.toolbarConfig, function(label, menuItems) {
 				
 				// Disabled group
 				if (menuItems === false) {
@@ -2532,12 +2535,12 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			
 			this.beforeCreateToolbar(items);
 
-			this.my.toolbar = new Ext.Toolbar({
+			this.toolbar = new Ext.Toolbar({
 				items: items
 				,forbidHiddenLayout: true
 			});
 
-			this.my.toolbar.getItemForAction = function(actionId) {
+			this.toolbar.getItemForAction = function(actionId) {
 				var items = this.findBy(function(item){
 					if (item.actionId === actionId) return true;
 					return undefined;
@@ -2547,7 +2550,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			};
 		}
 
-		return this.my.toolbar;
+		return this.toolbar;
 	}
 	
 	,beforeCreateToolbar: function(items) {}
@@ -2864,7 +2867,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 
 	,beforeCreateTabPanel: function(config) {
 		// toolbar plugin
-		if (this.extra.toolbar !== false) {
+		if (this.toolbarConfig !== false) {
 			config.tbar = this.getToolbar(true);
 		}
 	}
@@ -3456,16 +3459,16 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		
 		if (!destination) destination = Oce.mx.application.getMainDestination();
 
-		if (!this.my.tab) {
-			this.my.tab = this.create(config);
-			destination.add(this.my.tab);
+		if (!this.tab) {
+			this.tab = this.create(config);
+			destination.add(this.tab);
 		}
 		
-		this.my.tab.show();
+		this.tab.show();
 
 		// 06/09/12 20:31 Removed that, seems highly useless:
-		// if (this.my.toolbar) {
-		// 	this.my.toolbar.doLayout();
+		// if (this.toolbar) {
+		// 	this.toolbar.doLayout();
 		// }
 		
 		this.beforeFinishOpen(function() {
@@ -3873,31 +3876,6 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	,initActions: function() {
 
 		var helpHandler = this.viewHelp.createDelegate(this, [this.getHelpTopic()]);
-//		var helpHandler = function() {
-//			var panel = new Oce.AutoloadPanel({
-//				 controller: 'help'
-//				,action: 'get_topic'
-//				,name: this.my.name
-//				,collapsible: false
-//				,titleCollapse: false
-//			})
-//			var win = new Oce.w({
-//				 items: [panel]
-//				,title: "Aide: " + this.getTitle()
-//				,width: 350
-//				,height: 180
-//	//					,layout: 'fit'
-//				,collapsible: true
-//			});
-//			var win = new eoko.ext.IFrameWindow({
-//				title: "Aide: " + this.getTitle()
-//				,width: 350
-//				,height: 180
-//				,collapsible: true
-//				,url: this.my.helpUrl
-//			});
-//			win.show();
-//		}.createDelegate(this);
 
 		var actions = {
 			add: {
@@ -3953,20 +3931,14 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				,iconCls: 'ribbon icon export_csv'
 			}
 			,help: {
-				xtype: 'oce.rbbutton', handler: helpHandler.createDelegate(this),
-//				text: 'Aide', 
-				iconCls: 'icon ribbon help'
+				xtype: 'oce.rbbutton', handler: helpHandler.createDelegate(this)
+				,iconCls: 'icon ribbon help'
 				,depends: this.hasHelp.createDelegate(this)
 				,actionId: 'help'
 			}
+		};
 
-		}
-
-		if (this.actions) {
-			Ext.applyIf(this.actions, actions);
-		} else {
-			this.actions = actions;
-		}
+		this.actions = Ext.apply(actions, this.actions);
 	}
 
 	// private
@@ -4039,19 +4011,19 @@ Oce.GridModule.plugins = {
 					store.on({
 						scope: this
 						,beforeload: function() {
-							var t = this.my.tab;
+							var t = this.tab;
 							if (t) {
 								t.setIconClass(this.getIconCls("loading gm-tab-loading").split(' '));
 							}
 						}
 						,load: function() {
-							var t = this.my.tab;
+							var t = this.tab;
 							if (t) {
 								t.setIconClass(this.getIconCls());
 							}
 						}
 						,exception: function() {
-							var t = this.my.tab;
+							var t = this.tab;
 							if (t) {
 								t.setIconClass(this.getIconCls());
 							}
