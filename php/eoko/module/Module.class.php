@@ -188,13 +188,12 @@ class Module implements file\Finder {
 	 * ModuleManager to see if an ancestor is a module of its own. The name
 	 * of the first class, that is not the same as this module's class (which
 	 * means that the class is a parent in the lineage, the vertical inheritance
-	 * chain) and that is an eoze module will be returned).
+	 * chain) and that is an eoze module will be returned.
 	 * @return string
 	 */
 	private function getParentModuleName() {
 		foreach ($this->getParentNames(false) as $p) {
-			if ($p !== $this->name
-					&& ModuleManager::getModule($p, false)) {
+			if ($p !== $this->name && ModuleManager::getModule($p, false)) {
 				return $p;
 			}
 		}
@@ -217,6 +216,22 @@ class Module implements file\Finder {
 			$lastRelative = $rc;
 		}
 		return $parents;
+	}
+	
+	private function getParentClasses($includeSelf) {
+		$classes = array();
+		if ($includeSelf) {
+			$classes[] = get_class($this);
+		}
+		$class = $includeSelf ? get_class($this) : get_parent_class($this);
+		do {
+			$classes[] = $class;
+			$class = get_parent_class($class);
+		} while ($class !== false);
+//		while (false !== $class = get_parent_class($last)) {
+//			$classes[] = $class;
+//		}
+		return $classes;
 	}
 
 	public static function create($name, $path, $url) {
@@ -294,10 +309,6 @@ MSG
 				$this->config->apply($this->extraConfig);
 			}
 		}
-		
-		// Application config override
-		$applicationConfig = $this->getConfigManager()->get($this->getConfigNodePath());
-		$this->config->apply($applicationConfig);
 		
 		return $this->config;
 	}
