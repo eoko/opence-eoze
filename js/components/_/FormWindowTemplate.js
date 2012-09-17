@@ -18,7 +18,7 @@ Oce.win.TemplatePage = Ext.extend(Ext.Panel, {
 	,onRender: function() {
 		Oce.win.TemplatePage.superclass.onRender.apply(this, arguments);
 
-		var win = this.findParentBy(function(p){return p instanceof Oce.FormWindow})
+		var win = this.findParentBy(function(p){return p instanceof Oce.FormWindow || p instanceof Oce.FormWindowPanel})
 			,formPages = win.formPages
 			;
 
