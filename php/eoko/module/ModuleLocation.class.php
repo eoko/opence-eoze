@@ -3,7 +3,8 @@
 namespace eoko\module;
 
 use eoko\module\exceptions\InvalidModuleException;
-use eoko\config\Config, eoko\config\ConfigManager;
+use eoko\config\Config,
+	eoko\config\ConfigManager;
 
 /**
  * Represents the different locations of one named module.
@@ -165,6 +166,10 @@ class ModuleLocation extends Location {
 		}
 	}
 	
+	private function seachApplicationConfig() {
+		return ConfigManager::get($this->namespace);
+	}
+	
 	/**
 	 * Load the config of all the module's {@link ModuleManager line}. The 
 	 * returned Config object is cached for subsequent call to the method.
@@ -187,6 +192,10 @@ class ModuleLocation extends Location {
 			$config = $location->searchConfigFile();
 			if ($config) {
 				$r[] = $config;
+			}
+			$applicationConfig = $location->seachApplicationConfig();
+			if ($applicationConfig) {
+				$r[] = $applicationConfig;
 			}
 		}
 		return $this->configFileListCache = $r;
