@@ -30,6 +30,14 @@ class BasicHtmlExecutor extends HtmlExecutor {
 		if (substr($name, -9) !== strlen($extension)) $name .= $extension;
 		return pathFromNamespace(__NAMESPACE__, "default_templates/$name");
 	}
+	
+	/**
+	 * Creates the layout {@link Renderer} that will be used in {@link createLayout()}.
+	 * @return type
+	 */
+	protected function createLayoutRenderer() {
+		return HtmlRootTemplate::create($this);
+	}
 
 	/**
 	 * Creates the layout of an html page.
@@ -42,7 +50,9 @@ class BasicHtmlExecutor extends HtmlExecutor {
 			$filename = $this->resolveDefaultTemplatePath('layout');
 		}
 		
-		return HtmlRootTemplate::create($this)->setFile($filename)
+		$layoutRenderer = $this->createLayoutRenderer();
+		
+		return $layoutRenderer->setFile($filename)
 				->set('head', $this->createHead()->set('meta',
 					array('Content-Type' => 'text/html; charset=UTF-8')
 				))
