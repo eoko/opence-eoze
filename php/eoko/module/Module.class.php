@@ -14,6 +14,7 @@ use eoko\module\executor\Executor;
 use eoko\log\Logger;
 use eoko\cache\Cache;
 
+use eoko\config\ConfigManager;
 use eoko\config\Application;
 use eoko\php\SessionManager;
 use eoko\php\ClassLoader;
@@ -113,6 +114,14 @@ class Module implements file\Finder {
     public function getApplicationConfig() {
         return Application::getInstance();
     }
+	
+	/**
+	 * Gets the configuration maanager used by this Module.
+	 * @return ConfigManager
+	 */
+	protected function getConfigManager() {
+		return ConfigManager::getInstance();
+	}
 	
 	/**
 	 * @return SessionManager
@@ -247,12 +256,17 @@ MSG
 		}
 		
 		// generate
-		$this->config = $this->onConfig();
+		$this->doConfig();
 
 		// cache
 		$this->cacheConfig($this->config);
 		
 		return $this->config;
+	}
+	
+	private function doConfig() {
+		$this->onConfig();
+		$this->processConditionnalConfig();
 	}
 
 	/**
@@ -260,40 +274,42 @@ MSG
 	 * @return Config
 	 */
 	protected function onConfig() {
-		$config = new Config();
+		$this->config = new Config();
 
 		if (null !== $parent = $this->getParentModule()) {
-			$config->apply($parent->getConfig());
+			$this->config->apply($parent->getConfig());
 		}
 
-		unset($config['private']);
-		unset($config['abstract']);
-		unset($config['line']);
-		unset($config['jsClass']);
+		unset($this->config['private']);
+		unset($this->config['abstract']);
+		unset($this->config['line']);
+		unset($this->config['jsClass']);
 
-		$config->apply($this->location->loadConfig());
+		$this->config->apply($this->location->loadConfig());
 
 		if ($this->extraConfig) {
-			if (!$config) {
-				$config = $this->extraConfig;
+			if (!$this->config) {
+				$this->config = $this->extraConfig;
 			} else {
-				$config->apply($this->extraConfig);
+				$this->config->apply($this->extraConfig);
 			}
 		}
-
+		
+		return $this->config;
+	}
+	
+	private function processConditionnalConfig() {
 		// Conditionnal configuration
-		if (isset($config[''])) {
+		if (isset($this->config[''])) {
 			$app = $this->getApplicationConfig();
-			foreach ($config[''] as $tag => $envConfig) {
+			foreach ($this->config[''] as $tag => $envConfig) {
 				if ($app->isMode($tag)) {
-					$config->apply($envConfig);
+					$this->config->apply($envConfig);
 				}
 			}
 			// clear
-			unset($config['']);
+			unset($this->config['']);
 		}
-
-		return $config;
 	}
 	
 	private function useCache() {
