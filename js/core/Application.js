@@ -3,6 +3,8 @@
 Oce.MainApplication = {
 	
 	moduleInstances: {}
+	
+	,waitingFactoryCallbacks: {}
 
 	,start: function(){
 		var env = Oce.Context.environment;
@@ -24,6 +26,50 @@ Oce.MainApplication = {
 		// TODO
 	}
 
+	/**
+	 * This method tries to use factories registered in Oce.MainApplication.moduleFactories
+	 * to delegate creation of module instances.
+	 * 
+	 * A factory function must return `true` to take the creation of the instance to
+	 * its charge.
+	 * 
+	 * @return {Boolean}
+	 * 
+	 * @private
+	 */
+	,createModuleInstance: function(moduleName, callback) {
+		
+		var me = this,
+			queue = this.waitingFactoryCallbacks[moduleName];
+		
+		if (queue) {
+			queue.push(callback);
+			return true;
+		}
+		
+		else {
+			queue = this.waitingFactoryCallbacks[moduleName] = [];
+			
+			var factories = Oce.MainApplication.moduleFactories,
+				fn, i, l, delegating;
+				
+			for (i=0, l=factories.length; i<l; i++) {
+				fn = factories[i];
+				delegating = fn(moduleName, function(instance) {
+					Ext.each(queue, function(cb) {
+						cb(instance);
+					});
+					delete me.waitingFactoryCallbacks[moduleName];
+					callback(instance);
+				});
+				if (delegating === true) {
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+
 	,getModuleInstance: function(moduleName, callback, errorCallback) {
 		if (moduleName in this.moduleInstances) {
 			if (callback) {
@@ -32,6 +78,15 @@ Oce.MainApplication = {
 		} else {
 			var me = this;
 			var previousCursor = Ext.getBody().getStyle("cursor");
+			
+			// Trying module factories
+			if (this.createModuleInstance(moduleName, function(module) {
+				me.moduleInstances[moduleName] = module;
+				me.getModuleInstance(moduleName, callback, errorCallback);
+			})) {
+				return;
+			}
+			
 			Oce.getModuleByName(moduleName,
 				function(module) {
 					
@@ -104,6 +159,9 @@ Oce.MainApplication = {
         }
     }
 };
+
+// Initialize module factory register
+Oce.MainApplication.moduleFactories = [];
 
 Oce.getFrontModule = function() {
     return Oce.mx.application.getFrontModule();
