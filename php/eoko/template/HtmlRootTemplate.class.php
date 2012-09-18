@@ -139,6 +139,9 @@ MSG
 	 */
 	private function onCompileIncludes(Renderer $headRenderer, $options) {
 
+		$java = isset($options['javaCommand'])
+				? $options['javaCommand']
+				: false;
 		$yui = isset($options['yuiCompressorCommand'])
 				? $options['yuiCompressorCommand']
 				: false;
@@ -149,7 +152,7 @@ MSG
 
 			$compiler = new HtmlRootTemplate\JavascriptCompiler(
 				$options['javascript'],
-				$yui,
+				$yui, $java,
 				$app->getName(),
 				$app->getVersionId());
 
@@ -163,7 +166,7 @@ MSG
 
 			$compiler = new HtmlRootTemplate\CssCompiler(
 				$options['css'],
-				$yui,
+				$yui, $java,
 				$app->getName(),
 				$app->getVersionId());
 

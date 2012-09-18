@@ -21,7 +21,8 @@ use eoko\log\Logger;
 abstract class IncludeCompiler {
 
 	private $yui;
-	private $javaCommand = '/usr/bin/java'; // TODO by config...
+	// required by last tested version of yui
+	private $javaCommand = '/usr/bin/java';
 
 	private $baseName;
 
@@ -33,14 +34,19 @@ abstract class IncludeCompiler {
 	protected $yuiOptions;
 
 	protected $force = false;
+	
+	private $builder;
 
 	private $urls;
 
-	public function __construct($options, $yui, $baseName, $version, $force = null) {
+	public function __construct($options, $yui, $javaCommand, $baseName, $version, $force = null,
+			$builder = null) {
 		$this->options = $options;
 		$this->yui = $yui;
+		$this->javaCommand = $javaCommand;
 		$this->baseName = $baseName;
 		$this->version = $version;
+		$this->builder = $builder;
 		if ($force !== null) {
 			$this->force = $force;
 		} else {
@@ -51,17 +57,18 @@ abstract class IncludeCompiler {
 	private function is($option) {
 		return isset($this->options[$option]) && $this->options[$option];
 	}
-
+	
 	/**
-	 *
-	 * @param array $prioritizedUrls
-	 * @return bool `true` on success, that is if the input files have been at least
-	 * merged (even if compression was required but failed)
+	 * Gets the paths & urls of merged and compressed include.
+	 * 
+	 * Returns an array with the indexes: mergedFile, mergedUrl, compressedFile,
+	 * and compressedUrl.
+	 * 
+	 * @param string $index If specified, only this entry will be returned as a string.
+	 * @return array|string
 	 */
-	public function compile($prioritizedUrls) {
-
-		$this->urls = $prioritizedUrls;
-
+	private function getTargetNames($index = null) {
+		
 		$filename = $this->baseName;
 
 		if ($this->is('version') && $this->version) {
@@ -69,18 +76,58 @@ abstract class IncludeCompiler {
 		}
 
 		$mergedName = "$filename.$this->extension";
-		$mergedFile = WEB_DIR_PATH . $mergedName;
-		$mergedUrl = WEB_DIR_URL . $mergedName;
+		$r['mergedFile'] = WEB_DIR_PATH . $mergedName;
+		$r['mergedUrl'] = WEB_DIR_URL . $mergedName;
 
 		$compressedName = "$filename.min.$this->extension";
-		$compressedFile = WEB_DIR_PATH . $compressedName;
-		$compressedUrl = WEB_DIR_URL . $compressedName;
+		$r['compressedFile'] = WEB_DIR_PATH . $compressedName;
+		$r['compressedUrl'] = WEB_DIR_URL . $compressedName;
+		
+		return $index !== null ? $r[$index] : $r;
+	}
+	
+	/**
+	 * Builds a flat list of urls, in the order they should be included, from a
+	 * prioritized urls array of the form:
+	 * 
+	 *     array(
+	 *         URL => PRIORITY,
+	 *     )
+	 * 
+	 * Items with a `null` priority are put to the end of the list in a random
+	 * order.
+	 * 
+	 * @param array $prioritizedUrls
+	 * @return array
+	 */
+	private static function extractPrioritizedUrls($prioritizedUrls) {
+		$append = $prepend = array();
+		foreach ($prioritizedUrls as $url => $priority) {
+			if ($priority === null) {
+				$append[] = $url;
+			} else {
+				$prepend[$url] = $priority;
+			}
+		}
+		asort($prepend);
+		return array_merge(array_keys($prepend), $append);
+	}
+
+	/**
+	 * @param array $prioritizedUrls
+	 * @return bool `true` on success, that is if the input files have been at least
+	 * merged (even if compression was required but failed)
+	 */
+	public function compile($prioritizedUrls) {
+
+		$names = $this->getTargetNames();
+		extract($names);
 
 		// Merge
 		if ($this->is('merge')) {
 
-			$localFiles = $this->extractLocalFileFromUrls($this->urls, true);
-			$this->urls = array_keys($this->urls);
+			$localFiles = $this->extractLocalFileFromUrls($prioritizedUrls, true);
+			$this->urls = self::extractPrioritizedUrls($prioritizedUrls);
 
 			if (!file_exists($mergedFile) || $this->force) {
 				$this->merge($localFiles, $mergedFile);
@@ -99,8 +146,63 @@ abstract class IncludeCompiler {
 
 		return false;
 	}
+	
+	/**
+	 * Build the includes and assign them to the {@link urls} property, 
+	 * according to the following strategy:
+	 * 
+	 * - if the configuration says to merge,
+	 *     - and the compiled file already exists, then use this url
+	 *     - else, use the configured includes list builder to get the list, compile that
+	 *       and use the result
+	 * 
+	 * - else, use the list builder and use the whole list of urls
+	 * 
+	 * Compiled file means either merged or merged & compressed, depending on the
+	 * configuration.
+	 * 
+	 * @return void
+	 */
+	private function build() {
+		
+		$names = $this->getTargetNames();
+		extract($names); // mergedFile & mergedUrl
 
-	public function getUrls() {
+		// if configured to merge
+		if ($this->is('merge')) {
+			// if already merged: done
+			if (file_exists($mergedFile)) {
+				$this->urls = array($mergedUrl);
+				return;
+			}
+			// else, build url list & compile
+			else {
+				$urls = call_user_func($this->builder, $mergedFile, $mergedUrl);
+				$this->compile($urls);
+			}
+		}
+		// No merge: just build url list
+		else {
+			$urls = call_user_func($this->builder, $mergedFile, $mergedUrl);
+			$this->urls = $this->extractPrioritizedUrls($urls);
+		}
+	}
+
+	/**
+	 * Get include URLs.
+	 * 
+	 * @param boolean $build If true, then the compiler will use the builder provided
+	 * to the constructor to build the base url list (if needed) to compile according
+	 * to the configuration.
+	 * 
+	 * @return array()
+	 */
+	public function getUrls($build = false) {
+		
+		if ($build) {
+			$this->build();
+		}
+		
 		return $this->urls;
 	}
 
