@@ -1190,18 +1190,26 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				,scope: this
 				
 				,beforesave: function() {
-					var el = win.el,
-						maskEl = el && el.query('.x-window-mc');
-					if (maskEl) {
-						Ext.get(maskEl).mask('Enregistrement', 'x-mask-loading');
+					if (win.mask) {
+						win.mask('Enregistrement', 'x-mask-loading');
+					} else {
+						var el = win.el,
+							maskEl = el && el.query('.x-window-mc');
+						if (maskEl) {
+							Ext.get(maskEl).mask('Enregistrement', 'x-mask-loading');
+						}
 					}
 				}
 				
 				,aftersave: function() {
-					var el = win.el,
-						maskEl = el && el.query('.x-window-mc');
-					if (maskEl) {
-						Ext.get(maskEl).unmask();
+					if (win.unmask) {
+						win.unmask();
+					} else {
+						var el = win.el,
+							maskEl = el && el.query('.x-window-mc');
+						if (maskEl) {
+							Ext.get(maskEl).unmask();
+						}
 					}
 				}
 			});
@@ -1749,9 +1757,9 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				win.close();
 			};
 			win.on({
-//				destroy: function() {
-				hide: function() {
-					// TODO... changed the event because of a bug
+				// 17/09/12 21:22 change from hide to close, in prevision of future
+				// support for focus edit panel
+				close: function() {
 					this.editWindows[rowId].destroy();
 					delete this.editWindows[rowId];
 				}
