@@ -2126,7 +2126,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	 * @protected
 	 */
 	,buildEditWindowTitle: function(data) {
-		var format = this.extra.editWindowTitleFormat,
+		var format = this.editWindowTitleFormat || this.extra.editWindowTitleFormat,
 			re = /%([^%]+)%/,
 			matches,
 			value;
@@ -2155,7 +2155,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			me = this;
 			
 		var winConfig = Ext.apply({}, this.applyExtraWinConfig('edit', {
-			 title: this.my.editWindowTitle || (this.getSingularTitle() + " : Modifier") // i18n
+			title: this.editWindowTitle || (this.getSingularTitle() + " : Modifier") // i18n
 			,id: this.editWinId(recordId)
 			,layout: this.my.editWinLayout
 			,refreshable: true
@@ -2246,7 +2246,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		this.onConfigureAddFormPanel(formConfig);
 
 		var winConfig = Ext.apply({}, this.applyExtraWinConfig('add', {
-			 title: this.my.addWindowTitle
+			 title: this.addWindowTitle
 					 || this.extra.addWindowTitle
 					 || (this.getSingularTitle() + " : Nouveau") // i18n
 			,layout: this.my.addWinLayout
