@@ -101,7 +101,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	 * @cfg {Object} addWinConfig
 	 */
 
-	,constructor: function() {
+	,constructor: function(config) {
 		
 		this.addAsyncConstructTask(this.onApplyPreferences, this);
 
@@ -114,6 +114,9 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		this.toolbarConfig = Ext.clone(this.extra.toolbar, true);
 
 		Ext.apply(this, this.my);
+		
+		Ext.apply(this, config);
+		
 		this.sc = this.extra.shortcuts;
 
 		this.reloadLatch = 0;
