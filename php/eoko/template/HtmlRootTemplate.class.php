@@ -24,6 +24,25 @@ class HtmlRootTemplate extends HtmlTemplate {
 	
 	protected function doRender() {
 
+		if (self::$currentRootTemplate !== null) {
+			throw new IllegalStateException(
+				'HtmlRootTemplate rendering collision (root templates are not '
+				. 'allowed to have children root templates!)'
+			);
+		}
+
+		self::$currentRootTemplate = $this;
+
+		// implem
+		$this->onRender();
+		
+		self::$currentRootTemplate = null;
+		
+		parent::doRender();
+	}
+	
+	protected function onRender() {
+		
 		if (!isset($this->docType)) {
 			$this->set('docType', 
 <<<EOD
@@ -49,14 +68,6 @@ MSG
 		}
 
 		// 2. Render every other templates
-		if (self::$currentRootTemplate !== null) {
-			throw new IllegalStateException(
-				'HtmlRootTemplate rendering collision (root templates are not '
-				. 'allowed to have children root templates!)'
-			);
-		}
-
-		self::$currentRootTemplate = $this;
 		foreach ($this->vars as $var) {
 			if ($var instanceof Renderer) {
 				$var->forceResultCaching = true;
@@ -118,10 +129,6 @@ MSG
 				$this->onCompileIncludes($head, $this->compileOptions);
 			}
 		}
-		
-		self::$currentRootTemplate = null;
-		
-		parent::doRender();
 	}
 
 	/**
