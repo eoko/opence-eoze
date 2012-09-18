@@ -96,8 +96,11 @@ class TabModule extends BaseModule implements HasJavascript {
 	}
 	
 	public function getJavascriptAsString() {
-		if (!$this->isAbstract()) {
-			return $this->createModuleJavascriptTemplate()->render(true);
+		if ($this->getConfig()->getValue('private/generateJavascriptModule', true)) {
+			if (!$this->isAbstract()
+					|| $this->getConfig()->getValue('private/generateAbstractJavascriptModule', false)) {
+				return $this->createModuleJavascriptTemplate()->render(true);
+			}
 		}
 	}
 }
