@@ -20,6 +20,6 @@ class root extends Module implements HasJavascript {
 		$config = parent::onConfig();
 		// Apply configuration override from app level (i.e. in
 		// config/compilation.yml)
-		$config->apply($this->getConfigManager()->get(__NAMESPACE__));
+		$config->apply(\Config::create($this->getConfigManager()->get(__NAMESPACE__)));
 	}
 }
