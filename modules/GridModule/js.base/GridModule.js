@@ -2246,8 +2246,8 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		this.onConfigureAddFormPanel(formConfig);
 
 		var winConfig = Ext.apply({}, this.applyExtraWinConfig('add', {
-			 title: this.my.addWindowTitle 
-					 || this.extra.addWindowTitle 
+			 title: this.my.addWindowTitle
+					 || this.extra.addWindowTitle
 					 || (this.getSingularTitle() + " : Nouveau") // i18n
 			,layout: this.my.addWinLayout
 			,id: this.nextAddWinId()
