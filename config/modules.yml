@@ -23,6 +23,7 @@ used:
     - TreeMenu
     - IconProvider
     - TabModule
+    - ModuleGroupModule
     - MercurialConsole
     - DirectModule
     - DirectGridModule
