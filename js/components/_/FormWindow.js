@@ -633,7 +633,7 @@ eo.Window.MinimizePlugin = eo.Object.create({
 			}
 		});
 
-		win.afterRender = win.afterRender.createSequence(function() {
+		win.afterRender = Ext.Function.createSequence(win.afterRender, function() {
 			taskbar.addWindow(this);
 		});
 	}

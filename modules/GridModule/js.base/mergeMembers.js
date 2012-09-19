@@ -4,7 +4,7 @@ Oce.deps.wait('Oce.GridModule', function() {
 
 		mergeMembersWindow: null
 
-		,initActions: Oce.GridModule.prototype.initActions.createSequence(function() {
+		,initActions: Ext.Function.createSequence(Oce.GridModule.prototype.initActions, function() {
 
 			var xx = this.extra.mergeMembers;
 
@@ -18,7 +18,7 @@ Oce.deps.wait('Oce.GridModule', function() {
 			}
 		})
 
-		,initPlugins: Oce.GridModule.prototype.initPlugins.createSequence(function() {
+		,initPlugins: Ext.Function.createSequence(Oce.GridModule.prototype.initPlugins, function() {
 			if (this.extra.mergeMembers) {
 				Ext.applyIf(this.extra.mergeMembers, {
 					itemName: 'enregistrement'
@@ -87,7 +87,7 @@ Oce.deps.wait('Oce.GridModule', function() {
 							);
 							me.reload();
 						}
-						,failure: Oce.Ajax.handleFormError.createSequence(function() {
+						,failure: Ext.Function.createSequence(Oce.Ajax.handleFormError, function() {
 							started = false;
 						})
 					})

@@ -1146,10 +1146,10 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 
 		// This is necessary to make the component compatible with
 		// the FieldLabeler plugin
-		this.el.setWidth = this.el.setWidth.createSequence(function(w) {
+		this.el.setWidth = Ext.Function.createSequence(this.el.setWidth, function(w) {
 			if (me.grid) me.grid.setWidth(w);
 		})
-		this.el.setHeight = this.el.setHeight.createSequence(function(h) {
+		this.el.setHeight = Ext.Function.createSequence(this.el.setHeight, function(h) {
 			if (me.grid) me.grid.setHeight(h);
 		})
 

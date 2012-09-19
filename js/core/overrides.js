@@ -772,7 +772,7 @@ Ext.data.Types.INT.convert = function(v) {
 if (Ext.isChrome) {
 	(function() {
 		var spp = Ext.form.TextArea.prototype;
-		spp.afterRender = spp.afterRender.createSequence(function() {
+		spp.afterRender = Ext.Function.createSequence(spp.afterRender, function() {
 			var el = this.el.up('.x-form-element');
 			if (el) {
 				el.setHeight(this.getHeight());

@@ -2354,7 +2354,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			};
 
 			if (opts.onSuccess) {
-				onSuccess = onSuccess.createSequence(opts.onSuccess, opts.scope);
+				onSuccess = Ext.Function.createSequence(onSuccess, opts.onSuccess, opts.scope);
 				delete opts.onSuccess;
 			}
 			
@@ -3258,7 +3258,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		if (this.store) {
 			searchHandler.call(this, menu);
 		} else {
-			this.afterInitStore = this.afterInitStore.createSequence(function() {
+			this.afterInitStore = Ext.Function.createSequence(this.afterInitStore, function() {
 				searchHandler.call(me, menu);
 			});
 		}
@@ -3279,14 +3279,14 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 
 		if (!this.extra.multisort) return;
 
-		this.afterInitStore = this.afterInitStore.createSequence(function(store) {
+		this.afterInitStore = Ext.Function.createSequence(this.afterInitStore, function(store) {
 			this.doInitMultisortPlugin(store);
 		}, this)
 	}
 
 	,doInitMultisortPlugin: function(store) {
 
-		this.beforeCreateGrid = this.beforeCreateGrid.createSequence(function(config) {
+		this.beforeCreateGrid = Ext.Function.createSequence(this.beforeCreateGrid, function(config) {
 
 			var reorderer = new Ext.ux.ToolbarReorderer();
 
@@ -3980,13 +3980,13 @@ Oce.GridModule.plugins = {
 
 			Ext.apply(gm, {
 
-				beforeCreateWindow: gm.beforeCreateWindow.createSequence(
+				beforeCreateWindow: Ext.Function.createSequence(gm.beforeCreateWindow, 
 					function(config, action) {
 						this.configWindowIcon(config, action);
 					}
 				)
 
-				,beforeCreateTabPanel: gm.beforeCreateTabPanel.createSequence(function(config) {
+				,beforeCreateTabPanel: Ext.Function.createSequence(gm.beforeCreateTabPanel, function(config) {
 					// icon plugin
 					if (this.extra.iconCls) {
 						config.iconCls = this.getIconCls();
@@ -4017,7 +4017,7 @@ Oce.GridModule.plugins = {
 					}
 				}
 				
-				,afterCreateGridStore: gm.afterCreateGridStore.createSequence(function(store) {
+				,afterCreateGridStore: Ext.Function.createSequence(gm.afterCreateGridStore, function(store) {
 					store.on({
 						scope: this
 						,beforeload: function() {
