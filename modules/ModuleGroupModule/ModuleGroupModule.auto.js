@@ -66,7 +66,7 @@ eo.modules.ModuleGroupModule = Ext.extend(eo.modules.TabModule, {
 				me.ready = true;
 				if (me.whenReady) {
 					me.whenReady();
-					delete me.whenReady();
+					delete me.whenReady;
 				}
 			}
 		};
