@@ -19,7 +19,7 @@ eo.form.contact.EmailField = Ext.extend(eo.form.contact.AbstractField, {
 	
 	,createFields: function() {
 		return [
-			this.emailField = Ext.create({
+			this.emailField = Ext.widget({
 				name: this.emailName
 				,xtype: 'textfield'
 				,allowBlank: false

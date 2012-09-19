@@ -375,7 +375,7 @@ eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 		}
 		
 		if (this.xtypeChildren) {
-			return Ext.create(Ext.apply({xtype: this.xtypeChildren}, config));
+			return Ext.widget(Ext.apply({xtype: this.xtypeChildren}, config));
 		} else {
 			var c = this.getFieldConstructor();
 			return new c(config);

@@ -296,7 +296,7 @@ eo.form.contact.AbstractField = Ext.extend(Ext.form.CompositeField, {
 				// if we are in V mode, we can honnor the layout requested by
 				// the component (that is, have multiple fields on one single
 				// row, if needed)
-				return [this.mainCt = Ext.create({
+				return [this.mainCt = Ext.widget({
 					xtype: 'container'
 					,flex: 1
 					,layout: {
@@ -429,7 +429,7 @@ eo.form.contact.AbstractField = Ext.extend(Ext.form.CompositeField, {
 
 		// Type
 		if (this.hasTypeField()) {
-			var typeCombo = Ext.create(this.createTypeComboConfig());
+			var typeCombo = Ext.widget(this.createTypeComboConfig());
 			items.unshift(typeCombo);
 			this.valueFields[typeName] = typeCombo;
 		}
@@ -468,7 +468,7 @@ eo.form.contact.AbstractField = Ext.extend(Ext.form.CompositeField, {
 			
 			this.valueFields[this.primaryField] = this.primaryButton;
 		} else if (this.cardinalField) {
-			items.unshift(this.cardinalField = Ext.create({
+			items.unshift(this.cardinalField = Ext.widget({
 				xtype: 'button'
 				,width: 22
 				,text: '1/n'

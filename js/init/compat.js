@@ -91,3 +91,5 @@ Ext.reg = function(xtype, cls) {
 })(); // closure
 
 }
+
+Ext.widget = Ext.create;

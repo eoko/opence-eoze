@@ -253,7 +253,7 @@ NS.EnumField = NS.Enum = Ext.extend(NS.ModelField, {
 				,modelField: this
 			}, config);
 
-			return Ext.create(r);
+			return Ext.widget(r);
 		}
 	}()
 

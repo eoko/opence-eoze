@@ -14,7 +14,7 @@ var testField = new eo.form.contact.AddressField({
 	hideLabel: true
 });
 
-var formPanel = Ext.create({
+var formPanel = Ext.widget({
 	xtype: 'form'
 	,padding: 10
 	,hideLabel: true

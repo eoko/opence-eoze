@@ -199,15 +199,6 @@ class Application implements FileFinder {
 				),
 				array(
 					'forbidUpwardResolution' => true,
-//					'aliases' => array(
-//						'@ext' => array(
-//							FileType::JS => array(
-//								'ext/ext-base' => -10,
-//								'ext/ext-all-debug' => -9,
-//								'ext/ext-lang-fr' => -8,
-//							)
-//						),
-//					),
 				)
 			)
 		);

@@ -158,7 +158,7 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 
 		if (this.configurator) {
 			if (!this.configurator.created) {
-				this.configurator = Ext.create(this.configurator);
+				this.configurator = Ext.widget(this.configurator);
 			}
 			this.configurator.configure(this);
 		}
@@ -214,7 +214,7 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 						dataIndex: config.dataIndex || di
 					}, config, this.columnDefaults);
 					colConfig.editor = config.editor instanceof Ext.Component ? 
-							config.editor : Ext.create(config.editor);
+							config.editor : Ext.widget(config.editor);
 					if (!colConfig.renderer && colConfig.editor.createRenderer) {
 						colConfig.renderer = colConfig.editor.createRenderer('-');
 					}
@@ -290,7 +290,7 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 		}
 
 //		var store = this.store = new Ext.data.JsonStore(Ext.apply({
-		var store = this.store = Ext.create(Ext.apply({
+		var store = this.store = Ext.widget(Ext.apply({
 			url: 'index.php'
 			,totalProperty: 'count'
 			,idProperty: this.pkName

@@ -39,26 +39,26 @@ Oce.LengthyOperation = Ext.extend(Ext.util.Observable, {
 				,padding: 15
 			}
 			,items: [
-				this.progressBox = Ext.create({
+				this.progressBox = Ext.widget({
 					xtype: "box"
 					,html: this.progressText
 					,height: 30
 					,width: "80%"
 				})
-				,this.progress = Ext.create({
+				,this.progress = Ext.widget({
 					xtype: "progress"
 					,width: "80%"
 				})
 			]
 			,fbar: {
 				buttons: [
-					this.retryButton = Ext.create({
+					this.retryButton = Ext.widget({
 						xtype: "button"
 						,text: "Réessayer" // i18n
 						,handler: this.executeNextPass.createDelegate(this)
 						,hidden: true
 					})
-					,this.closeButton = Ext.create({
+					,this.closeButton = Ext.widget({
 						xtype: "button"
 						,text: "Fermer" // i18n
 						,handler: function() {

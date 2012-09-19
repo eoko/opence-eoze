@@ -74,7 +74,7 @@ eo.modules.TabModule = Ext.extend(Oce.BaseModule, {
 	,createTab: function() {
 		var tab = this.createTabConfig();
 		if (!(tab instanceof Ext.Component)) {
-			tab = Ext.create(tab);
+			tab = Ext.widget(tab);
 		}
 		this.tab = tab;
 		tab.on('close', this.onClose, this);

@@ -36,7 +36,7 @@ eo.form.DayMonthPicker = Ext.extend(Ext.form.CompositeField, {
 		
 		var mc, dc;
 		
-		this.items = [this.dayCombo = dc = Ext.create({
+		this.items = [this.dayCombo = dc = Ext.widget({
 			xtype: 'combo'
 			,emptyText: 'Jour'
 			,flex: 1
@@ -56,7 +56,7 @@ eo.form.DayMonthPicker = Ext.extend(Ext.form.CompositeField, {
 				}
 				return err;
 			}
-		}), mc = this.monthCombo = Ext.create({
+		}), mc = this.monthCombo = Ext.widget({
 			xtype: 'combo'
 			,emptyText: 'Mois'
 			,flex: 1.5
