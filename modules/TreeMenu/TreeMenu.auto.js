@@ -220,7 +220,7 @@ eo.ui.TreeMenu = Ext.extend(sp, {
 	// private
 	,createTreeNodeClass: function() {
 		var me = this;
-		return eo.ui.TreeMenu.prototype.TreeNode.extend({
+		return Ext.extend(eo.ui.TreeMenu.prototype.TreeNode, {
 			ownerTreeMenu: this
 			
 			,sjax: this.sjax
