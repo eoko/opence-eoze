@@ -2,11 +2,9 @@
 
 namespace eoko\modules\TabModule;
 
-use eoko\module\executor\JsonExecutor;
 use eoko\template\Template;
-use eoko\file\FileType;
 
-use SystemException, MissingConfigurationException;
+use SystemException;
 
 class Js extends \eoko\module\executor\ExecutorBase {
 	
