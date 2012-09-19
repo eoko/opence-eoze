@@ -639,7 +639,7 @@ eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 	
 });
 
-Ext.reg('contactfieldset', NS.AbstractFieldSet);
+Ext.reg('contactfieldset', 'eo.form.contact.AbstractFieldSet');
 
 eo.deps.reg('AbstractFieldSet', ns);
 	

@@ -46,4 +46,4 @@ eo.toolbar.HelpItem = Ext.extend(Ext.toolbar.TextItem, {
     }
 });
 
-Ext.reg('tbhelp', eo.toolbar.HelpItem);
+Ext.reg('tbhelp', 'eo.toolbar.HelpItem');

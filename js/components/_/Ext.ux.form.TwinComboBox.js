@@ -57,6 +57,6 @@ Ext.ux.form.TwinComboBox = Ext.extend(Ext.form.ComboBox, {
 
 Ext.ux.form.TwinComboBox = Ext.form.ComboBox;
 
-Ext.ComponentMgr.registerType('twincombo', Ext.ux.form.TwinComboBox);
+Ext.ComponentMgr.registerType('twincombo', 'Ext.ux.form.TwinComboBox');
 
 Oce.deps.reg('Ext.ux.form.TwinComboBox')

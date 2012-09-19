@@ -17,6 +17,6 @@ eo.form.contact.AddressFieldSet = Ext.extend(eo.form.contact.AbstractFieldSet, {
 	}
 });
 
-Ext.reg('addressesfieldset', NS.AddressFieldSet);
+Ext.reg('addressesfieldset', 'eo.form.contact.AddressFieldSet');
 	
 }); // deps

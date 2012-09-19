@@ -35,6 +35,6 @@ eo.form.contact.EmailField = Ext.extend(eo.form.contact.AbstractField, {
 	
 });
 
-Ext.reg('emailfield', NS.EmailField);
+Ext.reg('emailfield', 'eo.form.contact.EmailField');
 
 });

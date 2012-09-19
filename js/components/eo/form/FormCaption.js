@@ -4,7 +4,7 @@
  * @author Éric Ortega <eric@planysphere.fr>
  * @since 23 mai 2012
  */
-(function(self) {
+(function() {
 	
 Ext.ns('eo.form');
 
@@ -39,10 +39,10 @@ eo.form.FormCaption = Ext.extend(Ext.BoxComponent, {
 			}
 		}
 		
-		self.superclass.initComponent.call(this);
+		this.callParent();
 	}
 });
 
-Ext.reg('formcaption', self = eo.form.FormCaption);
+Ext.reg('formcaption', 'eo.form.FormCaption');
 
 })(); // closure

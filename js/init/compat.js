@@ -5,7 +5,7 @@
  * @since 19 sept. 2012
  */
 if (Ext.Compat) {
-	Ext.Compat.silent = true;
+//	Ext.Compat.silent = true;
 }
 
 else if (console && console.warn) {
@@ -71,5 +71,23 @@ Ext.Function.createSequence = function (originalFn, newFn, scope) {
 		};
 	}
 };
+
+(function() {
+var reg = Ext.reg;
+var resolve = function(name) {
+	if (!Ext.isString(name)) {
+		return name;
+	} else {
+		var o = window;
+		Ext.each(name.split('.'), function(sub) {
+			o = o[sub];
+		});
+		return o;
+	}
+};
+Ext.reg = function(xtype, cls) {
+	return reg(xtype, resolve(cls));
+};
+})(); // closure
 
 }

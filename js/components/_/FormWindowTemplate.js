@@ -54,7 +54,7 @@ Oce.win.TemplatePage = Ext.extend(Ext.Panel, {
 	}
 })
 
-Ext.reg('oce.wintpl', Oce.win.TemplatePage);
+Ext.reg('oce.wintpl', 'Oce.win.TemplatePage');
 
 
 //Oce.deps.wait('Ext.ux.GroupTabPanel', function() {

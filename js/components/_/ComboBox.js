@@ -74,7 +74,7 @@ Oce.deps.wait('eo.form.ClearableComboBox', function() {
 		}
 	});
 
-	Ext.reg('oce.simplecombo', Oce.form.SimpleComboBox);
+	Ext.reg('oce.simplecombo', 'Oce.form.SimpleComboBox');
 
 	Oce.form.SimpleChainedCombo = Ext.extend(Oce.form.SimpleComboBox, {
 
@@ -163,7 +163,7 @@ Oce.deps.wait('eo.form.ClearableComboBox', function() {
 		}
 	});
 
-	Ext.reg('oce.simplechainedcombo', Oce.form.SimpleChainedCombo);
+	Ext.reg('oce.simplechainedcombo', 'Oce.form.SimpleChainedCombo');
 
 	Oce.form.ForeignComboBox = Ext.extend(eo.form.ClearableComboBox, {
 
@@ -534,7 +534,7 @@ Oce.deps.wait('eo.form.ClearableComboBox', function() {
 		}
 	});
 
-	Ext.reg('oce.foreigncombo', Oce.form.ForeignComboBox);
+	Ext.reg('oce.foreigncombo', 'Oce.form.ForeignComboBox');
 
 	Oce.deps.reg('Oce.form.ForeignComboBox');
 })

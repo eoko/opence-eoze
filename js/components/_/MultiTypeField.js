@@ -108,6 +108,6 @@ Ext.ux.form.MultiTypeField = Ext.extend(sp, {
 	}
 });
 
-Ext.reg("multitypefield", Ext.ux.form.MultiTypeField);
+Ext.reg("multitypefield", 'Ext.ux.form.MultiTypeField');
 	
 })(); // closure

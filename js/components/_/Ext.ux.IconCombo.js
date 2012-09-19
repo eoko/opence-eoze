@@ -95,6 +95,6 @@ Ext.extend(Ext.ux.form.IconCombo, Ext.form.ComboBox, {
  
 }); // end of extend
 
-Ext.reg("iconcombo", Ext.ux.form.IconCombo);
+Ext.reg("iconcombo", 'Ext.ux.form.IconCombo');
  
 // end of file

@@ -1338,6 +1338,6 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 	}
 });
 
-Ext.reg('gridfield', Oce.form.GridField);
+Ext.reg('gridfield', 'Oce.form.GridField');
 
 Oce.deps.reg('eo.form.GridField');

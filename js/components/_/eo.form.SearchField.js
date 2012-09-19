@@ -98,7 +98,7 @@ eo.form.SearchField = Ext.extend(sp, {
 
 });
 
-Ext.reg("eo.search", eo.form.SearchField);
+Ext.reg("eo.search", 'eo.form.SearchField');
 
 	
 })(); // closure
