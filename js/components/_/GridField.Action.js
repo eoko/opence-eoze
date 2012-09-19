@@ -111,7 +111,7 @@ ACTION.Remove = Ext.extend(ACTION, {
 		var me = this,
 			gf = this.gridField;
 
-		gf.createGrid = gf.createGrid.createSequence(function() {
+		gf.createGrid = Ext.Function.createSequence(gf.createGrid, function() {
 			var grid = gf.grid;
 			var sm = grid.getSelectionModel();
 			if (sm) {

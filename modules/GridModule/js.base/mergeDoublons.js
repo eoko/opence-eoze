@@ -4,7 +4,7 @@ Oce.deps.wait('Oce.GridModule', function() {
 
 		mergeDoublonsWin: null
 
-		,initActions: Oce.GridModule.prototype.initActions.createSequence(function() {
+		,initActions: Ext.Function.createSequence(Oce.GridModule.prototype.initActions, function() {
 
 			var xx = this.extra.mergeDoublons;
 
@@ -18,7 +18,7 @@ Oce.deps.wait('Oce.GridModule', function() {
 			}
 		})
 
-		,initPlugins: Oce.GridModule.prototype.initPlugins.createSequence(function() {
+		,initPlugins: Ext.Function.createSequence(Oce.GridModule.prototype.initPlugins, function() {
 			if (this.extra.mergeDoublons) {
 				Ext.applyIf(this.extra.mergeDoublons, {
 					itemName: 'enregistrement'
@@ -81,7 +81,7 @@ Oce.deps.wait('Oce.GridModule', function() {
 							);
 							me.reload();
 						}
-						,failure: Oce.Ajax.handleFormError.createSequence(function() {
+						,failure: Ext.Function.createSequence(Oce.Ajax.handleFormError, function() {
 							started = false;
 						})
 					})
