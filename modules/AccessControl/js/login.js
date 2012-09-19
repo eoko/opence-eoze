@@ -27,7 +27,7 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 					+ '<br /><br />'
 					+ '</div>'
 				}
-			},db = Ext.create({
+			},db = Ext.widget({
 				xtype: 'textfield',
 				name: 'username',
 				fieldLabel: 'Identifiant',

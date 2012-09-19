@@ -90,7 +90,7 @@ Oce.FormWindowPanel = Ext.extend(Ext.Panel, {
 					this.formPanel.setAutoScroll(true);
 				}
 			} else {
-				this.formPanel = Ext.create(
+				this.formPanel = Ext.widget(
 					Ext.applyIf({
 						autoScroll: true
 					}, fp)

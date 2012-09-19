@@ -36,7 +36,7 @@ Oce.Modules.MediaManager.MediaManager = Ext.extend(Oce.Modules.MediaManager.Medi
             title: "Media Manager" // i18n
             ,closable: true
             ,tbar: new Ext.Toolbar({
-                items: [this.uploadFormPanel = Ext.create({
+                items: [this.uploadFormPanel = Ext.widget({
                     xtype: 'form'
                     ,fileUpload: true
 //                    ,padding: 0
@@ -45,7 +45,7 @@ Oce.Modules.MediaManager.MediaManager = Ext.extend(Oce.Modules.MediaManager.Medi
                     ,bodyStyle: 'background: none;'
                     ,hideLabels: true
                     ,itemCls: 'no-margin'
-                    ,items: this.uploadButton = Ext.create({
+                    ,items: this.uploadButton = Ext.widget({
                         xtype: 'fileuploadfield'
                         ,name: 'image'
                         ,buttonOnly: true

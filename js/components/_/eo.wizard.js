@@ -21,7 +21,7 @@ eo.wizard.Step = Ext.extend(Ext.util.Observable, {
 		if (!this.name) this.name = Ext.id();
 
 		if (false == this.panel instanceof Ext.Panel) {
-			this.panel = Ext.create(Ext.apply({
+			this.panel = Ext.widget(Ext.apply({
 				xtype: "panel"
 				,padding: 10
 			}, this.panel));
@@ -245,7 +245,7 @@ eo.wizard.FormStep = Ext.extend(eo.wizard.Step, {
 					config.requireValid : this.requireValid
 				,padding: 10
 			}, this.formDefaults), config.form);
-			this.panel = Ext.create(cfg);
+			this.panel = Ext.widget(cfg);
 			form = this.panel.getForm();
 		}
 
@@ -526,7 +526,7 @@ eo.WizardPanel = eo.wizard.WizardPanel = Ext.extend(Ext.Panel, {
 			if (p instanceof Ext.Panel) {
 				p = p;
 			} else {
-				p = Ext.create(Ext.apply({
+				p = Ext.widget(Ext.apply({
 					xtype: "panel"
 //					,html: "Please, be patient!"
 					,html: "Veuillez patienter..."
@@ -598,7 +598,7 @@ eo.WizardPanel = eo.wizard.WizardPanel = Ext.extend(Ext.Panel, {
 			config = Ext.apply({parent: this}, config);
 
 			if (config.xtype) {
-				return Ext.create(config);
+				return Ext.widget(config);
 			} else if (config.panel) {
 				return new eo.wizard.Step(config);
 			} else if (config.form) {

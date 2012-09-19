@@ -86,7 +86,7 @@ var ACTION = eo.form.GridField.Action = Ext.extend(Ext.util.Observable, {
 	}
 	
 	,doCreateToolbarItem: function() {
-		return Ext.create(Ext.apply({
+		return Ext.widget(Ext.apply({
 			text: '- Action -'
 			,xtype: "button"
 			,handler: this.handler

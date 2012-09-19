@@ -521,7 +521,7 @@ Ext.grid.Column.types.datecolumn =
 //				// <rx+>
 //				var xtype = this.pagingToolbarXtype || "paging";
 //				if (xtype.xtype) xtype = xtype.xtype;
-//				this.pageTb = Ext.create({
+//				this.pageTb = Ext.widget({
 //					xtype: xtype,
 //					store: this.store,
 //					pageSize: this.pageSize,
@@ -620,7 +620,7 @@ Ext.form.ComboBox.override({
 						};
 					}
 					// create component
-					this.toolbar = Ext.create(Ext.apply({
+					this.toolbar = Ext.widget(Ext.apply({
 						xtype: 'toolbar'
 						,renderTo: this.header
 					}, tb));

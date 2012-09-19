@@ -262,7 +262,7 @@ eo.MediaPanel = Ext.extend(Ext.Panel, {
             ,border: false
 //            ,items: [leftPane, view]
             ,cls: 'x-eo-media-panel'
-            ,items: [leftPane, this.viewCardCt = Ext.create({
+            ,items: [leftPane, this.viewCardCt = Ext.widget({
                 xtype: 'container'
                 ,region: 'center'
                 ,layout: 'card'

@@ -7,7 +7,7 @@
 eo.Testing.addUnitTest('PhoneNumberField', function() {
 Oce.deps.wait('eo.form.contact.PhoneNumberField', function() {
 	
-	var field = Ext.create({
+	var field = Ext.widget({
 		xtype: 'phonenumberfield'
 	});
 	

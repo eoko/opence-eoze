@@ -1653,7 +1653,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		});
 
 		var tbar = this.createFormWindowToolbar(handlers.getWindowFn, handlers, toolbarAddExtraFn, tbarOpts);
-		if (tbar instanceof Ext.Component == false) tbar = Ext.create(tbar);
+		if (tbar instanceof Ext.Component == false) tbar = Ext.widget(tbar);
 
 		var kit = new Oce.GridModule.ContentKit({
 
