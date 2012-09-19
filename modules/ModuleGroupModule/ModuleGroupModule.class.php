@@ -6,9 +6,7 @@ use eoko\_getModule\TabModule;
 
 use eoko\module\ModuleManager;
 
-use eoko\modules\TreeMenu\ActionProvider;
 use eoko\modules\TreeMenu\ActionProvider\ModuleGroupProvider;
-use eoko\modules\TreeMenu\HasMenuActions;
 
 /**
  * Base module class for ModuleGroupModules. ModuleGroupModules are modules that 
