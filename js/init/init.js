@@ -1,5 +1,7 @@
 Ext.ns('Oce.mx', 'Oce.ext');
 
+Ext.Compat.silent = true;
+
 Ext.BLANK_IMAGE_URL = Oce.ext.BLANK_IMAGE_URL || 'images/s.gif';
 Ext.Ajax.url = 'index.php';
 

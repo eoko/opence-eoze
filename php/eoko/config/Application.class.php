@@ -125,14 +125,21 @@ class Application implements FileFinder {
 	
 	public function resolveFileFinderAlias($alias) {
 		if ($alias === '@ext') {
-			$js = array(
-						'ext/ext-base-debug' => -10,
-						'ext/ext-all-debug-w-comments' => -9,
-						'ext/ext-basex' => -8,
-						'ext/ext-lang-fr' => -7,
+			$ext3 = array(
+				'ext/ext-base-debug' => -10,
+				'ext/ext-all-debug-w-comments' => -9,
+				'ext/ext-basex' => -8,
+				'ext/ext-lang-fr' => -7,
+			);
+			$ext4 = array(
+				'ext4/ext-all-debug' => -10,
+				'ext4/ext3-core-compat' => -8,
+				'ext4/ext3-compat' => -7,
+				'ext4/ext-lang-fr' => -6,
 			);
 			return array(
-				FileType::JS => $js,
+//				FileType::JS => $ext3,
+				FileType::JS => $ext4,
 				FileType::CSS => array(
 					'ext-all' => 1,
 				)
