@@ -67,7 +67,7 @@ eoko.ext.IFramePanel = Ext.extend(Ext.Panel, {
 				items: [
 					back, forward, "-", reload
 					,"->"
-					,this.loader = new Ext.Toolbar.TextItem({
+					,this.loader = new Ext.toolbar.TextItem({
 						cls: "mini-browser-ajax-loader"
 						,hidden: true
 						,text: this.showButtonsText ? this.loadingText : undefined // i18n

@@ -11,7 +11,7 @@ Ext.ns('Ext.ux.grid');
  * @extends Ext.grid.GridView
  * A custom GridView which renders rows on an as-needed basis.
  */
-Ext.ux.grid.BufferView = Ext.extend(Ext.grid.GridView, {
+Ext.ux.grid.BufferView = Ext.extend(Ext.grid.View, {
 	/**
 	 * @cfg {Number} rowHeight
 	 * The height of a row in the grid.

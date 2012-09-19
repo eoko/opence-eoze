@@ -33,7 +33,7 @@ eo.Sjax = eo.Class({
 		var onComplete = opts.onComplete;
 			
 		if (onComplete) {
-			opts.onComplete = onComplete.createSequence(this.next);
+			opts.onComplete = Ext.Function.createSequence(onComplete, this.next);
 		} else {
 			opts.onComplete = this.next;
 		}

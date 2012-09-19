@@ -139,7 +139,7 @@ class Application implements FileFinder {
 			);
 			return array(
 //				FileType::JS => $ext3,
-				FileType::JS => $ext4,
+				FileType::JS => isset($_GET['ext4']) ? $ext4 : $ext3,
 				FileType::CSS => array(
 					'ext-all' => 1,
 				)
