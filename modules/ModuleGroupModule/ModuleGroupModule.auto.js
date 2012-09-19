@@ -55,8 +55,11 @@ eo.modules.ModuleGroupModule = Ext.extend(eo.modules.TabModule, {
 	 */
 	
 	constructor: function() {
-		
 		this.callParent(arguments);
+		this.loadChildModules();
+	}
+	
+	,loadChildModules: function() {
 		
 		var latch = this.modules.length,
 			me = this;
@@ -150,7 +153,8 @@ eo.modules.ModuleGroupModule = Ext.extend(eo.modules.TabModule, {
 	}
 	
 	,createTabConfig: function() {
-		var config = Ext.apply(this.callParent(arguments), this.config.tab),
+		var tabConfig = this.config && this.config.tab || undefined,
+			config = Ext.apply(this.callParent(arguments), tabConfig),
 			items = [];
 			
 		Ext.each(this.modules, function(m) {
