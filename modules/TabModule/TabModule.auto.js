@@ -1,19 +1,30 @@
-(function() {
+/**
+ * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ * @author Éric Ortega <eric@planysphere.fr>
+ * @since 19 sept. 2012
+ */
+Ext.ns('eo.modules.TabModule');
 
-var sp = Oce.BaseModule,
-	sppp = sp.prototype;
-
-var <?php echo $var ?> = Ext.extend(sp, {
-
+/**
+ * Base class for TabModule modules.
+ */
+eo.modules.TabModule = Ext.extend(Oce.BaseModule, {
+	
+	/**
+	 * @cfg {String} controller
+	 */
+	/**
+	 * @cfg {Object} config
+	 */
+	
 	constructor: function(config) {
-		sppp.constructor.call(this, config);
-		this.addEvents("open", "close");
-		this.doConstruct();
+		
+		this.addEvents('open', 'close');
+		
+		Ext.apply(this, config);
+		
+		this.callParent(arguments);
 	}
-	
-	,doConstruct: function() {}
-	
-	,controller: "<?php echo $module ?>"
 	
 	/**
 	 * True if this component fires an "open" event. Read-only.
@@ -60,11 +71,6 @@ var <?php echo $var ?> = Ext.extend(sp, {
 		this.fireEvent("open", this);
 	}
 
-<?php if (isset($config)): ?>
-	,config: <?php echo $config ?>
-
-<?php endif ?>
-
 	,createTab: function() {
 		var tab = this.createTabConfig();
 		if (!(tab instanceof Ext.Component)) {
@@ -99,28 +105,15 @@ var <?php echo $var ?> = Ext.extend(sp, {
 	}
 	
 	,getTitle: function() {
-		return "<?php echo $title ?>";
+		return this.title;
 	}
 	
 	,getIconCls: function(action) {
-<?php if ($iconCls): ?>
-		return "<?php echo $iconCls ?>" + (action ? ' ' + action : '');
-<?php endif ?>
+		var c = this.iconCls;
+		if (c) {
+			return c + (action ? ' ' + action : '');
+		}
 	}
 });
 	
-<?php if (isset($main)): ?>
-
-var spp = <?php echo $var ?>.prototype;
-<?php echo $var ?> = <?php echo $var ?>.extend({});
-
-// === Auto included part ======================================================
-
-<?php echo $main ?>
-
-<?php endif ?>
-
-Ext.ns("<?php echo $namespace ?>.<?php echo $module ?>").<?php echo $module ?> = <?php echo $var ?>;
-Oce.deps.reg('<?php echo "$namespace.$module.$module" ?>');
-
-})(); // closure
+Oce.deps.reg('eo.modules.TabModule');

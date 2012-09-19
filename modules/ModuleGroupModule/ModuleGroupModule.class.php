@@ -85,28 +85,15 @@ use eoko\modules\TreeMenu\HasMenuActions;
 class ModuleGroupModule extends TabModule {
 
 	public function getActionProvider() {
-		$config = $this->getConfig()->get('config');
-		
-//		$actions = array();
-
-		$children = array();
-		foreach ($config['modules'] as $module) {
+		foreach ($this->getChildModules() as $module) {
 			$children[] = ModuleManager::getModule($module);
-//			$name = $module->getName();
-//			if (!($module instanceof HasMenuActions)) {
-//				continue;
-//			}
-//			$moduleActions = $module->getActionProvider()->getAvailableActions();
-//			unset($moduleActions['open']);
-//			
-//			foreach ($moduleActions as $action) {
-//				$actions["{$module->getName()}_{$action->getId()}"] = $action;
-//			}
 		}
-
 		return new ModuleGroupProvider($this, $children);
 	}
-	
+
+	/**
+	 * @return Module[]
+	 */
 	protected function getChildModules() {
 		$config = $this->getConfig()->get('config');
 		$r = array();
@@ -118,14 +105,10 @@ class ModuleGroupModule extends TabModule {
 		return $r;
 	}
 	
-	public function createModuleJavascriptTemplate() {
+	protected function createJavascriptModuleProperties() {
+		$properties = parent::createJavascriptModuleProperties();
 		
-		$config = $this->getConfig()->get('config');
-		
-		$modules = array();
-		
-		foreach ($config['modules'] as $module) {
-			$module = ModuleManager::getModule($module);
+		foreach ($this->getChildModules() as $module) {
 			$moduleName = $module->getName();
 			// first try to see if a special title has been prepared for us
 			$extra = $module->getConfig()->get('extra');
@@ -136,15 +119,16 @@ class ModuleGroupModule extends TabModule {
 			} else {
 				$title = $moduleName;
 			}
-			$modules[] = json_encode(array(
+			$modules[] = array(
 				'title' => $title,
 				'name' => $moduleName,
 				'cmd' => "Oce.Modules.$moduleName.$moduleName",
-			));
+			);
 		}
 		
-		$tpl = parent::createModuleJavascriptTemplate();
-		$tpl->main->modules = $modules;
-		return $tpl;
-	}	
+		$properties['modules'] = $modules;
+		
+		return $properties;
+	}
+	
 }

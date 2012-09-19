@@ -1,16 +1,7 @@
 /**
  * @author Éric Ortéga <eric@planysphere.fr>
- * 
- * This file is intended to be included in a closure by the JS executor of
- * TabModule.
  */
-//<script type="text/javascript">
-
-(function() {
-//Oce.deps.wait([ns + ".Slot", ns + ".SlotPortlet"], function() {
-	
-var ns = "eo.module.ModuleGroupModule",
-	NS = Ext.ns(ns);
+Oce.deps.wait('eo.modules.TabModule', function() {
 	
 //var ModuleContainer = Ext.extend(Ext.Container, {
 var ModuleContainer = Ext.extend(Ext.Panel, {
@@ -54,15 +45,19 @@ var ModuleContainer = Ext.extend(Ext.Panel, {
 	}
 });
 
-var o = {
+/**
+ * Base class for ModuleGroupModule modules.
+ */
+eo.modules.ModuleGroupModule = Ext.extend(eo.modules.TabModule, {
 	
-	modules: [
-<?php $comma = ''; foreach ($modules as $module): ?>
-		<?php echo "$comma$module" ?>
-<?php $comma = ','; endforeach ?>
-	]
+	/**
+	 * @cfg {Oce.Module[]} modules
+	 */
 	
-	,doConstruct: function() {
+	constructor: function() {
+		
+		this.callParent(arguments);
+		
 		var latch = this.modules.length,
 			me = this;
 		
@@ -126,14 +121,14 @@ var o = {
 					}
 				}
 			}
-			spp.open.apply(this, arguments);
+			this.callParent(arguments);
 		} else {
 			this.whenReady = this.open.createDelegate(this, args);
 		}
 	}
 	
 	,createTab: function() {
-		var tab = spp.createTab.apply(this, arguments);
+		var tab = this.callParent(arguments);
 
 		tab.on({
 			scope: this
@@ -155,7 +150,7 @@ var o = {
 	}
 	
 	,createTabConfig: function() {
-		var config = Ext.apply(spp.createTabConfig.call(this), this.config.tab),
+		var config = Ext.apply(this.callParent(arguments), this.config.tab),
 			items = [];
 			
 		Ext.each(this.modules, function(m) {
@@ -180,13 +175,10 @@ var o = {
 		if (tab) tab.items.each(function(c) {
 			c.onClose();
 		});
-		spp.onClose.apply(this, arguments);
+		this.callParent(arguments);
 	}
-};
+});
+
+Oce.deps.reg('eo.modules.ModuleGroupModule');
 	
-MODULE.override(o);
-
-//}); // deps
-})(); // closure
-
-//</script>
+}); // deps
