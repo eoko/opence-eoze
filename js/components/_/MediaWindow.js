@@ -529,7 +529,8 @@ eo.MediaPanel.TreePanel = Ext.extend(Ext.tree.TreePanel, {
                         ,beforeexpand: function() {this.iconElement.addClass("open")}
                     }
                 });
-                child.getUI().render = child.getUI().render.createSequence(function() {
+				var ui = child.getUI()
+				ui.render = Ext.Function.createSequence(ui.render, function() {
                     child.iconElement = new Ext.Element(this.getIconEl());
                 });
 

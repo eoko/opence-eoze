@@ -10,7 +10,7 @@ Ext.ns('eo.toolbar');
 /**
  * A toolbar item displaying a help tooltip on hovering.
  */
-eo.toolbar.HelpItem = Ext.extend(Ext.Toolbar.TextItem, {
+eo.toolbar.HelpItem = Ext.extend(Ext.toolbar.TextItem, {
     
     /**
      * @cfg {String} help
@@ -25,7 +25,7 @@ eo.toolbar.HelpItem = Ext.extend(Ext.Toolbar.TextItem, {
     
     ,onRender: function(ct, position) {
         this.autoEl = {cls: 'xtb-text xtb-help', html: this.text || ''};
-        Ext.Toolbar.TextItem.superclass.onRender.call(this, ct, position);
+        Ext.toolbar.TextItem.superclass.onRender.call(this, ct, position);
         if (this.iconCls) {
             this.el.addClass('x-icon');
             this.el.addClass(this.iconCls);

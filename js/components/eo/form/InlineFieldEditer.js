@@ -38,8 +38,8 @@ eo.form.TextFieldInlineSubmitter = Ext.extend(Object, {
 			,change: this.onValueChange
 		});
 		
-		field.setValue = field.setValue.createSequence(this.onValueChange, this);
-		field.applyEmptyText = field.applyEmptyText.createSequence(this.applyEmptyText, this);
+		field.setValue = Ext.Function.createSequence(field.setValue, this.onValueChange, this);
+		field.applyEmptyText = Ext.Function.createSequence(field.applyEmptyText, this.applyEmptyText, this);
 	}
 	
 	// private
@@ -69,12 +69,12 @@ eo.form.TextFieldInlineSubmitter = Ext.extend(Object, {
 			var layout = ownerCt.layout;
 			if (layout) {
 				// displaying hidden element before layout
-				layout.layout = function() {
+				layout.layout = Ext.Function.createSequence(function() {
 					if (!targetEl.isDisplayed()) {
 						targetEl.setDisplayed(true);
 						targetEl.hideAfterLayout = true;
 					}
-				}.createSequence(layout.layout);
+				}, layout.layout);
 				// and hidding them immediately after
 				ownerCt.on('afterlayout', function() {
 					if (targetEl.hideAfterLayout) {
