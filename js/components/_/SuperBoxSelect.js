@@ -1471,7 +1471,7 @@ Ext.ux.form.SuperBoxSelect = Ext.extend(Ext.ux.form.SuperBoxSelect,Ext.form.Comb
         }
     }
 });
-Ext.reg('superboxselect', Ext.ux.form.SuperBoxSelect);
+Ext.reg('superboxselect', 'Ext.ux.form.SuperBoxSelect');
 /*
  * @private
  */

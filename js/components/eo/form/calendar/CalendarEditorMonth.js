@@ -195,4 +195,4 @@ eo.form.calendar.MonthEditor = Ext.extend(Ext.BoxComponent, {
 	}
 });
 
-Ext.reg('eo.montheditor', eo.form.calendar.MonthEditor);
+Ext.reg('eo.montheditor', 'eo.form.calendar.MonthEditor');

@@ -41,4 +41,4 @@ Oce.form.HtmlEditor = Ext.extend(Ext.form.HtmlEditor, {
 
 });
 
-Ext.reg("htmleditor", Oce.form.HtmlEditor);
+Ext.reg("htmleditor", 'Oce.form.HtmlEditor');

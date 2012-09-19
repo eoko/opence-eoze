@@ -160,4 +160,4 @@ eo.form.DayMonthPicker = Ext.extend(Ext.form.CompositeField, {
 	
 });
 
-Ext.reg('daymonthpicker', eo.form.DayMonthPicker);
+Ext.reg('daymonthpicker', 'eo.form.DayMonthPicker');

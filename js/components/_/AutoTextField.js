@@ -84,4 +84,4 @@ Oce.form.AutoTextField = Ext.extend(Ext.form.TextArea, {
 
 })
 
-Ext.reg('oce.autotextfield', Oce.form.AutoTextField);
+Ext.reg('oce.autotextfield', 'Oce.form.AutoTextField');

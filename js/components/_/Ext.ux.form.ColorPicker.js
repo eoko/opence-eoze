@@ -155,7 +155,7 @@ Ext.ux.form.ColorPicker = Ext.extend(sp, {
 	
 });
 
-Ext.reg('colorpicker', Ext.ux.form.ColorPicker);
+Ext.reg('colorpicker', 'Ext.ux.form.ColorPicker');
 
 })(); // closure
 

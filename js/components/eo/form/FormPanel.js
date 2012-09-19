@@ -475,7 +475,7 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
 
 }); // << FormPanel
 
-Ext.reg("oce.form", Oce.FormPanel)
+Ext.reg("oce.form", 'Oce.FormPanel')
 
 /**
  * @class Oce.columnContainer
@@ -642,4 +642,4 @@ Oce.ColumnContainer = Ext.extend(Ext.Container, {
     }
 });
 
-Ext.reg("colcontainer", Oce.ColumnContainer);
+Ext.reg("colcontainer", 'Oce.ColumnContainer');

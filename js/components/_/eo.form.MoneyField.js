@@ -67,7 +67,7 @@ eo.form.MoneyField = Ext.extend(Ext.form.NumberField, {
 	
 });
 
-Ext.reg("moneyfield", eo.form.MoneyField);
+Ext.reg("moneyfield", 'eo.form.MoneyField');
 
 eo.form.MoneyDisplayField = Ext.extend(eo.form.MoneyField, {
 	
@@ -83,4 +83,4 @@ eo.form.MoneyDisplayField = Ext.extend(eo.form.MoneyField, {
 	}
 });
 
-Ext.reg("moneydisplayfield", eo.form.MoneyDisplayField);
+Ext.reg("moneydisplayfield", 'eo.form.MoneyDisplayField');
