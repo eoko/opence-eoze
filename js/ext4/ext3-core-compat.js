@@ -594,6 +594,13 @@ Ext.Compat = function(){
             deprecate({pkg:'Ext.Element', member:'toggleClass', alt:'toggleCls'});
             return this.toggleCls.apply(this, arguments);
         },
+		
+		// <rx>
+		addClass: function() {
+            deprecate({pkg:'Ext.Element', member:'addClass', alt:'addCls'});
+            return this.addCls.apply(this, arguments);
+		},
+		// </rx>
         
 // Can't do this since Ext internally uses these calls. Reverting them will break Ext 4 code, so have to doc as breaking changes.
 //        child : function(selector, returnDom){
