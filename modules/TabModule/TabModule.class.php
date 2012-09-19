@@ -50,37 +50,35 @@ class TabModule extends BaseModule implements HasJavascript {
 	
 	protected $defaultExecutor = 'js';
 	
+	protected function createJavascriptModuleProperties() {
+		
+		$config = $this->getConfig();
+		
+		$properties = array(
+			'title' => $this->getTitle(),
+			'iconCls' => $this->getIconCls(false),
+		);
+		
+		$cfg = $config->get('config');
+		if ($cfg) {
+			$properties['config'] = $cfg;
+		}
+		
+		return $properties;
+	}
+	
 	public function createModuleJavascriptTemplate() {
 		
 		$config = $this->getConfig();
 		$moduleName = $this->getName();
 		
-		$wrapper = $config->get('wrapper');
-		$main = $config->get('main');
-		
-		if (!$wrapper) {
-			throw new MissingConfigurationException(
-					$this->getName() . '.yml', 'wrapper');
-		}
-		
-		$tpl = Template::create()->setFile($this->findFilenameInLineage($wrapper));
+		$tpl = Template::create()->setFile($this->findFilenameInLineage('TabModule.js.php'));
 		
 		$tpl->namespace = $config->get('jsNamespace');
 		$tpl->module = $moduleName;
-		$tpl->var = $config->get('moduleJsVarName');
-		$tpl->iconCls = $this->getIconCls(false);
-		$tpl->title = $this->getTitle();
+		$tpl->parentClass = $config->get('jsParentClass');
 		
-		$cfg = $config->get('config');
-		if ($cfg) {
-			$tpl->config = json_encode($cfg);
-		}
-		
-		if ($main) {
-			$tpl->main = Template::create()->setFile($this->findFilenameInLineage($main, array(
-				'js', 'js.php'
-			)));
-		}
+		$tpl->properties = $this->createJavascriptModuleProperties($config);
 		
 		return $tpl;
 	}
