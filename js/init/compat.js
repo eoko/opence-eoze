@@ -90,6 +90,6 @@ Ext.reg = function(xtype, cls) {
 };
 })(); // closure
 
-}
-
 Ext.widget = Ext.create;
+
+} // end of compat patches
