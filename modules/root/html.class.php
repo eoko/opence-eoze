@@ -127,6 +127,23 @@ JS;
 	 * @return array
 	 */
 	private function resolveIncludeAlias($name, $type) {
+		
+		if ($name === '@ext' && isset($_GET['ext4'])) {
+			switch ($type) {
+				case 'js':
+					return array(
+						EOZE_BASE_URL . 'ext4/ext-all-debug.js' => -10,
+						EOZE_BASE_URL . 'ext4/ext3-core-compat.js' => -8,
+						EOZE_BASE_URL . 'ext4/ext3-compat.js' => -7,
+						EOZE_BASE_URL . 'ext4/ext-lang-fr.js' => -6,
+					);
+				case 'css':
+					return array(
+						EOZE_BASE_URL . 'ext4/resources/css/ext-all.css' => 1,
+					);
+			}
+		}
+		
 		$this->findPath($name, 'JS', $urlSpecs);
 		
 		$urls = array();
