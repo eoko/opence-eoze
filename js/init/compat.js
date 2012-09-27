@@ -74,20 +74,94 @@ Ext.Function.createSequence = function (originalFn, newFn, scope) {
 
 (function() {
 var reg = Ext.reg;
-var resolve = function(name) {
+var resolve = function(name, force) {
+	var o;
 	if (!Ext.isString(name)) {
-		return name;
+		o = name;
 	} else {
-		var o = window;
+		o = window;
 		Ext.each(name.split('.'), function(sub) {
 			o = o[sub];
 		});
 		return o;
 	}
+	if (!o || o === window) {
+		if (force !== false) {
+			debugger
+			throw new Error('Undefined class: ' + cls);
+		} else {
+			return null;
+		}
+	}
+	return o;
 };
+
+// Ext.reg
 Ext.reg = function(xtype, cls) {
-	return reg(xtype, resolve(cls));
+	var o = resolve(cls);
+	return reg(xtype, o);
 };
+
+// --- Ext.define
+
+var setClass = function(cls, o) {
+	var parts = cls.split('.'),
+		name = parts.pop();
+	Ext.namespace(parts.join('.'))[name] = o;
+};
+
+var alias = function(aliases, c) {
+	if (aliases) {
+		Ext.each(aliases, function(alias) {
+			var r = /^([^.]+)\.(.+)$/.exec(alias);
+			if (!r) {
+				throw new Error('Illegal alias: ' + alias);
+			}
+			if (r[1] === 'widget') {
+				Ext.reg(r[2], c);
+			} else if (r[1] === 'feature' || r[1] === 'plugin') {
+				throw new Error('Not implemented yet: support for alias namespace: ' + r[1]);
+			} else {
+				throw new Error('Illegal alias namespace: ' + r[1]);
+			}
+		});
+	}
+};
+
+Ext.define = function(cls, o) {
+	var parentCls,
+		parent,
+		deps;
+	
+	if (o.extend) {
+		parentCls = o.extend;
+		parent = resolve(parentCls, false);
+		if (!parent) {
+			deps = parentCls;
+		}
+	} else {
+		parent = Object;
+	}
+	
+	var define = function() {
+		var c = Ext.extend(parent, o);
+		c.prototype.$className = cls;
+		setClass(cls, c);
+		alias(o.alias, c);
+		Ext.reg(cls, cls);
+		Oce.deps.reg(cls);
+	};
+	
+	if (deps) {
+		Oce.deps.wait(deps, function() {
+			parent = resolve(parentCls);
+			define();
+		});
+	} else {
+		define();
+	}
+};
+
 })(); // closure
 
 Ext.widget = Ext.create;
