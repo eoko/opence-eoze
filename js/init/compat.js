@@ -128,7 +128,7 @@ var alias = function(aliases, c) {
 	}
 };
 
-Ext.define = function(cls, o) {
+Ext.define = function(cls, o, createFn) {
 	var parentCls,
 		parent,
 		deps;
@@ -146,10 +146,18 @@ Ext.define = function(cls, o) {
 	var define = function() {
 		var c = Ext.extend(parent, o);
 		c.prototype.$className = cls;
-		setClass(cls, c);
 		alias(o.alias, c);
-		Ext.reg(cls, cls);
-		Oce.deps.reg(cls);
+		if (cls) {
+			setClass(cls, c);
+			Ext.reg(cls, cls);
+			Oce.deps.reg(cls);
+		}
+		
+		if (createFn) {
+			createFn.call(c);
+		}
+		
+		return c;
 	};
 	
 	if (deps) {
@@ -158,7 +166,7 @@ Ext.define = function(cls, o) {
 			define();
 		});
 	} else {
-		define();
+		return define();
 	}
 };
 
