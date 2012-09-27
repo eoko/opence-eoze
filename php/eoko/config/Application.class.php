@@ -13,10 +13,15 @@ class Application implements FileFinder {
 
 	private $config;
 
-	/** @var FileFinder */
+	/**
+	 * @var FileFinder
+	 */
 	private $fileFinder = null;
-	
-	private $isDevMode = false;
+
+	/**
+	 * @var bool[MODE]
+	 */
+	private $modes;
 	
 	/**
 	 * @var SessionManager
@@ -27,7 +32,12 @@ class Application implements FileFinder {
 	
 	private function __construct(SessionManager $sessionManager) {
 		$this->sessionManager = $sessionManager;
-		$this->isDevMode = $this->findDevMode();
+		
+		// Configure modes
+		$this->modes = $this->getConfig()->get('modes');
+		if (!isset($this->modes['dev'])) {
+			$this->modes['dev'] = $this->findDevMode();
+		}
 	}
 
 	private function getConfig() {
@@ -66,7 +76,7 @@ class Application implements FileFinder {
 	 * @return bool
 	 */
 	public function isDevMode() {
-		return $this->isDevMode;
+		return $this->isMode('dev');
 	}
 
 	/**
@@ -79,11 +89,7 @@ class Application implements FileFinder {
 	 * @return bool
 	 */
 	public function isMode($tag) {
-		if ($tag === 'dev' || $tag === 'development') {
-			return $this->isDevMode();
-		} else {
-			return false; // only dev currently supported
-		}
+		return isset($this->modes[$tag]) && $this->modes[$tag];
 	}
 	
 	/**
