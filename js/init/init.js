@@ -236,47 +236,6 @@ eo.warn = function() {
 	}
 };
 
-(function() {
-	
-var extend = Ext.extend,
-	noArgs = [];
-
-Ext.extend = function() {
-	
-	var c = extend.apply(this, arguments);
-	
-	Ext.iterate(c.prototype, function(k, e) {
-		if (Ext.isFunction(e)) {
-			e.$owner = c;
-			// This test is needed to support aliasing of functions as a class member
-			// 
-			// Like in:
-			// 
-			// MyClass = Ext.extend(AnotherClass, {
-			// 
-			//   AliasedClass: com.demo.AliasedClass
-			// 
-			// });
-			// 
-			// Without the test, the $name for com.demo.AliasedClass will be changed
-			// to AliasedClass (instead of expected 'constructor').
-			//
-			if (!e.$name) {
-				e.$name = k;
-			}
-		}
-	});
-	
-	c.prototype.callParent = function(args) {
-		var m = this.callParent.caller;
-		return m.$owner.superclass[m.$name].apply(this, args || noArgs);
-	};
-	
-	return c;
-};
-	
-})();
-
 // Must be in init, very first, as to not override eo.app namespace
 eo.app = function(callback, scope) {
 	Oce.deps.wait('eo.app.Application', function() {

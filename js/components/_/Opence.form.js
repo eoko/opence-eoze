@@ -58,48 +58,48 @@ Oce.DefaultFormPanel = Ext.extend(Ext.FormPanel, {
 Ext.ns('Oce.form.Action');
 
 //Oce.form.Action.SubmitJson = Ext.extend(Ext.form.Action.Submit, {
-Ext.form.Action.ACTION_TYPES['jsonsubmit'] = Ext.extend(Ext.form.Action.Submit, {
-	run : function(){
-		var o = this.options,
-			method = this.getMethod(),
-			isGet = method == 'GET';
-			
-		if(o.clientValidation === false || this.form.isValid()){
-			if (o.submitEmptyText === false) {
-				var fields = this.form.items,
-				emptyFields = [];
-				fields.each(function(f) {
-					if (f.el.getValue() == f.emptyText) {
-						emptyFields.push(f);
-						f.el.dom.value = "";
-					}
-				});
-			}
-			
-			Oce.Ajax.request(Ext.apply(this.createCallback(o), {
-				form:this.form.el.dom,
-				jsonFormParam: o.jsonFormParam,
-				serializeForm: o.serializeForm,
-				url:this.getUrl(isGet),
-				method: method,
-				headers: o.headers,
-				params:!isGet ? this.getParams() : null,
-				isUpload: this.form.fileUpload
-			}));
-			
-			if (o.submitEmptyText === false) {
-				Ext.each(emptyFields, function(f) {
-					if (f.applyEmptyText) {
-						f.applyEmptyText();
-					}
-				});
-			}
-		}else if (o.clientValidation !== false){ // client validation failed
-			this.failureType = Ext.form.Action.CLIENT_INVALID;
-			this.form.afterAction(this, false);
-		}
-	}
-});
+//Ext.form.Action.ACTION_TYPES['jsonsubmit'] = Ext.extend(Ext.form.Action.Submit, {
+//	run : function(){
+//		var o = this.options,
+//			method = this.getMethod(),
+//			isGet = method == 'GET';
+//			
+//		if(o.clientValidation === false || this.form.isValid()){
+//			if (o.submitEmptyText === false) {
+//				var fields = this.form.items,
+//				emptyFields = [];
+//				fields.each(function(f) {
+//					if (f.el.getValue() == f.emptyText) {
+//						emptyFields.push(f);
+//						f.el.dom.value = "";
+//					}
+//				});
+//			}
+//			
+//			Oce.Ajax.request(Ext.apply(this.createCallback(o), {
+//				form:this.form.el.dom,
+//				jsonFormParam: o.jsonFormParam,
+//				serializeForm: o.serializeForm,
+//				url:this.getUrl(isGet),
+//				method: method,
+//				headers: o.headers,
+//				params:!isGet ? this.getParams() : null,
+//				isUpload: this.form.fileUpload
+//			}));
+//			
+//			if (o.submitEmptyText === false) {
+//				Ext.each(emptyFields, function(f) {
+//					if (f.applyEmptyText) {
+//						f.applyEmptyText();
+//					}
+//				});
+//			}
+//		}else if (o.clientValidation !== false){ // client validation failed
+//			this.failureType = Ext.form.Action.CLIENT_INVALID;
+//			this.form.afterAction(this, false);
+//		}
+//	}
+//});
 
 Oce.form.JsonForm = Ext.extend(Ext.form.BasicForm, {
     submit : function(options){

@@ -3,10 +3,13 @@
 namespace eoko\modules\TabModule;
 
 use eoko\_getModule\BaseModule as BaseModule;
+use eoko\module\HasJavascript;
 //use eoko\module\Module;
 use eoko\module\HasTitle;
 use eoko\modules\TreeMenu\HasMenuActions;
 use eoko\modules\TreeMenu\ActionProvider\ModuleProvider;
+
+use eoko\template\Template;
 
 /**
  * Base class for modules with a main tab.
@@ -43,8 +46,59 @@ use eoko\modules\TreeMenu\ActionProvider\ModuleProvider;
  * @package Modules\Eoko\TabModule
  * @author Éric Ortéga <eric@planysphere.fr>
  */
-class TabModule extends BaseModule {
+class TabModule extends BaseModule implements HasJavascript {
 	
 	protected $defaultExecutor = 'js';
 	
+	protected function createJavascriptModuleProperties() {
+		
+		$config = $this->getConfig();
+		
+		$properties = array(
+			'title' => $this->getTitle(),
+			'iconCls' => $this->getIconCls(false),
+		);
+		
+		$cfg = $config->get('config');
+		if ($cfg) {
+			$properties['config'] = $cfg;
+		}
+		
+		return $properties;
+	}
+	
+	public function createModuleJavascriptTemplate() {
+		
+		$config = $this->getConfig();
+		$moduleName = $this->getName();
+		
+		$tpl = Template::create()->setFile($this->findFilenameInLineage('TabModule.js.php'));
+		
+		$tpl->namespace = $config->get('jsNamespace');
+		$tpl->module = $moduleName;
+		$tpl->parentClass = $config->get('jsParentClass');
+		
+		$tpl->properties = $this->createJavascriptModuleProperties($config);
+		
+		return $tpl;
+	}
+	
+	private function findFilenameInLineage($pattern, $type = null) {
+		foreach ($this->getParentNames(true) as $name) {
+			$r = $this->searchPath(str_replace('%module%', $name, $pattern), $type);
+			if (null !== $r) {
+				return $r;
+			}
+		}
+		throw new \eoko\file\CannotFindFileException($pattern);
+	}
+	
+	public function getJavascriptAsString() {
+		if ($this->getConfig()->getValue('private/generateJavascriptModule', true)) {
+			if (!$this->isAbstract()
+					|| $this->getConfig()->getValue('private/generateAbstractJavascriptModule', false)) {
+				return $this->createModuleJavascriptTemplate()->render(true);
+			}
+		}
+	}
 }

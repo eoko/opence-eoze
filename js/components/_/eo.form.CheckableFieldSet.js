@@ -213,7 +213,7 @@ eo.form.CheckableFieldSet = Ext.extend(Ext.form.FieldSet, {
 
 var spp = eo.form.CheckableFieldSet.superclass;
 
-Ext.reg('checkfieldset', eo.form.CheckableFieldSet);
+Ext.reg('checkfieldset', 'eo.form.CheckableFieldSet');
 
 })(); // closure
 

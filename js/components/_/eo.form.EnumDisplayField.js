@@ -10,4 +10,4 @@ eo.form.EnumDisplayField = Ext.extend(Ext.form.DisplayField, {
 	}
 });
 
-Ext.reg('enumdisplayfield', eo.form.EnumDisplayField);
+Ext.reg('enumdisplayfield', 'eo.form.EnumDisplayField');

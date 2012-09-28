@@ -76,7 +76,7 @@ eo.form.contact.ContactPanel = Ext.extend(Ext.Panel, {
 					}, fs);
 				}
 				
-				var fieldSet = Ext.create(fs);
+				var fieldSet = Ext.widget(fs);
 				
 				if (fieldSet.hasPrimaryFieldSelection()) {
 					hasFieldSetWithPrimarySelection = true;
@@ -166,6 +166,6 @@ eo.form.contact.ContactPanel = Ext.extend(Ext.Panel, {
 	
 });
 
-Ext.reg('contactpanel', NS.ContactPanel);
+Ext.reg('contactpanel', 'eo.form.contact.ContactPanel');
 
 }); // deps

@@ -22,6 +22,6 @@ eo.form.contact.PhoneFieldSet = Ext.extend(eo.form.contact.AbstractFieldSet, {
 	}
 });
 
-Ext.reg('phonenumbersfieldset', NS.PhoneFieldSet);
+Ext.reg('phonenumbersfieldset', 'eo.form.contact.PhoneFieldSet');
 	
 }); // deps

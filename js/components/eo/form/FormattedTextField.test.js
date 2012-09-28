@@ -6,7 +6,7 @@
  */
 eo.Testing.addUnitTest('FormattedTextField', function() {
 	
-	var field = Ext.create({
+	var field = Ext.widget({
 		xtype: 'formattedtextfield'
 		,format: 'UCFirst'
 	});

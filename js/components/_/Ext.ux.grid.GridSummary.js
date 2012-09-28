@@ -189,7 +189,7 @@ Ext.extend(Ext.ux.grid.GridSummary, Ext.util.Observable, {
         return this.view.summary;
     }
 });
-Ext.reg('gridsummary', Ext.ux.grid.GridSummary);
+Ext.reg('gridsummary', 'Ext.ux.grid.GridSummary');
 
 /*
  * all Calculation methods are called on each Record in the Store

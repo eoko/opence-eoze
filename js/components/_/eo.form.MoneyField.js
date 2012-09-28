@@ -67,9 +67,9 @@ eo.form.MoneyField = Ext.extend(Ext.form.NumberField, {
 	
 });
 
-Ext.reg("moneyfield", eo.form.MoneyField);
+Ext.reg("moneyfield", 'eo.form.MoneyField');
 
-eo.form.MoneyDisplayField = eo.form.MoneyField.extend({
+eo.form.MoneyDisplayField = Ext.extend(eo.form.MoneyField, {
 	
 	initComponent: function() {
 		this.cls = this.cls + " readonly";
@@ -83,4 +83,4 @@ eo.form.MoneyDisplayField = eo.form.MoneyField.extend({
 	}
 });
 
-Ext.reg("moneydisplayfield", eo.form.MoneyDisplayField);
+Ext.reg("moneydisplayfield", 'eo.form.MoneyDisplayField');

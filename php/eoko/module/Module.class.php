@@ -14,6 +14,7 @@ use eoko\module\executor\Executor;
 use eoko\log\Logger;
 use eoko\cache\Cache;
 
+use eoko\config\ConfigManager;
 use eoko\config\Application;
 use eoko\php\SessionManager;
 use eoko\php\ClassLoader;
@@ -115,6 +116,14 @@ class Module implements file\Finder {
     }
 	
 	/**
+	 * Gets the configuration maanager used by this Module.
+	 * @return ConfigManager
+	 */
+	protected function getConfigManager() {
+		return ConfigManager::getInstance();
+	}
+	
+	/**
 	 * @return SessionManager
 	 */
 	public function getSessionManager() {
@@ -179,13 +188,12 @@ class Module implements file\Finder {
 	 * ModuleManager to see if an ancestor is a module of its own. The name
 	 * of the first class, that is not the same as this module's class (which
 	 * means that the class is a parent in the lineage, the vertical inheritance
-	 * chain) and that is an eoze module will be returned).
+	 * chain) and that is an eoze module will be returned.
 	 * @return string
 	 */
 	private function getParentModuleName() {
 		foreach ($this->getParentNames(false) as $p) {
-			if ($p !== $this->name
-					&& ModuleManager::getModule($p, false)) {
+			if ($p !== $this->name && ModuleManager::getModule($p, false)) {
 				return $p;
 			}
 		}
@@ -208,6 +216,22 @@ class Module implements file\Finder {
 			$lastRelative = $rc;
 		}
 		return $parents;
+	}
+	
+	private function getParentClasses($includeSelf) {
+		$classes = array();
+		if ($includeSelf) {
+			$classes[] = get_class($this);
+		}
+		$class = $includeSelf ? get_class($this) : get_parent_class($this);
+		do {
+			$classes[] = $class;
+			$class = get_parent_class($class);
+		} while ($class !== false);
+//		while (false !== $class = get_parent_class($last)) {
+//			$classes[] = $class;
+//		}
+		return $classes;
 	}
 
 	public static function create($name, $path, $url) {
@@ -247,12 +271,17 @@ MSG
 		}
 		
 		// generate
-		$this->config = $this->onConfig();
+		$this->doConfig();
 
 		// cache
 		$this->cacheConfig($this->config);
 		
 		return $this->config;
+	}
+	
+	private function doConfig() {
+		$this->onConfig();
+		$this->processConditionnalConfig();
 	}
 
 	/**
@@ -260,39 +289,51 @@ MSG
 	 * @return Config
 	 */
 	protected function onConfig() {
-		$config = new Config();
+		$this->config = new Config();
 
 		if (null !== $parent = $this->getParentModule()) {
-			$config->apply($parent->getConfig());
+			$this->config->apply($parent->getConfig());
 		}
 
-		unset($config['abstract']);
-		unset($config['line']);
-		unset($config['jsClass']);
+		unset($this->config['private']);
+		unset($this->config['abstract']);
+		unset($this->config['line']);
+		unset($this->config['jsClass']);
 
-		$config->apply($this->location->loadConfig());
+		$this->config->apply($this->location->loadConfig());
 
 		if ($this->extraConfig) {
-			if (!$config) {
-				$config = $this->extraConfig;
+			if (!$this->config) {
+				$this->config = $this->extraConfig;
 			} else {
-				$config->apply($this->extraConfig);
+				$this->config->apply($this->extraConfig);
 			}
 		}
-
+		
+		return $this->config;
+	}
+	
+	/**
+	 * Get the application config node path that overrides this module's hardcoded
+	 * configuration. Defaults to the module namespace.
+	 * @return string
+	 */
+	protected function getConfigNodePath() {
+		return rtrim($this->namespace, '\\');
+	}
+	
+	private function processConditionnalConfig() {
 		// Conditionnal configuration
-		if (isset($config[''])) {
+		if (isset($this->config[''])) {
 			$app = $this->getApplicationConfig();
-			foreach ($config[''] as $tag => $envConfig) {
+			foreach ($this->config[''] as $tag => $envConfig) {
 				if ($app->isMode($tag)) {
-					$config->apply($envConfig);
+					$this->config->apply($envConfig);
 				}
 			}
 			// clear
-			unset($config['']);
+			unset($this->config['']);
 		}
-
-		return $config;
 	}
 	
 	private function useCache() {

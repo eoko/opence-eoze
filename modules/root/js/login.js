@@ -13,7 +13,8 @@ Oce.Modules.root.login = Ext.extend(Oce.Module, {
 	}
 
 	,createLoginWindow: function(modal, text) {
-		this.loginForm = new Oce.DefaultFormPanel();
+//		this.loginForm = new Oce.DefaultFormPanel();
+		this.loginForm = new Ext.FormPanel();
 		this.loginWindow = new Oce.DefaultWin({
 			 title: 'Identification'
 			,closable: false

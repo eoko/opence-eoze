@@ -37,13 +37,13 @@ Ext.ux.FieldLabeler = (function(){
 //      Add behaviour at important points in the Field's lifecycle.
         init: function(f) {
 //          Replace the Field's onRender method with a sequence that calls the plugin's onRender after the Field's onRender
-            f.onRender = f.onRender.createSequence(this.onRender);
+            f.onRender = Ext.Function.createSequence(f.onRender, this.onRender);
 
 //          We need to completely override the onResize method because of the complexity
             f.onResize = this.onResize;
 
 //          Replace the Field's onDestroy method with a sequence that calls the plugin's onDestroy after the Field's onRender
-            f.onDestroy = f.onDestroy.createSequence(this.onDestroy);
+            f.onDestroy = Ext.Function.createSequence(f.onDestroy, this.onDestroy);
         },
 
         onRender: function() {

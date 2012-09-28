@@ -42,6 +42,6 @@ eo.form.contact.OrganisationField = Ext.extend(eo.form.contact.AbstractField, {
 	
 });
 
-Ext.reg('organisationfield', NS.OrganisationField);
+Ext.reg('organisationfield', 'eo.form.contact.OrganisationField');
 
 });
