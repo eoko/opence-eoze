@@ -25,6 +25,8 @@
 			this.loadConfiguration(function(config, data) {
 				Oce.mx.application.instanceId = data.instanceId;
 
+				this.config = config;
+
 				this.onConfigure(config);
 
 				this.doStart(config);
@@ -37,6 +39,18 @@
 		}
 
 		,onConfigure: function(config) {}
+
+		/**
+		 * Get the application configuration (acquired before the application starts
+		 * with an AJAX request).
+		 * @param {String} [key]
+		 * @return {Mixed}
+		 */
+		,getConfig: function(key) {
+			return Ext.isEmpty(key)
+					? this.config
+					: this.config[key];
+		}
 
 		,initStateProvider: function() {
 			//Ext.state.Manager.setProvider(new Ext.state.CookieProvider());
