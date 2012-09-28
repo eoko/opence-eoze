@@ -193,18 +193,6 @@ class ModuleLocation extends Location {
 	}
 	
 	private function doLoadConfig() {
-//REM		$r = null;
-//		foreach (array_reverse($this->getLocations()) as $location) {
-//			$config = $location->searchConfigFile();
-//			if ($config) {
-//				$config = Config::createForNode($config, $this->moduleName);
-//				if ($r === null) {
-//					$r = $config;
-//				} else {
-//					$r->apply($config, false);
-//				}
-//			}
-//		}
 		$r = null;
 		foreach ($this->listConfigFiles() as $config) {
 			$config = Config::createForNode($config, $this->moduleName);
