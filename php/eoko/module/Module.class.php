@@ -295,7 +295,20 @@ MSG
 			}
 		}
 		
+		// Application config override
+		$applicationConfig = $this->getConfigManager()->get($this->getConfigNodePath());
+		$this->config->apply($applicationConfig);
+		
 		return $this->config;
+	}
+	
+	/**
+	 * Get the application config node path that overrides this module's hardcoded
+	 * configuration. Defaults to the module namespace.
+	 * @return string
+	 */
+	protected function getConfigNodePath() {
+		return rtrim($this->namespace, '\\');
 	}
 	
 	private function processConditionnalConfig() {
