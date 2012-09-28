@@ -10,7 +10,7 @@ if (Ext.Compat) {
 
 else if (console && console.warn) {
 
-console.warn('Dead code');
+//console.warn('Dead code');
 
 Ext.ns('Ext.toolbar');
 Ext.toolbar.TextItem = Ext.Toolbar.TextItem;
@@ -173,5 +173,10 @@ Ext.define = function(cls, o, createFn) {
 })(); // closure
 
 Ext.widget = Ext.create;
+
+// Defer
+Ext.Function.defer = function(fn, millis, obj, args, appendArgs) {
+	Function.defer.apply(fn, Array.prototype.slice.call(arguments, 1));
+};
 
 } // end of compat patches
