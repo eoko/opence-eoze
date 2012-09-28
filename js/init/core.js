@@ -283,7 +283,7 @@ Ext.createIf = eo.createIf = function(o) {
 	if (o instanceof Ext.Observable || o instanceof eo.Class) {
 		return o;
 	} else {
-		return Ext.create(o);
+		return Ext.widget(o);
 	}
 }
 

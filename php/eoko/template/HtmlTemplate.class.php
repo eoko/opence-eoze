@@ -71,7 +71,7 @@ class HtmlTemplate extends Template {
 		}
 	}
 	
-	private function pushInclude($type, $url, $order) {
+	protected function pushInclude($type, $url, $order) {
 		$var = $type . 'Includes';
 		
 		if ($order === null) $order = \PHP_INT_MAX;

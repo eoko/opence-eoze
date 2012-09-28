@@ -171,8 +171,8 @@ Ext.extend(Ext.ux.grid.Search, Ext.util.Observable, {
 		}
 
 		// do our processing after grid render and reconfigure
-		grid.onRender = grid.onRender.createSequence(this.onRender, this);
-		grid.reconfigure = grid.reconfigure.createSequence(this.reconfigure, this);
+		grid.onRender = Ext.Function.createSequence(grid.onRender, this.onRender, this);
+		grid.reconfigure = Ext.Function.createSequence(grid.reconfigure, this.reconfigure, this);
 	} // eo function init
 	// }}}
 

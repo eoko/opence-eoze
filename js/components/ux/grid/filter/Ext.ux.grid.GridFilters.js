@@ -737,6 +737,6 @@ filters[0][data][value]="someValue3"&
 });
 
 // register ptype
-Ext.preg('gridfilters', Ext.ux.grid.GridFilters);
+Ext.preg('gridfilters', 'Ext.ux.grid.GridFilters');
 
 Oce.deps.reg("Ext.ux.grid.GridFilters");

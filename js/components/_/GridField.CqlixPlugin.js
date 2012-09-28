@@ -2,7 +2,7 @@ Oce.deps.wait(['eo.form.GridField', 'eo.form.GridField.Action'], function() {
 
 var GRID_ACTION = eo.form.GridField.Action;
 
-var CQLIX_PLUGIN = eo.form.GridField.CqlixPlugin = eo.Object.create({
+eo.form.GridField.CqlixPlugin = eo.Object.create({
 
 	addActionClass: eo.form.GridField.ModelAction.Add
 	,editActionClass: eo.form.GridField.ModelAction.Edit
@@ -123,7 +123,7 @@ var CQLIX_PLUGIN = eo.form.GridField.CqlixPlugin = eo.Object.create({
 	}
 }); // CqlixPlugin
 
-Ext.reg("gridfield.cqlix", CQLIX_PLUGIN);
+Ext.reg("gridfield.cqlix", 'eo.form.GridField.CqlixPlugin');
 
 }); // deps closure
 

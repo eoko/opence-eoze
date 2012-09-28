@@ -668,7 +668,7 @@ Ext.ux.grid.RowEditor = Ext.extend(Ext.Panel, {
         return data;
     }
 });
-Ext.preg('roweditor', Ext.ux.grid.RowEditor);
+Ext.preg('roweditor', 'Ext.ux.grid.RowEditor');
 
 Ext.ns('Oce.grid').RowEditor = Ext.extend(Ext.ux.grid.RowEditor, {
 

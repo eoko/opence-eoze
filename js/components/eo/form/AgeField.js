@@ -238,4 +238,4 @@ eo.form.AgeField = Ext.extend(Ext.form.TextField, {
 	
 });
 
-Ext.reg('agefield', eo.form.AgeField);
+Ext.reg('agefield', 'eo.form.AgeField');

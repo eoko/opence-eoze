@@ -101,17 +101,22 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	 * @cfg {Object} addWinConfig
 	 */
 
-	,constructor: function() {
+	,constructor: function(config) {
 		
 		this.addAsyncConstructTask(this.onApplyPreferences, this);
 
-		this.my = Ext.applyIf({
+		this.my = Ext.apply({
 			selectAllText: "Tout sélectionner"
 			,showAllColsText: "Toutes"
-			,tab: null
-		}, this.my || {})
+		}, this.my);
+		
+		// Init toolbar
+		this.toolbarConfig = Ext.clone(this.extra.toolbar, true);
 
 		Ext.apply(this, this.my);
+		
+		Ext.apply(this, config);
+		
 		this.sc = this.extra.shortcuts;
 
 		this.reloadLatch = 0;
@@ -407,10 +412,10 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	}
 
 	,destroy: function() {
-		this.my.tab.hide();
-		this.my.tab.destroy();
-		delete this.my.toolbar;
-		delete this.my.tab;
+		this.tab.hide();
+		this.tab.destroy();
+		delete this.toolbar;
+		delete this.tab;
 	}
 
 	,initDefaults: function() {
@@ -1188,18 +1193,26 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				,scope: this
 				
 				,beforesave: function() {
-					var el = win.el,
-						maskEl = el && el.query('.x-window-mc');
-					if (maskEl) {
-						Ext.get(maskEl).mask('Enregistrement', 'x-mask-loading');
+					if (win.mask) {
+						win.mask('Enregistrement', 'x-mask-loading');
+					} else {
+						var el = win.el,
+							maskEl = el && el.query('.x-window-mc');
+						if (maskEl) {
+							Ext.get(maskEl).mask('Enregistrement', 'x-mask-loading');
+						}
 					}
 				}
 				
 				,aftersave: function() {
-					var el = win.el,
-						maskEl = el && el.query('.x-window-mc');
-					if (maskEl) {
-						Ext.get(maskEl).unmask();
+					if (win.unmask) {
+						win.unmask();
+					} else {
+						var el = win.el,
+							maskEl = el && el.query('.x-window-mc');
+						if (maskEl) {
+							Ext.get(maskEl).unmask();
+						}
 					}
 				}
 			});
@@ -1640,7 +1653,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		});
 
 		var tbar = this.createFormWindowToolbar(handlers.getWindowFn, handlers, toolbarAddExtraFn, tbarOpts);
-		if (tbar instanceof Ext.Component == false) tbar = Ext.create(tbar);
+		if (tbar instanceof Ext.Component == false) tbar = Ext.widget(tbar);
 
 		var kit = new Oce.GridModule.ContentKit({
 
@@ -1747,9 +1760,9 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				win.close();
 			};
 			win.on({
-//				destroy: function() {
-				hide: function() {
-					// TODO... changed the event because of a bug
+				// 17/09/12 21:22 change from hide to close, in prevision of future
+				// support for focus edit panel
+				close: function() {
 					this.editWindows[rowId].destroy();
 					delete this.editWindows[rowId];
 				}
@@ -2113,7 +2126,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	 * @protected
 	 */
 	,buildEditWindowTitle: function(data) {
-		var format = this.extra.editWindowTitleFormat,
+		var format = this.editWindowTitleFormat || this.extra.editWindowTitleFormat,
 			re = /%([^%]+)%/,
 			matches,
 			value;
@@ -2142,7 +2155,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			me = this;
 			
 		var winConfig = Ext.apply({}, this.applyExtraWinConfig('edit', {
-			 title: this.my.editWindowTitle || (this.getSingularTitle() + " : Modifier") // i18n
+			title: this.editWindowTitle || (this.getSingularTitle() + " : Modifier") // i18n
 			,id: this.editWinId(recordId)
 			,layout: this.my.editWinLayout
 			,refreshable: true
@@ -2233,8 +2246,8 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		this.onConfigureAddFormPanel(formConfig);
 
 		var winConfig = Ext.apply({}, this.applyExtraWinConfig('add', {
-			 title: this.my.addWindowTitle 
-					 || this.extra.addWindowTitle 
+			 title: this.addWindowTitle
+					 || this.extra.addWindowTitle
 					 || (this.getSingularTitle() + " : Nouveau") // i18n
 			,layout: this.my.addWinLayout
 			,id: this.nextAddWinId()
@@ -2341,7 +2354,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			};
 
 			if (opts.onSuccess) {
-				onSuccess = onSuccess.createSequence(opts.onSuccess, opts.scope);
+				onSuccess = Ext.Function.createSequence(onSuccess, opts.onSuccess, opts.scope);
 				delete opts.onSuccess;
 			}
 			
@@ -2444,7 +2457,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	}
 
 	,getToolbar: function(createIf) {
-		if (!this.my.toolbar) {
+		if (!this.toolbar) {
 			
 			if (!createIf) {
 				return undefined;
@@ -2453,7 +2466,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			var leftItems = [],
 				rightItems = [];
 			
-			Ext.iterate(this.extra.toolbar, function(label, menuItems) {
+			Ext.iterate(this.toolbarConfig, function(label, menuItems) {
 				
 				// Disabled group
 				if (menuItems === false) {
@@ -2532,12 +2545,12 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			
 			this.beforeCreateToolbar(items);
 
-			this.my.toolbar = new Ext.Toolbar({
+			this.toolbar = new Ext.Toolbar({
 				items: items
 				,forbidHiddenLayout: true
 			});
 
-			this.my.toolbar.getItemForAction = function(actionId) {
+			this.toolbar.getItemForAction = function(actionId) {
 				var items = this.findBy(function(item){
 					if (item.actionId === actionId) return true;
 					return undefined;
@@ -2547,7 +2560,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			};
 		}
 
-		return this.my.toolbar;
+		return this.toolbar;
 	}
 	
 	,beforeCreateToolbar: function(items) {}
@@ -2864,7 +2877,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 
 	,beforeCreateTabPanel: function(config) {
 		// toolbar plugin
-		if (this.extra.toolbar !== false) {
+		if (this.toolbarConfig !== false) {
 			config.tbar = this.getToolbar(true);
 		}
 	}
@@ -3245,7 +3258,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		if (this.store) {
 			searchHandler.call(this, menu);
 		} else {
-			this.afterInitStore = this.afterInitStore.createSequence(function() {
+			this.afterInitStore = Ext.Function.createSequence(this.afterInitStore, function() {
 				searchHandler.call(me, menu);
 			});
 		}
@@ -3266,14 +3279,14 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 
 		if (!this.extra.multisort) return;
 
-		this.afterInitStore = this.afterInitStore.createSequence(function(store) {
+		this.afterInitStore = Ext.Function.createSequence(this.afterInitStore, function(store) {
 			this.doInitMultisortPlugin(store);
 		}, this)
 	}
 
 	,doInitMultisortPlugin: function(store) {
 
-		this.beforeCreateGrid = this.beforeCreateGrid.createSequence(function(config) {
+		this.beforeCreateGrid = Ext.Function.createSequence(this.beforeCreateGrid, function(config) {
 
 			var reorderer = new Ext.ux.ToolbarReorderer();
 
@@ -3456,16 +3469,16 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		
 		if (!destination) destination = Oce.mx.application.getMainDestination();
 
-		if (!this.my.tab) {
-			this.my.tab = this.create(config);
-			destination.add(this.my.tab);
+		if (!this.tab) {
+			this.tab = this.create(config);
+			destination.add(this.tab);
 		}
 		
-		this.my.tab.show();
+		this.tab.show();
 
 		// 06/09/12 20:31 Removed that, seems highly useless:
-		// if (this.my.toolbar) {
-		// 	this.my.toolbar.doLayout();
+		// if (this.toolbar) {
+		// 	this.toolbar.doLayout();
 		// }
 		
 		this.beforeFinishOpen(function() {
@@ -3873,31 +3886,6 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	,initActions: function() {
 
 		var helpHandler = this.viewHelp.createDelegate(this, [this.getHelpTopic()]);
-//		var helpHandler = function() {
-//			var panel = new Oce.AutoloadPanel({
-//				 controller: 'help'
-//				,action: 'get_topic'
-//				,name: this.my.name
-//				,collapsible: false
-//				,titleCollapse: false
-//			})
-//			var win = new Oce.w({
-//				 items: [panel]
-//				,title: "Aide: " + this.getTitle()
-//				,width: 350
-//				,height: 180
-//	//					,layout: 'fit'
-//				,collapsible: true
-//			});
-//			var win = new eoko.ext.IFrameWindow({
-//				title: "Aide: " + this.getTitle()
-//				,width: 350
-//				,height: 180
-//				,collapsible: true
-//				,url: this.my.helpUrl
-//			});
-//			win.show();
-//		}.createDelegate(this);
 
 		var actions = {
 			add: {
@@ -3953,20 +3941,14 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				,iconCls: 'ribbon icon export_csv'
 			}
 			,help: {
-				xtype: 'oce.rbbutton', handler: helpHandler.createDelegate(this),
-//				text: 'Aide', 
-				iconCls: 'icon ribbon help'
+				xtype: 'oce.rbbutton', handler: helpHandler.createDelegate(this)
+				,iconCls: 'icon ribbon help'
 				,depends: this.hasHelp.createDelegate(this)
 				,actionId: 'help'
 			}
+		};
 
-		}
-
-		if (this.actions) {
-			Ext.applyIf(this.actions, actions);
-		} else {
-			this.actions = actions;
-		}
+		this.actions = Ext.apply(actions, this.actions);
 	}
 
 	// private
@@ -3998,13 +3980,13 @@ Oce.GridModule.plugins = {
 
 			Ext.apply(gm, {
 
-				beforeCreateWindow: gm.beforeCreateWindow.createSequence(
+				beforeCreateWindow: Ext.Function.createSequence(gm.beforeCreateWindow, 
 					function(config, action) {
 						this.configWindowIcon(config, action);
 					}
 				)
 
-				,beforeCreateTabPanel: gm.beforeCreateTabPanel.createSequence(function(config) {
+				,beforeCreateTabPanel: Ext.Function.createSequence(gm.beforeCreateTabPanel, function(config) {
 					// icon plugin
 					if (this.extra.iconCls) {
 						config.iconCls = this.getIconCls();
@@ -4035,23 +4017,23 @@ Oce.GridModule.plugins = {
 					}
 				}
 				
-				,afterCreateGridStore: gm.afterCreateGridStore.createSequence(function(store) {
+				,afterCreateGridStore: Ext.Function.createSequence(gm.afterCreateGridStore, function(store) {
 					store.on({
 						scope: this
 						,beforeload: function() {
-							var t = this.my.tab;
+							var t = this.tab;
 							if (t) {
 								t.setIconClass(this.getIconCls("loading gm-tab-loading").split(' '));
 							}
 						}
 						,load: function() {
-							var t = this.my.tab;
+							var t = this.tab;
 							if (t) {
 								t.setIconClass(this.getIconCls());
 							}
 						}
 						,exception: function() {
-							var t = this.my.tab;
+							var t = this.tab;
 							if (t) {
 								t.setIconClass(this.getIconCls());
 							}

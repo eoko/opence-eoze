@@ -766,7 +766,7 @@ NS.SpecialFields = {
 
 	orderable: function(field) {
 		field.internal = true;
-		field.onModelCreate = field.onModelCreate.createSequence(function(model) {
+		field.onModelCreate = Ext.Function.createSequence(field.onModelCreate, function(model) {
 			if (model.orderField) throw new Exception("Model can have only one order field");
 			model.orderable = true;
 			model.orderField = this;
@@ -774,7 +774,7 @@ NS.SpecialFields = {
 	}
 
 	,main: function(field) {
-		field.onModelCreate = field.onModelCreate.createSequence(function(model) {
+		field.onModelCreate = Ext.Function.createSequence(field.onModelCreate, function(model) {
 			if (!model.mainField) model.mainField = this;
 		});
 	}

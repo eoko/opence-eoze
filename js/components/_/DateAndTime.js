@@ -111,8 +111,8 @@
 		}
 	});
 
-	Ext.reg("timefield", eo.form.TimeField);
-	Ext.reg("datefield", eo.form.DateField);
+	Ext.reg("timefield", 'eo.form.TimeField');
+	Ext.reg("datefield", 'eo.form.DateField');
 
 	function parseDatetimeName(config) {
 		var n = config.name;
@@ -294,7 +294,7 @@
 		}
 	});
 
-	Ext.reg("datetimefield", eo.form.DateTimeField);
+	Ext.reg("datetimefield", 'eo.form.DateTimeField');
 
 })(); // closure
 

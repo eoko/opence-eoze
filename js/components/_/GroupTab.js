@@ -265,4 +265,4 @@ Ext.ux.GroupTab = Ext.extend(Ext.Container, {
     }
 });
 
-Ext.reg('grouptab', Ext.ux.GroupTab);
+Ext.reg('grouptab', 'Ext.ux.GroupTab');

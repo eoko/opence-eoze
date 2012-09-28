@@ -1,6 +1,6 @@
 // Fixes the broken findParentBy method of CompositeField's children items
 Ext.form.CompositeField.prototype.initComponent = 
-	Ext.form.CompositeField.prototype.initComponent.createSequence(function(){
+	Ext.Function.createSequence(Ext.form.CompositeField.prototype.initComponent, function(){
 
 	if (!this.innerCt.ownerCt) {
 		this.innerCt.ownerCt = this;

@@ -73,6 +73,7 @@ Oce.ClassLoader = function() {
      * @param {string} [action='get_js'] callback(boolean success, array[error])
      */
     var loadFile = function (controller, name, callback, action) {
+		console.warn("Loading module: " + name);
 
         if (action === undefined) {
             action = 'get_js';

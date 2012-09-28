@@ -7,6 +7,7 @@
 	border: 0;
 }
 
+.ico.ajax-loader,
 .ico.loader.button {
 	background-image:url(images/ajax-loader-button-16x16.gif) !important;
 }

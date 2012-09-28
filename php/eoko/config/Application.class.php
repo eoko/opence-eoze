@@ -13,10 +13,15 @@ class Application implements FileFinder {
 
 	private $config;
 
-	/** @var FileFinder */
+	/**
+	 * @var FileFinder
+	 */
 	private $fileFinder = null;
-	
-	private $isDevMode = false;
+
+	/**
+	 * @var bool[MODE]
+	 */
+	private $modes;
 	
 	/**
 	 * @var SessionManager
@@ -27,7 +32,12 @@ class Application implements FileFinder {
 	
 	private function __construct(SessionManager $sessionManager) {
 		$this->sessionManager = $sessionManager;
-		$this->isDevMode = $this->findDevMode();
+		
+		// Configure modes
+		$this->modes = $this->getConfig()->get('modes');
+		if (!isset($this->modes['dev'])) {
+			$this->modes['dev'] = $this->findDevMode();
+		}
 	}
 
 	private function getConfig() {
@@ -66,7 +76,7 @@ class Application implements FileFinder {
 	 * @return bool
 	 */
 	public function isDevMode() {
-		return $this->isDevMode;
+		return $this->isMode('dev');
 	}
 
 	/**
@@ -79,11 +89,7 @@ class Application implements FileFinder {
 	 * @return bool
 	 */
 	public function isMode($tag) {
-		if ($tag === 'dev' || $tag === 'development') {
-			return $this->isDevMode();
-		} else {
-			return false; // only dev currently supported
-		}
+		return isset($this->modes[$tag]) && $this->modes[$tag];
 	}
 	
 	/**
@@ -125,55 +131,14 @@ class Application implements FileFinder {
 	
 	public function resolveFileFinderAlias($alias) {
 		if ($alias === '@ext') {
-			
-			$js = array(
-						'ext/ext-base-debug' => -10,
-						'ext/ext-all-debug-w-comments' => -9,
-						'ext/ext-basex' => -8,
-//						'ext/ext-all-debug' => -9,
-						'ext/ext-lang-fr' => -7,
-			);
-			
-			// 06/09/12 22:45
-			// This has become useless, since the js is compiled in prod environments
-			
-//			$isDevBrowser = isset($_SERVER['HTTP_USER_AGENT']) 
-//					&& preg_match('/Chrome|Chromium/i', $_SERVER['HTTP_USER_AGENT']);
-//			$isDevBrowser = true;
-//
-//			$js = $this->isDevMode
-//				? ($isDevBrowser
-//					? array(
-//						'ext/ext-base-debug' => -10,
-//						'ext/ext-all-debug-w-comments' => -9,
-//						'ext/ext-basex' => -8,
-////						'ext/ext-all-debug' => -9,
-//						'ext/ext-lang-fr' => -7,
-//					)
-//					: array(
-//						'ext/ext-base-debug' => -10,
-//						'ext/ext-all-debug' => -9,
-////						'ext/ext-all' => -9,
-//						'ext/ext-basex' => -8,
-//						'ext/ext-lang-fr' => -7,
-//					)
-//				)
-//				: array(
-//					'ext/ext-base' => -10,
-//					'ext/ext-all' => -9,
-//					'ext/ext-basex-min' => -8,
-//					'ext/ext-lang-fr' => -7,
-//				);
 			return array(
-				FileType::JS => $js,
-//				FileType::JS => array(
-////					'ext/ext-base' => -10,
-//					'ext/ext-base-debug' => -10,
-//					'ext/ext-all-debug-w-comments' => -9,
-//					'ext/ext-lang-fr' => -8,
-//				),
+				FileType::JS => array(
+					'ext/ext-base-debug' => -10,
+					'ext/ext-all-debug-w-comments' => -9,
+					'ext/ext-basex' => -8,
+					'ext/ext-lang-fr' => -7,
+				),
 				FileType::CSS => array(
-//					'reset-min' => -1,
 					'ext-all' => 1,
 				)
 			);
@@ -232,15 +197,6 @@ class Application implements FileFinder {
 				),
 				array(
 					'forbidUpwardResolution' => true,
-//					'aliases' => array(
-//						'@ext' => array(
-//							FileType::JS => array(
-//								'ext/ext-base' => -10,
-//								'ext/ext-all-debug' => -9,
-//								'ext/ext-lang-fr' => -8,
-//							)
-//						),
-//					),
 				)
 			)
 		);

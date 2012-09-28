@@ -17,6 +17,6 @@ eo.form.contact.OrganisationFieldSet = Ext.extend(eo.form.contact.AbstractFieldS
 	}
 });
 
-Ext.reg('organisationsfieldset', NS.OrganisationFieldSet);
+Ext.reg('organisationsfieldset', 'eo.form.contact.OrganisationFieldSet');
 	
 }); // deps

@@ -5,7 +5,7 @@
  * @since 9 janv. 2012
  */
 
-Ext.override(Ext.grid.GridView, {
+Ext.override(Ext.grid.View, {
 
 	// Fixes fitColumns. Multiple fitting when one pass includes a grid width that is
 	// less that the fixed columns total width broked rapport between flexed columns.

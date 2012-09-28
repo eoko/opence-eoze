@@ -32,6 +32,6 @@ eo.form.FormattedPhoneNumberField = Ext.extend(eo.form.FormattedTextField, {
 	}
 });
 
-Ext.reg('formattedphonefield', eo.form.FormattedPhoneNumberField);
+Ext.reg('formattedphonefield', 'eo.form.FormattedPhoneNumberField');
 
 }); // deps

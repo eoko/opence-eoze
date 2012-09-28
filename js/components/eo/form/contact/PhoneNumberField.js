@@ -44,7 +44,7 @@ eo.form.contact.PhoneNumberField = Ext.extend(eo.form.contact.AbstractField, {
 	
 });
 
-Ext.reg('phonenumberfield', NS.PhoneNumberField);
+Ext.reg('phonenumberfield', 'eo.form.contact.PhoneNumberField');
 Oce.deps.reg('eo.form.contact.PhoneNumberField');
 
 }); // deps
