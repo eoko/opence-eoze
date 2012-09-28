@@ -1,18 +1,61 @@
-(function() {
+/**
+ *
+ * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ * @author Éric Ortega <eric@planysphere.fr>
+ * @since 27 sept. 2012
+ */
 
-Ext.ns('eo.ui.modules');
-
-var sp = Ext.tree.TreePanel,
-	spp = sp.prototype;
+/**
+ * TreeMenu panel.
+ * 
+ * @xtype applicationmenu
+ */
+Ext.define('eo.ui.menu.tree.Menu', {
 	
-eo.ui.TreeMenu = Ext.extend(sp, {
+	extend: 'Ext.tree.TreePanel'
+	,alias: ['widget.applicationmenu']
+	,requires: [
+		'eo.ui.menu.tree.Node'
+	]
+	,uses: [
+//		'eo',
+//		'Ext.Msg',
+		// Ext
+		'Ext.menu.Menu',
+		'Ext.data.JsonReader',
+		'Ext.ux.data.PagingStore',
+		'Ext.Toolbar',
+		'Ext.tree.TreeFilter',
+		'Ext.Toolbar.Separator',
+		'Ext.data.JsonStore',
+		'Ext.DomHelper',
+		// Oce
+		'Oce.FormPanel',
+		'Oce.FormWindow'
+	]
 	
-	controller: "menu"
-	,filter: true
+	/**
+	 * @cfg {Boolean}
+	 * If `true`, the menu nodes can be added, moved, removed and edited (name,
+	 * icon, action). If the menu is editable, it will also provides a gear
+	 * menu to reset the menu to the default.
+	 */
+	,editable: false
+	
+	/**
+	 * @cfg {String} controller
+	 * Name of the server side controller.
+	 */
+	
+	/**
+	 * @cfg {Boolean}
+	 * Adds a toolbar to filter menu items.
+	 */
+	,filterable: true
 	
 	,initEvents: function() {
 		this.addEvents(["actionsloaded", "ready"]);
-		spp.initEvents.apply(this, arguments);
+		this.callParent(arguments);
 	}
 	
 	,initComponent: function() {
@@ -28,21 +71,6 @@ eo.ui.TreeMenu = Ext.extend(sp, {
 			
 			,autoScroll: true
 
-			,tools: [{
-				id: 'gear'
-				,handler: function(e, btn) {
-					this.gearMenu.show(btn);
-				}
-				,scope: this
-				,menu: 'xx'
-			}]
-			,gearMenu: new Ext.menu.Menu({
-				items: [{
-					text: "Recharger le menu par défaut"
-					,handler: this.resetFactoryDefaults.createDelegate(this)
-				}]
-			})
-
 			,enableDD: true
 			,useArrows: true
 			,animate: true
@@ -53,25 +81,6 @@ eo.ui.TreeMenu = Ext.extend(sp, {
 			,root: new this.TreeNode({
 				text: 'root'
 				,id: 'root'
-			})
-			
-			,contextMenu: new Ext.menu.Menu({
-				items: [{
-					text: "Propriétés..."
-					,iconCls: 'ico application_form_edit'
-					,handler: this.onNodeEdit
-					,scope: this
-				},'-',{
-					text: "Ajouter..."
-					,iconCls: 'ico add'
-					,handler: this.onNodeAdd
-					,scope: this
-				},{
-					text: "Supprimer"
-					,iconCls: 'ico delete'
-					,handler: this.onNodeRemove
-					,scope: this
-				}]
 			})
 			
 			,iconStore: new Ext.ux.data.PagingStore({
@@ -129,9 +138,51 @@ eo.ui.TreeMenu = Ext.extend(sp, {
 				}
 			})
 		});
+		
+		// gear menu
+		if (this.editable) {
+			Ext.apply(this, {
+				tools: [{
+					id: 'gear'
+					,handler: function(e, btn) {
+						this.gearMenu.show(btn);
+					}
+					,scope: this
+					,menu: 'xx'
+				}]
+				,gearMenu: new Ext.menu.Menu({
+					items: [{
+						text: "Recharger le menu par défaut" // i18n
+						,handler: this.resetFactoryDefaults.createDelegate(this)
+					}]
+				})
+			});
+		}
+		
+		// context menu
+		if (this.editable) {
+			this.contextMenu = new Ext.menu.Menu({
+				items: [{
+					text: "Propriétés..."
+					,iconCls: 'ico application_form_edit'
+					,handler: this.onNodeEdit
+					,scope: this
+				},'-',{
+					text: "Ajouter..."
+					,iconCls: 'ico add'
+					,handler: this.onNodeAdd
+					,scope: this
+				},{
+					text: "Supprimer"
+					,iconCls: 'ico delete'
+					,handler: this.onNodeRemove
+					,scope: this
+				}]
+			});
+		}
 
 		// search
-		if (this.filter) {
+		if (this.filterable) {
 			this.tbar = new Ext.Toolbar({
 				layout: {
 					type: "hbox"
@@ -173,16 +224,18 @@ eo.ui.TreeMenu = Ext.extend(sp, {
 			})
 		}
 		
-		spp.initComponent.call(this);
+		this.callParent(arguments);
 		
 		this.addClass("eozeTreeMenu");
 		
-		this.on({
-			scope: this
-			,contextmenu: this.onNodeRightClick
-			,containercontextmenu: this.onNodeRightClick
-			,movenode: this.onNodeDrop
-		});
+		if (this.editable) {
+			this.on({
+				scope: this
+				,contextmenu: this.onNodeRightClick
+				,containercontextmenu: this.onNodeRightClick
+				,movenode: this.onNodeDrop
+			});
+		}
 		
 		if (Ext.isNumber(this.userId)) {
 			this.load(this.executeDefaultCommands, this);
@@ -220,10 +273,15 @@ eo.ui.TreeMenu = Ext.extend(sp, {
 	// private
 	,createTreeNodeClass: function() {
 		var me = this;
-		return Ext.extend(eo.ui.TreeMenu.prototype.TreeNode, {
-			ownerTreeMenu: this
+		return Ext.define(null, {
+			extend: 'eo.ui.menu.tree.Node'
+			
+			,ownerTreeMenu: this
 			
 			,sjax: this.sjax
+			
+			// Node in fixed menu are not draggable
+			,draggable: this.editable
 
 			,getFamilyStore: function(cb) {
 				if (!me.actionFamiliesStore) {
@@ -286,7 +344,8 @@ eo.ui.TreeMenu = Ext.extend(sp, {
 	,resetFactoryDefaults: function() {
 		var me = this;
 		Ext.Msg.confirm(
-			"Réinitialisation",
+			"Réinitialisation", // i18n
+			// i18n
 			"Cette action effacera toutes les personnalisations que vous avez"
 			+ " effectuées sur ce menu et rechargera le menu par défaut. Êtes-"
 			+ "vous sûr de vouloir continuer ?",
@@ -562,7 +621,7 @@ eo.ui.TreeMenu = Ext.extend(sp, {
 	
 	// private
 	,onRender: function() {
-		spp.onRender.apply(this, arguments);
+		this.callParent(arguments);
 		if (this.hasLoadingMask) this.setLoadingMask(true);
 	}
 	
@@ -748,405 +807,3 @@ eo.ui.TreeMenu = Ext.extend(sp, {
 		this.resetCollapse();
 	}
 });
-
-eo.ui.TreeMenu.prototype.TreeNode = Ext.extend(Ext.tree.TreeNode, {
-	
-	spp: Ext.tree.TreeNode.prototype
-	
-	,defaultColor: "#000"
-	,PARENT_NODE_ID: "parent__menu_nodes_id"
-	
-	,constructor: function(config) {
-		
-		var d = this.data = config && config.data || {};
-		
-		d.expanded = eo.bool(d.expanded);
-		d.open = eo.bool(d.open);
-		
-		var cfg = {
-			text: d.label
-			,id: d.id
-			// We want all nodes expanded at creation time, so that they are
-			// all rendered
-			//,expanded: d.expanded
-			,expanded: true
-			,open: d.open
-			,draggable: true
-			,cls: d.cssClass
-		};
-		
-		this.configureIconCls(d.iconCls);
-		cfg.iconCls = this.iconCls;
-		
-		this.spp.constructor.call(this, Ext.apply(cfg, config));
-
-		if (d.command) {
-			this.setCommand(d.command, true);
-		}
-
-		Ext.each(d.children, function(nodeData) {
-			if (!nodeData[this.PARENT_NODE_ID]) {
-				nodeData[this.PARENT_NODE_ID] = this.id;
-			}
-			this.appendChild(
-				new this.constructor({
-					data: nodeData
-					,listeners: this.listeners
-				})
-			);
-		}, this);
-		
-		this.on("click", this.onClick);
-	}
-	
-	,resetCollapse: function() {
-		if (this.data.expanded) {
-			this.expand();
-		} else {
-			this.collapse();
-		}
-		this.eachChild(function(child) {
-			child.resetCollapse();
-		});
-	}
-	
-	,onClick: function() {
-		if (this.cmd || this.action) {
-			this.run();
-		} else {
-			this.toggle();
-		}
-	}
-	
-	,run: function() {
-		if (this.action) {
-			this.runAction();
-		} else if (this.cmd) {
-			this.runCmd();
-		}
-	}
-	
-	// private
-	,runAction: function() {
-		Oce.Module.executeAction(this.action, {
-			scope: this
-			,before: this.setLoading.createDelegate(this, [true])
-			,after: function(success) {
-				this.setLoading(false);
-				if (!success) {
-					Ext.Msg.alert(
-						"Échec de l'action", 
-						"Le module visé pas l'action n'est pas accessible."
-					);
-				}
-			}
-		})
-//		this.setLoading(true);
-//		var me = this,
-//			action = this.action,
-//			module = this.action.module;
-//		if (module.substr(0,12) !== "Oce.Modules.") {
-//			module = String.format("Oce.Modules.{0}.{0}", this.action.module);
-//		}
-//		Oce.mx.application.getModuleInstance(
-//			module,
-//			function(module) {
-//				module.executeAction({
-//					action: action.method
-//					,args: action.args
-//					,callback: function() { this.setLoading(false); }
-//					,scope: me
-//				});
-//			},
-//			function() {
-//				me.setLoading(false);
-//				Ext.Msg.alert("Échec de l'action", 
-//						"Le module visé pas l'action n'est pas accessible.");
-//			}
-//		);
-	}
-	
-	// private
-	,runCmd: function() {
-		this.setLoading();
-		this.cmd();
-		this.setLoading(false);
-	}
-	
-	,setLoading: function(loading) {
-		if (loading !== false) {
-			this.getUI().addClass("loading");
-		} else {
-			this.getUI().removeClass("loading");
-		}
-	}
-
-	,getActionFamily: function(cb) {
-		var fs = this.getFamilyStore(arguments.callee.createDelegate(this)),
-			af = this.data.action_family,
-			wl;
-		if (!fs) {
-			wl = this.getActionFamily_waitingList
-					 = this.getActionFamily_waitingList || [];
-			wl.push(cb);
-			return undefined;
-		}
-		if (af) {
-			wl = this.getActionFamily_waitingList;
-			delete this.getActionFamily_waitingList;
-			if (wl) Ext.each(wl, function(cb) {cb()});
-
-			return fs.getById(this.data.action_family);
-		}
-		return undefined;
-	}
-	
-	,getFamilyAction: function(familyRecord) {
-		var r;
-		Ext.each(familyRecord.get("actions"), function(a) {
-			if (a.id === this.data.action) {
-				r = a;
-				return false;
-			}
-		}, this);
-		return r;
-	}
-	
-	,configureIconCls: function(myic) {
-		var fam = this.getActionFamily(arguments.callee.createDelegate(this)),
-			fic = myic || fam && fam.get("iconCls");
-		if (fic) {
-			var fa = fam && this.getFamilyAction(fam),
-				bic = fa && fa.baseIconCls;
-			if (bic) {
-				fic = fa.baseIconCls;
-			}
-			var ic = ic = this.iconCls || "" + " "
-				+ fic.replace('%action%', this.data.action || "");
-			if (this.setIconCls && this.attributes) {
-				this.setIconCls(ic);
-			} else {
-				this.iconCls = ic;
-			}
-		}
-	}
-	
-	,parseActionRegex: /^@(.+)#(.+?)(?:\((.+)\))?$/
-	
-	,setCommand: function(command, force) {
-		if (command !== this.data.command || force) {
-			this.data.command = command;
-			
-			delete this.cmd;
-			delete this.action;
-			
-			if (command) {
-				if (command.substr(0,1) === '@') {
-					var parts = this.parseActionRegex.exec(command);
-					parts.shift();
-					var module = parts.shift(),
-						method = parts.shift(),
-						args = parts.shift();
-					if (!method) {
-						this.cmd = Ext.emptyFn;
-						return;
-					}
-					if (args) {
-						args = args.split(',');
-						for (var i=0,l=args.length; i<l; i++) {
-							args[i] = args[i].trim();
-						}
-					}
-					this.action = {
-						module: module
-						,method: method
-						,args: args
-					};
-				} else {
-					this.cmd = Oce.cmd(command);
-				}
-				this.setCls("x-tree-node-leaf");
-			} else {
-				if (this.el) this.el.removeClass("x-tree-node-leaf");
-			}
-		}
-	}
-	
-	,setCreationParent: function(node) {
-
-		Ext.apply(this.data, {
-			action_family: node.data.action_family
-			,parent__menu_nodes_id: node.id
-		});
-
-		this.futureParentNode = node;
-		this.phantom = true;
-	}
-	
-	,render: function() {
-		this.spp.render.apply(this, arguments);
-		var color = this.data.color;
-		delete this.data.color;
-		this.setColor(color);
-	}
-	
-	,setColor: function(color) {
-		if (color !== this.data.color) {
-			this.data.color = color;
-			if (this.rendered) {
-				Ext.get(this.getUI().getTextEl()).setStyle("color", color);
-			}
-		}
-	}
-	
-	,setLabel: function(text) {
-		if (text !== this.data.label) {
-			this.data.label = text;
-			this.setText(text);
-		}
-	}
-	
-	,setItemIconCls: function(iconCls) {
-		if (iconCls !== this.data.iconCls || this.isNew()) {
-			// Remove class in the node element
-			var el = Ext.get(this.getUI().getIconEl());
-			Ext.each([this.data.iconCls, this.iconCls], function(previous) {
-				if (previous && el) el.removeClass(previous.split(" "));
-			}, this);
-			// Update with the new iconCls. If a blank value is submitted, then
-			// we try to restore the default action icon.
-			this.data.iconCls = iconCls || null;
-			if (iconCls === undefined || iconCls === null) {
-				delete this.iconCls;
-				this.configureIconCls();
-			} else {
-				this.setIconCls(iconCls);
-			}
-		}
-	}
-	
-	,update: function(data) {
-		Ext.apply(this.data, {
-			action_family: data.action_family
-			,action: data.action
-			,expanded: !!data.expanded
-			,open: !!data.open
-		});
-		this.setLabel(data.label);
-		this.setColor(data.color);
-		this.setCommand(data.command);
-		// action family is used to set iconCls, so the next call must be
-		// done after having set data.action_family
-		this.setItemIconCls(data.iconCls);
-	}
-
-	,isNew: function() {
-		return !!this.phantom;
-	}
-
-	/**
-	 * Saves this node and all its descendants, recomputing order field.
-	 */
-	,saveFullNode: function(cb) {
-		var data = Ext.apply({}, this.data),
-			childNodes = [],
-			pId = !this.getDepth() ? null : this.id;
-
-		if (this.isNew()) {
-			throw new Error();
-		}
-
-		var children = [];
-		if (this.hasChildNodes()) {
-			var i=0;
-			this.eachChild(function(n) {
-				childNodes.push(n);
-				var data = Ext.apply(Ext.apply({}, n.data), {
-					order: i++
-					,'new': n.isNew()
-					,full: false
-					,root: !this.getDepth()
-				});
-				data[this.PARENT_NODE_ID] = pId;
-				delete data.children;
-				children.push(data);
-			});
-		}
-		data.children = children;
-
-		Ext.apply(data, {
-			'new': this.isNew()
-			,full: true
-			,root: !this.getDepth()
-		});
-
-		var me = this;
-		this.sjax.request({
-			jsonData: {
-				controller: this.ownerTreeMenu.controller
-				,action: 'saveNode'
-				,data: data
-			}
-			,onSuccess: function(o) {
-				if (childNodes.length !== o.childrenIds.length) {
-					throw new Error('Out of sync :(');
-				}
-				me.setId(o.id);
-				delete me.phantom;
-				for (var i=0,l=childNodes.length; i<l; i++) {
-					var cn = childNodes[i]
-					cn.setId(o.childrenIds[i]);
-					delete cn.phantom;
-				}
-				if (cb) cb();
-			}
-		});
-	}
-	
-	,setId: function(id) {
-		this.spp.setId.call(this, id);
-		this.data.id = id;
-	}
-	
-	,save: function() {
-
-		var newParent = this.futureParentNode;
-		if (newParent) {
-			newParent.appendChild(this);
-			newParent.expand();
-			newParent.saveFullNode();
-			delete this.futureParentNode;
-		} else {
-			this.sjax.request({
-				jsonData: {
-					controller: this.ownerTreeMenu.controller
-					,action: 'saveNode'
-					,data: Ext.apply(Ext.apply({}, this.data), {
-						'new': this.isNew()
-						,root: !this.getDepth()
-						,full: false
-					})
-				}
-				,onSuccess: function() {
-					delete this.phantom;
-				}.createDelegate(this)
-			});
-		}
-	}
-	
-	,remove: function() {
-		this.spp.remove.apply(this, arguments);
-		// to server
-		if (!this.isNew()) {
-			this.sjax.request({
-				params: {
-					controller: this.ownerTreeMenu.controller
-					,action: "deleteNode"
-					,nodeId: this.data.id
-				}
-			})
-		}
-	}
-});
-
-})(); // closure
