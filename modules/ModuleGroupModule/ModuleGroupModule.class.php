@@ -6,9 +6,7 @@ use eoko\_getModule\TabModule;
 
 use eoko\module\ModuleManager;
 
-use eoko\modules\TreeMenu\ActionProvider;
 use eoko\modules\TreeMenu\ActionProvider\ModuleGroupProvider;
-use eoko\modules\TreeMenu\HasMenuActions;
 
 /**
  * Base module class for ModuleGroupModules. ModuleGroupModules are modules that 
@@ -85,28 +83,15 @@ use eoko\modules\TreeMenu\HasMenuActions;
 class ModuleGroupModule extends TabModule {
 
 	public function getActionProvider() {
-		$config = $this->getConfig()->get('config');
-		
-//		$actions = array();
-
-		$children = array();
-		foreach ($config['modules'] as $module) {
+		foreach ($this->getChildModules() as $module) {
 			$children[] = ModuleManager::getModule($module);
-//			$name = $module->getName();
-//			if (!($module instanceof HasMenuActions)) {
-//				continue;
-//			}
-//			$moduleActions = $module->getActionProvider()->getAvailableActions();
-//			unset($moduleActions['open']);
-//			
-//			foreach ($moduleActions as $action) {
-//				$actions["{$module->getName()}_{$action->getId()}"] = $action;
-//			}
 		}
-
 		return new ModuleGroupProvider($this, $children);
 	}
-	
+
+	/**
+	 * @return Module[]
+	 */
 	protected function getChildModules() {
 		$config = $this->getConfig()->get('config');
 		$r = array();
@@ -116,6 +101,32 @@ class ModuleGroupModule extends TabModule {
 			}
 		}
 		return $r;
+	}
+	
+	protected function createJavascriptModuleProperties() {
+		$properties = parent::createJavascriptModuleProperties();
+		
+		foreach ($this->getChildModules() as $module) {
+			$moduleName = $module->getName();
+			// first try to see if a special title has been prepared for us
+			$extra = $module->getConfig()->get('extra');
+			if (isset($extra['groupModuleTitle'])) {
+				$title = $extra['groupModuleTitle'];
+			} else if (method_exists($module, 'getTitle')) {
+				$title = $module->getTitle();
+			} else {
+				$title = $moduleName;
+			}
+			$modules[] = array(
+				'title' => $title,
+				'name' => $moduleName,
+				'cmd' => "Oce.Modules.$moduleName.$moduleName",
+			);
+		}
+		
+		$properties['modules'] = $modules;
+		
+		return $properties;
 	}
 	
 }

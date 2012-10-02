@@ -18,8 +18,7 @@ Oce.win.TemplatePage = Ext.extend(Ext.Panel, {
 	,onRender: function() {
 		Oce.win.TemplatePage.superclass.onRender.apply(this, arguments);
 
-//		var win = this.findParentByType(Oce.FormWindow)
-		var win = this.findParentBy(function(p){return p instanceof Oce.FormWindow})
+		var win = this.findParentBy(function(p){return p instanceof Oce.FormWindow || p instanceof Oce.FormWindowPanel})
 			,formPages = win.formPages
 			;
 
@@ -55,7 +54,7 @@ Oce.win.TemplatePage = Ext.extend(Ext.Panel, {
 	}
 })
 
-Ext.reg('oce.wintpl', Oce.win.TemplatePage);
+Ext.reg('oce.wintpl', 'Oce.win.TemplatePage');
 
 
 //Oce.deps.wait('Ext.ux.GroupTabPanel', function() {

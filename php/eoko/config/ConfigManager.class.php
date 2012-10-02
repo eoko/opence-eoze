@@ -87,7 +87,7 @@ class ConfigManager {
 	/**
 	 * @return ConfigManager
 	 */
-	private static function getInstance() {
+	public static function getInstance() {
 		if (self::$instance === null) self::$instance = new ConfigManager();
 		return self::$instance;
 	}

@@ -8,7 +8,7 @@ eo.Testing.addUnitTest('CalendarEditor', function() {
 
 Ext.QuickTips.init();
 
-var month = Ext.create({
+var month = Ext.widget({
 	
 	xtype: 'eo.montheditor'
 

@@ -93,6 +93,6 @@ eo.form.contact.AddressField = Ext.extend(eo.form.contact.AbstractField, {
 	
 });
 
-Ext.reg('addressfield', eo.form.contact.AddressField);
+Ext.reg('addressfield', 'eo.form.contact.AddressField');
 
 }); // deps

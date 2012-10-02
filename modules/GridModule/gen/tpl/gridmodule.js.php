@@ -39,6 +39,9 @@ var completeRegistering = function() {
 <?php if (isset($uses)): ?>
 if (!Oce.deps.wait(<?php echo $uses ?>, function() {
 <?php endif // uses ?>
+
+Ext.namespace('<?php echo $namespace ?>.<?php echo $controller ?>');
+
 <?php echo $namespace ?>.<?php echo $controller ?>.<?php echo $name ?>Base = (function(renderers) {
 
 var moduleClass = Ext.extend(<?php echo $superclass ?>, {
@@ -150,7 +153,9 @@ if (!deferedRegistering) {
 <?php if (isset($uses)): ?>
 }) // Oce.deps.wait 
 ){ // if must wait, trigger dep loading
-	Oce.getModules(<?php echo $uses ?>);
+	Ext.onReady(function() {
+		Oce.getModules(<?php echo $uses ?>);
+	});
 }
 <?php endif ?>
 })(); // closure

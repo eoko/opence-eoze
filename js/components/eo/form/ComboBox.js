@@ -182,5 +182,5 @@ eo.form.ComboBox = Ext.extend(Ext.form.ComboBox, {
 	}
 });
 
-Ext.reg('combo', eo.form.ComboBox);
+Ext.reg('combo', 'eo.form.ComboBox');
 Oce.deps.reg('eo.form.ComboBox');

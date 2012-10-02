@@ -360,8 +360,8 @@ Oce.FormWindow = Ext.extend(eo.Window, {
 //				Ext.applyIf(this.formPanel, {
 //					autoScroll: true
 //				});
-//				formPanel = Ext.create(this.formPanel);
-				formPanel = Ext.create(
+//				formPanel = Ext.widget(this.formPanel);
+				formPanel = Ext.widget(
 					Ext.applyIf(this.formPanel, {
 						autoScroll: true
 					})
@@ -633,7 +633,7 @@ eo.Window.MinimizePlugin = eo.Object.create({
 			}
 		});
 
-		win.afterRender = win.afterRender.createSequence(function() {
+		win.afterRender = Ext.Function.createSequence(win.afterRender, function() {
 			taskbar.addWindow(this);
 		});
 	}

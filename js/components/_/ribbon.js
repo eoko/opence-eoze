@@ -15,4 +15,4 @@ Oce.RibbonButton = Ext.extend(Ext.Button, {
 		Oce.RibbonButton.superclass.constructor.call(this, config);
 	}
 })
-Ext.reg('oce.rbbutton', Oce.RibbonButton)
+Ext.reg('oce.rbbutton', 'Oce.RibbonButton')

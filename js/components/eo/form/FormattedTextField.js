@@ -116,5 +116,5 @@ eo.form.FormattedTextField = Ext.extend(Ext.form.TriggerField, {
 	}
 });
 
-Ext.reg('formattedtextfield', eo.form.FormattedTextField);
+Ext.reg('formattedtextfield', 'eo.form.FormattedTextField');
 Oce.deps.reg('eo.form.FormattedTextField');

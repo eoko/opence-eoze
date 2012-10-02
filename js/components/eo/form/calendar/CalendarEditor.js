@@ -330,7 +330,7 @@ eo.form.calendar.ZonesEditor = Ext.extend(Ext.form.Field, {
 	}
 });
 
-Ext.reg('calendarzoneseditor', eo.form.calendar.ZonesEditor);
+Ext.reg('calendarzoneseditor', 'eo.form.calendar.ZonesEditor');
 	
 var spp = eo.form.calendar.ZonesEditor.superclass;
 })(); // closure

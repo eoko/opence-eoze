@@ -23,7 +23,7 @@ var sp = Ext.form.TriggerField,
  * @class Ext.ux.form.ColobComboBox
  * @extends Ext.form.TriggerField
  */
-Ext.ux.form.ColorPicker = sp.extend({
+Ext.ux.form.ColorPicker = Ext.extend(sp, {
 	
 	value: "#FFFFFF"
 	
@@ -155,7 +155,7 @@ Ext.ux.form.ColorPicker = sp.extend({
 	
 });
 
-Ext.reg('colorpicker', Ext.ux.form.ColorPicker);
+Ext.reg('colorpicker', 'Ext.ux.form.ColorPicker');
 
 })(); // closure
 

@@ -146,5 +146,5 @@ Oce.form.SubmitDisplayField = Ext.extend(Ext.form.DisplayField, {
 	}
 })
 
-Ext.reg('oce.submitdisplayfield', Oce.form.SubmitDisplayField)
-Ext.reg('submitdisplayfield', Oce.form.SubmitDisplayField)
+Ext.reg('oce.submitdisplayfield', 'Oce.form.SubmitDisplayField')
+Ext.reg('submitdisplayfield', 'Oce.form.SubmitDisplayField')

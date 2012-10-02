@@ -14,7 +14,7 @@ eo.Testing.addUnitTest('DayMonthPicker', function() {
 		,monthField: 'month'
 	});
 
-	var formPanel = Ext.create({
+	var formPanel = Ext.widget({
 		xtype: 'form'
 		,padding: 10
 		,hideLabel: true

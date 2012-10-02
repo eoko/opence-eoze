@@ -23,7 +23,7 @@ Ext.override(Ext.form.Checkbox, {
     tooltipType: 'qtip'
 
     // private
-    ,onRender: Ext.form.Checkbox.prototype.onRender.createSequence(function() {
+    ,onRender: Ext.Function.createSequence(Ext.form.Checkbox.prototype.onRender, function() {
       if (this.tooltip) {
             this.setTooltip(this.tooltip, true);
         }

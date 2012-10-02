@@ -55,7 +55,7 @@ eo.app.Application = Ext.extend(Ext.util.Observable, {
 	,setEozeApplication: function(app) {
 		this.app = app;
 
-		app.onConfigure = app.onConfigure.createSequence(function() {
+		app.onConfigure = Ext.Function.createSequence(app.onConfigure, function() {
 
 			// fire event
 			this.fireEvent('configured', this);
@@ -65,7 +65,7 @@ eo.app.Application = Ext.extend(Ext.util.Observable, {
 			this.relayEvents(this.yearManager, ['datechanged']);
 		}, this);
 
-		app.afterStart = app.afterStart.createSequence(function() {
+		app.afterStart = Ext.Function.createSequence(app.afterStart, function() {
 			this.fireEvent('started', this);
 		}, this);
 	}
