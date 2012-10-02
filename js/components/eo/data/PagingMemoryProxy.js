@@ -432,7 +432,7 @@ eo.data.ProxyJsonStore = Ext.extend(Ext.data.JsonStore, {
 		var proxy = config.proxy || this.proxy,
 			dataProvider = config.dataProvider || this.dataProvider;
 		if (!proxy && dataProvider) {
-			this.proxy = new eo.data.CachingHttpProxy({
+			config.proxy = new eo.data.CachingHttpProxy({
 				dataProvider: dataProvider
 				,createStoreFilter: config.createStoreFilter || this.createStoreFilter
 			});

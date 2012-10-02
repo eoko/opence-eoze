@@ -521,7 +521,7 @@ Ext.grid.Column.types.datecolumn =
 //				// <rx+>
 //				var xtype = this.pagingToolbarXtype || "paging";
 //				if (xtype.xtype) xtype = xtype.xtype;
-//				this.pageTb = Ext.create({
+//				this.pageTb = Ext.widget({
 //					xtype: xtype,
 //					store: this.store,
 //					pageSize: this.pageSize,
@@ -620,7 +620,7 @@ Ext.form.ComboBox.override({
 						};
 					}
 					// create component
-					this.toolbar = Ext.create(Ext.apply({
+					this.toolbar = Ext.widget(Ext.apply({
 						xtype: 'toolbar'
 						,renderTo: this.header
 					}, tb));
@@ -772,7 +772,7 @@ Ext.data.Types.INT.convert = function(v) {
 if (Ext.isChrome) {
 	(function() {
 		var spp = Ext.form.TextArea.prototype;
-		spp.afterRender = spp.afterRender.createSequence(function() {
+		spp.afterRender = Ext.Function.createSequence(spp.afterRender, function() {
 			var el = this.el.up('.x-form-element');
 			if (el) {
 				el.setHeight(this.getHeight());
@@ -831,17 +831,21 @@ spp.setValue = function(v) {
 
 // Override to test that el & el.dom still exist at the time the method is called
 // (which is not guaranteed, since in ext it is wrapped in a DelayedTask).
-Ext.form.MessageTargets.qtip.mark = function(field, msg) {
-	var el = field.el,
-		dom = el && el.dom;
-	if (el) {
-		el.addClass(field.invalidClass);
-		if (dom) {
-			el.dom.qtip = msg;
-			el.dom.qclass = 'x-form-invalid-tip';
+if (Ext.form.MessageTargets) {
+	Ext.form.MessageTargets.qtip.mark = function(field, msg) {
+		var el = field.el,
+			dom = el && el.dom;
+		if (el) {
+			el.addClass(field.invalidClass);
+			if (dom) {
+				el.dom.qtip = msg;
+				el.dom.qclass = 'x-form-invalid-tip';
+			}
 		}
-	}
-	if(Ext.QuickTips){ // fix for floating editors interacting with DND
-		Ext.QuickTips.enable();
-	}
-};
+		if(Ext.QuickTips){ // fix for floating editors interacting with DND
+			Ext.QuickTips.enable();
+		}
+	};
+} else if (window.console && console.warn) {
+	console.warn('Overridding a class that does not exist anymore.');
+}

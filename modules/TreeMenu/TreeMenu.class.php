@@ -221,6 +221,20 @@ class TreeMenu extends Module implements HasMenuActions {
 		return $this->actionProvider;
 	}
 
+	/**
+	 * Gets the configuration object for the javascript menu component.
+	 * @return array|null
+	 */
+	public function getWidgetConfiguration() {
+		$config = array(
+			'controller' => $this->getName(),
+		);
+		return Arrays::apply(
+			$config,
+			$this->getConfig()->get('widget', null)
+		);
+	}
+	
 }
 
 class MissingMenuElementException extends Exception {

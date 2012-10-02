@@ -67,7 +67,7 @@ Oce.AutoloadPanel = Ext.extend(Ext.Panel, {
 	}
 });
 
-Ext.reg('oce.autoloadpanel', Oce.AutoloadPanel);
+Ext.reg('oce.autoloadpanel', 'Oce.AutoloadPanel');
 
 Oce.w = Ext.extend(Ext.Window, {
     initComponent: function() {

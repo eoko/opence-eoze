@@ -85,7 +85,7 @@ eo.form.ClearableComboBox = Ext.extend(eo.form.ComboBox, {
 	,onTrigger2Click : sppCombo.onTriggerClick
 });
 
-Ext.reg('clearablecombo', eo.form.ClearableComboBox);
+Ext.reg('clearablecombo', 'eo.form.ClearableComboBox');
 Oce.deps.reg('eo.form.ClearableComboBox');
 
 }); // deps

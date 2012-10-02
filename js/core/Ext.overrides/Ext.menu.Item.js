@@ -22,7 +22,7 @@ Ext.override(Ext.menu.Item, {
     tooltipType: 'qtip'
 
     // private
-    ,onRender: Ext.menu.Item.prototype.onRender.createSequence(function() {
+    ,onRender: Ext.Function.createSequence(Ext.menu.Item.prototype.onRender, function() {
       if (this.tooltip) {
             this.setTooltip(this.tooltip, true);
         }

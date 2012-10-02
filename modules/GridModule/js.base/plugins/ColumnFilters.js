@@ -4,8 +4,8 @@ var ColumnFiltersPlugin = Ext.extend(eo.Class, {
 	
 	constructor: function(gm) {
 		
-		gm.beforeCreateGrid = gm.beforeCreateGrid.createSequence(this.beforeCreateGrid, this);
-		gm.afterCreateGrid = gm.afterCreateGrid.createSequence(this.afterCreateGrid, this);
+		gm.beforeCreateGrid = Ext.Function.createSequence(gm.beforeCreateGrid, this.beforeCreateGrid, this);
+		gm.afterCreateGrid = Ext.Function.createSequence(gm.afterCreateGrid, this.afterCreateGrid, this);
 		gm.openActionHandlers["gridFilters"] = this.openActionHandler;
 		
 		var me = this,

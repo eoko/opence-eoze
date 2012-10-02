@@ -72,4 +72,4 @@ eo.form.GrowingTextArea = Ext.extend(Ext.form.TextArea, {
 	}
 });
 
-Ext.reg('growingtextarea', eo.form.GrowingTextArea);
+Ext.reg('growingtextarea', 'eo.form.GrowingTextArea');

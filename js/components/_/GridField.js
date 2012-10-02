@@ -158,7 +158,7 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 
 		if (this.configurator) {
 			if (!this.configurator.created) {
-				this.configurator = Ext.create(this.configurator);
+				this.configurator = Ext.widget(this.configurator);
 			}
 			this.configurator.configure(this);
 		}
@@ -214,7 +214,7 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 						dataIndex: config.dataIndex || di
 					}, config, this.columnDefaults);
 					colConfig.editor = config.editor instanceof Ext.Component ? 
-							config.editor : Ext.create(config.editor);
+							config.editor : Ext.widget(config.editor);
 					if (!colConfig.renderer && colConfig.editor.createRenderer) {
 						colConfig.renderer = colConfig.editor.createRenderer('-');
 					}
@@ -290,7 +290,7 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 		}
 
 //		var store = this.store = new Ext.data.JsonStore(Ext.apply({
-		var store = this.store = Ext.create(Ext.apply({
+		var store = this.store = Ext.widget(Ext.apply({
 			url: 'index.php'
 			,totalProperty: 'count'
 			,idProperty: this.pkName
@@ -1146,10 +1146,10 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 
 		// This is necessary to make the component compatible with
 		// the FieldLabeler plugin
-		this.el.setWidth = this.el.setWidth.createSequence(function(w) {
+		this.el.setWidth = Ext.Function.createSequence(this.el.setWidth, function(w) {
 			if (me.grid) me.grid.setWidth(w);
 		})
-		this.el.setHeight = this.el.setHeight.createSequence(function(h) {
+		this.el.setHeight = Ext.Function.createSequence(this.el.setHeight, function(h) {
 			if (me.grid) me.grid.setHeight(h);
 		})
 
@@ -1338,6 +1338,6 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 	}
 });
 
-Ext.reg('gridfield', Oce.form.GridField);
+Ext.reg('gridfield', 'Oce.form.GridField');
 
 Oce.deps.reg('eo.form.GridField');

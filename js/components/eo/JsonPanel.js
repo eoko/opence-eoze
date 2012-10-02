@@ -296,6 +296,6 @@ eo.JsonPanel = Ext.extend(Ext.Panel, {
 	,clearInvalid: Ext.emptyFn
 });
 
-Ext.reg('jsonpanel', eo.JsonPanel);
+Ext.reg('jsonpanel', 'eo.JsonPanel');
 
 })(); // closure

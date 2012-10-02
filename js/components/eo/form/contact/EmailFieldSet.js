@@ -17,6 +17,6 @@ eo.form.contact.EmailFieldSet = Ext.extend(eo.form.contact.AbstractFieldSet, {
 	}
 });
 
-Ext.reg('emailsfieldset', NS.EmailFieldSet);
+Ext.reg('emailsfieldset', 'eo.form.contact.EmailFieldSet');
 
 }); // deps

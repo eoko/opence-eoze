@@ -312,5 +312,5 @@ Ext.ux.GroupTabPanel = Ext.extend(Ext.TabPanel, {
     }
 });
 
-Ext.reg('grouptabpanel', Ext.ux.GroupTabPanel);
+Ext.reg('grouptabpanel', 'Ext.ux.GroupTabPanel');
 Oce.deps.reg('Ext.ux.GroupTabPanel');

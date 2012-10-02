@@ -60,4 +60,4 @@ Oce.form.DateDisplayField = Ext.extend(Ext.form.DisplayField, {
     }
 });
 
-Ext.reg('datedisplayfield', Oce.form.DateDisplayField);
+Ext.reg('datedisplayfield', 'Oce.form.DateDisplayField');

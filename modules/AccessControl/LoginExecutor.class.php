@@ -40,23 +40,10 @@ class LoginExecutor extends JsonExecutor {
 		return true;
 	}
 	
-	protected function prepareLoginTemplate(Template $tpl) {
-
-		$tpl->help = false;
-
-//		$tpl->text = <<<'TXT'
-//OpenCE est un service proposé par le comité inter-entreprise de Rhodia. Ses
-//services sont réservés aux membres du comité et à ses adhérents. <br /><br />
-//Pour accéder à openCE il est nécessaire de s'identifier.
-//TXT;
-		$tpl->text = 'Bonjour, veuillez vous identifier pour accéder à la console d\'administration.';
-	}
-	
 	public function get_module() {
-		$path = $this->findPath('login', FileType::JS);
-		$tpl = Template::create()->setFile($path);
-		$this->prepareLoginTemplate($tpl);
-		header('Content-type: application/x-javascript');
-		$tpl->render();
+		if (!headers_sent) {
+			header('Content-type: application/x-javascript');
+		}
+		echo $this->getModule()->getJavascriptAsString();
 	}
 }

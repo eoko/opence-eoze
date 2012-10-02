@@ -262,7 +262,7 @@ eo.MediaPanel = Ext.extend(Ext.Panel, {
             ,border: false
 //            ,items: [leftPane, view]
             ,cls: 'x-eo-media-panel'
-            ,items: [leftPane, this.viewCardCt = Ext.create({
+            ,items: [leftPane, this.viewCardCt = Ext.widget({
                 xtype: 'container'
                 ,region: 'center'
                 ,layout: 'card'
@@ -529,7 +529,8 @@ eo.MediaPanel.TreePanel = Ext.extend(Ext.tree.TreePanel, {
                         ,beforeexpand: function() {this.iconElement.addClass("open")}
                     }
                 });
-                child.getUI().render = child.getUI().render.createSequence(function() {
+				var ui = child.getUI()
+				ui.render = Ext.Function.createSequence(ui.render, function() {
                     child.iconElement = new Ext.Element(this.getIconEl());
                 });
 

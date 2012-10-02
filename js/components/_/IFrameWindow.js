@@ -67,7 +67,7 @@ eoko.ext.IFramePanel = Ext.extend(Ext.Panel, {
 				items: [
 					back, forward, "-", reload
 					,"->"
-					,this.loader = new Ext.Toolbar.TextItem({
+					,this.loader = new Ext.toolbar.TextItem({
 						cls: "mini-browser-ajax-loader"
 						,hidden: true
 						,text: this.showButtonsText ? this.loadingText : undefined // i18n
@@ -375,7 +375,7 @@ eoko.ext.IFramePanel = Ext.extend(Ext.Panel, {
 
 });
 
-Ext.reg('iframepanel', eoko.ext.IFramePanel);
+Ext.reg('iframepanel', 'eoko.ext.IFramePanel');
 
 eoko.ext.IFramePanel.IFrameContainer = Ext.extend(Ext.Container, {
 	htmlFormat: '<iframe id="{2}" src="{0}" width="100%" height = "100%" frameborder="0">{1}</iframe>'
@@ -472,7 +472,7 @@ eoko.ext.IFrameWindow = Ext.extend(Ext.Window, {
 	}
 });
 
-Ext.reg('iframewindow', eoko.ext.IFrameWindow);
+Ext.reg('iframewindow', 'eoko.ext.IFrameWindow');
 
 eoko.help.IFrameFactory = {
 

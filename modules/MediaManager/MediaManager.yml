@@ -1,5 +1,8 @@
 abstract: true
 
+private:
+  generateAbstractJavascriptModule: true
+
 class: GridModule
 model: User
 

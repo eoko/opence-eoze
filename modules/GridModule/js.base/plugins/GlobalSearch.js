@@ -71,8 +71,8 @@ Oce.GridModule.plugins.Search = Ext.extend(Object, {
             Ext.apply(this, config);
         }
         
-        gm.beforeCreateToolbar = gm.beforeCreateToolbar
-                .createSequence(this.beforeCreateToolbar, this);
+        gm.beforeCreateToolbar =
+				Ext.Function.createSequence(gm.beforeCreateToolbar, this.beforeCreateToolbar, this);
     }
     
     // private

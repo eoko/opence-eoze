@@ -235,7 +235,7 @@ Ext.ux.grid.RowExpander = Ext.extend(Ext.util.Observable, {
     }
 });
 
-Ext.preg('rowexpander', Ext.ux.grid.RowExpander);
+Ext.preg('rowexpander', 'Ext.ux.grid.RowExpander');
 
 //backwards compat
 Ext.grid.RowExpander = Ext.ux.grid.RowExpander;

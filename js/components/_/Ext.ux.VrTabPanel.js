@@ -935,7 +935,7 @@ Ext.ux.VrTabPanel = Ext.extend(Ext.Panel,  {
      * @hide
      */
 });
-Ext.reg('vrtabpanel', Ext.ux.VrTabPanel);
+Ext.reg('vrtabpanel', 'Ext.ux.VrTabPanel');
 
 /**
  * See {@link #setActiveTab}. Sets the specified tab as the active tab. This method fires
@@ -972,4 +972,4 @@ Ext.ux.VrTabPanel.AccessStack = function(){
     };
 };
 
-Ext.reg('vertabpanel', Ext.ux.VrTabPanel);
+Ext.reg('vertabpanel', 'Ext.ux.VrTabPanel');
