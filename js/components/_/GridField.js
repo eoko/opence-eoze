@@ -832,7 +832,7 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 	 * handled...
 	 */
 	,matchQuery: function(record, query) {
-		new RegExp('^' + query, 'i').test(record.data.nom);
+		new RegExp('^' + Ext.escapeRe(query), 'i').test(record.data.nom);
 	}
 
 	,onRemove: function() {
