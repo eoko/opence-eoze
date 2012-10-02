@@ -356,6 +356,64 @@ eo.data.CachingHttpProxy.IndexedDataProvider = Ext.extend(eo.data.CachingHttpPro
 });
 
 /**
+ * A {@link eo.data.CachingHttpProxy.IndexedDataProvider IndexedDataProvider} that 
+ * provides default support for RegExp searches.
+ * 
+ * The logic of this class lives in {@link #createQueryFilter}, itself called in parent's
+ * {@link #applyQuery}.
+ */
+eo.data.CachingHttpProxy.RegexIndexedDataProvider = Ext.extend(eo.data.CachingHttpProxy.IndexedDataProvider, {
+	
+	/**
+	 * @cfg {String}
+	 * String that will be prepended to the query to create the matching RegExp.
+	 */
+	rePrefix: '^'
+	/**
+	 * @cfg {String}
+	 * String that will be appended to the query to create the matching RegExp.
+	 */
+	,reSuffix: ''
+	/**
+	 * @cfg {String/undefined}
+	 * Modifier flags to be used in the RegExp construction.
+	 */
+	,reFlags: 'i'
+
+	/**
+	 * @cfg {String/String[]}
+	 * Name of the field to be tested, or an array of names (if any field matches,
+	 * the record will be kept).
+	 */
+	,queryField: undefined
+	
+	/**
+	 * @protected
+	 */
+	,createQueryFilter: function(query) {
+		var esc = this.rePrefix + Ext.escapeRe(query) + this.reSuffix,
+			re = new RegExp(esc, this.reFlags),
+			f = this.queryField;
+		if (Ext.isArray(f)) { // OR array
+			var l = f.length;
+			return function(record) {
+				var d = record.data;
+				for (var i=0; i<l; i++) {
+					if (re.test(d[f[i]])) {
+						return true;
+					}
+				}
+				return false;
+			};
+		} else {
+			return function(record) {
+				return re.test(record.data[f]);
+			};
+		}
+	}
+});
+
+/**
  * A {@link Ext.data.JsonStore JsonStore} that allows retrieving of records by id, even
  * if the records have been filtered out of the store. This is possible through the use
  * of an {@link eo.data.IndexedCachingHttpProxy IndexedCachingHttpProxy}, that can retrieve 
