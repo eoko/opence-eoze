@@ -66,8 +66,8 @@ NS.locale = function(key, num, genre, replacements) {
 				if (value.substr(0,1) === ':') {
 					value = NS.locale(value.substr(1), num, genre);
 				}
-				text = text.replace(new RegExp('{:' + key + '}', 'g'), value);
-				text = text.replace(new RegExp('{:' + key + ':lc}', 'g'), value.toLowerCase());
+				text = text.replace(new RegExp('{:' + Ext.escapeRe(key) + '}', 'g'), value);
+				text = text.replace(new RegExp('{:' + Ext.escapeRe(key) + ':lc}', 'g'), value.toLowerCase());
 			});
 		}
 		// Conditionnal words
