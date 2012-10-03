@@ -6,8 +6,8 @@ private:
 class: GridModule
 model: User
 
-basePath: medias
-baseUrl: medias
+downloadPath: %ROOT%/medias
+downloadUrl: medias
 
 extra:
   search: false

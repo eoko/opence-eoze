@@ -106,10 +106,11 @@ class Cache {
 				$cacheKey[1] . ".$key",
 			);
 		} else {
-			return array(
+			$cacheKey = array(
 				$cacheKey, $key
 			);
 		}
+		return $cacheKey;
 	}
 
 	public static function cacheData($class, $data, $version = null, $requires = null) {

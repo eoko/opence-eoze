@@ -2,9 +2,13 @@
 
 namespace eoko\module;
 
+// Exception
 use eoko\module\exceptions\InvalidModuleException;
+// Config
 use eoko\config\Config,
 	eoko\config\ConfigManager;
+// Eoze
+use Inflector;
 
 /**
  * Represents the different locations of one named module.
@@ -307,12 +311,30 @@ class ModuleLocation extends Location {
 		return $this->locations;
 	}
 	
-	private function getModuleClassPattern() {
+	private function getAllowedModuleClassFilename() {
+		$ccModuleName = Inflector::camelCase($this->moduleName, true);
 		return array(
-			"$this->moduleName.class.php", 
-			'module.class.php', 
-			"{$this->moduleName}Module.class.php"
+			"$this->moduleName.class.php",
+			'module.class.php',
+			"{$this->moduleName}Module.class.php",
+			"$this->moduleName.php",
+			"Module.php",
+			"$ccModuleName.php",
 		);
+	}
+	
+	private function getAllowedModuleClassName() {
+		$ccModuleName = Inflector::camelCase($this->moduleName, true);
+		return array(
+			$this->moduleName,
+			$ccModuleName,
+			'Module',
+			$ccModuleName . 'Module',
+			$this->moduleName . 'module',
+		);
+		// 02/08/12 22:40
+		// Original array was this one:
+		// array($this->moduleName, 'module', "{$this->moduleName}module")
 	}
 
 	/**
@@ -324,13 +346,14 @@ class ModuleLocation extends Location {
 	 */
 	public function searchModuleClass(&$cacheDeps = null) {
 
-		foreach ($this->getModuleClassPattern() as $file) {
+		foreach ($this->getAllowedModuleClassFilename() as $file) {
 			if (file_exists($file = "$this->path$file")) {
 				require_once $file;
 				if (is_array($cacheDeps)) {
-					$cacheDeps[] = "require_once '$file';";
+					$ns = rtrim($this->namespace, '\\');
+					$cacheDeps[] = "namespace $ns { require_once '$file'; }";
 				}
-				foreach (array($this->moduleName, 'module', "{$this->moduleName}module") as $class) {
+				foreach ($this->getAllowedModuleClassName() as $class) {
 					$class = $this->namespace . $class;
 					if (class_exists($class, false)) {
 						return $class;
@@ -354,28 +377,12 @@ class ModuleLocation extends Location {
 			$dirPaths[] = $dir->path;
 		}
 		
-		$ds = DIRECTORY_SEPARATOR;
 		foreach ($dirPaths as $path) {
 			// add the directory with the module name
 			// (all the content will be checked)
 			$r[] = $path . $this->moduleName;
 			// and the simple module config file
 			$r[] = $path . $this->moduleName . '.yml';
-					
-//			$base = "$path$this->moduleName$ds";
-//			
-//			$paths = array(
-//				"$base$this->moduleName.yml",
-//				"{$base}config.yml",
-//				"$path$this->moduleName.yml",
-//				"$base.",
-//			);
-//				
-//			foreach (self::getModuleClassPattern() as $mc) {
-//				$paths[] = "$base$mc";
-//			}
-//			
-//			$r = array_merge($r, $paths);
 		}
 		
 		return $r;
