@@ -414,7 +414,9 @@ class ModuleManager {
 
 			$module = null;
 			if (null !== $class = $location->searchModuleClass($cacheDeps)) {
-				$module = $this->createModule($name, $class);
+				if (null !== $module = $this->createModule($name, $class)) {
+					return $module;
+				}
 			}
 
 			// try to create the module from the config file information

@@ -1,0 +1,20 @@
+router:
+  
+  index:
+# that won't work because of ZF2-436
+#    type: literal
+#    options:
+#      route: ''
+    type: regex
+    options:
+      regex: /?
+      defaults:
+        _RequestReader: eoko\mvc\LegacyRequestReader
+        _Router: eoko\mvc\LegacyRouter
+      spec: ''
+    may_terminate: true
+    child_routes:
+      php-script:
+        type: literal
+        options:
+          route: index.php
