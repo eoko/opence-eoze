@@ -2,7 +2,6 @@
 
 namespace eoko\modules\TabModule;
 
-use eoko\_getModule\BaseModule as BaseModule;
 use eoko\module\HasJavascript;
 //use eoko\module\Module;
 use eoko\module\HasTitle;
@@ -46,7 +45,7 @@ use eoko\template\Template;
  * @package Modules\Eoko\TabModule
  * @author Éric Ortéga <eric@planysphere.fr>
  */
-class TabModule extends BaseModule implements HasJavascript {
+class TabModule extends _ implements HasJavascript {
 	
 	protected $defaultExecutor = 'js';
 	
