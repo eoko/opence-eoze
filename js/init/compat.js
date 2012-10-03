@@ -88,7 +88,7 @@ var resolve = function(name, force) {
 	if (!o || o === window) {
 		if (force !== false) {
 			debugger
-			throw new Error('Undefined class: ' + cls);
+			throw new Error('Class not found: ' + name);
 		} else {
 			return null;
 		}
@@ -170,9 +170,21 @@ Ext.define = function(cls, o, createFn) {
 	}
 };
 
-})(); // closure
+// --- Ext.create
 
 Ext.widget = Ext.create;
+
+Ext.create = function(cls, config) {
+	var c = Ext.isString(cls) && cls || cls.xclass;
+	if (c) {
+		c = resolve(c);
+		return new c(config);
+	} else {
+		return Ext.widget.apply(Ext, arguments);
+	}
+};
+
+})(); // closure
 
 // Defer
 Ext.Function.defer = function(fn, millis, obj, args, appendArgs) {
