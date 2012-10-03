@@ -131,8 +131,11 @@ class ModuleProvider implements ActionProvider {
 	}
 	
 	public function getAvailableActions() {
-		if ($this->menuActions) return $this->menuActions;
-		else return $this->menuActions = $this->buildMenuActions();
+		if ($this->menuActions) {
+			return $this->menuActions;
+		} else {
+			return $this->menuActions = $this->buildMenuActions();
+		}
 	}
 	
 	protected function getMenuFamilyId() {
