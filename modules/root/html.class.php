@@ -132,25 +132,18 @@ JS;
 			switch ($type) {
 				case 'js':
 					return array(
-//						EOZE_BASE_URL . 'ext4/ext-all-debug.js' => -10,
-//						EOZE_BASE_URL . 'ext4/ext3-core-compat.js' => -8,
-//						EOZE_BASE_URL . 'ext4/ext3-compat.js' => -7,
-//						EOZE_BASE_URL . 'ext4/ext-lang-fr.js' => -6,
-						
-						EOZE_BASE_URL . 'js/ext/ext-base-debug' => -10,
-						EOZE_BASE_URL . 'js/ext/ext-all-debug-w-comments' => -9,
-						EOZE_BASE_URL . 'js/ext/ext-basex' => -8,
-						EOZE_BASE_URL . 'js/ext/ext-lang-fr' => -7,
+						EOZE_BASE_URL . 'js/ext/ext-base-debug.js' => -10,
+						EOZE_BASE_URL . 'js/ext/ext-all-debug-w-comments.js' => -9,
+						EOZE_BASE_URL . 'js/ext/ext-basex.js' => -8,
+						EOZE_BASE_URL . 'js/ext/ext-lang-fr.js' => -7,
 						
 						EOZE_BASE_URL . 'ext4/builds/ext-all-sandbox-debug-w-comments.js' => -11,
 						EOZE_BASE_URL . 'ext4/builds/eo-ext4-compat.js' => -6,
 					);
 				case 'css':
 					return array(
-//						EOZE_BASE_URL . 'ext4/resources/css/ext-all.css' => 1,
-						
 						EOZE_BASE_URL . 'ext4/resources/css/ext-sandbox-debug.css' => 1,
-						EOZE_BASE_URL . 'css/ext-all' => 1,
+						EOZE_BASE_URL . 'css/ext-all.css' => 1,
 					);
 			}
 		}
