@@ -118,10 +118,10 @@ class Router {
 		}
 		
 		// Create route stack
-		$stack = new Zend\Mvc\Router\Http\TreeRouteStack;
-		$stack->addRoutes($routesConfig);
+		$this->routeStack = new Zend\Mvc\Router\Http\TreeRouteStack;
+		$this->routeStack->addRoutes($routesConfig);
 
-		return $stack->match($this->httpRequest);
+		return $this->routeStack->match($this->httpRequest);
 	}
 	
 	/**
@@ -141,7 +141,7 @@ class Router {
 			throw new IllegalStateException('Illegal reader class: ' . $readerClass);
 		}
 
-		return new $readerClass($this->httpRequest);
+		return new $readerClass($this->httpRequest, $this->routeMatch);
 	}
 	
 	private function createRouter() {
@@ -345,7 +345,7 @@ class Router_RouteConfigAssembler {
 					} else {
 						throw new RuntimeException(
 							"Invalid 'parent_segment' value: cannot find a parent "
-							+ "route named $parent."
+							. "route named $parent."
 						);
 					}
 				}

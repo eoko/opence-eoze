@@ -146,7 +146,8 @@
 	 */
 	eo.form.DateTimeField = Ext.extend(Ext.form.CompositeField, {
 
-		dateTimeSeparator: /T| /
+		dateTimeSeparator: 'T'
+		,dateTimeSplitter: /T| /
 		,outDateFormat: 'Y-m-d'
 		,outTimeFormat: 'H:i'
 
@@ -162,17 +163,23 @@
 				flex: 1
 				,enableKeyEvents: true
 				,name: dateName
+				,submitValue: !!dateName
 			}, dc));
 
 			var tf = this.timeField = new eo.form.TimeField(Ext.apply({
 				flex: 1
 				,name: timeName
+				,submitValue: !!timeName
 			}, tc));
 
 			// Remove autogen name attribute if fields are not to be
 			// submitted independantly
-			if (!dateName) df.on("afterrender", removeFieldName);
-			if (!timeName) tf.on("afterrender", removeFieldName);
+			if (!dateName) {
+				df.on('afterrender', removeFieldName);
+			}
+			if (!timeName) {
+				tf.on('afterrender', removeFieldName);
+			}
 
 			if (this.name && this.submitValue !== false) {
 
@@ -236,10 +243,16 @@
 		 * Returns the value of the datetime field, as a Date object.
 		 */
 		,getValue: function() {
+			
 			var date = this.getDate();
-			if (!Ext.isDate(date)) return "";
+			
+			if (!Ext.isDate(date)) {
+				return "";
+			}
 
-			var tf = this.timeField, def = Date.defaults;
+			var tf = this.timeField,
+				def = Date.defaults;
+			
 			Ext.apply(def, {
 				d: date.getDate(),
 				m: date.getMonth() + 1,
@@ -247,10 +260,15 @@
 			});
 
 			var r = Date.parseDate(tf.getValue(), tf.format);
-			delete def.d;delete def.m;delete def.y;
+			delete def.d;
+			delete def.m;
+			delete def.y;
 
-			if (!r) return "";
-			else return r;
+			if (!r) {
+				return "";
+			} else {
+				return r;
+			}
 		}
 
 		,getRawValue: function() {
@@ -258,8 +276,7 @@
 			if (!date) return "";
 			var df = this.outDateFormat || this.dateField.format,
 				tf = this.outTimeFormat || this.timeField.format;
-//			return date.format(this.dateField.format + this.dateTimeSeparator + this.timeField.format);
-			return date.format(df + this.dateTimeSeparator + tf);
+			return date.format(df) + this.dateTimeSeparator + date.format(tf);
 		}
 
 		,setDate: function(date) {
@@ -279,7 +296,7 @@
 				return;
 			}
 			if (Ext.isString(value)) {
-				value = value.split(this.dateTimeSeparator);
+				value = value.split(this.dateTimeSplitter || this.dateTimeSeparator);
 			} else if (Ext.isDate(value)) {
 				value = [value, value];
 			}

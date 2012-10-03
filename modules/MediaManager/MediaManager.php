@@ -7,6 +7,9 @@ use eoko\_getModule\GridModule;
 use eoko\module\ModuleLocation;
 use eoko\module\traits\HasRoutes;
 use Zend\Mvc\Router\Http\Regex;
+use eoko\log\Logger;
+
+use RuntimeException;
 
 /**
  *
@@ -57,12 +60,23 @@ class MediaManager extends GridModule implements HasRoutes {
 	}
 	
 	public function getDownloadPath($subPath = null) {
-		$path = str_replace(array('%ROOT%/', '%ROOT%'), ROOT, $this->getConfig()->get('downloadPath'));
-		$path = rtrim($path, '\\/');
-		if ($subPath) {
-			return $path . DS . $subPath;
+		// Resolve download path
+		$configPath = $this->getConfig()->get('downloadPath');
+		if ($configPath !== null) {
+			$downloadPath = str_replace(array('%ROOT%/', '%ROOT%'), ROOT, $configPath);
+		} else if (defined(MEDIA_PATH)) {
+			Logger::get($this)->error('Deprecated feature flagged for imminent removal');
+			$downloadPath = MEDIA_PATH;
 		} else {
-			return $path;
+			throw new RuntimeException('Missing configuration: downloadPath');
+		}
+		// Trim
+		$downloadPath = rtrim($downloadPath, '\\/');
+		// Subpath
+		if ($subPath) {
+			return $downloadPath . DS . $subPath;
+		} else {
+			return $downloadPath;
 		}
 	}
 }

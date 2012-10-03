@@ -2,8 +2,8 @@
 
 namespace eoko\mvc;
 
-use Zend\Http\Request;
 use eoko\util\Arrays;
+use eoko\config\ConfigManager;
 
 /**
  * Eoze legacy request data reader.
@@ -12,16 +12,9 @@ use eoko\util\Arrays;
  * @author Éric Ortega <eric@planysphere.fr>
  * @since 29 juil. 2012
  */
-class LegacyRequestReader implements RequestReader {
+class LegacyRequestReader extends AbstractRequestReader {
 	
-	/**
-	 * @var Request
-	 */
-	private $request;
-	
-	public function __construct(Request $request) {
-		$this->request = $request;
-	}
+	const CONFIG_NODE = 'eoko/router';
 
 	public function createRequest() {
 		
@@ -41,9 +34,18 @@ class LegacyRequestReader implements RequestReader {
 			unset($data['contentType']);
 		}
 		
-		// legacy routing
-		if (isset($data['route'])) {
-			\eoko\url\Maker::populateRouteRequest($data);
+		// Route data
+		foreach ($this->routeMatch->getParams() as $name => $value) {
+			if (substr($name, 0, 1) !== '_') {
+				if (!isset($data[$name])) {
+					$data[$name] = $value;
+				}
+			}
+		}
+
+		// Default controller
+		if (!isset($data['controller'])) {
+			$data['controller'] = ConfigManager::get(self::CONFIG_NODE, 'indexModule');
 		}
 		
 		return new \Request($data);
