@@ -139,6 +139,8 @@ JS;
 						
 						EOZE_BASE_URL . 'ext4/builds/ext-all-sandbox-debug-w-comments.js' => -11,
 						EOZE_BASE_URL . 'ext4/builds/eo-ext4-compat.js' => -6,
+						
+						EOZE_BASE_URL . 'js/deft/deft-debug.js' => -5,
 					);
 				case 'css':
 					return array(
