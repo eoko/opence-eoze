@@ -23,17 +23,69 @@ Ext4.define('Eoze.Ext.window.Window', {
 	 */
 	,animHide: true
 	
-	,afterShow: function(animateTarget, cb, scope) {
-		if (this.animShow || this.animateTarget !== animateTarget) {
+	/**
+	 * @protected
+	 * 
+	 * Implements {@link #animShow} option.
+	 * 
+	 * @since 05/10/12 14:54
+	 * @since Ext 4.1.1
+	 */
+	,afterShow: function() {
+		if (!this.animShow) {
+			var back = this.animateTarget;
+			delete this.animateTarget;
 			this.callParent(arguments);
+			this.animateTarget = back;
 		} else {
-			this.callParent([null, cb, scope]);
+			this.callParent(arguments);
 		}
 	}
 
+	/**
+	 * @protected
+	 * 
+	 * Fixes Window doClose implementation: it should not be overridding animateTarget 
+	 * behaviour. This is perfectly handled by the Component, and doesn't need to be
+	 * tweaked here.
+	 * 
+	 * However, forcing the animateTarget the way it was done in Ext 4.1.1 prevents
+	 * proper overriding of {@link #onHide}.
+	 * 
+	 * @since 05/10/12 14:54
+	 * @since Ext 4.1.1
+	 */
+	,doClose: function() {
+		var me = this;
+
+		// Being called as callback after going through the hide call below
+		if (me.hidden) {
+			me.fireEvent('close', me);
+			if (me.closeAction == 'destroy') {
+				this.destroy();
+			}
+		} else {
+			// Not forcing animateTarget, letting onHide do its job as intented
+			me.hide(undefined, me.doClose, me); // rx+
+			// close after hiding
+			// me.hide(me.animateTarget, me.doClose, me); // rx-
+		}
+	}
+
+	/**
+	 * @protected
+	 * 
+	 * Implements {@link #animHide} option.
+	 * 
+	 * @since 05/10/12 14:54
+	 * @since Ext 4.1.1
+	 */
 	,onHide: function(animateTarget, cb, scope) {
-		if (!this.animHide || this.animateTarget !== animateTarget) {
-			this.callParent([null, cb, scope]);
+		if (!this.animHide) {
+			var back = this.animateTarget;
+			delete this.animateTarget;
+			this.callParent(arguments);
+			this.animateTarget = back;
 		} else {
 			this.callParent(arguments);
 		}
