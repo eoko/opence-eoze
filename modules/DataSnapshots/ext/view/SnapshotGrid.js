@@ -6,14 +6,16 @@
  */
 Ext4.define('Eoze.modules.DataSnapshots.view.SnapshotGrid', {
 	extend: 'Ext4.grid.Panel'
+	
+	,plugins: ['i18n.Grid']
+	
 	,itemId: 'snapshotGrid'
+	
 	,columns: [
-		{text: "ID", dataIndex: 'id', hidden: true} // i18n
-		,{text: "Nom", dataIndex: 'id'} // i18n
-//		,{text: "Date", dataIndex: 'date', xtype: 'datecolumn', format: 'd/m/Y H:i:s', width: 120} // i18n
-		,{text: "Date", dataIndex: 'date', xtype: 'datecolumn', format: '@Y-m-d H:i:s', width: 120} // i18n
-		,{text: "Version", dataIndex: 'version'} // i18n
-		,{text: "Révision", dataIndex: 'revision'} // i18n
-		,{text: "Description", dataIndex: 'description', flex: 1} // i18n
+		{dataIndex: 'name'}
+		,{dataIndex: 'date', xtype: 'datecolumn', format: 'Y-m-d H:i:s', width: 120}
+		,{dataIndex: 'version'}
+		,{dataIndex: 'revision'}
+		,{dataIndex: 'description', flex: 1}
 	]
 });
