@@ -7,10 +7,14 @@
 if (window.Ext4) {
 	Ext4.application({
 		
-		name: 'Eoze'
-		
-		,requires: [
+		requires: [
 			'Eoze.lib.Eoze',
 		]
+		
+		,launch: function() {
+			Deft.Injector.configure({
+				locale: 'Eoze.locale.fr.Locale'
+			});
+		}
 	});	
 }
