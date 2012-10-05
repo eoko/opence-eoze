@@ -27,7 +27,7 @@ Ext4.define('Eoze.modules.DataSnapshots.view.EditPanel', {
 		{name: 'id', xtype: 'displayfield'}
 		,{name: 'name', xtype: 'textfield'}
 		,{name: 'description', xtype: 'textarea'}
-		,{name: 'date', xtype: 'datefield', readOnly: true, format: 'd/m/Y H:i:s'}
+		,{name: 'date', xtype: 'datefield', format: 'd/m/Y H:i:s'}
 	]
 	
 	// button texts are set by i18n.Form plugin

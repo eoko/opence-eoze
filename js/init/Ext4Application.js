@@ -9,6 +9,7 @@ if (window.Ext4) {
 		
 		requires: [
 			'Eoze.lib.Eoze',
+			'Eoze.modules.DataSnapshots.view.Main'
 		]
 		
 		,launch: function() {

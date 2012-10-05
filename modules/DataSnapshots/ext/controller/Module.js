@@ -11,20 +11,21 @@ Ext4.define('Eoze.modules.DataSnapshots.controller.Module', {
 	,requires: [
 		'Eoze.i18n.Ext.util.Format',
 		'Eoze.i18n.plugin.Form',
+		'Eoze.i18n.plugin.Grid',
 		
 		'Eoze.modules.DataSnapshots.model.DataSnapshot'
 	]
 	
 	,uses: [
-		'Eoze.modules.DataSnapshots.view.EditPanel'
+		'Eoze.modules.DataSnapshots.view.SnapshotGrid',
+		'Eoze.modules.DataSnapshots.view.EditPanel',
+		'Eoze.modules.DataSnapshots.view.EditWindow'
 	]
 	
 	,control: {
 		
 		newSnapshot: {
-			click: function() {
-				debugger
-			}
+			click: 'newSnapshot'
 		}
 		
 		,snapshotGrid: {
@@ -34,15 +35,41 @@ Ext4.define('Eoze.modules.DataSnapshots.controller.Module', {
 		}
 	}
 	
-	,newSnapshot: function() {
-		debugger
+	,init: function() {
+		this.editWindowsById = {};
+		this.callParent(arguments);
 	}
 	
-	,editRecord: function(record, animateTarget) {
-		var win = Ext4.create({
+	,newSnapshot: function(animateTarget) {
+		Ext4.create({
 			xclass: 'Eoze.modules.DataSnapshots.view.EditWindow'
 			,animateTarget: animateTarget
 		});
-		win.down('form').loadRecord(record);
+	}
+	
+	,editRecord: function(record, animateTarget) {
+		var id = record.getId(),
+			map = this.editWindowsById,
+			win;
+		if (!record.phantom) {
+			win = map[id];
+		}
+		if (win) {
+			win.show();
+		} else {
+			win = Ext4.create({
+				xclass: 'Eoze.modules.DataSnapshots.view.EditWindow'
+				,animateTarget: animateTarget
+				,listeners: {
+					close: function() {
+						delete map[id];
+					}
+				}
+			});
+			// store win reference
+			map[id] = win;
+			// load record
+			win.down('form').loadRecord(record);
+		}
 	}
 });
