@@ -8,6 +8,8 @@ Ext4.define('Eoze.lib.Eoze', {
 	requires: [
 		// adds support for lazy instance creation by xclass
 		'Eoze.Ext.ComponentManager',
+		// adds animOpen & animClose options
+		'Eoze.Ext.window.Window',
 		// i18n
 		'Eoze.i18n.Locale',
 		// Locale
