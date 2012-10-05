@@ -19,6 +19,9 @@ Ext4.define('Eoze.modules.DataSnapshots.view.EditWindow', {
 	,autoShow: true
 	
 	,border: false
+	
+	,animShow: true
+	,animHide: false
 
 	,items: [{
 		xclass: 'Eoze.modules.DataSnapshots.view.EditPanel'
