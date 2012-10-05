@@ -4,38 +4,33 @@
  * @author Éric Ortega <eric@planysphere.fr>
  * @since 5 oct. 2012
  */
-Ext4.define('Eoze.i18n.locale.fr.Locale', {
+Ext4.define('Eoze.locale.fr.Locale', {
 	extend: 'Eoze.i18n.Locale'
-	,code: 'fr-FR'
 	
 	,requires: [
 		'Eoze.locale.fr.Ext.util.Format'
 	]
+	
+	,code: 'fr-FR'
+	
+	,isPlural: function(count) {
+		return count <= 1;
+	}
 
-	,data: {
-		ok: "Ok"
-		,cancel: "Annuler"
-
-		,date: "Date"
-
-		,name: "Namo"
-		,firstName: "Prénamo"
-		,lastName: "Nomo"
-
-		,description: "Dexcritsione"
-
-		,label: "Libellé"
-
-		,eo: {
-			modules:{
-				DataSnapshots: {
-					view: {
-						grid: {
-							name: "Nombre"
-						}
-					}
-				}
-			}
+	,dictionary: {
+		date: {
+			one: "Date"
+			,other: "Dates"
 		}
+		,cancel: "Annuler"
+		,'delete': 'Supprimer'
+		,description: "Description"
+		,firstName: "Prénom"
+		,id: 'Identifiant'
+		,label: "Libellé"
+		,lastName: "Nom"
+		,name: "Nom"
+		,ok: "Ok"
+		,save: 'Enregistrer'
 	}
 });

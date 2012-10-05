@@ -1,4 +1,6 @@
 /**
+ * Plugin that set texts in a {@link Ext.form.Panel form panel} (i.e. field labels,
+ * and button texts), by using the injected {@link Eoze.i18n.Locale}.
  *
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  * @author Éric Ortega <eric@planysphere.fr>
@@ -7,41 +9,48 @@
 Ext4.define('Eoze.i18n.plugin.Form', {
 	
 	extend: 'Ext4.AbstractPlugin'
+	
+	,mixins: ['Deft.mixin.Injectable']
+	
+	,inject: ['locale']
+	
 	,alias: ['plugin.i18n.Form']
 	
-	,locale: {
-		id: "Identifiante"
-		,name: "Nombre"
-		,ok: "Yeah"
-		,cancel: "Nope"
-		,save: "Yo!"
-	}
-	
 	,init: function(fp) {
-		debugger
 		this.className = Ext4.getClassName(fp);
 		Ext.each(fp.query('field'), this.localizeFieldLabels, this);
 		Ext.each(fp.query('button'), this.localizeButton, this);
 	}
 	
-	,localizeKey: function(key) {
-		return this.locale[key];
-	}
-	
+	/**
+	 * @private
+	 */
 	,localizeFieldLabels: function(field) {
 		var label = field.fieldLabel,
-			matches = /^locale:(.+)$/.exec(label),
-			key = matches && matches[1] || field.name;
-		field.setFieldLabel(this.localizeKey(key) || label);
+			key = field.name;
+		if (!label || label instanceof Eoze.i18n.Entry) {
+			label = this.locale.translate(key, {
+				tags: ['model']
+			});
+			if (label)  {
+				field.setFieldLabel(label);
+			}
+		}
 	}
 	
+	/**
+	 * @private
+	 */
 	,localizeButton: function(button) {
 		var text = button.text,
-			matches = /^locale:(.+)$/.exec(text),
-			key = matches && matches[1] || button.itemId,
-			localText = this.localizeKey(key);
-		if (localText) {
-			button.setText(localText || text);
+			key = button.itemId;
+		if (!text || text instanceof Eoze.i18n.Entry) {
+			text = this.locale.translate(key, {
+				tags: ['button']
+			});
+			if (text)  {
+				button.setText(text);
+			}
 		}
 	}
 });

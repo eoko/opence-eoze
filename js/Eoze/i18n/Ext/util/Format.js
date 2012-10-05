@@ -81,6 +81,7 @@ Ext4.define('Eoze.i18n.Ext.util.Format', {
 	 * @private
 	 */
 	,doLocalizeDateFormat: function(format) {
-		return this.localeDateFormats[format] || format;
+		var map = this.localeDateFormats;
+		return map && map[format] || format;
 	}
 });

@@ -17,33 +17,27 @@ Ext4.define('Eoze.modules.DataSnapshots.view.EditPanel', {
 	
 	,plugins: ['i18n.Form']
 	
-	,locale: 'eo.modules.DataSnapshots.locale.FR-fr'
-	
 	,bodyCls: 'eo-form-body'
 	,defaults: {
 		width: 300
 	}
 
+	// field labels are set by i18n.Form plugin
 	,items: [
-//		,{name: 'id', xtype: 'displayfield', fieldLabel: "ID"}
-//		,{name: 'name', xtype: 'textfield', fieldLabel: "Nom"}
-//		,{name: 'description', xtype: 'textarea', fieldLabel: "Description"}
-//		,{name: 'date', xtype: 'datefield', readOnly: true, format: 'd/m/Y H:i:s', fieldLabel: "Date"}
 		{name: 'id', xtype: 'displayfield'}
 		,{name: 'name', xtype: 'textfield'}
-		,{name: 'description', xtype: 'textarea', fieldLabel: "locale:description"}
-		,{name: 'date', xtype: 'datefield', readOnly: true, format: 'd/m/Y H:i:s', fieldLabel: "Date"}
+		,{name: 'description', xtype: 'textarea'}
+		,{name: 'date', xtype: 'datefield', readOnly: true, format: 'd/m/Y H:i:s'}
 	]
 	
+	// button texts are set by i18n.Form plugin
 	,dockedItems: [{
 		xtype: 'toolbar'
 		,items: [{
-			text: "Enregistrer" // i18n
-			,iconCls: 'ico save'
+			iconCls: 'ico save'
 			,itemId: 'save'
 		}, {
-			text: "Supprimer" // i18n
-			,iconCls: 'ico delete'
+			iconCls: 'ico delete'
 			,itemId: 'delete'
 		}]
 	}]
