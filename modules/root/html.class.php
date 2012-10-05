@@ -115,6 +115,35 @@ JS;
 	}
 	
 	/**
+	 * Gets the javascript config file for Ext4.Loader.setConfig().
+	 */
+	public function getExt4LoaderConfig() {
+		
+		$loaders = array();
+		
+		foreach (ModuleManager::listModules(false) as $module) {
+			$loaders += $module->getJavascriptLoaderConfig();
+		}
+		
+		$loaders['Eoze.Ext'] = EOZE_BASE_URL . 'js/Eoze/Ext';
+		$loaders['Eoze.i18n'] = EOZE_BASE_URL . 'js/Eoze/i18n';
+		$loaders['Eoze.locale'] = EOZE_BASE_URL . 'js/Eoze/locale';
+		$loaders['Eoze.lib'] = EOZE_BASE_URL . 'js/Eoze/lib';
+		
+		$paths = json_encode($loaders);
+		
+		header('Content-type: text/javascript');
+		
+		echo <<<JS
+Ext4.Loader.setConfig({
+	enabled: true
+	,disableCaching: false
+	,paths: $paths
+});
+JS;
+	}
+	
+	/**
 	 * Resolves an alias name to a list of javascript of css file. The returned
 	 * array is of the form:
 	 * 
@@ -139,6 +168,8 @@ JS;
 						
 						EOZE_BASE_URL . 'ext4/builds/ext-all-sandbox-debug-w-comments.js' => -11,
 						EOZE_BASE_URL . 'ext4/builds/eo-ext4-compat.js' => -6,
+						// config for Ext4.Loader.setConfig
+						SITE_BASE_URL . 'index.php?controller=root.html&action=getExt4LoaderConfig' => -5,
 						
 						EOZE_BASE_URL . 'js/deft/deft-debug.js' => -5,
 					);
