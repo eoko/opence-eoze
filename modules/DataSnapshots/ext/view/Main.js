@@ -42,8 +42,10 @@ Ext4.define('Eoze.modules.DataSnapshots.view.Main', {
 		var store = new Ext4.data.Store({
 			model: 'Eoze.modules.DataSnapshots.model.DataSnapshot'
 			,data: [
-				{id: 1, date:'2012-01-01', version:'4.0.1'}
-				,{id: 2, date:'2012-01-01', version:'4.0.1'}
+				{id: 1, name: 'hop la li', date:'2012-01-01', version:'4.0.1'}
+				,{id: 2, name: 'boum lala', date:'2012-01-01', version:'4.0.1'}
+				,{id: 2, name: 'boum lala', date:'2012-01-01', version:'4.0.1'}
+				,{id: 4, name: 'tachi', date:'2012-01-01', version:'4.0.1'}
 			]
 		});
 
