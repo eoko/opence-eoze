@@ -122,7 +122,7 @@ JS;
 		$loaders = array();
 		
 		foreach (ModuleManager::listModules(false) as $module) {
-			$loaders += $module->getJavascriptLoaderConfig();
+			$loaders += $module->getExt4LoaderConfig();
 		}
 		
 		$loaders['Eoze.Ext'] = EOZE_BASE_URL . 'js/Eoze/Ext';
