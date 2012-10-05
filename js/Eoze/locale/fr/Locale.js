@@ -8,7 +8,8 @@ Ext4.define('Eoze.locale.fr.Locale', {
 	extend: 'Eoze.i18n.Locale'
 	
 	,requires: [
-		'Eoze.locale.fr.Ext.util.Format'
+		'Eoze.locale.fr.Ext.util.Format',
+		'Eoze.locale.fr.Ext.form.field.Date'
 	]
 	
 	,code: 'fr-FR'
@@ -26,11 +27,13 @@ Ext4.define('Eoze.locale.fr.Locale', {
 		,'delete': 'Supprimer'
 		,description: "Description"
 		,firstName: "Prénom"
-		,id: 'Identifiant'
+		,id: "Identifiant"
 		,label: "Libellé"
 		,lastName: "Nom"
 		,name: "Nom"
 		,ok: "Ok"
-		,save: 'Enregistrer'
+		,revision: "Révision"
+		,save: "Enregistrer"
+		,version: "Version"
 	}
 });
