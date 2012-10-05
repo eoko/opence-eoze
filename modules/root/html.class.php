@@ -166,7 +166,7 @@ JS;
 						EOZE_BASE_URL . 'js/ext/ext-basex.js' => -8,
 						EOZE_BASE_URL . 'js/ext/ext-lang-fr.js' => -7,
 						
-						EOZE_BASE_URL . 'ext4/builds/ext-all-sandbox-debug-w-comments.js' => -11,
+						EOZE_BASE_URL . 'ext4/builds/ext-all-sandbox-dev.js' => -11,
 						EOZE_BASE_URL . 'ext4/builds/eo-ext4-compat.js' => -6,
 						EOZE_BASE_URL . 'ext4/locale/ext-lang-fr.js' => -5,
 						// config for Ext4.Loader.setConfig
