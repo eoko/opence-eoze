@@ -24,12 +24,9 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 				validateOnChange: false
 			}
 			,items: [{
-				xtype: 'box',
-				autoEl: {
-					tag: 'div'
-					,cls: 'app-msg'
-					,html: (text ? text : "<?php _jsString($text) ?>") + '<br /><br />'
-				}
+				xtype: 'box'
+				,cls: 'app-msg'
+				,html: (text ? text : "<?php _jsString($text) ?>") + '<br /><br />'
 			},{
 				xtype: 'textfield'
 				,itemId: 'loginField'
