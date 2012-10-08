@@ -56,6 +56,7 @@ class TabModule extends _ implements HasJavascript {
 		$properties = array(
 			'title' => $this->getTitle(),
 			'iconCls' => $this->getIconCls(false),
+			'tabChild' => $config->get('tabChild'),
 		);
 		
 		$cfg = $config->get('config');

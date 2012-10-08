@@ -115,6 +115,35 @@ JS;
 	}
 	
 	/**
+	 * Gets the javascript config file for Ext4.Loader.setConfig().
+	 */
+	public function getExt4LoaderConfig() {
+		
+		$loaders = array();
+		
+		foreach (ModuleManager::listModules(false) as $module) {
+			$loaders += $module->getExt4LoaderConfig();
+		}
+		
+		$loaders['Eoze.Ext'] = EOZE_BASE_URL . 'js/Eoze/Ext';
+		$loaders['Eoze.i18n'] = EOZE_BASE_URL . 'js/Eoze/i18n';
+		$loaders['Eoze.locale'] = EOZE_BASE_URL . 'js/Eoze/locale';
+		$loaders['Eoze.lib'] = EOZE_BASE_URL . 'js/Eoze/lib';
+		
+		$paths = json_encode($loaders);
+		
+		header('Content-type: text/javascript');
+		
+		echo <<<JS
+Ext4.Loader.setConfig({
+	enabled: true
+	,disableCaching: false
+	,paths: $paths
+});
+JS;
+	}
+	
+	/**
 	 * Resolves an alias name to a list of javascript of css file. The returned
 	 * array is of the form:
 	 * 
@@ -137,15 +166,19 @@ JS;
 						EOZE_BASE_URL . 'js/ext/ext-basex.js' => -8,
 						EOZE_BASE_URL . 'js/ext/ext-lang-fr.js' => -7,
 						
-						EOZE_BASE_URL . 'ext4/builds/ext-all-sandbox-debug-w-comments.js' => -11,
+						EOZE_BASE_URL . 'ext4/builds/ext-all-sandbox-dev.js' => -11,
 						EOZE_BASE_URL . 'ext4/builds/eo-ext4-compat.js' => -6,
+						EOZE_BASE_URL . 'ext4/locale/ext-lang-fr.js' => -5,
+						// config for Ext4.Loader.setConfig
+						SITE_BASE_URL . 'index.php?controller=root.html&action=getExt4LoaderConfig' => -4,
 						
-						EOZE_BASE_URL . 'js/deft/deft-debug.js' => -5,
+						EOZE_BASE_URL . 'js/deft/deft-debug.js' => -3,
 					);
 				case 'css':
 					return array(
 						EOZE_BASE_URL . 'ext4/resources/css/ext-sandbox-debug.css' => 1,
 						EOZE_BASE_URL . 'css/ext-all.css' => 1,
+						EOZE_BASE_URL . 'css/eotheme4.css' => 100,
 					);
 			}
 		}

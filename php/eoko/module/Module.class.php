@@ -172,6 +172,35 @@ class Module implements file\Finder {
 	}
 	
 	/**
+	 * Returns an array of configs for Ext4.Loader.setConfig.
+	 * 
+	 * Returns an associative array of the form:
+	 * 
+	 *     array(
+	 *         JAVASCRIPT_NAMESPACE => BASE_URL,
+	 *     )
+	 * 
+	 * @todo OCE-575 This should be done on a per-module basis (all modules 
+	 *       do not necessarily expose Ext4 namespaces).
+	 * 
+	 * @return array
+	 * @since 05/10/12 03:07
+	 */
+	public function getExt4LoaderConfig() {
+		$dir = array();
+		foreach ($this->getLocation()->getLineActualLocations(true) as $location) {
+			$location instanceof ModuleLocation;
+			$namespace = str_replace(
+				array('eoko.', 'rhodia.'), array('Eoze.', 'Opence.'),
+				str_replace('\\', '.', rtrim($location->namespace, '\\'))
+			);
+			$url = $location->getDirectory()->url . $location->moduleName . '/ext';
+			$dir[$namespace] = $url;
+		}
+		return $dir;
+	}
+	
+	/**
 	 * @return Module
 	 */
 	private function getParentModule() {

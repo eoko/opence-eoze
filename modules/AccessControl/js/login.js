@@ -16,10 +16,7 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 	,x4_createLoginWindow: function(modal, text) {
 		var formPanel = new Ext4.form.Panel({
 			border: false
-			,padding: 20
-			,bodyStyle: {
-				backgroundColor: 'transparent'
-			}
+			,padding: 10
 			,defaults: {
 				validateOnChange: false
 			}
@@ -27,55 +24,63 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 				xtype: 'box',
 				autoEl: {
 					tag: 'div',
-					html: '<div class="app-msg">'
+					html: '<div class="alert-login">'
 					+ (text ? text : "<?php _jsString($text) ?>")
-					+ '<br /><br />'
 					+ '</div>'
 				}
 			},{
-				xtype: 'textfield'
-				,itemId: 'loginField'
-				,name: 'username'
-				,fieldLabel: 'Identifiant'
-				,allowBlank: false
-				,minLength: 3
-				,maxLength: 45
-				,listeners: {
-					specialkey: {
-						scope: this
-						,fn: function(field, el) {
-							if (el.getKey() == Ext.EventObject.ENTER) {
-								this.onSubmitForm(loginWindow, formPanel);
+				xtype: 'container'
+				,items: [	
+					{
+						xtype: 'textfield'
+						,itemId: 'loginField'
+						,name: 'username'
+						,fieldLabel: 'Identifiant'
+						,allowBlank: false
+						,minLength: 3
+						,maxLength: 45
+						,listeners: {
+							specialkey: {
+								scope: this
+								,fn: function(field, el) {
+									if (el.getKey() == Ext.EventObject.ENTER) {
+										this.onSubmitForm(loginWindow, formPanel);
+									}
+								}
+							}
+						}
+		//			}),{
+					},{
+						xtype: 'textfield',
+						name: 'password',
+						fieldLabel: 'Mot de passe',
+						inputType: 'password',
+						allowBlank: false,
+						minLength: 4,
+						maxLength: 255,
+						listeners: {
+							specialkey: {
+								scope: this
+								,fn: function(field, el) {
+									if (el.getKey() == Ext.EventObject.ENTER) {
+										this.onSubmitForm(loginWindow, formPanel);
+									}
+								}
 							}
 						}
 					}
-				}
-//			}),{
-			},{
-				xtype: 'textfield',
-				name: 'password',
-				fieldLabel: 'Mot de passe',
-				inputType: 'password',
-				allowBlank: false,
-				minLength: 4,
-				maxLength: 255,
-				listeners: {
-					specialkey: {
-						scope: this
-						,fn: function(field, el) {
-							if (el.getKey() == Ext.EventObject.ENTER) {
-								this.onSubmitForm(loginWindow, formPanel);
-							}
-						}
-					}
-				}
-			}]
+				]
+			},
+			]
 		});
 		
 //		var loginWindow = new Oce.DefaultWin({
 		var loginWindow = new Ext4.Window({
 			
-			title: 'Identification'
+			title: 'Identifiez-vous à Open.Ce'
+			
+			,cls : 'eoLogin'
+			,baseCls : 'eoWindows'
 			
 			,defaultFocus: 'loginField'
 			,width: 380
@@ -86,24 +91,25 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 			,maximizable: false
 			,minimizable: false
 			,collapsible: false
-			,draggable: false
+			,draggable: true
 			,resizable: false
 			
 			,items: formPanel
 			
 			,buttons: [
-				{ // Ok
-					text: 'Ok'
-					,scope: this
-					,handler: function() {
-						this.onSubmitForm(loginWindow, formPanel);
-					}
-				},{ // Reset
+				{ // Reset
 						text: 'Réinitialiser',
 						handler: function() {
 							formPanel.getForm().reset();
 							formPanel.getComponent('loginField').focus();
 						}
+				},{ // Ok
+					text: 'Ok'
+					,scope: this
+					,cls : 'primary'
+					,handler: function() {
+						this.onSubmitForm(loginWindow, formPanel);
+					}
 				}
 /*<?php if ($help): ?>*/
 				,{ // Help

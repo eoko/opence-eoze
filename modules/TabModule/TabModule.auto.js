@@ -74,7 +74,11 @@ eo.modules.TabModule = Ext.extend(Oce.BaseModule, {
 	,createTab: function() {
 		var tab = this.createTabConfig();
 		if (!(tab instanceof Ext.Component)) {
-			tab = Ext.widget(tab);
+			if (tab.xclass) {
+				tab = Ext.create(tab);
+			} else {
+				tab = Ext.widget(tab);
+			}
 		}
 		this.tab = tab;
 		tab.on('close', this.onClose, this);
@@ -95,13 +99,23 @@ eo.modules.TabModule = Ext.extend(Oce.BaseModule, {
 	}
 
 	,createTabConfig: function() {
-		return {
+		var config = {
 			xtype: "panel"
 			,border: false
 			,closable: true
 			,iconCls: this.getIconCls()
 			,title: this.getTitle()
 		};
+		
+		var child = this.tabChild;
+		if (child) {
+			config = Ext.apply({
+				layout: 'fit'
+				,items: [child]
+			}, config);
+		}
+		
+		return config;
 	}
 	
 	,getTitle: function() {
