@@ -1,0 +1,116 @@
+
+.eoLogin {
+	margin:0 auto 24px;
+	background:#fff;
+	border:1px solid #ccc;
+		-webkit-border-radius: 6px;
+		-moz-border-radius: 6px;
+		-ms-border-radius: 6px;
+		border-radius: 6px;
+}
+
+.eoWindows-header {
+	text-shadow:0 1px 0 rgba(255,255,255,.5);
+	font: 100 18px/42px 'PT Sans', sans-serif;
+	height:42px;
+	padding:0 20px;
+	background: #e0e0e0;
+	border-bottom:1px solid #ccc !important;
+		-moz-border-radius-topleft: 6px;
+		-moz-border-radius-topright: 6px;
+		-moz-border-radius-bottomright: 0px;
+		-moz-border-radius-bottomleft: 0px;
+		-webkit-border-radius: 6px 6px 0px 0px;
+		border-radius: 6px 6px 0px 0px;
+	font-size:15px}
+
+.eoWindows-body {
+	position: relative;
+}
+
+.eoWindows .x4-toolbar {
+	padding:12px 5px;
+	border-top:1px solid #e7e7e7 !important;
+	background:#f7f7f7;
+		-moz-border-radius-topleft: 0px;
+		-moz-border-radius-topright: 0px;
+		-moz-border-radius-bottomright: 6px;
+		-moz-border-radius-bottomleft: 6px;
+		-webkit-border-radius: 0px 0px 6px 6px;
+		border-radius: 0px 0px 6px 6px;
+}
+
+.eoWindows-header-draggable {
+	cursor: move;
+}
+
+.eoWindows-ghost {
+	border-radius: 6px;
+		-moz-border: 6px;
+		-webkit-border-radius: 6px;
+	background: rgb(250, 250, 250);
+	background: rgba(250, 250, 250, 0.6);
+}
+
+.eoWindows .alert-login {
+    background-color: #D9EDF7;
+    margin: 5px 5px 0;
+    color: #3A87AD;
+	
+    border: 1px solid #BCE8F1;
+    border-radius: 4px 4px 4px 4px;
+    margin-bottom: 20px;
+    padding: 8px 35px 8px 14px;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.eoWindows .x4-container {
+	margin: 0 20px;
+}
+
+.eoWindows .x4-border-box .x4-form-text {
+	padding: 5px;
+		-moz-border-radius : 6px;
+		-webkit-border-radius: 6px;
+		border-radius: 6px;
+	line-height: 15px;
+	height: 29px;
+	font-size: 13px;
+}
+
+.eoWindows .x4-btn {
+	 -moz-border-bottom-colors: none;
+    -moz-border-left-colors: none;
+    -moz-border-right-colors: none;
+    -moz-border-top-colors: none;
+    background-color: #F5F5F5;
+    background-image: -moz-linear-gradient(center top , #FFFFFF, #E6E6E6);
+    background-repeat: repeat-x;
+    border-color: #E6E6E6 #E6E6E6 #A2A2A2;
+    border-image: none;
+    border-radius: 4px 4px 4px 4px;
+    border-style: solid;
+    border-width: 1px;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.2) inset, 0 1px 2px rgba(0, 0, 0, 0.05);
+    color: #333333;
+    cursor: pointer;
+    display: inline-block;
+    line-height: 20px;
+    margin-bottom: 0;
+    padding: 6px 14px;
+    text-align: center;
+    text-shadow: 0 1px 1px rgba(255, 255, 255, 0.75);
+    vertical-align: middle;
+}
+
+.eoWindows .x4-btn.primary {
+	
+    background-color: #006DCC;
+    background-image: -moz-linear-gradient(center top , #0088CC, #0044CC);
+    background-repeat: repeat-x;
+    border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+}
+
+.eoWindows .x4-btn.primary span {
+	color: #F5F5F5;
+}
