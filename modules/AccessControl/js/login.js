@@ -13,7 +13,7 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 		);
 	}
 
-	,x4_createLoginWindow: function(modal, text) {
+	,createLoginWindow: function(modal, text) {
 		var formPanel = new Ext4.form.Panel({
 			border: false
 			,padding: 20
@@ -112,104 +112,6 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 				}
 /*<?php endif ?>*/
 			]
-		});
-
-		return loginWindow;
-	}
-	
-	,createLoginWindow: function(modal, text) {
-		// TODO Ext4
-		if (window.Ext4) {
-			return this.x4_createLoginWindow(modal, text);
-		}
-		
-		var db;
-		
-		var formPanel = new Oce.DefaultFormPanel({
-			items: [{
-				xtype: 'box',
-				autoEl: {
-					tag: 'div',
-					html: '<div class="app-msg">'
-					+ (text ? text : "<?php _jsString($text) ?>")
-					+ '<br /><br />'
-					+ '</div>'
-				}
-			},db = Ext.widget({
-				xtype: 'textfield',
-				name: 'username',
-				fieldLabel: 'Identifiant',
-				allowBlank: false,
-				minLength: 3,
-				maxLength: 45,
-				listeners: {
-					specialkey: {
-						scope: this
-						,fn: function(field, el) {
-							if (el.getKey() == Ext.EventObject.ENTER) {
-								this.onSubmitForm(loginWindow, formPanel);
-							}
-						}
-					}
-				}
-			}),{
-				xtype: 'textfield',
-				name: 'password',
-				fieldLabel: 'Mot de passe',
-				inputType: 'password',
-				allowBlank: false,
-				minLength: 4,
-				maxLength: 255,
-				listeners: {
-					specialkey: {
-						scope: this
-						,fn: function(field, el) {
-							if (el.getKey() == Ext.EventObject.ENTER) {
-								this.onSubmitForm(loginWindow, formPanel);
-							}
-						}
-					}
-				}
-			}]
-		});
-		
-		var loginWindow = new Oce.DefaultWin({
-			
-			title: 'Identification'
-			
-			,defaultButton: db
-			,width: 380
-			
-			,modal: modal
-			
-			,closable: false
-			,maximizable: false
-			,minimizable: false
-			,collapsible: false
-			,draggable: false
-			,resizable: false
-			
-			,items: formPanel
-			
-			,buttons: [{ // Ok
-				text: 'Ok'
-				,scope: this
-				,handler: function() {
-					this.onSubmitForm(loginWindow, formPanel);
-				}
-			},{ // Reset
-					text: 'Réinitialiser',
-					handler: function() {
-						formPanel.getForm().reset();
-					}
-			}
-/*<?php if ($help): ?>*/
-			,{ // Help
-				iconCls: 'ico_help',
-				handler: this.showHelp
-			}
-/*<?php endif ?>*/
-				]
 		});
 
 		return loginWindow;
