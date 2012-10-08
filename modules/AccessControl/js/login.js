@@ -16,18 +16,15 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 	,x4_createLoginWindow: function(modal, text) {
 		var formPanel = new Ext4.form.Panel({
 			border: false
+			// @merlin le padding devrait être laissé géré par le CSS en fait
 			,padding: 10
 			,defaults: {
 				validateOnChange: false
 			}
 			,items: [{
-				xtype: 'box',
-				autoEl: {
-					tag: 'div',
-					html: '<div class="alert-login">'
-					+ (text ? text : "<?php _jsString($text) ?>")
-					+ '</div>'
-				}
+				xtype: 'box'
+				,cls: 'alert-login'
+				,html: (text ? text : "<?php _jsString($text) ?>")
 			},{
 				xtype: 'container'
 				,items: [	
@@ -35,7 +32,7 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 						xtype: 'textfield'
 						,itemId: 'loginField'
 						,name: 'username'
-						,fieldLabel: 'Identifiant'
+						,fieldLabel: "Identifiant" // i18n
 						,allowBlank: false
 						,minLength: 3
 						,maxLength: 45
@@ -49,16 +46,15 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 								}
 							}
 						}
-		//			}),{
 					},{
-						xtype: 'textfield',
-						name: 'password',
-						fieldLabel: 'Mot de passe',
-						inputType: 'password',
-						allowBlank: false,
-						minLength: 4,
-						maxLength: 255,
-						listeners: {
+						xtype: 'textfield'
+						,name: 'password'
+						,fieldLabel: "Mot de passe" // i18n
+						,inputType: 'password'
+						,allowBlank: false
+						,minLength: 4
+						,maxLength: 255
+						,listeners: {
 							specialkey: {
 								scope: this
 								,fn: function(field, el) {
@@ -70,14 +66,13 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 						}
 					}
 				]
-			},
+			}, // @merlin trailing comma in array = null element :(
 			]
 		});
 		
-//		var loginWindow = new Oce.DefaultWin({
 		var loginWindow = new Ext4.Window({
 			
-			title: 'Identifiez-vous à Open.Ce'
+			title: "Connexion" // i18n
 			
 			,cls : 'eoLogin'
 			,baseCls : 'eoWindows'
@@ -98,8 +93,8 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 			
 			,buttons: [
 				{ // Reset
-						text: 'Réinitialiser',
-						handler: function() {
+						text: "Réinitialiser" // i18n
+						,handler: function() {
 							formPanel.getForm().reset();
 							formPanel.getComponent('loginField').focus();
 						}
@@ -113,8 +108,8 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 				}
 /*<?php if ($help): ?>*/
 				,{ // Help
-					iconCls: 'ico_help',
-					handler: this.showHelp
+					iconCls: 'ico_help'
+					,handler: this.showHelp
 				}
 /*<?php endif ?>*/
 			]
