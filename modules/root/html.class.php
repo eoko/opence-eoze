@@ -178,6 +178,7 @@ JS;
 					return array(
 						EOZE_BASE_URL . 'ext4/resources/css/ext-sandbox-debug.css' => 1,
 						EOZE_BASE_URL . 'css/ext-all.css' => 1,
+						EOZE_BASE_URL . 'css/eotheme4.css' => 100,
 					);
 			}
 		}
