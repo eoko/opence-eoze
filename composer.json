@@ -1,15 +1,20 @@
 {
-	"name": "eoko/eoze",
-	"license": "GPLv3",
+    "name": "eoko/eoze",
+    "license": "GPLv3",
+    
     "repositories": [
-		{
-			"type": "composer",
-			"url": "http://packages.zendframework.com/"
-		}
-	],
+	    {
+		    "type": "composer",
+		    "url": "http://packages.zendframework.com/"
+	    }
+    ],
+    
     "require": {
         "php": ">=5.3.3",
-        "zendframework/zend-http": ">=2.0.0",
+	
+	"symfony/yaml": "2.1.2",
+        
+	"zendframework/zend-http": ">=2.0.0",
         "zendframework/zend-mvc": ">=2.0.0"
     }
 }
