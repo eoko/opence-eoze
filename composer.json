@@ -12,9 +12,9 @@
     "require": {
         "php": ">=5.3.3",
 	
-	"symfony/yaml": "2.1.2",
+	"symfony/yaml": "2.*",
         
-	"zendframework/zend-http": ">=2.0.0",
-        "zendframework/zend-mvc": ">=2.0.0"
+	"zendframework/zend-http": "2.*",
+        "zendframework/zend-mvc": "2.*"
     }
 }
