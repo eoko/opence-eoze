@@ -1,3 +1,2 @@
 ^doc/php/
 ^vendor/
-^composer.lock$
