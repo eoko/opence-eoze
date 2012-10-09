@@ -6,11 +6,7 @@ use Symfony\Component\Yaml\Yaml;
 use eoko\log\Logger;
 
 if (!class_exists('Symfony\\Component\\Yaml\\Yaml')) {
-	throw new \SystemException(<<<MSG
-Missing dependency: Symfony\Component\Yaml.
-Install it with PEAR (see: http://pear.symfony.com/): pear install symfony2/Yaml.
-MSG
-	);
+	throw new \SystemException('Missing dependency: Symfony\Component\Yaml.');
 }
 
 /**
