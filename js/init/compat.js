@@ -82,8 +82,10 @@ var resolve = function(name, force) {
 		o = window;
 		Ext.each(name.split('.'), function(sub) {
 			o = o[sub];
+			if (!o) {
+				return false;
+			}
 		});
-		return o;
 	}
 	if (!o || o === window) {
 		if (force !== false) {
