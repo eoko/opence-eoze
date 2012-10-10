@@ -74,7 +74,7 @@ Ext.Function.createSequence = function (originalFn, newFn, scope) {
 
 (function() {
 var reg = Ext.reg;
-var resolve = function(name, force) {
+var resolve = function resolve(name, force) {
 	var o;
 	if (!Ext.isString(name)) {
 		o = name;
@@ -185,6 +185,14 @@ Ext.create = function(cls, config) {
 		return Ext.widget.apply(Ext, arguments);
 	}
 };
+
+// --- Ext.ClassManager
+
+Ext.ClassManager = Ext.apply(Ext.ClassManager, {
+	get: function(name) {
+		return resolve(name, true);
+	}
+});
 
 })(); // closure
 
