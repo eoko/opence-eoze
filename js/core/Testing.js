@@ -23,7 +23,11 @@ eo.Testing = {
 	,currentTest: undefined
 	
 	,startUnitTest: function(name) {
-		this.currentTest = new this.unitTests[name].fn;
+		var test = this.unitTests[name];
+		if (!test) {
+			throw new Error('No test registered for key: ' + name);
+		}
+		this.currentTest = new test.fn;
 	}
 	
 	,nextStep: function() {
