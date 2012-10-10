@@ -5,6 +5,8 @@
 
 namespace eoko\php;
 
+use eoko\log\Logger;
+
 /**
  *
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
@@ -25,7 +27,7 @@ class SessionManager {
 	private $data = null;
 	
 	public function __construct() {
-		
+
 		$path = MY_EOZE_PATH . '/sessions';
 		session_save_path($path);
 		if (!file_exists($path)) {
@@ -173,7 +175,7 @@ class SessionManager {
 			fclose($file);
 			return $return;
 		} else {
-			return(false);
+			return false;
 		}
 	}
 
@@ -184,6 +186,16 @@ class SessionManager {
 	}
 
 	public function gc($maxlifetime) {
+
+		if ($maxlifetime < \UserSession::$SESSION_LENGTH) {
+			Logger::get($this)->warn(
+				'PHP max session lifetime is less than configured max user session length ('
+				. "$maxlifetime < " . \UserSession::$SESSION_LENGTH
+				. '). PHP configuration is ignored in favor of Eoze configuration.'
+			);
+			$maxlifetime = \UserSession::$SESSION_LENGTH;
+		}
+
 		foreach (glob("$this->savePath/sess_*") as $filename) {
 			if (filemtime($filename) + $maxlifetime < time()) {
 				@unlink($filename);
