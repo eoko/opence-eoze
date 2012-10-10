@@ -9,7 +9,7 @@ use eoko\php\SessionManager;
  */
 class UserSession {
 
-	private static $SESSION_LENGTH = 3600; // in seconds
+	public static $SESSION_LENGTH = 3600; // in seconds
 	
 	const LEVEL_AUTHENTICATED = 99;
 
