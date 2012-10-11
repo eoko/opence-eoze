@@ -138,7 +138,21 @@ abstract class VirtualFieldBase extends ModelFieldBase implements VirtualField {
 	}
 
 	protected function doGetClause(QueryAliasable $aliasable) {
-		throw new UnsupportedOperationException(get_class($this) . '::doGetClause()');
+		if (null !== $clause = $this->getQualifiedClause()) {
+			return $aliasable->convertQualifiedNames($clause, $bindings);
+		} else {
+			throw new UnsupportedOperationException(get_class($this) . '::doGetClause()');
+		}
+	}
+
+	/**
+	 * Can be implemented by child classes instead of {@link doGetClause()}. Must
+	 * return a string in which field names will be 
+	 * {@link QueryAliasable::convertQualifiedNames() interpreted}.
+	 * @return string|null
+	 */
+	protected function getQualifiedClause() {
+		return null;
 	}
 
 	public function getOrderFieldAlias(QueryAliasable $aliasable, $alias = null) {
