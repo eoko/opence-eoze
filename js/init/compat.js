@@ -89,7 +89,6 @@ var resolve = function resolve(name, force) {
 	}
 	if (!o || o === window) {
 		if (force !== false) {
-			debugger
 			throw new Error('Class not found: ' + name);
 		} else {
 			return null;
