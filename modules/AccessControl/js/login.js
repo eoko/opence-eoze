@@ -16,59 +16,66 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 	,createLoginWindow: function(modal, text) {
 		var formPanel = new Ext4.form.Panel({
 			border: false
-			,padding: 20
-			,bodyStyle: {
-				backgroundColor: 'transparent'
-			}
+			// @merlin le padding devrait être laissé géré par le CSS en fait
+			,padding: 10
 			,defaults: {
 				validateOnChange: false
 			}
 			,items: [{
 				xtype: 'box'
-				,cls: 'app-msg'
-				,html: (text ? text : "<?php _jsString($text) ?>") + '<br /><br />'
+				,cls: 'alert-login'
+				,html: (text ? text : "<?php _jsString($text) ?>")
 			},{
-				xtype: 'textfield'
-				,itemId: 'loginField'
-				,name: 'username'
-				,fieldLabel: "Identifiant" // i18n
-				,allowBlank: false
-				,minLength: 3
-				,maxLength: 45
-				,listeners: {
-					specialkey: {
-						scope: this
-						,fn: function(field, el) {
-							if (el.getKey() == Ext.EventObject.ENTER) {
-								this.onSubmitForm(loginWindow, formPanel);
+				xtype: 'container'
+				,items: [	
+					{
+						xtype: 'textfield'
+						,itemId: 'loginField'
+						,name: 'username'
+						,fieldLabel: "Identifiant" // i18n
+						,allowBlank: false
+						,minLength: 3
+						,maxLength: 45
+						,listeners: {
+							specialkey: {
+								scope: this
+								,fn: function(field, el) {
+									if (el.getKey() == Ext.EventObject.ENTER) {
+										this.onSubmitForm(loginWindow, formPanel);
+									}
+								}
+							}
+						}
+					},{
+						xtype: 'textfield'
+						,name: 'password'
+						,fieldLabel: "Mot de passe" // i18n
+						,inputType: 'password'
+						,allowBlank: false
+						,minLength: 4
+						,maxLength: 255
+						,listeners: {
+							specialkey: {
+								scope: this
+								,fn: function(field, el) {
+									if (el.getKey() == Ext.EventObject.ENTER) {
+										this.onSubmitForm(loginWindow, formPanel);
+									}
+								}
 							}
 						}
 					}
-				}
-			},{
-				xtype: 'textfield'
-				,name: 'password'
-				,fieldLabel: "Mot de passe" // i18n
-				,inputType: 'password'
-				,allowBlank: false
-				,minLength: 4
-				,maxLength: 255
-				,listeners: {
-					specialkey: {
-						scope: this
-						,fn: function(field, el) {
-							if (el.getKey() == Ext.EventObject.ENTER) {
-								this.onSubmitForm(loginWindow, formPanel);
-							}
-						}
-					}
-				}
-			}]
+				]
+			}, // @merlin trailing comma in array = null element :(
+			]
 		});
 		
 		var loginWindow = new Ext4.Window({
 			
 			title: "Connexion" // i18n
+			
+			,cls : 'eoLogin'
+			,baseCls : 'eoWindows'
 			
 			,defaultFocus: 'loginField'
 			,width: 380
@@ -79,29 +86,30 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 			,maximizable: false
 			,minimizable: false
 			,collapsible: false
-			,draggable: false
+			,draggable: true
 			,resizable: false
 			
 			,items: formPanel
 			
 			,buttons: [
-				{ // Ok
-					text: 'Ok'
-					,scope: this
-					,handler: function() {
-						this.onSubmitForm(loginWindow, formPanel);
-					}
-				},{ // Reset
-						text: 'Réinitialiser',
-						handler: function() {
+				{ // Reset
+						text: "Réinitialiser" // i18n
+						,handler: function() {
 							formPanel.getForm().reset();
 							formPanel.getComponent('loginField').focus();
 						}
+				},{ // Ok
+					text: 'Ok'
+					,scope: this
+					,cls : 'primary'
+					,handler: function() {
+						this.onSubmitForm(loginWindow, formPanel);
+					}
 				}
 /*<?php if ($help): ?>*/
 				,{ // Help
-					iconCls: 'ico_help',
-					handler: this.showHelp
+					iconCls: 'ico_help'
+					,handler: this.showHelp
 				}
 /*<?php endif ?>*/
 			]
