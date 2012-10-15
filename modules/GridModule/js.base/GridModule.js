@@ -161,7 +161,15 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			 * @param {Oce.GridModule} this
 			 * @param {Ext.data.Store} store The main grid's store.
 			 */
-			'beforegridstorefirstload'
+			'beforegridstorefirstload',
+			/**
+			 * @event ribboncreated
+			 *
+			 * Fires after the ribbon component (i.e. toolbar) is created.
+			 *
+			 * @param {Oce.GridModule} this
+			 */
+			'ribboncreated'
 		);
 		
 		this.model.initRelations(this.modelRelations);
@@ -2558,6 +2566,8 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				if (items.length) return items[0];
 				return undefined;
 			};
+
+			this.fireEvent('ribboncreated', this, this.toolbar);
 		}
 
 		return this.toolbar;

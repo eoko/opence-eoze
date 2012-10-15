@@ -74,7 +74,7 @@ Ext.Function.createSequence = function (originalFn, newFn, scope) {
 
 (function() {
 var reg = Ext.reg;
-var resolve = function(name, force) {
+var resolve = function resolve(name, force) {
 	var o;
 	if (!Ext.isString(name)) {
 		o = name;
@@ -82,12 +82,13 @@ var resolve = function(name, force) {
 		o = window;
 		Ext.each(name.split('.'), function(sub) {
 			o = o[sub];
+			if (!o) {
+				return false;
+			}
 		});
-		return o;
 	}
 	if (!o || o === window) {
 		if (force !== false) {
-			debugger
 			throw new Error('Class not found: ' + name);
 		} else {
 			return null;
@@ -183,6 +184,14 @@ Ext.create = function(cls, config) {
 		return Ext.widget.apply(Ext, arguments);
 	}
 };
+
+// --- Ext.ClassManager
+
+Ext.ClassManager = Ext.apply(Ext.ClassManager, {
+	get: function(name) {
+		return resolve(name, true);
+	}
+});
 
 })(); // closure
 

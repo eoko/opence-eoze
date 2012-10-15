@@ -164,7 +164,17 @@ abstract class ModelTable extends ModelTableProxy {
 			$virtuals = func_get_args();
 		}
 		foreach ($virtuals as $virtual) {
-			$this->addVirtual($virtual);
+			if (is_array($virtual)) {
+				foreach ($virtual as $name => $virtual) {
+					if (is_string($name)) {
+						$this->addVirtual($virtual, $name);
+					} else {
+						$this->addVirtual($virtual);
+					}
+				}
+			} else {
+				$this->addVirtual($virtual);
+			}
 		}
 	}
 
