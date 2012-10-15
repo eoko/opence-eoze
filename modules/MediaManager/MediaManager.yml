@@ -1,0 +1,24 @@
+abstract: true
+
+private:
+  generateAbstractJavascriptModule: true
+
+class: GridModule
+model: User
+
+downloadPath: %ROOT%/medias
+downloadUrl: medias
+
+extra:
+  search: false
+  multisort: false
+
+module:
+  namespace: Oce.Modules
+  title: Médias
+
+columns:
+  id: id
+  name: {header: Nom}
+  size: {header: Taille}
+  datetime: {name: datetime, header: Date}
