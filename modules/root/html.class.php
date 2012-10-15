@@ -157,7 +157,7 @@ JS;
 	 */
 	private function resolveIncludeAlias($name, $type) {
 		
-		if ($name === '@ext' && isset($_GET['ext4'])) {
+		if ($name === '@ext') {
 			switch ($type) {
 				case 'js':
 					return array(
