@@ -16,7 +16,7 @@ use Inflector;
 use IllegalStateException, 
 	InvalidConfigurationException;
 
-require_once __DIR__ . '/LegacyGridModule.class.php';
+require_once __DIR__ . '/LegacyGridModule.php';
 use LegacyGridModule;
 
 class Columns {
