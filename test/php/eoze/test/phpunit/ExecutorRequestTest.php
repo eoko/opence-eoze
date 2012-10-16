@@ -23,6 +23,7 @@ use eoko\output\Output;
 use eoko\output\Adapter\NullAdapter;
 
 use eoko\module\Module;
+use eoko\module\ModuleResolver;
 use eoko\module\ModuleManager;
 
 use eoko\util\YmlReader;
@@ -149,7 +150,7 @@ class ExecutorRequestTest extends Assert implements Test {
 	 */
 	protected function runRequest(array $request) {
 		$request  = new Request($request);
-		$executor = Module::parseRequestAction($request);
+		$executor = ModuleResolver::parseRequestAction($request);
 
 		ExtJSResponse::purge();
 		$executor();
