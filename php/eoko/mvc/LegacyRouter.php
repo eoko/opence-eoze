@@ -2,7 +2,7 @@
 
 namespace eoko\mvc;
 
-use eoko\module\Module;
+use eoko\module\ModuleResolver;
 
 /**
  *
@@ -14,7 +14,7 @@ class LegacyRouter extends AbstractRouter {
 	
 	public function route() {
 
-		$action = Module::parseRequestAction($this->requestData);
+		$action = ModuleResolver::parseRequestAction($this->requestData);
 		$action();
 	}
 }
