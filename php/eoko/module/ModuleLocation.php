@@ -360,7 +360,7 @@ class ModuleLocation extends Location {
 					}
 				}
 				// A file matching the module filename pattern
-				// (eg. GridModule.class.php) has been found and included, but
+				// (eg. GridModule.php) has been found and included, but
 				// we cannot find the matching class...
 				throw new InvalidModuleException($this->moduleName, 'cannot find module class');
 			}

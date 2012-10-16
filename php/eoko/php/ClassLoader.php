@@ -14,7 +14,7 @@ class ClassLoader {
 	private $includePaths = array();
 
 	private $allowedClassSuffix = array(
-		'.class', '.interface', '',
+		'', '.class', '.interface',
 	);
 
 	private function __construct() {}
