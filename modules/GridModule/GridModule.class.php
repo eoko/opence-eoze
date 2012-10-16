@@ -56,7 +56,7 @@ class GridModule extends Module implements HasTitle, HasJavascript {
 		if ($this->getConfig()->getValue('private/generateJavascriptModule', true)) {
 			if (!$this->isAbstract()
 					|| $this->getConfig()->getValue('private/generateAbstractJavascriptModule', false)) {
-				require_once dirname(__FILE__) . DS . 'gen' . DS . 'LegacyGridModule.class.php';
+				require_once __DIR__ . DS . 'gen' . DS . 'LegacyGridModule.php';
 				return \LegacyGridModule::generateModule($this)->render(true);
 			}
 		}
