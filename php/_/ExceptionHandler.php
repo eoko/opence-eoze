@@ -3,7 +3,7 @@
  * @author Éric Ortéga <eric@mail.com>
  */
 
-require_once PHP_PATH . '_/ExtJSResponse.class.php';
+require_once PHP_PATH . '_/ExtJSResponse.php';
 
 use eoko\php\ErrorException;
 

@@ -14,7 +14,7 @@ call_user_func(function() {
 
 	$ds = DS;
 
-	require_once $eoze . "php/_/Context.class.php";
+	require_once $eoze . "php/_/Context.php";
 
 	$context = new eoko\context\ContextBase();
 
@@ -29,6 +29,5 @@ call_user_func(function() {
 		'path' => "{$eoze}php$ds",
 	));
 
-	global $directAccess;
 	require_once "{$eoze}php{$ds}init.inc.php";
 });

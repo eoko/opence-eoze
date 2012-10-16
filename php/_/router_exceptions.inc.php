@@ -135,7 +135,7 @@ class NullPointerException extends SystemException {
 }
 
 // Needed bellow
-require_once __DIR__ . '/UnsupportedOperationException.class.php';
+require_once __DIR__ . '/UnsupportedOperationException.php';
 
 class SecurityException extends SystemException {
 	function __construct($debugMessage = '', $previous = null) {
