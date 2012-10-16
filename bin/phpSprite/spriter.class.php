@@ -1,5 +1,5 @@
 <?php
-//require_once('../../php/Logger.class.php');
+//require_once('../../php/Logger.php');
 
 
 
