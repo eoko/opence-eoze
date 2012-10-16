@@ -2,8 +2,8 @@
 
 namespace eoko\module\executor;
 
-use eoko\module\ModuleManager;
 use eoko\module\Module;
+use eoko\module\ModuleResolver;
 
 use eoko\util\Files as FileHelper;
 use SecurityException, IllegalStateException;
@@ -257,7 +257,7 @@ abstract class Executor implements file\Finder {
 		$this->request->override($overrideRequest);
 		$this->request->remove('module', 'executor', 'controller');
 
-		$action = Module::parseAction($controller, $action, $this->request, false);
+		$action = ModuleResolver::parseAction($controller, $action, $this->request, false);
 		$action();
 	}
 	
