@@ -2,7 +2,7 @@
 
 namespace eoko\template;
 
-includeExtension(__FILE__, 'functions');
+require_once __DIR__ . '/Template.functions.php';
 
 use IllegalArgumentException;
 

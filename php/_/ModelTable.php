@@ -1755,4 +1755,4 @@ abstract class ModelTableProxy {
 	public abstract static function getModelName();
 }
 
-require_once __DIR__ . '/VirtualField.class.php';
+require_once __DIR__ . '/VirtualField.php';

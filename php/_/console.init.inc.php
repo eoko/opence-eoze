@@ -147,17 +147,17 @@ function includeFromNamespace($ns, $filename, $require = true, $once = true) {
 //... Exceptions bases
 require_once PHP_PATH . 'router_exceptions.inc.php';
 //... Language
-//require_once PHP_PATH . 'Language.class.php'; // declares the function lang in the global namespace
-includeFromNamespace('eoko\\i18n', 'Language.class.php');
+//require_once PHP_PATH . 'Language.php'; // declares the function lang in the global namespace
+includeFromNamespace('eoko\\i18n', 'Language.php');
 eoko\i18n\Language::importFunctions(__NAMESPACE__);
-//require_once PHP_PATH . 'Language.class.php'; // declares the function lang in the global namespace
+//require_once PHP_PATH . 'Language.php'; // declares the function lang in the global namespace
 //... Logger
-require_once PHP_PATH . 'Logger.class.php';
+require_once PHP_PATH . 'Logger.php';
 
 // TODO: make that ondemand compliant!
-require_once PHP_PATH . 'ModelRelation.class.php';
-require_once PHP_PATH . 'ModelField.class.php';
-require_once PHP_PATH . 'ModelRelationInfo.class.php';
+require_once PHP_PATH . 'ModelRelation.php';
+require_once PHP_PATH . 'ModelField.php';
+require_once PHP_PATH . 'ModelRelationInfo.php';
 
 //require_once PHP_PATH . str_replace('\\', DS, 'eoko/cqlix/Relation/Relation') . '.classes.php';
 //require_once PHP_PATH . str_replace('\\', DS, 'eoko/cqlix/Relation/RelationInfo') . '.classes.php';
@@ -166,12 +166,12 @@ if ((!isset($test) || !$test)
         && (!isset($is_script) || !$is_script)
         && (!isset($console) || !$console)
 ) {
-    require_once (PHP_PATH . 'ExceptionHandler.class.php');
+    require_once (PHP_PATH . 'ExceptionHandler.php');
 }
 
 // --- Class loader --
 // Autoload for helpers in /inc
-require_once PHP_PATH . 'eoko' . DS . 'php' . DS . 'ClassLoader.class.php';
+require_once PHP_PATH . 'eoko' . DS . 'php' . DS . 'ClassLoader.php';
 $classLoader = eoko\php\ClassLoader::register();
 
 $classLoader->addIncludePath(array(
