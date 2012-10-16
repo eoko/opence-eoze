@@ -29,7 +29,7 @@ class ExecutorGenerator extends GeneratorBase {
 				->toArray();
 
 		// --- Generation Template ---
-//		$tplFile = dirname(__FILE__) . DS . 'tpl' . DS . 'GridController.tpl.class.php';
+//		$tplFile = dirname(__FILE__) . DS . 'tpl' . DS . 'GridController.tpl.php';
 //		$tpl = Template::create($tplFile);
 //		$tpl->className = $name;
 		$tpl->merge($this->config->controllerInfo);
@@ -38,8 +38,8 @@ class ExecutorGenerator extends GeneratorBase {
 //		if (
 //			(null !== $path = ModuleManager::getModulePath($name, false))
 //			&& (
-//				file_exists($file = $path . "$name.class.php")
-//				|| file_exists($file = $path . "controller.class.php")
+//				file_exists($file = $path . "$name.php")
+//				|| file_exists($file = $path . "controller.php")
 //			)
 //		) {
 //			// substr remove the file's <?php tag
@@ -116,7 +116,7 @@ class ExecutorGenerator extends GeneratorBase {
 //
 //		$dir = CACHE_PATH . 'modules' . DS;
 //		if (!is_dir($dir)) mkdir($dir);
-//		return $tpl->compile(null, "$dir$name.class.php");
+//		return $tpl->compile(null, "$dir$name.php");
 	}
 
 	private function processAutoValues() {
