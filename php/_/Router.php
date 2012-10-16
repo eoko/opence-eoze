@@ -13,8 +13,6 @@ use Zend\Stdlib\ArrayUtils;
 
 use \MonitorRequest;
 
-if (!isset($GLOBALS['directAccess'])) { header('HTTP/1.0 404 Not Found'); exit('Not found'); }
-
 /**
  * Route HTTP requests to the correct action of the correct module.
  *

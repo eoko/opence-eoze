@@ -12,7 +12,6 @@
  */
 use eoko\config\ConfigManager;
 
-$directAccess = false;
 date_default_timezone_set('Europe/London');
 
 function defineIf($name, $value) {
