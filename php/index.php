@@ -29,6 +29,5 @@ call_user_func(function() {
 		'path' => "{$eoze}php$ds",
 	));
 
-	global $directAccess;
 	require_once "{$eoze}php{$ds}init.inc.php";
 });

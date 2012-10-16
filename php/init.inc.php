@@ -13,7 +13,6 @@ use eoko\config\ConfigManager;
 use eoko\config\Application;
 use eoko\modules\Kepler\CometEvents;
 
-$directAccess = false;
 date_default_timezone_set('Europe/Paris');
 bcscale(2);
 
