@@ -9,6 +9,7 @@ use ReflectionProperty;
 use ReflectionClass;
 
 use eoko\module\Module;
+use eoko\module\ModuleResolver;
 use eoko\module\Module\executor\Executor;
 use eoko\util\YmlReader;
 use eoko\util\Arrays;
@@ -161,7 +162,7 @@ class ExecutorTestCase extends ModuleTestCase {
 		}
 		
 		$request  = new \Request($request);
-		$executor = Module::parseRequestAction($request);
+		$executor = ModuleResolver::parseRequestAction($request);
 
 		ExtJSResponse::purge();
 		$executor();
