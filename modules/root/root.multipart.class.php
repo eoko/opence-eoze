@@ -4,8 +4,7 @@ namespace eoko\modules\root;
 
 use eoko\module\executor\JsonExecutor;
 
-use eoko\util\Arrays;
-use eoko\module\Module;
+use eoko\module\ModuleResolver;
 
 use Exception;
 
@@ -39,7 +38,7 @@ class Multipart extends JsonExecutor {
 				// TODO this code probably doesn't catch PHP errors...
 				// So, one request error could crash the whole batch :(
 				try {
-					$executor = Module::parseRequestAction(new \Request($data));
+					$executor = ModuleResolver::parseRequestAction(new \Request($data));
 
 					if ($executor instanceof JsonExecutor) {
 						$result['data'] = $executor(true);
@@ -67,4 +66,3 @@ class Multipart extends JsonExecutor {
 		return true;
 	}
 }
-
