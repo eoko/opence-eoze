@@ -22,6 +22,31 @@
  * 
  * @see {Ext.layout.ContainerLayout#runDelayedLayout}
  */
+Ext.override(Ext.Container, {
+	/**
+	 * Finds a child at any depth by itemId.
+	 * @param {String} itemId
+	 * @return {Component/null}
+	 */
+	findByItemId: function(itemId) {
+		var m = null, ct = this;
+		this.cascade(function(c) {
+			if (ct != c && c.itemId === itemId) {
+				m = c;
+				return false;
+			}
+		});
+		return m;
+	}
+	/**
+	 * Finds a child component at any depth by id or itemid.
+	 * @param {String} id or itemId
+	 * @return {Component/null}
+	 */
+	,findChild: function(id) {
+		return this.findById(id) || this.findByItemId(id);
+	}
+});
 
 /**
  * @class Ext.layout.ContainerLayout
