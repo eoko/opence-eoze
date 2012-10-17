@@ -121,7 +121,8 @@ Ext.ux.GroupTab = Ext.extend(Ext.Container, {
                beforeshow: function(tip) {
                    var item = (tip.triggerElement.parentNode === this.mainItem.tabEl)
                        ? this.mainItem
-                       : this.findById(tip.triggerElement.parentNode.id.split(this.idDelimiter)[1]);
+                       // : this.findById(tip.triggerElement.parentNode.id.split(this.idDelimiter)[1]); // rx-
+                       : this.findChild(tip.triggerElement.parentNode.id.split(this.idDelimiter)[1]); // rx+
 
                    if(!item.tabTip) {
                        return false;
@@ -261,7 +262,9 @@ Ext.ux.GroupTab = Ext.extend(Ext.Container, {
     beforeDestroy: function(){
 		if (!this.toolbars) this.toolbars = []; // +rx
         Ext.TabPanel.prototype.beforeDestroy.call(this);
-        this.tooltip.destroy();
+		if (this.tooltip) { // rx+
+	        this.tooltip.destroy();
+		} // rx+
     }
 });
 
