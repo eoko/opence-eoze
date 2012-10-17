@@ -220,14 +220,14 @@ class ModuleManager {
 	 *
 	 * Module Inheritance
 	 *
-	 * Modules which class is explicitely declared in a {ModuleName}.class.php
+	 * Modules which class is explicitely declared in a {ModuleName}.php
 	 * file can override another module by extending it without importing
 	 * any specific class with the <b>use</b> keyword. The ModuleManager will
 	 * resolve the highest (the nearest to the application level) implementation
 	 * of the Module.
 	 *
 	 * Modules of which the class is implicitely created (that is, which do not
-	 * have a {ModuleName}.class.php file) must declare the name of their base
+	 * have a {ModuleName}.php file) must declare the name of their base
 	 * module in their config file.
 	 *
 	 * A Module with the same name as a Module found lower in the hierarchy will

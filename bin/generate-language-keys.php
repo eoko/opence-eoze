@@ -4,7 +4,7 @@
 require_once 'init.inc.php';
 
 $excludedDirs = array('lib');
-$excludedFiles = array('Language.class.php');
+$excludedFiles = array('Language.php');
 
 function find_files($path, $pattern, $callback) {
   $path = rtrim(str_replace("\\", "/", $path), '/') . '/';
@@ -130,9 +130,9 @@ function extractKeys($filename) {
 }
 
 find_files(ROOT, '/\.(php|js)$/', 'extractKeys');
-//extractKeys(ROOT . DS . 'modules' . DS . 'users.class.php');
+//extractKeys(ROOT . DS . 'modules' . DS . 'users.php');
 
-require_once ROOT . 'inc' . DS . 'YAML.class.php';
+require_once ROOT . 'inc' . DS . 'YAML.php';
 
 $yml = array();
 

@@ -437,7 +437,7 @@ class LegacyGridModule {
 				->toArray();
 
 		// --- Generation Template ---
-		$tplFile = dirname(__FILE__) . DS . 'tpl' . DS . 'GridController.tpl.class.php';
+		$tplFile = dirname(__FILE__) . DS . 'tpl' . DS . 'GridController.tpl.php';
 		$tpl = Template::create($tplFile);
 		$tpl->className = $controller;
 		$config->controllerInfo['controller'] .= '.grid';
@@ -447,8 +447,8 @@ class LegacyGridModule {
 		if (
 			(null !== $path = ModuleManager::getModulePath($controller, false))
 			&& (
-				file_exists($file = $path . "$controller.class.php")
-				|| file_exists($file = $path . "controller.class.php")
+				file_exists($file = $path . "$controller.php")
+				|| file_exists($file = $path . "controller.php")
 			)
 		) {
 			// substr remove the file's <?php tag
@@ -515,7 +515,7 @@ class LegacyGridModule {
 
 		$dir = CACHE_PATH . 'modules' . DS;
 		if (!is_dir($dir)) mkdir($dir);
-		return $tpl->compile(null, "$dir$controller.class.php");
+		return $tpl->compile(null, "$dir$controller.php");
 	}
 
 	private static function processColumnsInfo(Config $config, GridModuleColumns $columns, Template $tpl) {

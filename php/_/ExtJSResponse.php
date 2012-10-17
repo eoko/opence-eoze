@@ -6,8 +6,6 @@
 use eoko\util\Json;
 use eoko\output\Output;
 
-if (!isset($GLOBALS['directAccess'])) { header('HTTP/1.0 404 Not Found'); exit('Not found'); }
-
 class ExtJSResponse {
 
 	private static $enabled = true;
