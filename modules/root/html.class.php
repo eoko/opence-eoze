@@ -124,11 +124,13 @@ JS;
 		foreach (ModuleManager::listModules(false) as $module) {
 			$loaders += $module->getExt4LoaderConfig();
 		}
-		
-		$loaders['Eoze.Ext'] = EOZE_BASE_URL . 'js/Eoze/Ext';
-		$loaders['Eoze.i18n'] = EOZE_BASE_URL . 'js/Eoze/i18n';
-		$loaders['Eoze.locale'] = EOZE_BASE_URL . 'js/Eoze/locale';
-		$loaders['Eoze.lib'] = EOZE_BASE_URL . 'js/Eoze/lib';
+
+		foreach (glob(EOZE_PATH . 'js/Eoze/*') as $file) {
+			if (is_dir($file)) {
+				$name = basename($file);
+				$loaders["Eoze.$name"] = EOZE_BASE_URL . "js/Eoze/$name";
+			}
+		}
 		
 		$paths = json_encode($loaders);
 		
