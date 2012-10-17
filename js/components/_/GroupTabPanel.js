@@ -118,7 +118,8 @@ Ext.ux.GroupTabPanel = Ext.extend(Ext.TabPanel, {
         var item = null,
             itemEl = e.getTarget('li', this.strip);
         if (itemEl) {
-            item = this.findById(itemEl.id.split(this.idDelimiter)[1]);
+            // item = this.findById(itemEl.id.split(this.idDelimiter)[1]); // rx-
+            item = this.findChild(itemEl.id.split(this.idDelimiter)[1]); // rx+
             if (item.disabled) {
                 return {
                     expand: null,
