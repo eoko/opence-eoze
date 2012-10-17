@@ -151,6 +151,11 @@ class Application implements FileFinder {
 			foreach (Files::listFiles(JS_PATH . 'core', 'glob:*.js', true) as $file) {
 				$js['core/' . $file] = 2;
 			}
+			if ($this->isDevMode()) {
+				foreach (Files::listFiles(JS_PATH . 'Eoze-tests', 'glob:*.js', true) as $file) {
+					$js['Eoze-tests/' . $file] = 3;
+				}
+			}
 			return array(
 				FileType::JS => $js,
 				FileType::CSS => array(
