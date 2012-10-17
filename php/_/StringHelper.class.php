@@ -24,18 +24,10 @@ class StringHelper {
 	}
 	
 	public static function replaceSuccessively($needle, $replaces, $subject) {
-		$nExpected = count($replaces);
-		$r = str_replace(
-			array_fill(0, $nExpected, $needle), 
-			$replaces, 
-			$subject,
-			$n
-		);
-		if ($n !== $nExpected) {
-			throw new IllegalStateException(
-				"Invalid number of replacement strings (given: $nExpected, replacements: $n)"
-			);
+		$quotedNeedle = preg_quote($needle, '/');
+		foreach ($replaces as $replace) {
+			$subject = preg_replace("/$quotedNeedle/", $replace, $subject, 1);
 		}
-		return $r;
+		return $subject;
 	}
 }
