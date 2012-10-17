@@ -37,6 +37,20 @@ class Date extends DateTime{
 			throw new IllegalArgumentException("$date (" . gettype($date) . ')');
 		}
 	}
+
+	/**
+	 * Parse the given date and returns a formated string. If the given date is
+	 * empty, then `null` is returned.
+	 * @param string|DateTime|Date $date
+	 * @param string $format
+	 * @return string|null
+	 */
+	public static function parseString($date, $format) {
+		$date = self::parseDate($date);
+		if ($date) {
+			return $date->format($format);
+		}
+	}
 	
 	public function __construct($date, $timeZone = null) {
 		if ($date instanceof DateTime) {
