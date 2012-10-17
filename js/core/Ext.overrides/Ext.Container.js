@@ -67,4 +67,18 @@ Ext.override(Ext.layout.ContainerLayout, {
             this.runLayout();
         }
     }
+
+	/**
+	 * Find a child at any depth by itemId.
+	 */
+	,findByItemId: function(itemId) {
+		var m = null, ct = this;
+		this.cascade(function(c) {
+			if (ct != c && c.itemId === itemId) {
+				m = c;
+				return false;
+			}
+		});
+		return m;
+	}
 });
