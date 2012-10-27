@@ -1,4 +1,4 @@
-require_once MODEL_QUERY_PATH . '<?php echo $modelName ?>Query.class.php';
+require_once MODEL_QUERY_PATH . '<?php echo $modelName ?>Query.php';
 
 /**
  * Base of the <?php echo $modelName ?> Table.
@@ -89,7 +89,7 @@ abstract class <?php echo $tableName ?>Base extends <?php echo $baseTableName ?>
 	 * @return <?php echo $modelName ?>Query
 	 */
 	public static function createQuery(array $context = null, &$getQuery = null) {
-		require_once MODEL_QUERY_PATH . '<?php echo $modelName ?>Query.class.php';
+		require_once MODEL_QUERY_PATH . '<?php echo $modelName ?>Query.php';
 		$getQuery = <?php echo $modelName ?>Query::create(<?php echo $tableName ?>::getInstance(), $context);
 		return $getQuery;
 	}
