@@ -255,11 +255,11 @@ abstract class Renderer {
 		}
 
 		throw new UnsupportedOperationException(
-'Module::parseAction has been modified, this method must be adapted to use the new form.
+'ModuleResolver::parseAction has been modified, this method must be adapted to use the new form.
 Old signature was:
 public static function parseAction($controller, $action, $request, $defaultExecutor = Module::DEFAULT_EXECUTOR, $require = true)'
 		);
-		$action = Module::parseAction($controller, Module::DEFAULT_INTERNAL_EXECUTOR, $name);
+		$action = ModuleResolver::parseAction($controller, Module::DEFAULT_INTERNAL_EXECUTOR, $name);
 		return $action($opts);
 
 //		$executor = ModuleManager::parseExecutor($controller, true);

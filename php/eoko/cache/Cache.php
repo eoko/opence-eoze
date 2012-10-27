@@ -25,7 +25,7 @@ class Cache {
 	public static function cachePhpClass($class, $code) {
 		return self::cachePhpFile(
 			parseNamespace($class, $class, GET_NAMESPACE_TRIM),
-			"$class.class.php",
+			"$class.php",
 			$code
 		);
 	}

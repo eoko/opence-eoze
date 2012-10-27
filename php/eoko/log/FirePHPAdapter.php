@@ -18,7 +18,7 @@ class FirePHPAdapter {
 	public function __construct() {
 		$found = false;
 		foreach (explode(':', get_include_path()) as $dir) {
-			$filename = LIBS_PATH . 'FirePHPCore/FirePHP.class.php';
+			$filename = LIBS_PATH . 'FirePHPCore/FirePHP.php';
 			if (file_exists($filename)) {
 				require_once($filename);
 				$found = true;
@@ -31,7 +31,7 @@ class FirePHPAdapter {
 			$this->firePHP->setOptions(array('includeLineNumbers' => false));
 			return $this->firePHP;
 		} else {
-			Logger::getLogger('LoggerFirePHPAppender')->error('FirePHP.class.php '
+			Logger::getLogger('LoggerFirePHPAppender')->error('FirePHP.php '
 					. 'cannot be found in include path');
 		}
 	}
