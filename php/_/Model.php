@@ -50,6 +50,12 @@ abstract class Model {
 	/** @var myModelTable */
 	protected $table;
 
+	/**
+	 * True if all fields have been set (from the database, usually), else false.
+	 * @var bool
+	 */
+	private $dbImage = false;
+
 	protected $initiated = false;
 
 	/**
@@ -1467,13 +1473,6 @@ abstract class Model {
 				$this->$m($value, $forceAcceptNull);
 				// call_user_method($m, $this, $value, $forceAcceptNull);
 			} else if ($this->getTable()->hasColumn($name)) {
-//				if ($name == 'genre') dump_mark();
-//				dump_after(array(
-//					'name'=> $name,
-//					'value' => $value,
-//					'value=0' => $value === 0,
-//					'value=""' => $value === '',
-//				));
 				$this->setColumnNoLoadCheck($name, $value, $forceAcceptNull);
 			} 
 			
@@ -1579,7 +1578,11 @@ abstract class Model {
 	 * @return Model
 	 */
 	private function setColumnNoLoadCheck($name, $value, $forceAcceptNull = false,
-			$testChanged = true) {
+			$testChanged = null) {
+
+		if ($testChanged !== null) {
+			throw new DeprecatedException('$testChanged parameter has been deprecated');
+		}
 
 		$table = $this->getTable();
 		if ($table->hasColumn($name)) {
@@ -1592,8 +1595,9 @@ abstract class Model {
 			
 			// 11/12/11 23:04 changed:
 			// if ($this->internal->fields[$name] != $v || !$testChanged) { 
-			if ($this->internal->fields[$name] !== $v || !$testChanged) {
-//				self::getLogger()->debug('Converted value for field {} : {} => {}', $name, $value, $v);
+			// 02/11/12 12:24 changed
+ 			// if ($this->internal->fields[$name] !== $v || !$testChanged) {
+			if (!$this->dbImage || $this->internal->fields[$name] !== $v || !$testChanged) {
 				$this->internal->fields[$name] = $this->applyFieldValue($name, $v);
 				$this->internal->colUpdated[$name] = true;
 				$this->internal->modified = true;
@@ -1632,25 +1636,26 @@ abstract class Model {
 		}
 	}
 
-	/**
-	 * Set multiple columns value
-	 * @param array $setters
-	 */
-	public function setColumns(array $setters, $forceAcceptNull = false, $testChanged = true) {
-
-//REMLOAD		if ($this->internal->needsLoading) $this->doLoad();
-
-//		$col = $this->getTable()->getColumn('conjoint__contacts_id');
-//		echo($col->convertValueToSQL($setters['conjoint__contacts_id']) === null);die;
-
-		foreach ($setters as $k => $v) {
-			$this->setColumnNoLoadCheck($k, $v, $forceAcceptNull, $testChanged);
-//			if (!$this->setColumnNoLoadCheck($k, $v)) {
-//				Logger::getLogger('Model')->warn('Setting inexistant key in model: {}[{}]',
-//						$this->getModelName(), $k);
-//			}
-		}
-	}
+// 02/11/12 12:23 Deprecated
+//	/**
+//	 * Set multiple columns value
+//	 * @param array $setters
+//	 */
+//	public function setColumns(array $setters, $forceAcceptNull = false, $testChanged = true) {
+//
+////REMLOAD		if ($this->internal->needsLoading) $this->doLoad();
+//
+////		$col = $this->getTable()->getColumn('conjoint__contacts_id');
+////		echo($col->convertValueToSQL($setters['conjoint__contacts_id']) === null);die;
+//
+//		foreach ($setters as $k => $v) {
+//			$this->setColumnNoLoadCheck($k, $v, $forceAcceptNull, $testChanged);
+////			if (!$this->setColumnNoLoadCheck($k, $v)) {
+////				Logger::getLogger('Model')->warn('Setting inexistant key in model: {}[{}]',
+////						$this->getModelName(), $k);
+////			}
+//		}
+//	}
 	
 	protected function applyFieldValue($field, $value) {
 		return $value;
@@ -1677,6 +1682,7 @@ abstract class Model {
 				$this->internal->fields[$virtual] = $setters[$virtual];
 			}
 		}
+		$this->dbImage = true;
 	}
 
 	/**
