@@ -13,7 +13,6 @@ use eoko\config\ConfigManager;
 use eoko\config\Application;
 use eoko\modules\Kepler\CometEvents;
 
-$directAccess = false;
 date_default_timezone_set('Europe/Paris');
 bcscale(2);
 
@@ -174,18 +173,18 @@ function includeFromNamespace($ns, $filename, $require = true, $once = true) {
 require_once PHP_PATH . '_/router_exceptions.inc.php';
 require_once PHP_PATH . 'eoko/php/ErrorException.php';
 //... Language
-//require_once PHP_PATH . 'Language.class.php'; // declares the function lang in the global namespace
-includeFromNamespace('eoko\\i18n', 'Language.class.php');
+//require_once PHP_PATH . 'Language.php'; // declares the function lang in the global namespace
+includeFromNamespace('eoko\\i18n', 'Language.php');
 eoko\i18n\Language::importFunctions(__NAMESPACE__);
-//require_once PHP_PATH . 'Language.class.php'; // declares the function lang in the global namespace
+//require_once PHP_PATH . 'Language.php'; // declares the function lang in the global namespace
 //... Logger
-require_once PHP_PATH . '_/Logger.class.php';
+require_once PHP_PATH . '_/Logger.php';
 
 // TODO: make that ondemand compliant!
-require_once PHP_PATH . '_/ModelRelation.class.php';
-require_once PHP_PATH . '_/ModelField.class.php';
-require_once PHP_PATH . '_/ModelFieldBase.class.php';
-require_once PHP_PATH . '_/ModelRelationInfo.class.php';
+require_once PHP_PATH . '_/ModelRelation.php';
+require_once PHP_PATH . '_/ModelField.php';
+require_once PHP_PATH . '_/ModelFieldBase.php';
+require_once PHP_PATH . '_/ModelRelationInfo.php';
 
 // --- Exception handler ---
 if ((!isset($test) || !$test) && (!isset($is_script) || !$is_script)
@@ -195,7 +194,7 @@ if ((!isset($test) || !$test) && (!isset($is_script) || !$is_script)
 
 // --- Class loader --
 // Autoload for helpers in /inc
-require_once PHP_PATH . 'eoko' . DS . 'php' . DS . 'ClassLoader.class.php';
+require_once PHP_PATH . 'eoko' . DS . 'php' . DS . 'ClassLoader.php';
 $classLoader = eoko\php\ClassLoader::register();
 
 $classLoader->addIncludePath(array(

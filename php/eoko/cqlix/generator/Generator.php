@@ -225,14 +225,14 @@ class Generator extends Script {
 			$modelName = NameMaker::modelFromDB($table);
 			$tableName = NameMaker::tableFromDB($table);
 
-			$modelFilename = MODEL_PATH . $modelName . '.class.php';
-			$modelBaseFilename = MODEL_BASE_PATH . $modelName . 'Base' . '.class.php';
+			$modelFilename = MODEL_PATH . $modelName . '.php';
+			$modelBaseFilename = MODEL_BASE_PATH . $modelName . 'Base' . '.php';
 
-			$tableFilename = MODEL_PATH . $tableName . '.class.php';
-			$tableBaseFilename = MODEL_BASE_PATH . $tableName . 'Base' . '.class.php';
-			$tableProxyFilename = MODEL_PROXY_PATH . $tableName . 'Proxy' . '.class.php';
+			$tableFilename = MODEL_PATH . $tableName . '.php';
+			$tableBaseFilename = MODEL_BASE_PATH . $tableName . 'Base' . '.php';
+			$tableProxyFilename = MODEL_PROXY_PATH . $tableName . 'Proxy' . '.php';
 
-			$modelQueryFilename = MODEL_QUERY_PATH . "{$modelName}Query" . '.class.php';
+			$modelQueryFilename = MODEL_QUERY_PATH . "{$modelName}Query" . '.php';
 
 			$params = array($table, $fields);
 

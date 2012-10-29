@@ -1,4 +1,4 @@
-require_once MODEL_BASE_PATH . '<?php echo $modelName ?>Base.class.php';
+require_once MODEL_BASE_PATH . '<?php echo $modelName ?>Base.php';
 
 /**
  * @package <?php echo $package ?>

@@ -2,7 +2,7 @@
 
 namespace eoko\modules\GridModule;
 
-require_once dirname(__FILE__) . DS . 'gen' . DS . 'LegacyGridModule.class.php';
+require_once __DIR__ . DS . 'gen' . DS . 'LegacyGridModule.php';
 
 class JsFileExecutor extends \eoko\module\executor\JsFileExecutor {
 
