@@ -56,6 +56,11 @@ use eoko\database\Database;
  */
 class Query {
 
+    // Right from the MySQL manual:
+    //     To retrieve all rows from a certain offset up to the end of the result set, you can
+    //     use some large number for the second parameter.
+	const MAX_ROW_COUNT = '18446744073709551615';
+
 	private static $executionCount = 0;
 	
 	private $db = null;
@@ -72,7 +77,7 @@ class Query {
 	/** @var QueryWhere */
 	private $where = null;
 
-	private $limitStart = false, $limit = false;
+	private $limitStart = null, $limit = null;
 	private $order = false;
 	private $defaultOrder = false;
 
@@ -774,10 +779,17 @@ class Query {
 	/**
 	 * @return Query
 	 */
-	public function limit($limit, $start = false) {
-		if ($start === null) $start = 0;
+	public function limit($limit, $start = null) {
 		$this->limitStart = $start;
 		$this->limit = $limit;
+		return $this;
+	}
+
+    /**
+     * @return Query $this
+     */
+	public function offset($start = null) {
+		$this->limitStart = $start;
 		return $this;
 	}
 
@@ -797,17 +809,15 @@ class Query {
 		}
 	}
 
-	private function hasLimit() {
-		return $this->limit !== false;
-	}
-
 	private function buildLimit() {
-		if ($this->hasLimit()) {
-			if ($this->limitStart !== false) {
+		if ($this->limit !== null && $this->limit !== false) {
+			if ($this->limitStart !== null && $this->limitStart !== null) {
 				return ' LIMIT ' . $this->limitStart . ',' . $this->limit;
 			} else {
 				return ' LIMIT ' . $this->limit;
 			}
+		} else if ($this->limitStart !== null && $this->limitStart !== false) {
+			return ' LIMIT ' . $this->limitStart . ',' . self::MAX_ROW_COUNT;
 		} else {
 			return '';
 		}
