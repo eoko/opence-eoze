@@ -50,17 +50,17 @@
         },
         {
             "name": "zendframework/zendframework",
-            "version": "2.0.2",
+            "version": "2.0.3",
             "source": {
                 "type": "git",
                 "url": "git://github.com/zendframework/zf2.git",
-                "reference": "release-2.0.2"
+                "reference": "release-2.0.3"
             },
             "dist": {
                 "type": "zip",
-                "url": "http://packages.zendframework.com/releases/ZendFramework-2.0.2/ZendFramework-2.0.2.zip",
-                "reference": "release-2.0.2",
-                "shasum": "f93487af607fe701a87f2a108259a44f60b91341"
+                "url": "http://packages.zendframework.com/releases/ZendFramework-2.0.3/ZendFramework-2.0.3.zip",
+                "reference": "release-2.0.3",
+                "shasum": "c063848cceb1e32ad57746099ec1fafa6b3efa34"
             },
             "require": {
                 "php": ">=5.3.3"

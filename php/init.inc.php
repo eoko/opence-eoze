@@ -142,7 +142,9 @@ require_once PHP_PATH . '_/functions.php';
 require_once PHP_PATH . '_/dump.php';
 
 // Vendors
-require_once EOZE_PATH . 'vendor' . DS . 'autoload.php';
+if (!defined('EOZE_AS_LIB') || !EOZE_AS_LIB) {
+	require_once EOZE_PATH . 'vendor' . DS . 'autoload.php';
+}
 
 if (!function_exists('lcfirst')) {
 	function lcfirst($str) {
@@ -185,8 +187,9 @@ require_once PHP_PATH . '_/ModelFieldBase.php';
 require_once PHP_PATH . '_/ModelRelationInfo.php';
 
 // --- Exception handler ---
-if ((!isset($test) || !$test) && (!isset($is_script) || !$is_script)) {
-	require_once (PHP_PATH . '_/ExceptionHandler.php');
+if ((!isset($test) || !$test) && (!isset($is_script) || !$is_script)
+		&& !(defined('EOZE_AS_LIB') && EOZE_AS_LIB)) {
+	require_once (PHP_PATH . '_/ExceptionHandler.class.php');
 }
 
 // --- Class loader --
@@ -290,6 +293,7 @@ if (!defined('ADD_LOG_APPENDERS') || ADD_LOG_APPENDERS) {
 if ((!isset($test) || !$test)
 		&& (!isset($is_script) || !$is_script)
 		&& (!defined('UNIT_TEST') || !UNIT_TEST)
+		&& (!defined('EOZE_AS_LIB') || !EOZE_AS_LIB)
 //		&& !interface_exists('PHPUnit_Framework_Test', false)
 ) {
 
