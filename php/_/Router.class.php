@@ -71,22 +71,25 @@ class Router {
 		
 		ExtJSResponse::put('timestamp', $this->actionTimestamp);
 
-		// HTTP request
-		$this->httpRequest = new HttpRequest();
-		
-		// Route match
-		$this->routeMatch = $this->getRouteMatch();
-		
-		// Legacy eoze Request
-		$requestReader = $this->createRequestReader();
-		$this->request = $requestReader->createRequest();
+		// TODO that should not happen in the constructor
+		if (!defined('EOZE_AS_LIB') || !EOZE_AS_LIB) {
+			// HTTP request
+			$this->httpRequest = new HttpRequest();
 
-		// Monitor
-		Logger::getLogger($this)->info('Start action #{}', $this->actionTimestamp);
-		$this->logRequest($this->request->toArray());
-		
-		// $_REQUEST usage must be fixed in that
-//		UserMessageService::parseRequest($this->request);
+			// Route match
+			$this->routeMatch = $this->getRouteMatch();
+
+			// Legacy eoze Request
+			$requestReader = $this->createRequestReader();
+			$this->request = $requestReader->createRequest();
+
+			// Monitor
+			Logger::getLogger($this)->info('Start action #{}', $this->actionTimestamp);
+			$this->logRequest($this->request->toArray());
+
+			// $_REQUEST usage must be fixed in that
+//			UserMessageService::parseRequest($this->request);
+		}
 	}
 	
 	/**
