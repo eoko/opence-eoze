@@ -189,7 +189,7 @@ require_once PHP_PATH . '_/ModelRelationInfo.php';
 // --- Exception handler ---
 if ((!isset($test) || !$test) && (!isset($is_script) || !$is_script)
 		&& !(defined('EOZE_AS_LIB') && EOZE_AS_LIB)) {
-	require_once (PHP_PATH . '_/ExceptionHandler.class.php');
+	require_once (PHP_PATH . '_/ExceptionHandler.php');
 }
 
 // --- Class loader --
