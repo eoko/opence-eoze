@@ -303,34 +303,33 @@ class Query {
 
 	/**
 	 *
-	 * The $function argument can contains placeholders in the form {} or {0}, {1}, 
+	 * The $function argument can contains placeholders in the form {} or {0}, {1},
 	 * etc.
-	 * 
+	 *
 	 * If no placeholders are used in the $function argument, then it will be
 	 * considered as the function name. In this case, $function can be provider
 	 * as an array of string that will be nested one in the next one.
-	 * 
+	 *
 	 * E.g. $function = array('ABS, 'SUM') will produce:
 	 *     ABS(SUM(`my_field`))
-	 * 
+	 *
 	 * If placeholders of the form {} are used, then $field must be a single string
 	 * and $function can be either a string or an array. If $function is a string,
-	 * then the placeholder will be replaced by the fully qualified $field name 
-	 * everywhere in the $function string. Else, if $function is an array, then the 
-	 * placeholder will be replaced by the fully qualified $field name in the first 
-	 * string in the $function array, then the placeholder in the second element of 
+	 * then the placeholder will be replaced by the fully qualified $field name
+	 * everywhere in the $function string. Else, if $function is an array, then the
+	 * placeholder will be replaced by the fully qualified $field name in the first
+	 * string in the $function array, then the placeholder in the second element of
 	 * $function will be replaced by the processed first element, and so on.
-	 * 
+	 *
 	 * Fninally, if named placeholders of the form {0}, {1} or {index} are used, then
 	 * the $function argument must be a string, and the $field argument must be an
 	 * array. Placeholders will be replaced by the fully qualified field in the $field
 	 * array which index matches the index of the placeholder.
-	 * @param type $field
-	 * 
+	 *
 	 * @param string|array $field
-	 * @param string|array $function
-	 * @param string $alias 
-	 * 
+	 * @param callable $fn
+	 * @param string $alias
+	 *
 	 * @return Query $this
 	 */
 	public function selectFunction($field, $fn, $alias = null) {
