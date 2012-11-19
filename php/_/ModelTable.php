@@ -1241,10 +1241,26 @@ EX
 		}
 		return $this->plugins[$class];
 	}
-	
+
+	/**
+	 * Creates a ModelSet for the given Query.
+	 *
+	 * @param ModelTableQuery $loadQuery
+	 * @param int $modelSetMode
+	 * @param ModelRelationReciproqueFactory $reciproqueFactory
+	 * @return ModelSet
+	 */
 	abstract static public function createModelSet(ModelTableQuery $loadQuery,
 			$modelSetMode = ModelSet::ONE_PASS,
 			ModelRelationReciproqueFactory $reciproqueFactory = null);
+	/**
+	 * Creates a ModelSet for the given Query.
+	 *
+	 * @param ModelTableQuery $loadQuery
+	 * @param int $modelSetMode
+	 * @param ModelRelationReciproqueFactory $reciproqueFactory
+	 * @return ModelSet
+	 */
 	protected function _createModelSet(ModelTableQuery $loadQuery,
 			$modelSetMode = ModelSet::ONE_PASS,
 			ModelRelationReciproqueFactory $reciproqueFactory = null) {
