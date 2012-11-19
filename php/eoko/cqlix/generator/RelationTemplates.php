@@ -196,7 +196,7 @@ new <?php echo $this->getClass() ?>(<?php echo $head ? $rTabs : '' ?>
 		if ($this instanceof ModelRelationHasOne) {
 			return NameMaker::modelFromDB($this->targetDBTableName);
 		} else if ($this instanceof ModelRelationHasMany) {
-			return 'array';
+			return 'ModelSet';
 		} else {
 			print_r($this);
 			throw new IllegalStateException(get_class($this) . ' => ' . $this);
