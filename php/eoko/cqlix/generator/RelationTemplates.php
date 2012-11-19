@@ -7,6 +7,7 @@ use eoko\util\Arrays;
 use eoko\config\ConfigManager;
 
 use UnsupportedOperationException;
+use InvalidArgumentException;
 
 use ModelRelationReferedByOneOnMultipleFields;
 use ModelRelationReferedByMany;
@@ -192,11 +193,16 @@ new <?php echo $this->getClass() ?>(<?php echo $head ? $rTabs : '' ?>
 						|| $this->reciproque->equals($other->reciproque, false)));
 	}
 	
-	public function getTargetType() {
+	public function getTargetType($operation, $php = false) {
 		if ($this instanceof ModelRelationHasOne) {
 			return NameMaker::modelFromDB($this->targetDBTableName);
 		} else if ($this instanceof ModelRelationHasMany) {
-			return 'array';
+			switch ($operation) {
+				case 'get': return 'ModelSet';
+				case 'set': return $php ? 'array' : $this->getTargetModelName() . '[]';
+				default:
+					throw new InvalidArgumentException('$operation must be "get" or "set"');
+			}
 		} else {
 			print_r($this);
 			throw new IllegalStateException(get_class($this) . ' => ' . $this);
