@@ -9,6 +9,7 @@ use eoko\util\Files as FileHelper;
 use SecurityException, IllegalStateException;
 use eoko\file;
 use eoko\util\Arrays;
+use eoko\config\Config;
 use Request;
 use Logger;
 
@@ -118,7 +119,7 @@ abstract class Executor implements file\Finder {
 	}
 	
 	/**
-	 * @return eoko\config\Config
+	 * @return Config
 	 */
 	public function getModuleConfig() {
 		return $this->module->getConfig();
