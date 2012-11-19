@@ -16,15 +16,11 @@ use eoko\modules\Kepler\CometEvents;
 date_default_timezone_set('Europe/Paris');
 bcscale(2);
 
-function defineIf($name, $value) {
-	if (!defined($name)) define($name, $value);
-}
-
 // Directories
-defineIf('DS', DIRECTORY_SEPARATOR);
-defineIf('ROOT', realpath(__DIR__ . DS . '..' . DS . '..') . DS);
+if (!defined('DS')) define('DS', DIRECTORY_SEPARATOR);
+if (!defined('ROOT')) define('ROOT', realpath(__DIR__ . DS . '..' . DS . '..') . DS);
 
-defineIf('SITE_BASE_URL', 'http://' .
+if (!defined('SITE_BASE_URL')) define('SITE_BASE_URL', 'http://' .
 		(isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost')
 		. rtrim(dirname($_SERVER['PHP_SELF']) , '/\\') . '/' );
 
@@ -34,8 +30,8 @@ if (file_exists($filename = ROOT . '../config.php')
 }
 
 // Config
-defineIf('APP_NAME', 'opence');
-defineIf('APP_TITLE', 'Open.CE');
+if (!defined('APP_NAME')) define('APP_NAME', 'opence');
+if (!defined('APP_TITLE')) define('APP_TITLE', 'Open.CE');
 
 // removed on 2/26/11 2:27 PM
 //$phpSubDirs = array(
@@ -52,73 +48,75 @@ defineIf('APP_TITLE', 'Open.CE');
 //	);
 //}
 
-defineIf('WEB_DIR', 'public');
-defineIf('WEB_DIR_URL', SITE_BASE_URL . WEB_DIR . '/');
-defineIf('WEB_DIR_PATH', ROOT . WEB_DIR . DS);
+if (!defined('WEB_DIR')) define('WEB_DIR', 'public');
+if (!defined('WEB_DIR_URL')) define('WEB_DIR_URL', SITE_BASE_URL . WEB_DIR . '/');
+if (!defined('WEB_DIR_PATH')) define('WEB_DIR_PATH', ROOT . WEB_DIR . DS);
 
-defineIf('USE_CONTROLLER_CACHE', false);
+if (!defined('USE_CONTROLLER_CACHE')) define('USE_CONTROLLER_CACHE', false);
 
-defineIf('BIN_PATH', ROOT . 'bin' . DS);
+if (!defined('BIN_PATH')) define('BIN_PATH', ROOT . 'bin' . DS);
 
-defineIf('LIB_DIR', null);
-defineIf('LIB_PATH', ROOT . (LIB_DIR ? LIB_DIR . DS : null));
+if (!defined('LIB_DIR')) define('LIB_DIR', null);
+if (!defined('LIB_PATH')) define('LIB_PATH', ROOT . (LIB_DIR ? LIB_DIR . DS : null));
 
-defineIf('EOZE_DIR', 'eoze');
-defineIf('EOZE_PATH', str_replace(DS . DS, DS, LIB_PATH . EOZE_DIR . DS));
-defineIf('EOZE_CONFIG_PATH', EOZE_PATH . 'config' . DS);
-defineIf('EOZE_BASE_URL', preg_replace('@([^:/])//@', '$1/', SITE_BASE_URL . '/' . EOZE_DIR) . '/');
+if (!defined('EOZE_DIR')) define('EOZE_DIR', 'eoze');
+if (!defined('EOZE_PATH')) define('EOZE_PATH', str_replace(DS . DS, DS, LIB_PATH . EOZE_DIR . DS));
+if (!defined('EOZE_CONFIG_PATH')) define('EOZE_CONFIG_PATH', EOZE_PATH . 'config' . DS);
+if (!defined('EOZE_BASE_URL')) define('EOZE_BASE_URL', preg_replace('@([^:/])//@', '$1/', SITE_BASE_URL . '/' . EOZE_DIR) . '/');
 
-defineIf('PHP_DIR', 'php');
-defineIf('PHP_PATH', EOZE_PATH . PHP_DIR . DS);
-defineIf('APP_PATH', ROOT . 'app' . DS);
-defineIf('APP_PHP_PATH', APP_PATH . PHP_DIR . DS);
+if (!defined('PHP_DIR')) define('PHP_DIR', 'php');
+if (!defined('PHP_PATH')) define('PHP_PATH', EOZE_PATH . PHP_DIR . DS);
+if (!defined('APP_PATH')) define('APP_PATH', ROOT . 'app' . DS);
+if (!defined('APP_PHP_PATH')) define('APP_PHP_PATH', APP_PATH . PHP_DIR . DS);
 
-defineIf('MY_EOZE_PATH', ROOT . '.eoze' . DS);
-defineIf('CACHE_PATH', MY_EOZE_PATH . 'cache' . DS);
-defineIf('LOG_PATH', MY_EOZE_PATH . 'log' . DS);
-defineIf('TMP_PATH', MY_EOZE_PATH . 'tmp' . DS);
-defineIf('HELP_PATH', ROOT . 'help' . DS);
-defineIf('LIBS_PATH', PHP_PATH . 'lib' . DS);
-defineIf('DATABASE_DUMP_PATH', ROOT . 'mysql' . DS);
+if (!defined('MY_EOZE_PATH')) define('MY_EOZE_PATH', ROOT . '.eoze' . DS);
+if (!defined('CACHE_PATH')) define('CACHE_PATH', MY_EOZE_PATH . 'cache' . DS);
+if (!defined('LOG_PATH')) define('LOG_PATH', MY_EOZE_PATH . 'log' . DS);
+if (!defined('TMP_PATH')) define('TMP_PATH', MY_EOZE_PATH . 'tmp' . DS);
+if (!defined('HELP_PATH')) define('HELP_PATH', ROOT . 'help' . DS);
+if (!defined('LIBS_PATH')) define('LIBS_PATH', PHP_PATH . 'lib' . DS);
+if (!defined('DATABASE_DUMP_PATH')) define('DATABASE_DUMP_PATH', ROOT . 'mysql' . DS);
 
-defineIf('MODULES_DIR', 'modules');
-defineIf('MODULES_PATH', ROOT . MODULES_DIR . DS);
+if (!defined('MODULES_DIR')) define('MODULES_DIR', 'modules');
+if (!defined('MODULES_PATH')) define('MODULES_PATH', ROOT . MODULES_DIR . DS);
 
-defineIf('IMAGES_PATH', ROOT . 'images' . DS);
+if (!defined('IMAGES_PATH')) define('IMAGES_PATH', ROOT . 'images' . DS);
 
-defineIf('HTML_TPL_PATH', ROOT . 'tpl' . DS);
-defineIf('CSS_BASE_URL', 'css/');
+if (!defined('HTML_TPL_PATH')) define('HTML_TPL_PATH', ROOT . 'tpl' . DS);
+if (!defined('CSS_BASE_URL')) define('CSS_BASE_URL', 'css/');
 
-defineIf('CSS_PATH', EOZE_PATH . 'css' . DS);
-defineIf('CSS_URL', EOZE_BASE_URL . 'css/');
-defineIf('JS_PATH', EOZE_PATH . 'js' . DS);
-defineIf('JS_URL', EOZE_BASE_URL . 'js/');
+if (!defined('CSS_PATH')) define('CSS_PATH', EOZE_PATH . 'css' . DS);
+if (!defined('CSS_URL')) define('CSS_URL', EOZE_BASE_URL . 'css/');
+if (!defined('JS_PATH')) define('JS_PATH', EOZE_PATH . 'js' . DS);
+if (!defined('JS_URL')) define('JS_URL', EOZE_BASE_URL . 'js/');
 
-//defineIf('MODEL_PATH', ROOT . 'models' . DS);
-//defineIf('MODEL_BASE_PATH', MODEL_PATH . 'base' . DS);
-//defineIf('MODEL_PROXY_PATH', MODEL_PATH . 'proxy' . DS);
-//defineIf('MODEL_QUERY_PATH', MODEL_PATH . 'query' . DS);
+//if (!defined('MODEL_PATH')) define('MODEL_PATH', ROOT . 'models' . DS);
+//if (!defined('MODEL_BASE_PATH')) define('MODEL_BASE_PATH', MODEL_PATH . 'base' . DS);
+//if (!defined('MODEL_PROXY_PATH')) define('MODEL_PROXY_PATH', MODEL_PATH . 'proxy' . DS);
+//if (!defined('MODEL_QUERY_PATH')) define('MODEL_QUERY_PATH', MODEL_PATH . 'query' . DS);
 
-defineIf('LIB_BASE_URL', SITE_BASE_URL . LIB_DIR . '/');
-defineIf('LIB_IMAGES_BASE_URL', LIB_BASE_URL . 'images' . '/');
-defineIf('LIB_PHP_BASE_URL', LIB_BASE_URL . PHP_DIR . '/');
+if (!defined('LIB_BASE_URL')) define('LIB_BASE_URL', SITE_BASE_URL . LIB_DIR . '/');
+if (!defined('LIB_IMAGES_BASE_URL')) define('LIB_IMAGES_BASE_URL', LIB_BASE_URL . 'images' . '/');
+if (!defined('LIB_PHP_BASE_URL')) define('LIB_PHP_BASE_URL', LIB_BASE_URL . PHP_DIR . '/');
 
-defineIf('MEDIA_PATH', ROOT . 'medias' . DS);
-defineIf('MEDIA_BASE_URL', SITE_BASE_URL . 'medias/');
-defineIf('EXPORTS_PATH', MEDIA_PATH . 'exports' . DS);
-defineIf('EXPORTS_BASE_URL', MEDIA_BASE_URL . 'exports/');
+if (!defined('MEDIA_PATH')) define('MEDIA_PATH', ROOT . 'medias' . DS);
+if (!defined('MEDIA_BASE_URL')) define('MEDIA_BASE_URL', SITE_BASE_URL . 'medias/');
+if (!defined('EXPORTS_PATH')) define('EXPORTS_PATH', MEDIA_PATH . 'exports' . DS);
+if (!defined('EXPORTS_BASE_URL')) define('EXPORTS_BASE_URL', MEDIA_BASE_URL . 'exports/');
 
-defineIf('BACKUPS_PATH', ROOT . 'backup' . DS);
-defineIf('BACKUPS_BASE_URL', SITE_BASE_URL . 'backup/');
+if (!defined('BACKUPS_PATH')) define('BACKUPS_PATH', ROOT . 'backup' . DS);
+if (!defined('BACKUPS_BASE_URL')) define('BACKUPS_BASE_URL', SITE_BASE_URL . 'backup/');
 
-defineIf('CONFIG_PATH', ROOT . 'config' . DS);
+if (!defined('CONFIG_PATH')) define('CONFIG_PATH', ROOT . 'config' . DS);
 
-defineIf('MODULES_BASE_URL', SITE_BASE_URL . MODULES_DIR . '/');
+if (!defined('MODULES_BASE_URL')) define('MODULES_BASE_URL', SITE_BASE_URL . MODULES_DIR . '/');
 if (defined('APP_MODULES_DIR')) {
-	defineIf('APP_MODULES_BASE_URL', SITE_BASE_URL . APP_MODULES_DIR . '/');
+	if (!defined('APP_MODULES_BASE_URL')) {
+		define('APP_MODULES_BASE_URL', SITE_BASE_URL . APP_MODULES_DIR . '/');
+	}
 }
 
-defineIf('MODULES_NAMESPACE', 'eoko\\modules\\');
+if (!defined('MODULES_NAMESPACE')) define('MODULES_NAMESPACE', 'eoko\\modules\\');
 
 exec('rm -rf ' . TMP_PATH);
 
