@@ -1352,6 +1352,13 @@ abstract class ModelSet implements Iterator {
 	const RANDOM_ACCESS = 1;
 
 	/**
+	 * Get the number of records in this set.
+	 *
+	 * @return int
+	 */
+	abstract function count();
+
+	/**
 	 *
 	 * @param Query $query
 	 * @param Const $mode
