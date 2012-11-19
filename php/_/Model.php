@@ -1620,7 +1620,12 @@ abstract class Model {
 		$this->getRelation($name)->setField($field, $value, $forceAcceptNull);
 	}
 
-	protected function getForeignModel($name, $overrideContext = null) {
+	/**
+	 * @param $name
+	 * @param array $overrideContext
+	 * @return Model|ModelSet
+	 */
+	protected function getForeignModel($name, array $overrideContext = null) {
 		return $this->getRelation($name)->get($overrideContext);
 	}
 
