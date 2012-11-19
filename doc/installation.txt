@@ -1,0 +1,35 @@
+1. Create project
+$ mkdir MyProject
+$ cd MyProject && hg init
+
+
+2. Link to eoze
+
+2a. Create .hgsub
+$ echo "eoze = ssh://hg@bitbucket.org/rixo/eoze" >> .hgsub
+
+2b. Clone eoze repo
+$ hg clone ssh://hg@bitbucket.org/rixo/eoze eoze
+
+
+3. Create eoze directory structure in project
+$ mkdir -p config medias/exports modules models mysql php
+
+
+4. Create eoze entry points
+
+
+5. Configure
+
+5a. Database
+$ nano config/database.yml
+
+=== config.database.yml ======================================================
+config.node: eoko\database
+database: $database
+user: $user
+password: $password
+host: $host
+==============================================================================
+
+

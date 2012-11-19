@@ -1,0 +1,14 @@
+/* 
+    Document   : DataSnapshots
+    Created on : 3 oct. 2012, 13:11:36
+    Author     : Éric Ortega <eric@planysphere.fr>
+*/
+
+.ico.DataSnapshots {
+	background-image: url("../images/database.png") !important;
+}
+
+.ico.DataSnapshots.add {
+	background-image: url("../images/database_add.png") !important;
+}
+
