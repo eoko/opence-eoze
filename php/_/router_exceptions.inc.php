@@ -269,7 +269,7 @@ class SqlSystemException extends SystemException implements SqlException {
 	}
 }
 
-class IllegalRequestParamException extends IllegalArgumentException {
+class InvalidRequestParamException extends IllegalArgumentException {
 
 }
 
