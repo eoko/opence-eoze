@@ -241,11 +241,11 @@ interface ModelRelationHasOne extends ModelRelationMarkerHasOne {
 //	function get();
 }
 interface ModelRelationHasMany extends ModelRelationMarkerHasMany {
-	/**
-	 * @param array $overrideContext
-	 * @return ModelSet
-	 */
-	public function get(array $overrideContext = null);
+//	/**
+//	 * @param array $overrideContext
+//	 * @return ModelSet
+//	 */
+//	public function get(array $overrideContext = null);
 }
 
 abstract class ModelRelationByReference extends ModelRelation {
