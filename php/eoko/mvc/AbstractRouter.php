@@ -4,6 +4,7 @@ namespace eoko\mvc;
 
 use Request as RequestData;
 use Zend\Mvc\Router\RouteMatch;
+use Zend\Mvc\Router\RouteStackInterface as Router;
 
 /**
  *
@@ -22,9 +23,15 @@ class AbstractRouter {
 	 * @var RouteMatch
 	 */
 	protected $routeMatch;
+
+	/**
+	 * @var Router
+	 */
+	protected $router;
 	
-	public function __construct(RequestData $requestData, RouteMatch $routeMatch) {
+	public function __construct(RequestData $requestData, Router $router, RouteMatch $routeMatch) {
 		$this->requestData = $requestData;
+		$this->router = $router;
 		$this->routeMatch = $routeMatch;
 	}
 }
