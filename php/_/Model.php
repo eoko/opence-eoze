@@ -1586,19 +1586,24 @@ abstract class Model {
 
 		$table = $this->getTable();
 		if ($table->hasColumn($name)) {
+
 			$col = $table->getColumn($name);
 			$v = $col->convertValueToSQL($value);
+
+			// 2012-11-20 moved here (see bellow)
+			$this->internal->fields[$name] = $this->applyFieldValue($name, $v);
 
 			if ($v === null && !$forceAcceptNull && !$col->isNullable() && (!$col->isPrimary())) {
 				throw new IllegalArgumentException($this->getModelName() . '.' . $name . ' cannot be null');
 			}
-			
+
 			// 11/12/11 23:04 changed:
 			// if ($this->internal->fields[$name] != $v || !$testChanged) { 
 			// 02/11/12 12:24 changed
  			// if ($this->internal->fields[$name] !== $v || !$testChanged) {
 			if (!$this->dbImage || $this->internal->fields[$name] !== $v || !$testChanged) {
-				$this->internal->fields[$name] = $this->applyFieldValue($name, $v);
+				// 2012-11-20 moved before the if
+				// $this->internal->fields[$name] = $this->applyFieldValue($name, $v);
 				$this->internal->colUpdated[$name] = true;
 				$this->internal->modified = true;
 				return true;
@@ -1656,9 +1661,23 @@ abstract class Model {
 ////			}
 //		}
 //	}
-	
-	protected function applyFieldValue($field, $value) {
-		return $value;
+
+	/**
+	 * Convert the given value for the specified field using a custom algorithm. The default
+	 * implementation looks for a method named `'apply' . ucfirst($fieldName)` and use it if
+	 * it is present, otherwise it returns the value unmodified (pass through).
+	 *
+	 * @param string $fieldName
+	 * @param mixed $value
+	 * @return mixed
+	 */
+	protected function applyFieldValue($fieldName, $value) {
+		$method = 'apply' . ucfirst($fieldName);
+		if (method_exists($this, $method)) {
+			return $this->$method($value);
+		} else {
+			return $value;
+		}
 	}
 
 	protected function setAllFieldsFromDatabase(array $setters) {
