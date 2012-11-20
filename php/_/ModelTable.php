@@ -1356,7 +1356,12 @@ abstract class ModelSet implements Iterator {
 	 *
 	 * @return int
 	 */
-	abstract function count();
+	abstract public function count();
+
+	/**
+	 * @return Model[]
+	 */
+	abstract public function toArray();
 
 	/**
 	 *
@@ -1416,7 +1421,9 @@ abstract class ModelSet implements Iterator {
 
 class RandomAccessModelSet extends ModelSet implements ArrayAccess {
 
-	/** @var array */
+	/**
+	 * @var Model[]
+	 */
 	protected $set;
 	protected $context = null;
 
@@ -1471,6 +1478,9 @@ class RandomAccessModelSet extends ModelSet implements ArrayAccess {
 		return count($this->set);
 	}
 
+	/**
+	 * @inheritdoc
+	 */
 	public function toArray() {
 		return $this->set;
 	}
@@ -1595,6 +1605,9 @@ class OnePassModelSet extends ModelSet {
 		else return $this->count = $this->query->executeCount();
 	}
 
+	/**
+	 * @inheritdoc
+	 */
 	public function toArray() {
 		$r = array();
 		foreach($this as $record) $r[] = $record;
