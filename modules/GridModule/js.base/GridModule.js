@@ -3775,7 +3775,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 
 				groupMenus.push(menu);
 
-				colMenu.add(new Ext.menu.CheckItem({
+				menu.parentItem = colMenu.add(new Ext.menu.CheckItem({
 					hideOnClick: false
 					,text: title
 					,menu: menu
@@ -3798,6 +3798,23 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			colMenu.add('-');
 		}
 
+		var updateParentItem = function(item) {
+			var menu = item.ownerCt,
+				pi = menu.parentItem;
+			if (pi) {
+				var checked = true;
+				pi.menu.items.each(function(item) {
+					if (item.setChecked && !item.checked) {
+						checked = false;
+						return false;
+					}
+				});
+				if (checked !== pi.checked) {
+					pi.setChecked(checked, true);
+				}
+			}
+		};
+
 		for(var i = 0; i < colCount; i++){
 			if(cm.config[i].hideable !== false){
 				checkAllSelected = checkAllSelected || !cm.isHidden(i);
@@ -3810,6 +3827,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 					disabled: cm.config[i].hideable === false,
 					tooltip: cm.config[i].tooltip,
 					checkHandler: function(item, checked, cm) {
+						// Apply change
 						var index = cm.getIndexById(item.itemId.substr(4));
 						if(index != -1){
 							apply(function() {
@@ -3830,6 +3848,8 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 								}, undefined, 1000);
 							});
 						}
+						// Update parent check
+						updateParentItem(item);
 					}.createDelegate(this, [cm], 2)
 				}));
 			}
@@ -3841,7 +3861,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		if (groupMenus) {
 			Ext.each(groupMenus, function(menu) {
 				var checked = false,
-					cb = menu.ownerCt;
+					cb = menu.parentItem;
 				if (menu.items) {
 					menu.items.each(function(item) {
 						if (item.checked) checked = true;

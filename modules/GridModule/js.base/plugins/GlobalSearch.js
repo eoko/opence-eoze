@@ -201,18 +201,17 @@ Oce.GridModule.plugins.Search = Ext.extend(Object, {
 
                 groupMenus.push(menu);
 
-                colMenu.add(new Ext.menu.CheckItem({
+                menu.parentItem = colMenu.add(new Ext.menu.CheckItem({
                     hideOnClick: false
                     ,text: title
                     ,menu: menu
                     ,checkHandler: function(cb, check) {
-                        if (!cb.initiated) return;
-                        if (menu.items) {
-                            menu.items.each(function(item) {
-                                item.setChecked(check);
-                            });
-                        }
-                    }
+		                if (menu.items) {
+			                menu.items.each(function(item) {
+				                item.setChecked(check, true);
+			                });
+		                }
+	                }
                 }));
 
                 Ext.each(items, function(item) {
@@ -226,12 +225,25 @@ Oce.GridModule.plugins.Search = Ext.extend(Object, {
         }
         
         var refreshSearch = new Ext.util.DelayedTask(function() {
-            var sf = this.getSelectedFields();
-            if (String(this.lastSearchFields) !== String(sf)) {
-                this.doSearch(sf);
-            }
+	        this.doSearch(this.getSelectedFields());
         }, this);
-        
+
+		var updateParentItem = function(menu) {
+			var pi = menu.parentItem;
+			if (pi) {
+				var checked = true;
+				pi.menu.items.each(function(item) {
+					if (item.setChecked && !item.checked) {
+						checked = false;
+						return false;
+					}
+				});
+				if (checked !== pi.checked) {
+					pi.setChecked(checked, true);
+				}
+			}
+		};
+
         var first = !this.lastSearchFields,
             lsf = this.lastSearchFields = this.lastSearchFields || [];
         
@@ -273,11 +285,13 @@ Oce.GridModule.plugins.Search = Ext.extend(Object, {
                     ,checked: select
                     ,hideOnClick: false
                     ,scope: this
-                    ,checkHandler: function() {
+                    ,checkHandler: function(item) {
                         refreshSearch.delay(this.delayAfterSelect);
+		                updateParentItem(item.ownerCt);
                     }
                 });
-                leafItems.push(item);
+
+	            leafItems.push(item);
                 dest.add(item);
             }
         }
@@ -293,21 +307,7 @@ Oce.GridModule.plugins.Search = Ext.extend(Object, {
 
         // Finish group menus -- determine checked statut from items
         if (groupMenus) {
-            Ext.each(groupMenus, function(menu) {
-                var checked = false,
-                    cb = menu.ownerCt;
-                if (menu.items) {
-                    menu.items.each(function(item) {
-                        if (item.checked) {
-                            checked = true;
-                        }
-                    });
-                } else {
-                    cb.hide();
-                }
-                cb.setChecked(checked);
-                cb.initiated = true;
-            });
+            Ext.each(groupMenus, updateParentItem);
         }
         
         return hasItems;
@@ -359,13 +359,18 @@ Oce.GridModule.plugins.Search = Ext.extend(Object, {
     ,doSearch: function(fields) {
         
         var store = this.gridModule.store,
-            val = this.field.getValue();
-            
-        if (this.lastSearchFields === val && String(this.lastSearchFields) === String(fields)) {
+            val = this.field.getValue(),
+	        lastFields = this.lastSearchFields;
+
+		// Save fields before is needed because the method will return if there was no search
+		// and there is still no search
+		this.lastSearchFields = fields;
+
+        if (this.lastSearchQuery === val
+	            && (String(lastFields) === String(fields) || val === '')) {
             return;
         }
 
-        this.lastSearchFields = fields;
         this.lastSearchQuery = val;
         
         // clear start (necessary if we have paging)
