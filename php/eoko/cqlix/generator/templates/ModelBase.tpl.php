@@ -284,18 +284,19 @@ foreach ($proxyMethods as $method) {
 <?php foreach ($relations as $relation): ?>
 <?php //if ($relation instanceof ModelRelationReferencingHasOne): ?>
 	/**
-	 * @return <?php echo $relation->getTargetType() ?>
-
+	 *
+	 * @param array $overrideContext
+	 * @return <?php echo $relation->getTargetType('get') . PHP_EOL ?>
 	 */
 	function get<?php echo $relation->getName() ?>(array $overrideContext = null) {
 		return $this->getForeignModel('<?php echo $relation->getName() ?>', $overrideContext);
 	}
 	/**
 	 *
-	 * @return <?php echo $relation->getTargetModelName() ?>
-
+	 * @param <?php echo $relation->getTargetType('set') . ' $' . lcfirst($relation->getName()) . PHP_EOL ?>
+	 * @return <?php echo $relation->getTargetType('set') . PHP_EOL ?>
 	 */
-	function set<?php echo $relation->getName() ?>(<?php echo $relation->getTargetType() ?> $<?php echo lcfirst($relation->getName()) ?>) {
+	function set<?php echo $relation->getName() ?>(<?php echo $relation->getTargetType('set', true) ?> $<?php echo lcfirst($relation->getName()) ?>) {
 		// return $this->getRelation('<?php echo $relation->getName() ?>')->get($this);
 		return $this->setForeignModel('<?php echo $relation->getName() ?>', $<?php echo lcfirst($relation->getName()) ?>);
 	}

@@ -13,6 +13,8 @@ use eoko\config\Config;
 use Request;
 use Logger;
 
+use Zend\Mvc\Router\RouteStackInterface;
+
 const ACTION_CANCELLED = -1;
 
 /**
@@ -36,6 +38,11 @@ abstract class Executor implements file\Finder {
 	public $module;
 	/** @var Request */
 	protected $request;
+
+	/**
+	 * @var RouteStackInterface
+	 */
+	private $router;
 	
 	public $name;
 	
@@ -79,6 +86,22 @@ abstract class Executor implements file\Finder {
 	}
 	
 	protected function construct() {}
+
+	/**
+	 * @param RouteStackInterface $router
+	 * @return Executor
+	 */
+	public function setRouter(RouteStackInterface $router) {
+		$this->router = $router;
+		return $this;
+	}
+
+	/**
+	 * @return RouteStackInterface
+	 */
+	protected function getRouter() {
+		return $this->router;
+	}
 	
 	private function getDefaultAction() {
 		return $this->request->get($this->actionParam, $this->defaultAction);
@@ -259,6 +282,9 @@ abstract class Executor implements file\Finder {
 		$this->request->remove('module', 'executor', 'controller');
 
 		$action = ModuleResolver::parseAction($controller, $action, $this->request, false);
+		if ($action instanceof Executor) {
+			$action->setRouter($this->getRouter());
+		}
 		$action();
 	}
 	

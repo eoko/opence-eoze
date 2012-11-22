@@ -3,6 +3,7 @@
 namespace eoko\mvc;
 
 use eoko\module\ModuleResolver;
+use eoko\module\executor\Executor;
 
 /**
  *
@@ -15,6 +16,11 @@ class LegacyRouter extends AbstractRouter {
 	public function route() {
 
 		$action = ModuleResolver::parseRequestAction($this->requestData);
+		
+		if ($action instanceof Executor) {
+			$action->setRouter($this->router);
+		}
+		
 		$action();
 	}
 }

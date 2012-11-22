@@ -203,13 +203,33 @@ class ConfigManager {
 		}
 	}
 
+	/**
+	 * Moves local (local/*) files to the end of the list
+	 *
+	 * @param string[] $files
+	 * @return string[]
+	 */
+	private function fixConfigFilesOrder(array $files) {
+		$first = array();
+		$last = array();
+		foreach ($files as $file) {
+			if (strpos($file, 'local' . DIRECTORY_SEPARATOR) === 0) {
+				$last[] = $file;
+			} else {
+				$first[] = $file;
+			}
+		}
+		return array_merge($first, $last);
+	}
+
 	private function listConfigFiles() {
 
 		if ($this->files !== null) return $this->files;
 
 		$this->files = array();
 		foreach (self::$configPaths as $path) {
-			$this->files[$path] = Files::listFiles($path, 'glob:*.yml', true, false);
+			$files = Files::listFiles($path, 'glob:*.yml', true, false);
+			$this->files[$path] = $this->fixConfigFilesOrder($files);
 		}
 		if (self::$extraFiles) {
 			foreach (self::$extraFiles as $path) {
