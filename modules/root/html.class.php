@@ -30,10 +30,8 @@ class Html extends BasicHtmlExecutor {
 		$url = str_replace("'", "\\'", EOZE_BASE_URL . 'images/s.gif');
 		$js = <<<JS
 <script type="text/javascript">
-Oce = window.Oce || {};
 	if (!window.Oce) window.Oce = { ext: {} };
 	Oce.ext.BLANK_IMAGE_URL = '$url';
-}
 </script>
 JS;
 		
