@@ -28,15 +28,18 @@ class Html extends BasicHtmlExecutor {
 
 		// Ext blank image
 		$url = str_replace("'", "\\'", EOZE_BASE_URL . 'images/s.gif');
-		$js = <<<JS
-<script type="text/javascript">
-	if (!window.Oce) window.Oce = { ext: {} };
-	Oce.ext.BLANK_IMAGE_URL = '$url';
-</script>
-JS;
-		
+		$js = implode(PHP_EOL, array(
+			'<script type="text/javascript">',
+			'	if (!window.Oce) window.Oce = { ext: {} };',
+			"	Oce.ext.BLANK_IMAGE_URL = '$url';",
+			'</script>',
+		));
+
 		// Extra script
+		/** @noinspection PhpUndefinedFieldInspection */
+		/** @noinspection PhpUndefinedMethodInspection */
 		$layout->head->set('beforeJs', $js, false);
+		/** @noinspection PhpUndefinedFieldInspection */
 		$extra = $layout->head->extra = $this->createTemplate('head_extra_script');
 
 		if (null !== $env = $this->request->get('env')) {
