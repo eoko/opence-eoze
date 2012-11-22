@@ -169,7 +169,7 @@ class ExtJsCompiler extends IncludeCompiler {
 					$sources->eoze . '/ext4/locale/ext-lang-fr.js' => -5,
 					$sources->eoze . '/ext4/builds/eo-ext4-compat.js' => -6, // Fixes ext 3 & 4 peaceful neighbouring
 					// config for Ext4.Loader.setConfig
-					$sources->eoze . '/index.php?controller=root.html&action=getExt4LoaderConfig' => -4,
+					$sources->opence . '/index.php?controller=root.html&action=getExt4LoaderConfig' => -4,
 
 					// Deft
 					$sources->eoze . '/js/deft/deft' . $debugMax->debug . '.js' => -3,
