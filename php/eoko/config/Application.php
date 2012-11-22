@@ -131,17 +131,8 @@ class Application implements FileFinder {
 	
 	public function resolveFileFinderAlias($alias) {
 		if ($alias === '@ext') {
-			return array(
-				FileType::JS => array(
-					'ext/ext-base-debug' => -10,
-					'ext/ext-all-debug-w-comments' => -9,
-					'ext/ext-basex' => -8,
-					'ext/ext-lang-fr' => -7,
-				),
-				FileType::CSS => array(
-					'ext-all' => 1,
-				)
-			);
+			// Completely deprecated (see modules/root/html.class.php)
+			throw new \DeprecatedException();
 		} else if ($alias === '@oce-core') {
 			$js = array();
 			$js['init/init.js'] = 0;
@@ -154,7 +145,6 @@ class Application implements FileFinder {
 			return array(
 				FileType::JS => $js,
 				FileType::CSS => array(
-					'reset-min' => -1,
 					'layout.css' => 0,
 					'menu.css' => 1,
 					'icons.css' => 2,
