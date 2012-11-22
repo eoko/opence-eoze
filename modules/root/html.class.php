@@ -166,7 +166,7 @@ JS;
 			/** @var \eoko\module\Module $module */
 			$loaders += $module->getExt4LoaderConfig();
 		}
-		
+
 		$loaders['Eoze.Ext'] = EOZE_BASE_URL . 'js/Eoze/Ext';
 		$loaders['Eoze.i18n'] = EOZE_BASE_URL . 'js/Eoze/i18n';
 		$loaders['Eoze.locale'] = EOZE_BASE_URL . 'js/Eoze/locale';
