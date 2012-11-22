@@ -23,7 +23,7 @@ class DatabaseProxy {
 	
 	/**
 	 * Get config for database from the default node.
-	 * @return eoko\util\collection\Map
+	 * @return \eoko\util\collection\Map
 	 */
 	public function getConfig() {
 		if (!$this->config) {

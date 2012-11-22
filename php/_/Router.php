@@ -9,6 +9,8 @@ use eoko\module\ModuleManager;
 use eoko\module\traits\HasRoutes;
 use eoko\cache\Cache;
 use Zend\Http\PhpEnvironment\Request as HttpRequest;
+use Zend\Mvc\Router\RouteStackInterface;
+use Zend\Mvc\Router\RouteMatch;
 use Zend\Stdlib\ArrayUtils;
 
 use \MonitorRequest;
@@ -39,7 +41,7 @@ class Router {
 	private $httpRequest;
 	
 	/**
-	 * @var Zend\Mvc\Router\RouteMatch
+	 * @var RouteMatch
 	 */
 	private $routeMatch;
 
@@ -52,7 +54,12 @@ class Router {
 
 	/** @var int */
 	private $routeCallCount = 0;
-	
+
+	/**
+	 * @var RouteStackInterface
+	 */
+	public $routeStack;
+
 	/**
 	 * @return Router
 	 */
@@ -155,7 +162,7 @@ class Router {
 			throw new IllegalStateException('Cannot find router class: ' . $routerClass);
 		}
 
-		return new $routerClass($this->request, $this->routeMatch);
+		return new $routerClass($this->request, $this->routeStack, $this->routeMatch);
 	}
 	
 	private function logRequest($requestData) {

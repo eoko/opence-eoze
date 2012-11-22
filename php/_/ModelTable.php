@@ -1368,6 +1368,18 @@ abstract class ModelSet implements Iterator {
 	const RANDOM_ACCESS = 1;
 
 	/**
+	 * Get the number of records in this set.
+	 *
+	 * @return int
+	 */
+	abstract public function count();
+
+	/**
+	 * @return Model[]
+	 */
+	abstract public function toArray();
+
+	/**
 	 *
 	 * @param Query $query
 	 * @param Const $mode
@@ -1425,7 +1437,9 @@ abstract class ModelSet implements Iterator {
 
 class RandomAccessModelSet extends ModelSet implements ArrayAccess {
 
-	/** @var array */
+	/**
+	 * @var Model[]
+	 */
 	protected $set;
 	protected $context = null;
 
@@ -1480,6 +1494,9 @@ class RandomAccessModelSet extends ModelSet implements ArrayAccess {
 		return count($this->set);
 	}
 
+	/**
+	 * @inheritdoc
+	 */
 	public function toArray() {
 		return $this->set;
 	}
@@ -1604,6 +1621,9 @@ class OnePassModelSet extends ModelSet {
 		else return $this->count = $this->query->executeCount();
 	}
 
+	/**
+	 * @inheritdoc
+	 */
 	public function toArray() {
 		$r = array();
 		foreach($this as $record) $r[] = $record;
