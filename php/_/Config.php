@@ -420,15 +420,15 @@ class Config implements ArrayAccess, IteratorAggregate {
 			return $node;
 		}
 	}
-	
+
 	/**
 	 * Apply the given $values to this config (ie. set the keys in this config
 	 * to their value in the array).
-	 * @param array $values
+	 * @param Traversable $values
+	 * @param bool $maxRecursionLevel
 	 * @return Config this config item
 	 * @internal default for $maxRecursionLevel changed on 01/03/11 07:30
 	 */
-//	public function apply($values, $maxRecursionLevel = true) {
 	public function apply($values, $maxRecursionLevel = false) {
 		ArrayHelper::apply($this->value, $values, $maxRecursionLevel);
 		return $this;

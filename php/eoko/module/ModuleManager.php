@@ -329,7 +329,7 @@ class ModuleManager {
 			if (null !== $cacheFile = Cache::getCacheFile($cacheKey, false)) {
 				$this->cachePile[] = $cacheFile;
 			}
-			$module->setCacheDepencies($this->cachePile);
+			$module->setCacheDependencies($this->cachePile);
 			
 			Cache::monitorFiles($cacheKey, $monitors);
 			Cache::cacheObject($cacheKey, $module, $deps);
@@ -342,7 +342,15 @@ class ModuleManager {
 
 		return $module;
 	}
-	
+
+	/**
+	 * @param string $name
+	 * @param bool $required
+	 * @param mixed $cacheDeps
+	 * @return Module|null
+	 * @throws exceptions\MissingModuleException
+	 * @throws \Exception
+	 */
 	private function doInstantiateModule($name, $required, &$cacheDeps) {
 
 		if (strstr($name, '\\')) {
