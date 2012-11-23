@@ -1,0 +1,6 @@
+config.node: eoko\module\Module
+
+extjs4:
+
+  namespaceAliases:
+    eoko: Eoze
