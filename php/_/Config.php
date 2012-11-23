@@ -105,21 +105,22 @@ class Config implements ArrayAccess, IteratorAggregate {
 		return $parts[0];
 	}
 
-	public static function find($rootNodeName, $dir = null) {
-		if ($dir === null) $dir = substr(CONFIG_PATH,0,-1);
-		else $dir = CONFIG_PATH . $dir;
-
-		$files = FileHelper::listFiles($dir, 're:\.ya?ml$', true, true);
-		foreach ($files as $file) {
-			// TODO error here => Fatal error: Call to undefined method Config::create()
-			$config = self::create(YAML::load(str_replace("\t", "  ", file_get_contents($file))));
-			if ($config instanceof Config && $config->hasNode($rootNodeName)) {
-				return $config->node($rootNodeName);
-			}
-		}
-
-		return null;
-	}
+// REMOVED ON 2012-11-22
+//	public static function find($rootNodeName, $dir = null) {
+//		if ($dir === null) $dir = substr(CONFIG_PATH,0,-1);
+//		else $dir = CONFIG_PATH . $dir;
+//
+//		$files = FileHelper::listFiles($dir, 're:\.ya?ml$', true, true);
+//		foreach ($files as $file) {
+//			// TODO error here => Fatal error: Call to undefined method Config::create()
+//			$config = self::create(YAML::load(str_replace("\t", "  ", file_get_contents($file))));
+//			if ($config instanceof Config && $config->hasNode($rootNodeName)) {
+//				return $config->node($rootNodeName);
+//			}
+//		}
+//
+//		return null;
+//	}
 
 	/**
 	 * Load a config node.
