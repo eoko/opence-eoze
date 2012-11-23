@@ -311,7 +311,6 @@ class ConfigManager {
 	 */
 	private function loadConfigDirectory($parentNodePath, $path, $files) {
 		foreach ($files as $file) {
-			$dirname = dirname($file);
 			$basename = basename($file);
 
 			// Node path from directory name
