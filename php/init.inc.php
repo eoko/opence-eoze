@@ -61,7 +61,6 @@ if (!defined('LIB_PATH')) define('LIB_PATH', ROOT . (LIB_DIR ? LIB_DIR . DS : nu
 
 if (!defined('EOZE_DIR')) define('EOZE_DIR', 'eoze');
 if (!defined('EOZE_PATH')) define('EOZE_PATH', str_replace(DS . DS, DS, LIB_PATH . EOZE_DIR . DS));
-if (!defined('EOZE_CONFIG_PATH')) define('EOZE_CONFIG_PATH', EOZE_PATH . 'config' . DS);
 if (!defined('EOZE_BASE_URL')) define('EOZE_BASE_URL', preg_replace('@([^:/])//@', '$1/', SITE_BASE_URL . '/' . EOZE_DIR) . '/');
 
 if (!defined('PHP_DIR')) define('PHP_DIR', 'php');
@@ -106,8 +105,6 @@ if (!defined('EXPORTS_BASE_URL')) define('EXPORTS_BASE_URL', MEDIA_BASE_URL . 'e
 
 if (!defined('BACKUPS_PATH')) define('BACKUPS_PATH', ROOT . 'backup' . DS);
 if (!defined('BACKUPS_BASE_URL')) define('BACKUPS_BASE_URL', SITE_BASE_URL . 'backup/');
-
-if (!defined('CONFIG_PATH')) define('CONFIG_PATH', ROOT . 'config' . DS);
 
 if (!defined('MODULES_BASE_URL')) define('MODULES_BASE_URL', SITE_BASE_URL . MODULES_DIR . '/');
 if (defined('APP_MODULES_DIR')) {
