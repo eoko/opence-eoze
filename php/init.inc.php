@@ -89,11 +89,6 @@ if (!defined('CSS_URL')) define('CSS_URL', EOZE_BASE_URL . 'css/');
 if (!defined('JS_PATH')) define('JS_PATH', EOZE_PATH . 'js' . DS);
 if (!defined('JS_URL')) define('JS_URL', EOZE_BASE_URL . 'js/');
 
-//if (!defined('MODEL_PATH')) define('MODEL_PATH', ROOT . 'models' . DS);
-//if (!defined('MODEL_BASE_PATH')) define('MODEL_BASE_PATH', MODEL_PATH . 'base' . DS);
-//if (!defined('MODEL_PROXY_PATH')) define('MODEL_PROXY_PATH', MODEL_PATH . 'proxy' . DS);
-//if (!defined('MODEL_QUERY_PATH')) define('MODEL_QUERY_PATH', MODEL_PATH . 'query' . DS);
-
 if (!defined('LIB_BASE_URL')) define('LIB_BASE_URL', SITE_BASE_URL . LIB_DIR . '/');
 if (!defined('LIB_IMAGES_BASE_URL')) define('LIB_IMAGES_BASE_URL', LIB_BASE_URL . 'images' . '/');
 if (!defined('LIB_PHP_BASE_URL')) define('LIB_PHP_BASE_URL', LIB_BASE_URL . PHP_DIR . '/');
