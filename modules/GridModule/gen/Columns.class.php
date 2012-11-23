@@ -298,6 +298,7 @@ class Columns {
 							$col['formField']['xtype'] = 'checkbox';
 						}
 						break;
+					/** @noinspection PhpMissingBreakStatementInspection */
 					case ModelColumn::T_TEXT:
 						self::setColFormItemIf($col, 'xtype', 'textarea');
 					case ModelColumn::T_STRING:
