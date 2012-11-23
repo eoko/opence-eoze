@@ -19,7 +19,8 @@ class ConfigReader {
 	protected function construct() {}
 	
 	protected function process(array &$content) {
-		return Arrays::applyIf($this->data, $content, false);
+		// 2012-11-23 14:48 Replace applyIf with apply
+		return Arrays::apply($this->data, $content, false);
 	}
 
 	public static function read($node, &$content) {
