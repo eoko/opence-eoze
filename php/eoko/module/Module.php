@@ -176,7 +176,39 @@ class Module implements file\Finder {
 		}
 		return $r;
 	}
-	
+
+	/**
+	 * Builds an ExtJS4 namespace for the specified namespace.
+	 *
+	 * This method will use the config map at eoko.modules.Module.extjs4.namespaceAliases,
+	 * and replace alias matching the *begining* of the namespace.
+	 *
+	 * E.g. If the alias foo => Bar is configured, then the namespace foo.baz will be
+	 * transformed to Bar.baz, but bar.foo won't be transformed to bar.Baz.
+	 *
+	 * @param string $phpNamespace
+	 * @throws \RuntimeException
+	 * @return string
+	 */
+	protected function makeExt4Namespace($phpNamespace) {
+		$phpNamespace = rtrim($phpNamespace, '\\');
+
+		if (!preg_match('/^(?<prefix>[^\\\\]+)(?:\\\\(?<middle>modules))?\\\\(?<suffix>.*)$/', $phpNamespace, $matches)) {
+			throw new \RuntimeException('Cannot parse namespace: ' . $phpNamespace);
+		}
+
+		$namespace = $matches['prefix'] . '.' . $matches['middle'] . '.' . ucfirst($matches['suffix']);
+
+		// Namespace aliases
+		foreach (ConfigManager::get(__CLASS__ . '/extjs4/namespaceAliases') as $base => $alias) {
+			if (strpos($namespace, $base) === 0) {
+				$namespace = $alias . substr($namespace, strlen($base));
+			}
+		}
+
+		return $namespace;
+	}
+
 	/**
 	 * Returns an array of configs for Ext4.Loader.setConfig.
 	 * 
@@ -189,18 +221,15 @@ class Module implements file\Finder {
 	 * @todo OCE-575 This should be done on a per-module basis (all modules 
 	 *       do not necessarily expose Ext4 namespaces).
 	 * 
-	 * @return array
+	 * @return string[]
 	 * @since 05/10/12 03:07
 	 */
 	public function getExt4LoaderConfig() {
 		$dir = array();
 		foreach ($this->getLocation()->getLineActualLocations(true) as $location) {
 			/** @var ModuleLocation $location  */
-			$namespace = str_replace(
-				array('eoko.', 'rhodia.'), array('Eoze.', 'Opence.'),
-				str_replace('\\', '.', rtrim($location->namespace, '\\'))
-			);
 			$url = $location->getDirectory()->url . $location->moduleName . '/ext';
+			$namespace = $this->makeExt4Namespace($location->namespace);
 			$dir[$namespace] = $url;
 		}
 		return $dir;
