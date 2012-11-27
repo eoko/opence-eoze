@@ -56,30 +56,28 @@ class UserSession {
 			if (isset($session['UserSession'])) {
 
 				$storedSession = $session['UserSession'];
-// PERF
-//				Logger::getLogger('UserSession')->debug('Found stored user session');
+
+				Logger::getLogger(__CLASS__)->debug('Found stored user session');
 
 				if ($storedSession instanceof UserSession) {
 					if ($storedSession->ip === getenv('REMOTE_ADDR')) {
 						self::$instance = $storedSession;
 					} else {
-// PERF
-//						Logger::getLogger('UserSession')->warn('Request IP {} not '
-//								. 'matching stored IP {} of identified user',
-//								getenv("REMOTE_ADDR"), $storedSession->ip);
+						Logger::getLogger(__CLASS__)->warn(
+							'Request IP {} not matching stored IP {} of identified user',
+							getenv("REMOTE_ADDR"), $storedSession->ip
+						);
 					}
 				} else {
-// PERF
-//					Logger::getLogger('UserSession')->warn('Value stored in session at '
-//							. '"UserSession" is not UserSession object');
+					Logger::getLogger(__CLASS__)->warn(
+						'Value stored in session at "UserSession" is not UserSession object');
 				}
 			}
 		}
 
 		// Session has not been started
 		if (self::$instance === null) {
-// PERF
-//			Logger::getLogger('UserSession')->debug('No valid user session stored');
+			Logger::getLogger(__CLASS__)->debug('No valid user session stored');
 			self::$instance = new UserSession();
 		}
 
