@@ -877,7 +877,7 @@ class Query {
 			}
 
 			if ($field instanceof SqlVar) {
-				Logger::warn('The next line is most probably wrong and causing problem with bindings');
+				$this->getLogger()->warn('The next line is most probably wrong and causing problem with bindings');
 				$this->order[] = $field->buildSql(false, $this->bindings);
 			} else {
 				$alias = $this->getOrderFieldAlias($field);
