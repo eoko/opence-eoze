@@ -157,7 +157,7 @@ class TreeMenu extends Module implements HasMenuActions {
 					'users_id' => $userId,
 				));
 			} catch (MissingMenuElementException $ex) {
-				Logger::warn('Missing menu item is ignored: {}', $ex->getMessage());
+				Logger::get($this)->warn('Missing menu item is ignored: {}', $ex->getMessage());
 			}
 		
 		} else if ($config === null) {
