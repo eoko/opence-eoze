@@ -217,7 +217,7 @@ abstract class IncludeCompiler {
 			putenv("JAVA_CMD=$this->javaCommand");
 			exec($cmd, $output, $result);
 			if ($result !== 0) {
-				Logger::warn('YUI Compressor failed: ' . $output);
+				Logger::get($this)->warn('YUI Compressor failed: ' . $output);
 				return false;
 			}
 		}
