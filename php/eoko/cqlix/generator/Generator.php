@@ -1004,7 +1004,7 @@ class Generator extends Script {
 								|| $relation->getReferenceField() !== $localField) throw new IllegalStateException();
 						// Check name/constraint integrity
 						if (!isset($this->referencesOneRelations[self::GUESS_BY_NAME][$table][$otherTable][$localField])) {
-							Logger::info('Field names with foreign key constraint mismatch: {}.{} refering {}.{}',
+							Logger::get($this)->info('Field names with foreign key constraint mismatch: {}.{} refering {}.{}',
 									$table, $localField, $otherTable, $this->primaryKeys[$otherTable]);
 
 							$tmp[$table][$localField] = $relation;
@@ -1037,12 +1037,12 @@ class Generator extends Script {
 				$tmp[$table][] = $relation;
 			}
 		}
-		
+
 		$this->referencesOneRelations = $tmp;
 	}
 
 	private function discoverPrimaryKeys() {
-		
+
 		$this->primaryKeys = array();
 
 		foreach ($this->tableFields as $table => $fields) {
@@ -1073,7 +1073,7 @@ class Generator extends Script {
 			$guessByForeignKeys = true, $detectSecondaryRelations = false) {
 
 		Logger::setDefaultContext($tableName);
-		Logger::info('Search relations');
+		Logger::get($this)->info('Search relations');
 
 		static $primaryKeyPatterns = null, $secondaryKeyPatterns = null;
 
@@ -1088,8 +1088,8 @@ class Generator extends Script {
 			foreach ($this->tableFields as $otherTable => $myFields) {
 
 				$secondaryKeyPatterns[$otherTable] = array();
-				
-				$quotedOtherTable = '(?:' . preg_quote($otherTable) 
+
+				$quotedOtherTable = '(?:' . preg_quote($otherTable)
 						. '|' . NameMaker::singular($otherTable) . ')';
 
 				foreach ($myFields as $field) {
@@ -1119,25 +1119,25 @@ class Generator extends Script {
 		foreach ($this->tables[$tableName]->getConfiguredRelations($excludedFields) as $relation) {
 			$this->addHasOneRelation($tableName, $relation, self::BY_CONFIG);
 		}
-		
+
 		// Guess by column names
 		foreach ($fields as $field) {
-			
+
 			if (in_array($field->getName(), $excludedFields)) {
 				continue;
 			}
 
 			$field instanceof TplField;
 			$fieldName = $field->getName();
-			
+
 			if (null !== $rel = $field->getConfiguredRelation()) {
-				
+
 				$relation = $this->addHasOneRelation($tableName, $rel, self::GUESS_BY_CONSTRAINT);
-				
+
 				// cannot be overriden by guesses...
 				continue;
 			}
-			
+
 			if ($guessByColName) {
 
 				$found = null;
@@ -1161,7 +1161,7 @@ class Generator extends Script {
 							$prefix
 						);
 
-						Logger::info('By name: found {}.{} as {} refers to {}.{}',
+						Logger::get($this)->info('By name: found {}.{} as {} refers to {}.{}',
 								$tableName, $fieldName, $rel->getName(), $otherTable, $this->primaryKeys[$otherTable]);
 
 						$found[] = $rel;
@@ -1202,17 +1202,17 @@ class Generator extends Script {
 					$fieldName = $field->getName();
 					$otherTable = $field->getForeignConstraint()->targetTable;
 					$otherField = $field->getForeignConstraint()->targetField;
-					
+
 					$quotedTable = preg_quote($fieldName, '/');
 					$quotedOtherTable = preg_quote($otherTable, '/');
 					$quotedOtherId = preg_quote(
 						$this->getTablePrimaryField($otherTable)->getName(), '/'
 					);
-					
+
 
 					$prefix = null;
 					$alias = null;
-					
+
 					// Decide what is the alias
 					if (preg_match($primaryKeyPatterns[$otherTable], $fieldName, $match)) {
 						// If the referencing field is in the form xxx_table_id,
@@ -1221,7 +1221,7 @@ class Generator extends Script {
 						if (isset($match[1])) {
 							$prefix = $match[1];
 						}
-					
+
 					} else if (preg_match("/^(?P<alias>.+)(?:$quotedOtherTable)?_$quotedOtherId$/", $fieldName, $matches)) {
 						$alias = $matches['alias'];
 						$alias = NameMaker::camelCase($alias, true);
@@ -1232,14 +1232,14 @@ class Generator extends Script {
 					} else {
 						$rel = new TplRelationReferencesOne(
 								$tableName,
-								$otherTable, 
+								$otherTable,
 								$field->localRelationAlias ? $field->localRelationAlias : $alias,
-								null, 
-								$fieldName, 
+								null,
+								$fieldName,
 								$prefix);
 
 						$relation = $this->addHasOneRelation($tableName, $rel, self::GUESS_BY_CONSTRAINT);
-						
+
 						if ($field->foreignConstraint) {
 							switch ($field->foreignConstraint->onDelete) {
 								case 'CASCADE':
@@ -1274,8 +1274,8 @@ class Generator extends Script {
 								case null:
 							}
 						}
-						
-						Logger::info('By constraints: found {}.{} as {} refers to {}.{}',
+
+						Logger::get($this)->info('By constraints: found {}.{} as {} refers to {}.{}',
 								$tableName, $fieldName, $rel->getName(), $otherTable, $otherField);
 					}
 				}
