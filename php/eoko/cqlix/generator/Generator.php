@@ -317,7 +317,7 @@ class Generator extends Script {
 			$engine = $matches[1];
 
 			if (strtolower($engine) !== 'innodb') {
-				Logger::warn('Table {} engine is not InnoDB (it is {})', $dbTable, $engine);
+				Logger::get($this)->warn('Table {} engine is not InnoDB (it is {})', $dbTable, $engine);
 			} else {
 				// CONSTRAINT `contact_phone_numbers_ibfk_1` FOREIGN KEY (`contact_id`) REFERENCES `contacts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 				
@@ -976,7 +976,7 @@ class Generator extends Script {
 										);
 						// Check name/constraint integrity
 						if (!isset($this->referencesOneRelations[self::GUESS_BY_CONSTRAINT][$table][$otherTable][$localField])) {
-							Logger::warn('Missing foreign key constraint for relation between {}.{} and {}.{}',
+							Logger::get($this)->warn('Missing foreign key constraint for relation between {}.{} and {}.{}',
 									$table, $localField, $otherTable, $this->primaryKeys[$otherTable]);
 						} else if (!$relation->equals($this->referencesOneRelations[self::GUESS_BY_CONSTRAINT][$table][$otherTable][$localField])) {
 							$nameRelation = $relation;
@@ -1228,7 +1228,7 @@ class Generator extends Script {
 					}
 
 					if ($otherField !== $this->primaryKeys[$otherTable]) {
-						Logger::warn('Foreign Key constraint found on non-primary key ' + $otherField + ' in table ' + $otherTable);
+						Logger::get($this)->warn('Foreign Key constraint found on non-primary key ' + $otherField + ' in table ' + $otherTable);
 					} else {
 						$rel = new TplRelationReferencesOne(
 								$tableName,
