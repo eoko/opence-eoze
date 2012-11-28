@@ -228,9 +228,18 @@ class Module implements file\Finder {
 		$dir = array();
 		foreach ($this->getLocation()->getLineActualLocations(true) as $location) {
 			/** @var ModuleLocation $location  */
-			$url = $location->getDirectory()->url . $location->moduleName . '/ext';
-			$namespace = $this->makeExt4Namespace($location->namespace);
-			$dir[$namespace] = $url;
+			$directory = $location->getDirectory();
+			$name = $location->moduleName;
+			$path = $directory->path . $name;
+			$url = $location->url;
+
+			$folder = 'js.ext4';
+//			foreach (array('js.ext4', 'ext') as $folder) {
+			if (is_dir($path . '/' . $folder)) {
+				$namespace = $this->makeExt4Namespace($location->namespace);
+				$dir[$namespace] = $url . '/' . $folder;
+			}
+//			}
 		}
 		return $dir;
 	}
