@@ -11,7 +11,7 @@ use eoze\util\DataStore;
  * @since 2 nov. 2011
  */
 class RegexFilter extends Filter {
-	
+
 	public function test($element) {
 		return !!preg_match($this->value, $this->getFieldValue($element));
 	}

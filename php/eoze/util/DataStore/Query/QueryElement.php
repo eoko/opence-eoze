@@ -14,7 +14,7 @@ use IllegalStateException;
  * @since 2 nov. 2011
  */
 abstract class QueryElement implements Query {
-	
+
 	/**
 	 * Abstract type.
 	 * @var string
@@ -25,11 +25,11 @@ abstract class QueryElement implements Query {
 	 * @var DataStore
 	 */
 	private $store;
-	
+
 	public static function getClass() {
 		return get_called_class();
 	}
-	
+
 	/**
 	 * @return DataStore
 	 */
@@ -39,11 +39,11 @@ abstract class QueryElement implements Query {
 		}
 		return $this->repository;
 	}
-	
+
 	public function setRepository(DataStore $store) {
 		$this->repository = $store;
 	}
-	
+
 //	public function options(DataStore $store, &$filters, &$sorter, &$pager) {
 //		$this->repository = $store;
 //		if ($this instanceof Filter) {
@@ -56,7 +56,7 @@ abstract class QueryElement implements Query {
 //			throw new IllegalStateException();
 //		}
 //	}
-	
+
 	public function getOptions(DataStore $store) {
 		$this->repository = $store;
 		return array($this->type => $this);

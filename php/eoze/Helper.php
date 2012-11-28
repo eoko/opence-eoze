@@ -11,9 +11,9 @@ namespace eoze;
 use IllegalArgumentException;
 
 final class Helper {
-	
+
 	private function __construct() {}
-	
+
 	public static function parseInt($value, $require = false, $default = null) {
 		if (is_int($value)) {
 			return $value;
@@ -25,7 +25,7 @@ final class Helper {
 			return $default;
 		}
 	}
-	
+
 	public static function isInt($value) {
 		return self::parseInt($value) !== null;
 	}

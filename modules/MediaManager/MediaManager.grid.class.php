@@ -33,11 +33,11 @@ class Grid extends GridBase {
 			throw new RuntimeException('Missing configuration: downloadUrl');
 		}
 	}
-	
+
 	private function getConfig() {
 		return $this->getModule()->getConfig();
 	}
-	
+
 	protected static function getModelName() {
 		return null;
 	}
@@ -188,7 +188,7 @@ class Grid extends GridBase {
 		move_uploaded_file($img['tmp_name'], MEDIA_PATH . $path . $img['name']);
 		return true;
 	}
-	
+
 	public function delete() {
 		$dir = $this->request->get('path', '');
 		$dir = str_replace('/', DS, $dir);

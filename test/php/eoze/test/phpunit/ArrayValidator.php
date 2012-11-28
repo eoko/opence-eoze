@@ -20,24 +20,24 @@ use eoko\util\YmlReader;
  * @since 24 nov. 2011
  */
 class ArrayValidator {
-	
+
 	private $schema;
-	
+
 	private $sep = '.';
-	
+
 	private $errors;
-	
+
 	private $lastError;
-	
+
 	private $throwException;
-	
+
 	private $defaults = array(
 		'strict'   => true,
 		'required' => false,
 		'allowNull' => true,
 		'type' => 'str',
 	);
-	
+
 	public function __construct($format, $throwException = false) {
 		if (is_string($format)) {
 			$format = YmlReader::load($format);
@@ -53,7 +53,7 @@ class ArrayValidator {
 			Arrays::apply($this->defaults, $this->schema['defaults']);
 		}
 	}
-	
+
 	private function testNull($spec) {
 		foreach (array('', 'null', 'allowNull') as $opt) {
 			if (isset($spec[$opt])) {
@@ -61,20 +61,20 @@ class ArrayValidator {
 			}
 		}
 	}
-	
+
 	private function isAllowNull($spec, $parentSpec) {
-		
+
 		if ((null !== $r = $this->testNull($spec))
 				|| isset($parentSpec['defaults']) && (null !== $r = $this->testNull($parentSpec['defaults']))
 				|| (null !== $r = $this->testNull($this->defaults))) {
 			return $r;
 		}
-		
+
 		else {
 			return !$this->isRequired($spec);
 		}
 	}
-	
+
 	private function isStrict($spec) {
 		if (!isset($spec['strict'])) {
 			return $this->defaults['strict'];
@@ -82,7 +82,7 @@ class ArrayValidator {
 			return !!$spec['strict'];
 		}
 	}
-	
+
 	private function isRequired($spec) {
 		if (!isset($spec['required'])) {
 			return $this->defaults['required'];
@@ -90,7 +90,7 @@ class ArrayValidator {
 			return !!$spec['required'];
 		}
 	}
-	
+
 	private function getType($spec, $parentSpec) {
 		if (array_key_exists('type', $spec)) {
 			return $spec['type'];
@@ -102,11 +102,11 @@ class ArrayValidator {
 			return null;
 		}
 	}
-	
+
 	public function getLastError() {
 		return $this->lastError;
 	}
-	
+
 	public function test(array $array) {
 		if (!isset($this->schema['type'])) {
 			if (isset($this->schema['mapping'])) {
@@ -147,7 +147,7 @@ class ArrayValidator {
 			return true;
 		}
 	}
-	
+
 	private function testMapping($path, array $spec, array $array) {
 		$keys = $array;
 		foreach ($spec['mapping'] as $key => $schema) {
@@ -178,7 +178,7 @@ class ArrayValidator {
 		}
 		return true;
 	}
-	
+
 	private function error($path, $msg) {
 		if ($this->throwException) {
 			throw new ValidationException($path, $msg);
@@ -187,7 +187,7 @@ class ArrayValidator {
 		}
 		return false;
 	}
-	
+
 	private static function exportValue($value) {
 		if ($value === null) {
 			return 'NULL';
@@ -197,7 +197,7 @@ class ArrayValidator {
 			return $value;
 		}
 	}
-	
+
 	private function testRule($path, $spec, $value, $parentSpec) {
 		if (array_key_exists('value', $spec)) {
 			if ($spec['value'] === $value) {
@@ -283,7 +283,7 @@ class ArrayValidator {
 		}
 		return true;
 	}
-	
+
 	private function testType($path, $spec, &$data, $parentSpec) {
 		if ($data === null) {
 			if (!$this->isAllowNull($spec, $parentSpec)) {

@@ -14,13 +14,13 @@ class RestRequestReader extends AbstractRequestReader {
 
 	public function createRequest() {
 		$data = array();
-		
+
 		foreach ($this->routeMatch->getParams() as $key => $value) {
 			if (substr($key, 0, 1) !== '_') {
 				$data[$key] = $value;
 			}
 		}
-		
+
 		$contentType = $this->request->getHeader('content-type');
 		if ($contentType) {
 			if ($contentType->getFieldValue() === 'application/json') {
@@ -34,7 +34,7 @@ class RestRequestReader extends AbstractRequestReader {
 				. $contentType->getFieldValue()
 			);
 		}
-		
+
 		return new RequestData($data);
 	}
 }

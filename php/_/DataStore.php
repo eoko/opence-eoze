@@ -254,7 +254,7 @@ class DataStore {
 		}
 		return 0;
 	}
-	
+
 	const CMP_BINARY = '===';
 	const CMP_BINARY_NOT = '!==';
 	const CMP_NAT	 = '==';

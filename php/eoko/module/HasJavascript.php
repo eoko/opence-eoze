@@ -9,6 +9,6 @@ namespace eoko\module;
  * @since 14 sept. 2012
  */
 interface HasJavascript {
-	
+
 	function getJavascriptAsString();
 }

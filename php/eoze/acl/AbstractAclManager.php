@@ -20,18 +20,18 @@ use IllegalArgumentException,
 abstract class AbstractAclManager implements AclManager {
 
 	private $lastUserId = null;
-	
+
 	private $lastUserAllowedRoleIdMap = null;
 
 	/**
 	 * @var AclManagerConfig
 	 */
 	protected $config;
-	
+
 	public function __construct(AclManagerConfig $config = null) {
 		$this->config = AclManagerConfig::create($config);
 	}
-	
+
 	public function isAllowed($user, $role) {
 		$uid = AclHelper::uid($user);
 		$rid = AclHelper::rid($role);
@@ -42,7 +42,7 @@ abstract class AbstractAclManager implements AclManager {
 		return isset($this->lastUserAllowedRoleIdMap[$rid]) 
 				&& $this->lastUserAllowedRoleIdMap[$rid];
 	}
-	
+
 	private static function id($var) {
 		if (is_numeric($var) && (int) $var == $var) {
 			return (int) $var;
@@ -50,7 +50,7 @@ abstract class AbstractAclManager implements AclManager {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * @param Role|int $role
 	 * @return Role 
@@ -89,7 +89,7 @@ abstract class AbstractAclManager implements AclManager {
 			throw new IllegalArgumentException();
 		}
 	}
-	
+
 	/**
 	 *
 	 * @param Group|int $group
@@ -109,5 +109,5 @@ abstract class AbstractAclManager implements AclManager {
 			throw new IllegalArgumentException();
 		}
 	}
-	
+
 }

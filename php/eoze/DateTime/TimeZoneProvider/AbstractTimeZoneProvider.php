@@ -15,16 +15,16 @@ use DateTimeZone;
 abstract class AbstractTimeZoneProvider implements TimeZoneProvider {
 
 	private static $utcTimeZone;
-	
+
 	public function getUtcName() {
 		return 'UTC';
 	}
-	
+
 	public function getUtc() {
 		if (!self::$utcTimeZone) {
 			self::$utcTimeZone = new DateTimeZone($this->getUtcName());
 		}
 		return self::$utcTimeZone;
 	}
-	
+
 }

@@ -3,7 +3,7 @@
 class ModelTableQuery extends Query implements QueryAliasable {
 
 	public $dbTable;
-	
+
 	/** @var myModelTable */
 	public $table;
 
@@ -20,7 +20,7 @@ class ModelTableQuery extends Query implements QueryAliasable {
 	 * @return ModelTableQuery
 	 */
 	public function select($field_s = null, $aliasPrefix = null) {
-		
+
 		if ($aliasPrefix !== null) {
 			throw new IllegalArgumentException('DEPRECATED');
 		}
@@ -55,7 +55,7 @@ class ModelTableQuery extends Query implements QueryAliasable {
 
 		return $this;
 	}
-	
+
 	/**
 	 * @param string $sql
 	 * @return ModelTableQuery
@@ -65,7 +65,7 @@ class ModelTableQuery extends Query implements QueryAliasable {
 	}
 
 	public function selectField($fieldName, $fieldAlias = null) {
-		
+
 		// SqlVar will select itself as it intends
 		if ($fieldName instanceof SqlVar) {
 			$this->select[] = $fieldName;
@@ -79,7 +79,7 @@ class ModelTableQuery extends Query implements QueryAliasable {
 				$joinFieldName = array_pop($fieldParts);
 				$fieldName = implode('->', $fieldParts);
 			}
-			
+
 			// Process assoc relations (in the type <AssocRelationName>fieldName)
 			else if (ModelTable::parseAssocRelationField($fieldName, $relation, $field)) {
 				$this->table->getRelationInfo($relation)->getAssocRelationInfo()
@@ -89,12 +89,12 @@ class ModelTableQuery extends Query implements QueryAliasable {
 						);
 				return;
 			}
-			
+
 			// else, $fieldName must point to a raw relation (eg. Contact) or a known
 			// column
 
 			$field = $this->table->getField($fieldName);
-			
+
 			// ModelColumn
 			if ($field instanceof ModelColumn) {
 				parent::select(new QuerySelect($fieldName, $fieldAlias, $this->table));
@@ -171,7 +171,7 @@ class ModelTableQuery extends Query implements QueryAliasable {
 
 		$staticPlaceHolder = '#S#T#A#T#I#C#P#H#';
 		$preSql = str_replace('``', $staticPlaceHolder, $preSql);
-		
+
 		$preSql = preg_replace_callback(
 			'/(^|\s)([^ `#]+?->[^` ]+?)([ !=]|$)/',
 //			array($this, 'cb_convertQualifiedNamesUnquoted'),
@@ -183,7 +183,7 @@ class ModelTableQuery extends Query implements QueryAliasable {
 					$preSql
 			)
 		);
-		
+
 		return str_replace($staticPlaceHolder, '`', $preSql);
 	}
 
@@ -340,16 +340,16 @@ class ModelTableQuery extends Query implements QueryAliasable {
 
 			if ($this->table->hasRelation($relationName)) {
 				$relation = $this->table->getRelationInfo($relationName);
-				
+
 				// 16/03/12 18:00 Removed:
-				
+
 				// if ($fieldName === null) {
 				// 	$fieldName = $relation->getTargetTable()->getNameFieldName();
 				// }
 				// return $this->join($relation)->getQualifiedName($fieldName);
-				
+
 				// 16/03/12 18:00 Added:
-				
+
 				return $relation->getNameClause($this);
 			}
 		}
@@ -422,7 +422,7 @@ class ModelTableQuery extends Query implements QueryAliasable {
 				}
 			}
 		}
-		
+
 		if (isset($this->joins[$index])) {
 			return $this->joins[$index];
 		} else if (isset($this->joinReferences[$index])) {
@@ -501,7 +501,7 @@ class ModelTableQuery extends Query implements QueryAliasable {
 		}
 		return $this;
 	}
-	
+
 }
 
 class QualifiedNameConverter {

@@ -19,7 +19,7 @@ class Json extends JsonExecutor {
 		);
 		$this->forward("{$this->module->getName()}.js", 'get_module', $override);
 	}
-	
+
 	public function hello() {
 		$this->data = 'hello';
 		return true;

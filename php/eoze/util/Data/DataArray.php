@@ -18,9 +18,9 @@ use eoze\util\Data;
  * @since 27 oct. 2011
  */
 class DataArray implements IteratorAggregate, Data {
-	
+
 	private $values;
-	
+
 	/**
 	 * Creates a new DataArray object.
 	 * 
@@ -31,11 +31,11 @@ class DataArray implements IteratorAggregate, Data {
 	public function __construct(array $values = null) {
 		$this->values = $values !== null ? $values : array();
 	}
-	
+
 	public function has($key) {
 		return $this->node($key);
 	}
-	
+
 	public function get($key) {
 		if (null !== $v = $this->getOr($key, null)) {
 			return $v;
@@ -45,7 +45,7 @@ class DataArray implements IteratorAggregate, Data {
 			throw new IllegalStateException('Undefined key: ' . $key);
 		}
 	}
-	
+
 	public function getOr($key, $default = null) {
 		if ($this->node($key, $value)) {
 			return $value;
@@ -53,7 +53,7 @@ class DataArray implements IteratorAggregate, Data {
 			return $default;
 		}
 	}
-	
+
 	private function node($key, &$value = null) {
 		$parts = explode('.', $key);
 		$node = $this->values;
@@ -67,7 +67,7 @@ class DataArray implements IteratorAggregate, Data {
 		$value = $node;
 		return true;
 	}
-	
+
 	public function getIterator() {
 		return new ArrayIterator($this->values);
 	}

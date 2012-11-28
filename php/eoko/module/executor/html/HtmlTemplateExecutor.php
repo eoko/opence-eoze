@@ -53,7 +53,7 @@ abstract class HtmlTemplateExecutor extends TemplateExecutor {
 			return null;
 		}
 	}
-	
+
 	protected function findTemplatePath($name, &$isTpl = null) {
 		return $this->searchTemplatePath($name, $isTpl, true);
 	}
@@ -76,15 +76,15 @@ abstract class HtmlTemplateExecutor extends TemplateExecutor {
 	 * @return \eoko\template\Template
 	 */
 	protected function createTemplate($name, $require = true, $opts = null) {
-		
+
 		if ($this->ajax) {
 			Arrays::apply($opts, array(
 				'ajaxLinks' => true
 			));
 		}
-		
+
 		if ($name === null) return HtmlTemplate::create($this, $opts);
-		
+
 		if (is_array($name)) {
 			foreach ($name as $n) {
 				if (($tpl = $this->createTemplate($n, false, $opts))) return $tpl;
@@ -96,7 +96,7 @@ abstract class HtmlTemplateExecutor extends TemplateExecutor {
 				return null;
 			}
 		}
-		
+
 		if (!file_exists($name)) {
 			if (null !== $name = $this->searchTemplatePath($name, $isTpl, $require)) {
 				if (!$isTpl) {
@@ -114,7 +114,7 @@ abstract class HtmlTemplateExecutor extends TemplateExecutor {
 				return RawRenderer::create($opts)->setFile($name);
 			}
 		}
-		
+
 		throw new IllegalStateException('Unreachable code');
 	}
 }

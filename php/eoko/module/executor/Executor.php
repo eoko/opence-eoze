@@ -33,7 +33,7 @@ function execute(Executor $executor, $action) {
 }
 
 abstract class Executor implements file\Finder {
-	
+
 	/** @var Module */
 	public $module;
 	/** @var Request */
@@ -43,32 +43,32 @@ abstract class Executor implements file\Finder {
 	 * @var RouteStackInterface
 	 */
 	private $router;
-	
+
 	public $name;
-	
+
 	private $action;
 	private $actionMethod;
-	
+
 	/** @var file\Finder */
 	private $fileFinder = null;
-	
+
 	private $cancelled = false;
 	private $executed = false;
-	
+
 	protected $actionParam = 'action';
 	protected $defaultAction = 'index';
-	
+
 	public final function __construct(Module $module, $name, $internal, $action, Request $request = null) {
-		
+
 		$this->module = $module;
 		$this->name = $name;
 		$this->request = $request !== null ? $request : new Request(array());
 		$this->action = $action !== null ? $action : $this->getDefaultAction();
-		
+
 		if (substr($this->action, 0, 1) == '_') {
 			throw new SecurityException('Litigious action: ' . $action);
 		}
-		
+
 		if ($this instanceof InternalExecutor) {
 			if (!$internal) {
 				throw new SecurityException('Request is not allowed to trigger internal actions');
@@ -84,7 +84,7 @@ abstract class Executor implements file\Finder {
 
 		$this->construct();
 	}
-	
+
 	protected function construct() {}
 
 	/**
@@ -102,11 +102,11 @@ abstract class Executor implements file\Finder {
 	protected function getRouter() {
 		return $this->router;
 	}
-	
+
 	private function getDefaultAction() {
 		return $this->request->get($this->actionParam, $this->defaultAction);
 	}
-	
+
 	/**
 	 * Execute the action with name $name.
 	 * @param Pointer $returnValue A variable that will be set to the action return
@@ -116,7 +116,7 @@ abstract class Executor implements file\Finder {
 	public function executeAction($name, &$returnValue) {
 		return false;
 	}
-	
+
 	/**
 	 * Returns the qualified name of the executor, that is:
 	 * 
@@ -127,11 +127,11 @@ abstract class Executor implements file\Finder {
 	public function __toString() {
 		return $this->name;
 	}
-	
+
 	public function getControllerString() {
 		return "$this->module.$this";
 	}
-	
+
 	/**
 	 * @return Module
 	 * @deprecated
@@ -140,7 +140,7 @@ abstract class Executor implements file\Finder {
 	public function getModule() {
 		return $this->module;
 	}
-	
+
 	/**
 	 * @return Config
 	 */
@@ -155,7 +155,7 @@ abstract class Executor implements file\Finder {
 	protected function getLogger() {
 		return Logger::get(get_class($this));
 	}
-	
+
 	/**
 	 * @deprecated
 	 * @todo Track usage
@@ -163,16 +163,16 @@ abstract class Executor implements file\Finder {
 	public function getName() {
 		return $this->name;
 	}
-	
+
 	public final function __invoke($return = false) {
-		
+
 		if ($this->executed) {
 			throw new IllegalStateException('Already executed');
 		}
-		
+
 		Logger::get($this)->debug('Executing {}.{}->{}',
 				$this->module, $this->name, $this->action);
-		
+
 		if ($this->beforeAction() === false) {
 			$this->cancelled = true;
 			$this->executed = true;
@@ -189,65 +189,65 @@ abstract class Executor implements file\Finder {
 				throw $ex;
 			}
 		}
-		
+
 		$this->executed = true;
-		
+
 		if ($this->cancelled) {
 			return;
 		}
-		
+
 		$this->afterAction();
-		
+
 		return $this->processResult($result, $return);
 	}
-	
+
 	private function doInvoke() {
 		return execute($this, $this->actionMethod);
 	}
-	
+
 //	public final function _beforeAction($action) {
-//		
+//
 //		if ($this->action !== null) {
 //			throw new IllegalStateException('Action execution collision');
 //		}
-//		
+//
 //		$this->action = $action;
-//		
+//
 //		return $this->beforeAction($action);
 //	}
-//	
+//
 //	public final function _afterAction($action, $result) {
-//		
+//
 //		// do nothing if the action has been cancelled
 //		if ($this->cancelled) {
 //			return;
 //		}
-//		
+//
 //		$r = $this->processResult($result);
-//		
+//
 //		$this->afterAction($action);
-//		
+//
 //		return $r;
 //	}
-	
+
 	private function cancel() {
-		
+
 		if ($this->cancelled) {
 			throw new IllegalStateException('Already cancelled!');
 		}
-		
+
 		$this->cancelled = true;
 	}
-	
+
 //	protected function setupAction() {}
 //	protected function cleanupAction() {}
-	
+
 	protected function afterAction() {}
 
 	protected function beforeAction() {}
-	
+
 	abstract protected function processResult($result);
-	
+
 	/**
 	 * Get the name of the action currently being executed. If this method is
 	 * called before or after an action is actually executed, an exception will
@@ -269,15 +269,15 @@ abstract class Executor implements file\Finder {
 	protected function isAction($action) {
 		return $this->getAction() === $action;
 	}
-	
+
 	protected function forward($controller, $action = null, $overrideRequest = null) {
 
 		$this->cancel();
-		
+
 		$overrideRequest = Arrays::applyIf($overrideRequest, array(
 			'action' => $action,
 		));
-		
+
 		$this->request->override($overrideRequest);
 		$this->request->remove('module', 'executor', 'controller');
 
@@ -287,12 +287,12 @@ abstract class Executor implements file\Finder {
 		}
 		$action();
 	}
-	
+
 	public function redirectTo($url) {
 		$this->cancel();
 		header('Location: ' . \eoko\url\Maker::makeAbsolute($url));
 	}
-	
+
 	/**
 	 * @return file\Finder
 	 */
@@ -308,15 +308,15 @@ abstract class Executor implements file\Finder {
 		}
 		return $this->fileFinder;
 	}
-	
+
 	public function searchPath($name, $type = null, &$getUrl = false, $forbidUpward = null, $require = false) {
 		return $this->getFileFinder()->searchPath($name, $type, $getUrl, $forbidUpward, $require);
 	}
-	
+
 	public function findPath($name, $type = null, &$getUrl = false, $forbidUpward = null) {
 		return $this->getFileFinder()->findPath($name, $type, $getUrl, $forbidUpward);
 	}
-	
+
 	public function resolveRelativePath($relativePath, $type = null, $forbidUpward = null) {
 		return $this->getFileFinder()->resolveRelativePath($relativePath, $type, $forbidUpward);
 	}

@@ -11,7 +11,7 @@ use IllegalStateException;
  * @since 6 déc. 2011
  */
 class ModelAlreadyDeletedException extends IllegalStateException {
-	
+
 //	public function __construct($msg) {
 //		alread
 //		parent::__constrct($msg);

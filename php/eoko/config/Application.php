@@ -8,7 +8,7 @@ use eoko\config\ConfigManager;
 use eoko\php\SessionManager;
 
 class Application implements FileFinder {
-	
+
 	private static $instance = null;
 
 	private $config;
@@ -22,17 +22,17 @@ class Application implements FileFinder {
 	 * @var bool[MODE]
 	 */
 	private $modes;
-	
+
 	/**
 	 * @var SessionManager
 	 */
 	private $sessionManager;
-	
+
 	private static $defaultSessionManager;
-	
+
 	private function __construct(SessionManager $sessionManager) {
 		$this->sessionManager = $sessionManager;
-		
+
 		// Configure modes
 		$this->modes = $this->getConfig()->get('modes');
 		if (!isset($this->modes['dev'])) {
@@ -46,18 +46,18 @@ class Application implements FileFinder {
 		}
 		return new Config($this->config);
 	}
-	
+
 	public static function setDefaultSessionManager(SessionManager $sessionManager) {
 		self::$defaultSessionManager = $sessionManager;
 	}
-	
+
 	/**
 	 * @return SessionManager
 	 */
 	public function getSessionManager() {
 		return $this->sessionManager;
 	}
-	
+
 	private function findDevMode() {
 		$config = $this->getConfig();
 		if (isset($config['devMode']) && $config['devMode'] !== 'auto') {
@@ -91,7 +91,7 @@ class Application implements FileFinder {
 	public function isMode($tag) {
 		return isset($this->modes[$tag]) && $this->modes[$tag];
 	}
-	
+
 	/**
 	 * @return Application
 	 */
@@ -102,7 +102,7 @@ class Application implements FileFinder {
 			return self::$instance = new Application(self::$defaultSessionManager);
 		}
 	}
-	
+
 	public function resolveRelativePath($relativePath, $type = null, $forbidUpward = null) {
 		return $this->getFileFinder()->resolveRelativePath($relativePath, $type, $forbidUpward);
 	}
@@ -110,25 +110,25 @@ class Application implements FileFinder {
 	public function searchPath($name, $type = null, &$getUrl = false, $forbidUpward = null, $require = false) {
 		return $this->getFileFinder()->searchPath($name, $type, $getUrl, $forbidUpward, $require);
 	}
-	
+
 	public function findPath($name, $type = null, &$getUrl = false, $forbidUpward = null) {
 		return $this->getFileFinder()->findPath($name, $type, $getUrl, $forbidUpward);
 	}
-	
+
 	private function getCssPathsUrl($urlPrefix = null) {
 		$r = array();
 		if (defined('APP_CSS_PATH')) $r[APP_CSS_PATH] = $urlPrefix . APP_CSS_URL;
 		$r[CSS_PATH] = $urlPrefix . CSS_URL;
 		return $r;
 	}
-	
+
 	private function getJSPathsUrl($urlPrefix = null) {
 		$r = array();
 		if (defined('APP_JS_PATH')) $r[APP_JS_PATH] = $urlPrefix . APP_JS_URL;
 		$r[JS_PATH] = $urlPrefix . JS_URL;
 		return $r;
 	}
-	
+
 	public function resolveFileFinderAlias($alias) {
 		if ($alias === '@ext') {
 			// Completely deprecated (see modules/root/html.class.php)
@@ -171,10 +171,10 @@ class Application implements FileFinder {
 			return array('@oce-core', '@oce-components');
 		}
 	}
-	
+
 	private function getFileFinder() {
 		if ($this->fileFinder) return $this->fileFinder;
-		
+
 		return $this->fileFinder = new file\ObjectFinder(
 			$this, 
 			null,

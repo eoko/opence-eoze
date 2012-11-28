@@ -15,20 +15,20 @@ use IllegalStateException;
  * @since 30 nov. 2011
  */
 class LegacyWrapper extends UserSessionHandler {
-	
+
 	public function __construct(SessionManager $sessionManager) {
 		UserSession::setSessionManager($sessionManager);
 		UserSession::onLogin(array($this, 'onLogin'));
 	}
-	
+
 	public function onLogin($user) {
 		$this->fireEvent('login', $user);
 	}
-	
+
 	public function getUser() {
 		return UserSession::getUser();
 	}
-	
+
 	public function getUserId($require = false) {
 		$user = UserSession::getUser();
 		if ($user) {
@@ -39,7 +39,7 @@ class LegacyWrapper extends UserSessionHandler {
 			return null;
 		}
 	}
-	
+
 	public function isAuthorized($level) {
 		return UserSession::isAuthorized($level);
 	}

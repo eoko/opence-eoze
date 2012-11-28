@@ -42,7 +42,7 @@ class ExceptionHandler {
 			Logger::getLogger('ExceptionHandler')->error('UserException', $ex);
 
 		}
-		
+
 		else {
 			$systemError = true;
 			$errorTitle = lang('Erreur Système');
@@ -59,11 +59,11 @@ class ExceptionHandler {
 
 			// Log exception
 			Logger::getLogger()->error('Uncaught exception', $ex);
-			
+
 			// DBG: trying to catch the output of some mystic errors that are
 			// not correctly pushed to the logs :(
 			error_log($ex->__toString());
-			
+
 			if ($answer && Logger::getLogger()->isActive(Logger::DEBUG)) {
 //				header('HTTP/1.1 500 Internal Server Error');
 			}

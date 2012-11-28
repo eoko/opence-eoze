@@ -13,7 +13,7 @@ use \IllegalArgumentException, \IllegalStateException;
 //const TYPE_HTML_TPL	= 'htmltpl';
 
 interface Finder {
-	
+
 	/**
 	 * Resolves the absolute path of the given $relativePath, relative to this
 	 * Finder's base path. This method doesn't test that the target file
@@ -32,7 +32,7 @@ interface Finder {
 	 * or NULL if this path doesn't point to an actual file (or dir)
 	 */
 	function searchPath($name, $type = null, &$getUrl = false, $forbidUpward = null, $require = false);
-	
+
 	function findPath($name, $type = null, &$getUrl = false, $forbidUpward = null);
 }
 
@@ -40,30 +40,30 @@ interface Finder {
  * Boilerplate for Finder implementations.
  */
 abstract class FinderBase implements Finder {
-	
+
 	public $cacheFinders = null;
 	public $forbidUpwardResolution = false;
 	public $fallbackFinder = null;
-	
+
 	public $aliases = null;
-	
+
 	/** @var Finder */
 	private static $rootFinder = null;
-	
+
 	public function __construct($opts) {
 		Options::apply($this, $opts);
 		if ($this->cacheFinders) $this->cacheFinders = array();
 	}
-	
+
 	protected function getAliasData($alias) {
 		if (!$this->aliases) return null;
 		else if (isset($this->aliases[$alias])) $aliasData = $this->aliases[$alias];
 		else if (isset($this->aliases[$altName = substr($alias, 1)])) $aliasData = $this->aliases[$altName];
 		else return null;
 	}
-	
+
 	private function searchAlias($name, $type = null, &$getUrl = false, $forbidUpward = null, $require = false) {
-		
+
 		if ($getUrl === false) {
 			throw new IllegalStateException("Missing reference variable to fetch files for alias ($name)");
 		}
@@ -110,9 +110,9 @@ abstract class FinderBase implements Finder {
 
 		return true;
 	}
-	
+
 	public final function searchPath($name, $type = null, &$getUrl = false, $forbidUpward = null, $require = false) {
-		
+
 		if (!self::$rootFinder) {
 			self::$rootFinder = $this;
 			$rootSearch = true;
@@ -121,7 +121,7 @@ abstract class FinderBase implements Finder {
 		}
 
 		$typeName = FileType::parse($type, $tryExtensions);
-		
+
 		if (($finder = $this->getFileFinderFor($type))) {
 			$r = $finder->searchPath($name, $type, $getUrl, $forbidUpward, $require);
 			if ($rootSearch) self::$rootFinder = null;
@@ -129,7 +129,7 @@ abstract class FinderBase implements Finder {
 		}
 
 		$forbidUpward = $forbidUpward || $this->forbidUpwardResolution;
-		
+
 		if (is_string($name) && substr($name, 0, 1) === '@'
 				&& $this->searchAlias($name, $type, $getUrl, $forbidUpward, $require)) {
 			if ($rootSearch) self::$rootFinder = null;
@@ -149,43 +149,43 @@ abstract class FinderBase implements Finder {
 			return null;
 		}
 	}
-	
+
 	public final function findPath($name, $type = null, &$getUrl = false, $forbidUpward = null) {
 		return $this->searchPath($name, $type, $getUrl, $forbidUpward, true);
 	}
-	
+
 	protected function doSearch($name, $tryExtensions, &$getUrl, $forbidUpward, $typeName, $type) {
 		// default behaviour is to find nothing... that will fallback to the
 		// fallback finder if one is set
 		return null;
 	}
-	
+
 	public final function resolveRelativePath($relativePath, $type = null, $forbidUpward = null) {
-		
+
 		if ($type !== null && (($finder = $this->getFileFinderFor($type)) || ($finder = $this->fallbackFinder))) {
 			return $finder->resolveRelativePath($relativePath, $type, $forbidUpward);
 		}
-		
+
 		if ($forbidUpward === null) $forbidUpward = $this->forbidUpwardResolution;
 
 		return $this->doResolveRelativePath($relativePath, $forbideUpward);
 	}
-	
+
 	protected function doResolveRelativePath($relativePath, $forbideUpward) {
 		// default behaviour is to find nothing... that will fallback to the
 		// fallback finder if one is set
 		return null;
 	}
-	
+
 	/**
 	 * @param string $type
 	 * @return Finder
 	 */
 	protected final function getFileFinderFor($type, $typeName = null) {
-		
+
 		// if type is null, there's no point in parsing it
 		if ($type && $typeName === null) $typeName = FileType::parse($type);
-		
+
 		if ($this->cacheFinders) {
 			if (array_key_exists($typeName, $this->cacheFinders)) {
 				return $this->cacheFinders[$typeName];
@@ -196,7 +196,7 @@ abstract class FinderBase implements Finder {
 			return $this->doGetFinderFor($type, $typeName);
 		}
 	}
-	
+
 	protected function doGetFinderFor($type, $typeName) {
 		// default behaviour is to have no finder for any type, this will let
 		// the current finder perform the search
@@ -212,10 +212,10 @@ abstract class FinderBase implements Finder {
  * resolve in multiple paths...
  */
 abstract class BasePathFinder extends FinderBase {
-	
+
 	protected $basePath;
 	protected $baseUrl;
-	
+
 	/**
 	 * @param mixed $opts 
 	 */
@@ -226,7 +226,7 @@ abstract class BasePathFinder extends FinderBase {
 		$this->basePath = $basePath;
 		$this->baseUrl = $baseUrl;
 	}
-	
+
 	/**
 	 * Makes the given path and url relative to this finder base path and url,
 	 * if they are not absolute. Absolute path follow os standards, but url are
@@ -272,12 +272,12 @@ abstract class BasePathFinder extends FinderBase {
 		}
 		return true;
 	}
-	
+
 	private static function cleanUrl(&$url) {
 		if (substr($url, -1) !== '/') $url .= '/';
 		return $url;
 	}
-	
+
 	private static function cleanPath(&$path) {
 		if (substr($path, -1) !== DS) $path .= DS;
 		return $path;
@@ -297,7 +297,7 @@ abstract class BasePathFinder extends FinderBase {
 //		return $cleanPathsUrl;
 //	}
 // </editor-fold>
-	
+
 	protected function cleanPathsUrl($pathsUrl, $testPathsExistence) {
 		$cleanPathsUrl = array();
 		foreach ($pathsUrl as $path => $url) {
@@ -318,19 +318,19 @@ abstract class BasePathFinder extends FinderBase {
 		}
 		return $cleanPathsUrl;
 	}
-	
+
 	protected static function tryFind($basePath, $baseUrl, $name, $tryExtensions, &$getUrl, $forbidUpward, $typeName, $type) {
-		
+
 		if (is_array($name)) {
 			foreach ($name as $n) {
 				if (($filename = self::tryFind($basePath, $baseUrl, $n, $tryExtensions, $getUrl, $forbidUpward, $typeName, $type))) {
 					return $filename;
 				}
 			}
-			
+
 			return null;
 		}
-		
+
 		if (($filename = Files::findIn($basePath, $name, $tryExtensions, $forbidUpward))) {
 			if ($getUrl !== false) {
 				if ($baseUrl === null) {
@@ -340,7 +340,7 @@ abstract class BasePathFinder extends FinderBase {
 					if (DS !== '/') $getUrl = str_replace(DS, '/', $getUrl);
 				}
 			}
-			
+
 			if ($tryExtensions) {
 				$goodExtension = false;
 				if (is_array($tryExtensions)) {
@@ -353,13 +353,13 @@ abstract class BasePathFinder extends FinderBase {
 				} else {
 					$goodExtension = substr($filename, -strlen($tryExtensions)) === $tryExtensions;
 				}
-				
+
 				if (!$goodExtension) return null;
 			}
-			
+
 			return $filename;
 		}
-		
+
 		$getUrl = null;
 		return null;
 	}
@@ -376,7 +376,7 @@ class BasicFinder extends BasePathFinder {
 			$name, $tryExtensions, $getUrl, $forbidUpward, $typeName, $type
 		);
 	}
-	
+
 	protected function doResolveRelativePath($relativePath, $forbideUpward) {
 		return Files::resolveRelativePath($this->basePath, $relativePath, $forbidUpward);
 	}
@@ -386,9 +386,9 @@ class BasicFinder extends BasePathFinder {
  * MultipathFinder performs a search in each of its base path before failing.
  */
 class MultipathFinder extends BasePathFinder {
-	
+
 	private $pathsUrl;
-	
+
 	public $testPathsExistence = true;
 
 	/**
@@ -403,13 +403,13 @@ class MultipathFinder extends BasePathFinder {
 	 * property
 	 */
 	public function __construct($basePath, $baseUrl, $pathsUrl, $opts = null, $cleanedPathsUrl = false) {
-		
+
 		parent::__construct($basePath, $baseUrl, $opts);
-		
+
 		$this->pathsUrl = $cleanedPathsUrl ? $pathsUrl
 				: $this->cleanPathsUrl($pathUrls, $this->testPathsExistence);
 	}
-	
+
 //REM	public static function createAbsoluteIf($pathsUrl, $testPathsExistence, $opts = null) {
 //		if (($cleanPathsUrl = self::cleanAbsolutePathsUrl($pathsUrl, $testPathsExistence))) {
 //			if (count($cleanPathsUrl) === 1) {
@@ -424,10 +424,10 @@ class MultipathFinder extends BasePathFinder {
 	public static function createAbsolute($pathsUrl, $opts = null, $cleanedPathsUrl = false) {
 		return new MultipathFinder(null, null, $pathsUrl, $opts, $cleanedPathsUrl);
 	}
-	
+
 	public static function createIf(BasePathFinder $owner, $pathsUrl, 
 			$testPathsExistence, $opts = null) {
-		
+
 		if (($cleanPathsUrl = $owner->cleanPathsUrl($pathsUrl, $testPathsExistence))) {
 			if (count($cleanPathsUrl) === 1) {
 				$url = reset($cleanPathsUrl);
@@ -441,20 +441,20 @@ class MultipathFinder extends BasePathFinder {
 			return null;
 		}
 	}
-	
+
 	protected function doSearch($name, $tryExtensions, &$getUrl, $forbidUpward, $typeName, $type) {
-		
+
 		foreach ($this->pathsUrl as $path => $url) {
 			if (($r = self::tryFind(
 					$path, $url, 
 					$name, $tryExtensions, $getUrl, $forbidUpward, $typeName, $type)
 			)) return $r;
 		}
-		
+
 		$getUrl = null;
 		return null;
 	}
-	
+
 	protected function doResolveRelativePath($relativePath, $forbideUpward) {
 		$r = array();
 		foreach (array_keys($this->pathsUrl) as $path) {
@@ -465,9 +465,9 @@ class MultipathFinder extends BasePathFinder {
 }
 
 class TypeFinder extends BasePathFinder {
-	
+
 	private $types;
-	
+
 	public $testPathExistence = true;
 	public $typeFindersOpts = null;
 
@@ -476,7 +476,7 @@ class TypeFinder extends BasePathFinder {
 		if ($typeFindersOpts) $this->typeFindersOpts = $typeFindersOpts;
 		$this->types = $typesPathsUrl;
 	}
-	
+
 	public static function createAbsolute($typesPathsUrl, $opts = null, $typeFindersOpts = null) {
 		return new TypeFinder(null, null, $typesPathsUrl, $opts, $typeFindersOpts);
 	}
@@ -515,11 +515,11 @@ class TypeFinder extends BasePathFinder {
 			);
 		}
 	}
-	
+
 	protected function doGetFinderFor($type, $typeName) {
 		if (isset($this->types[$typeName]) 
 				&& ($finder = $this->createTypeFinder($this->types[$typeName]))) {
-			
+
 			return $finder;
 		} else {
 			return parent::doGetFinderFor($type, $typeName);
@@ -533,19 +533,19 @@ class TypeFinder extends BasePathFinder {
  * methods, and delegates processing to its default finder if it finds none.
  */
 class ObjectFinder extends FinderBase {
-	
+
 	private $owner;
 	/** @var Finder */
-	
+
 	public $finderFnName = 'getFileFinderFor%s';
 	public $aliasFnName = 'resolveFileFinderAlias';
-	
+
 	public function __construct($owner, $opts = null, $fallbackFinder = null) {
 		$this->owner = $owner;
 		parent::__construct($opts);
 		if ($fallbackFinder) $this->fallbackFinder = $fallbackFinder;
 	}
-	
+
 	/**
 	 * Default implemention. Override to implement your own strategie. This
 	 * implementation search for methods named get{type}Finder in this
@@ -562,7 +562,7 @@ class ObjectFinder extends FinderBase {
 			return parent::doGetFinderFor($type, $typeName);
 		}
 	}
-	
+
 	protected function getAliasData($alias) {
 //		dumpl(array(
 //			$this, $this->owner, $alias,
@@ -570,7 +570,7 @@ class ObjectFinder extends FinderBase {
 //		));
 		if (method_exists($this->owner, $this->aliasFnName)
 				&& ($r = $this->owner->{$this->aliasFnName}($alias))) {
-					
+
 			return $r;
 		} else {
 			return parent::getAliasData($alias);

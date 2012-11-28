@@ -7,7 +7,7 @@
  * @since 7 déc. 2011
  */
 class UnsupportedOperationException extends SystemException {
-	
+
 	function __construct($debugMessage = true, $previous = null) {
 		if ($debugMessage === true) {
 			$trace = debug_backtrace();

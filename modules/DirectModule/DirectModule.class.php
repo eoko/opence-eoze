@@ -11,7 +11,7 @@ use eoko\modules\TabModule\TabModule;
  * @since 8 nov. 2011
  */
 class DirectModule extends TabModule {
-	
+
 	protected $defaultExecutor = 'json';
-	
+
 }

@@ -8,7 +8,7 @@ use eoko\template\RawRenderer;
 use eoko\template\HtmlRootTemplate;
 
 class BasicHtmlExecutor extends HtmlExecutor {
-	
+
 	protected $defaultPageTitle = 'Eoko > Default Title';
 	protected $pageTitle = null;
 
@@ -16,7 +16,7 @@ class BasicHtmlExecutor extends HtmlExecutor {
 		if ($this->pageTitle !== null) return $this->pageTitle;
 		else return $this->makePageTitle();
 	}
-	
+
 	protected function makePageTitle() {
 		return $this->defaultPageTitle;
 	}
@@ -49,11 +49,11 @@ class BasicHtmlExecutor extends HtmlExecutor {
 	 * @return Renderer
 	 */
 	protected function createLayout(Renderer $page) {
-		
+
 		if (null === $filename = $this->searchTemplatePath('layout.html.php')) {
 			$filename = $this->resolveDefaultTemplatePath('layout');
 		}
-		
+
 		$layoutRenderer = $this->createLayoutRenderer();
 
 		return $layoutRenderer->setFile($filename)
@@ -63,7 +63,7 @@ class BasicHtmlExecutor extends HtmlExecutor {
 				->set('body', $this->createBody($page))
 				;
 	}
-	
+
 	/**
 	 * Creates the head section of the html page.
 	 *
@@ -108,9 +108,9 @@ class BasicHtmlExecutor extends HtmlExecutor {
 	 * @return string|Renderer
 	 */
 	public function page() {
-		
+
 		$filename = $this->findTemplatePath($this->request->req('page'), $isTpl);
-		
+
 		if ($isTpl) {
 			return $this->createTemplate($filename);
 		} else {

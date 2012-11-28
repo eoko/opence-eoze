@@ -63,7 +63,7 @@ class QueryWhere {
 		if ($this->sql !== null) {
 			$this->sql .= " $op ";
 		}
-		
+
 		$field = $this->aliasable->getQualifiedName($field);
 
 		if ($field instanceof SqlVariable) {
@@ -76,7 +76,7 @@ class QueryWhere {
 		if (!is_array($values)) {
 			$values = array($values);
 		}
-		
+
 		if (count($values) > 0) {
 			$this->sql .= $quoted . $not . ' IN (?' . str_repeat(',?', count($values) - 1) . ')';
 			$this->bindings = array_merge($this->bindings, $values);

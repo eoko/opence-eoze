@@ -32,7 +32,7 @@ class Columns {
 	protected $table;
 
 	private $langTexts = null;
-	
+
 	protected static $specialStringPrefixes = array(
 		'__'
 	);
@@ -72,7 +72,7 @@ class Columns {
 				->apply($config->node('columns-defaults'), false)
 				->applyIf(array('extra' => array()), false)
 				;
-		
+
 		// Lang texts
 		$this->langTexts = $this->config->node('i18n')->toArray();
 
@@ -116,11 +116,11 @@ class Columns {
 			return null;
 		}
 	}
-	
+
 	private function extendTemplate($config) {
-		
+
 		$tpl = Arrays::pickOneOf($config, array('tpl', 'template'));
-		
+
 		if ($tpl === null) {
 			return $config;
 		} else {
@@ -128,7 +128,7 @@ class Columns {
 			return Arrays::apply($template, $config, false);
 		}
 	}
-	
+
 	protected static function parseSelfTemplates(&$config) {
 		foreach ($config as $name => &$colConfig) {
 			if (!is_array($colConfig)) {
@@ -139,7 +139,7 @@ class Columns {
 				if (($tpl = Arrays::pickOneOf($colConfig, array('tpl', 'template'))) !== null) {
 					if (!isset($config[$tpl]))
 							throw new IllegalStateException("Missing template: $tpl");
-					
+
 					$config[$name] = Arrays::applyIf($colConfig, $config[$tpl], false);
 				}
 			}
@@ -189,10 +189,10 @@ class Columns {
 			}
 
 			Arrays::apply($col, $colConfig, false);
-			
+
 			// 06/05/12 16:50 Apply grid meta
 			$this->applyGridMeta($col, $name);
-			
+
 			// 19/06/12 06:08 Apply model form config
 			$this->applyFormMeta($col, $name);
 
@@ -205,7 +205,7 @@ class Columns {
 						// simplest case
 						$col['name'] = $name;
 					}
-					
+
 					// else $autoName is a Config object
 					else {
 						if (
@@ -233,16 +233,16 @@ class Columns {
 					}
 				}
 			}
-			
+
 			if (null !== $f = $this->table->getField($col['name'], false)) {
-				
+
 				// Auto label
 				if (null !== $label = $f->getMeta()->label) {
 					if (!isset($col['header'])) {
 						$col['header'] = $label;
 					}
 				}
-				
+
 				switch ($f->getType()) {
 					case ModelColumn::T_INT:
 						if (!isset($col['renderer']) && !isset($col['xtype'])) {
@@ -334,7 +334,7 @@ class Columns {
 								'store' => $data
 							));
 						}
-						
+
 						// Columns filters
 						if (isset($col['filterable']) && $col['filterable']
 								|| isset($this->defaults['filterable']) && $this->defaults['filterable']) {
@@ -357,13 +357,13 @@ class Columns {
 						}
 						break;
 				}
-				
+
 				if ($f->getMeta()->readOnly) {
 					self::setColFormItemIf($col, 'readOnly', true);
 					self::setColFormItemIf($col, 'xtype', 'displayfield');
 					self::setColFormItemIf($col, 'submitValue', false);
 				}
-				
+
 				// auto set col.filter[type === list].options
 				if (isset($col['filter']) && isset($col['filter']['type'])
 						&& $col['filter']['type'] === 'list'
@@ -420,7 +420,7 @@ class Columns {
 
 			$this->columns[$name] = $col;
 		}
-		
+
 		foreach ($this->columns as $name => &$col) {
 			if (isset($col['useFields']) && $col['useFields']) {
 				LegacyGridModule::convertTabFields($this->columnsConfig, $col['formField']);
@@ -447,7 +447,7 @@ class Columns {
 			}
 		}
 	}
-	
+
 	private function applyFormMeta(array &$colConfig, $name) {
 		$field = $this->table->getField($name, false);
 		if ($field) {
@@ -457,7 +457,7 @@ class Columns {
 			}
 		}
 	}
-	
+
 	private static function setColFormItemIf(&$col, $name, $value = null) {
 		// 2 args
 		if (is_array($name)) {
@@ -480,7 +480,7 @@ class Columns {
 			}
 		}
 	}
-	
+
 	private static function setColStoreItemIf(&$col, $name, $value = null) {
 		if (is_array($name)) {
 			foreach ($name as $k => $v) {
@@ -500,7 +500,7 @@ class Columns {
 			);
 		}
 	}
-	
+
 	private function getDefaultFilterListOptions($col) {
 		$q = $this->table->createQuery();
 		$f = $q->getQualifiedName($col['name']);
@@ -512,7 +512,7 @@ class Columns {
 
 	protected function formConfigFromModel($name, $action = null) {
 		$table = ModelTable::getModelTable($this->config->model);
-		
+
 		if (null === $col = $table->getColumn($name)) return null;
 
 		$r = array(
@@ -569,7 +569,7 @@ class Columns {
 	static function quoteString($str) {
 		return json_encode("$str");
 	}
-	
+
 	private function getLangValue($key) {
 		if (isset($this->langTexts[$key])) {
 			return $this->langTexts[$key];
@@ -591,7 +591,7 @@ class Columns {
 					|| array_search($val, self::$specialStringVals, true) !== false) {
 				return $val;
 			}
-			
+
 			if (preg_match('/^\$lang\.(?P<key>.+)$/', $val, $matches)) {
 				$val = $this->getLangValue($matches['key']);
 			}
@@ -643,5 +643,5 @@ class Columns {
 		if (count($lines) > 0) $lines[0] = "\t\t $lines[0]";
 		echo implode("\n\t\t,", $lines) . "\n";
 	}
-	
+
 }

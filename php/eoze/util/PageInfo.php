@@ -11,11 +11,11 @@ use IllegalArgumentException;
  * @since 1 nov. 2011
  */
 class PageInfo {
-	
+
 	public $limit = null;
-	
+
 	public $start = 0;
-	
+
 	public function __construct($limit = null, $start = 0) {
 		if ($limit !== null && $limit <= 0) {
 			throw new IllegalArgumentException;
@@ -39,5 +39,5 @@ class PageInfo {
 			}
 		}
 	}
-	
+
 }

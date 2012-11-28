@@ -14,6 +14,6 @@ abstract class Script {
 		$this->run();
 		$this->executionTime = Debug::elapsedTime($startTime, microtime());
 	}
-	
+
 	abstract protected function run();
 }

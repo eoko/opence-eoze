@@ -148,7 +148,7 @@ class Config implements ArrayAccess, IteratorAggregate {
 			throw new InvalidConfigurationException($filename, null, null, null, $ex);
 		}
 	}
-	
+
 	/**
 	 * return \eoko\config\Config
 	 */
@@ -206,7 +206,7 @@ class Config implements ArrayAccess, IteratorAggregate {
 			throw new IllegalArgumentException();
 		}
 	}
-	
+
 	/**
 	 * Creates a Config object from the given $config param (see {@link
 	 * Config::create()} for accepted inputs), and returns the node $node if
@@ -265,7 +265,7 @@ class Config implements ArrayAccess, IteratorAggregate {
 			return $default;
 		}
 	}
-	
+
 	/**
 	 * Gets the value for the given path, or $default if the given config 
 	 * option is not set.
@@ -371,13 +371,13 @@ class Config implements ArrayAccess, IteratorAggregate {
 	 * node with the specified name
 	 */
 	public function node($path, $require = false, $createIfNeeded = true) {
-		
+
 		if ($path === null) {
 			return $this;
 		} else if (is_string($path)) {
 			$pathElt = explode('/', $path);
 		}
-		
+
 		if (count($pathElt) == 1) {
 			if (isset($this->value[$path])) {
 				if (is_array($this->value[$path])) {

@@ -34,12 +34,12 @@ class Router {
 
 	/** @var Router */
 	private static $instance = null;
-	
+
 	/**
 	 * @var HttpRequest
 	 */
 	private $httpRequest;
-	
+
 	/**
 	 * @var RouteMatch
 	 */
@@ -47,7 +47,7 @@ class Router {
 
 	public $request;
 	public $actionTimestamp;
-	
+
 	private $microTimeStart;
 	/** @var MonitorRequest */
 	private $requestMonitorRecord;
@@ -73,7 +73,7 @@ class Router {
 		// Debug infos
 		$this->microTimeStart = self::microtime($time);
 		$this->actionTimestamp = $time;
-		
+
 		ExtJSResponse::put('timestamp', $this->actionTimestamp);
 
 		// TODO that should not happen in the constructor
@@ -96,19 +96,19 @@ class Router {
 //			UserMessageService::parseRequest($this->request);
 		}
 	}
-	
+
 	/**
 	 * @return Zend\Mvc\Router\RouteMatch
 	 */
 	private function getRouteMatch() {
-		
+
 		$routesConfigCacheKey = get_class($this) . '-RoutesConfig';
 
 		// Retrieve route stack config from cache, or build it from modules
 		if (!($routesConfig = Cache::getCachedData($routesConfigCacheKey))) {
-			
+
 			$assembler = new Router_RouteConfigAssembler;
-			
+
 			$monitors = array();
 			foreach (ModuleManager::listModules() as $module) {
 				if ($module instanceof HasRoutes) {
@@ -118,29 +118,29 @@ class Router {
 				}
 				$monitors = array_merge($monitors, $module->getCacheMonitorFiles());
 			}
-			
+
 			$routesConfig = $assembler->assembleRoutes();
-			
+
 			Cache::cacheObject($routesConfigCacheKey, $routesConfig);
 			Cache::monitorFiles($routesConfigCacheKey, $monitors);
 		}
-		
+
 		// Create route stack
 		$this->routeStack = new Zend\Mvc\Router\Http\TreeRouteStack;
 		$this->routeStack->addRoutes($routesConfig);
 
 		return $this->routeStack->match($this->httpRequest);
 	}
-	
+
 	/**
 	 * @return eoko\mvc\RequestReader
 	 */
 	private function createRequestReader() {
-		
+
 		$readerClass = $this->routeMatch !== null
 				? $this->routeMatch->getParam('_RequestReader', $this->defaultRequestReaderClass)
 				: $this->defaultRequestReaderClass;
-		
+
 		if (!class_exists($readerClass)) {
 			throw new IllegalStateException('Cannot find reader class: ' . $readerClass);
 		}
@@ -151,39 +151,39 @@ class Router {
 
 		return new $readerClass($this->httpRequest, $this->routeMatch);
 	}
-	
+
 	private function createRouter() {
-		
+
 		$routerClass = $this->routeMatch !== null
 			? $this->routeMatch->getParam('_Router', $this->defaultRouterClass)
 			: $this->defaultRouterClass;
-		
+
 		if (!class_exists($routerClass)) {
 			throw new IllegalStateException('Cannot find router class: ' . $routerClass);
 		}
 
 		return new $routerClass($this->request, $this->routeStack, $this->routeMatch);
 	}
-	
+
 	private function logRequest($requestData) {
-		
+
 		if (!class_exists('MonitorRequest')) {
 			return;
 		}
-		
+
 		$phpRequest = $this->request;
 		$controller = $this->request->get('controller');
-		
+
 		if (substr($controller, 0, 14) === 'RequestMonitor') {
 			return;
 		}
-		
+
 		// Don't store clear passwords...
 		if ($controller === 'AccessControl.login') {
 			$requestData['password'] = '***';
 			$phpRequest = new Request($requestData);
 		}
-		
+
 		$this->requestMonitorRecord = MonitorRequest::create(array(
 			'datetime' => date('Y-m-d H:i:s', $this->actionTimestamp),
 			'action_timestamp' => $this->actionTimestamp,
@@ -193,7 +193,7 @@ class Router {
 			'controller' => $controller,
 			'action' => $phpRequest->get('action'),
 		));
-		
+
 		$this->requestMonitorRecord->save();
 
 		ExtJSResponse::put('requestId', $this->requestMonitorRecord->getId());
@@ -202,7 +202,7 @@ class Router {
 	public static function getActionTimestamp() {
 		return self::getInstance()->actionTimestamp;
 	}
-	
+
 	public static function getRequestId() {
 		if (null !== $record = self::getInstance()->requestMonitorRecord) {
 			return $record->getId();
@@ -210,11 +210,11 @@ class Router {
 			return null;
 		}
 	}
-	
+
 	private function isAllowMultipleRouteCalls() {
 		return ConfigManager::get('eoko/router', 'allowMultipleCalls', false);
 	}
-	
+
 	private function testMultipleRouteCall() {
 		if ($this->routeCallCount === 0 || $this->isAllowMultipleRouteCalls()) {
 			$this->routeCallCount++;
@@ -223,7 +223,7 @@ class Router {
 					. ' See config node: eoko\\router\\allowMultipleCalls.');
 		}
 	}
-	
+
 	private static function microtime(&$time = null) {
 		list($µ, $time) = explode(' ', microtime());
 		return (int) ($time . substr($µ, 2, 6));
@@ -234,9 +234,9 @@ class Router {
 	 * @see Router
 	 */
 	public function route() {
-		
+
 		$this->testMultipleRouteCall();
-		
+
 		// PHP error converted to exceptions will bypass the try/catch block
 		if ($this->requestMonitorRecord) {
 			eoko\php\ErrorException::onError(array($this, 'onRequestError'));
@@ -265,7 +265,7 @@ class Router {
 			throw $ex;
 		}
 	}
-	
+
 	public function onRequestError($ex) {
 		$microtime = self::microtime($time);
 		$runningTime = $microtime - $this->microTimeStart;
@@ -277,11 +277,11 @@ class Router {
 }
 
 class Router_RouteConfigAssembler {
-	
+
 	private $routes;
-	
+
 	private $childRoutes;
-	
+
 	public function addRoutes($routes) {
 		foreach ($routes as $name => $route) {
 			if ($route instanceof Traversable) {
@@ -344,7 +344,7 @@ class Router_RouteConfigAssembler {
 				$map += self::mapParentRoutes($routes);
 			}
 			unset($routes);
-			
+
 			// Assemble
 			foreach ($this->childRoutes as $parent => $children) {
 				foreach ($children as $name => $route) {
@@ -358,11 +358,11 @@ class Router_RouteConfigAssembler {
 					}
 				}
 			}
-			
+
 			// prevent reprocessing if the method is called again
 			unset($this->childRoutes);
 		}
-		
+
 		return $this->routes;
 	}
 }

@@ -22,17 +22,17 @@ use RuntimeException;
  * @version 1.0.0
  */
 abstract class AbstractDumper implements Dumper {
-	
+
 	/**
 	 * @var Map
 	 */
 	private $config;
-	
+
 	/**
 	 * @var DumperListener[]|null
 	 */
 	private $listeners;
-	
+
 	/**
 	 * Creates a new {@link AbstractDumper} object.
 	 * @param Map $config 
@@ -40,34 +40,34 @@ abstract class AbstractDumper implements Dumper {
 	public function __construct(Map $config) {
 		$this->config = $config;
 	}
-	
+
 	public function getLogger() {
 		return Logger::get($this);
 	}
-	
+
 	public function getConfig() {
 		return $this->config;
 	}
-	
+
 	final public function dump($dataFilename, $structureFilename = null) {
 		if (false !== $this->_beforeDump($dataFilename, $structureFilename)) {
 			$this->doDump($dataFilename, $structureFilename);
 		}
 	}
-	
+
 	/**
 	 * Get the {@link DumperListener}s registered in the configuration.
 	 * @return DumperListener[]
 	 */
 	protected function getListeners() {
-		
+
 		// Load cache
 		if ($this->listeners === null) {
-			
+
 			$this->listeners = array();
-			
+
 			$config = $this->getConfig()->toArray();
-			
+
 			if ($config['dump']['listeners']) {
 				foreach ($config['dump']['listeners'] as $class) {
 					if (class_exists($class)) {
@@ -78,18 +78,18 @@ abstract class AbstractDumper implements Dumper {
 				}
 			}
 		}
-		
+
 		return $this->listeners;
 	}
-	
+
 	private function _beforeDump($dataFilename, $structureFilename = null) {
-		
+
 		foreach ($this->getListeners() as $listener) {
 			if (false === $listener->beforeDump($dataFilename, $structureFilename)) {
 				return false;
 			}
 		}
-		
+
 		return $this->beforeDump($dataFilename, $structureFilename);
 	}
 

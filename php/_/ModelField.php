@@ -24,7 +24,7 @@ interface ModelField {
 //	function orderClause($dir, $tableAlias = null);
 
 	function getType();
-	
+
 	/**
 	 * Gets the maximum length of the field's value.
 	 * 
@@ -42,24 +42,24 @@ interface ModelField {
 	 * @return int\null
 	 */
 	function getLength();
-	
+
 	function getSqlType();
 
 	function isNullable();
-	
+
 	function getDefault();
-	
+
 	function hasDefault();
-	
+
 	function isPrimary();
-	
+
 	function castValue($value);
-	
+
 	/**
 	 * @return FieldMetadata
 	 */
 	function getMeta();
-	
+
 	/**
 	 * Gets the actual field object. This can be different from the object being
 	 * referred, in the case of {@link ModelRelationInfoField} for example.

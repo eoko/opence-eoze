@@ -9,5 +9,5 @@ namespace eoze\acl;
  * @since 20 oct. 2011
  */
 interface Group extends Role, HasRoles {
-	
+
 }

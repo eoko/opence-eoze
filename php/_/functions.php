@@ -10,7 +10,7 @@ CONST GET_NAMESPACE_TRIM                      = 6;
 
 //function get_namespace($class, &$relativeClassName = false, &$absoluteClassName = false, $trim = false) {
 function get_namespace($class, &$className = false, $opts = 0) {
-	
+
 	if (is_int($className) && func_num_args() === 2) {
 		$opts = $className;
 		$className = false;
@@ -85,7 +85,7 @@ function parseNamespace($class, &$className = false, $opts = 0) {
 		$opts = $className;
 		$className = false;
 	}
-	
+
 	if (is_array($class)) {
 		if (count($class) !== 2) {
 			throw new IllegalArgumentException('$class array must have exactly 2 elements (namespace, class)');

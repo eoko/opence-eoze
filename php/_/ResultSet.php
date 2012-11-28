@@ -31,7 +31,7 @@ class ResultSet implements IteratorAggregate, ArrayAccess {
 	public function getIterator() {
 		return new ArrayIterator($this->results);
 	}
-	
+
 	// ArrayAccess
 	public function offsetExists($offset) {
 		return array_key_exists($offset, $this->results);

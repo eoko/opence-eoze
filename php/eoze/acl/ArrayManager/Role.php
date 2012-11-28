@@ -11,9 +11,9 @@ use eoze\acl\ArrayManager;
  * @since 20 oct. 2011
  */
 class Role implements \eoze\acl\Role {
-	
+
 	private $id;
-	
+
 	/**
 	 * @var ArrayManager
 	 */
@@ -28,12 +28,12 @@ class Role implements \eoze\acl\Role {
 		}
 		$manager->add($this);
 	}
-	
+
 	public function __toString() {
 		$class = str_replace('\\', DIRECTORY_SEPARATOR, get_class($this));
 		return basename($class . '#' . $this->getId());
 	}
-	
+
 	public function getId() {
 		return $this->id;
 	}

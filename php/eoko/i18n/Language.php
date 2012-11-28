@@ -99,11 +99,11 @@ class Language {
 		$text = self::getTranslatedString($text);
 		return preg_replace_callback('/%([^%]+)%/', array($replacer, 'replace'), $text);
 	}
-	
+
 	private static function getTranslatedString($key) {
 		return $key;
 	}
-	
+
 	public static function callTranslate($args) {
 		$text = \array_shift($args);
 		$n = count($args);
@@ -122,7 +122,7 @@ class Language {
 			throw new IllegalStateException('Unreachable code');
 		}
 	}
-	
+
 	public static function importFunctions($ns) {
 		eval(
 <<<CODE
@@ -134,9 +134,9 @@ namespace $ns {
 CODE
 		);
 	}
-	
+
 	public static function translate($text, $___ = null) {
-		
+
 		if (func_num_args() > 2) {
 			$fillers = array_splice(func_get_args(), 1);
 			return Language::translateOrdered($text, $fillers);

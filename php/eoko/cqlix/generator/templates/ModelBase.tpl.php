@@ -132,7 +132,7 @@ abstract class <?php echo $modelName ?>Base extends <?php echo $baseModelName ?>
 	 * reccord matching the given primary key has been found
 	 */
 	public static function load($<?php echo $primaryField->getVarName(false) ?>, array $context = null) {
-		
+
 		$model = new <?php echo $modelName ?>(array(
 			'<?php echo $primaryField->getName() ?>' => $<?php echo $primaryField->getVarName(false) ?>
 		), false, $context);
@@ -265,7 +265,7 @@ abstract class <?php echo $modelName ?>Base extends <?php echo $baseModelName ?>
 <?php /*
 <?php if (!$field->isPrimary()): ?>
 		// $this->setField('<?php echo $field->getName() ?>', $<?php echo $field->getVarName() ?>
-		
+
 		$this->setColumn('<?php echo $field->getName() ?>', $<?php echo $field->getVarName() ?>
 , <?php echo $field->isNullable() ? '$ignoredArgument' : '$forceAcceptNull' ?>);
 <?php else: ?>

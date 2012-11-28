@@ -14,9 +14,9 @@ use eoko\modules\Kepler\Observable as CometObservable;
  * @since 1 déc. 2011
  */
 abstract class ExtendedModel extends Model implements CometObservable {
-	
+
 	protected $cometEvents = true;
-	
+
 	/**
 	 * Will return the model name, with the model id appended in the form:
 	 * 
@@ -40,7 +40,7 @@ abstract class ExtendedModel extends Model implements CometObservable {
 		}
 		return $name;
 	}
-	
+
 	protected function onDelete($isSaving) {
 		parent::onDelete($isSaving);
 		if ($this->cometEvents) {
@@ -51,7 +51,7 @@ abstract class ExtendedModel extends Model implements CometObservable {
 			CometEvents::publish($this->table, 'removed', array($id), $origin);
 		}
 	}
-	
+
 	protected function afterSave($new) {
 		parent::afterSave($new);
 		if ($this->cometEvents) {

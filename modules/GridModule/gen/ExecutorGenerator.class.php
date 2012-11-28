@@ -19,7 +19,7 @@ class ExecutorGenerator extends GeneratorBase {
 	public function populate(PHPCompiler $tpl) {
 
 		$this->tpl = $tpl;
-		
+
 		$this->config->controllerInfo = $this->config->node('controllerInfo')
 				// Inherit parent module
 				->applyIf($this->parentConfig->get('controllerInfo', null))
@@ -90,7 +90,7 @@ class ExecutorGenerator extends GeneratorBase {
 			$p = "'" . addcslashes($p, "'") . "'";
 		}
 		unset($p);
-		
+
 		$tpl->tabPages = implode(', ', $pages);
 
 		// --- Process columns infos ---

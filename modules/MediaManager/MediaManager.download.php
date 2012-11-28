@@ -11,9 +11,9 @@ use eoko\module\executor\ExecutorBase;
  * @since 1 août 2012
  */
 class download extends ExecutorBase {
-	
+
 	protected function processResult($result) {}
-	
+
 	public function download() {
 
 		// TODO session
@@ -21,7 +21,7 @@ class download extends ExecutorBase {
 			header('Status: 403 Forbidden');
 			die;
 		}
-		
+
 		$path = $this->getModule()->getDownloadPath($this->request->req('path'));
 		if (file_exists($path)) {
 			header('Content-Type: ' . self::getMime($path));
@@ -31,7 +31,7 @@ class download extends ExecutorBase {
 			require EOZE_PATH . 'php/error404.php';
 		}
 	}
-	
+
 	private static function getMime($filename) {
 		$mime_types = array(
 			'txt' => 'text/plain',

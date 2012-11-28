@@ -23,7 +23,7 @@ class Html extends BasicHtmlExecutor {
 	}
 
 	protected function onCreateLayout(SimplifiedHtmlRootTemplate $layout) {
-		
+
 		$layout->setIncludeUrls($this->buildIncludes());
 
 		// Ext blank image
@@ -50,7 +50,7 @@ class Html extends BasicHtmlExecutor {
 			));
 		}
 	}
-	
+
 	/**
 	 * Build the list of js & css files to be included in the index html page.
 	 * 
@@ -64,7 +64,7 @@ class Html extends BasicHtmlExecutor {
 	 * @return array
 	 */
 	private function buildIncludes() {
-		
+
 		$options = $this->getModuleConfig()->get('compilation', false);
 		$app = $this->getModule()->getApplicationConfig();
 		$cdnConfig = $this->getModuleConfig()->get('cdn', false);
@@ -75,11 +75,11 @@ class Html extends BasicHtmlExecutor {
 		$yui = isset($options['yuiCompressorCommand'])
 				? $options['yuiCompressorCommand']
 				: false;
-		
+
 		$includes = array();
-		
+
 		foreach (array(
-		
+
 			'js' => array(
 				// CDN compiler
 				new ExtJsCompiler('js', $cdnConfig, true, true, true),
@@ -102,7 +102,7 @@ class Html extends BasicHtmlExecutor {
 					array($this, '_buildModulesJavascriptIncludes')
 				),
 			),
-			
+
 			'css' => array(
 				// CDN compiler
 				new ExtJsCompiler('css', $cdnConfig, true, true, true),
@@ -154,14 +154,14 @@ Ext.onReady(function() {
 JS;
 
 	}
-	
+
 	/**
 	 * Gets the javascript config file for Ext4.Loader.setConfig().
 	 */
 	public function getExt4LoaderConfig() {
-		
+
 		$loaders = array();
-		
+
 		foreach (ModuleManager::listModules(false) as $module) {
 			/** @var \eoko\module\Module $module */
 			$loaders += $module->getExt4LoaderConfig();
@@ -171,11 +171,11 @@ JS;
 		$loaders['Eoze.i18n'] = EOZE_BASE_URL . 'js/Eoze/i18n';
 		$loaders['Eoze.locale'] = EOZE_BASE_URL . 'js/Eoze/locale';
 		$loaders['Eoze.lib'] = EOZE_BASE_URL . 'js/Eoze/lib';
-		
+
 		$paths = json_encode($loaders);
-		
+
 		header('Content-type: text/javascript');
-		
+
 		echo <<<JS
 Ext4.Loader.setConfig({
 	enabled: true
@@ -233,9 +233,9 @@ JS;
 	}
 
 	private function buildJasmineSpecIncludes() {
-		
+
 		$urls = array();
-		
+
 		foreach (ModuleManager::listModules(false) as $module) {
 			/** @var \eoko\module\Module $module */
 			$urls = array_merge($urls, $module->listLineFilesUrl('glob:*.js', 'js/tests', true));
@@ -258,11 +258,11 @@ JS;
 	 * @return array
 	 */
 	public function _buildModulesJavascriptIncludes($path, $url) {
-		
+
 		$devMode = $this->getModule()->getApplicationConfig()->isDevMode();
 
 		$contents = array();
-		
+
 		foreach (ModuleManager::listModules(false) as $module) {
 			if ($module instanceof \eoko\module\HasJavascript) {
 				$content = $module->getJavascriptAsString();
@@ -294,9 +294,9 @@ JS;
 
 		// merge modules javascript
 		file_put_contents($path, implode(PHP_EOL . PHP_EOL, $contents));
-		
+
 		unset($contents);
-		
+
 		return array(
 			$url => 100,
 		);
@@ -344,11 +344,11 @@ JS;
 	 * @return array
 	 */
 	public function _buildCssIncludes() {
-		
+
 		$urls = $this->resolveIncludeAlias('@oce', 'css');
 
 		$autoCssFiles = array();
-		
+
 		foreach (ModuleManager::listModules(false) as $module) {
 			/** @var \eoko\module\Module $module */
 			$autoCssFiles = array_merge($autoCssFiles, $module->listLineFilesUrl('re:\.auto\d*\.css$', ''));
@@ -356,11 +356,11 @@ JS;
 			$autoCssFiles = array_merge($autoCssFiles, $module->listLineFilesUrl('glob:*.css', 'css/auto', true));
 			$autoCssFiles = array_merge($autoCssFiles, $module->listLineFilesUrl('glob:*.css', 'css.auto', true));
 		}
-		
+
 		foreach ($autoCssFiles as $url) {
 			$urls[$url] = preg_match('/\.auto(\d+)\.css$/', $url, $m) ? 20 + (int) $m[1] : null;
 		}
-		
+
 		return $urls;
 	}
 

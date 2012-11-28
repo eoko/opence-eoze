@@ -52,7 +52,7 @@ MAIL_TEXT
 	 * @return type 
 	 */
 	public static function sendHTML($to, $from, $subject, $message, $bcc = null, $cc = null) {
-		
+
 		if (is_array($to)) {
 			$to = implode(', ', $to);
 		}
@@ -71,7 +71,7 @@ MAIL_TEXT
 		// than 70 characters.
 		// http://fr.php.net/manual/en/function.mail.php
 		$message = wordwrap($message, 70, "\n", true);
-		
+
 		$message = <<<MAIL
 <html>
 <head>
@@ -82,7 +82,7 @@ $message
 </body>
 </html>
 MAIL;
-		
+
 		// From
 		if (!strstr($from, '<')) {
 			$from = "<$from>";

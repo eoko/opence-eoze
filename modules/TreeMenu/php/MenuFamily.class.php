@@ -11,9 +11,9 @@ class MenuFamily implements HasAccessLevel {
 	private $actions;
 
 	private $iconCls;
-	
+
 	private $accessLevel = null;
-	
+
 	function __construct($id, $label, $actions) {
 		$this->id = $id;
 		$this->label = $label;
@@ -35,7 +35,7 @@ class MenuFamily implements HasAccessLevel {
 
 	public function getId() { return $this->id; }
 	public function getLabel() { return $this->label; }
-	
+
 	public function toArray($associative = true, TreeMenu $module = null) {
 		$r = array();
 		foreach ($this as $k => $v) {
@@ -57,13 +57,13 @@ class MenuFamily implements HasAccessLevel {
 		}
 		return $r;
 	}
-	
+
 	public static function __set_state($an) {
 		$f = new MenuFamily(null, null, null);
 		foreach ($an as $k => $v) $f->$k = $v;
 		return $f;
 	}
-	
+
 	/**
 	 * @param string $id
 	 * @return MenuAction
@@ -75,7 +75,7 @@ class MenuFamily implements HasAccessLevel {
 			return null;
 		}
 	}
-	
+
 	public function getAccessLevel() {
 		return $this->accessLevel;
 	}

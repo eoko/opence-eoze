@@ -50,7 +50,7 @@ class Logger {
 	 */
 	private static $defaultLogger = null;
 	private static $defaultContext = 'ROOT';
-	
+
 	private static $previousEntries;
 
 	/**
@@ -72,7 +72,7 @@ class Logger {
 	 * @return Logger
 	 */
 	public static function getLogger($context = null) {
-		
+
 		if (self::$defaultLogger === null)
 			self::$defaultLogger = new \eoko\log\Logger();
 
@@ -171,7 +171,7 @@ class Logger {
 	public function setLevel($level) {
 		$this->logLevel[$this->context] = $level;
 	}
-	
+
 	public static function setLevels($levels) {
 		$logger =& self::getLogger();
 		foreach ($levels as $context => $level) {
@@ -230,7 +230,7 @@ class Logger {
 			}
 		}
 	}
-	
+
 	protected function logImpl($level, $msg, $args = array()) {
 
 		if ($this->isActive($level, false)) {
@@ -284,7 +284,7 @@ class Logger {
 			$infoLine = $this->getTraceString();
 
 			$entry = new LogEntry($msg, $level, $date, $this->context, $infoLine);
-			
+
 			self::$previousEntries[] = $entry;
 
 			foreach (self::$appenders as $appender) {
@@ -592,14 +592,14 @@ class LoggerOutputAppender implements LoggerAppender {
 	const FORMAT_VOID  = 0;
 	const FORMAT_HTML  = 1;
 	const FORMAT_SHELL = 2;
-	
+
 	private $format;
 	/** @var ShellEoze */
 	private $shell;
 
 	function __construct($format = self::FORMAT_HTML, ShellEoze $shell = null) {
 		$this->shell = $shell;
-		
+
 		if ($format >= 0 && $format <= 2) {
 			$this->format = $format;
 		} else {
@@ -629,9 +629,9 @@ class LoggerFirePHPAppender implements LoggerAppender {
 	private $adapter;
 
 	function __construct() {
-		
+
 		ob_start();
-		
+
 		if (isset($_SERVER['HTTP_USER_AGENT']) 
 				&& preg_match('/Chrome|Chromium/i', $_SERVER['HTTP_USER_AGENT'])) {
 			$this->adapter = new ChromePHPAdapter();
@@ -641,7 +641,7 @@ class LoggerFirePHPAppender implements LoggerAppender {
 			$this->adapter = new FirePHPAdapter();
 		}
 	}
-	
+
 	function process(LogEntry $entry) {
 		$this->adapter->process($entry);
 	}

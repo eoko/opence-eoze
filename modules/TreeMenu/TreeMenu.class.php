@@ -23,34 +23,34 @@ use Exception, IllegalStateException, IllegalArgumentException;
 class TreeMenu extends Module implements HasMenuActions {
 
 	protected $defaultExecutor = 'json';
-	
+
 	private $actionProvider;
-	
+
 	protected function setPrivateState(&$vals) {
 		$this->actionProvider = $vals['actionProvider'];
 		unset($vals['actionProvider']);
 		parent::setPrivateState($vals);
 	}
-	
+
 	public function getMenuFamilies() {
-		
+
 		$cacheKey = array($this, 'families');
-		
+
 		$useCache = $this->getConfig()->get('useCache', false);
 
 		if ($useCache 
 				&& null !== $r = Cache::getCachedData($cacheKey)) {
 			return $r;
 		}
-		
+
 		$r = array();
 		foreach (ModuleManager::listModules() as $module) {
 			if ($module instanceof HasMenuActions
 					&& !$module->isAbstract()
 					&& !$module->isDisabled()) {
-				
+
 				$family = $module->getActionProvider()->getFamily();
-				
+
 				if ($family !== null && $family !== false) {
 					$r[$family->getId()] = $family;
 				}
@@ -61,14 +61,14 @@ class TreeMenu extends Module implements HasMenuActions {
 		if ($useCache) {
 			Cache::cacheData($cacheKey, $r);
 		}
-		
+
 		return $r;
 	}
-	
+
 	public function invalidateCache() {
 		Cache::clearCachedData(array($this, 'families'));
 	}
-	
+
 	/**
 	 * @param string $id
 	 * @return MenuFamily
@@ -81,7 +81,7 @@ class TreeMenu extends Module implements HasMenuActions {
 		}
 		return $families[$id];
 	}
-	
+
 	/**
 	 * @param string $action
 	 * @return MenuAction
@@ -100,27 +100,27 @@ class TreeMenu extends Module implements HasMenuActions {
 			throw new MissingMenuActionException("Family '$family' has no action '$action'");
 		}
 	}
-	
+
 	public function createDefaultMenu() {
-		
+
 		UserSession::requireLoggedIn();
 		$userId = UserSession::getUser()->id;
 		$items = $this->getConfig()->get('defaultMenu');
-		
+
 		$nodes = $this->createMenuItems($items);
-		
+
 		foreach ($nodes as $node) {
 			$node->save();
 		}
-		
+
 		return $nodes;
 	}
-	
+
 	private function createMenuItem($name, $config) {
-		
+
 		UserSession::requireLoggedIn();
 		$userId = UserSession::getUser()->id;
-		
+
 		$children = null;
 		if (is_array($config)) {
 			if (!Arrays::isAssoc($config)) {
@@ -130,14 +130,14 @@ class TreeMenu extends Module implements HasMenuActions {
 				$children = $this->createMenuItems($config['children']);
 				unset($config['children']);
 			}
-			
+
 			$overrides = Arrays::applyIf($config, array(
 				'id' => null,
 				'label' => $name,
 				'Children' => $children,
 				'users_id' => $userId,
 			));
-			
+
 			if (isset($config['action'])) {
 				try {
 					return $this->getMenuAction($config['action'])->createMenuNode($overrides);
@@ -149,7 +149,7 @@ class TreeMenu extends Module implements HasMenuActions {
 			} else {
 				return MenuNode::create($overrides);
 			}
-		
+
 		} else if (is_string($config)) {
 			try {
 				return $this->getMenuAction($config)->createMenuNode(array(
@@ -159,7 +159,7 @@ class TreeMenu extends Module implements HasMenuActions {
 			} catch (MissingMenuElementException $ex) {
 				Logger::get($this)->warn('Missing menu item is ignored: {}', $ex->getMessage());
 			}
-		
+
 		} else if ($config === null) {
 			if (!$name) {
 				Logger::get($this)->warn('Empty menu configuration item is ignored');
@@ -171,13 +171,13 @@ class TreeMenu extends Module implements HasMenuActions {
 				));
 			}
 		}
-//		
+//
 //		return Arrays::applyIf($config, array(
 //			'label' => $name,
 //			'children' => $children,
 //		));
 	}
-	
+
 	private function createMenuItems($items) {
 		if (is_array($items)) {
 			$r = array();
@@ -198,22 +198,22 @@ class TreeMenu extends Module implements HasMenuActions {
 					}
 				}
 			}
-			
+
 			// order
 			foreach ($r as $i => $node) {
 				$node->order = $i;
 			}
-			
+
 			return $r;
 		}
-		
+
 		throw new IllegalStateException('Invalid configuration item in menu.yml');
 	}
-	
+
 	public function isAuthorized(HasAccessLevel $item) {
 		return true;
 	}
-	
+
 	public function getActionProvider() {
 		if (!$this->actionProvider) {
 			$this->actionProvider = new ActionProvider\ModuleProvider($this);
@@ -234,17 +234,17 @@ class TreeMenu extends Module implements HasMenuActions {
 			$this->getConfig()->get('widget', null)
 		);
 	}
-	
+
 }
 
 class MissingMenuElementException extends Exception {
-	
+
 }
 
 class MissingMenuFamilyException extends MissingMenuElementException {
-	
+
 }
 
 class MissingMenuActionException extends MissingMenuElementException {
-	
+
 }

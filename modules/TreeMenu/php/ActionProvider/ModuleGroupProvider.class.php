@@ -8,7 +8,7 @@ use eoko\modules\TreeMenu\HasMenuActions;
 use eoko\util\Arrays;
 
 class ModuleGroupProvider extends ModuleProvider {
-	
+
 	/** @var array[Module] */
 	private $children;
 	/** @var Module */
@@ -24,28 +24,28 @@ class ModuleGroupProvider extends ModuleProvider {
 			}
 		}
 	}
-	
+
 //	public function getIconCls($action = null) {
 //		$r = parent::getIconCls($action);
 //	}
-	
+
 	protected function buildMenuActionsData() {
 
 		$moduleName = $this->mainModule->getName();
 		$familyId = $this->getMenuFamilyId();
 		$actions = parent::buildMenuActionsData();
-		
+
 		foreach ($this->children as $child) {
-			
+
 			$childName = $child->getName();
 			$ap = $child->getActionProvider();
 			$childActions = $ap->buildMenuActionsData();
 			$childFamilyId = $ap->getSubFamilyId();
-			
+
 			if (isset($childActions['open'])) {
 				$childActions['open']['command'] = "@$moduleName#open(,$childName)";
 			}
-			
+
 			foreach ($childActions as $action) {
 				$oldId = $action['id'];
 				Arrays::apply($action, array(
@@ -56,9 +56,9 @@ class ModuleGroupProvider extends ModuleProvider {
 				$actions[$id] = $action;
 			}
 		}
-		
+
 		return $actions;
-		
+
 		dump($actions);
 		dump(parent::buildMenuActionsData());
 	}

@@ -9,7 +9,7 @@ namespace eoze\acl;
  * @since 20 oct. 2011
  */
 interface AclManager {
-	
+
 	function isAllowed($user, $role);
 
 	/**
@@ -17,13 +17,13 @@ interface AclManager {
 	 * @return Role
 	 */
 	function getRole($rid, $require = false);
-	
+
 	/**
 	 * Loads the User for the given id.
 	 * @return User
 	 */
 	function getUser($uid, $require = false);
-	
+
 	/**
 	 * Loads the Group for the given id.
 	 * @return Group
@@ -39,24 +39,24 @@ interface AclManager {
 	 * @return User
 	 */
 	function user($uid);
-	
+
 	/**
 	 * @return Group
 	 */
 	function group($gid);
-	
+
 	/**
 	 * Creates a new Role in this Manager.
 	 * @return Role the new Role
 	 */
 	function newRole($rid = null, $disablable = false);
-	
+
 	/**
 	 * Creates a new Group in this Manager.
 	 * @return Group the new Group
 	 */
 	function newGroup($gid = null, $disablable = false);
-	
+
 	/**
 	 * Creates a new User in this Manager.
 	 * @return User the new User
