@@ -66,7 +66,7 @@ describe('Eoze.Ext.data.Types', function () {
 		expect(o.get('test').ignoreTime).toBe(true);
 		expect(o.get('test2')).toBe(null);
 
-		o.set('test2', '1980-07-22')
+		o.set('test2', '1980-07-22');
 		expect(o.get('test2').ignoreTime).toBe(true);
 	});
 });
