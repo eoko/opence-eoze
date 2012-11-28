@@ -60,7 +60,7 @@ class ConfigManager {
 		} else {
 			$this->altDelimiters = null;
 		}
-		
+
 		$this->loadData();
 
 //		Logger::get($this)->stopTimer('LOAD');
@@ -206,7 +206,7 @@ class ConfigManager {
 		}
 		$trimmedPath = rtrim($path, '/\\');
 		$path = $trimmedPath . DIRECTORY_SEPARATOR;
-		if ($this->isLocalPath($path)) {
+		if ($this->isLocalPath($trimmedPath)) {
 			$this->localConfigPaths[] = $path;
 		} else {
 			$this->configPaths[] = $path;
@@ -257,14 +257,14 @@ class ConfigManager {
 				foreach ($this->listConfigFiles() as $path => $files) {
 					foreach ($files as $file) {
 						if (filemtime("$path$file") > $mtime) {
-							Logger::get($this)->info('Discarding config cache (modified: {})', "$path$file");
+//							Logger::get($this)->info('Discarding config cache (modified: {})', "$path$file");
 							return false;
 						}
 					}
 				}
 			}
 
-			Logger::get($this)->debug('Using config cache last updated on {}', date('Y-m-d H:m:s', $mtime));
+//			Logger::get($this)->debug('Using config cache last updated on {}', date('Y-m-d H:m:s', $mtime));
 			/** @noinspection PhpIncludeInspection */
 			include $cache;
 			return true;
@@ -380,10 +380,10 @@ class ConfigManager {
 	private function addConfigFile($parentNodePath, $filename) {
 
 		// Read YAML content of the file
-		$yml = YmlReader::loadFile($filename);
-		if (isset($yml[NS_PROP])) {
-			$nodePath = $this->cleanNodePath($yml[NS_PROP]);
-			unset($yml[NS_PROP]);
+		$content = YmlReader::loadFile($filename);
+		if (isset($content[NS_PROP])) {
+			$nodePath = $this->cleanNodePath($content[NS_PROP]);
+			unset($content[NS_PROP]);
 			if (!self::isPathAbsolute($nodePath)) {
 				$nodePath = rtrim($parentNodePath, $this->delimiter) . $this->delimiter . $nodePath;
 			}
@@ -393,7 +393,7 @@ class ConfigManager {
 
 		// Merge config file content in global config
         try {
-			$this->addContent($nodePath, $yml);
+			$this->addContent($nodePath, $content);
 		} catch (\Exception $ex) {
 			// Add the file name to the exception
 			throw new InvalidConfigurationException($filename, $nodePath,
