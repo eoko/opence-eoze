@@ -24,21 +24,26 @@ class ModuleManager {
 
 	private static $modulesDirectories = null;
 	private static $infoLocked = false;
-	
+
 	private static $instance = null;
 
 	private static $moduleFactories = null;
-	
+
 	private static $modules = null;
 
 	private $getModuleNamespaceRegex;
 
+	/**
+	 * @var bool
+	 */
+	private $useCache = null;
+
 	private function __construct() {
 
 		$this->getModuleNamespaceRegex = '/^' . preg_quote(GET_MODULE_NAMESPACE, '/') . '(.+)$/';
-		
+
 		$this->loadConfig();
-		
+
 		self::$modulesDirectories = array_reverse(self::$modulesDirectories, true);
 		self::$infoLocked = true;
 	}
@@ -53,7 +58,7 @@ class ModuleManager {
 
 	private function loadConfig() {
 		$config = ConfigManager::get(__NAMESPACE__);
-		foreach (array_reverse($config['locations']) as $dirName => $location) {
+		foreach ($config['locations'] as $dirName => $location) {
 			self::addModuleLocationInfo($dirName, $location['path'], $location['url'], $location['namespace']);
 		}
 	}
@@ -103,12 +108,12 @@ class ModuleManager {
 		}
 
 		foreach (self::$modulesDirectories as $location) {
-			$location instanceof ModulesDirectory;
+			/** @var ModulesDirectory $location */
 			if ($location->testNamespace($class)) {
 
 				$classPath = substr($class, strlen($location->namespace));
 				$classPath = $location->path . str_replace('\\', DS, $classPath);
-				
+
 				$cp2 = $location->path . 'php' . DS . $classPath;
 				$cp2 = substr($class, strlen($location->namespace));
 				$cp2 = str_replace('\\', '/', $cp2);
@@ -118,7 +123,7 @@ class ModuleManager {
 				} else {
 					$cp2 = false;
 				}
-				
+
 				if (file_exists($path = "$classPath$suffix.php")
 						|| $cp2 && file_exists($path = "$cp2$suffix.php")) {
 					require_once $path;
@@ -161,7 +166,7 @@ class ModuleManager {
 	public static function listModules($onlyWithDir = false) {
 		$self = self::getInstance();
 		$config = ConfigManager::get(__NAMESPACE__);
-		
+
 		$r = array();
 
 		foreach (self::$modulesDirectories as $modulesDir) {
@@ -171,7 +176,7 @@ class ModuleManager {
 				$r[$module->getName()] = $module;
 			}
 		}
-		
+
 		// Children modules
 		foreach ($r as $module) {
 			if ($module instanceof HasChildrenModules) {
@@ -201,7 +206,7 @@ class ModuleManager {
 		if (self::$instance) return self::$instance;
 		else return self::createInstance();
 	}
-	
+
 	/**
 	 * Gets the module with the given name. Module are searched in each
 	 * registered {@link ModulesLocation}, starting from the application level
@@ -259,9 +264,9 @@ class ModuleManager {
 	 * @return Module
 	 */
 	public static function getModule($name, $required = true) {
-		
+
 		$me = self::getInstance();
-		
+
 		if ($name instanceof Module) {
 			$module = $name;
 		} else if (isset(self::$modules[$name])) {
@@ -271,7 +276,7 @@ class ModuleManager {
 			// dependancy pile by itself
 			return self::$modules[$name] = $me->doGetModule($name, $required);
 		}
-		
+
 		// save in cache dependancy pile, if needed
 		if ($me->cachePile !== null
 			&& $module 
@@ -280,31 +285,33 @@ class ModuleManager {
 		) {
 			$me->cachePile[] = $cacheFile;
 		}
-		
+
 		return $module;
 	}
-	
+
 	private function useCache() {
-		return true;
-//		return false;
+		if (!isset($this->useCache)) {
+			$this->useCache = ConfigManager::get($this, 'cache', false);
+		}
+		return $this->useCache;
 	}
-	
+
 	private $cachePile = null;
-	
+
 	public function makeCacheKey($moduleName) {
 		return array($this, "cachedModule_$moduleName");
 	}
-	
+
 	private function doGetModule($name, $required) {
-		
+
 		$cacheKey = $this->makeCacheKey($name);
-		
+
 		// try the cache
 		if ($this->useCache()
 				&& (null !== $module = Cache::getCachedData($cacheKey))) {
 			return $module;
 		}
-		
+
 		if ($this->useCache() && $this->cachePile === null) {
 			$this->cachePile = array();
 			$rootCall = true;
@@ -314,14 +321,14 @@ class ModuleManager {
 
 		$deps = array();
 		$module = $this->doInstantiateModule($name, $required, $deps);
-		
+
 		// module that don't support caching will set cacheDeps to FALSE
 		if ($module && $this->useCache() && $deps !== false) {
-			
+
 			// The module cache doesn't need to monitor itself, so we use the
 			// current cache pile
 			$monitors = array_merge($this->cachePile, $module->getCacheMonitorFiles(true));
-			
+
 			// 1. The module config needs to depend on the module cache file
 			// 2. The dependancies needs to be kept in the cache!!!
 			// => That's why we must use Cache::getCacheFile to add the cacheFile
@@ -330,12 +337,12 @@ class ModuleManager {
 				$this->cachePile[] = $cacheFile;
 			}
 			$module->setCacheDependencies($this->cachePile);
-			
+
 			Cache::monitorFiles($cacheKey, $monitors);
 			Cache::cacheObject($cacheKey, $module, $deps);
 			// the cachePile has already been updated
 		}
-		
+
 		if ($rootCall) {
 			$this->cachePile = null;
 		}
@@ -356,7 +363,7 @@ class ModuleManager {
 		if (strstr($name, '\\')) {
 			throw new \Exception('DEPRECATED');
 		}
-		
+
 		// try to delegate
 		if (self::$moduleFactories) foreach (self::$moduleFactories as $factory) {
 			if (null !== $module = $factory->generateModule($name, $cacheDeps)) {
@@ -375,7 +382,7 @@ class ModuleManager {
 		if ($required) throw new MissingModuleException($name);
 		else return null;
 	}
-	
+
 	/**
 	 * List all directories where modules can possibly be declared.
 	 * @return string[]
@@ -383,7 +390,7 @@ class ModuleManager {
 	public function listModuleDirectories() {
 		return self::$modulesDirectories;
 	}
-	
+
 	private static function getModuleConfig($moduleName) {
 		foreach (self::$modulesDirectories as $dir) {
 			$location = ModuleLocation::create($dir, $moduleName);
@@ -410,7 +417,7 @@ class ModuleManager {
 
 		$location = ModuleLocation::create($dir, $name);
 		$config = $location->loadConfig();
-		
+
 		if ($location->isDisabled()) {
 			return null;
 		}
@@ -454,7 +461,7 @@ class ModuleManager {
 
 	private function createModule($name, $class) {
 		return new $class(ModuleLocation::create($this->getTopLevelDirectory(), $name));
-		
+
 		// if this is used, that may break the possibility to find parent Modules
 		// configuration files, during configuration inheritance processing,
 		// in Module->getConfig (eg. for SMInstance autogenerated child, the
@@ -487,7 +494,7 @@ class ModuleManager {
 		// 
 		return new $class(ModuleLocation::createTopLevelLocation($this->getTopLevelDirectory(), $name));
 	}
-	
+
 	/**
 	 * Generates a default module class and instanciates it, according to its
 	 * configuration file "class" item.
@@ -507,17 +514,17 @@ class ModuleManager {
 	 */
 	public function createDefaultModule(ModuleLocation $location, $config, 
 			$setExtraConfig = true, &$cacheDeps = null) {
-		
+
 		$config = Config::createForNode($config, $location->moduleName);
 		if (isset($config[$location->moduleName])) $config = $config->node($location->moduleName, true);
-		
+
 		if (!isset($config['class'])) {
 			// this is a base module, in the vertical hierarchy (direct descendant
 			// of Module) -- it cannot be created from config, let's return false
 			// to let the ModuleManager find and instanciate the module class
 			return false;
 		}
-		
+
 		$class = $location->namespace . $location->moduleName;
 
 		// Generate the module class, if needed
@@ -529,13 +536,13 @@ class ModuleManager {
 				$cacheDeps[] = $baseModule->generateDefaultModuleClass($class, $config);
 			}
 		}
-		
+
 		// create an instance of the newly created class
 		$module = $this->createModule($location->moduleName, $class);
 		if ($setExtraConfig) $module->setExtraConfig($config);
 		return $module;
 	}
-	
+
 	private function inNamespace($code) {
 		$ns = __NAMESPACE__;
 		return "namespace $ns { $code }";
