@@ -29,7 +29,8 @@ Ext4.define('Eoze.Ext.data.Types', {
 	 */
 	,DAYDATE: {
 		convert: function(v, data) {
-			var date = this.DATE.convert(v, data);
+			var DATE = Ext4.data.Types.DATE;
+			var date = DATE.convert(v, data);
 			if (date) {
 				date.ignoreTime = true;
 			}
