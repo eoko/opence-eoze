@@ -29,7 +29,6 @@ Ext4.define('Eoze.Ext.data.Types', {
 	 */
 	,DAYDATE: {
 		convert: function(v, data) {
-			debugger
 			var date = this.DATE.convert(v, data);
 			if (date) {
 				date.ignoreTime = true;
