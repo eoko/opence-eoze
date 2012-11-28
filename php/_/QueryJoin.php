@@ -24,7 +24,7 @@ abstract class QueryJoin implements QueryAliasable {
 	protected $foreignDBTableName;
 	public $foreignTableAlias;
 	protected $qForeignTableAlias;
-	
+
 	/**
 	 * @var ModelTable
 	 */
@@ -35,7 +35,7 @@ abstract class QueryJoin implements QueryAliasable {
 
 	protected $where = array();
 	protected $bindings = array();
-	
+
 	public function __toString() {
 		return get_class($this)
 				. ": $this->leftTable AS $this->leftTableAlias -> $this->foreignTable AS $this->foreignTableAlias"
@@ -107,9 +107,9 @@ abstract class QueryJoin implements QueryAliasable {
 		$this->leftField = $leftField;
 		$this->rightField = $rightField;
 	}
-	
+
 	abstract protected function buildJoin();
-	
+
 	public function buildSql(&$bindings) {
 		if ($this->bindings !== null) {
 			$bindings = array_merge($bindings, $this->bindings);
@@ -147,7 +147,7 @@ abstract class QueryJoin implements QueryAliasable {
 			foreach ($field_s as $k => $fieldName) {
 
 				$fieldAlias = is_string($k) ? $k : null;
-				
+
 				if ($this->foreignTable->hasRelation($fieldName)) {
 					// TODO rx select name... or other? (cf. ModelTable::LOAD_ID)
 					$this->foreignTable->getRelationInfo($fieldName)->selectName(
@@ -195,7 +195,7 @@ abstract class QueryJoin implements QueryAliasable {
 		}
 		return implode(', ', $this->select);
 	}
-	
+
 	private function getQualifiedNameFor(QueryAliasable $aliasable, ModelTableProxy $table, 
 			$tableAlias, $field) {
 		// This implentation is copy-pasted from ModeTableQuery. If something
@@ -232,7 +232,7 @@ abstract class QueryJoin implements QueryAliasable {
 			throw new Exception("No field '$field' in $table");
 		}
 	}
-	
+
 	public function getQualifiedName($field, $side = QueryJoin::TABLE_RIGHT) {
 		switch ($side) {
 			case self::TABLE_LEFT:
@@ -284,7 +284,7 @@ abstract class QueryJoin implements QueryAliasable {
 	public function getQuery() {
 		return $this->query;
 	}
-	
+
 	/**
 	 * Get the db name of the foreign table.
 	 * @return string
@@ -292,7 +292,7 @@ abstract class QueryJoin implements QueryAliasable {
 	public function getForeignTableName() {
 		return $this->foreignDBTableName;
 	}
-	
+
 	/**
 	 * Gets the foreign table alias.
 	 * @return string
@@ -313,14 +313,14 @@ class QueryJoinAliasable implements QueryAliasable {
 	 * @var QueryJoin
 	 */
 	private $join;
-	
+
 	private $side;
-	
+
 	function __construct($join, $side) {
 		$this->join = $join;
 		$this->side = $side;
 	}
-	
+
 	public function __toString() {
 		$side;
 		switch ($this->side) {
@@ -331,7 +331,7 @@ class QueryJoinAliasable implements QueryAliasable {
 		}
 		return "Aliasable($side) for: $this->join";
 	}
-	
+
 	public function convertQualifiedNames($preSql, &$bindings) {
 		return $this->join->convertQualifiedNames($preSql, $bindings);
 	}

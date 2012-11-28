@@ -12,7 +12,7 @@ namespace eoko\modules\Kepler;
  * @since 30 nov. 2011
  */
 interface Observable {
-	
+
 	/**
 	 * Gets the name that will be used as the class name in the Kepler event
 	 * system.

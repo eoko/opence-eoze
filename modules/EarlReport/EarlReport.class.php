@@ -16,31 +16,31 @@ use RuntimeException;
  * @since 26 janv. 2012
  */
 class EarlReport extends Module {
-	
+
 	private static $classLoaderRegistered = false;
-	
+
 	/**
 	 * @var EarlReport
 	 */
 	private $earl;
-	
+
 	public function createExecutor($type, $action = null, Request $request = null, $internal = false) {
 		throw new RuntimeException('EarlReport module is not executable.');
 	}
-	
+
 	private function registerClassLoader() {
 		if (!self::$classLoaderRegistered) {
-			
+
 			$this->getClassLoader()->addIncludePath(__DIR__ . '/lib');
-			
+
 			require_once __DIR__ .'/lib/EarlReport.php';
-			
+
 			self::$classLoaderRegistered = true;
 		}
 	}
-	
+
 	private $customEarlClassesCache = null;
-	
+
 	/**
 	 * Creates a new Earl (or a subclass) object.
 	 * 
@@ -51,7 +51,7 @@ class EarlReport extends Module {
 	 * @return Earl
 	 */
 	public function getEarl($class = null) {
-		
+
 		// Default class
 		if ($class === null) {
 			if (!$this->earl) {
@@ -62,7 +62,7 @@ class EarlReport extends Module {
 			}
 			return $this->earl;
 		}
-		
+
 		// Creates with a custom class
 		else {
 			if (!isset($this->customEarlClassesCache[$class])) {
@@ -74,18 +74,18 @@ class EarlReport extends Module {
 			return $this->customEarlClassesCache[$class];
 		}
 	}
-	
+
 //	protected function configureEarl(Earl $earl) {
 //		$config = $this->getConfig();
-//		
+//
 //		$earl->setSofficeCommand($config->get('soffice'))
 //				->setUnoconvCommand($config->get('unoconv'))
 //				->setLogger(new LoggerProxy($earl));
-//				
+//
 //		if (!$earl->checkDependencies()) {
 //			throw new RuntimeException('Missing dependency for EarlReport.');
 //		}
-//		
+//
 //		$earl->getContext()
 //				->setDateFormat($config->get('dateFormat'))
 //				->setDateTimeFormat($config->get('dateTimeFormat'));

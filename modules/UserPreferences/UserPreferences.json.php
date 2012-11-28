@@ -14,7 +14,7 @@ use UserSession;
  * @since 5 sept. 2012
  */
 class Json extends JsonExecutor {
-	
+
 	/**
 	 * @return ModelTable
 	 */
@@ -23,9 +23,9 @@ class Json extends JsonExecutor {
 		$tableName = $modelName . 'Table';
 		return ModelTable::getTable($tableName);
 	}
-	
+
 	public function getUserPreferences() {
-		
+
 		UserSession::requireLoggedIn();
 
 		$row = $this->getTable()->createQuery()
@@ -34,26 +34,26 @@ class Json extends JsonExecutor {
 			->executeSelectFirst();
 
 		$this->preferences = $row ? $row['json_preferences'] : null;
-		
+
 		return true;
 	}
-	
+
 	public function saveUserPreferences() {
-		
+
 		$userId = UserSession::getUserId();
 		$table = $this->getTable();
 		$record = $table->findOneWhere('user_id = ?', $userId);
-		
+
 		if (!$record) {
 			$record = $table->createModel(array(
 				'user_id' => $userId,
 			));
 		}
-		
+
 		$record->setJsonPreferences($this->request->req('jsonPreferences'));
 
 		$record->save();
-		
+
 		return true;
 	}
 }

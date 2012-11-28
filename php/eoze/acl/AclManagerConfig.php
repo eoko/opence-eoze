@@ -13,8 +13,8 @@ use eoze\util\ConfigObject;
 class AclManagerConfig extends ConfigObject {
 
 	public $disablableRolesDefault = true;
-	
+
 	public $disablableGroupsDefault = true;
-	
+
 	public $disablableUserDefault = true;
 }

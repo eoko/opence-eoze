@@ -8,15 +8,15 @@ use UserSession;
 use eoko\database\Database;
 
 class Json extends JsonExecutor {
-	
+
 	public function loadUserMenu() {
-		
+
 		$finder = MenuNodeTable::find('`users_id`=?', $this->getUserId());
 		$finder->query
 				->orderBy('parent__menu_nodes_id')
 				->thenOrderBy('order');
 		$nodes = $finder->execute();
-		
+
 		if (!$nodes->count()) {
 			$nodes = $this->createDefaultMenu();
 		} else {
@@ -24,7 +24,7 @@ class Json extends JsonExecutor {
 			// the query
 			$nodes = $nodes->toArray();
 		}
-		
+
 		$nodesById = array();
 		$nodesChildren = array();
 		foreach ($nodes as $node) {
@@ -52,12 +52,12 @@ class Json extends JsonExecutor {
 				$data[] = $node->getData();
 			}
 		}
-		
+
 		$this->data = $data;
-		
+
 		return true;
 	}
-	
+
 	private function createDefaultMenu() {
 		$db = Database::getDefaultConnection();
 		$db->beginTransaction();
@@ -70,27 +70,27 @@ class Json extends JsonExecutor {
 			throw $ex;
 		}
 	}
-	
+
 	private function doCreateDefaultMenu() {
-		
+
 		$defaultMenuUserId = $this->getModule()->getConfig()->getValue('defaultMenuUserId');
 		$userId = $this->getUserId();
-		
+
 		if ($defaultMenuUserId === null || $userId == $defaultMenuUserId) {
 			return $this->getModule()->createDefaultMenu();
 		}
-		
+
 		$finder = MenuNodeTable::find('`users_id`=?', $defaultMenuUserId);
 		$finder->query
 				->orderBy('parent__menu_nodes_id')
 				->thenOrderBy('order');
-		
+
 		$nodes = $finder->execute()->toArray();
-		
+
 		if (!$nodes) {
 			return $this->getModule()->createDefaultMenu();
 		}
-		
+
 		$lookup = array();
 		foreach ($nodes as $node) {
 			$lookup[$node->getId()] = $node;
@@ -105,7 +105,7 @@ class Json extends JsonExecutor {
 				$children[] = $node;
 			}
 		}
-		
+
 		foreach ($children as $node) {
 			$node instanceof MenuNode;
 			if (isset($lookup[$node->getParentMenuNodesId()])) {
@@ -113,10 +113,10 @@ class Json extends JsonExecutor {
 				$node->save();
 			}
 		}
-		
+
 		return $nodes;
 	}
-	
+
 	public function getAvailableActions() {
 		$module = $this->getModule();
 		$families = array();
@@ -174,7 +174,7 @@ class Json extends JsonExecutor {
 		} else {
 			$this->childrenIds = array();
 		}
-		
+
 //		dump($this->request->toArray());
 
 		if (isset($data['root']) && $data['root']) {
@@ -189,16 +189,16 @@ class Json extends JsonExecutor {
 			$node->users_id = $this->getUserId();
 			//dump("$node");
 		}
-		
+
 		$node->save();
 
 		return $node->id;
 	}
-	
+
 	private function getIconFolderPath() {
 		return EOZE_PATH . 'images' . DS . 'icons';
 	}
-	
+
 	public function listIcons() {
 		$iconProvider = $this->getModule()->getConfig()->get('iconProvider');
 		if (!$iconProvider) {
@@ -206,11 +206,11 @@ class Json extends JsonExecutor {
 		}
 		$this->forward("$iconProvider.json", 'getIconList');
 	}
-	
+
 	public function deleteNode() {
 		return MenuNodeTable::delete($this->request->req('nodeId'));
 	}
-	
+
 	public function clearCache() {
 		$this->getModule()->invalidateCache();
 	}

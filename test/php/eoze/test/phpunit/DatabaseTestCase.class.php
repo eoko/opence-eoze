@@ -19,14 +19,14 @@ abstract class DatabaseTestCase extends PHPUnit_Extensions_Database_TestCase {
 	static private $pdo = null;
 	// only instantiate PHPUnit_Extensions_Database_DB_IDatabaseConnection once per test
 	private $conn = null;
-	
+
     protected function setUp() {
 		// Disable foreign key checks during fixtures loading
 		$this->getConnection()->getConnection()->query('SET FOREIGN_KEY_CHECKS = 0;');
         parent::setUp();
 		$this->getConnection()->getConnection()->query('SET FOREIGN_KEY_CHECKS = 1;');
 	}
-	
+
 	/**
 	 * @return PHPUnit_Extensions_Database_DB_DefaultDatabaseConnection
 	 */
@@ -40,7 +40,7 @@ abstract class DatabaseTestCase extends PHPUnit_Extensions_Database_TestCase {
 
 		return $this->conn;
 	}
-	
+
 	protected function getDataSet() {
 		$class = new \ReflectionClass($this);
 		$file = $class->getFileName();

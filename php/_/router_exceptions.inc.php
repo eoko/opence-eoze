@@ -25,7 +25,7 @@ class OpenceException extends Exception {
 		$this->msg = $message;
 		parent::__construct($debugMessage, null, $previous);
 	}
-	
+
 	/**
 	 * @return OpenceException
 	 */
@@ -131,7 +131,7 @@ class IllegalStateException extends SystemException {
 }
 
 class NullPointerException extends SystemException {
-	
+
 }
 
 // Needed bellow
@@ -247,7 +247,7 @@ interface SqlException {
 class SqlUserException extends UserException implements SqlException {
 
 	public $errorInfo;
-	
+
 	public function __construct($errorInfo, $message, $title, $previous = null) {
 		$this->errorInfo = $errorInfo;
 		parent::__construct($message, $title, null, $previous);
@@ -255,7 +255,7 @@ class SqlUserException extends UserException implements SqlException {
 }
 
 class SqlSystemException extends SystemException implements SqlException {
-	
+
 	public $errorInfo;
 
 	public function __construct($errorInfo, $message = null, $previous = null) {
@@ -306,5 +306,5 @@ class UnimplementedYetException extends UnsupportedOperationException {
 }
 
 class DeprecatedException extends SystemException {
-	
+
 }

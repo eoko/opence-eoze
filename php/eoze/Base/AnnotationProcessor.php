@@ -13,45 +13,45 @@ use ReflectionClass,
  * @since 2 nov. 2011
  */
 class AnnotationProcessor {
-	
+
 	private $classesSetterInjections = array();
-	
+
 	private $classesInjections = array();
-	
+
 	// ReflectionProperty::IS_PUBLIC | ReflectionProperty::IS_PROTECTED
 	// === ReflectionMethod::IS_PUBLIC | ReflectionMethod::IS_PROTECTED
 	private static $filter = 768;
-	
+
 	private static $eozeInjectRegex;
-	
+
 	private static $varRegex;
-	
+
 	private static $paramRegex;
-	
+
 	private static function initRegexes() {
 		if (self::$eozeInjectRegex) {
 			return;
 		}
-		
+
 		$injectTag = '@Eoze:inject';
 		// Those are (roughly) the official regexes from php.net/manual
 		$nsClass = '\\\\?(?P<class>[a-zA-Z_\x7f-\xff][\\\\a-zA-Z0-9_\x7f-\xff]*)';
 		$variable  = '[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*';
-		
+
 		// doc line start
 		$start = '/^[\s*]*';
-		
+
 		self::$eozeInjectRegex = $start . "$injectTag(?:\s*$|\s+$nsClass)/m";
-		
+
 		self::$varRegex        = $start . "@var\s+$nsClass/m";
-		
+
 		self::$paramRegex      = $start . "@param\s+(?:$nsClass\s+)?\\$(?P<name>$variable)/m";
 	}
-	
+
 	public function __construct() {
 		self::initRegexes();
 	}
-	
+
 	public static function parsePropertyDocCommentInjections($doc) {
 		if ($doc instanceof ReflectionProperty) {
 			$doc = $doc->getDocComment();
@@ -68,7 +68,7 @@ class AnnotationProcessor {
 			return null;
 		}
 	}
-	
+
 	public function parsePropertyInjections($class) {
 		if (!isset($this->classesInjections[$class])) {
 			$reflectionClass = new ReflectionClass($class);
@@ -83,7 +83,7 @@ class AnnotationProcessor {
 		}
 		return $this->classesInjections[$class] ? $this->classesInjections[$class] : null;
 	}
-	
+
 //	public static function parseSetterDocCommentInjections($doc) {
 //		if ($doc instanceof ReflectionMethod) {
 //			$doc = $doc->getDocComment();
@@ -100,7 +100,7 @@ class AnnotationProcessor {
 //			return null;
 //		}
 //	}
-	
+
 	public static function parseParamTags($doc) {
 		if (preg_match_all(self::$paramRegex, $doc, $matches, PREG_SET_ORDER)) {
 			$params = null;
@@ -113,7 +113,7 @@ class AnnotationProcessor {
 			return null;
 		}
 	}
-	
+
 	public static function parseMethodParamInjection(ReflectionMethod $method) {
 		$len = $method->getNumberOfParameters();
 		if ($len === 0) {
@@ -172,7 +172,7 @@ class AnnotationProcessor {
 			return null;
 		}
 	}
-	
+
 	public function parseSetterInjections($class) {
 		if (!isset($this->classesSetterInjections[$class])) {
 			$reflectionClass = new ReflectionClass($class);
@@ -192,5 +192,5 @@ class AnnotationProcessor {
 		return $this->classesSetterInjections[$class] 
 				? $this->classesSetterInjections[$class] : null;
 	}
-	
+
 }

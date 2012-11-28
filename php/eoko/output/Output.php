@@ -11,18 +11,18 @@ use eoko\output\Adapter\EchoAdapter;
  * @since 24 nov. 2011
  */
 class Output {
-	
+
 	private function __construct() {}
-	
+
 	/**
 	 * @var Adapter
 	 */
 	private static $adapter;
-	
+
 	public static function out($string) {
 		self::$adapter->out($string);
 	}
-	
+
 	public static function setAdapter(Adapter $adapter) {
 		self::$adapter = $adapter;
 	}

@@ -9,8 +9,8 @@ namespace eoze\æcl;
  * @since 20 oct. 2011
  */
 class PasswordHelper {
-	
+
 	private function __construct() {}
-	
+
 //	public static function 
 }

@@ -13,11 +13,11 @@ class Cache {
 
 	public static $mode = 0777;
 	public static $debugInfo = false;
-	
+
 	private static $useValidityMonitors = true;
 
 	private function __construct() {}
-	
+
 	public static function getClassName() {
 		return get_called_class();
 	}
@@ -39,7 +39,7 @@ class Cache {
 		if (!file_exists($nsPath)) mkdir($nsPath, self::$mode, true);
 		return $nsPath . DS;
 	}
-	
+
 	private static function getCacheFileInNamespace($namespace, $filename) {
 		$nsPath = self::createNamespaceDir($namespace);
 		if (!is_writeable($nsPath)) {
@@ -64,7 +64,7 @@ class Cache {
 		if ($onlyIfExists && file_exists($path)) return $path;
 		else return false;
 	}
-	
+
 	private static function parseClassAndKey(&$cacheKey, &$namespace, &$key) {
 		if (is_array($cacheKey)) {
 			list($cacheKey, $key) = $cacheKey;
@@ -98,7 +98,7 @@ class Cache {
 		}
 		return $key;
 	}
-	
+
 	private static function appendKey(&$cacheKey, $key) {
 		if (is_array($cacheKey)) {
 			$cacheKey = array(
@@ -114,9 +114,9 @@ class Cache {
 	}
 
 	public static function cacheData($class, $data, $version = null, $requires = null) {
-		
+
 		Logger::get(Cache::getClassName())->warn('cacheData() is deprecated');
-		
+
 		self::parseClassAndKey($class, $namespace, $key);
 
 		if ($version === null) {
@@ -135,16 +135,16 @@ class Cache {
 			'<?php return ' . var_export($data, true) . ';'
 		);
 	}
-	
+
 	public static function cacheObject($cacheKey, $object, $extraCode = null) {
-		
+
 		$debug = '';
-		
+
 		if (Logger::get(get_called_class())->isActive(Logger::DEBUG, false)) {
 			$debug = print_r($object, true);
 			$debug = "\n\n/* === Debug Informations ===\n\n$debug\n*/";
 		}
-		
+
 		return self::cacheDataRaw(
 			$cacheKey,
 			'return unserialize(\'' 
@@ -172,13 +172,13 @@ class Cache {
 			return null;
 		}
 	}
-	
+
 	public static function cacheDataRaw($cacheKey, $code, $extraCode = null) {
-		
+
 		self::parseClassAndKey($cacheKey, $namespace, $key);
-		
+
 		$filenameBase = "$cacheKey.DataCache" . (isset($key) ? ".$key" : '');
-		
+
 		if ($extraCode) {
 			$depFileName = "$filenameBase.inc.php";
 			// cache dep file
@@ -199,18 +199,18 @@ class Cache {
 			$code = PHP_EOL . "require dirname(__FILE__) . DS . '$depFileName';" 
 				. PHP_EOL . $code;
 		}
-		
+
 		return self::cachePhpFile(
 			$namespace,
 			"$filenameBase.php",
 			"<?php $code"
 		);
 	}
-	
+
 	public static function cacheDataEx($cacheKey, $data, $extraCode) {
 		self::cacheDataRaw($cacheKey, 'return ' . var_export($data, true) . ';', $extraCode);
 	}
-	
+
 	/**
 	 * Set the validity of the cache node specified by $cacheKey dependant on
 	 * modifications of the files in $files.
@@ -224,12 +224,12 @@ class Cache {
 			self::cacheObject($cacheKey, $validator);
 		}
 	}
-	
+
 	public static function getCachedData($cacheKey) {
-		
+
 		self::parseClassAndKey($cacheKey, $namespace, $key);
 		$baseFilename = $cacheKey . '.DataCache' . (isset($key) ? ".$key" : '');
-		
+
 		if (self::$useValidityMonitors) {
 			$file = self::getPhpFilePath(
 				$namespace, 
@@ -247,24 +247,24 @@ class Cache {
 				}
 			}
 		}
-		
+
 		$file = self::getPhpFilePath(
 			$namespace, 
 			$baseFilename . '.php'
 		);
-		
+
 		if ($file) return require $file;
 		else return null;
 	}
-	
+
 	public static function clearCachedData($cacheKey) {
 		self::parseClassAndKey($cacheKey, $namespace, $key);
 		return self::doClearCachedData($cacheKey, $namespace, $key);
 	}
-	
+
 	private static function doClearCachedData($cacheKey, $namespace, $key) {
 		$base = $cacheKey . '.DataCache' . (isset($key) ? ".$key" : '');
-		
+
 		foreach (array(
 			'',
 			'.inc',

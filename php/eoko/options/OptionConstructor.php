@@ -3,7 +3,7 @@
 namespace eoko\options;
 
 class OptionConstructor {
-	
+
 	public function __construct($options = null) {
 		if ($options) {
 			foreach ($options as $k => $v) {

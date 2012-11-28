@@ -13,12 +13,12 @@ use Zend\Mvc\Router\RouteStackInterface as Router;
  * @since 3 août 2012
  */
 class AbstractRouter {
-	
+
 	/**
 	 * @var RequestData
 	 */
 	protected $requestData;
-	
+
 	/**
 	 * @var RouteMatch
 	 */
@@ -28,7 +28,7 @@ class AbstractRouter {
 	 * @var Router
 	 */
 	protected $router;
-	
+
 	public function __construct(RequestData $requestData, Router $router, RouteMatch $routeMatch) {
 		$this->requestData = $requestData;
 		$this->router = $router;

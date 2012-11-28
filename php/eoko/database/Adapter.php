@@ -5,7 +5,7 @@ namespace eoko\database;
 use eoko\util\collection\Map;
 
 interface Adapter {
-	
+
 	function __construct(Map $config);
 
 	/** @return PDO */
@@ -40,7 +40,7 @@ interface Adapter {
 	 * @return Map
 	 */
 	function getConfig();
-	
+
 	/**
 	 * Get a {@link Dumper} that can create backups of the database, and load 
 	 * them back. Adapaters are allowed to return NULL, meaning they don't know 

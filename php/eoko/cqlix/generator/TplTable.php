@@ -5,7 +5,7 @@ namespace eoko\cqlix\generator;
 use UnsupportedOperationException, IllegalArgumentException, IllegalStateException;
 
 class TplTable implements ConfigConstants {
-	
+
 	public $dbTable;
 	public $tableName;
 	public $modelName;
@@ -50,20 +50,20 @@ class TplTable implements ConfigConstants {
 	public function __toString() {
 		return $this->dbTable;
 	}
-	
+
 	private $engineAutomaticCascade = false;
-	
+
 	public function setEngineAutomaticCascade($engineAutomaticCascade) {
 		$this->engineAutomaticCascade = $engineAutomaticCascade;
 	}
-	
+
 	public function isEngineAutomaticCascade() {
 		return $this->engineAutomaticCascade;
 	}
-	
+
 	private $configured = false;
 	private $config = null;
-	
+
 	public function configure($config) {
 
 		if ($this->configured) {
@@ -109,14 +109,14 @@ class TplTable implements ConfigConstants {
 	public function configureRelations() {
 
 		$this->mergeRelations();
-		
+
 		if (!$this->config) return;
 
 		$colConfig;
 		if (isset($this->config[self::CFG_COLUMNS])) {
 			$colConfig = $this->config[self::CFG_COLUMNS];
 		}
-		
+
 		foreach ($this->relations as $name => $relation) {
 			if (isset($this->config['relations'][$name])) {
 				if (isset($colConfig[$relation->referenceField]['relation'])) {
@@ -143,7 +143,7 @@ class TplTable implements ConfigConstants {
 		}
 		return $this->columns[$dbFieldName];
 	}
-	
+
 	/**
 	 *
 	 * @param array $excludedFields The fields used in the returned relations will be
@@ -154,12 +154,12 @@ class TplTable implements ConfigConstants {
 		$relations = array();
 		if (isset($this->config['relations'])) {
 			foreach ($this->config['relations'] as $alias => $relation) {
-				
+
 				if (isset($relation['referenceField'])) { // means that is configured relation
-					
+
 					// exclude reference fields
 					$excludedFields[] = $relation['referenceField'];
-					
+
 					$relations[] = $rel = new TplRelationReferencesOne(
 						$this->dbTable,
 						NameMaker::dbFromModel($relation['target']),
@@ -168,9 +168,9 @@ class TplTable implements ConfigConstants {
 						$relation['referenceField'], 
 						null
 					);
-					
+
 					$rel->reciproqueName = $relation['foreignAlias'];
-					
+
 					if (isset($relation['foreignConfig'])) {
 						$rel->reciproqueConfig = $relation['foreignConfig'];
 					}
@@ -182,7 +182,7 @@ class TplTable implements ConfigConstants {
 		}
 		return $relations;
 	}
-	
+
 	private function addRelation(TplRelation $relation) {
 		if (isset($this->relations[$relation->getName()])) {
 			$prev = $this->relations[$relation->getName()];
@@ -192,7 +192,7 @@ class TplTable implements ConfigConstants {
 			// that this is OK, and implement a real way to handle mirror relation
 			if ($prev->localDBTableName !== $relation->localDBTableName 
 					|| $prev->referenceField !== $relation->referenceField) {
-				
+
 				throw new IllegalStateException(
 					"Relation with name {$relation->getName()} already exist in table "
 					. "$this->tableName (in database: $this->dbTable).\n"
@@ -226,18 +226,18 @@ class TplTable implements ConfigConstants {
 	}
 
 	public function setColumns($fields) {
-		
+
 		if ($this->columns !== null) {
 			throw new IllegalStateException();
 		}
-		
+
 		foreach ($fields as $field) {
 			if (false == $field instanceof TplField) {
 				throw new IllegalArgumentException('Field must implement TplField');
 			}
 			$field->setParentTable($this);
 		}
-		
+
 		$this->columns = $fields;
 	}
 

@@ -14,18 +14,18 @@ use eoze\util\DataStore\Query;
 class ComposableQuery implements Query {
 
 	private $filter;
-	
+
 	private $sorter;
-	
+
 	private $pager;
-	
+
 //	public function options(DataStore $store, &$filter, &$sorter, &$pager) {
 //		$this->setRepository($store);
 //		$filter = $this->filter;
 //		$sorter = $this->sorter;
 //		$pager  = $this->pager;
 //	}
-	
+
 	public function getOptions(DataStore $store) {
 		$this->setRepository($store);
 		return array(
@@ -34,7 +34,7 @@ class ComposableQuery implements Query {
 			self::SORTER => $this->sorter,
 		);
 	}
-	
+
 	protected function setRepository(DataStore $store) {
 		if ($this->filter) {
 			$this->filter->setRepository($store);
@@ -54,7 +54,7 @@ class ComposableQuery implements Query {
 	public function setSorter(Sorter $sorter) {
 		$this->sorter = $sorter;
 	}
-	
+
 	public function addSorter(Sorter $sorter) {
 		if (!$this->sorter) {
 			$this->sorter = $sorter;
@@ -64,11 +64,11 @@ class ComposableQuery implements Query {
 			$this->sorter = new CompositeSorter($this->sorter, $sorter);
 		}
 	}
-	
+
 	public function setFilter(Filter $filter) {
 		$this->filter = $filter;
 	}
-	
+
 	public function addFilter(Filter $filter) {
 		if (!$this->filter) {
 			$this->filter = $filter;
@@ -78,5 +78,5 @@ class ComposableQuery implements Query {
 			$this->filter = new CompositeFilter($this->filter, $filter);
 		}
 	}
-	
+
 }

@@ -11,21 +11,21 @@ use eoko\config\Config;
 use eoko\util\Arrays;
 
 class ModuleProvider implements ActionProvider {
-	
+
 	private $menuFamily = null;
 	private $menuActions = null;
 
 	/** @var Module */
 	private $module = null;
-	
+
 	public function __construct(Module $module) {
 		$this->module = $module;
 	}
-	
+
 	private function getModuleConfig() {
 		return $this->module->getConfig();
 	}
-	
+
 	private function getModuleTitle() {
 		if ($this->module instanceof HasTitle) {
 			return $this->module->getTitle();
@@ -33,11 +33,11 @@ class ModuleProvider implements ActionProvider {
 			return null;
 		}
 	}
-	
+
 	private function getModuleName() {
 		return $this->module->getName();
 	}
-	
+
 	private function getModuleTitleOrName() {
 		if (null !== $r = $this->getModuleTitle()) {
 			return $r;
@@ -45,7 +45,7 @@ class ModuleProvider implements ActionProvider {
 			return $this->getModuleName();
 		}
 	}
-	
+
 	private function getPluginsConfig($key = null) {
 		if (($config = $this->getModuleConfig()->get('extra'))
 				|| ($config = $this->getModuleConfig()->get('plugins'))) {
@@ -58,7 +58,7 @@ class ModuleProvider implements ActionProvider {
 		}
 		return null;
 	}
-	
+
 	public function getIconCls($action = null, $module = null) {
 		if ($module === null) {
 			$module = $this->getModuleName();
@@ -81,7 +81,7 @@ class ModuleProvider implements ActionProvider {
 			return $config;
 		}
 	}
-	
+
 	private function replacePlaceHolders(&$in) {
 		if (is_array($in)) {
 			foreach ($in as &$v) {
@@ -96,7 +96,7 @@ class ModuleProvider implements ActionProvider {
 			return $in;
 		}
 	}
-	
+
 	private function buildMenuActions() {
 		$menuActions = array();
 		foreach ($this->buildMenuActionsData() as $id => $action) {
@@ -104,7 +104,7 @@ class ModuleProvider implements ActionProvider {
 		}
 		return $menuActions;
 	}
-	
+
 	protected function buildMenuActionsData() {
 		$menuActions = array();
 		if (null !== $config = $this->getMenuConfig()) {
@@ -129,7 +129,7 @@ class ModuleProvider implements ActionProvider {
 		}
 		return $menuActions;
 	}
-	
+
 	public function getAvailableActions() {
 		if ($this->menuActions) {
 			return $this->menuActions;
@@ -137,7 +137,7 @@ class ModuleProvider implements ActionProvider {
 			return $this->menuActions = $this->buildMenuActions();
 		}
 	}
-	
+
 	protected function getMenuFamilyId() {
 		if (null !== $config = $this->getMenuConfig()) {
 			if (isset($config['family']['id'])) {
@@ -149,7 +149,7 @@ class ModuleProvider implements ActionProvider {
 		// defaults to module name
 		return $this->getModuleName();
 	}
-	
+
 	protected function getSubFamilyId() {
 		if ((null !== $config = $this->getMenuConfig())
 				&& isset($config['subFamilyId'])) {
@@ -158,7 +158,7 @@ class ModuleProvider implements ActionProvider {
 		// defatuls to familyId
 		return $this->getMenuFamilyId();
 	}
-	
+
 	private function buildMenuFamily() {
 		if (null !== $config = $this->getMenuConfig()) {
 			$defaults = array(

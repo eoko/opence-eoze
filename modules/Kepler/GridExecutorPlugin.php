@@ -15,7 +15,7 @@ use Request;
  * @since 1 déc. 2011
  */
 class GridExecutorPlugin extends PluginBase {
-	
+
 //	public function afterSaveModel(Model $model, $wasNew) {
 //		// Fire comet events
 //		if ($wasNew) {
@@ -38,13 +38,13 @@ class GridExecutorPlugin extends PluginBase {
 //	public function afterDelete(array $ids) {
 //		CometEvents::publish($this->table, 'removed', $ids);
 //	}
-	
+
 	public function onCreateQueryContext(Request $request, array &$context) {
 		if (null !== $origin = $request->get('keplerOrigin')) {
 			$context['keplerOrigin'] = $origin;
 		}
 	}
-	
+
 	public function addModelContext(Model $model) {
 		if (null !== $origin = $this->getRequest()->get('keplerOrigin')) {
 			$model->context['keplerOrigin'] = $origin;

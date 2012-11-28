@@ -8,7 +8,7 @@ class <?php echo $class ?> extends <?php echo $extend ?> {
 	protected $table;
 
 	protected $modelName = '<?php echo $modelName ?>';
-	
+
 	protected $title = '<?php echo $title ?>';
 
 	protected function construct() {

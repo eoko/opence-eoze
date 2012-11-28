@@ -5,11 +5,11 @@ if (!isset($dumpPre)) { $dumpPre = '<pre>'; $endDumpPre = '</pre>'; }
 // Debug function
 function dump($var, $maxDeep = 50, $die = true, $deep = 0) {
 	global $dumpPre, $endDumpPre;
-	
+
 //	while (ob_get_level()) {
 //		ob_end_clean();
 //	}
-	
+
 //	dump_trace(false);
 	$trace = debug_backtrace();
 //	Logger::get('dump')->debug('dumping: {}:{}', $trace[0]['file'], $trace[0]['line']);

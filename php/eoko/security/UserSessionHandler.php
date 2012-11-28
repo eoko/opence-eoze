@@ -9,13 +9,13 @@ namespace eoko\security;
  * @since 30 nov. 2011
  */
 abstract class UserSessionHandler {
-	
+
 	private $listeners;
-	
+
 	public function addListener($event, $fn) {
 		$this->listeners[$event][] = $fn;
 	}
-	
+
 	protected function fireEvent($event, $_ = null) {
 		if ($this->listeners[$event]) {
 			$args = array_slice(func_get_args(), 1);
@@ -29,9 +29,9 @@ abstract class UserSessionHandler {
 	 * @return User
 	 */
 	abstract public function getUser();
-	
+
 	abstract public function getUserId($require = false);
-	
+
 	abstract public function isAuthorized($level);
-	
+
 }

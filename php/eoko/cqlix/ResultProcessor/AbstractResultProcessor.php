@@ -30,18 +30,18 @@ use DateTime;
  * @since 21 déc. 2011
  */
 abstract class AbstractResultProcessor implements ResultProcessor {
-	
+
 	/**
 	 * @var ModelTable
 	 */
 	private $table;
-	
+
 	private $fields;
-	
+
 	public function __construct(ModelTable $table, $fields, array $options = null) {
 		$this->table = $table;
 		$this->fields = $fields;
-		
+
 		if ($options) {
 			foreach ($options as $k => $v) {
 				$k = "_$k";
@@ -49,23 +49,23 @@ abstract class AbstractResultProcessor implements ResultProcessor {
 			}
 		}
 	}
-	
+
 	public function process(array $result) {
-		
+
 		$return = array();
-		
+
 		foreach ($this->fields as $name) {
 			$field = $this->table->getField($name, true);
 			foreach ($result as $i => $row) {
 				$return[$i][$name] = $this->convertValue($field, $row[$name]);
 			}
 		}
-		
+
 		return $return;
 	}
-	
+
 	protected function convertValue(ModelField $field, $value) {
-		
+
 		// It is not possible to check for NULL value based on field's
 		// nullable param, because Relation->fields may be NULL because
 		// the _relation_ itself is NULL.
@@ -76,9 +76,9 @@ abstract class AbstractResultProcessor implements ResultProcessor {
 				);
 			}
 		}
-		
+
 		switch ($field->getType()) {
-			
+
 			case ModelField::T_BOOL:
 				if ($value === null) {
 					return $this->convertNullBoolean();
@@ -91,7 +91,7 @@ abstract class AbstractResultProcessor implements ResultProcessor {
 					throw new IllegalStateException(
 							"Not a valid boolean value: ($class) $value"); 
 				}
-				
+
 			case ModelField::T_ENUM:
 				$field = $field->getActualField();
 				if (!($field instanceof EnumField)) {
@@ -103,12 +103,12 @@ abstract class AbstractResultProcessor implements ResultProcessor {
 				return $value === null
 						? $this->convertNullEnum($field)
 						: $this->convertEnum($field, $value);
-				
+
 			case ModelField::T_DATE:
 				return $value === null
 						? $this->convertNullDate()
 						: $this->convertDate($value);
-				
+
 			case ModelField::T_DATETIME:
 				return $value === null
 						? $this->convertNullDateTime()
@@ -123,11 +123,11 @@ abstract class AbstractResultProcessor implements ResultProcessor {
 	 * @return mixed
 	 */
 	abstract protected function convertBoolean($value);
-	
+
 	protected function convertNullBoolean() {
 		return null;
 	}
-	
+
 	/**
 	 * Converts an enum value. This method is guaranteed never to be called
 	 * with `null` value.
@@ -136,11 +136,11 @@ abstract class AbstractResultProcessor implements ResultProcessor {
 	 * @return mixed
 	 */
 	abstract protected function convertEnum(EnumField $column, $value);
-	
+
 	protected function convertNullEnum(EnumField $column) {
 		return null;
 	}
-	
+
 	/**
 	 * Converts a date value. This method is guaranteed never to be called
 	 * with `null` value.
@@ -148,11 +148,11 @@ abstract class AbstractResultProcessor implements ResultProcessor {
 	 * @return mixed
 	 */
 	abstract protected function convertDate($value);
-	
+
 	protected function convertNullDate() {
 		return null;
 	}
-	
+
 	/**
 	 * Converts a datetime value. This method is guaranteed never to be called
 	 * with `null` value.
@@ -160,7 +160,7 @@ abstract class AbstractResultProcessor implements ResultProcessor {
 	 * @return mixed
 	 */
 	abstract protected function convertDateTime($value);
-	
+
 	protected function convertNullDateTime() {
 		return null;
 	}

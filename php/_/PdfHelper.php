@@ -5,7 +5,7 @@ use eoko\template\Template;
 class PdfHelper {
 
 	public static function render($src, $options = array()) {
-		
+
 		require_once LIBS_PATH . 'html2pdf.phar';
 
 		ArrayHelper::applyIf($options, array(

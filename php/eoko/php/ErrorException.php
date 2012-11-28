@@ -11,18 +11,18 @@ use Exception;
  * @since 14 mars 2012
  */
 class ErrorException extends Exception {
-	
+
 	private static $registered = false;
-	
+
 	private static $onErrorListeners = null;
-	
+
 	public function __construct($code, $message, $file, $line) {
 		$this->code    = $code;
 		$this->file    = $file;
 		$this->line    = $line;
 		$this->message = $message;
 	}
-	
+
 	public function __toString() {
 		$s = "PHP error with message: '{$this->getMessage()}'";
 		if ($this->file) {
@@ -33,12 +33,12 @@ class ErrorException extends Exception {
 		}
 		$s .= PHP_EOL;
 		$s .= 'Stack trace:' . PHP_EOL;
-		
+
 		$trace = $this->getTrace();
 		if (count($trace)) {
 			array_shift($trace);
 		}
-		
+
 		$traceLines = array();
 		$i = 0;
 		foreach ($trace as $traceLine) {
@@ -83,14 +83,14 @@ class ErrorException extends Exception {
 		$s .= implode(PHP_EOL, $traceLines);
 		return $s;
 	}
-	
+
 	public static function registerErrorHandler() {
 		if (!self::$registered) {
 			set_error_handler(array(get_class(), 'wrapError'), E_ALL & ~E_STRICT);
 			self::$registered = true;
 		}
 	}
-	
+
 	public static function wrapError($code, $message, $file, $line) {
 		if (error_reporting() !== 0) {
 			$exception = new ErrorException($code, $message, $file, $line);
@@ -102,7 +102,7 @@ class ErrorException extends Exception {
 			throw $exception;
 		}
 	}
-	
+
 	public static function onError($listener) {
 		self::$onErrorListeners[] = $listener;
 	}

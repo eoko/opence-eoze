@@ -44,12 +44,12 @@ class QueryJoinLeft extends QueryJoin {
 
 		parent::__construct($query, $rightTable, $leftField, $rightField,
 				$alias, $leftTable, $leftTableAlias);
-		
+
 		$this->buildOnClauseFn = $buildOnClauseFn;
 	}
-	
+
 	private $buildOnClauseFn = null;
-	
+
 	private function buildSingleField($field, $tableName, $side) {
 		if ($field instanceof QueryJoinField) {
 			return $field->buildField($tableName);
@@ -57,12 +57,12 @@ class QueryJoinLeft extends QueryJoin {
 			return $this->getQualifiedName($field, $side);
 		}
 	}
-	
+
 	protected function buildOnClause() {
-		
+
 		$leftField = $this->buildSingleField($this->leftField, $this->leftTableAlias, QueryJoin::TABLE_LEFT);
 		$rightField = $this->buildSingleField($this->rightField, $this->foreignTableAlias, QueryJoin::TABLE_RIGHT);
-		
+
 		if ($this->buildOnClauseFn !== null) {
 			return call_user_func($this->buildOnClauseFn, $leftField, $rightField);
 		} else {
@@ -82,7 +82,7 @@ class QueryJoinLeft extends QueryJoin {
 //		$rightField = $this->rightField instanceof QueryJoinField ?
 //				$this->rightField->buildField($this->foreignTableAlias)
 //				: "`$this->foreignTableAlias`.`$this->rightField`";
-		
+
 		$onClause = $this->buildOnClause();
 
 		return "LEFT JOIN `$this->foreignDBTableName`"
@@ -101,7 +101,7 @@ class QueryJoinLeft extends QueryJoin {
 			$this->where[] = " $boolOp $assocField";
 		}
 	}
-	
+
 	public function andWhere($condition, $inputs = null) {
 		$where = new QueryWhere($this, $condition, $inputs);
 		if (!$where->isNull()) {

@@ -608,7 +608,7 @@ class ChromePhp
         }
 
         file_put_contents($this->getSetting(self::LOG_PATH) . '/' . $file_name, $json);
-		
+
 		chmod($this->getSetting(self::LOG_PATH) . '/' . $file_name, 0644); // rx+
 
         $data = array(

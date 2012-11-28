@@ -13,14 +13,14 @@ use IllegalArgumentException;
  * @since 2 nov. 2011
  */
 class Sorter extends QueryElementOnField {
-	
+
 	protected $type = self::SORTER;
-	
+
 	const ASC  =  1;
 	const DESC = -1;
 
 	protected $direction = 1;
-	
+
 	public function __construct($field, $direction = null) {
 		parent::__construct($field);
 		if ($direction !== null) {
@@ -46,7 +46,7 @@ class Sorter extends QueryElementOnField {
 	public function getSortInfo() {
 		return array($this->field => $this->direction);
 	}
-	
+
 	protected function doCompare($leftValue, $rightValue) {
 		if (is_numeric($leftValue) && is_numeric($rightValue)) {
 			return ($leftValue - $rightValue) * $this->direction;
@@ -54,7 +54,7 @@ class Sorter extends QueryElementOnField {
 			return strnatcmp($leftValue, $rightValue) * $this->direction;
 		}
 	}
-	
+
 	public function compare($leftElement, $rightElement) {
 		return $this->doCompare(
 				$this->getFieldValue($leftElement), 

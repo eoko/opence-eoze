@@ -9,7 +9,7 @@ namespace eoze\util\DataStore\Query;
  * @since 2 nov. 2011
  */
 class CompositeSorter extends Sorter {
-	
+
 	private $sorters;
 
 	public function __construct() {
@@ -17,11 +17,11 @@ class CompositeSorter extends Sorter {
 			$this->add($sorter);
 		}
 	}
-	
+
 	public function add(Sorter $sorter) {
 		$this->sorters[] = $sorter;
 	}
-	
+
 	public function compare($left, $right) {
 		foreach ($this->sorters as $sorter) {
 			if (0 !== $diff = $sorter->compare($left, $right)) {
@@ -30,7 +30,7 @@ class CompositeSorter extends Sorter {
 		}
 		return 0;
 	}
-	
+
 	public function getSortInfo() {
 		$r = array();
 		foreach ($this->sorters as $s) {

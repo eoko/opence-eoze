@@ -16,6 +16,6 @@ abstract class Bootstrap {
 	abstract protected function registerModuleFactories();
 
 	abstract protected function initModulesLocations();
-	
+
 	abstract protected function initGlobalEvents();
 }

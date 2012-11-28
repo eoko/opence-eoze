@@ -9,10 +9,10 @@ namespace eoko\cqlix;
  * @since 22 déc. 2011
  */
 interface EnumField {
-	
+
 	function getEnumCode($value);
-	
+
 	function getEnumLabelForValue($value);
-	
+
 	function getCodeLabels();
 }

@@ -26,7 +26,7 @@ class ConfigManager {
 	private $configPaths = array();
 	private $localConfigPaths = array();
 	private $defaultNodes = array();
-	
+
 	private static $extraFiles = null;
 	private static $DELIMITERS = array('/', '\\');
 
@@ -44,7 +44,7 @@ class ConfigManager {
 	private function __construct($init = true) {
 
 //		Logger::get($this)->startTimer('LOAD', 'Config loaded in {}');
-		
+
 		// -- Paths --
 		// First, add defaults path
 		if ($init) {
@@ -178,7 +178,7 @@ class ConfigManager {
 			return $node;
 		}
 	}
-	
+
 	public static function put($node, $value) {
 		$target =& self::getInstance()->node($node);
 		$target = $value;

@@ -21,9 +21,9 @@ function setPrimaryPhoneNumbers() {
 }
 
 function createVersions(ModelTable $table) {
-	
+
 	foreach ($table::findAll() as $record) {
-		
+
 		$version = DataVersion::create();
 
 		$rev = DataVersionRevision::create(array(
@@ -39,7 +39,7 @@ function createVersions(ModelTable $table) {
 
 		$record->setVersion($version);
 		$record->save();
-		
+
 		echo "Record $record->id done.\n";
 	}
 }

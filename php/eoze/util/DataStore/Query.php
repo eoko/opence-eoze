@@ -11,7 +11,7 @@ use eoze\util\DataStore;
  * @since 2 nov. 2011
  */
 interface Query {
-	
+
 	const PAGER  = 'pager';
 	const FILTER = 'filter';
 	const SORTER = 'sorter';

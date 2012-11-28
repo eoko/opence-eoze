@@ -14,9 +14,9 @@ use UnsupportedOperationException,
  * @since 22 nov. 2011
  */
 class ModelFieldHelper {
-	
+
 	private final function __construct() {}
-	
+
 	public static function castValue($value, $type) {
 		if ($value === null) {
 			return null;

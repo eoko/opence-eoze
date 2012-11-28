@@ -21,7 +21,7 @@ abstract class <?php echo $tableName ?>Base extends <?php echo $baseTableName ?>
 	public $modelName = '<?php echo $modelName ?>';
 	public $tableName = '<?php echo $tableName ?>';
 	public $dbTableName = '<?php echo $dbTable ?>';
-	
+
 	protected $engineAutomaticCascade = <?php echo $table->isEngineAutomaticCascade() ? 'true' : 'false' ?>;
 
 	protected function __construct() {
@@ -33,7 +33,7 @@ abstract class <?php echo $tableName ?>Base extends <?php echo $baseTableName ?>
 <?php endforeach ?>
 
 		);
-		
+
 		$relations = array(
 <?php $comma = "\t\t\t\t"; ?>
 <?php foreach ($relations as $relation): ?>
@@ -43,7 +43,7 @@ abstract class <?php echo $tableName ?>Base extends <?php echo $baseTableName ?>
 <?php endforeach ?>
 
 		);
-				
+
 		parent::__construct($cols, $relations);
 	}
 
@@ -62,7 +62,7 @@ abstract class <?php echo $tableName ?>Base extends <?php echo $baseTableName ?>
 	public static function getModelName() {
 		return '<?php echo $modelName ?>';
 	}
-	
+
 	/**
 	 * @return String
 	 */

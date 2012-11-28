@@ -11,7 +11,7 @@ namespace eoko\cqlix;
  * @since 21 déc. 2011
  */
 interface ResultProcessor {
-	
+
 	/**
 	 * Returns the processed results. This method expects an (indexed) array
 	 * which elements are themselves arrays associating field names to raw

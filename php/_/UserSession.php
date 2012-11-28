@@ -10,7 +10,7 @@ use eoko\php\SessionManager;
 class UserSession {
 
 	public static $SESSION_LENGTH = 3600; // in seconds
-	
+
 	const LEVEL_AUTHENTICATED = 99;
 
 	/** @var UserSession */
@@ -24,7 +24,7 @@ class UserSession {
 
 	const DEFAULT_REQ_DATA_NAME = 'sessionDataId';
 	private $data = null;
-	
+
 	/**
 	 * @var SessionManager
 	 */
@@ -36,11 +36,11 @@ class UserSession {
 		$this->user = null;
 		$this->lastActivity = time();
 	}
-	
+
 	public static function setSessionManager(SessionManager $sessionManager) {
 		self::$sessionManager = $sessionManager;
 	}
-	
+
 	/**
 	 * @return UserSession
 	 */
@@ -49,7 +49,7 @@ class UserSession {
 		if (self::$instance !== null) {
 			return self::$instance;
 		}
-		
+
 		$session = self::$sessionManager->getData(false);
 
 		if (self::$instance === null) {
@@ -83,21 +83,21 @@ class UserSession {
 
 		// User session has expired
 		else if (self::$instance->isIdentified()) {
-			
+
 			if (self::$instance->isExpired()) {
 				self::$instance->loggedIn = false;
 			}
-		
+
 			// We should update last activity right now
 			else if ($updateLastActivity) {
 				self::$instance->lastActivity = time();
-				
+
 				self::$sessionManager->put('UserSession', self::$instance);
 			}
 		}
 
 		self::$sessionManager->commit();
-		
+
 //		Logger::dbg('Session user is: {}', self::$instance->user);
 
 		return self::$instance;
@@ -107,9 +107,9 @@ class UserSession {
 	 * @deprecated Not supported anymore, will throw an exception
 	 */
 	public static function updateUserLastActivity() {
-		
+
 		throw new DeprecatedException();
-		
+
 		$instance = self::getInstance();
 		if (($now = time()) - $instance->lastActivity > self::$SESSION_LENGTH) {
 			if ($instance->isIdentified()) {
@@ -150,13 +150,13 @@ class UserSession {
 
 		self::$sessionManager->put('UserSession', $instance)->commit();
 	}
-	
+
 	private static $loginAdapter;
-	
+
 	public static function setLoginAdapter(LoginAdapter $adapter) {
 		self::$loginAdapter = $adapter;
 	}
-	
+
 	/**
 	 * @return LoginAdapter
 	 */
@@ -182,9 +182,9 @@ class UserSession {
 			throw new LoginFailedException(lang('L\'identification a échoué.'));
 		}
 	}
-	
+
 	private static $loginListeners;
-	
+
 	private static function fireLoginEvent(User $user) {
 		if (self::$loginListeners) {
 			foreach (self::$loginListeners as $callback) {
@@ -192,7 +192,7 @@ class UserSession {
 			}
 		}
 	}
-	
+
 	public static function onLogin($callback) {
 		self::$loginListeners[] = $callback;
 	}
@@ -228,7 +228,7 @@ class UserSession {
 	public static function getUser($updateLastActivity = true) {
 		return self::getInstance($updateLastActivity)->user;
 	}
-	
+
 	public static function getUserId($updateLastActivity = true) {
 		if (null !== $user = self::getUser($updateLastActivity)) {
 			return $user->getId();
@@ -271,9 +271,9 @@ class UserSession {
 	 * @deprecated Not supported anymore, will throw an Exception.
 	 */
 	public static function & createSessionData($timeToLive = 3600) {
-		
+
 		throw new DeprecatedException();
-		
+
 		$instance = self::getInstance();
 
 		do {
@@ -289,9 +289,9 @@ class UserSession {
 	 * @deprecated Not supported anymore, will throw an Exception.
 	 */
 	public static function destroySessionData($id) {
-		
+
 		throw new DeprecatedException();
-		
+
 		// We don't really want to check for the session existance, which would
 		// produce a completly meaningless error warning...
 		unset(self::getInstance()->data[$id]);
@@ -302,9 +302,9 @@ class UserSession {
 	 * @deprecated Not supported anymore, will throw an Exception.
 	 */
 	public static function getSessionData($id) {
-		
+
 		throw new DeprecatedException();
-		
+
 		$instance = self::getInstance();
 		return isset($instance->data[$id]) ? $instance->data[$id] : null;
 	}
@@ -316,7 +316,7 @@ class UserSession {
 			$name = self::DEFAULT_REQ_DATA_NAME) {
 
 		throw new DeprecatedException();
-		
+
 		if ($require) {
 			if (null === $data = self::getSessionData($id = $request->req($name))) {
 				throw new IllegalStateException("Missing session data (id=$id)");
@@ -375,11 +375,11 @@ class UserSessionDataItem implements ArrayAccess {
 	public function renewLease() {
 		$this->startTime = time();
 	}
-	
+
 	public function & __get($name) {
 		return $this->data[$name];
 	}
-	
+
 	public function & __set($name, $value) {
 		$this->data[$name] = $value;
 		return $this->data[$name];

@@ -74,7 +74,7 @@ class Generator extends Script {
 	private $proxyModelMethods;
 	private $primaryKeys;
 	private $tableFields;
-	
+
 	/** @var array[$dbTable => array[TplRelation]] */
 	private $referencesOneRelations;
 	private $hasOneReciproqueRelations;
@@ -86,11 +86,11 @@ class Generator extends Script {
 
 	private $tables;
 	private $modelsConfig;
-	
+
 	private $fileWritten = 0, $modelProcessed = 0;
 
 	public $addTimeVersionInGeneratedFiles = false;
-	
+
 	private $config;
 
 	public function __construct() {
@@ -102,7 +102,7 @@ class Generator extends Script {
 
 		// Includes all relation templates classes
 		RelationTemplates::load();
-		
+
 		$this->config = ConfigManager::get('eoko/cqlix/Generator');
 
 		$this->tplPath = dirname(__FILE__) . DS . 'templates' . DS;
@@ -116,7 +116,7 @@ class Generator extends Script {
 			throw new \DeprecatedException('Set the namespace in eoze/application/namespace');
 		}
 //		$ns = defined(APP_NAMESPACE) ? APP_NAMESPACE : ConfigManager::get($node, $key);
-		
+
 		$this->modelsConfig = ConfigManager::get(
 			ConfigManager::get('eoze/application/namespace') . '/cqlix/models'
 		);
@@ -140,7 +140,7 @@ class Generator extends Script {
 		// Deported in TplTable creation
 		// Generate name maker entries
 		//NameMaker::generateAllEntries($this->tables);
-		
+
 		// Reverse engineer tables columns informations from the database
 		$this->discoverTablesFields();
 
@@ -149,7 +149,7 @@ class Generator extends Script {
 		$this->discoverPrimaryKeys();
 
 		$this->configureTables();
-		
+
 		// --- Relations ---------------------------------------------------------------
 
 		$this->discoverDirectReferencingOneRelations();
@@ -298,11 +298,11 @@ class Generator extends Script {
 
 				$tplField = new TplField($field, $type, $length, $canNull, $default,
 						false, null, $primaryKey, $autoIncrement);
-				
+
 				if (isset($matches['unsigned'])) {
 					$tplField->unsigned = true;
 				}
-				
+
 				$fields[$field] = $tplField;
 			}
 
@@ -320,7 +320,7 @@ class Generator extends Script {
 				Logger::get($this)->warn('Table {} engine is not InnoDB (it is {})', $dbTable, $engine);
 			} else {
 				// CONSTRAINT `contact_phone_numbers_ibfk_1` FOREIGN KEY (`contact_id`) REFERENCES `contacts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-				
+
 				$table->setEngineAutomaticCascade(true);
 
 				// Foreign key constraints
@@ -335,14 +335,14 @@ class Generator extends Script {
 					. '(?: ON DELETE (?P<onDelete>CASCADE|SET NULL|RESTRICT|NO ACTION))?'
 					. '(?: ON UPDATE (?P<onUpdate>CASCADE|SET NULL|RESTRICT|NO ACTION))?'
 					. '/';
-				
+
 				preg_match_all($pattern, $createTable, $matches, PREG_SET_ORDER);
-				
+
 				foreach ($matches as $matches) {
 					list($ignore, $constraintName, $localKey, $constraintTable, $otherField) = $matches;
 					$constraint = new ModelColumnForeignConstraint($constraintTable, $otherField, $constraintName);
 					$fields[$localKey]->foreignConstraint = $constraint;
-						
+
 					$constraint->onDelete = isset($matches['onDelete']) 
 							? $matches['onDelete']
 							: 'RESTRICT'; // default action, not shown in SHOW CREATE TABLE
@@ -398,7 +398,7 @@ class Generator extends Script {
 			$this->tableFields[$dbTable] = $fields;
 		}
 	}
-	
+
 	private function getTableConfig($table, $key = null, $default = null) {
 		if (isset($this->modelsConfig[$table][$key])) {
 			return $this->modelsConfig[$table][$key];
@@ -413,7 +413,7 @@ class Generator extends Script {
 			self::GUESS_BY_NAME => array(),
 			self::GUESS_BY_CONSTRAINT => array()
 		);
-		
+
 		foreach ($this->tableFields as $table => $fields) {
 			$this->discoverTableReferencesOneRelations(
 				$table, 
@@ -422,9 +422,9 @@ class Generator extends Script {
 				$this->getTableConfig($table, 'guessByConstraint', true)
 			);
 		}
-		
+
 		$this->mergeRelationsFoundByNameAndByFK(true, true);
-		
+
 		foreach ($this->referencesOneRelations as $dbTable => $relation) {
 			$table = $this->tables[$dbTable];
 			$table->addDirectRelations($relation);
@@ -439,7 +439,7 @@ class Generator extends Script {
 
 				$targetTable = $relation->targetDBTableName;
 				$field = $relation->getReferenceField();
-				
+
 				$this->tableFields[$dbTable][$field]->setForeignKeyToTable($targetTable);
 
 				// --- has one reciproques
@@ -455,11 +455,11 @@ class Generator extends Script {
 				} else {
 					$alias = $this->tableFields[$dbTable][$field]->foreignRelationAlias;
 				}
-				
+
 				if ($alias === false) {
 					continue;
 				}
-				
+
 				if (isset($relation->reciproqueConfig['unique'])) {
 					$unique = $relation->reciproqueConfig['unique'];
 				}
@@ -473,7 +473,7 @@ class Generator extends Script {
 						// multiple fields primary keys...
 					$unique = $this->tableFields[$dbTable][$field]->isUnique();
 				}
-				
+
 				if ($unique) {
 					$reciproqueRelation = new TplRelationReferedByOne($relation->targetDBTableName, $dbTable,
 							$alias, $relation, $relation->getReferenceField(), null);
@@ -493,16 +493,16 @@ class Generator extends Script {
 				$reciproqueRelation->constraintName = $constraintName;
 				$reciproqueRelation->referencingTableName = $dbTable;
 				$reciproqueRelation->referencedTableName = $targetTable;
-				
+
 //				$reciproqueName = isset($relation->reciproqueName) 
 //						? $relation->reciproqueName 
 //						: $relation->alias;
 				$reciproqueRelation->setReferencingAlias($alias);
-				
+
 				if (isset($relation->reciproqueConfig)) {
 					$reciproqueRelation->config = $relation->reciproqueConfig;
 				}
-				
+
 //				if ($reciproqueName !== false) {
 					$relation->reciproque = $reciproqueRelation;
 
@@ -656,7 +656,7 @@ class Generator extends Script {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * @param string $tableName
 	 * @return TplField
@@ -739,7 +739,7 @@ class Generator extends Script {
 		if (!is_array($relations)) $relations = array();
 
 		$generator = $this;
-		
+
 		ob_start();
 		include $this->tplPath . 'ModelBase.tpl.php';
 		return ob_get_clean();
@@ -813,7 +813,7 @@ class Generator extends Script {
 		}
 
 		$tpl->relations = $relations;
-		
+
 		if (!is_array($tpl->relations)) $tpl->relations = array();
 
 		$tpl->package = APP_NAME;
@@ -918,7 +918,7 @@ class Generator extends Script {
 	const BY_CONFIG           = 3;
 
 	private function addHasOneRelation($table, TplRelationReferencesOne $relation, $method = self::GUESS_BY_NAME) {
-		
+
 		if ($method === self::BY_CONFIG) {
 			$this->referencesOneRelations[$method][] = $relation;
 		}
@@ -952,10 +952,10 @@ class Generator extends Script {
 	}
 
 	private function mergeRelationsFoundByNameAndByFK($guessByName = true, $guessByConstraints = true) {
-		
+
 		$configRelations = isset($this->referencesOneRelations[self::BY_CONFIG])
 				? $this->referencesOneRelations[self::BY_CONFIG] : null;
-			
+
 		if ($guessByName === false) {
 			$this->referencesOneRelations = $this->referencesOneRelations[self::GUESS_BY_NAME];
 		} else if ($guessByConstraints === false) {

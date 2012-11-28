@@ -3,7 +3,7 @@
 
  */
 <?php echo $baseClass ?> {
-	
+
 }
 <?php foreach ($icons as $icon): ?>
 <?php echo $baseClass ?>.<?php echo $icon['class'] ?> {

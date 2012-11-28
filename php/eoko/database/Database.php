@@ -7,18 +7,18 @@ use eoko\util\Arrays;
 use eoko\util\collection\ImmutableMap;
 
 class Database {
-	
+
 	/**
 	 * @var DatabaseProxy
 	 */
 	private static $defaultProxy = null;
-	
+
 	private function __construct() {}
-	
+
 	public static function reset() {
 		self::$defaultProxy = null;
 	}
-	
+
 	/**
 	 * @return DatabaseProxy
 	 */

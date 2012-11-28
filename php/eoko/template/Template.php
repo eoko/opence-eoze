@@ -11,9 +11,9 @@ use IllegalArgumentException;
  * @method \eoko\template\Template setFile(\string $filename)
  */
 class Template extends Renderer {
-	
+
 	protected $vars = array();
-	
+
 	public function &__get($name) {
 		return $this->vars[$name];
 	}
@@ -21,19 +21,19 @@ class Template extends Renderer {
 	public final function __set($name, $value) {
 		$this->set($name, $value);
 	}
-	
+
 	public function __isset($name) {
 		return isset($this->vars[$name]);
 	}
-	
+
 	public function __unset($name) {
 		unset($this->vars[$name]);
 	}
-	
+
 	public function clearData() {
 		$this->vars = array();
 	}
-	
+
 	public function getData() {
 		return $this->vars;
 	}
@@ -77,7 +77,7 @@ class Template extends Renderer {
 		} else {
 			throw new IllegalArgumentException();
 		}
-		
+
 		return $this;
 	}
 

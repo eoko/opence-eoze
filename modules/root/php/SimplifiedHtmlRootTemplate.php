@@ -19,24 +19,24 @@ use eoko\template\Renderer;
  * @since 18 sept. 2012
  */
 class SimplifiedHtmlRootTemplate extends HtmlRootTemplate {
-	
+
 	private $forbidIncludePush = false;
-	
+
 	protected function pushInclude($type, $url, $order) {
 		throw new \IllegalStateException(
 			'Pushing includes in templates has been deprecated.'
 		);
 	}
-	
+
 	private $jsUrls, $cssUrls;
-	
+
 	public function setIncludeUrls(array $includes) {
 		$this->jsUrls = $includes['js'];
 		$this->cssUrls = $includes['css'];
 	}
-	
+
 	protected function onRender() {
-		
+
 		if (!isset($this->docType)) {
 			$this->set('docType', 
 <<<EOD
@@ -44,7 +44,7 @@ class SimplifiedHtmlRootTemplate extends HtmlRootTemplate {
 EOD
 			, false);
 		}
-		
+
 		// --- Push includes
 		if (null !== $this->headTemplateName) {
 			if (!isset($this->{$this->headTemplateName})) {
@@ -54,14 +54,14 @@ Missing head template in RootHtmlTemplate (property: $this->headTemplateName)
 MSG
 				);
 			}
-			
+
 			// Push includes in head template
 			$head = $this->{$this->headTemplateName};
 
 			if ($this->compileOptions) {
 				$this->onCompileIncludes($head, $this->compileOptions);
 			}
-		
+
 			$head->css = $this->cssUrls;
 			$head->js = $this->jsUrls;
 		}

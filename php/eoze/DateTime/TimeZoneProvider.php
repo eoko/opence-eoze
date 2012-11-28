@@ -13,21 +13,21 @@ use eoze\util\PageInfo;
  * @since 1 nov. 2011
  */
 interface TimeZoneProvider {
-	
+
 	function listAbbreviations(PageInfo $page = null);
-	
+
 	function listIdentifiers($what = DateTimeZone::ALL, $country = null, PageInfo $page = null);
-	
+
 	/**
 	 * @return DateTimeZone
 	 */
 	function getTimeZone($name);
-	
+
 	function getUtcName();
-	
+
 	/**
 	 * @return DateTimeZone
 	 */
 	function getUtc();
-	
+
 }
