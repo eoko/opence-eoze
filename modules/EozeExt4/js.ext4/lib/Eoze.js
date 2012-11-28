@@ -15,6 +15,8 @@ Ext4.define('Eoze.lib.Eoze', {
 		// Locale
 		'Eoze.locale.fr.Locale',
 		// Data types
-		'Eoze.Ext.data.Types'
+		'Eoze.Ext.data.Types',
+		// Date
+		'Eoze.Ext.Date'
 	]
 });
