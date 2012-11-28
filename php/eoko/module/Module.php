@@ -237,7 +237,7 @@ class Module implements file\Finder {
 //			foreach (array('js.ext4', 'ext') as $folder) {
 			if (is_dir($path . '/' . $folder)) {
 				$namespace = $this->makeExt4Namespace($location->namespace);
-				$dir[$namespace] = $url . '/' . $folder;
+				$dir[$namespace] = $url . $folder;
 			}
 //			}
 		}
@@ -488,7 +488,7 @@ MSG
 	}
 
 	public function getBaseUrl() {
-		if ($this->basePath === null) {
+		if ($this->baseUrl === null) {
 			throw new IllegalStateException("Module $this->name url is undefined");
 		} else {
 			return $this->baseUrl;
