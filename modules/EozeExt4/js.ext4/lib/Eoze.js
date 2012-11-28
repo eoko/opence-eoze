@@ -13,6 +13,8 @@ Ext4.define('Eoze.lib.Eoze', {
 		// i18n
 		'Eoze.i18n.Locale',
 		// Locale
-		'Eoze.locale.fr.Locale'
+		'Eoze.locale.fr.Locale',
+		// Data types
+		'Eoze.Ext.data.Types'
 	]
 });

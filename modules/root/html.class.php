@@ -146,8 +146,13 @@ class Html extends BasicHtmlExecutor {
 	public function getJasmineAppJavascript() {
 		header('Content-type: text/javascript');
 		echo <<<JS
-Ext.ns('eo').isUnitTestEnv = function() { return true; };
-Ext.onReady(function() {
+Ext4.ns('eo').isUnitTestEnv = function() { return true; };
+
+Ext4.require([
+	'Eoze.lib.Eoze'
+]);
+
+Ext4.onReady(function() {
 	jasmine.getEnv().addReporter(new jasmine.TrivialReporter());
 	jasmine.getEnv().execute();
 });
@@ -167,10 +172,10 @@ JS;
 			$loaders += $module->getExt4LoaderConfig();
 		}
 
-		$loaders['Eoze.Ext'] = EOZE_BASE_URL . 'js/Eoze/Ext';
-		$loaders['Eoze.i18n'] = EOZE_BASE_URL . 'js/Eoze/i18n';
-		$loaders['Eoze.locale'] = EOZE_BASE_URL . 'js/Eoze/locale';
-		$loaders['Eoze.lib'] = EOZE_BASE_URL . 'js/Eoze/lib';
+//		$loaders['Eoze.Ext'] = EOZE_BASE_URL . 'js/Eoze/Ext';
+//		$loaders['Eoze.i18n'] = EOZE_BASE_URL . 'js/Eoze/i18n';
+//		$loaders['Eoze.locale'] = EOZE_BASE_URL . 'js/Eoze/locale';
+//		$loaders['Eoze.lib'] = EOZE_BASE_URL . 'js/Eoze/lib';
 
 		$paths = json_encode($loaders);
 
