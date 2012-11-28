@@ -35,8 +35,7 @@ abstract class Renderer {
 	public $forceResultCaching = false;
 	
 	private $cachedResult = null;
-	/** @var RendererOptions */
-	
+
 	/** @var Renderer may be used by functions in the template namespace */
 	public static $currentRenderer;
 	
@@ -170,7 +169,7 @@ abstract class Renderer {
 	
 	/**
 	 * @param string $filename
-	 * @return Renderer 
+	 * @return Renderer
 	 */
 	public function setFile($filename) {
 		if ($this->filename !== $filename) {
