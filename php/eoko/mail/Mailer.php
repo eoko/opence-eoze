@@ -82,7 +82,7 @@ class Mailer {
 
 	/**
 	 *
-	 * @param type $to
+	 * @param string|string[] $to
 	 *
 	 * @param string $from The expedient name and address. Must be either the raw
 	 * email address (e.g. eric@example.com) or the name and email in the form
@@ -90,11 +90,11 @@ class Mailer {
 	 * (<>) they will be added around the whole string, considered in this case
 	 * as a raw email.
 	 *
-	 * @param type $subject
-	 * @param type $message
-	 * @param type $bcc
-	 * @param type $cc
-	 * @return type
+	 * @param string $subject
+	 * @param string $message
+	 * @param string|string[] $bcc
+	 * @param string|string[] $cc
+	 * @return bool
 	 */
 	public function sendHTML($to, $from, $subject, $message, $bcc = null, $cc = null) {
 
