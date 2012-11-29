@@ -178,11 +178,16 @@ MAIL;
 			return $from;
 		}
 
-		if (!isset($_SERVER['HOSTNAME'])) {
-			throw new RuntimeException('Cannot read server hostname');
+		if (strstr($from, '%server.domain%', $from)) {
+			if (!isset($_SERVER['SERVER_NAME'])) {
+				$host = $_SERVER['SERVER_NAME'];
+			} else if (isset($_SERVER['HTTP_HOST'])) {
+				$host = $_SERVER['HTTP_HOST'];
+			} else {
+				throw new RuntimeException('Cannot read server hostname');
+			}
+			$from = str_replace("%server.domain%", $host, $from);
 		}
-
-		$from = str_replace("%server.domain%", $_SERVER['HOSTNAME'], $from);
 
 		foreach ($sender as $k => $v) {
 			$from = str_replace("%from.$k%", $v, $from);
