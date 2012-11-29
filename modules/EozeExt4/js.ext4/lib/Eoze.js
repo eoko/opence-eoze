@@ -17,6 +17,8 @@ Ext4.define('Eoze.lib.Eoze', {
 		// Data types
 		'Eoze.Ext.data.Types',
 		// Date
-		'Eoze.Ext.Date'
+		'Eoze.Ext.Date',
+		// Model
+		'Eoze.Ext.data.association.HasOne'
 	]
 });
