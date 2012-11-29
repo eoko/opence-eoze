@@ -129,11 +129,11 @@ var alias = function(aliases, c) {
 	}
 };
 
-Ext.define = function(cls, o, createFn) {
+var define = function(cls, o, createFn) {
 	var parentCls,
 		parent,
 		deps;
-	
+
 	if (o.extend) {
 		parentCls = o.extend;
 		parent = resolve(parentCls, false);
@@ -168,6 +168,26 @@ Ext.define = function(cls, o, createFn) {
 		});
 	} else {
 		return define();
+	}
+};
+
+Ext.define = function(cls, o, createFn) {
+	if (o.singleton) {
+		var constructor = define(cls, o, createFn),
+			instance = new constructor;
+		if (cls) {
+			var matches = /^(?:(.*)\.)?([^.]+)$/.exec(cls),
+				name = matches[2],
+				ns = matches[1],
+				node = window;
+			if (ns) {
+				node = resolve(ns, true);
+			}
+			node[name] = instance;
+		}
+		return instance;
+	} else {
+		return define(cls, o, createFn);
 	}
 };
 
