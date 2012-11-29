@@ -57,8 +57,8 @@ class Mailer {
 	 * The following variables can be used and will be replaced with values extracted from
 	 * the given `from` field or from the server info:
 	 *
-	 * - `%from.name%`
-	 * - `%from.email%`
+	 * - `%sender.name%`
+	 * - `%sender.email%`
 	 * - `%server.domain%`
 	 *
 	 * @param string $email
@@ -190,7 +190,7 @@ MAIL;
 		}
 
 		foreach ($sender as $k => $v) {
-			$from = str_replace("%from.$k%", $v, $from);
+			$from = str_replace("%sender.$k%", $v, $from);
 		}
 
 		return $from;
