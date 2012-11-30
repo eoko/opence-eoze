@@ -130,12 +130,7 @@ var alias = function(aliases, c) {
 	}
 };
 
-<<<<<<< local
-//noinspection FunctionWithInconsistentReturnsJS
-	Ext.define = function(cls, o, createFn) {
-=======
 var define = function(cls, o, createFn) {
->>>>>>> other
 	var parentCls,
 		parent,
 		deps;
