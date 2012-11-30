@@ -1,5 +1,3 @@
-config.node: eoko\cqlix\generator
-
 *:
   applies: /^.*$/
   modelNameFormat: $1

@@ -40,6 +40,7 @@ class Config extends \eoko\config\Config {
 //			Arrays::apply($config, $cfg, false);
 //		}
 //		$this->values = $config;
+		dump(ConfigManager::get('rhodia/cqlix/models'));
 		$this->values = ConfigManager::get(get_namespace($this));
 	}
 
