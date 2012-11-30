@@ -3,13 +3,13 @@
 namespace eoko\util;
 
 abstract class Singleton {
-	
+
 	private static $instances = array();
 
 	private function __construct() {}
 
 	abstract protected function construct();
-	
+
 	protected static function createInstance() {
 		$o = self::createObject();
 		$o->construct();
@@ -39,7 +39,7 @@ abstract class Singleton {
 //			return call_user_func_array(array($class, $name), $args);
 //		}
 //	}
-	
+
 	public final static function getInstance() {
 		$class = get_called_class();
 		if (!isset(self::$instances[$class])) {
@@ -48,5 +48,5 @@ abstract class Singleton {
 			return self::$instances[$class];
 		}
 	}
-	
+
 }

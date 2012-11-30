@@ -12,7 +12,7 @@ use Wkhtmltopdf;
  * @since 30 janv. 2012
  */
 class Wkhtml2pdf extends Module {
-	
+
 	public function createExecutor($type, $action = null, Request $request = null, $internal = false) {
 		throw new RuntimeException('EarlReport module is not executable.');
 	}
@@ -23,13 +23,13 @@ class Wkhtml2pdf extends Module {
 	public function getAdapter($options = array()) {
 
 		require_once __DIR__ . '/lib/Wkhtmltopdf.php';
-		
+
 		$config = $this->getConfig();
-		
+
 		$wk = new Wkhtmltopdf($options);
-		
+
 //		$wk->setBinPath()
-		
+
 		return $wk;
 	}
 }

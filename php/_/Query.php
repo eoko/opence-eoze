@@ -62,7 +62,7 @@ class Query {
 	const MAX_ROW_COUNT = '18446744073709551615';
 
 	private static $executionCount = 0;
-	
+
 	private $db = null;
 
 	private $table = null;
@@ -235,7 +235,7 @@ class Query {
 		}
 		return $parts;
 	}
-	
+
 	protected function buildJoinsClauses() {
 		if ($this->joins !== null) {
 //			$selects = array();
@@ -281,7 +281,7 @@ class Query {
 			if (is_array($_)) $fields = $_;
 			else $fields = array($_);
 		}
-		
+
 		if ($this->select === null) $this->select = array();
 
 		foreach ($fields as $field) {
@@ -475,7 +475,7 @@ class Query {
 		}
 
 		$formattedString = 'CONVERT(CONCAT(' . implode(', ', $parts) . ") USING utf8)";
-		
+
 		if ($nullField !== null) {
 			$nullField = $aliasable->getQualifiedName($nullField);
 			return "IF($nullField IS NULL, NULL, $formattedString)";
@@ -510,15 +510,15 @@ class Query {
 
 	protected function buildUpdateClause() {
 		$parts = array();
-		
+
 		if (!$this->set) {
 			throw new IllegalStateException(
 				'Cannot build update clause, no setters have been defined'
 			);
 		}
-		
+
 		foreach ($this->set as $col => $val) {
-			
+
 			if ($val instanceof SqlVar) {
 				$val->buildSql(false, $this->bindings);
 
@@ -585,7 +585,7 @@ class Query {
 			}
 			$this->sql = substr($this->sql, 0, -2);
 		}
-		
+
 		$fields = implode(', ', $fields);
 		$values = implode(',', $values);
 		$table = $this->buildTable();
@@ -686,7 +686,7 @@ class Query {
 		$this->where->whereNotIn($field, $values);
 		return $this;
 	}
-	
+
 	/**
 	 * @return Query
 	 */
@@ -855,7 +855,7 @@ class Query {
 	public function thenOrderBy($field, $dir = 'ASC') {
 		return $this->addThenOrderBy($this->order, $field, $dir);
 	}
-	
+
 	private function addThenOrderBy(&$order, $field, $dir = 'ASC') {
 		if ($field == null || $field == '') {
 			throw new Exception('Illegal Argument Exception: $order cannot be empty');
@@ -877,7 +877,7 @@ class Query {
 			}
 
 			if ($field instanceof SqlVar) {
-				Logger::warn('The next line is most probably wrong and causing problem with bindings');
+				$this->getLogger()->warn('The next line is most probably wrong and causing problem with bindings');
 				$this->order[] = $field->buildSql(false, $this->bindings);
 			} else {
 				$alias = $this->getOrderFieldAlias($field);
@@ -906,7 +906,7 @@ class Query {
 		if ($name[0] !== '`') return '`' . $name . '`';
 		else return $name;
 	}
-	
+
 	public static function getExecutionCount() {
 		return self::$executionCount;
 	}
@@ -916,12 +916,12 @@ class Query {
 	 * @return PDOStatement
 	 */
 	private function executeSql(&$pdo = null) {
-		
+
 		self::$executionCount++;
 
 		$pdo = Database::getDefaultConnection();
 		$pdoStatement = $pdo->prepare($this->sql);
-		
+
 		$logger = $this->getLogger();
 		if ($logger->isActive(Logger::DEBUG)) {
 			$call = null;
@@ -956,7 +956,7 @@ class Query {
 			}
 		} catch (PDOException $ex) {
 			$error = $ex->errorInfo;
-			
+
 			// deadlock
 			if ($retry && $error[1] == 1213) {
 				$retry = false;
@@ -1080,7 +1080,7 @@ class Query {
 
 	public function executeSelectColumn($colIndex = 0) {
 		self::getLogger()->debug('Executing select query');
-		
+
 		$this->action = self::SELECT;
 		$this->buildSelect();
 
@@ -1097,7 +1097,7 @@ class Query {
 			return $default;
 		}
 	}
-	
+
 	/**
 	 *
 	 * @return array
@@ -1105,7 +1105,7 @@ class Query {
 	public function executeSelect($fetchStyle = PDO::FETCH_ASSOC, $columnIndex = null) {
 
 //		self::getLogger()->debug('Executing select query');
-		
+
 		$this->action = self::SELECT;
 		$this->buildSelect();
 
@@ -1151,7 +1151,7 @@ class Query {
 	public function exists() {
 		return $this->executeCount() > 0;
 	}
-	
+
 	public function setAction($action) {
 		$this->sql = null;
 		$this->bindings = array();
@@ -1324,7 +1324,7 @@ class Query {
 			$this->sql = null;
 			$this->bindings = array();
 		}
-		
+
 		return $sql;
 	}
 
@@ -1335,11 +1335,11 @@ class Query {
 	 * @return PDOStatement
 	 */
 	public static function executeQuery($sql, $errorHandler = null) {
-		
+
 		Logger::get('Query')->debug('Executing raw query: {}', $sql);
-		
+
 		$sth = Database::getDefaultConnection()->prepare($sql);
-		
+
 		if ($sth->execute()) {
 			return $sth;
 		} else {
@@ -1470,7 +1470,7 @@ abstract class QuerySelectBase extends SqlVariable {
 
 	/** @var QueryAliasable */
 	private $aliasable;
-	
+
 	private $alias = null;
 
 	function __construct(QueryAliasable $query, $alias = null) {
@@ -1488,7 +1488,7 @@ abstract class QuerySelectBase extends SqlVariable {
 	}
 
 	abstract protected function doBuildSql(QueryAliasable $aliasable, &$bindings);
-	
+
 	public function __toString() {
 		return $this->buildSql(false, $bindings);
 	}
@@ -1526,7 +1526,7 @@ class QuerySelect extends SqlVariable {
 	function isSetAlias() {
 		return $this->alias_es != null;
 	}
-	
+
 	function isTable($table) {
 		if ($this->table instanceof ModelTable) {
 			if ($table instanceof ModelTable) return $this->table === $table;
@@ -1555,7 +1555,7 @@ class QuerySelect extends SqlVariable {
 
 		$tableName = $this->table instanceof ModelTable ? $this->table->getDBTable() : $this->table;
 		$qTable = $omit ? null : Query::quoteName($tableName);
-		
+
 		return $this->doBuildSql($qTable);
 	}
 
@@ -1854,7 +1854,7 @@ class QueryErrorHandler {
 					$message = lang('Impossible de créer la nouvelle table');
 				}
 				throw new SqlUserException($error, $message, lang('Impossible de créer la table'));
-				
+
 			case 1216:
 			case 1451:
 				throw new SqlUserException(

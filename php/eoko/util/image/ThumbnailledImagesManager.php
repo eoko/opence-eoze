@@ -17,7 +17,7 @@ namespace eoko\util\image;
  * as expected.
  */
 interface ThumbnailledImagesManager {
-	
+
 	/**
 	 * Creates a new ThumbnailledImagesManager.
 	 * 
@@ -32,7 +32,7 @@ interface ThumbnailledImagesManager {
 	 * cannot be read
 	 */
 	function __construct($imageRootPath, $cacheRootPath);
-	
+
 	/**
 	 * Adds the given image to the image path managed by the ThumbnailledImagesManager.
 	 * If a $width and $height are specified, then the image is immediately
@@ -53,7 +53,7 @@ interface ThumbnailledImagesManager {
 	 * @throws \IllegalStateException if a writting error occurs
 	 */
 	function addImage($absoluteSourcePath, $relativeDestPath, $width = null, $height = null);
-	
+
 	/**
 	 * Deletes the image identified by $path, and all the cached image it has
 	 * generated.
@@ -62,7 +62,7 @@ interface ThumbnailledImagesManager {
 	 * delete error occurs
 	 */
 	function deleteImage($path);
-	
+
 	/**
 	 * Get the absolute path for an image with the desired $width and $height.
 	 * 
@@ -86,13 +86,13 @@ interface ThumbnailledImagesManager {
 }
 
 class ImageException extends \SystemException {
-	
+
 }
 
 class ImageNotFoundException extends ImageException {
-	
+
 }
 
 class InvalidImageException extends ImageException {
-	
+
 }

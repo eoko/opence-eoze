@@ -3690,34 +3690,14 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		if (this.firstLoad) {
 			this.store.reload(o);
 		}
-// REM
-//		if (this.reloadLatch > 0) {
-//			this.reloadLatch--;
-//		} else {
-//			var o;
-//			if (callback) {
-//				if (Ext.isFunction(callback)) {
-//					o = {
-//						callback: callback
-//						,scope: scope || this
-//					};
-//				} else {
-//					o = callback;
-//				}
-//			}
-//			if (this.firstLoad) {
-//				this.reloadLatch = 0;
-////				debugger
-//				this.store.reload(o);
-//			}
-//		}
 	}
 	
 	// private
 	,columnMenu_onBeforeShow: function(colMenu) {
 		var cm = this.grid.getColumnModel(),
-			colCount = cm.getColumnCount();
-			
+			colCount = cm.getColumnCount(),
+			checkGroups = [];
+
 		colMenu.removeAll();
 		
 		// --- Select all ---
@@ -3725,18 +3705,12 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			 text:this.my.showAllColsText
 			,checked:!(this.checkIndexes instanceof Array)
 			,hideOnClick:false
-			,handler:function(item) {
-				var checked = ! item.checked;
-				apply(function() {
-					item.parentMenu.items.each(function(i) {
-						if(item !== i && i.setChecked && !i.disabled) {
-							i.setChecked(checked);
-						}
-					});
-				});
-			}
 		});
 		colMenu.add(checkAllItem,'-');
+
+		var checkAllGroup = Ext.create('eo.form.SelectableCheckGroup', checkAllItem);
+		colMenu.checkGroup = checkAllGroup;
+		checkGroups.push(checkAllGroup);
 		
 		// This method intends to give some air to the layout to avoid some
 		// overly manifest freezing of the UI
@@ -3765,8 +3739,6 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		};
 
 		// --- Items ---
-		var checkAllSelected = false;
-
 		var groups = {}, groupMenus;
 		if (this.extra.columnGroups) {
 			groupMenus = [];
@@ -3775,7 +3747,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 
 				groupMenus.push(menu);
 
-				colMenu.add(new Ext.menu.CheckItem({
+				var item = colMenu.add(Ext.create('Ext.menu.CheckItem', {
 					hideOnClick: false
 					,text: title
 					,menu: menu
@@ -3786,10 +3758,20 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 								menu.items.each(function(item) {
 									item.setChecked(check);
 								});
-							})
+							});
+						}
+						if (check) {
+							this.removeClass('undetermined');
 						}
 					}
 				}));
+
+				menu.parentItem = item;
+
+				checkAllGroup.add(item);
+				var checkGroup = Ext.create('eo.form.SelectableCheckGroup', item);
+				menu.checkGroup = checkGroup;
+				checkGroups.push(checkGroup);
 
 				Ext.each(items, function(item) {
 					groups[item] = menu;
@@ -3800,9 +3782,8 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 
 		for(var i = 0; i < colCount; i++){
 			if(cm.config[i].hideable !== false){
-				checkAllSelected = checkAllSelected || !cm.isHidden(i);
 				var dest = groups[cm.config[i].dataIndex] || colMenu;
-				dest.add(new Ext.menu.CheckItem({
+				var item = new Ext.menu.CheckItem({
 					itemId: 'col-'+cm.getColumnId(i),
 					text: cm.getColumnHeader(i),
 					checked: !cm.isHidden(i),
@@ -3810,6 +3791,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 					disabled: cm.config[i].hideable === false,
 					tooltip: cm.config[i].tooltip,
 					checkHandler: function(item, checked, cm) {
+						// Apply change
 						var index = cm.getIndexById(item.itemId.substr(4));
 						if(index != -1){
 							apply(function() {
@@ -3831,28 +3813,18 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 							});
 						}
 					}.createDelegate(this, [cm], 2)
-				}));
+				});
+
+				dest.add(item);
+
+				dest.checkGroup.add(item);
 			}
 		}
 
-		checkAllItem.setChecked(checkAllSelected);
-
 		// Finish group menus -- determine checked statut from items
-		if (groupMenus) {
-			Ext.each(groupMenus, function(menu) {
-				var checked = false,
-					cb = menu.ownerCt;
-				if (menu.items) {
-					menu.items.each(function(item) {
-						if (item.checked) checked = true;
-					});
-				} else {
-					colMenu.remove(cb);
-				}
-				cb.setChecked(checked);
-				cb.initiated = true;
-			});
-		}
+		Ext.each(checkGroups.reverse(), function(checkGroup) {
+			checkGroup.init();
+		});
 	}
 	
 	/**

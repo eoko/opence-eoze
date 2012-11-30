@@ -1,13 +1,13 @@
 <?php
 
 call_user_func(function() {
-	
+
 	$featureNamespace = 'eoze\\behat\\context\\';
 	$strlenFNS = strlen($featureNamespace);
-	
+
 	$contextPath = __DIR__ . '/behat/';
 	define('EOZE_FEATURES_PATH', $contextPath);
-	
+
 	// Register autoload for eoze Context classes
 	spl_autoload_register(function($class) use($contextPath, $featureNamespace, $strlenFNS) {
 		if (substr($class, 0, $strlenFNS) === $featureNamespace) {
@@ -18,7 +18,7 @@ call_user_func(function() {
 			}
 		}
 	});
-	
+
 	require __DIR__ . '/php/init.inc.php';
 
 	// PHPUnit

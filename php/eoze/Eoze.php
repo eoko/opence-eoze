@@ -12,14 +12,14 @@ use eoze\Dependency\Registry;
  * @since 2 nov. 2011
  */
 class Eoze extends ConfigurableClass {
-	
+
 	private static $eoze = null;
-	
+
 	/**
 	 * @var Registry
 	 */
 	private $registry;
-	
+
 	public function __construct(array $config = null) {
 		parent::__construct($config);
 		$class = $this->config->get('register().eoze\Dependency\Registry');

@@ -17,12 +17,12 @@ class PdfTemplate extends \eoko\template\Template {
 		'language' => 'fr',
 		'format' => 'A4',
 	);
-	
+
 	public function __construct($opts = null) {
 		parent::__construct($opts);
 		$this->createEngine();
 	}
-	
+
 	private function createEngine() {
 		if (!($this->engine instanceof PdfRenderingEngine)) {
 			if (!isset($this->engine['class'])) {
@@ -36,7 +36,7 @@ class PdfTemplate extends \eoko\template\Template {
 			$this->engine = new $class($this->engine);
 		}
 	}
-	
+
 	/**
 	 * @return PdfRenderingEngine
 	 */
@@ -64,5 +64,5 @@ class PdfTemplate extends \eoko\template\Template {
 		}
 		return $this->engine->toFile(parent::render(true));
 	}
-	
+
 }

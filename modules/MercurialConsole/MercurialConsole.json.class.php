@@ -5,7 +5,7 @@ namespace eoko\modules\MercurialConsole;
 use eoko\module\executor\JsonExecutor;
 
 class Json extends JsonExecutor {
-	
+
 	public function id() {
 		$hg = exec("which hg ");
 		$id = trim(`$hg id -ibt`);
@@ -14,5 +14,5 @@ class Json extends JsonExecutor {
 		$this->output = "<strong>Version:</strong> $id ($m[1])";
 		return true;
 	}
-	
+
 }

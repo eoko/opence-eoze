@@ -16,7 +16,7 @@ use Locale;
  * @since 1 nov. 2011
  */
 class IntlOrDummyServiceFactory implements ServiceFactory {
-	
+
 	public function createService() {
 		if (extension_loaded('intl')) {
 			return new Intl();

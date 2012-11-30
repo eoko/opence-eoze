@@ -25,7 +25,7 @@ class LegacyGridModule {
 
 		$controllerName = $module->getName();
 		$config = $module->getConfig();
-		
+
 		$tplFile = dirname(__FILE__) . DS . 'tpl' . DS . 'gridmodule.js.php';
 
 		$parentConfig = self::loadParentConfig($config);
@@ -44,14 +44,14 @@ class LegacyGridModule {
 					'namespace' => 'Oce.Modules',
 
 					'title' => ucfirst($controllerName),
-					
+
 					'primaryKeyName' => $table->getPrimaryKeyName(),
 				), false)
 				->toArray();
 
 		// --- Generation Template ---
 		$tpl = Template::create()->setFile($tplFile);
-		
+
 		// uses
 		if (isset($config['uses'])) {
 			$uses = $config->uses;
@@ -71,31 +71,31 @@ class LegacyGridModule {
 		}
 
 		$uses[] = $tpl->superclass;
-		
+
 		$tpl->modelName = json_encode($modelName);
 		$tpl->tableName = json_encode($table->getTableName());
 
 		$tpl->uses = json_encode($uses);
 
 		// --- i18n ---
-		
+
 		$i18n = null;
 		if (isset($config['i18n'])) {
 			$i18n = self::generateI18n($config['i18n'],
 					isset($config['i18nOptions']) && $config['i18nOptions']);
 			$tpl->i18n = self::toJSTemplate($i18n);
 		}
-		
+
 		// --- Extra ---
 		$extra = $config->node('extra')
 				->applyIf($parentConfig->get('extra', null))
 				->toArray();
-		
+
 		// --- Forms ---
 		$forms = $config->node('forms')
 				->applyIf($parentConfig->get('forms', null))
 				->toArray();
-		
+
 		// --- Filters ---
 		if (isset($extra['filters'])) {
 			// Converting to assoc array (legacy expectation)
@@ -241,13 +241,13 @@ class LegacyGridModule {
 //		dump("$tpl");
 		return $tpl;
 	}
-	
+
 	private static function generateI18n($texts, $convertAll = false) {
-		
+
 		require_once LIBS_PATH . 'markdown.php';
-		
+
 		$htmlTexts = array();
-		
+
 		foreach ($texts as $k => $text) {
 			if (substr($k, 0, 1) === '>') {
 				// removes the <p>...</p>
@@ -267,7 +267,7 @@ class LegacyGridModule {
 				$htmlTexts[$k] = $text;
 			}
 		}
-		
+
 		return $htmlTexts;
 	}
 
@@ -286,7 +286,7 @@ class LegacyGridModule {
 	}
 
 	private static function toJSTemplate($array) {
-		
+
 		return json_encode($array);
 
 		if (!is_array($array)) return self::valueToJSTemplate($array);
@@ -347,7 +347,7 @@ class LegacyGridModule {
 			return $tabs;
 		}
 	}
-	
+
 	private static function convertLangItems($langKeys, &$array) {
 		foreach ($array as $k => &$v) {
 			if (is_array($v)) {

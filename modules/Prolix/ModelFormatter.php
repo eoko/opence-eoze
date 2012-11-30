@@ -16,11 +16,11 @@ use InvalidConfigurationException;
  * @since 8 nov. 2011
  */
 class ModelFormatter {
-	
+
 	private $modelName;
-	
+
 	private $tableName;
-	
+
 	private $config;
 	private $fieldsConfig;
 
@@ -28,14 +28,14 @@ class ModelFormatter {
 	 * @var ModelTable
 	 */
 	private $table;
-	
+
 	public function __construct($name, array $config = null) {
 		$this->modelName    = isset($config['model']) ? $config['model'] : $name;
 		$this->tableName    = isset($config['table']) ? $config['table'] : $name . 'Table';
 		$this->config       = $config;
 		$this->fieldsConfig = isset($config['fields']) ? $config['fields'] : null;
 	}
-	
+
 	public function getModelName() {
 		return $this->modelName;
 	}
@@ -50,7 +50,7 @@ class ModelFormatter {
 	public function getTable() {
 		return ModelTable::getTable($this->getTableName());
 	}
-	
+
 	public function getFieldConfig($alias) {
 		if (isset($this->fieldsConfig[$alias])) {
 			return $this->fieldsConfig[$alias];
@@ -58,9 +58,9 @@ class ModelFormatter {
 	}
 
 	private function applyUiDefaults(&$uiConfig, $column, $context) {
-		
+
 	}
-	
+
 	private function applyUiConfig(&$fieldConfig, ModelColumn $column) {
 		if (isset($fieldConfig['ui'])) {
 			foreach ($fieldConfig['ui'] as $context => &$uiConfig) {
@@ -80,7 +80,7 @@ class ModelFormatter {
 			}
 		}
 	}
-	
+
 	public function getFields() {
 		$return = array();
 		foreach ($this->getTable()->getColumns() as $column) {

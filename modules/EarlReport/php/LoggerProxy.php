@@ -12,28 +12,28 @@ use eoko\log\Logger;
  * @since 26 janv. 2012
  */
 class LoggerProxy implements Xapi {
-	
+
 	/**
 	 * @var Logger
 	 */
 	private $logger;
-	
+
 	public function __construct($context) {
 		$this->logger = Logger::get($this);
 	}
-	
+
 	public function debug($message) {
 		$this->logger->debug($message);
 	}
-	
+
 	public function info($message) {
 		$this->logger->info($message);
 	}
-	
+
 	public function warn($message) {
 		$this->logger->warn($message);
 	}
-	
+
 	public function error($message) {
 		$this->logger->error($message);
 	}

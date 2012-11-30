@@ -19,12 +19,12 @@ use IllegalStateException;
  * @since 27 oct. 2011
  */
 class Base extends ConfigurableClass {
-	
+
 	/**
 	 * @var Registry
 	 */
 	private $dependencyRegistry;
-	
+
 	public function __construct(array $config = null) {
 		parent::__construct($config);
 		// Init dependency registry
@@ -36,9 +36,9 @@ class Base extends ConfigurableClass {
 		$this->resolveDependencies();
 		$this->construct();
 	}
-	
+
 	protected function construct() {}
-	
+
 	/**
 	 * Gets the {@link Registry} used to resolve dependencies within this
 	 * class.
@@ -55,12 +55,12 @@ class Base extends ConfigurableClass {
 	public static function getClass() {
 		return get_called_class();
 	}
-	
+
 //	protected function locale($message, $num = 1, array $replacements = null) {
 ////		return $this->messageTranslator->translate($message, $num, $replace);
 //		return $message;
 //	}
-	
+
 	/**
 	 * @var AnnotationProcessor
 	 */
@@ -75,11 +75,11 @@ class Base extends ConfigurableClass {
 		}
 		return self::$annotationProcessor;
 	}
-	
+
 	private function resolveDependencies() {
 		$annotationProcessor = self::getAnnotationProcessor();
 		$class = get_class($this);
-		
+
 		$propertyInjections = $annotationProcessor->parsePropertyInjections($class);
 		foreach ($this->config as $key => $value) {
 			if ($key{0} === '$') {
@@ -87,9 +87,9 @@ class Base extends ConfigurableClass {
 				$propertyInjections[$key] = $value;
 			}
 		}
-		
+
 		$setterInjections = $annotationProcessor->parseSetterInjections($class);
-		
+
 		if ($propertyInjections) {
 			foreach ($propertyInjections as $property => $spec) {
 				$this->dependencyRegistry->hook($this->$property, $spec);
@@ -120,5 +120,5 @@ class Base extends ConfigurableClass {
 			}
 		}
 	}
-	
+
 }

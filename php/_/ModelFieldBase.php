@@ -10,7 +10,7 @@ use eoko\cqlix\ModelFieldHelper;
  * @since 22 nov. 2011
  */
 abstract class ModelFieldBase implements ModelField {
-	
+
 	public function castValue($value) {
 		if ($value === null) {
 			return null;
@@ -37,17 +37,17 @@ abstract class ModelFieldBase implements ModelField {
 				return $value;
 		}
 	}
-	
+
 	public function getActualField() {
 		return $this;
 	}
-	
+
 	public function hasDefault() {
 		return false;
 	}
-	
+
 	public function getDefault() {}
-	
+
 	public function isPrimary() {
 		return false;
 	}

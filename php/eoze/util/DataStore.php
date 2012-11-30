@@ -13,6 +13,6 @@ use eoze\util\DataStore\Query;
 interface DataStore {
 
 	function query(Query $query = null);
-	
+
 	function getElementFieldValue($element, $field);
 }

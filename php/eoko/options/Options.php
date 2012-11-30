@@ -3,7 +3,7 @@
 namespace eoko\options;
 
 class Options {
-	
+
 	private function __construct($opts = null) {
 		if ($opts !== null) {
 			foreach ($opts as $name => $v) {
@@ -11,7 +11,7 @@ class Options {
 			}
 		}
 	}
-	
+
 	public static function apply($target, $opts) {
 		if ($opts === null) {
 			return;
@@ -21,7 +21,7 @@ class Options {
 			}
 		}
 	}
-	
+
 	public static function parse($opts) {
 		$class = get_called_class();
 		if ($opts === null || is_array($opts)) {
@@ -47,21 +47,21 @@ class Options {
 			}
 		}
 	}
-	
+
 	public static function create() {
 		$class = \get_called_class();
 		return new $class();
 	}
-	
+
 	public function __call($name, $args) {
 		$this->$name = $args[0];
 		return $this;
 	}
-	
+
 	public static function __callStatic($name, $args) {
 		return self::create()->__call($name, $args);
 	}
-	
+
 //	const B1	= 1;
 //	const B2	= 2;
 //	const B3	= 4;

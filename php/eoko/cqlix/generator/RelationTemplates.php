@@ -7,6 +7,7 @@ use eoko\util\Arrays;
 use eoko\config\ConfigManager;
 
 use UnsupportedOperationException;
+use InvalidArgumentException;
 
 use ModelRelationReferedByOneOnMultipleFields;
 use ModelRelationReferedByMany;
@@ -32,7 +33,7 @@ class RelationTemplates {
 }
 
 abstract class TplRelation {
-	
+
 	public $alias;
 	public $localDBTableName;
 	public $targetDBTableName;
@@ -45,9 +46,9 @@ abstract class TplRelation {
 
 	public $onDeleteAction = null;
 	public $onUpdateAction = null;
-	
+
 	public $uniqueBy = null;
-	
+
 	public $config;
 
 	function __construct($alias, $localTableName, $targetTableName, $reciproque) {
@@ -76,7 +77,7 @@ abstract class TplRelation {
 		$table = $this->targetDBTableName !== $this->localDBTableName ?
 				$this->getTargetTableName() . 'Proxy::get()'
 				: '$this';
-		
+
 		$config = array(
 			'name'     => $this->getName(),
 		);
@@ -87,12 +88,12 @@ abstract class TplRelation {
 		if ($this->onDeleteAction) {
 			$config['onDeleteAction'] = '%onDeleteAction%';
 		}
-		
+
 		$config = var_export($config, true);
 		$config = str_replace("array (", "array(", $config);
 		$config = str_replace("\n  ", "\n\t\t\t\t\t", $config);
 		$config = str_replace("\n)", "\n\t\t\t\t)", $config);
-		
+
 		if ($this->onDeleteAction) {
 			$config = str_replace("'%onDeleteAction%'", $this->exportOnDeleteAction(), $config);
 		}
@@ -141,7 +142,7 @@ new <?php echo $this->getClass() ?>(<?php echo $head ? $rTabs : '' ?>
 	protected function formatAlias($alias) {
 		return $alias;
 	}
-	
+
 	private function isTrimLocalTablePrefix() {
 		return ConfigManager::get('eoko/cqlix/Generator/relation', 'trimLocalTablePrefix', true);
 	}
@@ -152,11 +153,11 @@ new <?php echo $this->getClass() ?>(<?php echo $head ? $rTabs : '' ?>
 
 //		echo get_class($this) . ' => ';
 //		echo "getName(): $this->targetDBTableName: $this->alias, $this->prefix\n";
-		
+
 		if (!$this->alias) {
 			$this->alias = $this->makeAlias();
 		}
-		
+
 		if ($this->alias === null) {
 			// filter out local table prefix in target table name
 			$regex = '/^(?:' . preg_quote($this->localDBTableName)
@@ -168,7 +169,7 @@ new <?php echo $this->getClass() ?>(<?php echo $head ? $rTabs : '' ?>
 			} else {
 				$target = $this->targetDBTableName;
 			}
-			
+
 			if ($this instanceof ModelRelationHasOne) {
 				$name = NameMaker::modelFromDB($target);
 			} else if ($this instanceof ModelRelationHasMany) {
@@ -191,12 +192,17 @@ new <?php echo $this->getClass() ?>(<?php echo $head ? $rTabs : '' ?>
 					|| (($this->reciproque !== null || $other->reciproque === null)
 						|| $this->reciproque->equals($other->reciproque, false)));
 	}
-	
-	public function getTargetType() {
+
+	public function getTargetType($operation, $php = false) {
 		if ($this instanceof ModelRelationHasOne) {
 			return NameMaker::modelFromDB($this->targetDBTableName);
 		} else if ($this instanceof ModelRelationHasMany) {
-			return 'array';
+			switch ($operation) {
+				case 'get': return 'ModelSet';
+				case 'set': return $php ? 'array' : $this->getTargetModelName() . '[]';
+				default:
+					throw new InvalidArgumentException('$operation must be "get" or "set"');
+			}
 		} else {
 			print_r($this);
 			throw new IllegalStateException(get_class($this) . ' => ' . $this);
@@ -242,23 +248,23 @@ new <?php echo $this->getClass() ?>(<?php echo $head ? $rTabs : '' ?>
 	public function configure(array $config = null) {
 
 		$this->config = Arrays::apply($this->config, $config);
-		
+
 		if (isset($this->config['onDelete'])) {
 			$this->onDeleteAction = $config['onDelete'];
 		}
-		
+
 		if (isset($this->config['uniqueBy'])) {
 			$this->uniqueBy = $this->config['uniqueBy'];
 		}
 	}
-	
+
 	public function exportConfig($pre = '') {
 		$export = var_export($this->config, true);
 		$export = str_replace("\n", "\n" . $pre, $export);
 		$export = str_replace('array (', 'array(', $export);
 		return $export;
 	}
-	
+
 	public function exportOnDeleteAction() {
 		switch ($this->onDeleteAction) {
 			case 'NOTHING':
@@ -372,7 +378,7 @@ class TplRelationReferedByOne extends TplRelationReferencesOne implements TplRel
 	protected function getInfoClass() {
 		return 'ModelRelationInfoReferedByOne';
 	}
-	
+
 	public function setReferencingAlias($referencingAlias) {
 		return $this->referencingAlias = $referencingAlias;
 	}
@@ -402,7 +408,7 @@ class TplRelationReferedByMany extends TplRelationByReference
 		implements ModelRelationHasMany, TplRelationIsRefered {
 
 	public $constraintName, $referencingTableName, $referencedTableName;
-	
+
 	protected $referencingAlias;
 
 	public function setReferencingAlias($referencingAlias) {

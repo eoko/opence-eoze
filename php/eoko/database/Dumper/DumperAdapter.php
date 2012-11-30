@@ -14,7 +14,7 @@ use eoko\database\Dumper,
  * @version 1.0.0 10/04/12 01:13
  */
 abstract class DumperAdapter implements DumperListener {
-	
+
 	/**
 	 * @var Dumper
 	 */
@@ -23,7 +23,7 @@ abstract class DumperAdapter implements DumperListener {
 	public function __construct(Dumper $dumper) {
 		$this->dumper = $dumper;
 	}
-	
+
 	/**
 	 * Gets the {@link DumperListener} execution context's {@link Dumper}.
 	 * @return Dumper
@@ -31,7 +31,7 @@ abstract class DumperAdapter implements DumperListener {
 	protected function getDumper() {
 		return $this->dumper;
 	}
-//	
+//
 //	/**
 //	 * Gets the {@link DumperListener} internal {@link Logger}.
 //	 * @return Logger
@@ -42,10 +42,10 @@ abstract class DumperAdapter implements DumperListener {
 //		}
 //		return $this->logger;
 //	}
-//	
+//
 //	protected function getConfig() {
 //		return $this->dumper->getConfig();
 //	}
-	
+
 	public function beforeDump($dataFilename, $structureFilename = null) {}
 }

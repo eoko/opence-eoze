@@ -5,7 +5,7 @@ namespace eoko\util;
 use eoko\log\Logger;
 
 class Json {
-	
+
 	private static function utf8_encode_array($in) {
 		$out = array();
         if (is_array($in)) {
@@ -43,8 +43,8 @@ class Json {
 		return json_decode(urldecode($json), $assoc);
 //		return json_decode($json, $assoc);
 	}
-	
-	
+
+
 	/**
 	 * Indents a flat JSON string to make it more human-readable.
 	 *

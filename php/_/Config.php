@@ -105,21 +105,22 @@ class Config implements ArrayAccess, IteratorAggregate {
 		return $parts[0];
 	}
 
-	public static function find($rootNodeName, $dir = null) {
-		if ($dir === null) $dir = substr(CONFIG_PATH,0,-1);
-		else $dir = CONFIG_PATH . $dir;
-
-		$files = FileHelper::listFiles($dir, 're:\.ya?ml$', true, true);
-		foreach ($files as $file) {
-			// TODO error here => Fatal error: Call to undefined method Config::create()
-			$config = self::create(YAML::load(str_replace("\t", "  ", file_get_contents($file))));
-			if ($config instanceof Config && $config->hasNode($rootNodeName)) {
-				return $config->node($rootNodeName);
-			}
-		}
-
-		return null;
-	}
+// REMOVED ON 2012-11-22
+//	public static function find($rootNodeName, $dir = null) {
+//		if ($dir === null) $dir = substr(CONFIG_PATH,0,-1);
+//		else $dir = CONFIG_PATH . $dir;
+//
+//		$files = FileHelper::listFiles($dir, 're:\.ya?ml$', true, true);
+//		foreach ($files as $file) {
+//			// TODO error here => Fatal error: Call to undefined method Config::create()
+//			$config = self::create(YAML::load(str_replace("\t", "  ", file_get_contents($file))));
+//			if ($config instanceof Config && $config->hasNode($rootNodeName)) {
+//				return $config->node($rootNodeName);
+//			}
+//		}
+//
+//		return null;
+//	}
 
 	/**
 	 * Load a config node.
@@ -147,7 +148,7 @@ class Config implements ArrayAccess, IteratorAggregate {
 			throw new InvalidConfigurationException($filename, null, null, null, $ex);
 		}
 	}
-	
+
 	/**
 	 * return \eoko\config\Config
 	 */
@@ -205,7 +206,7 @@ class Config implements ArrayAccess, IteratorAggregate {
 			throw new IllegalArgumentException();
 		}
 	}
-	
+
 	/**
 	 * Creates a Config object from the given $config param (see {@link
 	 * Config::create()} for accepted inputs), and returns the node $node if
@@ -264,7 +265,7 @@ class Config implements ArrayAccess, IteratorAggregate {
 			return $default;
 		}
 	}
-	
+
 	/**
 	 * Gets the value for the given path, or $default if the given config 
 	 * option is not set.
@@ -370,13 +371,13 @@ class Config implements ArrayAccess, IteratorAggregate {
 	 * node with the specified name
 	 */
 	public function node($path, $require = false, $createIfNeeded = true) {
-		
+
 		if ($path === null) {
 			return $this;
 		} else if (is_string($path)) {
 			$pathElt = explode('/', $path);
 		}
-		
+
 		if (count($pathElt) == 1) {
 			if (isset($this->value[$path])) {
 				if (is_array($this->value[$path])) {
@@ -420,15 +421,15 @@ class Config implements ArrayAccess, IteratorAggregate {
 			return $node;
 		}
 	}
-	
+
 	/**
 	 * Apply the given $values to this config (ie. set the keys in this config
 	 * to their value in the array).
-	 * @param array $values
+	 * @param Traversable $values
+	 * @param bool $maxRecursionLevel
 	 * @return Config this config item
 	 * @internal default for $maxRecursionLevel changed on 01/03/11 07:30
 	 */
-//	public function apply($values, $maxRecursionLevel = true) {
 	public function apply($values, $maxRecursionLevel = false) {
 		ArrayHelper::apply($this->value, $values, $maxRecursionLevel);
 		return $this;

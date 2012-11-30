@@ -14,7 +14,7 @@ use ChromePHP;
  * @since 8 nov. 2011
  */
 class ChromePHPAdapter {
-	
+
 	public function __construct() {
 		// TODO this should not be hardcoded for my computer......
 		//$homeTmpDir = trim(`echo ~/tmp`);
@@ -24,19 +24,19 @@ class ChromePHPAdapter {
 		} else {
 			$tmpDir = '/tmp/chromelogs';
 		}
-		
+
 		if (!is_dir($tmpDir)) {
 			mkdir($tmpDir);
 		}
-		
+
 		$ln = ROOT . '/chromelogs';
 		if (!file_exists($ln)) {
 			symlink($tmpDir, $ln);
 		}
-		
+
 		ChromePhp::useFile($tmpDir, 'chromelogs');
 	}
-	
+
 	public function process(LogEntry $entry) {
 		switch ($entry->level) {
 			case Logger::INFO:

@@ -15,9 +15,9 @@ use IllegalArgumentException;
  * @since 29 oct. 2011
  */
 class Helper {
-	
+
 	private function __construct() {}
-	
+
 	/**
 	 * Extends the $parent array with the $child array.
 	 * 
@@ -129,7 +129,7 @@ class Helper {
 		}
 		return self::extendImpl($parent, $child, null);
 	}
-	
+
 	private static function expandSpecialKeys($array) {
 		$copy = array();
 		foreach ($array as $key => $value) {
@@ -148,7 +148,7 @@ class Helper {
 		}
 		return $copy;
 	}
-	
+
 	private static function extendImpl_applyAssocToAssoc(array &$parent, array $config) {
 		foreach ($config as $key => $value) {
 			if (substr($key, -2) === '[]') {
@@ -182,21 +182,21 @@ class Helper {
 			}
 		}
 	}
-	
+
 	private static function extendImpl(&$parent, $config, $rootKey) {
-		
+
 		if (!$parent) {
 			return $parent = $config;
 		}
-		
+
 		if (is_array($parent)) { // --- $parent is an array ----------------------------------------
-			
+
 			if (Arrays::isAssoc($parent)) { // $parent is an associative array
-				
+
 				$parent = self::expandSpecialKeys($parent);
-				
+
 				if (is_array($config)) { // $config is array
-					
+
 					if (Arrays::isAssoc($config)) { // $config is an associative array
 						self::extendImpl_applyAssocToAssoc($parent, $config);
 					} else { // $config is an indexed array
@@ -216,7 +216,7 @@ class Helper {
 						);
 					}
 				}
-			
+
 			} else { // $parent is an indexed array
 
 				if ($config === null) {
@@ -237,9 +237,9 @@ class Helper {
 					);
 				}
 			}
-		
+
 		} else { // --- $parent is scalar ----------------------------------------------------------
-			
+
 			if (!is_array($config)) {
 				// overriding scalar key
 				$parent = $config;
@@ -257,10 +257,10 @@ class Helper {
 				}
 			}
 		}
-		
+
 		return $parent;
 	}
-	
+
 	public static function complement(array $child = null, array $parent = null) {
 		throw new NotImplementedYetException();
 	}

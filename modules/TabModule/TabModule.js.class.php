@@ -7,7 +7,7 @@ use eoko\template\Template;
 use SystemException;
 
 class Js extends \eoko\module\executor\ExecutorBase {
-	
+
 	protected function processResult($result) {
 		if (is_string($result)) {
 			require $result;
@@ -17,7 +17,7 @@ class Js extends \eoko\module\executor\ExecutorBase {
 			throw new SystemException('Unknown error');
 		}
 	}
-	
+
 	public function get_module() {
 		if (!headers_sent()) {
 			header('Content-type: application/javascript');

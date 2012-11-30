@@ -9,7 +9,7 @@ namespace eoze\acl;
  * @since 20 oct. 2011
  */
 interface HasIntId {
-	
+
 	/**
 	 * @return int
 	 */

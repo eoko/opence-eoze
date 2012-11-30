@@ -71,7 +71,7 @@ class TableFilterPlugin {
 		if (false === $filter instanceof TableFilter) {
 			$filter = new TableFilter($filter, $label, $condition, $default);
 		}
-		
+
 		return $this->filters[$filter->name] = $filter;
 	}
 
@@ -116,11 +116,11 @@ class TableFilterPlugin {
 	}
 
 	public function addLoadQueryFilters(ModelTableQuery $query, $filters, $baseRelation = null) {
-		
+
 		if (!$filters) return;
-		
+
 		$opts = helper\makeFilterHash($filters);
-		
+
 		if (!isset($opts['all'])) {
 			$conditions = null;
 
@@ -144,7 +144,7 @@ class TableFilterPlugin {
 				}
 			}
 		}
-		
+
 		$options = null;
 		if ($this->filterOptions) foreach ($this->filterOptions as $filter) {
 			$o = $filter->getCondition($baseRelation, $this->baseRelations, $this->table, $opts);

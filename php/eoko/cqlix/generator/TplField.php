@@ -39,7 +39,7 @@ class TplField extends ModelColumn implements ConfigConstants {
 	public $enum = false, $enumLabels = null;
 	private $enumConfig;
 	private $enumCodeValues = null;
-	
+
 	public $unsigned = false;
 
 	function __construct($field, $type, $length = null, $canNull = false,
@@ -132,9 +132,9 @@ class TplField extends ModelColumn implements ConfigConstants {
 //REM			$this->configure($config);
 		}
 	}
-	
+
 	private $uniqueByConfig = null;
-	
+
 	public function isUnique() {
 		if ($this->uniqueByConfig !== null) {
 			return $this->uniqueByConfig;
@@ -144,11 +144,11 @@ class TplField extends ModelColumn implements ConfigConstants {
 	}
 
 	public function configure($config = null) {
-		
+
 		if (isset($config['unique'])) {
 			$this->uniqueByConfig = $config['unique'];
 		}
-		
+
 		if ($this->configured) {
 			throw new IllegalStateException("Field $this->columnName already configured");
 		} else {
@@ -165,12 +165,12 @@ class TplField extends ModelColumn implements ConfigConstants {
 				);
 			}
 		}
-		
+
 		if ($this->commentConfig) {
 
 			Logger::get($this)->info('Comment configuration may be overriden '
 					. 'by configuration files for field ' . $this->columnName);
-			
+
 			$config = Arrays::apply($this->commentConfig, $config, false);
 		}
 
@@ -190,11 +190,11 @@ class TplField extends ModelColumn implements ConfigConstants {
 			$this->configureEnum($config[self::CFG_ENUM]);
 			unset($config[self::CFG_ENUM]);
 		}
-		
+
 		$this->meta = Arrays::apply($this->meta, $config);
 //		$this->meta = count($config) ? $config : null;
 	}
-	
+
 	public function getConfiguredRelation() {
 		if (isset($this->relationConfig['foreignModel'])) {
 			return new TplRelationReferencesOne(
@@ -207,7 +207,7 @@ class TplField extends ModelColumn implements ConfigConstants {
 			);
 		}
 	}
-	
+
 	private $relationConfig;
 
 	private function configureRelations($config) {
@@ -254,7 +254,7 @@ class TplField extends ModelColumn implements ConfigConstants {
 
 		$type = $this->type;
 		$this->enum = true;
-		
+
 		if ($type === self::T_INT) {
 			$nextFreeEnumValue = 1;
 			if (!is_array($config)) {
@@ -280,7 +280,7 @@ class TplField extends ModelColumn implements ConfigConstants {
 		} else {
 			throw new IllegalStateException('Virtual Enum columns must either be of type INT or STRING');
 		}
-		
+
 //		dump($this->enumCodeValues);
 //		dump($config);
 
@@ -331,7 +331,7 @@ class TplField extends ModelColumn implements ConfigConstants {
 			}
 			unset($cfg);
 		}
-		
+
 		// Guess default
 		if (!$hasDefault) {
 			$default = $this->getDefault();
@@ -350,7 +350,7 @@ class TplField extends ModelColumn implements ConfigConstants {
 			}
 			unset($cfg);
 		}
-		
+
 		$this->enumConfig = array();
 		foreach ($enumConfig as $code => $cfg) {
 			$this->enumConfig[$this->enumCodeValues[$code]] = $cfg;
@@ -472,7 +472,7 @@ echo $autoIncrement ?>, <?php ?>
 					. "(new table: $table->dbTable)");
 		}
 	}
-	
+
 	private function ensureConfigured() {
 		if (!$this->configured) {
 			$trace = debug_backtrace();

@@ -11,13 +11,13 @@ use eoze\util\DataStore;
  * @since 2 nov. 2011
  */
 abstract class QueryElementOnField extends QueryElement {
-	
+
 	protected $field;
-	
+
 	protected function __construct($field) {
 		$this->field = $field;
 	}
-	
+
 	protected function getFieldValue($element) {
 		return $this->getRepository()->getElementFieldValue($element, $this->field);
 	}

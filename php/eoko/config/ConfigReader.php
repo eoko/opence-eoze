@@ -6,20 +6,21 @@ use eoko\util\Arrays;
 
 use \IllegalStateException;
 
+/**
+ * @todo Get rid of this confusing class
+ */
 class ConfigReader {
 
 	private static $readers = array();
-
-	protected $data = array();
 
 	private final function __construct() {
 		$this->construct();
 	}
 
 	protected function construct() {}
-	
+
 	protected function process(array &$content) {
-		return Arrays::applyIf($this->data, $content, false);
+		return $content;
 	}
 
 	public static function read($node, &$content) {

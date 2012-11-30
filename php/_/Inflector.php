@@ -14,7 +14,7 @@ class Inflector {
 		}
 		return preg_split('/(?<=\\w)(?=[A-Z])/', $string);
 	}
-	
+
 	/**
 	 * Converts a camelCasedString to an underscored_separated_string.
 	 * 
@@ -65,7 +65,7 @@ class Inflector {
 		return self::capitalizeWords(self::explodeCamelCase($string, $split),
 				$split, $newSplit);
 	}
-	
+
 	public static function plural($word) {
 		$plural = Inflect::pluralize($word);
 		if (strtolower($word) === $word) {
@@ -83,9 +83,9 @@ class Inflector {
 	public static function pluralizeModel($modelName) {
 		return self::plural($modelName);
 	}
-	
+
 	private static $modelsConfig = null;
-	
+
 	private static function getTableConfig($table, $key = null, $default = null) {
 		if (self::$modelsConfig === null) {
 			self::$modelsConfig = ConfigManager::get(
@@ -98,9 +98,9 @@ class Inflector {
 			return $default;
 		}
 	}
-	
+
 	private static $knownSingulars = null;
-	
+
 	private static function getKnownSingular($word, $default = null) {
 		if (self::$knownSingulars === null) {
 			self::$knownSingulars = ConfigManager::get('eoko/lang/Inflector/singulars');
@@ -112,7 +112,7 @@ class Inflector {
 			return $default;
 		}
 	}
-	
+
 	public static function singularize($string) {
 		if (null !== $r = self::getKnownSingular($string)) {
 			return $r;

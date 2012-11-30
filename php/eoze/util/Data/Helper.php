@@ -15,7 +15,7 @@ use IllegalArgumentException;
 class Helper {
 
 	private function __construct() {}
-	
+
 	/**
 	 * Expands an array by transforming its keys that contain a $separator
 	 * into nested sub arrays.
@@ -34,7 +34,7 @@ class Helper {
 		throw new \UnsupportedOperationException(get_class() . '::expand()');
 		return self::expandImpl($array, $separator);
 	}
-	
+
 	private static function expandImpl(array $array = null, $separator = '.', $prevKey = null) {
 		if (!$array) {
 			return $array;
@@ -60,7 +60,7 @@ class Helper {
 		}
 		return $return;
 	}
-	
+
 	private static function expand_ApplyValue(&$array, $key, $value, $separator, $fullKey) {
 		if (!is_array($array)) {
 			throw new IllegalArgumentException("Conflict in expanding key: $fullKey");
@@ -94,7 +94,7 @@ class Helper {
 			$array[$key] = $value;
 		}
 	}
-	
+
 	public static function node(array $array = null, $key, &$value = null) {
 		if ($array === null) {
 			return false;

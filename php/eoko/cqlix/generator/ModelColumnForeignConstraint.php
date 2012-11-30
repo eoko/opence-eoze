@@ -7,7 +7,7 @@ class ModelColumnForeignConstraint {
 	public $targetTable;
 	public $targetField;
 	public $constraintName;
-	
+
 	public $onDelete;
 	public $onUpdate;
 

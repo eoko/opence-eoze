@@ -76,7 +76,7 @@ abstract class ModelTable extends ModelTableProxy {
 	public $renderers = null;
 
 	private $plugins = null;
-	
+
 	private $constructed = false;
 
 	/**
@@ -95,22 +95,22 @@ abstract class ModelTable extends ModelTableProxy {
 	 * @param array $cols
 	 */
 	protected function __construct(&$cols, &$relations) {
-		
+
 		$this->cols = $cols;
 		$this->relations = $relations;
-		
+
 		$this->doConfigure();
 		$this->preConfigure($this->cols, $this->relations, $this->virtuals);
-		
+
 		$this->configureBase($this->cols, $this->relations, $this->virtuals);
-		
+
 		$this->configure();
-		
+
 		$this->constructed = true;
 	}
-	
+
 	protected function doConfigure() {}
-	
+
 	protected function preConfigure(&$cols, &$relations, &$virtuals) {}
 
 	/**
@@ -129,19 +129,19 @@ abstract class ModelTable extends ModelTableProxy {
 	protected function configure() {
 		// initialization ...
 	}
-	
+
 	private $config;
-	
+
 	protected function getConfig() {
 		return $this->config;
 	}
 
 	protected function configureBase() {
-		
+
 		$this->config = ConfigManager::get(
 			ConfigManager::get('eoze/application/namespace') . "/cqlix/models/$this->dbTableName"
 		);
-		
+
 		foreach ($this->relations as $name => $relation) {
 			$relation->configureMeta(
 				isset($this->config['relations'][$name])
@@ -158,7 +158,7 @@ abstract class ModelTable extends ModelTableProxy {
 			);
 		}
 	}
-	
+
 	protected function addVirtuals($virtuals) {
 		if (func_num_args() > 1) {
 			$virtuals = func_get_args();
@@ -187,14 +187,14 @@ abstract class ModelTable extends ModelTableProxy {
 		}
 		$this->virtuals[$name] = $virtual;
 	}
-	
+
 	protected function addRelation(ModelRelationInfo $relation) {
 		if ($this->constructed) {
 			throw new IllegalStateException('This operation is only allowed during initialization');
 		}
 		$this->relations[$relation->getName()] = $relation;
 	}
-	
+
 	/**
 	 * Returns `true` if the underlying database engine automatically performs
 	 * ON_DELETE and ON_UPDATE actions.
@@ -492,7 +492,7 @@ abstract class ModelTable extends ModelTableProxy {
 	}
 
 	abstract public static function hasColumn($name);
-	
+
 	protected function _hasRelation($name) {
 		return array_key_exists($name, $this->relations);
 	}
@@ -561,7 +561,7 @@ abstract class ModelTable extends ModelTableProxy {
 //		else if ($require) throw new IllegalStateException();
 //		else return null;
 	}
-	
+
 	/**
 	 * Creates a Query with its WHERE claused configured to match only
 	 * 
@@ -569,11 +569,11 @@ abstract class ModelTable extends ModelTableProxy {
 	 * @return ModelTableQuery 
 	 */
 	abstract public static function createReadQuery(array $context = null);
-	
+
 	protected function _createReadQuery(array $context = null) {
-		
+
 		$query = $this->createQuery($context);
-		
+
 		return $query;
 	}
 
@@ -593,9 +593,9 @@ abstract class ModelTable extends ModelTableProxy {
 	 */
 	protected function _createLoadQuery($relationsMode = ModelTable::LOAD_NAME, 
 			array $context = null, $columns = null) {
-		
+
 		$query = $this->createReadQuery($context);
-		
+
 		// Makes it a hash... for speed!
 		if ($columns) {
 			$columns = array_flip($columns);
@@ -710,7 +710,7 @@ abstract class ModelTable extends ModelTableProxy {
 			} else {
 				throw new IllegalArgumentException('$requireType');
 			}
-			
+
 			$class = get_class($this);
 			$type = $requireType == ModelRelation::HAS_MANY ? 'HAS_MANY' : 'HAS_ONE';
 			throw new IllegalStateException("The relation $name of table $class is not of type $type");
@@ -773,9 +773,9 @@ abstract class ModelTable extends ModelTableProxy {
 	protected function _hasVirtual($name) {
 		return array_key_exists($name, $this->virtuals);
 	}
-	
+
 	abstract public static function isVirtualCachable($name);
-	
+
 	protected function _isVirtualCachable($name) {
 		return $this->virtuals[$name]->isCachable();
 	}
@@ -966,7 +966,7 @@ abstract class ModelTable extends ModelTableProxy {
 			$join->andWhere($where);
 		}
 	}
-	
+
 	public function addAssocWhere(QueryWhere $where, QueryAliasable $aliasable) {}
 
 	/**
@@ -1000,9 +1000,9 @@ abstract class ModelTable extends ModelTableProxy {
 	 */
 	protected function _findFirst(QueryWhere $where = null, array $context = null, 
 			$aliasingCallback = null) {
-		
+
 		$query = $this->createQuery($context);
-		
+
 		if ($aliasingCallback !== null) {
 			call_user_func($aliasingCallback, $where, $query);
 // REM 13/12/11 04:28
@@ -1033,7 +1033,7 @@ abstract class ModelTable extends ModelTableProxy {
 
 		$data = $this->createFindOneQuery($condition, $inputs, $context, $aliasingCallback)
 				->executeSelectFirst();
-		
+
 		if ($data !== null) {
 			return $this->createModel($data, true, $context);
 		} else {
@@ -1045,13 +1045,13 @@ abstract class ModelTable extends ModelTableProxy {
 	 * @return ModelTableQuery
 	 */
 	private function createFindOneQuery($condition, $inputs, $context, $aliasingCallback) {
-		
+
 		$query = $this->createQuery($context);
 		$where = $query->createWhere($condition, $inputs);
 		if ($aliasingCallback !== null) {
 			call_user_func($aliasingCallback, $where, $query);
 		}
-		
+
 		return $query->andWhere($where);
 	}
 
@@ -1063,7 +1063,7 @@ abstract class ModelTable extends ModelTableProxy {
 	 */
 	abstract public static function findOneWhere($condition = null, $inputs = null,
 			array $context = null, $aliasingCallback = null);
-	
+
 	/**
 	 * Find the Model corresponding the given condition, when only one result
 	 * is expected. If no corresponding model is found, NULL is returned. But, if
@@ -1072,11 +1072,11 @@ abstract class ModelTable extends ModelTableProxy {
 	 */
 	protected function _findOneWhere($condition = null, $inputs = null,
 			array $context = null, $aliasingCallback = null) {
-		
+
 		$data = $this->createFindOneQuery(
 			$condition, $inputs, $context, $aliasingCallback
 		)->executeSelect();
-		
+
 		if (count($data) === 1) {
 			return $this->createModel($data[0], true, $context);
 		} else if (1 < $n = count($data)) {
@@ -1167,7 +1167,7 @@ EX
 			$reciproqueFactory
 		);
 	}
-	
+
 	/**
 	 * @return ModelSet
 	 */
@@ -1241,10 +1241,26 @@ EX
 		}
 		return $this->plugins[$class];
 	}
-	
+
+	/**
+	 * Creates a ModelSet for the given Query.
+	 *
+	 * @param ModelTableQuery $loadQuery
+	 * @param int $modelSetMode
+	 * @param ModelRelationReciproqueFactory $reciproqueFactory
+	 * @return ModelSet
+	 */
 	abstract static public function createModelSet(ModelTableQuery $loadQuery,
 			$modelSetMode = ModelSet::ONE_PASS,
 			ModelRelationReciproqueFactory $reciproqueFactory = null);
+	/**
+	 * Creates a ModelSet for the given Query.
+	 *
+	 * @param ModelTableQuery $loadQuery
+	 * @param int $modelSetMode
+	 * @param ModelRelationReciproqueFactory $reciproqueFactory
+	 * @return ModelSet
+	 */
 	protected function _createModelSet(ModelTableQuery $loadQuery,
 			$modelSetMode = ModelSet::ONE_PASS,
 			ModelRelationReciproqueFactory $reciproqueFactory = null) {
@@ -1283,7 +1299,7 @@ EX
 		// 12/12/11 22:45 changed to createQuery, to bypass context
 //		$query = $this->createLoadQuery(self::LOAD_NONE);
 		$query = $this->createQuery($context);
-		
+
 		// Create the where clause
 //		$where = $query->createWhere()->whereIn($query->getQualifiedName($field), $values);
 		$where = $query->createWhere()->whereIn($field, $values);
@@ -1298,14 +1314,14 @@ EX
 		// Actually remove the data from the data store
 		return $this->executeDelete($query);
 	}
-	
+
 	abstract static public function deleteWhereNotIn($field, $values, $context = null);
 	protected function _deleteWhereNotIn($field, $values, $context = null) {
 
 		// 12/12/11 22:45 changed to createQuery, to bypass context
 //		$query = $this->createLoadQuery(self::LOAD_NONE);
 		$query = $this->createQuery($context);
-		
+
 		// Create the where clause
 		$where = $query->createWhere()->whereNotIn($field, $values);
 		// Notify each refering model of the end of the relationship, in order
@@ -1319,7 +1335,7 @@ EX
 		// Actually remove the data from the data store
 		return $this->executeDelete($query);
 	}
-	
+
 	protected function executeDelete(ModelTableQuery $query) {
 		return $query->executeDelete();
 	}
@@ -1328,7 +1344,7 @@ EX
 	protected function _deleteWherePkIn($values, $context = null) {
 		return $this->deleteWhereIn($this->getPrimaryKeyName(), $values, $context);
 	}
-	
+
 	abstract public static function deleteWherePkNotIn($values, $context = null);
 	protected function _deleteWherePkNotIn($values, $context = null) {
 		return $this->deleteWhereNotIn($this->getPrimaryKeyName(), $values, $context);
@@ -1350,6 +1366,18 @@ abstract class ModelSet implements Iterator {
 	const RAW = -1;
 	const ONE_PASS = 0;
 	const RANDOM_ACCESS = 1;
+
+	/**
+	 * Get the number of records in this set.
+	 *
+	 * @return int
+	 */
+	abstract public function count();
+
+	/**
+	 * @return Model[]
+	 */
+	abstract public function toArray();
 
 	/**
 	 *
@@ -1409,7 +1437,9 @@ abstract class ModelSet implements Iterator {
 
 class RandomAccessModelSet extends ModelSet implements ArrayAccess {
 
-	/** @var array */
+	/**
+	 * @var Model[]
+	 */
 	protected $set;
 	protected $context = null;
 
@@ -1464,6 +1494,9 @@ class RandomAccessModelSet extends ModelSet implements ArrayAccess {
 		return count($this->set);
 	}
 
+	/**
+	 * @inheritdoc
+	 */
 	public function toArray() {
 		return $this->set;
 	}
@@ -1588,6 +1621,9 @@ class OnePassModelSet extends ModelSet {
 		else return $this->count = $this->query->executeCount();
 	}
 
+	/**
+	 * @inheritdoc
+	 */
 	public function toArray() {
 		$r = array();
 		foreach($this as $record) $r[] = $record;
@@ -1665,7 +1701,7 @@ class ModelTableFinder extends QueryWhere {
 	public function getQuery() {
 		return $this->query;
 	}
-	
+
 	/**
 	 * Gets a clone of the finder's query.
 	 * @return ModelTableQuery

@@ -9,18 +9,18 @@ namespace eoko\util;
  * @since 1 déc. 2011
  */
 class GlobalEvents {
-	
+
 	private static $listeners;
-	
+
 	private function __construct() {}
-	
+
 	public static function addListener($class, $event, $listener) {
 		if (is_object($class)) {
 			$class = get_class($class);
 		}
 		self::$listeners[$class][$event][] = $listener;
 	}
-	
+
 	public static function fire($class, $event, $_ = null) {
 		if (is_object($class)) {
 			$class = get_class($class);

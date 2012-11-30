@@ -14,19 +14,19 @@ use IllegalStateException;
  * @since 22 déc. 2011
  */
 abstract class AbstractEnumVirtualField extends AbstractVirtualField implements EnumField {
-	
+
 	protected $type = ModelField::T_ENUM;
-	
+
 	protected $sqlType = ModelField::T_STRING;
-	
+
 	public function getSqlType() {
 		return $this->sqlType;
 	}
-	
+
 	public function getCodeLabels() {
 		return $this->getMeta()->enum;
 	}
-	
+
 	public function getEnumCode($value) {
 		return $value;
 	}

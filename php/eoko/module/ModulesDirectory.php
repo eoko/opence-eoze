@@ -25,13 +25,13 @@ class ModulesDirectory extends Location {
 		$this->parent = $prev;
 		$this->name = $name;
 	}
-	
+
 	public static function create($name, $path, $url, $namespace, ModulesDirectory $prev = null) {
 		$o = self::createInstance();
 		$o->construct($name, $path, $url, $namespace, $prev);
 		return $o;
 	}
-	
+
 	/**
 	 * Tests if the passed namespace is the same as this ModuleInfo's one.
 	 * @param string $namespaceOrClass
@@ -62,7 +62,7 @@ class ModulesDirectory extends Location {
 		}
 		return $pathsUrl;
 	}
-	
+
 	public function getLineageLocations($names) {
 		$locations = array();
 		foreach ($names as $name) {
