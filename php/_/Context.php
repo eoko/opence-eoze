@@ -36,15 +36,15 @@ class Context {
 			return call_user_func_array(array($this, $method), $args);
 		}
 	}
-	
+
 	public function isCli() {
 		return php_sapi_name() !== 'cli';
 	}
-	
+
 	public function isRequest() {
 		return !$this->isCli() && ($_SERVER ? true : false);
 	}
-	
+
 	public function __get($name) {
 		if ($parent) {
 			return $this->parent->$name;
@@ -52,7 +52,7 @@ class Context {
 			throw new Exception(get_class($this) . ' has no property ' . $name);
 		}
 	}
-	
+
 	public function __call($name, $args) {
 		if ($parent) {
 			return $this->parent->call($name, $args);
@@ -78,7 +78,7 @@ class SourcePath extends PartialContext {
 }
 
 class Eoze extends SourcePath {
-	
+
 }
 
 class ContextBase extends Context {
@@ -88,5 +88,5 @@ class ContextBase extends Context {
 
 	/** @var Eoze */
 	public $eoze;
-	
+
 }

@@ -22,7 +22,7 @@ class StringHelper {
 		}
 		return implode('', $r);
 	}
-	
+
 	public static function replaceSuccessively($needle, $replaces, $subject) {
 		$quotedNeedle = preg_quote($needle, '/');
 		foreach ($replaces as $replace) {

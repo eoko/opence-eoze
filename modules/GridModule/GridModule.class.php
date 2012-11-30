@@ -13,11 +13,11 @@ use eoko\cache\Cache;
 use \ModelTable;
 
 class GridModule extends Module implements HasTitle, HasJavascript {
-	
+
 	private $codeTemplatePath = 'php-template/';
-	
+
 	protected $defaultExecutor = 'grid';
-	
+
 	public function generateGridExecutorBase($namespace, $class, $baseClass) {
 
 		$tpl = PHPCompiler::create()->setFile(
@@ -27,7 +27,7 @@ class GridModule extends Module implements HasTitle, HasJavascript {
 		$tpl->namespace = $namespace;
 		$tpl->class     = $class;
 		$tpl->extend    = $baseClass;
-		
+
 		$config = $this->getConfig();
 		$modelName = $config->model;
 		$tpl->tableName = ModelTable::getModelTable($modelName);
@@ -37,7 +37,7 @@ class GridModule extends Module implements HasTitle, HasJavascript {
 
 		return $tpl;
 	}
-	
+
 	public function getTitle() {
 		$config = $this->getConfig()->module;
 		if (isset($config['title'])) {

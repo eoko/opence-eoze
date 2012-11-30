@@ -11,9 +11,9 @@ use eoze\acl\Disablable;
  * @since 20 oct. 2011
  */
 class DisablableRole extends Role implements Disablable {
-	
+
 	private $disabled = false;
-	
+
 	public function isDisabled() {
 		return $this->disabled;
 	}

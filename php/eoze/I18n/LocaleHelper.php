@@ -9,8 +9,8 @@ namespace eoze\I18n;
  * @since 1 nov. 2011
  */
 interface LocaleHelper {
-	
+
 	function getPrimaryLanguage($locale);
-	
+
 	function getDefault();
 }

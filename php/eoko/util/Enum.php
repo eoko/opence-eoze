@@ -4,18 +4,18 @@ namespace eoko\util;
 use \IllegalArgumentException;
 
 abstract class Enum {
-	
+
 	private static $values = null;
 
 	private $name;
 	private $value;
-	
+
 	static protected $args = array();
-	
+
 	private function __construct($name, $value, $args = null) {
 		$this->name = $name;
 		$this->value = $value;
-		
+
 		$class = get_class($this);
 		if (isset(self::$args[$class][$value])) {
 			call_user_func_array(array($this, 'construct'), self::$args[$class][$value]);
@@ -23,17 +23,17 @@ abstract class Enum {
 			$this->construct();
 		}
 	}
-	
+
 	protected function construct() {}
-	
+
 	public function value() {
 		return $this->value;
 	}
-	
+
 	public function name() {
 		return $this->name;
 	}
-	
+
 	public function __get($name) {
 		switch ($name) {
 			case 'name': return $this->name;
@@ -41,15 +41,15 @@ abstract class Enum {
 		}
 		throw new IllegalArgumentException();
 	}
-	
+
 	public function __toString() {
 		return "$this->value";
 	}
-	
+
 	public function __invoke() {
 		return $this->value();
 	}
-	
+
 	private static function initStatic($class) {
 		$rc = new \ReflectionClass($class);
 		foreach ($rc->getConstants() as $k => $val) {
@@ -61,17 +61,17 @@ abstract class Enum {
 			self::$args = null;
 		}
 	}
-	
+
 	public static function __callStatic($v, $args) {
-		
+
 		$class = get_called_class();
-		
+
 		if (!isset(self::$values[$class])) {
 			self::initStatic($class);
 		}
-		
+
 		$values =& self::$values[$class];
-		
+
 		if (array_key_exists($v, $values)) {
 			if ($values[$v] === null) {
 				$values[$v] = new $class($v, constant("$class::$v"));
@@ -81,25 +81,25 @@ abstract class Enum {
 			throw new IllegalArgumentException();
 		}
 	}
-	
+
 }
 
 // Example
 //
 //class MyEnum extends Enum {
-//	
+//
 //	const BLA		= 2;
 //	const BLABLA	= 3;
-//	
+//
 //	static protected $args = array(
 //		self::BLA => array('says'),
 //		self::BLABLA => array('yells'),
 //	);
-//	
+//
 //	protected function construct($say) {
 //		$this->say = $say;
 //	}
-//		
+//
 //	function hello() {
 //		println("$this->name $this->say: hello!");
 //	}

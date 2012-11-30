@@ -113,7 +113,7 @@ abstract class DatabaseBehatContext extends BehatContext {
 	protected function getTearDownOperation() {
 		return PHPUnit_Extensions_Database_Operation_Factory::NONE();
 	}
-	
+
 	/**
 	 * If the given $context is a Context that exposes a DataSet (that is,
 	 * it contains a getDataSet() method), then this DataSet is returned,
@@ -128,7 +128,7 @@ abstract class DatabaseBehatContext extends BehatContext {
 			return null;
 		}
 	}
-	
+
 	/**
 	 * Returns a DataSet containing the given Context's one as well as all 
 	 * its children's ones, or NULL if nor the given Context nor any of its
@@ -137,9 +137,9 @@ abstract class DatabaseBehatContext extends BehatContext {
 	 * @return IDataSet
 	 */
 	private static function getDataSetFromContext(BehatContext $context) {
-		
+
 		$subContexts = $context->getSubContexts();
-		
+
 		if ($subContexts) {
 			$dataSets = array();
 			foreach ($subContexts as $context) {
@@ -156,7 +156,7 @@ abstract class DatabaseBehatContext extends BehatContext {
 				return $dataSets;
 			}
 		}
-		
+
 		return self::getOwnDataSet($context);
 	}
 
@@ -166,13 +166,13 @@ abstract class DatabaseBehatContext extends BehatContext {
 	 * @BeforeScenario
 	 */
 	public function setUpDatabaseFixtures() {
-		
+
 		if ($this->getMainContext() !== $this) {
 			return;
 		}
-		
+
 		$dataSets = self::getDataSetFromContext($this);
-		
+
 		if (!$dataSets) {
 			return;
 		} else if (is_array($dataSets)) {
@@ -182,7 +182,7 @@ abstract class DatabaseBehatContext extends BehatContext {
 		} else {
 			throw new \Exception('');
 		}
-		
+
         $this->databaseTester = NULL;
 
         $this->getDatabaseTester()->setSetUpOperation($this->getSetUpOperation());
@@ -196,11 +196,11 @@ abstract class DatabaseBehatContext extends BehatContext {
 	 * @AfterScenario
 	 */
 	public function tearDownDatabaseFixtures() {
-		
+
 		if ($this->getMainContext() !== $this) {
 			return;
 		}
-		
+
 		$this->getDatabaseTester()->setTearDownOperation($this->getTearDownOperation());
 		$this->getDatabaseTester()->setDataSet($this->getDataSet());
 		$this->getDatabaseTester()->onTearDown();

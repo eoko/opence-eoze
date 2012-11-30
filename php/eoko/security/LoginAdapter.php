@@ -9,7 +9,7 @@ namespace eoko\security;
  * @since 24 nov. 2011
  */
 interface LoginAdapter {
-	
+
 	/**
 	 * @return \User
 	 */

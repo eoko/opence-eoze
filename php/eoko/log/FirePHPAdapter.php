@@ -12,9 +12,9 @@ use FirePHP;
  * @since 8 nov. 2011
  */
 class FirePHPAdapter {
-	
+
 	private $firePHP;
-	
+
 	public function __construct() {
 		$found = false;
 		foreach (explode(':', get_include_path()) as $dir) {
@@ -25,7 +25,7 @@ class FirePHPAdapter {
 				break;
 			}
 		}
-		
+
 		if ($found) {
 			$this->firePHP = FirePHP::getInstance(true);
 			$this->firePHP->setOptions(array('includeLineNumbers' => false));
@@ -35,7 +35,7 @@ class FirePHPAdapter {
 					. 'cannot be found in include path');
 		}
 	}
-	
+
 	public function process(LogEntry $entry) {
 		switch ($entry->level) {
 			case Logger::INFO:

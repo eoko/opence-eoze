@@ -47,7 +47,7 @@ abstract class ModelRelation {
 		$info->getLocalTableProxy()->attach($this->localTable);
 		$info->getTargetTableProxy()->attach($this->targetTable);
 	}
-	
+
 	public function reset() {
 		$this->cache = new ModelRelationCache($this->parentModel->context);
 	}
@@ -59,7 +59,7 @@ abstract class ModelRelation {
 	public function getName() {
 		return $this->name;
 	}
-	
+
 	/**
 	 * Get the {@link Model} or {@link ModelResultSet} pointed to by this
 	 * relation.
@@ -143,7 +143,7 @@ abstract class ModelRelation {
 			get_class($this) . "::getAsId()"
 		);
 	}
-	
+
 	public final function getAsModel($createIfNone = false, array $overrideContext = null) {
 		if ($overrideContext !== null) {
 			ArrayHelper::applyIf($overrideContext, $this->parentModel->context);
@@ -222,7 +222,7 @@ class ModelRelationCache {
 		}
 		return $this->cache[$hash];
 	}
-	
+
 	public static function compareContext(array $c1 = null, array $c2 = null) {
 		if ($c1 === null) {
 			return $c2 === null;
@@ -241,19 +241,22 @@ interface ModelRelationHasOne extends ModelRelationMarkerHasOne {
 //	function get();
 }
 interface ModelRelationHasMany extends ModelRelationMarkerHasMany {
-//	/** return ModelSet */
-//	function get();
+//	/**
+//	 * @param array $overrideContext
+//	 * @return ModelSet
+//	 */
+//	public function get(array $overrideContext = null);
 }
 
 abstract class ModelRelationByReference extends ModelRelation {
-	
+
 	protected $referenceField;
 
 	function __construct(ModelRelationInfoByReference $info, Model $parentModel) {
 		parent::__construct($info, $parentModel);
 		$this->referenceField = $info->referenceField;
 	}
-	
+
 	public function getReferenceField() {
 		return $this->referenceField;
 	}
@@ -284,7 +287,7 @@ class ModelRelationReferencesOne extends ModelRelationHasReference
 	public function setFromId($id, $forceAcceptNull = false) {
 		$this->parentModel->setColumn($this->referenceField, $id, $forceAcceptNull);
 	}
-	
+
 	public function saveModelCallback() {
 		$this->parentModel->setColumn(
 			$this->referenceField, 
@@ -313,13 +316,13 @@ class ModelRelationReferencesOne extends ModelRelationHasReference
 		$context = $overrideContext !== null ? $overrideContext : $this->parentModel->context;
 
 		if (null !== $id = $this->getAsId()) {
-			
+
 			if (null !== $uniqueBy = $this->info->getUniqueBy()) {
 //				dump($uniqueBy);
 				$id = array(
 					$this->targetTable->getPrimaryKeyName() => $id,
 				);
-				
+
 				foreach ($uniqueBy as $foreign => $local) {
 					if (is_array($local)) {
 						if (isset($local['value'])) {
@@ -332,7 +335,7 @@ class ModelRelationReferencesOne extends ModelRelationHasReference
 					}
 				}
 			}
-			
+
 			$model = $this->targetTable->loadModel($id, $context);
 		}
 
@@ -378,10 +381,10 @@ class ModelRelationReferedByOne extends ModelRelationByReference
 	 * found and $createIfNone if FALSE
 	 */
 	protected function getStoredModel($createIfNone, array $overrideContext = null) {
-		
+
 		$model = null;
 		$context = $overrideContext !== null ? $overrideContext : $this->parentModel->context;
-		
+
 		if (!$this->parentModel->isNew()) {
 			$model = $this->targetTable->findFirstWhere(
 				"`$this->referenceField`=?",
@@ -404,10 +407,10 @@ class ModelRelationReferedByOne extends ModelRelationByReference
 //				call_user_func($this->info->initCreatedModel, $model, $this->parentModel, $this);
 //			}
 		}
-		
+
 		return $model;
 	}
-	
+
 	public function doGetAsModel($createIfNone = false, array $overrideContext = null) {
 		return $this->getModelReference($createIfNone, $overrideContext);
 	}
@@ -416,7 +419,7 @@ class ModelRelationReferedByOne extends ModelRelationByReference
 	 * @return Model
 	 */
 	private function &getModelReference($createIfNone = false, array $overrideContext = null) {
-		
+
 		if (null !== $model =& $this->cache->get($overrideContext)) {
 			return $model;
 		}
@@ -425,7 +428,7 @@ class ModelRelationReferedByOne extends ModelRelationByReference
 			$createIfNone, 
 			$overrideContext
 		);
-		
+
 //		if ($model !== null && $this->info->reciproqueName !== null) {
 //			$relation = $this->targetTable
 //					->getRelationInfo($this->info->reciproqueName)
@@ -436,7 +439,7 @@ class ModelRelationReferedByOne extends ModelRelationByReference
 
 		return $model;
 	}
-	
+
 	public function doSet($value, $forceAcceptNull = false) {
 		if (is_array($value)) {
 			$model =& $this->getModelReference(true);
@@ -485,11 +488,11 @@ class ModelRelationReferedByOne extends ModelRelationByReference
  * @property @info ModelRelationInfoReferredByOneAssoc
  */
 class ModelRelationReferredByOneAssoc extends ModelRelationReferedByOne {
-	
+
 	public function __construct(ModelRelationInfoReferredByOneAssoc $info, Model $parentModel) {
 		parent::__construct($info, $parentModel);
 	}
-	
+
 	protected function getStoredModel($createIfNone, array $overrideContext = null) {
 		return $this->parentModel
 				->getRelation($this->info->assocRelationInfo->name)
@@ -503,30 +506,30 @@ class ModelRelationReferredByOneAssoc extends ModelRelationReferedByOne {
 //	public function __construct(ModelRelationInfoByReference $info, Model $parentModel) {
 //		parent::__construct($info, $parentModel);
 //	}
-//	
+//
 //	protected function getStoredModel($createIfNoe, array $context) {
-//		
+//
 //	}
 //}
 //
 class ModelRelationReferedByOneOnMultipleFields extends ModelRelationReferedByOne {
-	
+
 	protected function getStoredModel($createIfNone, array $context) {
-		
+
 		$model = null;
-		
+
 		if (!$this->parentModel->isNew()) {
-			
+
 			$fields = array();
 			$inputs = array();
-			
+
 			foreach ($this->referenceField as $f) {
 				$fields[] = "`$f`=?";
 				$inputs[] = $this->parentModel->getPrimaryKeyValue();
 			}
-			
+
 			$fields = trim(implode(' OR ', $fields));
-			
+
 			$model = $this->targetTable->findFirstWhere(
 				"($fields)",
 				$inputs,
@@ -542,7 +545,7 @@ class ModelRelationReferedByOneOnMultipleFields extends ModelRelationReferedByOn
 			);
 			$model->setFieldFromModelPk($this->referenceField[0], $this->parentModel);
 		}
-		
+
 		return $model;
 	}
 }
@@ -555,15 +558,15 @@ class ModelRelationReferedByMany extends ModelRelationByReference implements Mod
 	 * @return ModelResultSet
 	 */
 	public function get(array $overrideContext = null) {
-		
+
 		if (null !== $models =& $this->cache->get($overrideContext)) {
 			return $models;
 		} else if ($this->parentModel->isNew()) {
 			return $models = array();
 		}
-		
+
 		$context = $overrideContext !== null ? $overrideContext : $this->parentModel->context;
-		
+
 		$query = $this->targetTable
 				->createLoadQuery(ModelTable::LOAD_NONE, $context)
 				->applyAssocWhere(
@@ -627,7 +630,7 @@ class ModelRelationReferedByMany extends ModelRelationByReference implements Mod
 			$models[] = $m;
 		}
 	}
-	
+
 	protected function getExistingModels($modelSetMode = ModelSet::ONE_PASS, $overrideContext = null) {
 		return $this->targetTable->findWhere(
 			$this->referenceField . ' = ?',
@@ -642,7 +645,7 @@ class ModelRelationReferedByMany extends ModelRelationByReference implements Mod
 		if (null === $models = $this->cache->get()) {
 			return;
 		}
-		
+
 		$olds = array();
 		foreach($this->getExistingModels() as $m) {
 			$old = true;
@@ -684,7 +687,7 @@ abstract class ModelRelationByAssoc extends ModelRelation {
 //		dumpl(array("$this", $this->parentModel->context));
 
 		$info->getAssocTable()->attach($this->assocTable);
-		
+
 		$this->localForeignKey = $info->localForeignKey;
 		$this->otherForeignKey = $info->otherForeignKey;
 	}
@@ -718,7 +721,7 @@ class ModelRelationIndirectHasMany extends ModelRelationByAssoc
 	protected function doSet($value, $forceAcceptNull = false) {
 
 		$id = $this->parentModel->getPrimaryKeyValue();
-		
+
 		$this->assocModels = array();
 
 		if ($value) {
@@ -892,33 +895,33 @@ class ModelRelationIndirectHasMany extends ModelRelationByAssoc
 	protected function doGetAsModel($createIfNone = false, array $overrideContext = null) {
 		return $this->get($overrideContext);
 	}
-	
+
 	public function getIterator() {
 		return $this->get();
 	}
-	
+
 	public function get(array $overrideContext = null) {
 		if (null !== $models =& $this->cache->get($overrideContext)) {
 			return $models;
 		}
-		
+
 		$assocModels = $this->getAssocModels(ModelSet::RANDOM_ACCESS);
 
 		if (count($assocModels) === 0) return $models = ModelSet::createEmpty($this->targetTable);
-		
+
 		$targetIds = array();
 		foreach ($assocModels as $i => $assocModel) {
 			$targetIds[$i] = $assocModel->getField($this->otherForeignKey);
 		}
-		
+
 		$context = $overrideContext !== null ? $overrideContext : $this->parentModel->context;
-		
+
 		if (count($targetIds) == 0) {
 			return ModelSet::createEmpty($this->targetTable, ModelSet::RANDOM_ACCESS);
 		}
-		
+
 		$query = $this->targetTable->createLoadQuery(ModelTable::LOAD_NONE, $context);
-		
+
 		$this->targetTable->addAssocWhere(
 			$query->createWhere()->whereIn($this->targetTable->getPrimaryKeyName(), $targetIds)
 			,$query
@@ -989,7 +992,7 @@ class ModelRelationIndirectHasOne extends ModelRelationHasOneByAssoc {
 	 * @return myModel
 	 */
 	public function getAssocModel($createIfNone = false, array $overrideContext = null) {
-		
+
 		if ($overrideContext === null) {
 			// We are in parent model's default context, so
 			// (1) we set $context to the parent model's one
@@ -1003,7 +1006,7 @@ class ModelRelationIndirectHasOne extends ModelRelationHasOneByAssoc {
 			// We don't store value when we use overriden context
 			$assocModel = null;
 		}
-		
+
 		if (!$this->parentModel->isNew()) {
 			$assocModel = $this->findAssocModel(
 				$this->parentModel->getPrimaryKeyValue(),
@@ -1145,5 +1148,5 @@ class ModelRelationIndirectHasOneMirror extends ModelRelationIndirectHasOne {
 				throw new IllegalStateException("Wrong assoc model: $assocModel");
 		}
 	}
-	
+
 }

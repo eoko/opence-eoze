@@ -22,7 +22,7 @@ if (isset($databaseConfig['test'])) {
 			: $databaseConfig['password'];
 
 	if (file_exists($file = DATABASE_DUMP_PATH . 'data.sql.gz')) {
-		Logger::info('Syncing test database from file: ' . $file);
+		Logger::get()->info('Syncing test database from file: ' . $file);
 		exec("gunzip < $file | mysql --user $user --password=$password $database");
 	}
 }

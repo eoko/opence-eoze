@@ -6,7 +6,7 @@ use MenuNode;
 use eoko\util\Arrays;
 
 class MenuAction implements HasAccessLevel {
-	
+
 	/** @var string */
 	private $id;
 	/** @var string */
@@ -19,16 +19,16 @@ class MenuAction implements HasAccessLevel {
 	private $baseIconCls = null;
 	private $expanded = null;
 	private $accessLevel = null;
-	
+
 	function __construct($id, $label) {
 		$this->id = $id;
 		$this->label = $label;
 	}
-	
+
 	public static function __set_state($an) {
 		return self::fromArray($an);
 	}
-	
+
 	/**
 	 * @param array $array
 	 * @param string $id
@@ -41,7 +41,7 @@ class MenuAction implements HasAccessLevel {
 		}
 		return $a;
 	}
-	
+
 	public function getId() {
 		return $this->id;
 	}
@@ -49,17 +49,17 @@ class MenuAction implements HasAccessLevel {
 	public function getLabel() {
 		return $this->label;
 	}
-	
+
 	public function getAccessLevel() {
 		return $this->accessLevel;
 	}
-	
+
 	public function toArray($config = null) {
 		$r = array();
 		foreach ($this as $k => $v) $r[$k] = $v;
 		return Arrays::apply($r, $config);
 	}
-	
+
 	public function createMenuNode($config = null) {
 		// ensure action cannot be overriden (action=module.action) in the
 		// menu.class methods...

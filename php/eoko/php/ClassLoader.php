@@ -10,7 +10,7 @@ use IllegalStateException;
 class ClassLoader {
 
 	private static $classLoader = null;
-	
+
 	private $includePaths = array();
 
 	private $allowedClassSuffix = array(
@@ -51,7 +51,7 @@ class ClassLoader {
 			$this->includePaths[] = $path;
 		}
 	}
-	
+
 	public function load($class) {
 		foreach ($this->allowedClassSuffix as $suffix) {
 			if ($this->doLoad($class, $suffix)) return;
@@ -62,7 +62,7 @@ class ClassLoader {
 
 		$classPath = str_replace('\\', DS, $class);
 		$nsPath = str_replace('\\', DS, rtrim(get_namespace($class), '\\'));
-		
+
 		foreach ($this->includePaths as $path) {
 			if (file_exists($filename = "$path$classPath$suffix.php")) {
 				require_once $filename;

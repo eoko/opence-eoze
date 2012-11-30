@@ -19,9 +19,9 @@ use IllegalArgumentException;
  * @since 27 oct. 2011
  */
 class Classes {
-	
+
 	private function __construct() {}
-	
+
 	/**
 	 * Find the vendor name of a given class or object; this is effectively the 
 	 * part of the class name that comes before the first backslash.
@@ -44,7 +44,7 @@ class Classes {
 			);
 		}
 	}
-	
+
 	private static function toReflectionClass(&$class) {
 		if ($class instanceof ReflectionClass) {
 			$rc = $class;
@@ -74,7 +74,7 @@ class Classes {
 		}
 		return $r;
 	}
-	
+
 	/**
 	 * Gets the names of all the interfaces that are implemented by the given $class,
 	 * and also the names of all its parent class.

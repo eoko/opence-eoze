@@ -15,7 +15,7 @@ abstract class TemplateExecutor extends ExecutorBase {
 	 * @var HtmlTemplate the current action default template
 	 */
 	private $myTemplate = null;
-	
+
 	protected function setTemplate($template = null) {
 		if ($template instanceof Template) {
 			$this->myTemplate = $template;
@@ -23,9 +23,9 @@ abstract class TemplateExecutor extends ExecutorBase {
 			$this->myTemplate = $this->createTemplate($template, true);
 		}
 	}
-	
+
 	abstract protected function createTemplate($name, $require = true, $opts = null);
-	
+
 	/**
 	 * @return Template
 	 */
@@ -35,11 +35,11 @@ abstract class TemplateExecutor extends ExecutorBase {
 		}
 		return $this->myTemplate;
 	}
-	
+
 	protected function clearData() {
 		$this->getTemplate()->clearData();
 	}
-	
+
 	public function getData() {
 		return $this->getTemplate()->getData();
 	}
@@ -51,7 +51,7 @@ abstract class TemplateExecutor extends ExecutorBase {
 			$this->getTemplate()->__set($name, $value);
 		}
 	}
-	
+
 	public function __get($name) {
 		if ($this->myTemplate) {
 			return $this->myTemplate->__get($name);
@@ -59,7 +59,7 @@ abstract class TemplateExecutor extends ExecutorBase {
 			return $this->getTemplate()->__get($name);
 		}
 	}
-	
+
 	public function __isset($name) {
 		if ($this->myTemplate) {
 			return $this->myTemplate->__isset($name);
@@ -67,7 +67,7 @@ abstract class TemplateExecutor extends ExecutorBase {
 			return $this->getTemplate()->__isset($name);
 		}
 	}
-	
+
 	public function __unset($name) {
 		$this->getTemplate()->__unset($name);
 	}

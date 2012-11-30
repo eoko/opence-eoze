@@ -12,18 +12,18 @@ use IllegalStateException;
  * @since 20 oct. 2011
  */
 class ArrayManager extends AbstractAclManager {
-	
+
 	private $entities = array();
-	
+
 	private $nextId = 1;
-	
+
 	public function nextId() {
 		do {
 			$id = $this->nextId++;
 		} while (array_key_exists($id, $this->entities));
 		return $id;
 	}
-	
+
 	public function takeId($id, $o) {
 		if (array_key_exists($id, $this->entities)) {
 			throw new IllegalStateException("Id $id is already taken");
@@ -34,7 +34,7 @@ class ArrayManager extends AbstractAclManager {
 		$this->entities[$id] = array($id, $o);
 		return $id;
 	}
-	
+
 	public function add(ArrayManager\Role $o) {
 		$id = $o->getId();
 		if ($o->getManager() !== $this) {
@@ -47,7 +47,7 @@ class ArrayManager extends AbstractAclManager {
 		$this->entities[$id] = $o;
 		return $id;
 	}
-	
+
 	public function remove(ArrayManager\Role $o) {
 		if ($o->getManager() !== $this) {
 			throw new IllegalArgumentException();
@@ -62,7 +62,7 @@ class ArrayManager extends AbstractAclManager {
 		$this->entities[$id] = null;
 		return true;
 	}
-	
+
 	private function get($id, $class, $require) {
 		if (!isset($this->entities[$id])) {
 			if ($require) {
@@ -87,7 +87,7 @@ class ArrayManager extends AbstractAclManager {
 	public function getGroup($gid, $require = false) {
 		return $this->get($gid, 'Group', $require);
 	}
-	
+
 	/**
 	 * @param int $rid
 	 * @return ArrayManager\Role
@@ -95,7 +95,7 @@ class ArrayManager extends AbstractAclManager {
 	public function getRole($rid, $require = false) {
 		return $this->get($rid, 'Role', $require);
 	}
-	
+
 	/**
 	 * @param int $uid
 	 * @return ArrayManager\User

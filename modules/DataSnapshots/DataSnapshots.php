@@ -15,20 +15,20 @@ use eoko\modules\TreeMenu\ActionProvider\ModuleProvider;
 class DataSnapshots extends _ implements HasMenuActions, HasTitle {
 
 	private $actionProvider;
-	
+
 	protected function setPrivateState(&$vals) {
 		$this->actionProvider = $vals['actionProvider'];
 		unset($vals['actionProvider']);
 		parent::setPrivateState($vals);
 	}
-	
+
 	public function getActionProvider() {
 		if (!$this->actionProvider) {
 			$this->actionProvider = new ModuleProvider($this);
 		}
 		return $this->actionProvider;
 	}
-	
+
 	public function getTitle() {
 		return $this->getConfig()->get('title');
 	}

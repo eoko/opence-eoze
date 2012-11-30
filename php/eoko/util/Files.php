@@ -6,17 +6,17 @@ use \SecurityException;
 class IllegalPathException extends SecurityException {
 
 	const MSG_FORBIDDEN_UPWARD_RESOLUTION = 'Forbidden upward resolution for path: ';
-	
+
 	public function __construct($path, $cause = 'Illegal path: ') {
 		parent::__construct($cause . $path);
 	}
-	
+
 }
 
 class Files extends \FileHelper {
-	
+
 	private function __construct() {}
-	
+
 	/**
 	 * Resolves the absolute path for the given $relativePath relative to the
 	 * $basePath. This method does test that a file actually exists.
@@ -32,22 +32,22 @@ class Files extends \FileHelper {
 	 * @throws IllegalPathException
 	 */
 	public static function resolveRelativePath($basePath, $relativePath, $forbidUpward = false) {
-		
+
 		$path = preg_replace(
 			'@(?:\w+/\.\./)|(?:/\.)@', '', 
 			str_replace('\\', '/', $basePath . $relativePath)
 		);
-		
+
 		if ($forbidUpward && substr($path, 0, strlen($basePath) !== $basePath)) {
 			throw new IllegalPathException(
 				$relativePath, 
 				IllegalPathException::MSG_FORBIDDEN_UPWARD_RESOLUTION
 			);
 		}
-		
+
 		return $path;
 	}
-	
+
 	/**
 	 * Get the absolute filename of the file with the $given name if it exists
 	 * in the given $basePath, optionnaly searching for different $extensions.
@@ -59,9 +59,9 @@ class Files extends \FileHelper {
 	 * will be thrown.
 	 * 
 	 * @param string $basePath		the base path to the directory to be searched in
-	 * @param string $name			
-	 * @param boolean|array|string $tryExtensions	
-	 * @param boolean $forbidUpward	
+	 * @param string $name
+	 * @param boolean|array|string $tryExtensions
+	 * @param boolean $forbidUpward
 	 * @param boolean $forceExtension  if set to TRUE, the found filename will
 	 * be required to end up with one of the $tryExtensions. If $tryExtension is
 	 * not set, this param has no effect.
@@ -71,9 +71,9 @@ class Files extends \FileHelper {
 	 */
 	public static function findIn($basePath, $name, 
 			$tryExtensions = false, $forbidUpward = false, $forceExtension = true) {
-		
+
 		$target = null;
-		
+
 		if (($target = realpath("$basePath$name"))) {
 			if ($tryExtensions && $forceExtension && !self::testExtension($target, $tryExtensions)) {
 				$target = false;
@@ -92,7 +92,7 @@ class Files extends \FileHelper {
 				return null;
 			}
 		}
-		
+
 		if ($forbidUpward) {
 			// $basePath = realpath($basePath);
 			$target = rtrim($target, DS);
@@ -105,14 +105,14 @@ class Files extends \FileHelper {
 				);
 			}
 		}
-		
+
 		if (substr($name, -1) === DS && substr($target, -1) !== DS) {
 			$target .= DS;
 		}
-		
+
 		return $target;
 	}
-	
+
 	public static function testExtension($filename, $extension) {
 
 		if (is_array($extension)) {
@@ -137,7 +137,7 @@ class Files extends \FileHelper {
 			return null;
 		}
 	}
-	
+
 	/**
 	 * @author http://www.php.net/manual/en/function.realpath.php#97885
 	 * @author Éric Ortéga
@@ -150,7 +150,7 @@ class Files extends \FileHelper {
 		if (DS !== '/') {
 			\str_replace(DS, '/', array($targetPath, $basePath));
 		}
-		
+
 		$lastDS = null;
 		if (substr($targetPath, -1) == '/') {
 			$lastDS = '/';
@@ -201,7 +201,7 @@ class Files extends \FileHelper {
 	public static function isAbsolute($path) {
 		return preg_match('@^(?:/|\w+://|\w:)@', $path);
 	}
-	
+
 	/**
 	 * Convert a string containing system filename jokers (namely: * and ?) to
 	 * an equivalent regex.

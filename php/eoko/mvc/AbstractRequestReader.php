@@ -12,17 +12,17 @@ use Zend\Mvc\Router\RouteMatch;
  * @since 3 août 2012
  */
 abstract class AbstractRequestReader implements RequestReader {
-	
+
 	/**
 	 * @var Request
 	 */
 	protected $request;
-	
+
 	/**
 	 * @var RouteMatch
 	 */
 	protected $routeMatch;
-	
+
 	public function __construct(Request $request, RouteMatch $routeMatch) {
 		$this->request = $request;
 		$this->routeMatch = $routeMatch;

@@ -11,13 +11,13 @@ use eoko\output\Adapter;
  * @since 24 nov. 2011
  */
 class BufferedAdapter implements Adapter {
-	
+
 	private $buffer;
-	
+
 	public function out($string) {
 		$this->buffer[] = $string;
 	}
-	
+
 	public function getBuffer() {
 		return $this->buffer;
 	}

@@ -3,7 +3,7 @@
 namespace eoko\modules\TreeMenu;
 
 interface HasAccessLevel {
-	
+
 	/**
 	 * @return int
 	 */

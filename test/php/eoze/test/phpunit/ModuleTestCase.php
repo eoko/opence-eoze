@@ -24,14 +24,14 @@ use eoko\config\ConfigManager;
  * @since 23 nov. 2011
  */
 abstract class ModuleTestCase extends DatabaseTestCase {
-	
+
 	protected $username = 'test';
 	protected $password = 'test';
-	
+
 	private $baseFixtures;
-	
+
 	protected function setUp() {
-		
+
 		// Completely overriding parent's setUp to change getDataSet
         $this->databaseTester = NULL;
 
@@ -44,7 +44,7 @@ abstract class ModuleTestCase extends DatabaseTestCase {
 		// My code...
 		UserSession::setLoginAdapter(new DummyLoginAdapter);
 		UserSession::login($this->username, $this->password);
-		
+
 		Output::setAdapter(new NullAdapter);
 	}
 
@@ -60,7 +60,7 @@ abstract class ModuleTestCase extends DatabaseTestCase {
          */
         $this->databaseTester = NULL;
     }
-	
+
 	private static function getConfigFixtures() {
 		$config = ConfigManager::get(get_class());
 		$fixtures = array();
@@ -73,7 +73,7 @@ abstract class ModuleTestCase extends DatabaseTestCase {
 		}
 		return $fixtures;
 	}
-	
+
 	protected function getBaseFixtures() {
 		if ($this->baseFixtures) {
 			return array_merge(self::getConfigFixtures(), $this->baseFixtures);
@@ -81,7 +81,7 @@ abstract class ModuleTestCase extends DatabaseTestCase {
 			return self::getConfigFixtures();
 		}
 	}
-	
+
 	protected function getModulesBaseDataSet() {
 		if ($this->getBaseFixtures()) {
 			$applicationDirectories = ConfigManager::get('eoze\\application\\directories');
@@ -105,7 +105,7 @@ abstract class ModuleTestCase extends DatabaseTestCase {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * @return IDataSet
 	 */
@@ -116,7 +116,7 @@ abstract class ModuleTestCase extends DatabaseTestCase {
 			return null;
 		}
 	}
-	
+
 	/**
 	 * @return IDataSet
 	 */

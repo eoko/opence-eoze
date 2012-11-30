@@ -62,7 +62,7 @@ class ModuleResolver {
 			);
 		}
 	}
-	
+
 // REM
 // Unused
 //	public static function parseModuleName($controller) {

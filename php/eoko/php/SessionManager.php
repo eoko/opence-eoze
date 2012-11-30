@@ -17,15 +17,15 @@ class SessionManager {
 
 	protected $savePath;
 	protected $sessionName;
-	
+
 	private $listeners;
 
 	private $sessionId = null;
 	private $modified = false;
 	private $started  = false;
-	
+
 	private $data = null;
-	
+
 	public function __construct() {
 
 		$path = MY_EOZE_PATH . '/sessions';
@@ -33,7 +33,7 @@ class SessionManager {
 		if (!file_exists($path)) {
 			mkdir($path, 0700);
 		}
-		
+
 		session_set_save_handler(
 			array($this, "open"), 
 			array($this, "close"), 
@@ -43,20 +43,20 @@ class SessionManager {
 			array($this, "gc")
 		);
 	}
-	
+
 	public function __destruct() {
 		if ($this->modified) {
 			$this->commit();
 		}
 	}
-	
+
 	public function getId() {
 		if ($this->sessionId === null) {
 			$this->getData();
 		}
 		return $this->sessionId;
 	}
-	
+
 	public function getData($close = true) {
 		if ($this->data === null) {
 			$this->start();
@@ -67,7 +67,7 @@ class SessionManager {
 		}
 		return $this->data;
 	}
-	
+
 	public function commit() {
 		$this->start();
 		foreach ($this->data as $k => $v) {
@@ -81,7 +81,7 @@ class SessionManager {
 		$this->modified = false;
 		$this->closeSession();
 	}
-	
+
 	private function start() {
 		if (!$this->started) {
 			if ($this->sessionId === null) {
@@ -94,20 +94,20 @@ class SessionManager {
 			$this->started = true;
 		}
 	}
-	
+
 	private function closeSession() {
 		if ($this->started) {
 			session_write_close();
 			$this->started = false;
 		}
 	}
-	
+
 	public function destroySession() {
 		$this->start();
 		session_destroy();
 		$this->closeSession();
 	}
-	
+
 	/**
 	 * Save some data in the session.
 	 * 
@@ -137,11 +137,11 @@ class SessionManager {
 		}
 		return $this;
 	}
-	
+
 	public function addListener($event, $fn) {
 		$this->listeners[$event][] = $fn;
 	}
-	
+
 	private function fireEvent($event, $args = null) {
 		if (isset($this->listeners[$event])) {
 			$args = array_slice(func_get_args(), 1);
@@ -150,7 +150,7 @@ class SessionManager {
 			}
 		}
 	}
-	
+
 	public function open($savePath, $sessionName) {
 		$this->savePath = $savePath;
 		$this->sessionName = $sessionName;

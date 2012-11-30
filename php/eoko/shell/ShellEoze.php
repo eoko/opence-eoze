@@ -15,7 +15,7 @@ class ShellEoze extends ShellCore {
     private $conn = array();
 
     function __construct() {
-//		
+//
 //		$this->conn[0] = new ShellCore();
 //		var_dump($this->conn);
 //		die();

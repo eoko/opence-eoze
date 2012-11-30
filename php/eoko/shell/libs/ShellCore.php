@@ -38,13 +38,13 @@ class ShellCore extends ShellLib {
 	 * @var String
 	 */
 	public $appName = "No application name";
-	
+
 	/**
 	 * The application description
 	 * @var String
 	 */
 	public $appDesc = "No description";
-	
+
 	public static $useReadline = FALSE;
 	public static $lnOnRead = TRUE;
 	public static $captureEOT = TRUE;
@@ -58,7 +58,7 @@ class ShellCore extends ShellLib {
 	/** args known by this class */
 	private $knownArgs = array();
 	private $required_args = array();
-	
+
 	/**
 	 * Remove tag, set FALSE by default
 	 * @var type boolean
@@ -79,7 +79,7 @@ class ShellCore extends ShellLib {
 		2 => 'notice',
 		99 => 'message'
 	);
-	
+
 	/**
 	 * Not use yet... It's a way to create differents set colors for
 	 * light or dark shell.
@@ -96,7 +96,7 @@ class ShellCore extends ShellLib {
 		'error' => array('bold|bg_red', 'ERROR ', ' '),
 		'message' => array('', '', ' ')
 	);
-	
+
 	protected static $TextForegroundColors = array(
 		'black' => 30,
 		'red' => 31,
@@ -144,7 +144,7 @@ class ShellCore extends ShellLib {
 	/**
 	 * <p>Permit to use tag define in TextBackgroundColors, TextForegroundColors and TextEffects.</p>
 	 * 
-	 * <p>Examples	
+	 * <p>Examples
 	 * <ul>
 	 * 		<li>tag_string("My first example","blink")</li>
 	 * 		<li>tag_string("Another example with output","blink|blue",TRUE)</li>

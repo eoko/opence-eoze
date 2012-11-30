@@ -67,7 +67,7 @@ abstract class Model {
 	private $forceNew = null;
 
 	private $forcedAllFieldsUpdate = false;
-	
+
 	protected $determinationMultifieldListeners = null;
 	protected $determinationListeners = null;
 	protected $undeterminedFields = array();
@@ -95,7 +95,7 @@ abstract class Model {
 
 	protected function __construct(&$fields, array $initValues = null, 
 			$strict = false, array $context = null) {
-		
+
 		$this->events = new EventManager();
 
 		$this->table = $this->getTable();
@@ -188,19 +188,19 @@ abstract class Model {
 	 * @return mixed
 	 */
 	private function getFieldValue($field, &$model = null, &$modelField = null) {
-		
+
 		if (array_key_exists($field, $this->internal->fields)) {
 			$model = $this;
 			$modelField = $field;
 			return $this->getField($field);
 		} 
-		
+
 		else if ($this->table->hasVirtual($field)
 				|| $this->table->hasVirtual($field = lcfirst($field))) {
 
 			$model = $this;
 			$modelField = $field;
-			
+
 			if (array_key_exists($field, $this->virtualFieldsCache)) {
 				return $this->virtualFieldsCache[$field];
 			}
@@ -213,14 +213,14 @@ abstract class Model {
 					->executeSelectValue();
 
 			$r = $this->table->getVirtual($field)->castValue($r);
-					
+
 			if ($this->table->isVirtualCachable($field)) {
 				$this->virtualFieldsCache[$field] = $r;
 			}
 
 			return $r;
 		}
-		
+
 		else {
 			$relName = ucfirst($field);
 
@@ -234,7 +234,7 @@ abstract class Model {
 				}
 				$model = $relModel;
 				$modelField = $last;
-				
+
 //				return $relModel->__get($last);
 				return $relModel->getFieldValue($last);
 			} else {
@@ -399,7 +399,7 @@ abstract class Model {
 			return $r;
 		}
 	}
-	
+
 	/**
 	 * Get the value of each field in the given array.
 	 * 
@@ -466,30 +466,30 @@ abstract class Model {
 		}
 		return $return;
 	}
-	
+
 	// TODO this should be documented & have unit tests
 	// it is known to be used twice in opence, and in:
 	// OpenCE:
 	// - SmInstance.grid.class.php
 	public function getDataEx($relationNames, $aliasPrefix = null, $includeBaseData = true) {
 		$data = $includeBaseData ? $this->getData($aliasPrefix) : array();
-		
+
 		if ($relationNames === '*') {
 			$relationNames = $this->table->getRelationNames();
 		} else if (!is_array($relationNames)) {
 			$r = $this->getDataEx(array($relationNames), null, false);
 			return $r[$relationNames];
 		}
-		
+
 		foreach ($relationNames as $k => $rName) {
-			
+
 			if (is_string($k)) {
 				$params = $rName;
 				$rName = $k; // relation name
 			} else {
 				$params = null;
 			}
-			
+
 			if (null !== $foreignModel = $this->getForeignModel($rName)) {
 				if ($foreignModel instanceof Model) {
 					if (!$params) {
@@ -544,10 +544,10 @@ abstract class Model {
 			} else {
 				if ($col instanceof ModelColumn) {
 					if (!$col->validateLength($value, $len, $maxLength)) {
-						
+
 						$label = $col->getMeta()->get('label', $col->getName());
 						$label = lcfirst($label);
-						
+
 						if (strstr($maxLength, ',')) {
 							list($maxInt, $maxDec) = explode(',', $maxLength);
 							$maxInt = max(0, $maxInt - $maxDec);
@@ -557,7 +557,7 @@ abstract class Model {
 						} else {
 							$humanMaxLength = "$maxLength chiffre" . ($maxLength > 1 ? 's' : '');
 						}
-						
+
 						throw new UserException(
 							"La valeur du champ <em>$label</em> dépasse la longueur maximale "
 							. "autorisée de $humanMaxLength."
@@ -568,7 +568,7 @@ abstract class Model {
 		}
 		return true;
 	}
-	
+
 	/**
 	 * Marks all fields as modified. This will has effect until after the 
 	 * next successful saving operation.
@@ -682,7 +682,7 @@ abstract class Model {
 	public function wasDeleted() {
 		return $this->deleted;
 	}
-	
+
 	public function isModified($fieldName = null) {
 		if ($fieldName === null) {
 			return $this->internal->modified;
@@ -691,38 +691,38 @@ abstract class Model {
 				&& $this->internal->colUpdated[$fieldName];
 		}
 	}
-	
+
 	private $virtualFieldsCache = array();
-	
+
 	public function __call($name, $args) {
 		if (substr($name, 0, 3) === 'get') {
 			$k = substr($name, 3);
 			if ($this->table->hasVirtual($k)
 					|| $this->table->hasVirtual($k = lcfirst($k))) {
-				
+
 				if (array_key_exists($k, $this->virtualFieldsCache)) {
 					return $this->virtualFieldsCache[$k];
 				}
-				
+
 				if ($this->isNew()) {
 					throw new UnsupportedOperationException("$name must be implemented for new models.");
 				}
-				
+
 				$table = $this->getTable();
-				
+
 				$r = $table
 						->createQuery($this->context)
 						->select($k)
 						->where("`{$this->getPrimaryKeyName()}` = ?", $this->getPrimaryKeyValue())
 						->executeSelectValue();
-						
+
 				if ($table->isVirtualCachable($k)) {
 					$this->virtualFieldsCache[$k] = $r;
 				}
-				
+
 				return $r;
 			}
-			
+
 			// 06/12/11 22:46
 			// Get from relation
 			$relationName = ucfirst($k);
@@ -773,7 +773,7 @@ abstract class Model {
 	}
 	protected function afterSaveRelations($wasNew) {
 	}
-	
+
 	/**
 	 * Event method called unconditionnaly before any save operation, that is
 	 * even if the Model's data won't be persisted to the datastore (which
@@ -782,14 +782,14 @@ abstract class Model {
 	 * @param boolean $new 
 	 */
 	protected function onPrepareForSave(&$new, $deleted) {}
-	
+
 	/**
 	 * This flag is set to `true` when the record is being saved, else it is set
 	 * to `false`.
 	 * @var boolean
 	 */
 	private $saving = false;
-	
+
 	/**
 	 * This flag is set to `true` if the {@link save()} method is called when
 	 * the record is {@link isSaving() being saved} then, when the record has
@@ -806,7 +806,7 @@ abstract class Model {
 	 * @return Bool TRUE if succeeds, FALSE if fails.
 	 */
 	public function save($new = null) {
-		
+
 		if ($this->saving) {
 			$this->saveAgain = true;
 		}
@@ -839,7 +839,7 @@ abstract class Model {
 			$this->saving = true;
 
 			if ($new) {
-				
+
 				// Operation is CREATE
 				$this->events->fire(self::EVT_BEFORE_SAVE_BASE, $this);
 				$this->beforeSave(true);
@@ -860,7 +860,7 @@ abstract class Model {
 				if ($this->hasPrimaryKey()) {
 					$this->setPrimaryKeyValue($id);
 				}
-				
+
 				$this->afterCommitChanges();
 
 				// afterSave event (must be fired here, see bellow)
@@ -896,19 +896,19 @@ abstract class Model {
 					throw new ModelSaveException('Failed saving relation: ' . $relation);
 				}
 			}
-			
+
 			$this->afterSaveRelations($new);
 			$this->saving = false;
-			
+
 			if ($this->saveAgain) {
 				$this->saveAgain = false;
 				$this->save();
 			}
 		}
-		
+
 		return true;
 	}
-	
+
 	/**
 	 * Returns `true` if the model is be
 	 * @return boolean
@@ -916,7 +916,7 @@ abstract class Model {
 	public function isSaving() {
 		return $this->saving;
 	}
-	
+
 	/**
 	 * Commits the updated fields of the model to the database.
 	 * 
@@ -924,7 +924,7 @@ abstract class Model {
 	 * is not found modified, no database query will be issued.
 	 */
 	protected function commitChanges() {
-		
+
 		$setters = $this->buildUpdatedFields(ModelColumn::OP_UPDATE);
 		unset($setters[$this->getPrimaryKeyName()]);
 
@@ -934,7 +934,7 @@ abstract class Model {
 					->set($setters)
 					->where($this->getPrimaryKeyName() . ' = ?', $this->getPrimaryKeyValue())
 					->executeUpdate();
-			
+
 			$this->afterCommitChanges();
 			return true;
 		} else {
@@ -942,9 +942,9 @@ abstract class Model {
 			return false;
 		}
 	}
-	
+
 	private function afterCommitChanges() {
-		
+
 		// Take care, do not fire events or such from here... Look, just above,
 		// commitChanges is using this to reset fields, but does not expect
 		// more.
@@ -986,7 +986,7 @@ abstract class Model {
 	public function on($eventName, $callback, $extraArgs = null) {
 		$this->events->on($eventName, $callback, $extraArgs);
 	}
-	
+
 	public function onOnce($eventName, $callback, $extraArgs = null) {
 		$this->events->onOnce($eventName, $callback, $extraArgs);
 	}
@@ -1047,7 +1047,7 @@ abstract class Model {
 	 * the deletion of the model.
 	 */
 	protected function onDelete($isSaving) {}
-	
+
 	/**
 	 * Hooking method called when the model is marked for deletion, or when
 	 * it is actually in the process of being deleted.
@@ -1056,7 +1056,7 @@ abstract class Model {
 	 * occur on the next call to the {@link save()} method of this model).
 	 */
 	protected function beforeDelete($isSaving) {}
-	
+
 	protected function onDeleteInternal() {
 		$tableName = $this->table->getTableName();
 		foreach ($this->table->getRelationsInfo() as $relInfo) {
@@ -1069,10 +1069,10 @@ abstract class Model {
 
 	/**
 	 * Remove the data that this model represent from the data store. This action
-	 * is commited immediatly.
+	 * is committed immediately.
 	 *
 	 * An delete notification, triggering delete postprocessing (including
-	 * refering relation cascading) will be trigger <b>only</b> if some data
+	 * referring relation cascading) will be trigger <b>only</b> if some data
 	 * is actually removed from the database. That means that if the data have
 	 * already been removed, the post-processing procedure will not be triggered
 	 * again.
@@ -1085,7 +1085,7 @@ abstract class Model {
 	public function delete() {
 		return $this->doDelete(false);
 	}
-	
+
 	/**
 	 * Delete this Model by {@link Model::delete() deleting} it from the DB or,
 	 * if the Model is new, prevent it from being later persisted in the DB.
@@ -1116,21 +1116,21 @@ abstract class Model {
 	// Used to prevent double actual deletion operation, primarily in
 	// order to avoid multiple firing of deletion events.
 	private $deletedFromDB = false;
-	
+
 	private function doDelete($isSaving) {
-		
+
 		if ($this->isNew()) {
 			throw new IllegalStateException('Cannot delete a new model');
 		}
 
 		if (!$this->deletedFromDB) {
 			$this->beforeDelete($isSaving);
-			
+
 			if ($this->doDeleteQuery()) {
 
 				$this->deletedFromDB = true;
 				$this->deleted = true;
-				
+
 				$this->onDeleteInternal();
 				$this->onDelete($isSaving);
 
@@ -1156,7 +1156,7 @@ abstract class Model {
 				->where("`{$this->getPrimaryKeyName()}` = ?", $this->getPrimaryKeyValue())
 				->executeDelete();
 	}
-	
+
 	protected function applyLoadQueryWherePk(ModelTableQuery $query) {
 		$pkName = $this->getPrimaryKeyName();
 		$id = $this->internal->fields[$pkName];
@@ -1166,7 +1166,7 @@ abstract class Model {
 	}
 
 	protected function doLoad() {
-		
+
 		if ($this->isNew()) {
 			throw new IllegalStateException(
 				'Cannot load a new record that has never been stored in the database.'
@@ -1181,9 +1181,9 @@ abstract class Model {
 		// be referred by thousands of records that we generally don't want to
 		// load with the Country record.
 		$query = $table->createLoadQuery(ModelTable::LOAD_NONE, $this->context);
-		
+
 		$result = $this->applyLoadQueryWherePk($query)->executeSelectFirst();
-		
+
 //		$result = $query->where(
 //			$query->getQualifiedName($table->getPrimaryKeyName()) . ' = ?', $id
 //		)->executeSelectFirst();
@@ -1219,7 +1219,7 @@ abstract class Model {
 
 		return $this;
 	}
-	
+
 	/**
 	 * @return Model
 	 */
@@ -1234,24 +1234,24 @@ abstract class Model {
 	 * @return boolean
 	 */
 	public function hasChanged($field, $strict = true) {
-		
+
 		if ($this->isNew()) {
 			return false;
 		}
-		
+
 		$oldValue = $this->doGetStoredCopy(null)->getFieldValue($field);
 		$currentValue = $this->getFieldValue($field);
-		
+
 		return $strict
 				? $oldValue !== $currentValue
 				: $oldValue !=  $currentValue;
 	}
-	
+
 	/**
 	 * @var Model
 	 */
 	private $cachedStoredCopy = null;
-	
+
 	/**
 	 * @param boolean $loadFromDb
 	 * 
@@ -1389,7 +1389,7 @@ abstract class Model {
 
 		if (count($this->undeterminedFields[$fieldName]) === 0) {
 			unset($this->undeterminedFields[$fieldName]);
-			
+
 			if (isset($this->determinationListeners[$fieldName])) {
 				$v = $this->__get($fieldName);
 				foreach ($this->determinationListeners[$fieldName] as $l) {
@@ -1419,7 +1419,7 @@ abstract class Model {
 				"The field $name is in an undetermined state"
 			);
 		}
-		
+
 		if (array_key_exists($name, $this->internal->fields)) {
 			$v = $this->internal->fields[$name];
 		} else if (
@@ -1429,7 +1429,7 @@ abstract class Model {
 			$m = 'get' . ucfirst($name);
 			$v = $this->$m();
 		}
-		
+
 		return $this->table->getField($name)->castValue($v);
 	}
 
@@ -1463,7 +1463,7 @@ abstract class Model {
 				"The undetermination about the field $name must be released before it can be set"
 			);
 		}
-		
+
 		if (count($parts = preg_split('/->/', $name, 2)) == 2) {
 			$this->setForeignModelValue($parts[0], $parts[1], $value, $forceAcceptNull);
 		} else {
@@ -1475,12 +1475,12 @@ abstract class Model {
 			} else if ($this->getTable()->hasColumn($name)) {
 				$this->setColumnNoLoadCheck($name, $value, $forceAcceptNull);
 			} 
-			
+
 			// Let pass virtual fields... (they are loaded in certain cases and
 			// may be returned to the server as is)
 			else if ($this->getTable()->hasVirtual($name)) {
 			} 
-			
+
 			else {
 				Logger::get($this)->debug("'$name' is not a field from " . get_class($this));
 //				throw new IllegalArgumentException("$name is not a field from " . get_class($this));
@@ -1586,19 +1586,24 @@ abstract class Model {
 
 		$table = $this->getTable();
 		if ($table->hasColumn($name)) {
+
 			$col = $table->getColumn($name);
 			$v = $col->convertValueToSQL($value);
+
+			// 2012-11-20 moved here (see bellow)
+			$this->internal->fields[$name] = $this->applyFieldValue($name, $v);
 
 			if ($v === null && !$forceAcceptNull && !$col->isNullable() && (!$col->isPrimary())) {
 				throw new IllegalArgumentException($this->getModelName() . '.' . $name . ' cannot be null');
 			}
-			
+
 			// 11/12/11 23:04 changed:
 			// if ($this->internal->fields[$name] != $v || !$testChanged) { 
 			// 02/11/12 12:24 changed
  			// if ($this->internal->fields[$name] !== $v || !$testChanged) {
 			if (!$this->dbImage || $this->internal->fields[$name] !== $v || !$testChanged) {
-				$this->internal->fields[$name] = $this->applyFieldValue($name, $v);
+				// 2012-11-20 moved before the if
+				// $this->internal->fields[$name] = $this->applyFieldValue($name, $v);
 				$this->internal->colUpdated[$name] = true;
 				$this->internal->modified = true;
 				return true;
@@ -1620,7 +1625,12 @@ abstract class Model {
 		$this->getRelation($name)->setField($field, $value, $forceAcceptNull);
 	}
 
-	protected function getForeignModel($name, $overrideContext = null) {
+	/**
+	 * @param $name
+	 * @param array $overrideContext
+	 * @return Model|ModelSet
+	 */
+	protected function getForeignModel($name, array $overrideContext = null) {
 		return $this->getRelation($name)->get($overrideContext);
 	}
 
@@ -1656,9 +1666,23 @@ abstract class Model {
 ////			}
 //		}
 //	}
-	
-	protected function applyFieldValue($field, $value) {
-		return $value;
+
+	/**
+	 * Convert the given value for the specified field using a custom algorithm. The default
+	 * implementation looks for a method named `'apply' . ucfirst($fieldName)` and use it if
+	 * it is present, otherwise it returns the value unmodified (pass through).
+	 *
+	 * @param string $fieldName
+	 * @param mixed $value
+	 * @return mixed
+	 */
+	protected function applyFieldValue($fieldName, $value) {
+		$method = 'apply' . ucfirst($fieldName);
+		if (method_exists($this, $method)) {
+			return $this->$method($value);
+		} else {
+			return $value;
+		}
 	}
 
 	protected function setAllFieldsFromDatabase(array $setters) {
@@ -1763,7 +1787,7 @@ abstract class Model {
 		// Return
 		return $this->internal->relations[$name];
 	}
-	
+
 	/**
 	 * Get the specified relation if it has been modified (ie. set) in the
 	 * current Model.
@@ -1797,7 +1821,7 @@ abstract class Model {
 		if ($relation instanceof ModelRelation) $relation = $relation->name;
 		unset($this->internal->relations[$relation]);
 	}
-	
+
 	public function unlinkRelationByName($name) {
 		unset($this->internal->relations[$name]);
 	}

@@ -27,29 +27,29 @@ use PHP_Timer;
  * @since 23 nov. 2011
  */
 class ExecutorTestCase extends ModuleTestCase {
-	
+
 	/**
 	 * @var eoko\module\executor\Executor
 	 */
 	protected $executor;
 	protected $executorType;
-	
+
 	/**
 	 * @var eoko\module\Module
 	 */
 	protected $module;
 	protected $moduleName;
-	
+
 	protected $controller;
-	
+
 	protected $testRequests = true;
-	
+
 	/**
 	 * `true` to dump the result array in the failure message when schema validation fails.
 	 * @var bool
 	 */
 	protected $dumpResult = true;
-	
+
     public function __construct($name = NULL, array $data = array(), $dataName = '') {
 		parent::__construct($name, $data, $dataName);
 		if (isset($this->controller)) {
@@ -68,12 +68,12 @@ class ExecutorTestCase extends ModuleTestCase {
 			}
 		}
 	}
-	
+
 	protected function setUp() {
 		parent::setUp();
 		$this->module = $this->getModule();
 	}
-	
+
 	protected function getModuleName() {
 		if (isset($this->moduleName)) {
 			return $this->moduleName;
@@ -92,7 +92,7 @@ class ExecutorTestCase extends ModuleTestCase {
 		}
 		throw new IllegalStateException('Cannot determine module name');
 	}
-	
+
 	protected function getExecutorType() {
 		if (isset($this->executorType)) {
 			return $this->executorType;
@@ -115,7 +115,7 @@ class ExecutorTestCase extends ModuleTestCase {
 		return null;
 //		throw new IllegalStateException('Cannot determine executor type');
 	}
-	
+
 	protected function getControllerName() {
 		if (!$this->controller) {
 			return $this->controller = $this->getModuleName() . '.' . $this->getExecutorType();
@@ -123,7 +123,7 @@ class ExecutorTestCase extends ModuleTestCase {
 			return $this->controller;
 		}
 	}
-	
+
 	/**
 	 *
 	 * @return Module
@@ -131,7 +131,7 @@ class ExecutorTestCase extends ModuleTestCase {
 	protected function getModule() {
 		return ModuleManager::getModule($this->getModuleName());
 	}
-	
+
 	/**
 	 * @param string  $action
 	 * @param Request $request
@@ -143,7 +143,7 @@ class ExecutorTestCase extends ModuleTestCase {
 		return $this->getModule()->createExecutor(
 				$this->getExecutorType(), $action, $request, $internal);
 	}
-	
+
 	/**
 	 * Runs the given request on the Executor tested by this test case.
 	 * 
@@ -156,29 +156,29 @@ class ExecutorTestCase extends ModuleTestCase {
 	 * @return array Request result data
 	 */
 	protected function runRequest(array $request) {
-		
+
 		if (!array_key_exists('controller', $request)) {
 			$request['controller'] = $this->getControllerName();
 		}
-		
+
 		$request  = new \Request($request);
 		$executor = ModuleResolver::parseRequestAction($request);
 
 		ExtJSResponse::purge();
 		$executor();
-		
+
 		return $executor->getData();
 	}
-	
+
 	protected function getRequestTestList() {
 		$class = new ReflectionClass($this);
-		
+
 		$tests = array();
-		
+
 		// Load ./ClassName.requests.yml file
 		if (file_exists($file = dirname($class->getFileName()) 
 				. '/' . get_relative_classname($this) . '.requests.yml')) {
-			
+
 			$tests[get_relative_classname($this)] = YmlReader::loadFile($file);
 		}
 
@@ -191,10 +191,10 @@ class ExecutorTestCase extends ModuleTestCase {
 				$tests[substr(basename($file), 0, -4)] = YmlReader::loadFile($file);
 			}
 		}
-		
+
 		return $tests;
 	}
-	
+
 	public function requestsTestProvider() {
 		// Run
 		$return = array();
@@ -214,32 +214,32 @@ class ExecutorTestCase extends ModuleTestCase {
 	 * @dataProvider requestsTestProvider
 	 */
 	public function testRequests($file, $name, $test) {
-		
+
 		if (!isset($test['request'])) {
 			throw new IllegalStateException("Missing request in data set $name of file $file");
 		}
-		
+
 		// Shortcut form 'request' => $action
 		if (is_string($test['request'])) {
 			$test['request'] = array(
 				'action' => $test['request']
 			);
 		}
-		
+
 		// Automatic controller
 		if (!isset($test['request']['controller'])) {
 			$test['request']['controller'] = $this->getControllerName();
 		}
-			
+
 		$result = $this->runRequest($test['request']);
-		
+
 		if (isset($test['expected'])
 				&& !Arrays::compareMap($test['expected'], $result)) {
-			
+
 			$this->assertEquals($test['expected'], $result, 
 					'Asserting that result match expected');
 		}
-		
+
 		$schema = null;
 		if (isset($test['expectedSchema'])) {
 			$schema = $test['expectedFormat'];
@@ -252,11 +252,11 @@ class ExecutorTestCase extends ModuleTestCase {
 		} else if (isset($test['format'])) {
 			$schema = $test['format'];
 		}
-		
+
 		$dumpResult = array_key_exists('dumpResult', $test) 
 				? $test['dumpResult'] 
 				: $this->dumpResult;
-		
+
 		if (isset($schema)) {
 			$validator = new ArrayValidator($schema);
 			if (!$validator->test($result)) {
@@ -266,7 +266,7 @@ class ExecutorTestCase extends ModuleTestCase {
 				);
 			}
 		}
-		
+
 		if (isset($test['after'])) {
 			$method = $test['after'];
 			$this->$method($result);

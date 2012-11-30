@@ -14,5 +14,5 @@ namespace eoko\module\executor;
  * must not prefix their internal actions with an underscore (_).
  */
 interface InternalExecutor {
-	
+
 }

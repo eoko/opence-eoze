@@ -11,6 +11,6 @@ use eoko\output\Adapter;
  * @since 24 nov. 2011
  */
 class NullAdapter implements Adapter {
-	
+
 	public function out($string) {}
 }

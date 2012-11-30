@@ -4,7 +4,7 @@ namespace eoko\template;
 use \IllegalStateException;
 
 class HtmlRootTemplate extends HtmlTemplate {
-	
+
 	public $headTemplateName = 'head';
 
 	private $compileOptions = false;
@@ -12,16 +12,16 @@ class HtmlRootTemplate extends HtmlTemplate {
 	 * @var \eoko\config\Application
 	 */
 	private $applicationConfig;
-	
+
 	private static $currentRootTemplate = null;
-	
+
 	/**
 	 * @return HtmlRootTemplate
 	 */
 	public static function getRendering() {
 		return self::$currentRootTemplate;
 	}
-	
+
 	protected function doRender() {
 
 		if (self::$currentRootTemplate !== null) {
@@ -35,14 +35,14 @@ class HtmlRootTemplate extends HtmlTemplate {
 
 		// implem
 		$this->onRender();
-		
+
 		self::$currentRootTemplate = null;
-		
+
 		parent::doRender();
 	}
-	
+
 	protected function onRender() {
-		
+
 		if (!isset($this->docType)) {
 			$this->set('docType', 
 <<<EOD
@@ -50,7 +50,7 @@ class HtmlRootTemplate extends HtmlTemplate {
 EOD
 			, false);
 		}
-		
+
 		// --- Defer head rendering to allow for all other renderer to push css & js ---
 
 		// 1. Remove head template, if any
@@ -62,7 +62,7 @@ Missing head template in RootHtmlTemplate (property: $this->headTemplateName)
 MSG
 				);
 			}
-			
+
 			$head = $this->{$this->headTemplateName};
 			unset($this->{$this->headTemplateName});
 		}
@@ -74,25 +74,25 @@ MSG
 				$var->render(true);
 			}
 		}
-		
+
 		// -- sort existing includes *now*
 		// if head doesn't add some, it will be rendered correctly in one pass
 		asort($this->cssIncludes);
 		asort($this->jsIncludes);
-		
+
 		// 3. Push back head template
 		if (isset($head)) {
-			
+
 			$head->css = array_keys($this->cssIncludes);
 			$head->js = array_keys($this->jsIncludes);
-			
+
 			$cssIncludes = $this->cssIncludes;
 			$jsIncludes = $this->jsIncludes;
 			$this->cssIncludes = array();
 			$this->jsIncludes = array();
-			
+
 			$this->vars[$this->headTemplateName] = $head;
-			
+
 			// Also render the head template, in case it wants to push includes itself
 			$head->forceResultCaching = true;
 			$head->render(true);
@@ -118,7 +118,7 @@ MSG
 			} else {
 				$this->jsIncludes = $jsIncludes;
 			}
-			
+
 			if ($rerender) {
 				$head->clearCache();
 				//$head->render(true);

@@ -132,7 +132,7 @@ abstract class <?php echo $modelName ?>Base extends <?php echo $baseModelName ?>
 	 * reccord matching the given primary key has been found
 	 */
 	public static function load($<?php echo $primaryField->getVarName(false) ?>, array $context = null) {
-		
+
 		$model = new <?php echo $modelName ?>(array(
 			'<?php echo $primaryField->getName() ?>' => $<?php echo $primaryField->getVarName(false) ?>
 		), false, $context);
@@ -265,7 +265,7 @@ abstract class <?php echo $modelName ?>Base extends <?php echo $baseModelName ?>
 <?php /*
 <?php if (!$field->isPrimary()): ?>
 		// $this->setField('<?php echo $field->getName() ?>', $<?php echo $field->getVarName() ?>
-		
+
 		$this->setColumn('<?php echo $field->getName() ?>', $<?php echo $field->getVarName() ?>
 , <?php echo $field->isNullable() ? '$ignoredArgument' : '$forceAcceptNull' ?>);
 <?php else: ?>
@@ -284,18 +284,19 @@ foreach ($proxyMethods as $method) {
 <?php foreach ($relations as $relation): ?>
 <?php //if ($relation instanceof ModelRelationReferencingHasOne): ?>
 	/**
-	 * @return <?php echo $relation->getTargetType() ?>
-
+	 *
+	 * @param array $overrideContext
+	 * @return <?php echo $relation->getTargetType('get') . PHP_EOL ?>
 	 */
 	function get<?php echo $relation->getName() ?>(array $overrideContext = null) {
 		return $this->getForeignModel('<?php echo $relation->getName() ?>', $overrideContext);
 	}
 	/**
 	 *
-	 * @return <?php echo $relation->getTargetModelName() ?>
-
+	 * @param <?php echo $relation->getTargetType('set') . ' $' . lcfirst($relation->getName()) . PHP_EOL ?>
+	 * @return <?php echo $relation->getTargetType('set') . PHP_EOL ?>
 	 */
-	function set<?php echo $relation->getName() ?>(<?php echo $relation->getTargetType() ?> $<?php echo lcfirst($relation->getName()) ?>) {
+	function set<?php echo $relation->getName() ?>(<?php echo $relation->getTargetType('set', true) ?> $<?php echo lcfirst($relation->getName()) ?>) {
 		// return $this->getRelation('<?php echo $relation->getName() ?>')->get($this);
 		return $this->setForeignModel('<?php echo $relation->getName() ?>', $<?php echo lcfirst($relation->getName()) ?>);
 	}

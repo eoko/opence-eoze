@@ -38,9 +38,9 @@ use eoko\modules\TreeMenu\ActionProvider\ModuleProvider;
  * @author Éric Ortéga <eric@planysphere.fr>
  */
 class BaseModule extends Module implements HasTitle, HasMenuActions {
-	
+
 	private $actionProvider;
-	
+
 	/**
 	 * @return eoko\modules\TreeMenu\ActionProvider
 	 */
@@ -50,7 +50,7 @@ class BaseModule extends Module implements HasTitle, HasMenuActions {
 		}
 		return $this->actionProvider;
 	}
-	
+
 	public function getTitle() {
 		$config = $this->getConfig()->get('module');
 		if (isset($config['title'])) {
@@ -59,7 +59,7 @@ class BaseModule extends Module implements HasTitle, HasMenuActions {
 			return null;
 		}
 	}
-	
+
 	public function getIconCls($action = null) {
 		return $this->getActionProvider()->getIconCls($action);
 	}

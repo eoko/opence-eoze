@@ -15,7 +15,7 @@ use Locale;
  * @since 2 nov. 2011
  */
 class Intl implements LocaleHelper {
-	
+
 	public function __construct() {
 		if (!extension_loaded('intl')) {
 			$class = get_class();
@@ -30,7 +30,7 @@ MSG
 			);
 		}
 	}
-	
+
 	public function getDefault() {
 		return Locale::getDefault();
 	}
@@ -38,5 +38,5 @@ MSG
 	public function getPrimaryLanguage($locale) {
 		return Locale::getPrimaryLanguage($locale);
 	}
-	
+
 }

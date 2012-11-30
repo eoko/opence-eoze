@@ -11,7 +11,7 @@ use RuntimeException, IllegalArgumentException;
  * @since 20 oct. 2011
  */
 abstract class ConfigObject {
-	
+
 	public static function create(ConfigObject $config = null) {
 		$class = get_called_class();
 		if ($config) {
@@ -25,7 +25,7 @@ abstract class ConfigObject {
 			return new $class;
 		}
 	}
-	
+
 	public function __call($name, $args) {
 		$n = count($args);
 		if (!property_exists($this, $name)) {

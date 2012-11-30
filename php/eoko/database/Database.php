@@ -7,18 +7,18 @@ use eoko\util\Arrays;
 use eoko\util\collection\ImmutableMap;
 
 class Database {
-	
+
 	/**
 	 * @var DatabaseProxy
 	 */
 	private static $defaultProxy = null;
-	
+
 	private function __construct() {}
-	
+
 	public static function reset() {
 		self::$defaultProxy = null;
 	}
-	
+
 	/**
 	 * @return DatabaseProxy
 	 */
@@ -31,7 +31,7 @@ class Database {
 
 	/**
 	 * Get config for database from the default node.
-	 * @return eoko\util\collection\Map
+	 * @return \eoko\util\collection\Map
 	 */
 	public static function getDefaultConfig() {
 		return self::getDefaultProxy()->getConfig();
@@ -45,7 +45,7 @@ class Database {
 	}
 
 	/**
-	 * @return PDO
+	 * @return \PDO
 	 */
 	public static function getDefaultConnection() {
 		return self::getDefaultProxy()->getConnection();

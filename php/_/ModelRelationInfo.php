@@ -11,7 +11,7 @@ class ModelRelationReciproqueFactory {
 	protected $relationInfo;
 	/** @var Model */
 	protected $reciproqueModel;
-	
+
 	function __construct(ModelRelationInfo $relationInfo, Model $reciproqueModel) {
 		$this->relationInfo = $relationInfo;
 		$this->reciproqueModel = $reciproqueModel;
@@ -48,7 +48,7 @@ abstract class ModelRelationInfo extends ModelFieldBase {
 	public $reciproqueName;
 
 	protected $virtualVariables;
-	
+
 	public $buildJoinOnClauseFn = null;
 //	public $buildFindModelCondition = null;
 //	public $initCreatedModel = null;
@@ -62,7 +62,7 @@ abstract class ModelRelationInfo extends ModelFieldBase {
 
 		$localTable->attach($this->localTable);
 		$targetTableProxy->attach($this->targetTable);
-		
+
 		// configure
 		if (is_array($name)) {
 			foreach ($name as $k => $v) {
@@ -75,7 +75,7 @@ abstract class ModelRelationInfo extends ModelFieldBase {
 		} else {
 			$this->name = $name;
 		}
-		
+
 		$this->configure();
 
 		$this->virtualVariables = array(
@@ -83,14 +83,14 @@ abstract class ModelRelationInfo extends ModelFieldBase {
 			'targetTable' => $this->targetTable
 		);
 	}
-	
+
 	public function configureMeta(array $config = null) {
 		if ($this->metaConfig) {
 			throw new IllegalStateException('Already configured');
 		}
 		$this->metaConfig = new FieldMetadata($config);
 	}
-	
+
 	public function getMeta() {
 		return $this->metaConfig;
 	}
@@ -173,7 +173,7 @@ abstract class ModelRelationInfo extends ModelFieldBase {
 			throw new UnsupportedOperationException;
 		}
 	}
-	
+
 	public function getSqlType() {
 		return $this->getType();
 	}
@@ -188,17 +188,17 @@ abstract class ModelRelationInfo extends ModelFieldBase {
 		}
 		throw new UnsupportedOperationException;
 	}
-	
+
 	public function isNullable() {
 		return true;
 	}
 
 //	protected function parseSelectJoinAlias(&$relationName, &$joinAlias, &$leftAlias) {
-//		
+//
 //		if ($relationName === null) $relationName = $this->name;
 //
 //		$joinAlias = $relationName;
-//		
+//
 //		if (count($parts = explode('->', $relationName)) > 1) {
 //			array_pop($parts);
 //			$leftAlias = implode('->', $parts);
@@ -207,7 +207,7 @@ abstract class ModelRelationInfo extends ModelFieldBase {
 //		}
 //	}
 	protected function parseSelectJoinAlias(&$relationName, &$joinAlias, &$leftAlias) {
-		
+
 		if ($relationName === null) $relationName = $this->name;
 
 //		if (count($parts = preg_split('/->/', $relationName, 2)) == 2) {
@@ -242,7 +242,7 @@ abstract class ModelRelationInfo extends ModelFieldBase {
 
 //r	public function selectName(ModelTableQuery $query, $alias = null, $sqlAlias = false) {
 	public function selectName(ModelTableQuery $query, $alias = null, $relationName = null) {
-		
+
 		if (!$this->selectable) {
 			return $query;
 		}
@@ -253,11 +253,11 @@ abstract class ModelRelationInfo extends ModelFieldBase {
 		if ($alias === null) {
 			$alias = $relationName;
 		}
-		
+
 		$this->parseSelectJoinAlias($relationName, $joinAlias, $leftAlias);
 
 //r		$alias = is_string($sqlAlias) ? $sqlAlias : $alias;
-		
+
 		// TODO getLabelSelectFormatString is app specific (implemented in
 		// myTable)
 		if (null !== $labelFormat = $this->targetTable->getLabelSelectFormatString()) {
@@ -340,11 +340,11 @@ abstract class ModelRelationInfo extends ModelFieldBase {
 	 * @return ModelRelationInfo
 	 */
 	public function getRelationInfo($name) {
-		
+
 		if (isset($this->relationInstances[$name])) {
 			return $this->relationInstances[$name];
 		}
-		
+
 		$relationNames = explode('->', $name);
 		$lastName = array_pop($relationNames);
 
@@ -361,7 +361,7 @@ abstract class ModelRelationInfo extends ModelFieldBase {
 				$hasMany = true;
 			}
 		}
-		
+
 		// Last name
 		// This may be either a field (column or virtual), or a relation.
 		if (!$lastRelation->targetTable->hasColumn($lastName)
@@ -466,7 +466,7 @@ abstract class ModelRelationInfo extends ModelFieldBase {
 				$r[$meta] = $referenceField->getMeta()->$meta;
 			}
 		}
-		
+
 		$r['meta'] = $referenceField->getMeta()->toArray();
 
 		return $r;
@@ -499,7 +499,7 @@ class ModelRelationInfoField extends ModelFieldBase {
 	public function getType() {
 		return $this->getActualField()->getType();
 	}
-	
+
 	public function getSqlType() {
 		return $this->getActualField()->getSqlType();
 	}
@@ -507,19 +507,19 @@ class ModelRelationInfoField extends ModelFieldBase {
 	public function isNullable() {
 		return $this->getActualField()->isNullable();
 	}
-	
+
 	public function getMeta() {
 		return $this->getActualField()->getMeta();
 	}
-	
+
 	public function getLength() {
 		return $this->getActualField()->getLength();
 	}
-	
+
 	public function getActualField() {
 		return $this->info->targetTable->getField($this->fieldName, true);
 	}
-	
+
 	public function __call($method, $args) {
 		$field = $this->getActualField();
 		if (method_exists($field, $method)) {
@@ -529,25 +529,25 @@ class ModelRelationInfoField extends ModelFieldBase {
 					. "::$method()");
 		}
 	}
-	
+
 }
 
 abstract class ModelRelationInfoByReference extends ModelRelationInfo {
 
 	public $referenceField;
 	public $prefix;
-	
+
 	protected $uniqueBy;
 
 	function  __construct($name, ModelTableProxy $localTable, ModelTableProxy $targetTableProxy, $referenceField) {
 		parent::__construct($name, $localTable, $targetTableProxy);
 		$this->referenceField = $referenceField;
 	}
-	
+
 	protected function addJoinWhere(QueryJoin $join) {
 
 		$this->targetTable->addJoinWhere($join);
-		
+
 		if ($this->uniqueBy) {
 			foreach ($this->uniqueBy as $foreign => $local) {
 				if (is_array($local)) {
@@ -575,7 +575,7 @@ abstract class ModelRelationInfoHasReference extends ModelRelationInfoByReferenc
 	const ODA_DELETE   = 1;
 	const ODA_NOTHING  = 2;
 	const ODA_RESTRICT = 3;
-	
+
 	/**
 	 * What to do when the refered model is deleted?
 	 * @internal Each relation kind can specify its default onDeleteAction,
@@ -678,7 +678,7 @@ abstract class ModelRelationInfoHasReference extends ModelRelationInfoByReferenc
 	public function getReferenceField() {
 		return $this->localTable->getField($this->referenceField);
 	}
-	
+
 	public function configureMeta(array $config = null) {
 		if ($this->metaConfig !== null) {
 			throw new IllegalStateException('Already configured');
@@ -689,7 +689,7 @@ abstract class ModelRelationInfoHasReference extends ModelRelationInfoByReferenc
 			$this->metaConfig = new FieldMetadata($config);
 		}
 	}
-	
+
 	public function getMeta() {
 		if ($this->metaConfig === false) {
 			return $this->localTable->getColumn($this->referenceField)->getMeta();
@@ -704,15 +704,15 @@ class ModelRelationInfoReferencesOne extends ModelRelationInfoHasReference
 		implements ModelRelationInfoHasOne {
 
 	protected $rightField;
-	
+
 //	protected $uniqueBy;
-	
+
 	function  __construct($name, ModelTableProxy $localTable, ModelTableProxy $targetTableProxy, $referenceField, $rightField = null) {
 		parent::__construct($name, $localTable, $targetTableProxy, $referenceField, $rightField);
 		$this->selectable = true;
 		$this->rightField = $rightField;
 	}
-	
+
 	public function getUniqueBy() {
 		return $this->uniqueBy;
 	}
@@ -736,7 +736,7 @@ class ModelRelationInfoReferencesOne extends ModelRelationInfoHasReference
 	}
 
 //	protected function addJoinWhere(QueryJoin $join) {
-//		
+//
 ////		if ($this->uniqueBy) {
 ////			foreach ($this->uniqueBy as $foreign => $local) {
 ////				if (is_array($local)) {
@@ -754,7 +754,7 @@ class ModelRelationInfoReferencesOne extends ModelRelationInfoHasReference
 ////				}
 ////			}
 ////		}
-//		
+//
 //		return $join;
 //	}
 
@@ -772,10 +772,10 @@ class ModelRelationInfoReferencesOne extends ModelRelationInfoHasReference
 			$this->referenceField, 
 			$this->rightField,
 			$alias,
-			
+
 			// Left table
 			$this->localTable, $leftAlias,
-			
+
 			$this->buildJoinOnClauseFn
 		);
 	}
@@ -785,11 +785,11 @@ class ModelRelationInfoIsRefered extends ModelRelationInfoByReference {
 
 	function __construct($name, ModelTableProxy $localTable, 
 			ModelTableProxy $targetTableProxy, $referenceField, $reciproqueName = null) {
-		
+
 		parent::__construct($name, $localTable, $targetTableProxy, $referenceField);
 		$this->reciproqueName = $reciproqueName;
 	}
-	
+
 //	protected function addJoinWhere(QueryJoin $join) {
 //		parent::addJoinWhere($join);
 //		$this->targetTable->addJoinWhere($join);
@@ -853,7 +853,7 @@ class ModelRelationInfoReferedByOne extends ModelRelationInfoIsRefered
 	public function createRelation(Model $parentModel) {
 		return new ModelRelationReferedByOne($this, $parentModel);
 	}
-	
+
 	/**
 	 * @internal
 	 * Create the reference field has it will be passed for the QueryJoin
@@ -873,7 +873,7 @@ class ModelRelationInfoReferedByOne extends ModelRelationInfoIsRefered
 			$alias !== null ? $alias : $this->name,
 			// Left table
 			$this->localTable, $leftAlias,
-			
+
 			$this->buildJoinOnClauseFn
 		);
 		return $join;
@@ -886,10 +886,10 @@ class ModelRelationInfoReferedByOne extends ModelRelationInfoIsRefered
 }
 
 class ModelRelationInfoReferredByOneAssoc extends ModelRelationInfoReferedByOne {
-	
+
 	/** @var ModelRelationInfoIndirectHasOne */
 	public $assocRelationInfo;
-	
+
 	public function __construct(ModelRelationInfoIndirectHasOne $info, $name = null) {
 		$this->doConstruct($info, $name, $info->localForeignKey);
 	}
@@ -912,14 +912,14 @@ class ModelRelationInfoReferredByOneAssoc extends ModelRelationInfoReferedByOne 
 }
 
 class ModelRelationInfoReferredByOneAssocMirror extends ModelRelationInfoReferredByOneAssoc {
-	
+
 	public function __construct(ModelRelationInfoIndirectHasOneMirror $info, $name = null) {
 		$this->doConstruct(
 			$info, 
 			$name, 
 			array($info->localForeignKey, $info->otherForeignKey)
 		);
-		
+
 		$this->buildJoinOnClauseFn = array($this, 'buildOnJoinClause');
 	}
 
@@ -938,7 +938,7 @@ class ModelRelationInfoReferredByOneAssocMirror extends ModelRelationInfoReferre
 		$clauses = trim(implode(' OR ', $clauses));
 		return "($clauses)";
 	}
-	
+
 	protected function getJoinReferenceField() {
 		return new QueryJoinField_Multiple($this->referenceField);
 	}
@@ -964,7 +964,7 @@ class ModelRelationInfoReferedByOneOnMultipleFields extends ModelRelationInfoRef
 
 	public function __construct($name, ModelTableProxy $localTable, ModelTableProxy $targetTableProxy,
 			$referenceField, $reciproqueName = null) {
-		
+
 		if (!is_array($referenceField)) {
 			throw new IllegalArgumentException(
 				'$referenceField should be an array. Use ModelRelationReferedByOne for '
@@ -976,7 +976,7 @@ class ModelRelationInfoReferedByOneOnMultipleFields extends ModelRelationInfoRef
 			$name, $localTable, $targetTableProxy, $referenceField,
 			$reciproqueName
 		);
-		
+
 		$this->buildJoinOnClauseFn = array($this, 'buildOnJoinClause');
 	}
 
@@ -995,15 +995,15 @@ class ModelRelationInfoReferedByOneOnMultipleFields extends ModelRelationInfoRef
 		$clauses = trim(implode(' OR ', $clauses));
 		return "($clauses)";
 	}
-	
+
 	protected function getJoinReferenceField() {
 		return new QueryJoinField_Multiple($this->referenceField);
 	}
-	
+
 	public function createRelation(Model $parentModel) {
 		return new ModelRelationReferedByOneOnMultipleFields($this, $parentModel);
 	}
-	
+
 	public function mergeDoublon($srcId, $destId, $context = null) {
 		throw new UnsupportedOperationException(get_class($this) . '::mergeDoublon()');
 	}
@@ -1027,7 +1027,7 @@ class ModelRelationInfoReferencesMany extends ModelRelationInfoHasReference
 
 class ModelRelationInfoReferedByMany extends ModelRelationInfoIsRefered
 		implements ModelRelationInfoHasMany {
-	
+
 	protected $selectable = true;
 
 	public function createRelation(Model $parentModel) {
@@ -1060,7 +1060,7 @@ class ModelRelationInfoReferedByMany extends ModelRelationInfoIsRefered
 		$join = $query->join($this, $joinAlias, $leftAlias);
 
 		$localField = $this->localTable->getPrimaryKeyName();
-		
+
 		$leftField = $join->getQualifiedName(
 				$this->localTable->getPrimaryKeyName(), QueryJoin::TABLE_LEFT);
 
@@ -1127,12 +1127,12 @@ abstract class ModelRelationInfoByAssoc extends ModelRelationInfo {
 	 * @var string name of the target model(s)' assoc relation
 	 */
 	public $assocRelationName;
-	
+
 	/** @var ModelRelationInfo */
 	private $assocRelationInfo = null;
-	
+
 	protected $whereAssoc;
-	
+
 	function  __construct(
 		$name,
 		ModelTableProxy $localTable, ModelTableProxy $targetTableProxy,
@@ -1188,9 +1188,9 @@ abstract class ModelRelationInfoByAssoc extends ModelRelationInfo {
 	}
 
 	protected function addJoinWhere(QueryJoin $join) {
-		
+
 		$this->assocTable->addJoinWhere($join);
-		
+
 		if ($this->whereAssoc) {
 			foreach ($this->whereAssoc as $field => $value) {
 				$join->whereAssoc($field, $value);
@@ -1201,7 +1201,7 @@ abstract class ModelRelationInfoByAssoc extends ModelRelationInfo {
 	public function getReferenceField() {
 		return $this->assocTable->getColumn($this->otherForeignKey);
 	}
-	
+
 //	public function createCqlixFieldConfig() {
 //		$cfg = parent::createCqlixFieldConfig();
 //		$cfg['fieldType'] = 'hasMany';
@@ -1256,7 +1256,7 @@ class ModelRelationInfoIndirectHasOneMirror extends ModelRelationInfoIndirectHas
 
 class ModelRelationInfoIndirectHasMany extends ModelRelationInfoByAssoc
 		implements ModelRelationInfoHasMany {
-	
+
 	protected $selectable = true;
 
 	/**
@@ -1280,7 +1280,7 @@ class ModelRelationInfoIndirectHasMany extends ModelRelationInfoByAssoc
 		}
 
 		$this->parseSelectJoinAlias($relationName, $joinAlias, $leftTableName);
-		
+
 //r		dumpl(array(
 //d			$alias, $joinAlias, $leftTableName
 //		));
@@ -1299,7 +1299,7 @@ class ModelRelationInfoIndirectHasMany extends ModelRelationInfoByAssoc
 					"`$leftTableName`.`$leftPK` = `$assocAlias`.`$this->localForeignKey`"
 				)
 				->count();
-		
+
 //		$assocQuery->where(
 //			$this->assocTable->addAssocWhere(
 //				$assocQuery->createWhere(
@@ -1340,7 +1340,7 @@ class ModelRelationInfoIndirectHasMany extends ModelRelationInfoByAssoc
 				->createQuery($query->context)
 				->select(QuerySelectRaw::create("GROUP_CONCAT(`$this->otherForeignKey`)"))
 				->applyAssocWhere($this->assocTable, "`$this->localForeignKey` = $idField");
-		
+
 		$query->select(new QuerySelectSub($assocQuery, $this->name));
 
 		// <editor-fold defaultstate="collapsed" desc="Alternative Query">
@@ -1377,17 +1377,17 @@ class ModelRelationInfoIndirectHasMany extends ModelRelationInfoByAssoc
 
 	public function createLoadQueryFor($pkValue, array $context = array(), $joinAlias = null) {
 		$query = $this->createLoadQuery($context, $joinAlias, $join);
-		
+
 		$where = $query->createWhere(
 			$join->getQualifiedName($this->localForeignKey, QueryJoin::TABLE_FOREIGN) . ' = ?',
 			$pkValue
 		);
 		$this->assocTable->addAssocWhere($where, $join);
-		
+
 		if (!$where->isNull()) {
 			$query->where($where);
 		}
-		
+
 		return $query;
 	}
 
@@ -1401,13 +1401,13 @@ abstract class ModelRelationInfoChain extends ModelRelationInfo {
 	protected $targetRelation;
 	/** @var string */
 	public $name;
-	
+
 	public function __construct(array $relationChain) {
 		if (count($relationChain) < 1) throw new IllegalArgumentException();
 		$this->relationChain = $relationChain;
 
 		$this->targetRelation = $relationChain[count($relationChain)-1];
-		
+
 		$names = array();
 		foreach ($relationChain as $info) $names[] = $info->name;
 
@@ -1435,7 +1435,7 @@ abstract class ModelRelationInfoChain extends ModelRelationInfo {
 	// overriden so that the target relation (ie the last one in the chain) 
 	// uses the correct $alias and not its own one
 	public function selectName(ModelTableQuery $query, $alias = null, $relationName = null) {
-		
+
 		// Ensure the base joins exist
 		$this->createJoin($query);
 
@@ -1464,15 +1464,15 @@ abstract class ModelRelationInfoChain extends ModelRelationInfo {
 			$alias !== null ? $alias : $this->name
 		);
 	}
-	
+
 	public function getType() {
 		return $this->targetRelation->getType();
 	}
-	
+
 	public function getSqlType() {
 		return $this->targetRelation->getSqlType();
 	}
-	
+
 	public function getMeta() {
 		return $this->targetRelation->getMeta();
 	}

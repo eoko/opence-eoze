@@ -11,7 +11,7 @@ use eoko\output\Adapter;
  * @since 24 nov. 2011
  */
 class EchoAdapter implements Adapter {
-	
+
 	public function out($string) {
 		echo $string;
 	}

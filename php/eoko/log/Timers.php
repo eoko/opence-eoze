@@ -23,7 +23,7 @@ class Timers {
 //		}
 		return $this->timers[$context][$key] = new Timer($message, $level);
 	}
-	
+
 	/**
 	 * Retrieves the {@link Timer} for the specified $context and $key. If no
 	 * such Timer has yet been created by {@link create()}, NULL will be
