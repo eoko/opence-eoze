@@ -6,13 +6,18 @@
 (function() {
 
 var spp = Ext.form.TextField.prototype,
-	getAutoCreate = spp.getAutoCreate;
+	getAutoCreate = spp.getAutoCreate,
+	focus = spp.focus,
+	preFocus = spp.preFocus;
 	
 /**
  * @class Ext.form.TextField
  * @author Éric Ortega <eric@eoko.fr>
- * 
- * Overriden to implement {@link #enforeMaxLength}.
+ *
+ * Overridden for the following:
+ *
+ * - implements {@link #enforeMaxLength}.
+ * - forces focus(false) to prevent selection
  */
 Ext.override(Ext.form.TextField, {
 	
@@ -57,6 +62,34 @@ Ext.override(Ext.form.TextField, {
 //            e.stopEvent();
 //        }
 //    }
+
+	/**
+	 * Overridden to enforce preventing selection on focus if the first argument is false.
+	 * @see {Ext.form.Field#focus}
+	 */
+	,focus: function(selectText) {
+		if (selectText === false) {
+			this.preventSelectOnFocus = true;
+		}
+		focus.apply(this, arguments);
+	}
+
+	/**
+	 * Overridden to enforce preventing selection on focus when focus is called with
+	 * argument select = false.
+	 * @see {Ext.form.TextField#focus}
+	 * @private
+	 */
+	,preFocus: function() {
+		if (this.selectOnFocus && this.preventSelectOnFocus) {
+			this.selectOnFocus = false;
+			this.preventSelectOnFocus = false;
+			preFocus.apply(this, arguments);
+			this.selectOnFocus = true;
+		} else {
+			preFocus.apply(this, arguments);
+		}
+	}
 	
 });
 
