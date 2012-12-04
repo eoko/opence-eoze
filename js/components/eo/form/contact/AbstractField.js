@@ -786,14 +786,15 @@ eo.form.contact.AbstractField = Ext.extend(Ext.form.CompositeField, {
 		}, this);
 	}
 	
-	,afterRender: function() {
-		spp.afterRender.apply(this, arguments);
-		// init value
-		if (this.value) {
-			this.setValue(this.value);
-		}
-		this.originalValue = this.getValue();
-	}
+// 2012-12-04 11:54 This is already done in Ext.form.Field#initValue code
+//	,afterRender: function() {
+//		spp.afterRender.apply(this, arguments);
+//		// init value
+//		if (this.value) {
+//			this.setValue(this.value);
+//		}
+//		this.originalValue = this.getValue();
+//	}
 	
 	,setbaseParams: function(baseParams) {}
 
