@@ -355,7 +355,7 @@ class ModelColumn extends ModelFieldBase {
 				new QuerySelectFunctionOnField(
 					$query, 
 					$this->name, 
-					'DATE_FORMAT({}, "%Y-%m-%dT%H:%m:%i")', 
+					'DATE_FORMAT({}, "%Y-%m-%dT%H:%i:%s")',
 					$this->name
 				)
 			);
