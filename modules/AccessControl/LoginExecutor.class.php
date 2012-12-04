@@ -41,7 +41,7 @@ class LoginExecutor extends JsonExecutor {
 	}
 
 	public function get_module() {
-		if (!headers_sent) {
+		if (!headers_sent()) {
 			header('Content-type: application/x-javascript');
 		}
 		echo $this->getModule()->getJavascriptAsString();
