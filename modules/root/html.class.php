@@ -282,8 +282,10 @@ JS;
 							'try {',
 							$content,
 							'} catch (e) {',
-							'   window.console && console.error && ',
-							"console.error('Error in module's javascript: {$module->getName()}');",
+							'   if (window.console && console.error) {',
+							"       console.error(e.stack);",
+							"       console.error('Error in module\'s javascript: {$module->getName()}');",
+							'   }',
 							'}'
 						);
 //						$contents[] = 'try {';
