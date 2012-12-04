@@ -241,4 +241,12 @@ Ext.Date.isEqual = function (date1,date2){
 	}
 };
 
+// String
+
+Ext.ns('Ext.String');
+
+Ext.String.format = function() {
+	return String.format.apply(String, arguments);
+};
+
 } // end of compat patches
