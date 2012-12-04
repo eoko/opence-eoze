@@ -317,7 +317,9 @@ class ModelColumn extends ModelFieldBase {
 			case self::T_DATE:
 				return DateHelper::dateExtToSql($value);
 			case self::T_INT: return $value === null || $value === '' ? null
-				: (($value === 0 ? '0' : $value));
+				// 2012-12-04 16:12 changed
+				// : (($value === 0 ? '0' : $value));
+				: "$value";
 			case self::T_FLOAT: return $value === null || $value === '' ? null
 				: (float) str_replace(',', '.', $value);
 			case self::T_DECIMAL: return $value === null || $value === '' ? null

@@ -1184,36 +1184,11 @@ abstract class Model {
 
 		$result = $this->applyLoadQueryWherePk($query)->executeSelectFirst();
 
-//		$result = $query->where(
-//			$query->getQualifiedName($table->getPrimaryKeyName()) . ' = ?', $id
-//		)->executeSelectFirst();
-
-		if ($result == null) return null;
-
-		foreach ($this->internal->fields as $i => $v) {
-			if (!array_key_exists($i, $result)) {
-				Logger::getLogger($this)->warn('Model {} not synchronized: '
-						. 'missing column {} in database result', get_class($this), $i);
-				// throw new IllegalStateException("Model '$thisName' not synchronized: missing "
-				//		. 'column "' . $i . '" in database result');
-			}
-			$this->internal->dbValues[$i] = $this->internal->fields[$i] = $result[$i];
-//			$this->setColumnNoLoadCheck($i, $result[$i]);
-
-			// $this->internal->fieldUpdated[$i] = false; // useless => redondant, this is already done in the constructor
+		if ($result == null) {
+			return null;
 		}
 
-		foreach ($table->getVirtualNames() as $virtual) {
-			if (!array_key_exists($virtual, $result)) {
-				Logger::getLogger($this)->warn('Model "{}" not synchronized: '
-						. 'missing virtual field `{}` in database result', get_class($this), $virtual);
-			}
-			$this->internal->dbValues[$virtual] = $this->internal->fields[$virtual] = $result[$virtual];
-		}
-
-//		foreach ($this->getRelations() as $name => $relation) {
-//			$relation->loadFromDB($result);
-//		}
+		$this->setAllFieldsFromDatabase($result);
 
 		$this->clearModified();
 
@@ -1591,7 +1566,9 @@ abstract class Model {
 			$v = $col->convertValueToSQL($value);
 
 			// 2012-11-20 moved here (see bellow)
-			$this->internal->fields[$name] = $this->applyFieldValue($name, $v);
+			$previous = isset($this->internal->fields[$name]) ? $this->internal->fields[$name] : null;
+			$v = $this->applyFieldValue($name, $v);
+			$this->internal->fields[$name] = $v;
 
 			if ($v === null && !$forceAcceptNull && !$col->isNullable() && (!$col->isPrimary())) {
 				throw new IllegalArgumentException($this->getModelName() . '.' . $name . ' cannot be null');
@@ -1601,7 +1578,7 @@ abstract class Model {
 			// if ($this->internal->fields[$name] != $v || !$testChanged) { 
 			// 02/11/12 12:24 changed
  			// if ($this->internal->fields[$name] !== $v || !$testChanged) {
-			if (!$this->dbImage || $this->internal->fields[$name] !== $v || !$testChanged) {
+			if (!$this->dbImage || $v !== $previous) {
 				// 2012-11-20 moved before the if
 				// $this->internal->fields[$name] = $this->applyFieldValue($name, $v);
 				$this->internal->colUpdated[$name] = true;

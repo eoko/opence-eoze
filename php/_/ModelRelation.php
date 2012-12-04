@@ -622,12 +622,18 @@ class ModelRelationReferedByMany extends ModelRelationByReference implements Mod
 
 		$models = array();
 
-		if ($value) foreach ($value as $m) {
-			if (false == $m instanceof Model) {
-				$m = $this->targetTable->createModel($m, false, $this->parentModel->context);
+		if ($value) {
+			foreach ($value as $m) {
+				if (false == $m instanceof Model) {
+					if (is_array($m)) {
+						$m = $this->targetTable->createModel($m, false, $this->parentModel->context);
+					} else {
+						$m = $this->targetTable->loadModel($m, $this->parentModel->context);
+					}
+				}
+				$m->setFieldFromModelPk($this->referenceField, $this->parentModel);
+				$models[] = $m;
 			}
-			$m->setFieldFromModelPk($this->referenceField, $this->parentModel);
-			$models[] = $m;
 		}
 	}
 
