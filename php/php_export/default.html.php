@@ -53,7 +53,7 @@ th {
 	<page_footer>
 		<hr class="rule"/>
 		<p class="footer">
-			CIE RHODIA BELLE ETOILE &mdash; SIRET 07307 559 559 40
+			CE RHODIA BELLE ETOILE &mdash; SIRET 07307 559 559 40
 		</p>
 	</page_footer>
 
