@@ -1,3 +1,5 @@
+(function(Ext) {
+
 /*
 DeftJS 0.6.7
 
@@ -36,3 +38,5 @@ Ext.define("Deft.promise.Promise",{alternateClassName:["Deft.Promise"],statics:{
 b.resolve(a)};c=function(){return j=i=function(){}};h=function(a){return i(a)};f=function(a){return rejector(a)};e=function(a){return j(a)};d=k=0;for(l=a.length;k<l;d=++k)g=a[d],d in a&&this.when(g).then(h,f,e);return this.when(b)},memoize:function(a,c,b){return this.all(Ext.Array.toArray(arguments)).then(Deft.util.Function.spread(function(){return Deft.util.memoize(arguments,c,b)},c))},map:function(a,c){var b,d,e,g,f;e=Array(a.length);b=g=0;for(f=a.length;g<f;b=++g)d=a[b],b in a&&(e[b]=this.when(d,
 c));return this.reduce(e,this.reduceIntoArray,e)},reduce:function(a,c,b){var d,e;e=this.when;d=[function(b,d,h){return e(b,function(b){return e(d,function(d){return c(b,d,h,a)})})}];arguments.length===3&&d.push(b);return this.when(this.reduceArray.apply(a,d))},reduceArray:function(a,c){var b,d,e,g,f;e=0;d=Object(this);g=d.length>>>0;b=arguments;if(b.length<=1)for(;;){if(e in d){f=d[e++];break}if(++e>=g)throw new TypeError;}else f=b[1];for(;e<g;)e in d&&(f=a(f,d[e],e,d)),e++;return f},reduceIntoArray:function(a,
 c,b){a[b]=c;return a}},constructor:function(a){this.deferred=a;return this},then:function(a){return this.deferred.then.apply(this.deferred,arguments)},always:function(a){return this.deferred.always(a)},cancel:function(a){return this.deferred.cancel(a)},getState:function(){return this.deferred.getState()}},function(){if(Array.prototype.reduce!=null)this.reduceArray=Array.prototype.reduce});
+
+})(Ext4);
