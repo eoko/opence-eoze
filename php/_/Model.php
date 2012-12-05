@@ -683,7 +683,31 @@ abstract class Model {
 		return $this->deleted;
 	}
 
+	/**
+	 * Returns true if the specified field or fields have been modified.
+	 *
+	 * If the method is called with no arguments, it will return true if *any* field
+	 * has been modified.
+	 *
+	 * @param null|string|string[] $fieldName
+	 * @param ...
+	 * @return bool
+	 */
 	public function isModified($fieldName = null) {
+		// Multiple arguments
+		if (func_num_args() > 1) {
+			$fieldName = func_get_args();
+		}
+		// Multiple fields
+		if (is_array($fieldName)) {
+			foreach ($fieldName as $field) {
+				if ($this->isModified($field)) {
+					return true;
+				}
+			}
+			return false;
+		}
+		// Single field
 		if ($fieldName === null) {
 			return $this->internal->modified;
 		} else {
