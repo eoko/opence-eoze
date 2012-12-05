@@ -45,10 +45,10 @@ use eoko\config\ConfigManager;
  * @method ModelColumn getPrimaryKeyColumn()
  * @method ModelTableQuery createQuery()
  *
- * @method ModelTableColumn getColumn($name) Get a ModelTableColumn of
+ * @method ModelColumn getColumn($name) Get a ModelTableColumn of
  * %%ModelTable%% from its name. This method is static in concrete ModelTable
  * implementations, but it is abstract in ModelTable class.
- * @method Array getColumns($excludeAutoOperation = false, $excludeFinal = false) This
+ * @method ModelColumn[] getColumns($excludeAutoOperation = false, $excludeFinal = false) This
  * method is static in concrete ModelTable implementations, but it is abstract
  * in ModelTable class.
  * 
