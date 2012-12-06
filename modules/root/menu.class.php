@@ -25,7 +25,7 @@ class menu extends BasicHtmlExecutor {
 		);
 		return true;
 	}
-	
+
 	private function getMenuData() {
 		$path = $this->searchPath('menu.yml');
 		if (!$path) return array(
@@ -59,7 +59,7 @@ class menu extends BasicHtmlExecutor {
 	 * @return HtmlTemplate
 	 */
 	private function createMenu($menu) {
-		
+
 		$menuData = $this->getMenuData();
 
 		$avMenuItems = $menuData['menu-items'];

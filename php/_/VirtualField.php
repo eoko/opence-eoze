@@ -9,9 +9,9 @@ interface VirtualField extends ModelField {
 	function getClause(ModelTableQuery $query, QueryAliasable $aliasable = null);
 
 	function getOrderFieldAlias(QueryAliasable $aliasable, $alias = null);
-	
+
 	function isCachable();
-	
+
 	function configureMeta($config);
 }
 
@@ -19,11 +19,11 @@ abstract class VirtualFieldBase extends ModelFieldBase implements VirtualField {
 
 	protected $alias;
 	protected $cachable = true;
-	
+
 	protected $type = null;
 	protected $maxLength = null;
 	protected $defaultAlias = null;
-	
+
 	/**
 	 * @var FieldMetadata
 	 */
@@ -40,7 +40,7 @@ abstract class VirtualFieldBase extends ModelFieldBase implements VirtualField {
 			}
 		}
 	}
-	
+
 	public function configureMeta($config) {
 		if ($config !== null) {
 			if (!is_array($config)) {
@@ -56,11 +56,11 @@ abstract class VirtualFieldBase extends ModelFieldBase implements VirtualField {
 		}
 		$this->meta = new FieldMetadata($config);
 	}
-	
+
 	public function getMeta() {
 		return $this->meta;
 	}
-	
+
 	/**
 	 * Implementation of the {@link ModelField::getLength()} method.
 	 * 
@@ -72,18 +72,18 @@ abstract class VirtualFieldBase extends ModelFieldBase implements VirtualField {
 	public function getLength() {
 		return $this->maxLength;
 	}
-	
+
 	private function guessAliasFromClassName() {
 		$class = get_class($this);
 		if (preg_match('/(?:^|_)([^_]+?)(?:VirtualField)?$/', $class, $matches)) {
 			return lcfirst($matches[1]);
 		}
 	}
-	
+
 	public function isCachable() {
 		return $this->cachable;
 	}
-	
+
 	public function getName() {
 		if ($this->alias !== null) {
 			return $this->alias;
@@ -91,7 +91,7 @@ abstract class VirtualFieldBase extends ModelFieldBase implements VirtualField {
 			throw new UnsupportedOperationException(get_class($this) . '::getName()');
 		}
 	}
-	
+
 	public function getType() {
 		if ($this->type !== null) {
 			return $this->type;
@@ -99,7 +99,7 @@ abstract class VirtualFieldBase extends ModelFieldBase implements VirtualField {
 			throw new UnsupportedOperationException(get_class($this) . '::getType()');
 		}
 	}
-	
+
 	public function getSqlType() {
 		return $this->getType();
 	}
@@ -107,17 +107,17 @@ abstract class VirtualFieldBase extends ModelFieldBase implements VirtualField {
 	public function isNullable() {
 		return true;
 	}
-	
+
 	public function select(ModelTableQuery $query, $alias = null, QueryAliasable $aliasable = null) {
 		if ($alias === null) $alias = $this->alias;
-		
+
 		$clause = $this->getClause($query, $aliasable);
-		
+
 		$bindings = null;
 		if ($clause instanceof SqlVar) {
 			$clause = $clause->buildSql(false, $bindings);
 		}
-		
+
 		return $query->select(
 			new QuerySelectRaw(
 				"$clause AS `$alias`",
@@ -166,7 +166,7 @@ abstract class VirtualFieldBase extends ModelFieldBase implements VirtualField {
 }
 
 class AbstractVirtualField extends VirtualFieldBase {
-	
+
 	protected $alias = true;
 }
 
@@ -255,16 +255,16 @@ class FormattedVirtualField extends AbstractVirtualField {
 	protected $format = null;
 	protected $nullable = true;
 	protected $type = ModelColumn::T_STRING;
-	
+
 	protected $nullField  = null;
 	protected $nullString = '?';
 
 	function __construct($format = null, $defaultAlias = null, $nullable = null, $nullField = null, 
 			$nullString = null) {
 		parent::__construct($defaultAlias);
-		
+
 		$this->nullable = $nullable;
-		
+
 		if ($format !== null) {
 			$this->format = $format;
 		}

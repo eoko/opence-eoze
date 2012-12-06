@@ -11,6 +11,6 @@ use eoze\I18n\LocaleHelper;
  * @since 2 nov. 2011
  */
 class Dummy extends LocaleHelper {
-	
-	
+
+
 }

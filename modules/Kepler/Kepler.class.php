@@ -16,11 +16,11 @@ use eoko\util\GlobalEvents;
  * @since 30 nov. 2011
  */
 class Kepler extends Module {
-	
+
 	protected $defaultExecutor = 'json';
-	
+
 	private $workingPath;
-	
+
 	private $sessionManager = null;
 
 	/**
@@ -36,7 +36,7 @@ class Kepler extends Module {
 			return parent::getSessionManager();
 		}
 	}
-	
+
 	public function getWorkingPath($subDirectory = null) {
 		if ($this->workingPath === null) {
 			if (null !== $path = $this->getConfig()->getValue('workingPath')) {
@@ -51,11 +51,11 @@ class Kepler extends Module {
 			return $this->workingPath;
 		}
 	}
-	
+
 	public function getQueueFilePath() {
 		return $this->getWorkingPath($this->getSessionManager()->getId());
 	}
-	
+
 	private function replacePathVariables($path) {
 		$search  = array();
 		$replace = array();
@@ -67,13 +67,13 @@ class Kepler extends Module {
 		}
 		return str_replace($search, $replace, $path);
 	}
-	
+
 	public function clearWaitingEvents() {
 		if (file_exists($file = $this->getQueueFilePath())) {
 			unlink($file);
 		}
 	}
-	
+
 	public function buildCometEntries(array $entries) {
 		$result = array();
 		foreach ($entries as $entry) {

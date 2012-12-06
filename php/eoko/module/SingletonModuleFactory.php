@@ -9,7 +9,7 @@ abstract class SingletonModuleFactory implements ModuleFactory {
 	private function __construct() {
 		$this->construct();
 	}
-	
+
 	protected function construct() {}
 
 	public static function get() {

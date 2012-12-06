@@ -12,7 +12,7 @@ use eoze\util\PageInfo;
  * @since 1 nov. 2011
  */
 class PhpTimeZoneProvider extends AbstractTimeZoneProvider {
-	
+
 	public function getTimeZone($name) {
 		return new DateTimeZone($name);
 	}
@@ -24,5 +24,5 @@ class PhpTimeZoneProvider extends AbstractTimeZoneProvider {
 	public function listIdentifiers($what = DateTimeZone::ALL, $country = null, PageInfo $page = null) {
 		return PageInfo::getArrayPage(DateTimeZone::listIdentifiers($what, $country), $page);
 	}
-	
+
 }

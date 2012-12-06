@@ -17,7 +17,7 @@ use Request;
  * @since 1 déc. 2011
  */
 class PluginBase implements Plugin {
-	
+
 	/**
 	 * @var GridExecutor
 	 */
@@ -27,18 +27,18 @@ class PluginBase implements Plugin {
 	 * @var ModelTable
 	 */
 	private $table;
-	
+
 	/**
 	 * @var Request
 	 */
 	private $request;
-	
+
 	public function configure(GridExecutor $gridExecutor, ModelTable $table, Request $request) {
 		$this->gridExecutor = $gridExecutor;
 		$this->table = $table;
 		$this->request = $request;
 	}
-	
+
 	/**
 	 * @return GridExecutor
 	 */
@@ -52,14 +52,14 @@ class PluginBase implements Plugin {
 	protected function getTable() {
 		return $this->table;
 	}
-	
+
 	/**
 	 * @return Request
 	 */
 	protected function getRequest() {
 		return $this->request;
 	}
-	
+
 	public function executeAction($name, &$returnValue) {
 		$method = "action_$name";
 		if (method_exists($this, $method)) {
@@ -68,22 +68,22 @@ class PluginBase implements Plugin {
 		}
 		return false;
 	}
-	
+
 	// Empty listener implementations
-	
+
 	public function addModelContext(Model $model) {}
 
 	public function afterSaveModel(Model $model, $wasNew) {}
 
 	public function beforeSaveModel(Model $model, $new) {}
-	
+
 	public function beforeDelete(array $ids) {}
-	
+
 	public function afterDelete(array $ids) {}
-	
+
 	public function onCreateQueryContext(Request $request, array &$context) {}
-	
+
 	public function configureLoadQuery(ModelTableQuery $query) {}
-	
+
 	public function afterExecuteLoadQuery(ModelTableQuery $query) {}
 }

@@ -47,7 +47,7 @@ Ext.namespace('<?php echo $namespace ?>.<?php echo $controller ?>');
 var moduleClass = Ext.extend(<?php echo $superclass ?>, {
 
 	my: <?php echo $my . "\n" ?>
-	
+
 	,modelName: <?php echo $modelName . "\n" ?>
 	,tableName: <?php echo $tableName . "\n" ?>
 
@@ -58,7 +58,7 @@ var moduleClass = Ext.extend(<?php echo $superclass ?>, {
 	,extra: <?php echo $extra ?>
 
 	,renderers: renderers
-	
+
 	,templates: {
 		<?php echo $templates ?>
 	}
@@ -81,7 +81,7 @@ var moduleClass = Ext.extend(<?php echo $superclass ?>, {
 	,enums: new eo.cqlix.Enums(<?php echo $enumsConfig ?>)
 <?php endif ?>
  */ ?>
-	
+
 <?php if (isset($i18n)): ?>
 	,i18n: <?php echo $i18n ?>
 <?php endif ?>

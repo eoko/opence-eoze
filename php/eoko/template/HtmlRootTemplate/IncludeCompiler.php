@@ -34,7 +34,7 @@ abstract class IncludeCompiler {
 	protected $yuiOptions;
 
 	protected $force = false;
-	
+
 	private $builder;
 
 	private $urls;
@@ -57,7 +57,7 @@ abstract class IncludeCompiler {
 	private function is($option) {
 		return isset($this->options[$option]) && $this->options[$option];
 	}
-	
+
 	/**
 	 * Gets the paths & urls of merged and compressed include.
 	 * 
@@ -68,7 +68,7 @@ abstract class IncludeCompiler {
 	 * @return array|string
 	 */
 	private function getTargetNames($index = null) {
-		
+
 		$filename = $this->baseName;
 
 		if ($this->is('version') && $this->version) {
@@ -82,10 +82,10 @@ abstract class IncludeCompiler {
 		$compressedName = "$filename.min.$this->extension";
 		$r['compressedFile'] = WEB_DIR_PATH . $compressedName;
 		$r['compressedUrl'] = WEB_DIR_URL . $compressedName;
-		
+
 		return $index !== null ? $r[$index] : $r;
 	}
-	
+
 	/**
 	 * Builds a flat list of urls, in the order they should be included, from a
 	 * prioritized urls array of the form:
@@ -146,7 +146,7 @@ abstract class IncludeCompiler {
 
 		return false;
 	}
-	
+
 	/**
 	 * Build the includes and assign them to the {@link urls} property, 
 	 * according to the following strategy:
@@ -164,7 +164,7 @@ abstract class IncludeCompiler {
 	 * @return void
 	 */
 	private function build() {
-		
+
 		$names = $this->getTargetNames();
 		extract($names); // mergedFile & mergedUrl
 
@@ -198,11 +198,11 @@ abstract class IncludeCompiler {
 	 * @return array()
 	 */
 	public function getUrls($build = false) {
-		
+
 		if ($build) {
 			$this->build();
 		}
-		
+
 		return $this->urls;
 	}
 
@@ -217,7 +217,7 @@ abstract class IncludeCompiler {
 			putenv("JAVA_CMD=$this->javaCommand");
 			exec($cmd, $output, $result);
 			if ($result !== 0) {
-				Logger::warn('YUI Compressor failed: ' . $output);
+				Logger::get($this)->warn('YUI Compressor failed: ' . $output);
 				return false;
 			}
 		}

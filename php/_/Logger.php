@@ -50,7 +50,7 @@ class Logger {
 	 */
 	private static $defaultLogger = null;
 	private static $defaultContext = 'ROOT';
-	
+
 	private static $previousEntries;
 
 	/**
@@ -72,7 +72,7 @@ class Logger {
 	 * @return Logger
 	 */
 	public static function getLogger($context = null) {
-		
+
 		if (self::$defaultLogger === null)
 			self::$defaultLogger = new \eoko\log\Logger();
 
@@ -97,11 +97,24 @@ class Logger {
 		unset($logger->logLevel[$old]);
 	}
 
-	const ERROR = 0;
-	const WARNING = 5;
-	const ASSERTION = 6;
-	const INFO = 7;
-	const DEBUG = 10;
+	const EMERG   = 0;  // Emergency: system is unusable
+	const ALERT   = 1;  // Alert: action must be taken immediately
+	const CRIT    = 2;  // Critical: critical conditions
+	const ERR     = 3;  // Error: error conditions
+	const WARN    = 4;  // Warning: warning conditions
+	const NOTICE  = 5;  // Notice: normal but significant condition
+	const INFO    = 6;  // Informational: informational messages
+	const DEBUG   = 7;  // Debug: debug messages
+	// Legacy aliases
+	const ERROR = self::ERR;
+	const WARNING = self::WARN;
+	const ASSERTION = self::DEBUG;
+
+//	const ERROR = 0;
+//	const WARNING = 5;
+//	const ASSERTION = 6;
+//	const INFO = 7;
+//	const DEBUG = 10;
 	const ALL = 100;
 
 	private static $levelNames = array(
@@ -158,7 +171,7 @@ class Logger {
 	public function setLevel($level) {
 		$this->logLevel[$this->context] = $level;
 	}
-	
+
 	public static function setLevels($levels) {
 		$logger =& self::getLogger();
 		foreach ($levels as $context => $level) {
@@ -217,7 +230,7 @@ class Logger {
 			}
 		}
 	}
-	
+
 	protected function logImpl($level, $msg, $args = array()) {
 
 		if ($this->isActive($level, false)) {
@@ -271,7 +284,7 @@ class Logger {
 			$infoLine = $this->getTraceString();
 
 			$entry = new LogEntry($msg, $level, $date, $this->context, $infoLine);
-			
+
 			self::$previousEntries[] = $entry;
 
 			foreach (self::$appenders as $appender) {
@@ -282,7 +295,7 @@ class Logger {
 
 	/**
 	 * Log the given message with the specified log level
-	 * 
+	 *
 	 * The $msg string parameter can contains placeholders of the form {} which
 	 * will be replaced in order by the optional arguments.
 	 *
@@ -297,15 +310,14 @@ class Logger {
 	 * param), and given arguments casting to string should be left to the
 	 * logger (that is, being passed as-is).
 	 *
-	 * @param Const $level	the level at which the message will be logged
-	 * @param String $msg	the formatted message string
-	 * @param mixed $args,... optional arguments to sequently replace the {}
+	 * @param int $level	the level at which the message will be logged
+	 * @param string $msg	the formatted message string
+	 * @param mixed $args,... optional arguments to sequentially replace the {}
 	 * placeholders
 	 */
-	public static function log($level, $msg) {
-		$logger = isset($this) ? $this : Logger::getLogger();
+	public function log($level, $msg) {
 		$args = func_get_args();
-		$logger->logImpl($level, $msg, array_slice($args, 2));
+		$this->logImpl($level, $msg, array_slice($args, 2));
 	}
 
 	/**
@@ -325,15 +337,13 @@ class Logger {
 	 * param), and given arguments casting to string should be left to the
 	 * logger (that is, being passed as-is).
 	 *
-	 * @param Const $level	the level at which the message will be logged
-	 * @param String $msg	the formatted message string
-	 * @param mixed $args,... optional arguments to sequently replace the {}
+	 * @param string $msg	the formatted message string
+	 * @param mixed $args,... optional arguments to sequentially replace the {}
 	 * placeholders
 	 */
 	public function debug($msg) {
-		$logger = isset($this) && $this instanceof Logger ? $this : Logger::getLogger();
 		$args = func_get_args();
-		$logger->logImpl(self::DEBUG, $msg, array_slice($args, 1));
+		$this->logImpl(self::DEBUG, $msg, array_slice($args, 1));
 	}
 
 	public static function dbg($msg) {
@@ -343,10 +353,9 @@ class Logger {
 	}
 
 	public static function tmp($msg) {
-		if (isset($this)) {
-			throw new IllegalStateException(
-					'Only use static call with this, to help cleaning afterward!');
-		}
+//		if (isset($this)) {
+//			throw new IllegalStateException('Only use static call with this, to help cleaning afterward!');
+//		}
 		$logger = Logger::getLogger();
 		$args = func_get_args();
 		$logger->logImpl(self::DEBUG, $msg, array_slice($args, 1));
@@ -369,15 +378,13 @@ class Logger {
 	 * param), and given arguments casting to string should be left to the
 	 * logger (that is, being passed as-is).
 	 *
-	 * @param Const $level	the level at which the message will be logged
-	 * @param String $msg	the formatted message string
-	 * @param mixed $args,... optional arguments to sequently replace the {}
+	 * @param string $msg	the formatted message string
+	 * @param mixed $args,... optional arguments to sequentially replace the {}
 	 * placeholders
 	 */
-	public static function warn($msg) {
-		$logger = isset($this) ? $this : Logger::getLogger();
+	public function warn($msg) {
 		$args = func_get_args();
-		$logger->logImpl(self::WARNING, $msg, array_slice($args, 1));
+		$this->logImpl(self::WARNING, $msg, array_slice($args, 1));
 	}
 
 	/**
@@ -397,15 +404,13 @@ class Logger {
 	 * param), and given arguments casting to string should be left to the
 	 * logger (that is, being passed as-is).
 	 *
-	 * @param Const $level	the level at which the message will be logged
-	 * @param String $msg	the formatted message string
-	 * @param mixed $args,... optional arguments to sequently replace the {}
+	 * @param string $msg	the formatted message string
+	 * @param mixed $args,... optional arguments to sequentially replace the {}
 	 * placeholders
 	 */
 	public function error($msg) {
-		$logger = isset($this) && $this instanceof Logger ? $this : Logger::getLogger();
 		$args = func_get_args();
-		$logger->logImpl(self::ERROR, $msg, array_slice($args, 1));
+		$this->logImpl(self::ERROR, $msg, array_slice($args, 1));
 	}
 
 	/**
@@ -425,51 +430,46 @@ class Logger {
 	 * param), and given arguments casting to string should be left to the
 	 * logger (that is, being passed as-is).
 	 *
-	 * @param Const $level	the level at which the message will be logged
-	 * @param String $msg	the formatted message string
-	 * @param mixed $args,... optional arguments to sequently replace the {}
+	 * @param string $msg	the formatted message string
+	 * @param ... optional arguments to sequentially replace the {}
 	 * placeholders
 	 */
-	public static function info($msg) {
-		$logger = isset($this) ? $this : Logger::getLogger();
+	public function info($msg) {
 		$args = func_get_args();
-		$logger->logImpl(self::INFO, $msg, array_slice($args, 1));
+		$this->logImpl(self::INFO, $msg, array_slice($args, 1));
 	}
 
 	private function getAssertionLevel() {
 		return self::ERROR;
 	}
 
-	public static function assert($observed, $expected, $msg = 'Expected: {}, Observed: {}') {
-		$logger = isset($this) ? $this : Logger::getLogger();
-		if ($logger->isActive(self::ASSERTION, false)) {
+	public function assert($observed, $expected, $msg = 'Expected: {}, Observed: {}') {
+		if ($this->isActive(self::ASSERTION, false)) {
 			if ($observed !== $expected) {
 				$msg = 'ASSERTION FAILED -- ' . $msg;
 				$args = func_get_args();
 				$args = array_merge(array($expected, $observed), array_slice($args, 3));
-				$logger->logImpl($logger->getAssertionLevel(), $msg, $args);
+				$this->logImpl($this->getAssertionLevel(), $msg, $args);
 			}
 		}
 	}
 
-	public static function assertTrue($expression, $msg = '') {
-		$logger = isset($this) ? $this : Logger::getLogger();
-		if ($logger->isActive(self::ASSERTION, false)) {
+	public function assertTrue($expression, $msg = '') {
+		if ($this->isActive(self::ASSERTION, false)) {
 			if ($expression !== true) {
 				$msg = 'ASSERTION FAILED -- ' . $msg;
 				$args = func_get_args();
-				$logger->logImpl($logger->getAssertionLevel(), $msg, array_slice($args, 2));
+				$this->logImpl($this->getAssertionLevel(), $msg, array_slice($args, 2));
 			}
 		}
 	}
 
-	public static function assertFalse($expression, $msg = '') {
-		$logger = isset($this) ? $this : Logger::getLogger();
-		if ($logger->isActive(self::ASSERTION, false)) {
+	public function assertFalse($expression, $msg = '') {
+		if ($this->isActive(self::ASSERTION, false)) {
 			if ($expression !== false) {
 				$msg = 'ASSERTION FAILED -- ' . $msg;
 				$args = func_get_args();
-				$logger->logImpl($logger->getAssestionLevel(), $msg, array_slice($args, 2));
+				$this->logImpl($this->getAssestionLevel(), $msg, array_slice($args, 2));
 			}
 		}
 	}
@@ -592,14 +592,14 @@ class LoggerOutputAppender implements LoggerAppender {
 	const FORMAT_VOID  = 0;
 	const FORMAT_HTML  = 1;
 	const FORMAT_SHELL = 2;
-	
+
 	private $format;
 	/** @var ShellEoze */
 	private $shell;
 
 	function __construct($format = self::FORMAT_HTML, ShellEoze $shell = null) {
 		$this->shell = $shell;
-		
+
 		if ($format >= 0 && $format <= 2) {
 			$this->format = $format;
 		} else {
@@ -629,9 +629,9 @@ class LoggerFirePHPAppender implements LoggerAppender {
 	private $adapter;
 
 	function __construct() {
-		
+
 		ob_start();
-		
+
 		if (isset($_SERVER['HTTP_USER_AGENT']) 
 				&& preg_match('/Chrome|Chromium/i', $_SERVER['HTTP_USER_AGENT'])) {
 			$this->adapter = new ChromePHPAdapter();
@@ -641,7 +641,7 @@ class LoggerFirePHPAppender implements LoggerAppender {
 			$this->adapter = new FirePHPAdapter();
 		}
 	}
-	
+
 	function process(LogEntry $entry) {
 		$this->adapter->process($entry);
 	}

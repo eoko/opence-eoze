@@ -19,7 +19,7 @@ use MembreTable;
  * @since 24 nov. 2011
  */
 class DefaultLoginAdapter implements LoginAdapter {
-	
+
 	/**
 	 *
 	 * @param String $username
@@ -28,7 +28,7 @@ class DefaultLoginAdapter implements LoginAdapter {
 	 * log in is successful, or NULL if the login failed.
 	 */
 	public function tryLogin($username, $password, &$reason = null) {
-		
+
 		$user = UserTable::findOneWhere(
 			'username = ? AND pwd = ?',
 			array($username, Security::cryptPassword($password))
@@ -100,5 +100,5 @@ class DefaultLoginAdapter implements LoginAdapter {
 			'contactId' => $contact->id,
 		));
 	}
-	
+
 }

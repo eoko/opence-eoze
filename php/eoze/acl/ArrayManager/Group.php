@@ -12,13 +12,13 @@ use IllegalStateException;
  * @since 20 oct. 2011
  */
 class Group extends Role implements \eoze\acl\Group {
-	
+
 	private $roles = array();
-	
+
 	public function getRoles() {
 		return $this->roles;
 	}
-	
+
 	public function setRoles(array $roles) {
 		$this->roles = array();
 		$manager = $this->getManager();
@@ -32,7 +32,7 @@ class Group extends Role implements \eoze\acl\Group {
 		$role = $this->getManager()->role($role);
 		$this->roles[$role->getId()] = $role;
 	}
-	
+
 	public function removeRole($role, $strict = false) {
 		$rid = AclHelper::rid($role);
 		if ($strict && !isset($this->roles[$rid])) {
@@ -40,7 +40,7 @@ class Group extends Role implements \eoze\acl\Group {
 		}
 		unset($this->roles[$rid]);
 	}
-	
+
 	public function hasRole($role) {
 		$rid = AclHelper::rid($role);
 		return isset($this->roles[$rid]) && $this->roles[$rid]->getId() === $rid;

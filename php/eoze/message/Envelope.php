@@ -11,12 +11,12 @@ use eoze\util\Data;
  * @since 27 oct. 2011
  */
 interface Envelope extends Message {
-	
+
 	/**
 	 * @return bool
 	 */
 	function hasHeader($name);
-	
+
 	/**
 	 * @return Data
 	 */

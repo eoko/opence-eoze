@@ -27,7 +27,7 @@ class ModuleLocation extends Location {
 	 * has not been loaded yet, else the value of loadConfig() (that can be NULL).
 	 */
 	private $configCache = false;
-	
+
 	private $configFileListCache = null;
 
 	/**
@@ -56,14 +56,14 @@ class ModuleLocation extends Location {
 			"$dir->namespace$moduleName\\"
 		);
 	}
-	
+
 	/**
 	 * @return ModulesDirectory
 	 */
 	public function getDirectory() {
 		return $this->directory;
 	}
-	
+
 	protected function setPrivateState(&$vals) {
 		foreach ($vals as $k => $v) {
 			$this->$k = $v;
@@ -81,8 +81,8 @@ class ModuleLocation extends Location {
 		$o = self::createInstance();
 		$o->construct($dir, $moduleName, $path);
 		return $o;
-	}	
-	
+	}
+
 	/**
 	 * Creates a new ModuleLocation object, starting from the top level 
 	 * directory, that is, the first directory in the parent hierarchy that
@@ -97,7 +97,7 @@ class ModuleLocation extends Location {
 		$location = ModuleLocation::create($dir, $moduleName);
 		while ($location->directory->parent 
 				&& !$location->isActual() && !$location->searchConfigFile()) {
-			
+
 			$location = ModuleLocation::create($location->directory->parent, $moduleName);
 		}
 		return $location;
@@ -124,13 +124,13 @@ class ModuleLocation extends Location {
 		}
 		return $location;
 	}
-	
+
 	public function __toString() {
 		return "$this->moduleName << $this->directory";
 	}
-	
+
 	private $configExtensionFiles = null;
-	
+
 	private function searchConfigExtensionFiles() {
 		if ($this->configExtensionFiles === null) {
 			$this->configExtensionFiles = array();
@@ -169,11 +169,11 @@ class ModuleLocation extends Location {
 			return false;
 		}
 	}
-	
+
 	private function seachApplicationConfig() {
 		return ConfigManager::get($this->namespace);
 	}
-	
+
 	/**
 	 * Load the config of all the module's {@link ModuleManager line}. The 
 	 * returned Config object is cached for subsequent call to the method.
@@ -185,7 +185,7 @@ class ModuleLocation extends Location {
 		}
 		return $this->configCache;
 	}
-	
+
 	public function listConfigFiles() {
 		if ($this->configFileListCache !== null) {
 			return $this->configFileListCache;
@@ -204,7 +204,7 @@ class ModuleLocation extends Location {
 		}
 		return $this->configFileListCache = $r;
 	}
-	
+
 	private function doLoadConfig() {
 		$r = null;
 		foreach ($this->listConfigFiles() as $config) {
@@ -242,7 +242,7 @@ class ModuleLocation extends Location {
 				($this->directory->path === null || !$this->searchConfigFile())
 				: file_exists($this->path . 'disabled');
 	}
-	
+
 	/**
 	 * Gets the ModuleLocations of this location's module, starting from this
 	 * locations and including only location in which a directory for this
@@ -250,7 +250,7 @@ class ModuleLocation extends Location {
 	 * @return array[ModuleLocation]
 	 */
 	public function getActualLocations($includeSelf = true) {
-		
+
 		if ($this->actualLocations !== null) {
 			if ($includeSelf || !$this->path !== null) {
 				return $this->actualLocations;
@@ -310,7 +310,7 @@ class ModuleLocation extends Location {
 
 		return $this->locations;
 	}
-	
+
 	private function getAllowedModuleClassFilename() {
 		$ccModuleName = Inflector::camelCase($this->moduleName, true);
 		return array(
@@ -322,7 +322,7 @@ class ModuleLocation extends Location {
 			"$ccModuleName.php",
 		);
 	}
-	
+
 	private function getAllowedModuleClassName() {
 		$ccModuleName = Inflector::camelCase($this->moduleName, true);
 		return array(
@@ -371,12 +371,12 @@ class ModuleLocation extends Location {
 
 	public function listFileToMonitor() {
 		$r = array();
-		
+
 		$dirPaths = array();
 		foreach (ModuleManager::listModuleDirectories() as $dir) {
 			$dirPaths[] = $dir->path;
 		}
-		
+
 		foreach ($dirPaths as $path) {
 			// add the directory with the module name
 			// (all the content will be checked)
@@ -384,7 +384,7 @@ class ModuleLocation extends Location {
 			// and the simple module config file
 			$r[] = $path . $this->moduleName . '.yml';
 		}
-		
+
 		return $r;
 	}
 

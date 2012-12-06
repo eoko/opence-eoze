@@ -112,7 +112,7 @@ function extractKeys($filename) {
 				$concat .= $sub . '.';
 			}
 			$concat = substr($concat, 0, -1) . ';';
-			
+
 			$key = eval("return $concat");
 
 			$name = "$filename:$line";

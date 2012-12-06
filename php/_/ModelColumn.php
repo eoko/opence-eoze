@@ -113,7 +113,7 @@ class ModelColumn extends ModelFieldBase {
 		} else {
 			$this->alias = $this->createDefaultAlias();
 		}
-		
+
 		if ($foreignKeyToTable instanceof ModelTableProxy) {
 			$foreignKeyToTable->attach($this->foreignKeyToTable);
 		} else {
@@ -140,7 +140,7 @@ class ModelColumn extends ModelFieldBase {
 	public function getType() {
 		return $this->type;
 	}
-	
+
 	public function getSqlType() {
 		return $this->sqlType;
 	}
@@ -269,7 +269,7 @@ class ModelColumn extends ModelFieldBase {
 	public function isNullable() {
 		return $this->nullable;
 	}
-	
+
 	public function getMeta() {
 		return $this->meta;
 	}
@@ -283,7 +283,7 @@ class ModelColumn extends ModelFieldBase {
 	function getPhpType() {
 		return ucfirst($this->type);
 	}
-	
+
 	public function getPhpConvertTypeString() {
 		switch ($this->type) {
 			case self::T_INT: return '(int)';
@@ -293,7 +293,7 @@ class ModelColumn extends ModelFieldBase {
 			default: return '';
 		}
 	}
-	
+
 	public function getHeader() {
 		return $this->name;
 	}
@@ -317,7 +317,9 @@ class ModelColumn extends ModelFieldBase {
 			case self::T_DATE:
 				return DateHelper::dateExtToSql($value);
 			case self::T_INT: return $value === null || $value === '' ? null
-				: (($value === 0 ? '0' : $value));
+				// 2012-12-04 16:12 changed
+				// : (($value === 0 ? '0' : $value));
+				: "$value";
 			case self::T_FLOAT: return $value === null || $value === '' ? null
 				: (float) str_replace(',', '.', $value);
 			case self::T_DECIMAL: return $value === null || $value === '' ? null
@@ -353,7 +355,7 @@ class ModelColumn extends ModelFieldBase {
 				new QuerySelectFunctionOnField(
 					$query, 
 					$this->name, 
-					'DATE_FORMAT({}, "%Y-%m-%dT%H:%m:%i")', 
+					'DATE_FORMAT({}, "%Y-%m-%dT%H:%i:%s")',
 					$this->name
 				)
 			);
@@ -453,26 +455,26 @@ class ModelColumn extends ModelFieldBase {
 				case ModelField::T_STRING:
 				case ModelField::T_TEXT:
 					return $len <= $maxLength;
-					
+
 				case ModelField::T_DECIMAL:
 				case ModelField::T_FLOAT:
 					$maxDecimalLength = $this->meta->get('decimals');
 					$maxIntLength = $maxLength - $maxDecimalLength;
 					$maxLength .= ",$maxDecimalLength";
-					
+
 					$re = '/^-?(?P<int>\d+)?(?:.(?P<decimals>\d+))?$/';
 					if (!preg_match($re, "$value", $matches)) {
 						throw new IllegalStateException();
 					}
-					
+
 					if (isset($matches['int']) && strlen($matches['int']) > $maxIntLength) {
 						return false;
 					}
-					
+
 					if (isset($matches['decimals']) && strlen($matches['decimals']) > $maxDecimalLength) {
 						return false;
 					}
-					
+
 					return true;
 			}
 		} else {

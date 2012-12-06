@@ -9,9 +9,9 @@ namespace eoko\util;
  * @since 2 déc. 2011
  */
 class Strings {
-	
+
 	private function __construct() {}
-	
+
 	private static $slugReplace = array(
 		'à' => 'a',
 		'Â' => 'a',
@@ -43,9 +43,9 @@ class Strings {
 		'œ' => 'oe',
 		'Œ' => 'OE',
 	);
-	
+
 	public static function slugify($text) {
-		
+
 		$text = str_replace(array_keys(self::$slugReplace), self::$slugReplace, $text);
 
 		// replace non letter or digits by -
@@ -53,7 +53,7 @@ class Strings {
 
 		// trim
 		$text = trim($text, '-');
-		
+
 		// transliterate
 		$text = iconv('utf-8', 'us-ascii//TRANSLIT', $text);
 

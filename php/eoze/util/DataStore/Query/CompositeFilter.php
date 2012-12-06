@@ -9,19 +9,19 @@ namespace eoze\util\DataStore\Query;
  * @since 2 nov. 2011
  */
 class CompositeFilter extends Filter {
-	
+
 	private $filters;
-	
+
 	public function __construct() {
 		foreach (func_get_args() as $filter) {
 			$this->add($filter);
 		}
 	}
-	
+
 	public function add(Filter $filter) {
 		$this->filters[] = $filter;
 	}
-	
+
 	public function test($value) {
 		foreach ($this->filters as $filter) {
 			if (!$filter->test($value)) {

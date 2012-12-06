@@ -9,6 +9,6 @@ namespace eoko\module\traits;
  * @since 31 juil. 2012
  */
 interface HasRoutes {
-	
+
 	function getRoutesConfig();
 }

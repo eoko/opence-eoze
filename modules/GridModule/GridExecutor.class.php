@@ -39,24 +39,24 @@ abstract class GridExecutor extends JsonExecutor {
 
 	/** @var \ModelTable */
 	protected $table;
-	
+
 	protected $formTemplatePath = 'formTemplates';
 
 	private $plugins;
-	
+
 	protected function construct() {
 		parent::construct();
 		$this->initPlugins();
 		GlobalEvents::fire(get_class(), 'initPlugins', $this);
 	}
-	
+
 	protected function initPlugins() {}
-	
+
 	public function addPlugin(GridExecutor\Plugin $plugin) {
 		$plugin->configure($this, $this->table, $this->request);
 		$this->plugins[] = $plugin;
 	}
-	
+
 	public function executeAction($name, &$returnValue) {
 		if ($this->plugins) {
 			foreach ($this->plugins as $plugin) {
@@ -81,7 +81,7 @@ abstract class GridExecutor extends JsonExecutor {
 		// TODO SECURITY real security management...
 		UserSession::requireLoggedIn();
 	}
-	
+
 	protected final function callInTransaction($method) {
 		if (!method_exists($this, $method)) {
 			throw new IllegalArgumentException('Missing method: ' . get_class() . "::$method");
@@ -107,7 +107,7 @@ abstract class GridExecutor extends JsonExecutor {
 			throw $ex;
 		}
 	}
-	
+
 	  //////////////////////////////////////////////////////////////////////////
 	 // ADD
 	////////////////////////////////////////////////////////////////////////////
@@ -121,7 +121,7 @@ abstract class GridExecutor extends JsonExecutor {
 			return $this->handleSqlError($ex->errorInfo);
 		}
 	}
-	
+
 	protected function handleSqlError($errorInfo) {
 		list($sqlState, $errorCode, $message) = $errorInfo;
 		switch ($sqlState) {
@@ -130,7 +130,7 @@ abstract class GridExecutor extends JsonExecutor {
 						'/^Duplicate entry \'(?P<value>[^\']+)\' for key \'(?P<key>[^\']+)/',
 						$message, $matches)
 						&& $matches['key'] !== 'PRIMARY') {
-					
+
 					if (($field = $this->table->getField($matches['key']))) {
 						$label = strtolower($field->getMeta()->label);
 					}
@@ -151,7 +151,7 @@ abstract class GridExecutor extends JsonExecutor {
 		} else {
 			$request = $this->request->requireSub('form');
 		}
-		
+
 		if (false === $this->prepareAddData($request)) {
 			return false;
 		}
@@ -232,16 +232,16 @@ abstract class GridExecutor extends JsonExecutor {
 			$this->data = $result;
 //			ExtJSResponse::put('data', $result);
 		}
-		
+
 		$this->afterAdd($model);
 
 		return true;
 	}
-	
+
 	protected function afterAdd(Model $model) {}
-	
+
 	protected function prepareAddData(Request &$data) {}
-	
+
 	protected function add_createContext(Request $form, $setters) {}
 
 	protected function add_getField(Request $request, $col, &$setters, &$missingFields) {
@@ -273,16 +273,16 @@ abstract class GridExecutor extends JsonExecutor {
 		Logger::get($this)->warn('auto_complete action is deprecated, use autoComplete');
 		return $this->autoComplete();
 	}
-	
+
 	public function autoComplete() {
-		
+
 		$table = $this->table;
 //REM		$context = array(
 //			'year' => $this->request->get('year', null)
 //		);
 //		$query = $table->createQuery($context);
 		$query = $table->createReadQuery($this->createAutoCompleteQueryContext());
-		
+
 		$selects = $this->getAutoCompleteSelects($query);
 
 		if ($selects === null || $selects === false)
@@ -323,7 +323,7 @@ abstract class GridExecutor extends JsonExecutor {
 		$this->autoComplete_prepareQuery($query);
 
 		$this->autoComplete_processSearchQuery($query, $this->request->get('query', null));
-		
+
 		if ($this->request->has('initValue')) {
 			$q = clone $query;
 			$q->where($q->createWhere(
@@ -345,7 +345,7 @@ abstract class GridExecutor extends JsonExecutor {
 
 		$this->data = $result;
 		$this->count = $count;
-		
+
 		return true;
 	}
 
@@ -430,14 +430,14 @@ abstract class GridExecutor extends JsonExecutor {
 //			'form' => $this->getRelationSelectionModes('form'),
 //			'grid' => $this->getRelationSelectionModes('grid'),
 //		));
-		
+
 //		dump($relModes);
 //		unset($relModes[3]['Contact->Conjoint']);
-		
+
 		if ($columns === null) {
 			$columns = $this->request->get('columns');
 		}
-		
+
 		// Add alwaysLoad columns
 		if ($columns) {
 			foreach ($this->getModuleConfig()->node('columns')->toArray() as $name => $config) {
@@ -446,15 +446,15 @@ abstract class GridExecutor extends JsonExecutor {
 				}
 			}
 		}
-		
+
 		$query = $this->table->createLoadQuery(
 			$relModes,
 			$this->getLoadQueryContext(),
 			$columns
 		);
-		
+
 		$this->configureLoadQuery($query);
-		
+
 		if ($this->plugins) {
 			foreach ($this->plugins as $plugin) {
 				$plugin->configureLoadQuery($query);
@@ -464,14 +464,14 @@ abstract class GridExecutor extends JsonExecutor {
 		if ($this->table instanceof TableHasFilters) {
 			$this->table->addLoadQueryFilters($query, $this->request->get('filters'));
 		}
-		
+
         $this->afterCreateLoadQuery($query);
 
 		return $query;
 	}
-	
+
 	protected function afterCreateLoadQuery(ModelTableQuery $query) {}
-	
+
     /**
      * Applies filters, sort, search, etc. It is strongly recommanded to use
      * this method instead of afterCreateLoadQuery for such tasks, because
@@ -503,19 +503,19 @@ abstract class GridExecutor extends JsonExecutor {
 			}
 		}
 	}
-	
+
 	private static $filter_acceptedOperators = array(
 		'eq' => '=',
 		'gt' => '>',
 		'lt' => '<',
 	);
-	
+
 	private static $filter_acceptedOperators_date = array(
 		'eq' => '=',
 		'gt' => '>=',
 		'lt' => '<',
 	);
-	
+
 	private static $filter_acceptedTypes = array(
 		'boolean' => 'boolean',
 		'date' => 'date',
@@ -525,18 +525,18 @@ abstract class GridExecutor extends JsonExecutor {
 	);
 
 	protected function createLoadQuery_filters(ModelTableQuery $query) {
-		
+
 //		dump($this->request->toArray());
 
 		if (null !== $filters = $this->request->get('columnFilters', null)) {
 			foreach ($filters as $filter) {
-				
+
 				$type = self::$filter_acceptedTypes[$filter['type']];
-				
+
 				$field = $this->table->getField($filter['field']);
 				$field = $filter['field'];
 				$value = $filter['value'];
-				
+
 				switch ($type) {
 					case 'date':
 						$date = \DateTime::createFromFormat('d/m/Y', $value);
@@ -548,11 +548,11 @@ abstract class GridExecutor extends JsonExecutor {
 						$op = self::$filter_acceptedOperators[$filter['comparison']];
 						$query->andWhere("`$field` $op ?", $value);
 						break;
-					
+
 					case 'boolean':
 						$query->andWhere("`$field` = ?", $value ? 1 : 0);
 						break;
-					
+
 					case 'list':
 						// If the field points directly to a relation (not a relation
 						// field), we must specify that we aim at the id field
@@ -560,7 +560,7 @@ abstract class GridExecutor extends JsonExecutor {
 						if ($f instanceof ModelRelationInfo) {
 							$field .= '->' . $f->getTargetTable()->getPrimaryKeyName();
 						}
-						
+
 						// Processing filter
 						$where = $query->createWhere();
 						foreach ($value as $i => $f) {
@@ -574,7 +574,7 @@ abstract class GridExecutor extends JsonExecutor {
 						}
 						$query->andWhere($where);
 						break;
-					
+
 					case 'string':
 						$query->andWhere("`$field` LIKE ?", 
 								$this->createLoadQuery_processColumnFilterString($value));
@@ -583,7 +583,7 @@ abstract class GridExecutor extends JsonExecutor {
 			}
 		}
 	}
-	
+
 	protected function createLoadQuery_processColumnFilterString($value) {
 		$value = str_replace('%', 'µ§~€PLACEHOLDER_FOR_STAR', $value);
 		$value = str_replace('_', 'µ§~€PLACEHOLDER_FOR_QT', $value);
@@ -609,9 +609,9 @@ abstract class GridExecutor extends JsonExecutor {
 //				$fields = $this->table->
 			}
 //			print_r($fields);die;
-			
+
 			foreach (explode(' ', $extQuery) as $word) {
-				
+
 				$word = strtolower($word);
 				$word = preg_quote($word);
 
@@ -643,11 +643,11 @@ abstract class GridExecutor extends JsonExecutor {
 		}
 		return $context;
 	}
-	
+
 	protected function getLoadQueryContext() {
 		return $this->createQueryContext();
 	}
-	
+
 	protected function addModelContext(Model $model) {
 		if ($this->plugins) {
 			foreach ($this->plugins as $plugin) {
@@ -674,7 +674,7 @@ abstract class GridExecutor extends JsonExecutor {
 	  //////////////////////////////////////////////////////////////////////////
 	 // LOAD -- Multiple Rows
 	//////////////////////////////////////////////////////////////////////////
-	
+
 	protected function beforeLoad() {}
 
 	/**
@@ -702,7 +702,7 @@ abstract class GridExecutor extends JsonExecutor {
 	 * @version 1.0.0 25/04/12 22:37
 	 */
 	public function load() {
-		
+
 		$this->beforeLoad();
 
 		$query = $this->createLoadQuery('grid');
@@ -719,9 +719,9 @@ abstract class GridExecutor extends JsonExecutor {
 				$start
 			);
 		}
-		
+
 		$this->beforeExecuteLoadQuery($query);
-		
+
 		$r = $query->executeSelect();
 
 		foreach ($r as &$record) {
@@ -730,7 +730,7 @@ abstract class GridExecutor extends JsonExecutor {
 			}
 			unset($value);
 		}
-		
+
 		if (count($r) === 0) {
 			$r = array();
 			$count = 0;
@@ -738,7 +738,7 @@ abstract class GridExecutor extends JsonExecutor {
 			$countQuery = clone $query;
 			$count = $countQuery->executeCount();
 		}
-		
+
 		$this->afterExecuteLoadQuery($query);
 		if ($this->plugins) {
 			foreach ($this->plugins as $plugin) {
@@ -751,9 +751,9 @@ abstract class GridExecutor extends JsonExecutor {
 
 		return true;
 	}
-	
+
 	protected function beforeExecuteLoadQuery(ModelTableQuery $query) {}
-	
+
 	protected function afterExecuteLoadQuery(ModelTableQuery $query) {}
 
 	  //////////////////////////////////////////////////////////////////////////
@@ -764,13 +764,13 @@ abstract class GridExecutor extends JsonExecutor {
 		Logger::get($this)->warn('Deprecated, use loadOne');
 		return $this->loadOne($id);
 	}
-	
+
 	public function loadOne($id = null) {
 
 		if ($id === null) {
 			$id = $this->request->req($this->table->getPrimaryKeyName());
 		}
-		
+
 		if (!$this->doLoadOne($id)) {
 			$msg = <<<'MSG'
 L'enregistrement sélectioné n'existe pas dans la base de donnée. Ceci signifie
@@ -779,17 +779,17 @@ bouton "Rafraichir" pour mettre à jour l'affichage.
 MSG;
 			throw new UserException($msg, 'Enregistrement inexistant'); // i18n
 		}
-		
+
 		return true;
 	}
-		
+
 	protected function doLoadOne($id) {
 		$model = $this->table->loadModel($id, $this->load_one_createContext());
 		return $this->doLoadOneFromModel($model);
 	}
-	
+
 	protected function doLoadOneFromModel(Model $model) {
-		
+
 		$data = $this->loadOne_loadData($model);
 
 		if ($model === null) {
@@ -797,7 +797,7 @@ MSG;
 		}
 
 		$this->generateLoadFormPages($model);
-		
+
 		$this->loadOne_addExtraData($data, $model);
 
 		$this->data = $data;
@@ -806,7 +806,7 @@ MSG;
 	}
 
 	protected function loadOne_loadData(Model $model) {
-		
+
 		$query = $this->createLoadQuery('form')->selectFirst();
 		$idField = $query->getQualifiedName($this->table->getPrimaryKeyName());
 		return $query->andWhere("$idField = ?", $model->getPrimaryKeyValue())->executeSelectFirst();
@@ -846,7 +846,7 @@ MSG;
 	protected function getFormPageNames() {
 		return array();
 	}
-	
+
 	protected function generateLoadFormPages(Model $model) {
 		foreach ($this->getFormPageNames() as $pageName) {
 			$this->generateFormPage($pageName, $model);
@@ -904,7 +904,7 @@ MSG;
 	public final function mod() {
 		return $this->callInTransaction('doMod');
 	}
-	
+
 	protected function getFormDataRequest() {
 		if ($this->request->hasSub('data')) {
 			return $this->request->getSub('data');
@@ -914,7 +914,7 @@ MSG;
 	}
 
 	protected function doMod() {
-		
+
 		$request = $this->getFormDataRequest();
 
 		$setters = array();
@@ -945,17 +945,17 @@ MSG;
 		// TODO rx add a where constraint to loadModel
 		// $table->loadModel($id, QueryWhere::create('year = ?', 2008)
 		$model = $this->createModelForUpdate($request, $setters);
-		
+
 //		dump($setters, 50);
 //		dump($model);
-		
+
 		$model->setFields($setters);
 
 		$this->saveModel($model, false);
 
 		return true;
 	}
-	
+
 	protected function createModelForUpdate($request, $setters) {
 
 		$idName = $this->table->getPrimaryKeyName();
@@ -963,30 +963,30 @@ MSG;
 				&& (null === $id = $this->request->get($idName))) {
 			$id = $this->request->req('id');
 		}
-		
+
 		$model = $this->table->loadModel($id, $this->load_one_createContext());
-		
+
 		if ($model === null) {
 			throw new SystemException('Cannot load model with id: ' . $id);
 		}
-		
+
 		return $model;
 	}
 
 	protected function mod_getFields(Request $request, &$setters, &$missingFields) {}
-	
+
 	public function toggleFieldValue() {
 		$name = $this->request->req('name');
 		$id = $this->request->req('id');
-		
+
 		$q = $this->table->createQuery();
-		
+
 		$q->set(array(
 			$name => new \SqlVariable("IF({$q->getQualifiedName($name)},0,1)")
 		));
-				
+
 		$success = 1 === $q->where('id=?', $id)->executeUpdate();
-		
+
 		$this->data = $this->table->loadModel($id)->getData();
 
 		return $success;
@@ -997,11 +997,11 @@ MSG;
 	//////////////////////////////////////////////////////////////////////////
 
 	protected function saveModel(Model $model, $new = null) {
-		
+
 		if ($new === null) {
 			$new = $model->isNew();
 		}
-		
+
 		$this->beforeSaveModel($model, $new);
 
 		if ($this->plugins) {
@@ -1009,9 +1009,9 @@ MSG;
 				$plugin->beforeSaveModel($model, $new);
 			}
 		}
-		
+
 		$model->save($new);
-		
+
 		$this->afterSaveModel($model, $new);
 
 		if ($this->plugins) {
@@ -1020,43 +1020,43 @@ MSG;
 			}
 		}
 	}
-	
+
 	protected function beforeSaveModel(Model $model) {
 		$this->addModelContext($model);
 	}
-	
+
 	protected function afterSaveModel(Model $model, $wasNew) {}
 
 	  //////////////////////////////////////////////////////////////////////////
 	 // DELETE
 	//////////////////////////////////////////////////////////////////////////
-	
+
 	/**
 	 * @deprecated Use {@link delete}
 	 */
 	public function delete_one() {
 		return $this->onDelete();
 	}
-	
+
 	/**
 	 * @deprecated Use {@link delete}
 	 */
 	public function delete_multiple() {
 		return $this->onDelete();
 	}
-	
+
 	public function delete() {
 		return $this->onDelete();
 	}
-	
+
 	private function onDelete() {
-		
+
 		try {
 			return $this->callInTransaction('doDelete');
 		} 
-		
+
 		catch (ModelAlreadyDeletedException $ex) {
-			
+
 			list($ids, $count) = $this->getDeleteVariables();
 
 			$alreadyDeleted = $this->table->createQuery()
@@ -1080,28 +1080,28 @@ MSG;
 			return false;
 		}
 	}
-	
+
 	protected function afterDelete(array $ids) {}
-	
+
 	protected function beforeDelete(array $ids) {}
 
 	private function onAfterDelete(array $ids) {
-		
+
 		$this->afterDelete($ids);
-		
+
 		if ($this->plugins) {
 			foreach ($this->plugins as $plugin) {
 				$plugin->afterDelete($ids);
 			}
 		}
 	}
-	
+
 	private function onBeforeDelete(array $ids) {
-		
+
 		if (false === $this->beforeDelete($ids)) {
 			return false;
 		}
-		
+
 		if ($this->plugins) {
 			foreach ($this->plugins as $plugin) {
 				if (false === $plugin->beforeDelete($ids)) {
@@ -1109,29 +1109,29 @@ MSG;
 				}
 			}
 		}
-		
+
 		return true;
 	}
-	
+
 	private function getDeleteVariables() {
-		
+
 		$ids = $this->request->requireFirst(array(
 			$this->table->getPrimaryKeyName(), 'id', 'ids'
 		));
-		
+
 		if (!is_array($ids)) {
 			$ids = array($ids);
 		}
-		
+
 		$count = count($ids);
-		
+
 		return array($ids, $count);
 	}
-	
+
 	protected function doDelete() {
-		
+
 		list($ids, $count) = $this->getDeleteVariables();
-		
+
 		if ($this->onBeforeDelete($ids)) {
 			if ($count === $n = $this->table->deleteWherePkIn($ids)) {
 				$this->deletedCount = $count;
@@ -1236,7 +1236,7 @@ MSG;
 	protected function makePdfTitle() {
 		return $this->title;
 	}
-	
+
 	/**
 	 * Gets the module name in a filesystem & url friendly version.
 	 * @return string
@@ -1248,9 +1248,9 @@ MSG;
 			return Strings::slugify($this->title);
 		}
 	}
-	
+
 	private $earl;
-	
+
 	/**
 	 * @return EarlReport\EarlReport
 	 */
@@ -1272,16 +1272,16 @@ MSG;
 	}
 
 	public function export() {
-		
+
 		set_time_limit(180);
-		
+
 		$allowedFormats = array(
 			'pdf', 'xls', 'ods', 'csv',
 		);
 
 		$fields = $this->request->req('fields');
 		$format = $this->request->req('format');
-		
+
 		if (!in_array($format, $allowedFormats, true)) {
 			throw new IllegalStateException();
 		}
@@ -1337,7 +1337,7 @@ MSG;
 ////			$this->request->get('start', 0, true)
 //		);
 		// /tmp
-		
+
 		$result = $query->execute();
 
 //RODO		// order
@@ -1349,18 +1349,18 @@ MSG;
 //			$row = $newRow;
 //		}
 //		dump(count($result));
-		
+
 //		var_export(array_slice($result, 0, 2));
-//		
+//
 //		dump(array(
 //			$fields,
 //			array_slice($result, 0, 2),
 //		));
 
 		$earl = $this->getEarl();
-		
+
 		$user = UserSession::getUser();
-		
+
 		$report = $earl->createReport()
 				->setAddress(<<<TXT
 CE Rhodia - Site Belle Étoile
@@ -1371,9 +1371,9 @@ TXT
 				->setTitle($this->makePdfTitle())
 				->setUser($user->getDisplayName(User::DNF_PRETTY))
 				->setUserEmail($user->getEmail());
-		
+
 		$sheet = $report->addWorksheet('Feuille 1');
-		
+
 		foreach ($fields as $field => $title) {
 			$colFormat = null;
 			$f = $this->table->getField($field);
@@ -1411,20 +1411,20 @@ TXT
 				'format' => $colFormat,
 			));
 		}
-		
+
 //		$result = array_slice($result, 0, 2); // DEBUG
 		$sheet->setRows(new \EarlReport\Data\Rows\NamedFieldsArray($result, array_keys($fields)));
-		
+
 		$slug = $this->getSlug();
 		$slugDir = $slug ? "$slug/" : null;
 		$directory = EXPORTS_PATH . $slugDir;
 		$filename = $this->makeExportFilename($directory, $format);
-		
+
 		$file = $directory . $filename;
 		$url = EXPORTS_BASE_URL . $slugDir . $filename;
-		
+
 		$earl->createWriter($report)->write($file);
-		
+
 //		$exporter = new \Exporter($this->makeExportFilename());
 //		$exporter->setDirectory($this->getSlug());
 //
@@ -1449,17 +1449,17 @@ TXT
 //		header('Content-Type: application/force-download');
 //header('Content-type: application/pdf');
 //header('Content-Disposition: attachment; filename="downloaded.pdf"');
-		
+
 		return true;
 	}
 
 	private function makeExportFilename($directory, $ext, $date = true) {
 		$s = 'Export';
-		
+
 		if ($date) {
 			$s .= '_' . date('Ymd_His');
 		}
-		
+
 		// Ensure unicity
 		$n = null;
 		$i = 1;
@@ -1467,9 +1467,9 @@ TXT
 			$i++;
 			$n = "_$i";
 		}
-		
+
 		$s .= "$n.$ext";
-		
+
 		return $s;
 	}
 
@@ -1477,7 +1477,7 @@ TXT
 
 	public function exportPDF($result, $fields, ModelTable $table, $title) {
 		$pdfExport = new \PdfExport($result, $fields, $table, $title);
-		
+
 		$this->beforeWritePdf($pdfExport);
 
 		$filename = $this->getFileName('pdf');

@@ -18,7 +18,7 @@ use RuntimeException;
  * @since 14 mai 2012
  */
 abstract class DefaultTimeZone {
-	
+
 	/**
 	 * Default time zone.
 	 * @var DateTimeZone
@@ -32,9 +32,9 @@ abstract class DefaultTimeZone {
 	 */
 	public static function get() {
 		if (!self::$defaultTimeZone) {
-			
+
 			$configTimeZone = ConfigManager::get(__NAMESPACE__, 'defaultTimeZone');
-			
+
 			if ($configTimeZone === null) {
 				throw new RuntimeException('Missing configuration: ' . __NAMESPACE__ 
 						. '/defaultTimeZone');

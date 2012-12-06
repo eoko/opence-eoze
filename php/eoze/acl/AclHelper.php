@@ -14,9 +14,9 @@ use eoze\Helper;
  * @since 20 oct. 2011
  */
 class AclHelper {
-	
+
 	private function __construct() {}
-	
+
 	private static function getId($o, $class) {
 		if (is_integer($o)) {
 			return $o;
@@ -29,19 +29,19 @@ class AclHelper {
 		}
 		throw new RuntimeException('Invalid id: ' . $o);
 	}
-	
+
 	public static function rid($role) {
 		return self::getId($role, 'Role');
 	}
-	
+
 	public static function uid($user) {
 		return self::getId($user, 'User');
 	}
-	
+
 	public static function gid($group) {
 		return self::getId($group, 'Group');
 	}
-	
+
 	private static function isEnabled($o) {
 		if (!is_object($o)) {
 			throw new IllegalArgumentException();
@@ -51,7 +51,7 @@ class AclHelper {
 			return true;
 		}
 	}
-	
+
 	public static function isDisablable($o) {
 		if (!is_object($o)) {
 			throw new IllegalArgumentException();
@@ -94,5 +94,5 @@ class AclHelper {
 		}
 		return $asMap ? $map : array_keys($map);
 	}
-	
+
 }

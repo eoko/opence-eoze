@@ -22,5 +22,8 @@ RewriteRule (^|/)config(/|$)                        eoze/php/error404.php [L]
 # Route medias directory downloads through the application
 #RewriteRule ^medias/?(.*)$                          index.php/medias/$1 [L]
 
+RewriteRule ^doc\b                                  doc
+RewriteRule ^eoze/doc\b                             eoze/doc
+
 RewriteRule ^$                                      index.php
 RewriteRule !\.(js|ico|gif|jpg|png|css)$            index.php

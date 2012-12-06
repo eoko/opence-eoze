@@ -8,7 +8,7 @@ use eoko\config\Config;
 use eoko\module\ModuleManager;
 
 abstract class GeneratorBase {
-	
+
 	/** @var Config */
 	protected $config;
 	protected $parentConfig;
@@ -30,7 +30,7 @@ abstract class GeneratorBase {
 
 		$this->columns = new Columns($moduleName, $this->config, $this->parentConfig, $this->table);
 	}
-	
+
 	protected function loadParentConfig() {
 		$config = ModuleManager::getModule($this->config->class)->getConfig();
 		if (isset($config['class'])) {

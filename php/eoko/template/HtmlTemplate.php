@@ -6,10 +6,10 @@ use eoko\file\Finder as FileFinder, eoko\file\FileType;
 use eoko\file\CannotFindFileException;
 
 class EscapedValue {
-	
+
 	private $val;
 	public $raw;
-	
+
 	function __construct($val, $raw) {
 		$this->val = $val;
 		$this->raw = $raw;
@@ -21,34 +21,34 @@ class EscapedValue {
 }
 
 class HtmlTemplate extends Template {
-	
+
 	protected $cssIncludes = array();
 	protected $jsIncludes = array();
-	
+
 	/** @var HtmlTemplate */
 	private $parent = null;
-	
+
 	/** @var FileFinder */
 	private $fileFinder;
-	
+
 	public static $renderPrettyDefault = true;
 	public $renderPretty;
-	
+
 	public static $htmlSpecialCharsDefault = true;
 	public $htmlSpecialChars;
-	
+
 	public $ajaxLinks = false;
-	
+
 	public function __construct(FileFinder $fileFinder = null, $opts = null) {
 		// default options
 		$this->renderPretty = self::$renderPrettyDefault;
 		$this->htmlSpecialChars = self::$htmlSpecialCharsDefault;
-		
+
 		$this->fileFinder = $fileFinder;
-		
+
 		parent::__construct($opts);
 	}
-	
+
 	/**
 	 * @param array $opts
 	 * @return Renderer
@@ -70,12 +70,12 @@ class HtmlTemplate extends Template {
 			return $parent;
 		}
 	}
-	
+
 	protected function pushInclude($type, $url, $order) {
 		$var = $type . 'Includes';
-		
+
 		if ($order === null) $order = \PHP_INT_MAX;
-		
+
 		if (isset($this->{$var}[$url])) {
 			$order = min($order, $this->{$var}[$url]);
 		}
@@ -88,7 +88,7 @@ class HtmlTemplate extends Template {
 			$p->{$var}[$url] = $order;
 		}
 	}
-	
+
 	private function pushAliasInclude($typeName, $type, $includes, $order) {
 		if ($typeName !== null) {
 			if (isset($includes[$typeName])) {
@@ -113,7 +113,7 @@ class HtmlTemplate extends Template {
 			'A FileFinder must be set to use push* methods'
 		); else return $this->fileFinder;
 	}
-	
+
 	private function pushAliasIncludeLine($type, $url, $order) {
 		if (is_array($url)) {
 			if ($url['extra'] === null) $url['extra'] = $order;
@@ -123,7 +123,7 @@ class HtmlTemplate extends Template {
 		}
 		$this->pushInclude($type, $url, $order);
 	}
-	
+
 	public function pushAlias($name, $order = null) {
 		if (is_array($name)) {
 			foreach (self::nameOrder($name, $order) as $name => $order2) {
@@ -131,7 +131,7 @@ class HtmlTemplate extends Template {
 			}
 			return $this;
 		}
-		
+
 		if (FileType::ALIAS() !== ($r = $this->getFileFinder()->searchPath($name, null, $url, null, true))
 				|| $url === null) {
 
@@ -139,12 +139,12 @@ class HtmlTemplate extends Template {
 		} else {
 			$this->pushAliasInclude(null, null, $url, $order);
 		}
-		
+
 		return $this;
 	}
-	
+
 	public function pushCss($name, $order = null, $require = true) {
-		
+
 		if (is_array($name)) {
 			foreach (self::nameOrder($name, $order) as $css => $order) {
 				$this->pushCss($css, $order, $require);
@@ -158,7 +158,7 @@ class HtmlTemplate extends Template {
 			|| (null !== ($r = $this->fileFinder->searchPath($name, FileType::CSS, $url, null, $require))
 				&& $url !== null)
 		) {
-			
+
 			if ($r === FileType::ALIAS()) {
 				$this->pushAliasInclude(FileType::CSS, 'css', $url, $order);
 			} else {
@@ -168,7 +168,7 @@ class HtmlTemplate extends Template {
 
 		return $this;
 	}
-	
+
 	private static function nameOrder(array $name, $baseOrder) {
 		$r = array();
 		foreach ($name as $name => $order) {
@@ -184,7 +184,7 @@ class HtmlTemplate extends Template {
 		}
 		return $r;
 	}
-	
+
 	public function pushJs($name, $order = null, $require = true) {
 
 		if (is_array($name)) {
@@ -193,7 +193,7 @@ class HtmlTemplate extends Template {
 			}
 			return $this;
 		}
-		
+
 		$r = null;
 		if (
 			preg_match('@\w+://@', $url = $name)
@@ -206,10 +206,10 @@ class HtmlTemplate extends Template {
 				$this->pushInclude('js', $url, $order);
 			}
 		}
-		
+
 		return $this;
 	}
-	
+
 	public function findImageUrl($name, $type = FileType::IMAGE) {
 		$path = $this->fileFinder->findPath($name, $type, $url);
 		if ($url === null) {
@@ -217,22 +217,22 @@ class HtmlTemplate extends Template {
 		}
 		return $url;
 	}
-	
+
 	protected function setParent(HtmlTemplate $parent) {
-		
+
 		if ($this->parent !== null) {
 			throw new IllegalStateException('Parent template already set');
 		}
-		
+
 		$this->parent = $parent;
 		$root = $this->getFirstParent();
-		
+
 		if ($this->cssIncludes !== null) {
 			$root->cssIncludes = array_merge(
 				$root->cssIncludes, $this->cssIncludes
 			);
 		}
-		
+
 		if ($this->jsIncludes !== null) {
 			$root->jsIncludes = array_merge(
 				$root->jsIncludes, $this->jsIncludes
@@ -252,7 +252,7 @@ class HtmlTemplate extends Template {
 		}
 		return parent::set($name, $value);
 	}
-	
+
 	public function addLinkExtra(array &$extra, $url) {
 		if ($this->ajaxLinks) {
 			$extra[] = <<<JS
@@ -260,5 +260,5 @@ onClick="return Oce.html.update('$url')"
 JS;
 		}
 	}
-	
+
 }

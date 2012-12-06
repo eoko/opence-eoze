@@ -18,13 +18,13 @@ use eoze\util\Classes;
  * @since 27 oct. 2011
  */
 class Registry {
-	
+
 	private $functionnality;
 
 	private $useFallbacks = true;
-	
+
 	private $fallbacks;
-	
+
 	public function __construct(array $config = null) {
 		$this->useFallbacks = !isset($config['useFallbacks']) || $config['useFallbacks'];
 		if (isset($config['register()'])) {
@@ -46,7 +46,7 @@ class Registry {
 		}
 		return $class;
 	}
-	
+
 	public function register($spec, $provider = null) {
 		if (is_array($spec)) {
 			if ($provider !== null) {
@@ -75,7 +75,7 @@ class Registry {
 			}
 		}
 	}
-	
+
 	private static function instantiate($spec, &$provider, array $config = null) {
 		if (is_string($provider)) {
 			$provider = new $provider();
@@ -107,7 +107,7 @@ class Registry {
 			return null;
 		}
 	}
-	
+
 	public function getIf($spec, array $config = null) {
 		if (is_array($spec)) {
 			if (count($spec) > 1) {
@@ -137,7 +137,7 @@ class Registry {
 			return self::instantiate($spec, $this->fallbacks[$spec], $config);
 		}
 	}
-	
+
 	public function get($spec, array $config = null) {
 		if (null !== $o = $this->getIf($spec, $config)) {
 			return $o;
@@ -146,11 +146,11 @@ class Registry {
 			throw new MissingDependencyException("Missing dependency: $spec");
 		}
 	}
-	
+
 	public function hook(&$hook, $spec, array $config = null) {
 		$hook = $this->get($spec, $config);
 	}
-	
+
 	public function hookIf(&$hook, $spec, array $config = null) {
 		$hook = $this->getIf($spec, $config);
 	}

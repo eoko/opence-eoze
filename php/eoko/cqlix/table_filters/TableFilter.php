@@ -26,7 +26,7 @@ class TableFilter {
 
 		$this->condition = "($condition)";
 	}
-	
+
 	/**
 	 * Sets the user tip for this filter.
 	 * @param string $tip
@@ -36,16 +36,16 @@ class TableFilter {
 		$this->tip = $tip;
 		return $this;
 	}
-	
+
 	public function setFlag($flag, $override = true) {
 		$this->flags[$flag] = $override;
 		return $this;
 	}
-	
+
 	public function hasFlags() {
 		return !empty($this->flags);
 	}
-	
+
 	public function isFlag($name) {
 		return array_key_exists($name, $this->flags);
 	}
@@ -97,19 +97,19 @@ class TableFilter {
 	}
 
 	public function toYaml($flag = false) {
-		
+
 		$label = $this->label;
 		$tip = $this->tip;
 		$default = $this->default;
-		
+
 		if ($flag && isset($this->flags[$flag]) && is_array($this->flags[$flag])) {
 			extract($this->flags[$flag]);
 		}
-		
+
 		$default = $default ? 'true' : 'false';
 		$option = $this instanceof TableFilterOption ? 'true' : 'false';
 		$tip = $tip ? ", tooltip: $tip" : null;
-		
+
 		return "{text: $label, checked: $default, isOption: $option{$tip}, name: $this->name }";
 	}
 }

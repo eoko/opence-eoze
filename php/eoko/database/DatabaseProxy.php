@@ -8,34 +8,34 @@ use eoko\util\collection\ImmutableMap;
 use RuntimeException;
 
 class DatabaseProxy {
-	
+
 	private $adapter = null;
-	
+
 	private $connection = null;
-	
+
 	private $config = null;
-	
+
 	private $sourceConfig = null;
-	
+
 	public function __construct(array $sourceConfig) {
 		$this->sourceConfig = $sourceConfig;
 	}
-	
+
 	/**
 	 * Get config for database from the default node.
-	 * @return eoko\util\collection\Map
+	 * @return \eoko\util\collection\Map
 	 */
 	public function getConfig() {
 		if (!$this->config) {
 			$this->config = $this->sourceConfig;
-			
+
 			$defaults = $config =& $this->config;
-			
+
 			// Process server-conditional configuration
 			if (isset($config['servers'])) {
 				$servers = $config['servers'];
 				unset($config['servers']);
-				
+
 				if (isset($servers['default'])) {
 					$defaults =  $servers['default'];
 				} else {
@@ -52,10 +52,10 @@ class DatabaseProxy {
 						}
 					}
 				}
-				
+
 				Arrays::apply($config, $defaults);
 			}
-				
+
 			// Process environment specific configuration
 			$env = getenv('APPLICATION_ENV');
 			if ($env && isset($config[$env])) {
@@ -63,17 +63,17 @@ class DatabaseProxy {
 				unset($config[$env]);
 				Arrays::apply($config, $envConfig);
 			}
-			
+
 			$this->config = new \eoko\util\collection\ImmutableMap($config);
 		}
 		return $this->config;
 	}
-	
+
 	/**
 	 * @return Adapter
 	 */
 	public function getAdapter() {
-		
+
 		if (!$this->adapter) {
 			$config = self::getConfig();
 			$adapter = ucfirst(strtolower($config->adapter));
@@ -83,7 +83,7 @@ class DatabaseProxy {
 			}
 			$this->adapter = new $class($config);
 		}
-		
+
 		return $this->adapter;
 	}
 

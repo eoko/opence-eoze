@@ -54,7 +54,7 @@ class Config extends \eoko\config\Config {
 	}
 
 	private function doBuildModelInfo($config, $dbTable, $baseName) {
-		
+
 		$r = array(
 			'dbTable' => $dbTable,
 			'modelName' => NameMaker::modelFromDB($baseName),

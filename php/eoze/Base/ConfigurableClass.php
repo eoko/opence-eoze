@@ -21,9 +21,9 @@ class ConfigurableClass {
 	 * @var Data
 	 */
 	protected $config;
-	
+
 	private static $classConfig = null;
-	
+
 	public function __construct(array $config = null) {
 		if ($config) {
 			$config = Helper::extend(self::getClassConfig(), $config);
@@ -32,7 +32,7 @@ class ConfigurableClass {
 		}
 		$this->config = new DataArray($config);
 	}
-	
+
 	private static function getClassConfig() {
 		$class = get_called_class();
 		if (!isset(self::$classConfig[$class])) {
@@ -44,5 +44,5 @@ class ConfigurableClass {
 		}
 		return self::$classConfig[$class];
 	}
-	
+
 }

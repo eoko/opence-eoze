@@ -9,6 +9,6 @@ namespace eoze\util;
  * @since 2 nov. 2011
  */
 interface FieldReader {
-	
+
 	function read($element, $field);
 }

@@ -13,13 +13,13 @@ use eoko\config\ConfigManager;
  * @since 29 juil. 2012
  */
 class LegacyRequestReader extends AbstractRequestReader {
-	
+
 	const CONFIG_NODE = 'eoko/router';
 
 	public function createRequest() {
-		
+
 		$data = $_REQUEST;
-		
+
 		if (
 			isset($_SERVER['REQUEST_METHOD'])
 				&& $_SERVER['REQUEST_METHOD'] === 'POST' 
@@ -28,12 +28,12 @@ class LegacyRequestReader extends AbstractRequestReader {
 			|| isset($_GET['contentType'])
 				&& preg_match('/(?:^|\/)json$/i', $_GET['contentType'])
 		) {
-		
+
 			Arrays::apply($data, json_decode(file_get_contents("php://input"), true));
-			
+
 			unset($data['contentType']);
 		}
-		
+
 		// Route data
 		foreach ($this->routeMatch->getParams() as $name => $value) {
 			if (substr($name, 0, 1) !== '_') {
@@ -47,7 +47,7 @@ class LegacyRequestReader extends AbstractRequestReader {
 		if (!isset($data['controller'])) {
 			$data['controller'] = ConfigManager::get(self::CONFIG_NODE, 'indexModule');
 		}
-		
+
 		return new \Request($data);
 	}
 }

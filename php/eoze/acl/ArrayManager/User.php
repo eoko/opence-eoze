@@ -13,9 +13,9 @@ use IllegalStateException, IllegalArgumentException;
  * @since 20 oct. 2011
  */
 class User extends Group implements \eoze\acl\User {
-	
+
 	private $groups = array();
-	
+
 	public function getGroups() {
 		return $this->groups;
 	}
@@ -27,12 +27,12 @@ class User extends Group implements \eoze\acl\User {
 			$this->groups[$group->getId()] = $group;
 		}
 	}
-	
+
 	public function addGroup($group) {
 		$group = $this->getManager()->group($group);
 		$this->groups[$group->getId()] = $group;
 	}
-	
+
 	public function removeGroup($group, $strict = false) {
 		$gid = AclHelper::gid($group);
 		if ($strict && !isset($this->roles[$gid])) {

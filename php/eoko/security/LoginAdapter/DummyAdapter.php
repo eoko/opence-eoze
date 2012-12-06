@@ -13,9 +13,9 @@ use eoko\util\date\DateHelper;
  * @since 24 nov. 2011
  */
 class DummyAdapter implements LoginAdapter {
-	
+
 	private $level;
-	
+
 	public function tryLogin($username = null, $password = null, &$reason = null) {
 		return User::create(array(
 			'id'         => -1,
@@ -26,7 +26,7 @@ class DummyAdapter implements LoginAdapter {
 			'deleted'    => false,
 		), false);
 	}
-	
+
 	public function setLevel($level) {
 		$this->level = $level;
 	}

@@ -9,6 +9,6 @@ namespace eoze\Dependency;
  * @since 27 oct. 2011
  */
 interface Factory {
-	
+
 	function create(array $config = null);
 }

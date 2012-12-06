@@ -40,7 +40,7 @@ class MysqlAdapter extends AbstractAdapter {
 			);
 		}
 	}
-	
+
 	public function getDumper() {
 		return new MysqlDumper($this->getConfig());
 	}

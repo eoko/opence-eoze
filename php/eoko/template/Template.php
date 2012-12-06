@@ -4,12 +4,16 @@ namespace eoko\template;
 
 require_once __DIR__ . '/Template.functions.php';
 
+use eoko\log\Logger;
 use IllegalArgumentException;
 
+/**
+ * @method \eoko\template\Template setFile(\string $filename)
+ */
 class Template extends Renderer {
-	
+
 	protected $vars = array();
-	
+
 	public function &__get($name) {
 		return $this->vars[$name];
 	}
@@ -17,19 +21,19 @@ class Template extends Renderer {
 	public final function __set($name, $value) {
 		$this->set($name, $value);
 	}
-	
+
 	public function __isset($name) {
 		return isset($this->vars[$name]);
 	}
-	
+
 	public function __unset($name) {
 		unset($this->vars[$name]);
 	}
-	
+
 	public function clearData() {
 		$this->vars = array();
 	}
-	
+
 	public function getData() {
 		return $this->vars;
 	}
@@ -50,10 +54,12 @@ class Template extends Renderer {
 		$this->vars[$name] = $value;
 		return $this;
 	}
-	
+
 	/**
 	 * Add all the elements of the passed $in argument to this Template's vars.
-	 * @param array|object $in
+	 *
+	 * @param \Traversable $in
+	 * @throws \IllegalArgumentException
 	 * @return Template $this
 	 */
 	public function merge($in) {
@@ -71,7 +77,7 @@ class Template extends Renderer {
 		} else {
 			throw new IllegalArgumentException();
 		}
-		
+
 		return $this;
 	}
 

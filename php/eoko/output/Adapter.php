@@ -9,6 +9,6 @@ namespace eoko\output;
  * @since 24 nov. 2011
  */
 interface Adapter {
-	
+
 	function out($string);
 }

@@ -6,7 +6,7 @@
  */
 
 MODULE.override({
-	
+
 	createTabConfig: function() {
 		var viewClass = Ext.ns(this.config.mainViewClass);
 		return new viewClass(Ext.apply(this.config, {
@@ -16,5 +16,5 @@ MODULE.override({
 			,closable: true
 		}));
 	}
-	
+
 });

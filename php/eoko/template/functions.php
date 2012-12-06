@@ -84,7 +84,7 @@ function _index() {
 }
 
 function linkTo($url, $text, $extra = null) {
-	
+
 	$extras = array();
 	if ($extra) {
 		foreach ($extra as $k => $v) {
@@ -100,7 +100,7 @@ function linkTo($url, $text, $extra = null) {
 	}
 
 	$extras = implode(' ', $extras);
-	
+
 	return 
 <<<CODE
 <a href="$url" $extras>$text</a>

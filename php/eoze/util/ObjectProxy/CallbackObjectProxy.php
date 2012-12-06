@@ -14,12 +14,12 @@ use Closure;
 class CallbackObjectProxy extends ObjectProxy {
 
 	private $createFunction;
-	
+
 	public function __construct(&$hook, Closure $createFunction) {
 		parent::__construct($hook);
 		$this->createFunction = $createFunction;
 	}
-	
+
 	protected function createObject() {
 		return call_user_func($this->createFunction);
 	}

@@ -23,14 +23,14 @@ class MediaManager extends GridModule implements HasRoutes {
 	 * @var Regex
 	 */
 	private $downloadRoute;
-	
+
 	protected function construct(ModuleLocation $location) {
 		parent::construct($location);
 		if (!$this->isAbstract()) {
-			
+
 			$downloadUrl = $this->getConfig()->get('downloadUrl');
 			$quotedDownloadUrl = preg_quote($downloadUrl, '/');
-			
+
 			$this->downloadRoute = Regex::factory(array(
 				'regex' => "/$quotedDownloadUrl/(?<path>.+)",
 				'spec' => "/$downloadUrl/%path%",
@@ -43,7 +43,7 @@ class MediaManager extends GridModule implements HasRoutes {
 			));
 		}
 	}
-	
+
 	public function getRoutesConfig() {
 		if ($this->downloadRoute) {
 			return array(
@@ -51,14 +51,14 @@ class MediaManager extends GridModule implements HasRoutes {
 			);
 		}
 	}
-	
+
 	/**
 	 * @return Regex
 	 */
 	public function getDownloadRoute() {
 		return $this->downloadRoute;
 	}
-	
+
 	public function getDownloadPath($subPath = null) {
 		// Resolve download path
 		$configPath = $this->getConfig()->get('downloadPath');

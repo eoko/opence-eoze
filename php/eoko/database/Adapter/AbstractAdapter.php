@@ -29,7 +29,7 @@ abstract class AbstractAdapter implements Adapter {
 		} else {
 			$this->config = Database::getDefaultConfig();
 		}
-		
+
 		// prefix
 		$this->prefix = $this->config->prefix;
 		$this->prefixLength = $this->prefix !== null ? strlen($this->prefix) : 0;
@@ -38,7 +38,7 @@ abstract class AbstractAdapter implements Adapter {
 	public function getConfig() {
 		return $this->config;
 	}
-	
+
 	public function getDatabaseName() {
 		return $this->config->database;
 	}
@@ -74,9 +74,9 @@ abstract class AbstractAdapter implements Adapter {
 	public function internalTableNameToDatabase($internalTableName) {
 		return $this->prefix . $internalTableName;
 	}
-	
+
 	public function getDumper() {
 		return null;
 	}
-	
+
 }

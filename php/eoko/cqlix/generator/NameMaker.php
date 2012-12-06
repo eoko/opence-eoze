@@ -39,7 +39,7 @@ class NameMaker extends Inflector {
 		}
 		return self::$cache[self::dbFromModel($modelName)]['plural_model'];
 	}
-	
+
 	public static function singular($name) {
 		if (substr($name, -1) === 's') {
 			return substr($name, 0, -1);
