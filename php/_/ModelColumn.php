@@ -314,8 +314,18 @@ class ModelColumn extends ModelFieldBase {
 
 		switch ($this->type) {
 			case self::T_BOOL: return $value === null || $value === '' ? null : ($value ? 1 : 0);
+			case self::T_DATETIME:
+				if ($value instanceof DateTime) {
+					$value = $value->format('Y-m-d H:i:s');
+				}
+				return $value;
 			case self::T_DATE:
-				return DateHelper::dateExtToSql($value);
+				if ($value instanceof DateTime) {
+					$value = $value->format('Y-m-d');
+				} else {
+					$value = DateHelper::dateExtToSql($value);
+				}
+				return $value;
 			case self::T_INT: return $value === null || $value === '' ? null
 				// 2012-12-04 16:12 changed
 				// : (($value === 0 ? '0' : $value));
