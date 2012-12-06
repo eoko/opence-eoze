@@ -895,11 +895,14 @@ class Query {
 	}
 
 	private function buildOrder() {
-		if (!$order = ($this->order !== false ? $this->order : ($this->defaultOrder !== false ? $this->defaultOrder : false))) {
-			return null;
+		if ($this->order !== false) {
+			$order = $this->order;
+		} else if ($this->defaultOrder !== false) {
+			$order = $this->defaultOrder;
 		} else {
-			return ' ORDER BY ' . implode(', ', $order);
+			return null;
 		}
+		return ' ORDER BY ' . implode(', ', $order);
 	}
 
 	public static function quoteName($name) {
