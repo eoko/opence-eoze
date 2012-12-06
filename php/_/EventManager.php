@@ -3,7 +3,7 @@
 class EventManager {
 
 	protected $listeners = array();
-	
+
 	/**
 	 * Listeners that will be fire only once.
 	 * @var array
@@ -37,7 +37,7 @@ class EventManager {
 					}
 				}
 			}
-		}			
+		}
 	}
 
 	public function on($eventName, $callback, $extraArgs = null) {
@@ -48,7 +48,7 @@ class EventManager {
 			0 => $callback, 1 => $extraArgs
 		);
 	}
-	
+
 	public function onOnce($eventName, $callback, $extraArgs = null) {
 		if (!isset($this->waiters[$eventName])) {
 			$this->waiters[$eventName] = array();

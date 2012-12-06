@@ -3,7 +3,7 @@
 namespace eoko\util;
 
 class Arrays extends \ArrayHelper {
-	
+
 	/**
 	 * Compares two array considered as hash map, that is the order
 	 * of the elements is not taken into account.
@@ -32,7 +32,7 @@ class Arrays extends \ArrayHelper {
 			return self::orderMapAs($left, $right) == $right;
 		}
 	}
-	
+
 	public static function orderMapAs(array $map, array $format) {
 		$return = array();
 		foreach ($format as $key => $v) {
@@ -50,5 +50,5 @@ class Arrays extends \ArrayHelper {
 		}
 		return $return;
 	}
-	
+
 }

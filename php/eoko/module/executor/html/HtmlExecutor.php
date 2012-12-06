@@ -11,13 +11,13 @@ use ExtJSResponse;
 use eoko\util\GlobalEvents;
 
 abstract class HtmlExecutor extends HtmlTemplateExecutor {
-	
+
 	protected $ajax = null;
 	protected $hasPartialRendering = false;
 	protected $ajaxTarget = '#page';
-	
+
 	protected $executorSuffix = 'html';
-	
+
 	protected function processResult($result) {
 		if ($result === null) {
 			return;
@@ -37,24 +37,24 @@ abstract class HtmlExecutor extends HtmlTemplateExecutor {
 			$this->answer(RawRenderer::create()->setContent($result));
 		}
 	}
-	
+
 	/**
 	 * @return Renderer
 	 */
 	abstract protected function createLayout(Renderer $page);
-	
+
 	protected function onCreateLayout(HtmlRootTemplate $layout) {}
-	
+
 	protected function beforeRender(Renderer &$template) {
 		return $template;
 	}
 
 	private function answer(Renderer $template) {
-		
+
 		if (null !== $tpl = $this->beforeRender($template)) {
 			$template = $tpl;
 		}
-		
+
 		if ($this->ajax === false || !$this->request->get('fragment', false)) {
 			GlobalEvents::fire('Browser', 'reload');
 			if (!$this->hasPartialRendering && !$this->request->get('rawFragment', false)) {
@@ -67,15 +67,15 @@ abstract class HtmlExecutor extends HtmlTemplateExecutor {
 		} else {
 			$template->forceResultCaching = true;
 			$content = $template->render(true);
-			
+
 			// TODO => css, js ...
-			
+
 			ExtJSResponse::put('content', $content);
 			ExtJSResponse::put('target', $this->ajaxTarget);
 			ExtJSResponse::answer(false);
 		}
 	}
-	
+
 	/**
 	 * Forces the full reload of the page, that is, if the executor was 
 	 * requested to answer an html fragment to update the page with ajax, it

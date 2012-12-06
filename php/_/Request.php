@@ -17,9 +17,9 @@ class Request implements Message {
 	private $params;
 
 	private $originalParams = null;
-	
+
 	private $originalRequest = null;
-	
+
 	/**
 	 * @return Logger
 	 */
@@ -40,14 +40,14 @@ class Request implements Message {
 	public static function setHttpRequest($request) {
 		self::$httpRequest = new Request($request);
 	}
-	
+
 	private function cleanRequestArray($request) {
 		unset($request['PHPSESSID']);
 		return $request;
 	}
 
 	public function __construct($request) {
-		
+
 		$this->params = $this->cleanRequestArray($request);
 
 		foreach ($this->params as $key => $param) {
@@ -82,7 +82,7 @@ class Request implements Message {
 			unset($this->params['json']);
 		}
 	}
-	
+
 	public function buildUrl() {
 		$params = array();
 		foreach ($this->params as $k => $v) {
@@ -97,9 +97,9 @@ class Request implements Message {
 	public function toArray() {
 		return $this->params;
 	}
-	
+
 	private $messageBody = null;
-	
+
 	public function getBody() {
 		if (!$this->messageBody) {
 			$this->messageBody = new DataArray($this->toArray());
@@ -196,7 +196,7 @@ class Request implements Message {
 
 		$originalKeys = $keys;
 		if ($keys === null) $keys = array_keys($this->params);
-		
+
 		foreach ($keys as $k => $v) {
 
 			$kExcludeEmptyString = $excludeEmptyStrings;
@@ -263,20 +263,20 @@ class Request implements Message {
 		if (!$this->hasSub($key)) throw new MissingRequiredRequestParamException($key);
 		return new Request($this->params[$key]);
 	}
-	
+
 	public function override($override, $value = null) {
-		
+
 		if ($this->originalParams === null) {
 			$this->originalParams = $this->params;
 		}
-		
+
 		if ($value === null) {
 			Arrays::apply($this->params, $override);
 		} else {
 			$this->params[$override] = $value;
 		}
 	}
-	
+
 	public function remove() {
 		if ($this->originalParams === null) {
 			$this->originalParams = $this->params;
@@ -292,7 +292,7 @@ class Request implements Message {
 	public function isOverriden() {
 		return $this->originalParams !== null;
 	}
-	
+
 	/**
 	 * @return Request 
 	 */

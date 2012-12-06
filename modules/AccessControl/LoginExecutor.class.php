@@ -14,15 +14,15 @@ use IllegalStateException;
  * to prevent the method login() from being considered a constructor...)
  */
 class LoginExecutor extends JsonExecutor {
-	
+
 	public function index() {
 		return $this->forward('root.bootstrap', 'get_js', array('name' => 'login'));
 	}
-	
+
 	public function login() {
 		$username = $this->request->req('username', true);
 		$password = $this->request->req('password', true);
-		
+
 //		dump(array(
 //			$username, $password
 //		));
@@ -39,9 +39,9 @@ class LoginExecutor extends JsonExecutor {
 		UserSession::logOut();
 		return true;
 	}
-	
+
 	public function get_module() {
-		if (!headers_sent) {
+		if (!headers_sent()) {
 			header('Content-type: application/x-javascript');
 		}
 		echo $this->getModule()->getJavascriptAsString();

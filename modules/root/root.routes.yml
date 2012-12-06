@@ -1,20 +1,50 @@
 router:
-  
+
   index:
 # that won't work because of ZF2-436
 #    type: literal
 #    options:
 #      route: ''
-    type: regex
+#    type: regex
+#    options:
+#      regex: /?
+#      defaults:
+#        _RequestReader: eoko\mvc\LegacyRequestReader
+#        _Router: eoko\mvc\LegacyRouter
+#      spec: '/'
+
+    type: segment
     options:
-      regex: /?
+      route: ''
       defaults:
         _RequestReader: eoko\mvc\LegacyRequestReader
         _Router: eoko\mvc\LegacyRouter
-      spec: ''
+      
     may_terminate: true
     child_routes:
+      index:
+        type: literal
+        options:
+          route: '/'
+    
       php-script:
         type: literal
         options:
-          route: index.php
+          route: /index.php
+
+      jasmine:
+        type: literal
+        options:
+          route: /jasmine
+          defaults:
+            jasmineIndex: true
+        may_terminate: true
+        child_routes:
+          app:
+            type: literal
+            options:
+              route: /app
+              defaults:
+                controller: root.html
+                action: getJasmineAppJavascript
+

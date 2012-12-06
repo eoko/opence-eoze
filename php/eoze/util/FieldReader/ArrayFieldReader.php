@@ -15,7 +15,7 @@ use ArrayAccess;
  * @since 2 nov. 2011
  */
 class ArrayFieldReader implements FieldReader {
-	
+
 	public function read($element, $field) {
 		if (is_array($element)) {
 			if (array_key_exists($field, $element)) {

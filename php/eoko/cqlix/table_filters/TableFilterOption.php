@@ -17,11 +17,11 @@ class TableFilterOption extends TableFilter {
 				? $this->getOnCondition($opts) 
 				: $this->getOffCondition($opts);
 	}
-	
+
 	protected function getOnCondition($opts) {
 		return $this->onCondition;
 	}
-	
+
 	protected function getOffCondition($opts) {
 		return $this->offCondition;
 	}

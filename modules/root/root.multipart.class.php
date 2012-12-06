@@ -15,15 +15,15 @@ use Exception;
  * @since 2 déc. 2011
  */
 class Multipart extends JsonExecutor {
-	
+
 	public function index() {
-		
+
 		$responses = array();
-		
+
 		foreach ($this->request->get('requests') as $request) {
-			
+
 			$data = $request['data'];
-			
+
 			$result = array(
 				'id' => $request['id'],
 			);
@@ -33,7 +33,7 @@ class Multipart extends JsonExecutor {
 			if (!isset($data['accept']) || $data['accept'] !== 'json') {
 				$result['cannotBuffer'] = true;
 			}
-			
+
 			else {
 				// TODO this code probably doesn't catch PHP errors...
 				// So, one request error could crash the whole batch :(
@@ -43,10 +43,10 @@ class Multipart extends JsonExecutor {
 					if ($executor instanceof JsonExecutor) {
 						$result['data'] = $executor(true);
 					} 
-					
+
 					// TODO ... implement bufferizable for other type of
 					// executor (see upper)
-					
+
 					else {
 						$result['cannotBuffer'] = true;
 					}
@@ -60,9 +60,9 @@ class Multipart extends JsonExecutor {
 				$responses[$request['id']] = $result;
 			}
 		}
-		
+
 		$this->results = $responses;
-		
+
 		return true;
 	}
 }

@@ -11,11 +11,11 @@ use IllegalStateException;
  * to prevent the method login() from being considered a constructor...)
  */
 class LoginExecutor extends JsonExecutor {
-	
+
 	public function index() {
 		return $this->forward('root.bootstrap', 'get_js', array('name' => 'login'));
 	}
-	
+
 	public function login() {
 		$username = $this->request->req('login-user', true);
 		$password = $this->request->req('login-pwd', true);

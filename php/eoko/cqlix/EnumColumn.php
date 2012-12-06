@@ -55,7 +55,7 @@ class EnumColumn extends ModelColumn implements EnumField {
 			);
 		}
 	}
-	
+
 	public function getEnumLabelForValue($value) {
 		if (isset($this->labels[$value])) {
 			return $this->labels[$value];
@@ -86,7 +86,7 @@ class EnumColumn extends ModelColumn implements EnumField {
 		}
 		return $r;
 	}
-	
+
 	public function castValue($value) {
 		return ModelFieldHelper::castValue($value, $this->sqlType);
 	}

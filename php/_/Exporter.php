@@ -6,9 +6,9 @@ class Exporter {
 	private $saltFileNameEnd = true;
 	/** @var Controller */
 	private $controller = null;
-	
+
 	private $exportsAbsolutePath = EXPORTS_PATH;
-	
+
 	private $directory;
 
 	public function __construct($basename = 'Export', Controller $moduleController = null) {
@@ -91,7 +91,7 @@ class Exporter {
 		}
 		return EXPORTS_BASE_URL . $directory . $filename;
 	}
-	
+
 	public function setDirectory($directory) {
 		$this->directory = trim($directory, DS . '/') . DS;
 	}

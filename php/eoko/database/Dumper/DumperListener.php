@@ -13,9 +13,9 @@ use eoko\database\Dumper;
  * @version 1.0.0 10/04/12 01:13
  */
 interface DumperListener {
-	
+
 	function __construct(Dumper $dumper);
-	
+
 	/**
 	 * Called before the {@link eoko\Database\Dumper::dump()} method is called.
 	 */

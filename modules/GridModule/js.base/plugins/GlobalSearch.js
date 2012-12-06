@@ -165,29 +165,24 @@ Oce.GridModule.plugins.Search = Ext.extend(Object, {
         
         var gm = this.gridModule,
             cm = gm.grid.getColumnModel(),
-            colCount = cm.getColumnCount();
-        
+            colCount = cm.getColumnCount(),
+	        checkGroups = [];
+
         colMenu.removeAll();
         
         // Check all item
         var checkAllItem = new Ext.menu.CheckItem({
              text: 'Tous'
-//            ,checked: !(this.checkIndexes instanceof Array)
             ,hideOnClick: false
-            ,handler: function(item) {
-                var checked = ! item.checked;
-                item.parentMenu.items.each(function(i) {
-                    if(item !== i && i.setChecked && !i.disabled) {
-                        i.setChecked(checked);
-                    }
-                });
-            }
         });
         colMenu.add(checkAllItem,'-');
 
+		var checkAllGroup = Ext.create('eo.form.SelectableCheckGroup', checkAllItem);
+		colMenu.checkGroup = checkAllGroup;
+		checkGroups.push(checkAllGroup);
+
         // --- Items ---
         var anySelected = false,
-            checkAllSelected = true,
             hasItems = false,
             leafItems = [];
 
@@ -201,19 +196,16 @@ Oce.GridModule.plugins.Search = Ext.extend(Object, {
 
                 groupMenus.push(menu);
 
-                colMenu.add(new Ext.menu.CheckItem({
+                var item = colMenu.add(Ext.create('Ext.menu.CheckItem', {
                     hideOnClick: false
                     ,text: title
                     ,menu: menu
-                    ,checkHandler: function(cb, check) {
-                        if (!cb.initiated) return;
-                        if (menu.items) {
-                            menu.items.each(function(item) {
-                                item.setChecked(check);
-                            });
-                        }
-                    }
                 }));
+
+	            checkAllGroup.add(item);
+	            var checkGroup = Ext.create('eo.form.SelectableCheckGroup', item);
+	            menu.checkGroup = checkGroup;
+	            checkGroups.push(checkGroup);
 
                 Ext.each(items, function(item) {
                     groups[item] = menu;
@@ -226,12 +218,9 @@ Oce.GridModule.plugins.Search = Ext.extend(Object, {
         }
         
         var refreshSearch = new Ext.util.DelayedTask(function() {
-            var sf = this.getSelectedFields();
-            if (String(this.lastSearchFields) !== String(sf)) {
-                this.doSearch(sf);
-            }
+	        this.doSearch(this.getSelectedFields());
         }, this);
-        
+
         var first = !this.lastSearchFields,
             lsf = this.lastSearchFields = this.lastSearchFields || [];
         
@@ -255,10 +244,8 @@ Oce.GridModule.plugins.Search = Ext.extend(Object, {
                     select = lsf.indexOf(di) !== -1;
                 }
                 
-                if (!select) {
-                    checkAllSelected = false;
-                } else {
-                    anySelected = true;
+                if (select) {
+	                anySelected = true;
                 }
                 
                 var dest = (groups[colConfig.dataIndex] || colMenu);
@@ -273,12 +260,14 @@ Oce.GridModule.plugins.Search = Ext.extend(Object, {
                     ,checked: select
                     ,hideOnClick: false
                     ,scope: this
-                    ,checkHandler: function() {
+                    ,checkHandler: function(item) {
                         refreshSearch.delay(this.delayAfterSelect);
                     }
                 });
-                leafItems.push(item);
+
+	            leafItems.push(item);
                 dest.add(item);
+	            dest.checkGroup.add(item);
             }
         }
         
@@ -289,27 +278,10 @@ Oce.GridModule.plugins.Search = Ext.extend(Object, {
             });
         }
 
-        checkAllItem.setChecked(checkAllSelected);
+		Ext.each(checkGroups.reverse(), function(checkGroup) {
+			checkGroup.init();
+		});
 
-        // Finish group menus -- determine checked statut from items
-        if (groupMenus) {
-            Ext.each(groupMenus, function(menu) {
-                var checked = false,
-                    cb = menu.ownerCt;
-                if (menu.items) {
-                    menu.items.each(function(item) {
-                        if (item.checked) {
-                            checked = true;
-                        }
-                    });
-                } else {
-                    cb.hide();
-                }
-                cb.setChecked(checked);
-                cb.initiated = true;
-            });
-        }
-        
         return hasItems;
     }
     
@@ -359,13 +331,18 @@ Oce.GridModule.plugins.Search = Ext.extend(Object, {
     ,doSearch: function(fields) {
         
         var store = this.gridModule.store,
-            val = this.field.getValue();
-            
-        if (this.lastSearchFields === val && String(this.lastSearchFields) === String(fields)) {
+            val = this.field.getValue(),
+	        lastFields = this.lastSearchFields;
+
+		// Save fields before is needed because the method will return if there was no search
+		// and there is still no search
+		this.lastSearchFields = fields;
+
+        if (this.lastSearchQuery === val
+	            && (String(lastFields) === String(fields) || val === '')) {
             return;
         }
 
-        this.lastSearchFields = fields;
         this.lastSearchQuery = val;
         
         // clear start (necessary if we have paging)

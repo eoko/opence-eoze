@@ -25,12 +25,12 @@ use eoko\php\ClassLoader;
  * Configuration
  * =============
  *
- * Conditionnal configuration
+ * Conditional configuration
  * --------------------------
  *
- * Conditionnal configuration allows for overrides depending on the execution
+ * Conditional configuration allows for overrides depending on the execution
  * mode. Any configuration key beginning with a dot (e.g. .dev .prod) will be
- * considered conditionnal configuration. If the name (without the dot) matches
+ * considered conditional configuration. If the name (without the dot) matches
  * an active mode tag (as decided in {@link eoko\config\Application::isMode()}),
  * then it will be applied to the rest of the module config.
  *
@@ -39,8 +39,10 @@ use eoko\php\ClassLoader;
  *
  * @see eoko\config\Application::isMode()
  */
+/** @noinspection PhpInconsistentReturnPointsInspection */
+/** @noinspection PhpInconsistentReturnPointsInspection */
 class Module implements file\Finder {
-	
+
 	const DEFAULT_EXECUTOR           = '';
 	const DEFAULT_INTERNAL_EXECUTOR  = '_';
 
@@ -52,19 +54,19 @@ class Module implements file\Finder {
 	protected $namespace;
 	/**
 	 * Base path for this module's top level actual directory. If this module
-	 * doesn't have a concrete directory in the top level location, $basePath 
+	 * does not have a concrete directory in the top level location, $basePath
 	 * will be NULL.
 	 * @var string
 	 */
 	protected $basePath;
 	protected $baseUrl;
-	
+
 	private $pathsUrl;
 	/** @var array[ModulesLocation] */
 	private $lineageLocations;
 	/** @var ModuleLocation */
 	private $location;
-	
+
 	private $dependantCacheFiles, $dependantCacheKey;
 
 	/** @var Config */
@@ -76,34 +78,34 @@ class Module implements file\Finder {
 	 * existing items with same names.
 	 */
 	private $extraConfig = null;
-	
+
 	/** @var file\Finder */
 	private $fileFinder = null;
-	
+
 	protected $createExecutorMethodNameFormat = 'create%sExecutor'; // TODO unused
 	protected $defaultExecutor = 'html';
 	protected $defaultInternalExecutor = self::DEFAULT_EXECUTOR;
 	private $executorClassNames = null;
-	
+
 	public final function __construct(ModuleLocation $location) {
-		
+
 		$this->name = $location->moduleName;
 		$this->basePath = $location->path;
 		$this->baseUrl = $location->url;
 
 		$this->location = $location;
-		
+
 		$this->namespace = get_namespace($this);
 
 		$lineage = $this->getParentNames(true);
-		// purge dupplicates
+		// purge duplicates
 		$lineageItems = array();
 		foreach ($lineage as $item) $lineageItems[$item] = true;
 		$lineage = array_keys($lineageItems);
 
 		$this->pathsUrl = $location->getDirectory()->getLineagePathsUrl($lineage);
 		$this->lineageLocations = $location->getDirectory()->getLineageLocations($lineage);
-		
+
 		$this->construct($location);
 	}
     
@@ -114,15 +116,15 @@ class Module implements file\Finder {
     public function getApplicationConfig() {
         return Application::getInstance();
     }
-	
+
 	/**
-	 * Gets the configuration maanager used by this Module.
+	 * Gets the configuration manager used by this Module.
 	 * @return ConfigManager
 	 */
 	protected function getConfigManager() {
 		return ConfigManager::getInstance();
 	}
-	
+
 	/**
 	 * @return SessionManager
 	 */
@@ -132,7 +134,7 @@ class Module implements file\Finder {
 		// it contains)
 		return $this->getApplicationConfig()->getSessionManager();
 	}
-	
+
 	/**
 	 * Gets the Eoze's class loader.
 	 * @return ClassLoader
@@ -140,9 +142,10 @@ class Module implements file\Finder {
 	protected function getClassLoader() {
 		return ClassLoader::getInstance();
 	}
-	
+
 	public static function __set_state($vals) {
 		$class = get_called_class();
+		/** @var Module $o */
 		$o = new $class($vals['location']);
 		$o->setPrivateState($vals);
 		if (is_array($vals)) {
@@ -152,15 +155,18 @@ class Module implements file\Finder {
 		}
 		return $o;
 	}
-	
+
 	protected function setPrivateState(&$vals) {}
-	
+
 	protected function construct(ModuleLocation $location) {}
-	
+
 	protected function getLocation() {
 		return $this->location;
 	}
-	
+
+	/**
+	 * @return Module[]
+	 */
 	protected function getParentModules() {
 		$r = array();
 		foreach ($this->getParentNames(false) as $name) {
@@ -170,7 +176,39 @@ class Module implements file\Finder {
 		}
 		return $r;
 	}
-	
+
+	/**
+	 * Builds an ExtJS4 namespace for the specified namespace.
+	 *
+	 * This method will use the config map at eoko.modules.Module.extjs4.namespaceAliases,
+	 * and replace alias matching the *begining* of the namespace.
+	 *
+	 * E.g. If the alias foo => Bar is configured, then the namespace foo.baz will be
+	 * transformed to Bar.baz, but bar.foo won't be transformed to bar.Baz.
+	 *
+	 * @param string $phpNamespace
+	 * @throws \RuntimeException
+	 * @return string
+	 */
+	protected function makeExt4Namespace($phpNamespace) {
+		$phpNamespace = rtrim($phpNamespace, '\\');
+
+		if (!preg_match('/^(?<prefix>[^\\\\]+)(?:\\\\(?<middle>modules))?\\\\(?<suffix>.*)$/', $phpNamespace, $matches)) {
+			throw new \RuntimeException('Cannot parse namespace: ' . $phpNamespace);
+		}
+
+		$namespace = $matches['prefix'] . '.' . $matches['middle'] . '.' . ucfirst($matches['suffix']);
+
+		// Namespace aliases
+		foreach (ConfigManager::get(__CLASS__ . '/extjs4/namespaceAliases') as $base => $alias) {
+			if (strpos($namespace, $base) === 0) {
+				$namespace = $alias . substr($namespace, strlen($base));
+			}
+		}
+
+		return $namespace;
+	}
+
 	/**
 	 * Returns an array of configs for Ext4.Loader.setConfig.
 	 * 
@@ -183,23 +221,29 @@ class Module implements file\Finder {
 	 * @todo OCE-575 This should be done on a per-module basis (all modules 
 	 *       do not necessarily expose Ext4 namespaces).
 	 * 
-	 * @return array
+	 * @return string[]
 	 * @since 05/10/12 03:07
 	 */
 	public function getExt4LoaderConfig() {
 		$dir = array();
 		foreach ($this->getLocation()->getLineActualLocations(true) as $location) {
-			$location instanceof ModuleLocation;
-			$namespace = str_replace(
-				array('eoko.', 'rhodia.'), array('Eoze.', 'Opence.'),
-				str_replace('\\', '.', rtrim($location->namespace, '\\'))
-			);
-			$url = $location->getDirectory()->url . $location->moduleName . '/ext';
-			$dir[$namespace] = $url;
+			/** @var ModuleLocation $location  */
+			$directory = $location->getDirectory();
+			$name = $location->moduleName;
+			$path = $directory->path . $name;
+			$url = $location->url;
+
+			$folder = 'js.ext4';
+//			foreach (array('js.ext4', 'ext') as $folder) {
+			if (is_dir($path . '/' . $folder)) {
+				$namespace = $this->makeExt4Namespace($location->namespace);
+				$dir[$namespace] = $url . $folder;
+			}
+//			}
 		}
 		return $dir;
 	}
-	
+
 	/**
 	 * @return Module
 	 */
@@ -228,7 +272,7 @@ class Module implements file\Finder {
 		}
 		return null;
 	}
-	
+
 	public function getParentNames($includeSelf) {
 		$parents = array();
 		$lastRelative = get_relative_classname($this);
@@ -246,7 +290,8 @@ class Module implements file\Finder {
 		}
 		return $parents;
 	}
-	
+
+	/** @noinspection PhpUnusedPrivateMethodInspection */
 	private function getParentClasses($includeSelf) {
 		$classes = array();
 		if ($includeSelf) {
@@ -267,8 +312,8 @@ class Module implements file\Finder {
 		$class = get_called_class();
 		return new $class($name, $path, $url);
 	}
-	
-	public function setConfig($config) {
+
+	public function setConfig() {
 		Logger::get($this)->warn(<<<MSG
 Module::setConfig() is not used anymore... Because the getConfig method has to
 load it anyway, in order to account for horizontal (lineage) inheritance.
@@ -276,11 +321,11 @@ MSG
 		);
 		return;
 	}
-	
+
 	public function isAbstract() {
 		return $this->getConfig()->get('abstract', false);
 	}
-	
+
 	public function isDisabled() {
 		return $this->location->isDisabled();
 	}
@@ -288,7 +333,7 @@ MSG
 	public function setExtraConfig($config) {
 		$this->extraConfig = $config;
 	}
-	
+
 	/**
 	 * @return Config
 	 */
@@ -298,19 +343,19 @@ MSG
 		} else if ($this->loadCachedConfig()) {
 			return $this->config;
 		}
-		
+
 		// generate
 		$this->doConfig();
 
 		// cache
 		$this->cacheConfig($this->config);
-		
+
 		return $this->config;
 	}
-	
+
 	private function doConfig() {
 		$this->onConfig();
-		$this->processConditionnalConfig();
+		$this->processConditionalConfig();
 	}
 
 	/**
@@ -338,10 +383,10 @@ MSG
 				$this->config->apply($this->extraConfig);
 			}
 		}
-		
+
 		return $this->config;
 	}
-	
+
 	/**
 	 * Get the application config node path that overrides this module's hardcoded
 	 * configuration. Defaults to the module namespace.
@@ -350,9 +395,9 @@ MSG
 	protected function getConfigNodePath() {
 		return rtrim($this->namespace, '\\');
 	}
-	
-	private function processConditionnalConfig() {
-		// Conditionnal configuration
+
+	private function processConditionalConfig() {
+		// Conditional configuration
 		if (isset($this->config[''])) {
 			$app = $this->getApplicationConfig();
 			foreach ($this->config[''] as $tag => $envConfig) {
@@ -364,28 +409,29 @@ MSG
 			unset($this->config['']);
 		}
 	}
-	
+
 	private function useCache() {
 		return true;
 	}
-	
+
 	/**
-	 * Set the Module's config cache dependancy. That is, if one of the given
+	 * Set the Module's config cache dependency. That is, if one of the given
 	 * file changed later, the config cache for this module will be invalidated.
-	 * If the second argument is passed, the dependancy will be registered both
+	 * If the second argument is passed, the dependency will be registered both
 	 * way (warning, that would overwrite any existing monitor on the passed
 	 * $configKey).
+	 *
 	 * @param array $dependantCacheFiles
-	 * @param mixed $cacheKey If set, the dependancy will be registered both
+	 * @param mixed $cacheKey If set, the dependency will be registered both
 	 * way, that is the $cacheKey will be invalidated when this module's config
 	 * cache is invalidated.
 	 */
-	public function setCacheDepencies($dependantCacheFiles, $cacheKey = null) {
+	public function setCacheDependencies($dependantCacheFiles, $cacheKey = null) {
 		$this->dependantCacheFiles = $dependantCacheFiles;
 		$this->dependantCacheKey = $cacheKey;
 		Cache::flattenKey($this->dependantCacheKey);
 	}
-	
+
 	public function getCacheMonitorFiles($parents = false) {
 		$r = $this->location->listFileToMonitor();
 		if ($parents) {
@@ -395,24 +441,25 @@ MSG
 		}
 		return $r;
 	}
-	
+
 	private function cacheConfig(Config $config) {
 		if (!$this->useCache()) {
 			return false;
 		}
 		$key = array($this, 'config');
 		$cacheFile = Cache::cacheObject($key, $config);
-		
+
 		if ($this->dependantCacheFiles) {
 			Cache::monitorFiles($key, $this->dependantCacheFiles);
 		}
-		
-		// reciproque dependancy
+
+		// reciprocate dependency
 		if ($this->dependantCacheKey) {
 			Cache::monitorFiles($this->dependantCacheKey, $cacheFile);
 		}
+		return null;
 	}
-	
+
 	private function loadCachedConfig() {
 		if (!$this->useCache()) {
 			return false;
@@ -423,11 +470,11 @@ MSG
 			return false;
 		}
 	}
-	
+
 	public function __toString() {
 		return $this->name;
 	}
-	
+
 	public function getName() {
 		return $this->name;
 	}
@@ -439,9 +486,9 @@ MSG
 			return $this->basePath;
 		}
 	}
-	
+
 	public function getBaseUrl() {
-		if ($this->basePath === null) {
+		if ($this->baseUrl === null) {
 			throw new IllegalStateException("Module $this->name url is undefined");
 		} else {
 			return $this->baseUrl;
@@ -462,6 +509,7 @@ MSG
 	 * SecurityException is thrown.
 	 *
 	 * @param string $name
+	 * @throws \SecurityException
 	 * @return string
 	 */
 	protected static function sanitizeExecutorName($name) {
@@ -472,33 +520,37 @@ MSG
 	}
 
 	/**
+	 * @param \Request $request
+	 * @param string $overrideExecutor
 	 * @return Executor
 	 */
-	public function createRequestExecutor(Request $request, $overideExecutor = null) {
-		
-		if ($overideExecutor === null) {
-			$overideExecutor = $request->get('executor', self::DEFAULT_EXECUTOR);
+	public function createRequestExecutor(Request $request, $overrideExecutor = null) {
+
+		if ($overrideExecutor === null) {
+			$overrideExecutor = $request->get('executor', self::DEFAULT_EXECUTOR);
 		}
-		
+
 		return $this->createExecutor(
-			$overideExecutor,
+			$overrideExecutor,
 			$request->get('action', null), 
 			$request,
 			false
 		);
 	}
-	
+
 	/**
 	 * Creates an Executor for the given $type, with the given parameters.
-	 * 
-	 * @param string  $action
+	 *
+	 * @param string $type
+	 * @param string $action
 	 * @param Request $request
-	 * @param bool    $internal
-	 * 
+	 * @param bool $internal
+	 *
+	 * @throws MissingExecutorException
 	 * @return Executor
 	 */
 	public function createExecutor($type, $action = null, Request $request = null, $internal = false) {
-		
+
 		if ($type === null || $type === self::DEFAULT_EXECUTOR) $type = $this->defaultExecutor;
 		else if ($type === self::DEFAULT_INTERNAL_EXECUTOR) $type = $this->defaultInternalExecutor;
 
@@ -510,12 +562,19 @@ MSG
 
 		return new $class($this, $type, $internal, $action, $request);
 	}
-	
+
 	/**
+	 * @param string $type
+	 * @param string $action
+	 * @param \Request $opts
+	 * @param string $fallbackExecutor
 	 * @return Executor
 	 */
-	public function getInternalExecutor($type, $action, Request $opts = null, $fallbackExecutor = self::DEFAULT_INTERNAL_EXECUTOR) {
-		if ($type === null) $type = $this->defaultInternalExecutor;
+	public function getInternalExecutor($type, $action, Request $opts = null,
+				/** @noinspection PhpUnusedParameterInspection */ $fallbackExecutor = self::DEFAULT_INTERNAL_EXECUTOR) {
+		if ($type === null) {
+			$type = $this->defaultInternalExecutor;
+		}
 		return $this->createExecutor($type, $action, $opts, true);
 	}
 
@@ -524,7 +583,7 @@ MSG
 	 * Module own level in its lineage. That is, this method should not try to
 	 * load lower level classes.
 	 *
-	 * This method can be overriden by each level implementation of the Module.
+	 * This method can be overridden by each level implementation of the Module.
 	 *
 	 * The method must return either the path to the file that contains the
 	 * declaration of the class (that is the file to be included), or a
@@ -537,6 +596,7 @@ MSG
 	 * can be walked down.
 	 *
 	 * @param string $type
+	 * @param string $path
 	 * @return string|PHPCompiler
 	 */
 	protected function loadExecutorClass($type, $path) {
@@ -572,7 +632,7 @@ MSG
 	 * own level (not lower in its lineage).
 	 *
 	 * This method is called after the class code has been loaded, so it should
-	 * absolutly not try to load it. It must just try all allowed class names
+	 * absolutely not try to load it. It must just try all allowed class names
 	 * for an Executor of this type. If you use the PHP class_exists method to
 	 * test for class existence, do not forget to specify the second argument
 	 * as FALSE, in order to prevent it from trying to autoload the class
@@ -584,6 +644,8 @@ MSG
 	 * though.
 	 *
 	 * @param string $type
+	 * @param $ns
+	 * @throws \IllegalStateException
 	 * @return string
 	 */
 	public function findExecutorClassName($type, $ns) {
@@ -650,7 +712,7 @@ MSG
 	protected function generateExecutorBase($type, $namespace, $className, $baseClass) {
 		if (method_exists($this, $m = "generate{$type}ExecutorBase")
 			|| method_exists($this, $m = "generate{$type}ExecutorBaseClass")) {
-				
+
 			$namespace = trim($namespace, '\\');
 			if (substr($baseClass, 0, 1) !== '\\') $baseClass = "\\$baseClass";
 
@@ -663,11 +725,14 @@ MSG
 	}
 
 	/**
-	 * Centralizes the compilation of PHPCompiler or code framgents, to enable
+	 * Centralizes the compilation of PHPCompiler or code fragments, to enable
 	 * the implementation of a coherent caching strategy for these compilation
 	 * operations.
+	 *
 	 * @param PHPCompiler $src
-	 * @return boolean TRUE if the passed $src was successfuly compiled, FALSE
+	 * @throws \IllegalArgumentException
+	 * @throws \UnsupportedOperationException
+	 * @return boolean TRUE if the passed $src was successfully compiled, FALSE
 	 * if the passed $src is not compilable (actually if $src is neither a
 	 * string or a PHPCompiler)
 	 */
@@ -691,7 +756,7 @@ MSG
 	 * @return string the fully qualified class name
 	 */
 	private function loadExecutorTopLevelClass($type) {
-		
+
 		if (isset($this->executorClassNames[$type])) {
 			// The class has already been loaded
 			return $this->executorClassNames[$type];
@@ -699,9 +764,9 @@ MSG
 			return $this->executorClassNames[$type] = $this->doLoadExecutorTopLevelClass($type);
 		}
 	}
-	
+
 	private function doLoadExecutorTopLevelClass($type) {
-		
+
 		$type = self::sanitizeExecutorName($type);
 
 		$locations = $this->lineageLocations;
@@ -715,7 +780,7 @@ MSG
 		}
 
 		$basePath = $this->location->findTopLevelActualLocation()->path;
-		
+
 		// if there is a user-defined class in the top level module directory
 		//
 		// NB. We must not search if this file exist in $this->basePath, but
@@ -724,19 +789,20 @@ MSG
 		// 
 		// In fact, I'm not sure for now that it is the right place to search
 		// but, for sure, $this->path is not, since it can easily be NULL when
-		// the Module is not overriden at the topmost level(s).
+		// the Module is not overridden at the topmost level(s).
 		//
 		if (null !== $classFile = $this->findExecutorClassFile($type, $basePath, $this->name)) {
 			$finalClassLoader = function() use($classFile) {
+				/** @noinspection PhpIncludeInspection */
 				require_once $classFile;
 			};
 		} else {
 			$ns = $this->namespace;
 			$finalClassLoader = function() use($type, $ns) {
 				// We must test that the class doesn't already exist, for the 
-				// case where the module itself has not been overriden at all. 
+				// case where the module itself has not been overridden at all.
 				// 
-				// eg. if the module root is not overriden at all
+				// eg. if the module root is not overridden at all
 				// (ie. there is only one dir root in only one modules dir), then 
 				// $this->namespace will be the same as the original module,
 				// and the class will have already been loaded).
@@ -772,6 +838,7 @@ MSG
 
 		foreach (array_reverse($baseLoaders) as $file) {
 			list($file, $ns, $searchNS) = $file;
+			/** @noinspection PhpIncludeInspection */
 			require_once $file;
 
 			$baseClass = $this->findExecutorClassName($type, $searchNS);
@@ -789,21 +856,22 @@ MSG
 				}
 			}
 		}
-		
+
 		$finalClassLoader();
 
 		return $this->findExecutorClassName($type, $this->namespace);
 	}
-	
-	protected function doGenerateModuleClass($class, $config) {
+
+	protected function doGenerateModuleClass($class, /** @noinspection PhpUnusedParameterInspection */ $config) {
 		return class_extend($class, get_class($this));
 	}
 
 	/**
 	 * Generates the default class for a module extending this one.
+	 *
 	 * @param string $class
 	 * @param Config $config
-	 * @return void
+	 * @return string
 	 */
 	public final function generateDefaultModuleClass($class, $config) {
 		return $this->doGenerateModuleClass($class, $config);
@@ -813,15 +881,15 @@ MSG
 	public function searchPath($name, $type = null, &$getUrl = false, $forbidUpward = null, $require = false) {
 		return $this->getFileFinder()->searchPath($name, $type, $getUrl, $forbidUpward, $require);
 	}
-	
+
 	public function findPath($name, $type = null, &$getUrl = false, $forbidUpward = null) {
 		return $this->getFileFinder()->findPath($name, $type, $getUrl, $forbidUpward);
 	}
-	
+
 	public function resolveRelativePath($relativePath, $type = null, $forbidUpward = null) {
 		return $this->getFileFinder()->resolveRelativePath($relativePath, $type, $forbidUpward);
 	}
-	
+
 	private function getFileFinder() {
 		if ($this->fileFinder) {
 			return $this->fileFinder;
@@ -829,7 +897,7 @@ MSG
 			return $this->fileFinder = $this->createFileFinder();
 		}
 	}
-	
+
 	/**
 	 * @todo Make that a real FileFinder method
 	 */
@@ -845,7 +913,7 @@ MSG
 		}
 		return $files;
 	}
-	
+
 	public function listFilesUrl($pattern, $dir, $type = null) {
 		$r = array();
 		foreach ($this->pathsUrl as $basePath => $baseUrl) {
@@ -870,7 +938,7 @@ MSG
 			$urlDir = '';
 		}
 		foreach (array_reverse($this->location->getLineActualLocations()) as $loc) {
-			$loc instanceof ModuleLocation;
+			/** @var ModuleLocation $loc */
 			if (!$loc->url) continue;
 			$baseUrl = $loc->url . $urlDir;
 			$urls = Files::listFilesIfDirExists($loc->path . $dir, $pattern, $recursive, false);
@@ -879,7 +947,7 @@ MSG
 		}
 		return $r;
 	}
-	
+
 	private function createTypeFinder($path, $url, $fallbackFinder) {
 		return new file\TypeFinder(
 			$path, $url, 
@@ -910,17 +978,17 @@ MSG
 			)
 		);
 	}
-	
+
 	protected function createFileFinder() {
-		
+
 		$fallbackFinder = $this->getApplicationConfig();
-		
+
 		$upperPathsUrl = array_reverse($this->pathsUrl, true);
 		if ($this->basePath) array_pop($upperPathsUrl);
 		foreach ($upperPathsUrl as $path => $url) {
 			$fallbackFinder = $this->createTypeFinder($path, $url, $fallbackFinder);
 		}
-		
+
 		return $this->fileFinder = new file\ObjectFinder(
 			$this, 
 			array(
@@ -930,12 +998,12 @@ MSG
 			$this->createTypeFinder($this->basePath, $this->baseUrl, $fallbackFinder)
 		);
 	}
-	
+
 }
 
 class MissingExecutorException extends SystemException {
-	
-	public function __construct($module, $executor, Exception $previous = null) {
+
+	public function __construct($module, $executor, \Exception $previous = null) {
 		parent::__construct(
 			'Missing executor "' . $executor . '" for module "' . $module . '"', 
 			'', $previous

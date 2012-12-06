@@ -41,7 +41,7 @@ use eoko\modules\TreeMenu\ActionProvider\ModuleGroupProvider;
  * grouped modules.
  * 
  *     # ModuleGroupModule.menu.yml
- *		
+ *
  *     extra.menu:
  *  
  *       family:
@@ -102,10 +102,10 @@ class ModuleGroupModule extends TabModule {
 		}
 		return $r;
 	}
-	
+
 	protected function createJavascriptModuleProperties() {
 		$properties = parent::createJavascriptModuleProperties();
-		
+
 		foreach ($this->getChildModules() as $module) {
 			$moduleName = $module->getName();
 			// first try to see if a special title has been prepared for us
@@ -123,10 +123,10 @@ class ModuleGroupModule extends TabModule {
 				'cmd' => "Oce.Modules.$moduleName.$moduleName",
 			);
 		}
-		
+
 		$properties['modules'] = $modules;
-		
+
 		return $properties;
 	}
-	
+
 }

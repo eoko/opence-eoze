@@ -80,6 +80,7 @@ var resolve = function resolve(name, force) {
 		o = name;
 	} else {
 		o = window;
+		//noinspection FunctionWithInconsistentReturnsJS
 		Ext.each(name.split('.'), function(sub) {
 			o = o[sub];
 			if (!o) {
@@ -218,6 +219,34 @@ Ext.ClassManager = Ext.apply(Ext.ClassManager, {
 // Defer
 Ext.Function.defer = function(fn, millis, obj, args, appendArgs) {
 	Function.defer.apply(fn, Array.prototype.slice.call(arguments, 1));
+};
+
+// Date
+
+Ext.ns('Ext.Date');
+
+Ext.Date.format = function (date, format) {
+	return date && date.format(format) || undefined;
+};
+
+Ext.Date.isEqual = function (date1,date2){
+	if (date1 && date2) {
+		if (date1.ignoreTime && date2.ignoreTime) {
+			return Ext.Date.format(date1, 'Ymd') === Ext.Date.format(date2, 'Ymd');
+		} else {
+			return (date1.getTime() === date2.getTime());
+		}
+	} else {
+		return !(date1 || date2);
+	}
+};
+
+// String
+
+Ext.ns('Ext.String');
+
+Ext.String.format = function() {
+	return String.format.apply(String, arguments);
 };
 
 } // end of compat patches

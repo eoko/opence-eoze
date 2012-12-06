@@ -12,18 +12,18 @@ use DateTime;
  * @since 21 déc. 2011
  */
 class DisplayResultProcessor extends AbstractResultProcessor {
-	
+
 	protected $_dateFormat = 'd/m/Y';
 	protected $_dateTimeFormat = 'd/m/Y H:i:s';
-	
+
 	protected function convertBoolean($value) {
 		return $value ? 'Oui' : 'Non';
 	}
-	
+
 	protected function convertEnum(EnumField $field, $value) {
 		return $field->getEnumLabelForValue($value);
 	}
-	
+
 	protected function convertDate($value) {
 		if ($value === null) {
 			return null;

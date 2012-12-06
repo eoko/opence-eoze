@@ -14,14 +14,14 @@ use IllegalArgumentException;
  * @since 8 nov. 2011
  */
 class Prolix extends Module {
-	
+
 	protected $defaultExecutor = 'json';
 
 	public function listExistingModelsTables() {
-		
+
 		$models = array();
 		$tables = array();
-		
+
 		$dir = dir(MODEL_PATH);
 		while (false !== $file = $dir->read()) {
 			if (preg_match('/^(?P<table>(?P<model>.+)Table)(?:\.class)?\.php$/', $file, $matches)) {
@@ -29,10 +29,10 @@ class Prolix extends Module {
 				$tables[] = $matches['table'];
 			}
 		}
-		
+
 		return array('models' => $models, 'tables' => $tables);
 	}
-	
+
 	public function getModelConfig($name) {
 		$config = $this->getConfig()->get('models');
 		if (!isset($config)) {
@@ -43,7 +43,7 @@ class Prolix extends Module {
 		}
 		return isset($config[$name]) ? $config[$name] : array();
 	}
-	
+
 	public function getModelSpec($name) {
 		$config = $this->getModelConfig($name);
 	}

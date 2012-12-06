@@ -8,7 +8,7 @@ use ExtJSResponse;
 use UnsupportedOperationException;
 
 class JsonExecutor extends TemplateExecutor {
-	
+
 	/**
 	 * @return JsonTemplate
 	 */
@@ -23,7 +23,7 @@ class JsonExecutor extends TemplateExecutor {
 			return new JsonTemplate($opts);
 		}
 	}
-	
+
 	protected function processResult($result, $return = false) {
 		if (is_bool($result)) {
 			$tpl = $this->getTemplate();

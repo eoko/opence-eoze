@@ -5,7 +5,7 @@ use eoko\util\Arrays, eoko\util\Enum;
 use \IllegalArgumentException;
 
 class FileType extends Enum {
-	
+
 	const HTML		= 'HTML';
 	const HTML_TPL	= 'HTML_TPL';
 	const JS		= 'JS';
@@ -13,17 +13,17 @@ class FileType extends Enum {
 	const CSS		= 'CSS';
 	const PHP		= 'PHP';
 	const YML       = 'YML';
-	
+
 	const PNG       = 'PNG';
 	const JPG       = 'JPG';
 	const GIF       = 'GIF';
 	const IMAGE     = 'IMAGE';
-	
+
 	const ALIAS    = 'ALIAS';
-	
+
 	public $type;
 	public $extensions;
-	
+
 	protected static function getArgs() {
 		return array(
 			self::HTML => array(
@@ -65,16 +65,16 @@ class FileType extends Enum {
 			),
 		);
 	}
-	
+
 	protected function construct($type, $extensions) {
 		$this->type = $type;
 		$this->extensions = $extensions;
 	}
-	
+
 	public function __toString() {
 		return $this->type;
 	}
-	
+
 	/**
 	 * @param string $filename
 	 * @return boolean
@@ -89,7 +89,7 @@ class FileType extends Enum {
 			return substr($filename, -strlen($this->extensions)) === $this->extensions;
 		}
 	}
-	
+
 	public static function parse($in, &$extensions = null, &$typeName = null) {
 		if ($in === null) {
 			$extensions = false;

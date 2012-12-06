@@ -18,7 +18,7 @@ use DateTimeZone;
  * @since 15 déc. 2011
  */
 class DateRange {
-	
+
 	/**
 	 * @var Date
 	 */
@@ -27,7 +27,7 @@ class DateRange {
 	 * @var Date
 	 */
 	private $to;
-	
+
 	/**
 	 * Constructs a new DateRange object.
 	 * 
@@ -38,7 +38,7 @@ class DateRange {
 	 * @param string|DateTime|null $to 
 	 */
 	public function __construct($from, $to = null) {
-		
+
 		if ($to === null) {
 			if (is_array($from)) {
 
@@ -53,17 +53,17 @@ class DateRange {
 						. 'with only one argument.');
 			}
 		}
-		
+
 		$this->from = Date::parseDate($from);
 		$this->to = Date::parseDate($to);
-		
+
 		if ($this->getFrom()->after($this->getTo())) {
 			$from = $this->getFrom()->format('Y-m-d e');
 			$to = $this->getTo()->format('Y-m-d e');
 			throw new IllegalArgumentException("Date from ($from) must be before date to ($to)");
 		}
 	}
-	
+
 	/**
 	 * Returns a **clone** of the from Date.
 	 * @return Date
@@ -71,7 +71,7 @@ class DateRange {
 	public function getFrom() {
 		return clone $this->from;
 	}
-	
+
 	/**
 	 * Returns a **clone** of the to Date.
 	 * @return Date
@@ -88,19 +88,19 @@ class DateRange {
 	 * @return DateRange 
 	 */
 	public function intersect(DateRange $other) {
-		
+
 		// If ranges don't intersect at all
 		if (!$this->getTo()->afterOrEquals($other->getFrom())
 				|| !$this->getFrom()->beforeOrEquals($other->getTo())) {
 			return null;
 		}
-		
+
 		return new DateRange(
 			$this->getFrom()->afterOrEquals($other->getFrom()) ? $this->getFrom() : $other->getFrom(),
 			$this->getTo()->beforeOrEquals($other->getTo()) ? $this->getTo() : $other->getTo()
 		);
 	}
-	
+
 	/**
 	 * Gets the range as an array of which the first element is the start date
 	 * string and the second, the end date string.
@@ -111,7 +111,7 @@ class DateRange {
 	public function toStringArray($format = 'Y-m-d') {
 		return array($this->getFrom()->format($format), $this->getTo()->format('Y-m-d'));
 	}
-	
+
 	/**
 	 *
 	 * @param mixed $range
@@ -126,12 +126,12 @@ class DateRange {
 			throw new IllegalArgumentException();
 		}
 	}
-	
+
 	public function __toString() {
 		return 'DateRange[' . $this->getFrom()->format('Y-m-d e') . ', ' 
 				. $this->getTo()->format('Y-m-d e') . ']';
 	}
-	
+
 	/**
 	 *
 	 * @param array $ranges

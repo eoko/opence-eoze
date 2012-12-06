@@ -12,7 +12,7 @@ class Logger extends Base {
 		if (!$this->timers) $this->timers = new Timers();
 		return $this->timers;
 	}
-	
+
 	public function startTimer($key, $message, $level = self::DEBUG) {
 		if (!$this->isActive($level)) {
 			return;

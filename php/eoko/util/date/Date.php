@@ -14,7 +14,7 @@ use IllegalArgumentException;
  * @since 15 déc. 2011
  */
 class Date extends DateTime{
-	
+
 	/**
 	 * Parses a Date object.
 	 * 
@@ -51,7 +51,7 @@ class Date extends DateTime{
 			return $date->format($format);
 		}
 	}
-	
+
 	public function __construct($date, $timeZone = null) {
 		if ($date instanceof DateTime) {
 			$date = $date->format('Y-m-d');
@@ -63,7 +63,7 @@ class Date extends DateTime{
 			parent::__construct($date, DefaultTimeZone::get());
 		}
 	}
-	
+
 	public function __toString() {
 		return $this->format('Y-m-d');
 	}
@@ -73,27 +73,27 @@ class Date extends DateTime{
 		$d->setTimezone($d->getTimezone());
 		return $this->format('Ymd') === $d->format('Ymd');
 	}
-	
+
 	public function afterOrEquals($d) {
 		$d = self::parseDate($d);
 		return !$d->diff($this)->invert || $this->equals($d);
 	}
-	
+
 	public function beforeOrEquals($d) {
 		$d = self::parseDate($d);
 		return !$this->diff($d)->invert || $this->equals($d);
 	}
-	
+
 	public function after($d) {
 		$d = self::parseDate($d);
 		return !$d->diff($this)->invert && !$this->equals($d);
 	}
-	
+
 	public function before($d) {
 		$d = self::parseDate($d);
 		return $d->after($this);
 	}
-	
+
 	public function inRanges(array $ranges) {
 		foreach ($ranges as $range) {
 			$range = DateRange::parseRange($range);

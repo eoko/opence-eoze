@@ -11,20 +11,20 @@ namespace eoze\util\DataStore\Query;
 class Pager extends QueryElement {
 
 	protected $type = self::PAGER;
-	
+
 	private $limit = null;
-	
+
 	private $start = null;
 
 	function __construct($limit = null, $start = null) {
 		$this->limit = $limit;
 		$this->start = $start;
 	}
-	
+
 	protected function getType() {
 		return self::PAGER;
 	}
-	
+
 	public function getLimit() {
 		return $this->limit;
 	}
@@ -36,11 +36,11 @@ class Pager extends QueryElement {
 			return 0;
 		}
 	}
-	
+
 	public function setLimit($limit) {
 		$this->limit = $limit;
 	}
-	
+
 	public function setStart($start) {
 		$this->start = $start;
 	}

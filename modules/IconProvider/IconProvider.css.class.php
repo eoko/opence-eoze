@@ -7,7 +7,7 @@ use eoko\template\Template;
 use eoko\url\Maker as UrlMaker;
 
 class Css extends TemplateExecutor {
-	
+
 	protected function processResult($result) {
 //		if ($result instanceof Template) {
 //			$result->render();
@@ -18,30 +18,30 @@ class Css extends TemplateExecutor {
 		return Template::create()
 				->setFile($this->findPath('icons.css.php'));
 	}
-	
+
 	public function getIconCss() {
-		
+
 		$module = $this->getModule();
-		
+
 		$icons = array();
 		foreach ($module->listFiles() as $file) {
-			
+
 			$url = $this->module->getBasePath() . 'icons' . DS . $file;
-			
+
 			$icons[] = array(
 				'class' => $module->makeClass($file),
 //				'url' => 'icons' . DS . $file,
 				'url' => UrlMaker::getFor($this, 'getIconImage', array('img' => $file)),
 			);
 		}
-		
+
 		$this->baseClass = $module->getConfig()->get('cssBaseClass');
 		$this->icons = $icons;
-		
+
 		header('Content-type: text/css');
 		$this->getTemplate()->render();
 	}
-	
+
 	public function getIconImage() {
 		$file = $this->request->req('img');
 		$filename = $this->module->getBasePath() . 'icons' . DS . $file;

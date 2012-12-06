@@ -3,5 +3,5 @@
 namespace eoko\template;
 
 function debugInfo() {
-	
+
 }

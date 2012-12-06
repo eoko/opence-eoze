@@ -46,43 +46,43 @@ use eoko\template\Template;
  * @author Éric Ortéga <eric@planysphere.fr>
  */
 class TabModule extends _ implements HasJavascript {
-	
+
 	protected $defaultExecutor = 'js';
-	
+
 	protected function createJavascriptModuleProperties() {
-		
+
 		$config = $this->getConfig();
-		
+
 		$properties = array(
 			'title' => $this->getTitle(),
 			'iconCls' => $this->getIconCls(false),
 			'tabChild' => $config->get('tabChild'),
 		);
-		
+
 		$cfg = $config->get('config');
 		if ($cfg) {
 			$properties['config'] = $cfg;
 		}
-		
+
 		return $properties;
 	}
-	
+
 	public function createModuleJavascriptTemplate() {
-		
+
 		$config = $this->getConfig();
 		$moduleName = $this->getName();
-		
+
 		$tpl = Template::create()->setFile($this->findFilenameInLineage('TabModule.js.php'));
-		
+
 		$tpl->namespace = $config->get('jsNamespace');
 		$tpl->module = $moduleName;
 		$tpl->parentClass = $config->get('jsParentClass');
-		
+
 		$tpl->properties = $this->createJavascriptModuleProperties($config);
-		
+
 		return $tpl;
 	}
-	
+
 	private function findFilenameInLineage($pattern, $type = null) {
 		foreach ($this->getParentNames(true) as $name) {
 			$r = $this->searchPath(str_replace('%module%', $name, $pattern), $type);
@@ -92,7 +92,7 @@ class TabModule extends _ implements HasJavascript {
 		}
 		throw new \eoko\file\CannotFindFileException($pattern);
 	}
-	
+
 	public function getJavascriptAsString() {
 		if ($this->getConfig()->getValue('private/generateJavascriptModule', true)) {
 			if (!$this->isAbstract()

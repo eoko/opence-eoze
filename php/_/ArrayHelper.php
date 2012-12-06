@@ -16,7 +16,7 @@ class ArrayHelper {
 	public static function isAssocArray($array) {
 		return is_array($array) && self::isAssoc($array);
 	}
-	
+
 	public static function isIndexedArray($array) {
 		return is_array($array) && !self::isAssoc($array);
 	}
@@ -139,7 +139,7 @@ class ArrayHelper {
 		}
 		return $r;
 	}
-	
+
 	public static function get($array, $key, $default = null) {
 		if (isset($array[$key])) return $array[$key];
 		else return $default;
@@ -180,7 +180,7 @@ class ArrayHelper {
 				return $r;
 			}
 		}
-		
+
 		if (!$require) return null;
 		else throw new IllegalStateException("Missing key: \$obj[$key]");
 	}

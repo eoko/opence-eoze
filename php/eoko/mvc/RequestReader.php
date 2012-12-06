@@ -13,7 +13,7 @@ use Zend\Mvc\Router\RouteMatch;
  * @since 29 juil. 2012
  */
 interface RequestReader {
-	
+
 	/**
 	 * 
 	 * @param \Zend\Http\Request $request
@@ -21,6 +21,6 @@ interface RequestReader {
 	 * @return \Request
 	 */
 	function __construct(Request $request, RouteMatch $routeMatch);
-	
+
 	function createRequest();
 }

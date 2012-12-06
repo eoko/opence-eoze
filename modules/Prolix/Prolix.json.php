@@ -10,16 +10,16 @@ use eoko\module\executor\JsonExecutor;
  * @since 8 nov. 2011
  */
 class Json extends JsonExecutor {
-	
+
 	public function index() {
-		
+
 		$this->models = array();
-		
+
 		dump($tables);
-		
+
 		return true;
 	}
-	
+
 	public function hello() {
 		$sub = new Sub\Test;
 		$this->msg = "$sub";

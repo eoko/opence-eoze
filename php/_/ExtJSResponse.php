@@ -15,11 +15,11 @@ class ExtJSResponse {
 	private static $vars = array();
 
 	private static $answerJson = true;
-	
+
 	public static function purge() {
 		self::$vars = array();
 	}
-	
+
 	private static function out($string) {
 		Output::out($string);
 	}
@@ -27,7 +27,7 @@ class ExtJSResponse {
 	public static function put($name, $val) {
 		self::$vars[$name] = $val;
 	}
-	
+
 	public static function putIf($name, $val) {
 		if (!array_key_exists($name, self::$vars)) {
 			self::$vars[$name] = $val;
@@ -110,7 +110,7 @@ class ExtJSResponse {
 		} else {
 			$out = Json::encode((array('success'=>true, 'data' => $data)));
 		}
-		
+
 		self::out($out);
 
 		if ($return) {
@@ -177,7 +177,7 @@ class ExtJSResponse {
 		if ($includeTimestamp === null){
 			$includeTimestamp = $systemError;
 		}
-		
+
 		if ($errorTitle === null) $errorTitle = $systemError ? 
 			lang('Erreur Sytème') : lang('Erreur');
 

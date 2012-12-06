@@ -37,24 +37,24 @@ use eoze\test\phpunit\ArrayValidator;
  * @since 24 nov. 2011
  */
 class ExecutorRequestTest extends Assert implements Test {
-	
+
 	/**
 	 * @var eoko\module\executor\Executor
 	 */
 	protected $executor;
 	protected $executorType;
-	
+
 	/**
 	 * @var eoko\module\Module
 	 */
 	protected $module;
 	protected $moduleName;
-	
+
 	protected $controller;
 
 	protected $username = 'test';
 	protected $password = 'test';
-	
+
 	public function __construct() {
 		if (isset($this->controller)) {
 			switch (count($parts = explode('.', $this->controller))) {
@@ -72,7 +72,7 @@ class ExecutorRequestTest extends Assert implements Test {
 			}
 		}
 	}
-	
+
 	protected function getModuleName() {
 		if (isset($this->moduleName)) {
 			return $this->moduleName;
@@ -91,7 +91,7 @@ class ExecutorRequestTest extends Assert implements Test {
 		}
 		throw new IllegalStateException('Cannot determine module name');
 	}
-	
+
 	protected function getExecutorType() {
 		if (isset($this->executorType)) {
 			return $this->executorType;
@@ -108,7 +108,7 @@ class ExecutorRequestTest extends Assert implements Test {
 		}
 		return null;
 	}
-	
+
 	protected function getControllerName() {
 		if (!$this->controller) {
 			return $this->controller = $this->getModuleName() . '.' . $this->getExecutorType();
@@ -116,7 +116,7 @@ class ExecutorRequestTest extends Assert implements Test {
 			return $this->controller;
 		}
 	}
-	
+
 	/**
 	 *
 	 * @return Module
@@ -124,7 +124,7 @@ class ExecutorRequestTest extends Assert implements Test {
 	protected function getModule() {
 		return ModuleManager::getModule($this->getModuleName());
 	}
-	
+
 	/**
 	 * @param string  $action
 	 * @param Request $request
@@ -136,7 +136,7 @@ class ExecutorRequestTest extends Assert implements Test {
 		return $this->getModule()->createExecutor(
 				$this->getExecutorType(), $action, $request, $internal);
 	}
-	
+
 	/**
 	 * Runs the given request on the Executor tested by this test case.
 	 * 
@@ -154,19 +154,19 @@ class ExecutorRequestTest extends Assert implements Test {
 
 		ExtJSResponse::purge();
 		$executor();
-		
+
 		return $executor->getData();
 	}
-	
+
 	protected function getTestList() {
 		$class = new ReflectionClass($this);
-		
+
 		$tests = array();
-		
+
 		// Load ./ClassName.requests.yml file
 		if (file_exists($file = dirname($class->getFileName()) 
 				. '/' . get_relative_classname($this) . '.requests.yml')) {
-			
+
 			$tests[get_relative_classname($this)] = YmlReader::loadFile($file);
 		}
 
@@ -179,67 +179,67 @@ class ExecutorRequestTest extends Assert implements Test {
 				$tests[substr(basename($file), 0, -4)] = YmlReader::loadFile($file);
 			}
 		}
-		
+
 		return $tests;
 	}
-	
+
 	public function count() {
 		return 1;
 	}
-	
+
 	protected function doTestRequest($file, $name, $test) {
 		if (!isset($test['request'])) {
 			throw new IllegalStateException("Missing request in data set $name of file $file");
 		}
-		
+
 		// Shortcut form 'request' => $action
 		if (is_string($test['request'])) {
 			$test['request'] = array(
 				'action' => $test['request']
 			);
 		}
-		
+
 		// Automatic controller
 		if (!isset($test['request']['controller'])) {
 			$test['request']['controller'] = $this->getControllerName();
 		}
-			
+
 		$result = $this->runRequest($test['request']);
-		
+
 		if (isset($test['expected'])
 				&& !Arrays::compareMap($test['expected'], $result)) {
-			
+
 			$this->assertEquals($test['expected'], $result, 
 					'Asserting that result match expected');
 		}
-		
+
 		$format = null;
 		if (isset($test['expected-format'])) {
 			$format = $test['expected-format'];
 		} else if (isset($test['format'])) {
 			$format = $test['format'];
 		}
-		
+
 		if (isset($format)) {
 			$validator = new ArrayValidator($format);
 			$success = $validator->test($result);
-			
+
 			$this->assertTrue($success, $validator->getLastError(),
 					'Asserting that result match expected template');
 		}
 	}
-	
+
 	public function run(TestResult $result = NULL) {
-		
+
 		if ($result === NULL) {
 			$result = new TestResult;
 		}
 
 		UserSession::setLoginAdapter(new DummyLoginAdapter);
 		UserSession::login($this->username, $this->password);
-		
+
 		Output::setAdapter(new NullAdapter);
-		
+
 		foreach ($this->getTestList() as $file => $data) {
 			foreach ($data as $name => $test) {
 				$result->startTest($this);

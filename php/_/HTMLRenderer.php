@@ -38,7 +38,7 @@ class HTMLRenderer {
 		);
 
 		if (null !== $content = $this->buildContent()) $r[] = $content;
-		
+
 		$r[] = "</$this->tag>";
 		return implode('', $r);
 	}
@@ -50,7 +50,7 @@ class HTMLRenderer {
 	public function output() {
 		echo $this->render();
 	}
-	
+
 	protected function buildContent() {
 		if ($this->content === null) {
 			return null;
@@ -62,12 +62,12 @@ class HTMLRenderer {
 			throw new IllegalStateException('I do not know what to do with $this->content ...');
 		}
 	}
-	
+
 	protected function buildTagParams() {
 		if ($this->tagParams === null) return null;
-		
+
 		$r = array();
-		
+
 		foreach ($this->tagParams as $name => $value) {
 			if (is_array($value)) {
 				$value = implode(' ', $value);
@@ -77,7 +77,7 @@ class HTMLRenderer {
 
 		return ' ' . implode($r);
 	}
-	
+
 	/**
 	 * @return HTMLRenderer
 	 */
@@ -93,7 +93,7 @@ class HTMLRenderer {
 			throw new IllegalStateException("Method $class::$name doesn't exist");
 		}
 	}
-	
+
 	/**
 	 * @return HTMLRenderer
 	 */
@@ -107,7 +107,7 @@ class HTMLRenderer {
 		}
 		return $this;
 	}
-	
+
 	/**
 	 * @return HTMLRenderer
 	 */

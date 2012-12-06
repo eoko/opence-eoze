@@ -15,11 +15,11 @@ use eoko\module\executor\JsonExecutor;
 class Json extends JsonExecutor {
 
 	public function index() {
-		
+
 		$module = $this->getModule();
 		$path = $module->getQueueFilePath();
 		$refreshRate = $module->getConfig()->getValue('refreshRate', 1);
-		
+
 		if (null !== $timeout = $this->request->get('timeout')) {
 			$maxTime = time() + min(ini_get('max_execution_time') - 5, $timeout);
 		} else {
@@ -40,13 +40,13 @@ class Json extends JsonExecutor {
 		foreach (file($path) as $entry) {
 			$entries[] = unserialize($entry);;
 		}
-		
+
 		// Delete file
 		unlink($path);
 
 		// Build response
 		$this->entries = $module->buildCometEntries($entries);
-		
+
 		return true;
 	}
 }

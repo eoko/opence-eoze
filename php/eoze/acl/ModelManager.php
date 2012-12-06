@@ -15,8 +15,8 @@ class ModelManager extends AbstractAclManager {
 	private $idTableName = 'AclIdTable';
 
 	private $roleTableName = 'AclRoleTable';
-	
+
 	private $groupTableName = 'AclGroupTable';
-	
+
 	private $userTableName = 'AclUserTable';
 }

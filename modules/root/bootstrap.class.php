@@ -8,11 +8,11 @@ use \UserSession;
 use \ExtJSResponse;
 
 class Bootstrap extends \eoko\module\executor\JsFileExecutor {
-	
+
 	public function index() {
 		return $this->forward('root.html');
 	}
-	
+
 	/**
 	 * @todo LEGACY Move to the new model
 	 */

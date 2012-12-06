@@ -11,7 +11,7 @@ use eoze\util\Data;
  * @since 27 oct. 2011
  */
 interface Message {
-	
+
 	/**
 	 * @return Data
 	 */

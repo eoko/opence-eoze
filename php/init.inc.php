@@ -61,7 +61,6 @@ if (!defined('LIB_PATH')) define('LIB_PATH', ROOT . (LIB_DIR ? LIB_DIR . DS : nu
 
 if (!defined('EOZE_DIR')) define('EOZE_DIR', 'eoze');
 if (!defined('EOZE_PATH')) define('EOZE_PATH', str_replace(DS . DS, DS, LIB_PATH . EOZE_DIR . DS));
-if (!defined('EOZE_CONFIG_PATH')) define('EOZE_CONFIG_PATH', EOZE_PATH . 'config' . DS);
 if (!defined('EOZE_BASE_URL')) define('EOZE_BASE_URL', preg_replace('@([^:/])//@', '$1/', SITE_BASE_URL . '/' . EOZE_DIR) . '/');
 
 if (!defined('PHP_DIR')) define('PHP_DIR', 'php');
@@ -90,11 +89,6 @@ if (!defined('CSS_URL')) define('CSS_URL', EOZE_BASE_URL . 'css/');
 if (!defined('JS_PATH')) define('JS_PATH', EOZE_PATH . 'js' . DS);
 if (!defined('JS_URL')) define('JS_URL', EOZE_BASE_URL . 'js/');
 
-//if (!defined('MODEL_PATH')) define('MODEL_PATH', ROOT . 'models' . DS);
-//if (!defined('MODEL_BASE_PATH')) define('MODEL_BASE_PATH', MODEL_PATH . 'base' . DS);
-//if (!defined('MODEL_PROXY_PATH')) define('MODEL_PROXY_PATH', MODEL_PATH . 'proxy' . DS);
-//if (!defined('MODEL_QUERY_PATH')) define('MODEL_QUERY_PATH', MODEL_PATH . 'query' . DS);
-
 if (!defined('LIB_BASE_URL')) define('LIB_BASE_URL', SITE_BASE_URL . LIB_DIR . '/');
 if (!defined('LIB_IMAGES_BASE_URL')) define('LIB_IMAGES_BASE_URL', LIB_BASE_URL . 'images' . '/');
 if (!defined('LIB_PHP_BASE_URL')) define('LIB_PHP_BASE_URL', LIB_BASE_URL . PHP_DIR . '/');
@@ -106,8 +100,6 @@ if (!defined('EXPORTS_BASE_URL')) define('EXPORTS_BASE_URL', MEDIA_BASE_URL . 'e
 
 if (!defined('BACKUPS_PATH')) define('BACKUPS_PATH', ROOT . 'backup' . DS);
 if (!defined('BACKUPS_BASE_URL')) define('BACKUPS_BASE_URL', SITE_BASE_URL . 'backup/');
-
-if (!defined('CONFIG_PATH')) define('CONFIG_PATH', ROOT . 'config' . DS);
 
 if (!defined('MODULES_BASE_URL')) define('MODULES_BASE_URL', SITE_BASE_URL . MODULES_DIR . '/');
 if (defined('APP_MODULES_DIR')) {

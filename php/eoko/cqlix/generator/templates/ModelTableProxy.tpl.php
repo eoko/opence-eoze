@@ -14,7 +14,7 @@ class <?php echo $tableName ?>Proxy extends ModelTableProxy {
 	public static $tableName = '<?php echo $tableName ?>';
 	public static $modelName = '<?php echo $modelName ?>';
 	public static $dbTableName = '<?php echo $dbTable ?>';
-	
+
 	private static $instance = null;
 
 	public static function get() {

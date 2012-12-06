@@ -16,7 +16,7 @@ class FileHelper {
 			return array();
 		}
 	}
-	
+
 	const LF_PATH_ABS_REL = 1;
 
 	/**
@@ -72,7 +72,7 @@ class FileHelper {
 
 		$matches = array();
 		foreach ($entries as $entry) {
-			
+
 			$fullname = $directory . $entry;
 
 			if ($entry != '.' && $entry != '..' && is_dir($fullname)) {
@@ -103,7 +103,7 @@ class FileHelper {
 
 		return $matches;
 	}
-	
+
 	/**
 	 *
 	 * @param string $directory

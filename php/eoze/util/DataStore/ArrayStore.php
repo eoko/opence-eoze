@@ -11,41 +11,41 @@ use eoze\util\DataStore;
  * @since 2 nov. 2011
  */
 class ArrayStore implements DataStore {
-	
+
 	private $data;
-	
+
 	public function __construct(array $data) {
 		$this->data = $data;
 	}
-	
+
 	public function query(Query $query = null) {
-		
+
 		if (!$query) {
 			return $this->data;
 		}
-		
+
 		extract($query->getOptions($this));
-		
+
 		$data = $this->data;
-		
+
 		// filters
 		if (isset($filter)) {
 			$data = array_filter($data, array($filter, 'test'));
 		}
-		
+
 		// sorters
 		if (isset($sorter)) {
 			usort($data, array($sorter, 'compare'));
 		}
-		
+
 		// pagers
 		if (isset($pager)) {
 			$data = array_slice($data, $pager->getStart(), $pager->getLimit());
 		}
-		
+
 		return $data;
 	}
-	
+
 	public function getElementFieldValue($element, $field) {
 		if ($field === null) {
 			return $element;
@@ -55,5 +55,5 @@ class ArrayStore implements DataStore {
 			return null;
 		}
 	}
-	
+
 }

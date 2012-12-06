@@ -36,7 +36,7 @@ class FieldMetadata {
 			$config[$k] = $v;
 		}
 	}
-	
+
 	public function toArray() {
 		return (array) $this->data;
 	}

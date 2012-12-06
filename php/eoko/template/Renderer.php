@@ -20,7 +20,7 @@ class CurrentRenderer {
 }
 
 abstract class Renderer {
-	
+
 	/** 
 	 * @var boolean Cache the rendering result when it is rendered in a string.
 	 * The result will not be cached if it is rendered directly to the output.
@@ -33,27 +33,26 @@ abstract class Renderer {
 	 * rendered directly to the output.
 	 */
 	public $forceResultCaching = false;
-	
+
 	private $cachedResult = null;
-	/** @var RendererOptions */
-	
+
 	/** @var Renderer may be used by functions in the template namespace */
 	public static $currentRenderer;
-	
+
 	private $filename = null;
 	private $content = null;
 	private $contentMD5 = null;
-	
+
 	public $subTemplateProvider = null;
-	
+
 	private $previousRenderer;
-	
+
 	public function __construct($opts = null) {
 		Options::apply($this, $opts);
 	}
-	
+
 	abstract protected function doRender();
-	
+
 	/**
 	 * @param array $opts
 	 * @return Renderer
@@ -62,7 +61,7 @@ abstract class Renderer {
 		$class = get_called_class();
 		return new $class($opts);
 	}
-	
+
 	public function renderingErrorHandler($errno, $errstr, $errfile, $errline, $context) {
 
 		Logger::get($this)->error("RENDERING ERROR: $errfile($errline): $errstr");
@@ -84,7 +83,7 @@ abstract class Renderer {
 		} else {
 			$msg .= ' (cannot determine error location)';
 		}
-		
+
 //		restore_error_handler();
 
 		throw new RenderingException(
@@ -98,7 +97,7 @@ abstract class Renderer {
 //			)
 //		);
 	}
-	
+
 	protected function getTemplateFilename() {
 		if ($this->filename) {
 			return $this->filename;
@@ -109,16 +108,16 @@ abstract class Renderer {
 
 	private function performRendering() {
 		set_error_handler(array($this, 'renderingErrorHandler'));
-		
+
 		$this->previousRenderer = CurrentRenderer::$renderer;
 		CurrentRenderer::$renderer = $this;
-		
+
 		$this->doRender();
-		
+
 		CurrentRenderer::$renderer = $this->previousRenderer;
 		restore_error_handler();
 	}
-	
+
 	public function render($return = null) {
 		if ($return) {
 			return $this->doRenderToString();
@@ -133,9 +132,9 @@ abstract class Renderer {
 			}
 		}
 	}
-	
+
 	private final function doRenderToString() {
-		
+
 		if ($this->cachedResult !== null) {
 			Logger::get($this)->debug('Template already rendered, returning cache');
 			return $this->cachedResult;
@@ -147,14 +146,14 @@ abstract class Renderer {
 		$this->performRendering();
 		$result = ob_get_clean();
 		Logger::flush();
-		
+
 		if ($this->resultCaching || $this->forceResultCaching) {
 			$this->cachedResult = $result;
 		}
-		
+
 		return $result;
 	}
-	
+
 	public function __toString() {
 		try {
 			return $this->doRenderToString();
@@ -163,14 +162,14 @@ abstract class Renderer {
 			return 'Rendering error';
 		}
 	}
-	
+
 	public function clearCache() {
 		$this->cachedResult = null;
 	}
-	
+
 	/**
 	 * @param string $filename
-	 * @return Renderer 
+	 * @return Renderer
 	 */
 	public function setFile($filename) {
 		if ($this->filename !== $filename) {
@@ -179,7 +178,7 @@ abstract class Renderer {
 		}
 		return $this;
 	}
-	
+
 	/**
 	 * @param string $content
 	 * @return Renderer 
@@ -196,14 +195,14 @@ abstract class Renderer {
 		} else {
 			$this->content = $content;
 		}
-		
+
 		return $this;
 	}
-	
+
 	public function isContentSet() {
 		return $this->filename || $this->content;
 	}
-	
+
 	protected function getContent() {
 		if ($this->filename) {
 			return file_get_contents($this->filename);
@@ -215,17 +214,17 @@ abstract class Renderer {
 			);
 		}
 	}
-	
+
 	public function renderFile($filename, $return = null) {
 		return $this->setFile($filename)->render($return);
 	}
-	
+
 	public function renderString($content, $return = null) {
 		return $this->setContent($content)->render($return);
 	}
-	
+
 	private $subTemplateExecutor = null;
-	
+
 //	private function getSubTemplateExecutor($module) {
 //		if ($module === null) {
 //			if ($this->defaultSubTemplateModule !== null) {
@@ -243,11 +242,11 @@ abstract class Renderer {
 //			return $this->subTemplateExecutor;
 //		} else if (!$this->subTemplateProvider) {
 //			return $this->subTemplateExecutor$this->subTemplateProvider->
-//			
+//
 //	}
-	
+
 	public function getSubTemplate($name, $controller = null, $opts = null) {
-		
+
 		if ($opts === null) {
 			$opts = array('name' => $name);
 		} else {
@@ -265,11 +264,11 @@ public static function parseAction($controller, $action, $request, $defaultExecu
 //		$executor = ModuleManager::parseExecutor($controller, true);
 //		return $this->subTemplateProvider->get($name, $opts);
 	}
-	
+
 }
 
 class RenderingException extends SystemException {
-	
+
 	private $errno, $errstr, $errfile, $errline, $context;
 
 	function __construct($msg, $errno, $errstr, $errfile, $errline, $context, $previous = null) {
@@ -280,5 +279,5 @@ class RenderingException extends SystemException {
 		$this->context = $context;
 		parent::__construct($msg, '', $previous);
 	}
-	
+
 }
