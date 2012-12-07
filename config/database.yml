@@ -1,0 +1,18 @@
+config.node: eoko\database
+
+adapter: Mysql
+host: localhost
+#database: 
+user: root
+password: root
+#prefix: 
+characterSet: utf8
+collation: utf8_general_ci
+
+#test:
+#  adapter: Mysql
+#  host: localhost
+#  user: root
+#  password: root
+#  characterSet: utf8
+#  collation: utf8_general_ci
