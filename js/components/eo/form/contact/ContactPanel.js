@@ -110,6 +110,11 @@ eo.form.contact.ContactPanel = Ext.extend(Ext.Panel, {
 		});
 		
 		spp.initComponent.call(this);
+
+		// Fix bug with grouptab (OCE-659)
+		if (this.ownerCt) {
+			this.ownerCt.on('show', this.doLayout, this);
+		}
 	}
 	
 	,afterRender: function() {
