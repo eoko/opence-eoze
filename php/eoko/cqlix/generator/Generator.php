@@ -87,7 +87,9 @@ class Generator extends Script {
 	private $tables;
 	private $modelsConfig;
 
-	private $fileWritten = 0, $modelProcessed = 0;
+	private $modelProcessed = 0,
+		$fileCreated = 0,
+		$fileSkipped = 0;
 
 	public $addTimeVersionInGeneratedFiles = false;
 
@@ -210,7 +212,7 @@ class Generator extends Script {
 
 		// --- Process -----------------------------------------------------------------
 
-		foreach (array(MODEL_BASE_PATH, MODEL_PROXY_PATH, MODEL_QUERY_PATH) as $dir) {
+		foreach (array(MODEL_BASE_PATH, MODEL_PROXY_PATH) as $dir) {
 			if (!file_exists($dir)) {
 				mkdir($dir, 0744);
 			} else {
@@ -232,8 +234,6 @@ class Generator extends Script {
 			$tableBaseFilename = MODEL_BASE_PATH . $tableName . 'Base' . '.php';
 			$tableProxyFilename = MODEL_PROXY_PATH . $tableName . 'Proxy' . '.php';
 
-			$modelQueryFilename = MODEL_QUERY_PATH . "{$modelName}Query" . '.php';
-
 			$params = array($table, $fields);
 
 			$this->writeFile($tableProxyFilename, true, array($this, 'tplTableProxy'), $params);
@@ -241,15 +241,15 @@ class Generator extends Script {
 			$this->writeFile($tableFilename, false, array($this, 'tplTable'), $params);
 			$this->writeFile($modelBaseFilename, true, array($this, 'tplModelBase'), $params);
 			$this->writeFile($modelFilename, false, array($this, 'tplModel'), $params);
-			$this->writeFile($modelQueryFilename, true, array($this, 'tplModelQuery'), $params);
 
 			$this->modelProcessed++;
 		}
 
 		$time = Debug::elapsedTime($startTime, microtime());
-		echo PHP_EOL . sprintf('DONE ! (%d models processed, %d files written -- %.2fs)'
-				. PHP_EOL . PHP_EOL,
-				$this->modelProcessed, $this->fileWritten, $time);
+		$msg = sprintf('DONE -- %.2fs', $time) . PHP_EOL
+			. "$this->fileCreated files created, $this->fileSkipped existing files have been skipped";
+
+		echo PHP_EOL . $msg . PHP_EOL . PHP_EOL;
 	}
 
 	private function discoverTables() {
@@ -826,6 +826,9 @@ class Generator extends Script {
 		return $tpl->render(true);
 	}
 
+	/**
+	 * @deprecated
+	 */
 	function tplModelQuery($tableName, $fields) {
 		$tpl = Template::create()->setFile($this->tplPath . 'ModelQuery.tpl.php');
 		$this->tplSetTableBaseVars($tpl, $tableName, $fields);
@@ -1301,6 +1304,7 @@ class Generator extends Script {
 
 		if (!$replace && file_exists($filename)) {
 			echo 'Passing existing file: ' . $filename . PHP_EOL;
+			$this->fileSkipped++;
 			return;
 		}
 
@@ -1315,8 +1319,7 @@ class Generator extends Script {
 
 		fclose($file);
 
-		global $fileWritten;
-		$fileWritten++;
+		$this->fileCreated++;
 		echo 'OK' . PHP_EOL;
 	}
 }

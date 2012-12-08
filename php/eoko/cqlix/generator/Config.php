@@ -40,7 +40,29 @@ class Config extends \eoko\config\Config {
 //			Arrays::apply($config, $cfg, false);
 //		}
 //		$this->values = $config;
-		$this->values = ConfigManager::get(get_namespace($this));
+
+		$content = ConfigManager::get(get_namespace($this));
+
+		// --- Legacy code from eoko\cqlix\ConfigReader
+		foreach ($content as &$loc) {
+
+			if (!isset($loc['extends'])) {
+				throw new \InvalidConfigurationException();
+			}
+
+			foreach ($loc['extends'] as &$ex) {
+				if (count($parts = explode('|', $ex)) > 1) {
+					$items = array();
+					foreach ($parts as $p) {
+						$items[] = trim($p);
+					}
+					$ex = $items;
+				}
+			}
+		}
+		// ---
+
+		$this->values = $content;
 	}
 
 	public function buildModelInfo($dbTable) {

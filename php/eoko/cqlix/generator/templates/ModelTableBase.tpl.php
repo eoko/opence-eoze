@@ -2,8 +2,11 @@ require_once MODEL_QUERY_PATH . '<?php echo $modelName ?>Query.php';
 
 /**
  * Base of the <?php echo $modelName ?> Table.
- * @package <?php echo $package ?> 
+ *
+ * @category <?php echo $package . PHP_EOL ?>
+ * @package models
  * @subpackage models_base
+ *
 <?php if ($version): ?>
  * @since <?php echo $version ?>
 
@@ -48,7 +51,7 @@ abstract class <?php echo $tableName ?>Base extends <?php echo $baseTableName ?>
 	}
 
 	/**
-	 * @return <?php echo $tableName ?> 
+	 * @return <?php echo $tableName . PHP_EOL ?>
 	 */
 	public static function getInstance() {
 		if (self::$singleton == null) self::$singleton = new <?php echo $tableName ?>();
@@ -56,7 +59,8 @@ abstract class <?php echo $tableName ?>Base extends <?php echo $baseTableName ?>
 	}
 
 	/**
-	 * Get the name of this Table's Model.
+	 * Gets the name of this Table's Model.
+
 	 * @return String
 	 */
 	public static function getModelName() {
@@ -88,9 +92,8 @@ abstract class <?php echo $tableName ?>Base extends <?php echo $baseTableName ?>
 	/**
 	 * @return <?php echo $modelName ?>Query
 	 */
-	public static function createQuery(array $context = null, &$getQuery = null) {
-		require_once MODEL_QUERY_PATH . '<?php echo $modelName ?>Query.php';
-		$getQuery = <?php echo $modelName ?>Query::create(<?php echo $tableName ?>::getInstance(), $context);
+	protected static function doCeateQuery(array $context = null) {
+		$getQuery = <?php echo $baseQueryName ?>::create(static::getInstance(), $context);
 		return $getQuery;
 	}
 
