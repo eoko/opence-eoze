@@ -1,6 +1,7 @@
 <?php
 
 use eoko\cqlix\ModelFieldHelper;
+use eoko\cqlix\Aliaser\Aliaser;
 
 /**
  * Base class implementation for {@link ModelField}.
@@ -60,4 +61,49 @@ abstract class ModelFieldBase implements ModelField {
 	public function getLength() {
 		return null;
 	}
+
+	protected function createClause($clause) {
+		if (is_string($clause) && !preg_match('/^\(.+\)$/', $clause)) {
+			return "($clause)";
+		} else if ($clause instanceof Query) {
+			return new QuerySelectSub($clause);
+		} else {
+			return $clause;
+		}
+	}
+
+	final public function getSortClause($dir, QueryAliasable $aliaser) {
+		$query = $aliaser->getQuery();
+		// protected dir
+		$dir = $query->protectDir($dir);
+		return $this->assembleSortClause($dir, $query, $aliaser);
+	}
+
+	/**
+	 * @param string $dir Direction clause, already protected.
+	 * @param ModelTableQuery $query
+	 * @param QueryAliasable $aliaser
+	 * @return string
+	 */
+	protected function assembleSortClause($dir, ModelTableQuery $query, QueryAliasable $aliaser) {
+		return $this->makeSortClause($query, $aliaser) . ' ' . $dir;
+	}
+
+	/**
+	 * @param ModelTableQuery $query
+	 * @param QueryAliasable $aliaser
+	 * @return string
+	 */
+	protected function makeSortClause(ModelTableQuery $query, QueryAliasable $aliaser) {
+		return $this->doMakeSortClause($aliaser);
+	}
+
+	/**
+	 * @param QueryAliasable $aliaser
+	 * @return string
+	 */
+	protected function doMakeSortClause(QueryAliasable $aliaser) {
+		return $aliaser->getQualifiedName($this->getName());
+	}
+
 }

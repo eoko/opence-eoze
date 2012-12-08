@@ -8,8 +8,6 @@ interface VirtualField extends ModelField {
 
 	function getClause(ModelTableQuery $query, QueryAliasable $aliasable = null);
 
-	function getOrderFieldAlias(QueryAliasable $aliasable, $alias = null);
-
 	function isCachable();
 
 	function configureMeta($config);
@@ -127,14 +125,7 @@ abstract class VirtualFieldBase extends ModelFieldBase implements VirtualField {
 	}
 
 	public function getClause(ModelTableQuery $query, QueryAliasable $aliasable = null) {
-		$clause = $this->doGetClause($aliasable !== null ? $aliasable : $query);
-		if (is_string($clause) && !preg_match('/^\(.+\)$/', $clause)) {
-			$clause = "($clause)";
-		}
-		else if ($clause instanceof Query) {
-			return new QuerySelectSub($clause);
-		}
-		return $clause;
+		return $this->createClause($this->doGetClause($aliasable !== null ? $aliasable : $query));
 	}
 
 	protected function doGetClause(QueryAliasable $aliasable) {
@@ -153,15 +144,6 @@ abstract class VirtualFieldBase extends ModelFieldBase implements VirtualField {
 	 */
 	protected function getQualifiedClause() {
 		return null;
-	}
-
-	public function getOrderFieldAlias(QueryAliasable $aliasable, $alias = null) {
-		if ($alias === null) $alias = $this->alias;
-		return $this->doGetOrderFieldAlias($aliasable, $alias);
-	}
-
-	protected function doGetOrderFieldAlias(QueryAliasable $aliasable, $alias) {
-		return Query::quoteName($alias);
 	}
 }
 
@@ -202,17 +184,11 @@ class AgeVirtualField extends VirtualFieldBase {
 		return true;
 	}
 
-	protected function doGetOrderFieldAlias(QueryAliasable $aliasable, $alias) {
-		// Age virtual field is just for display... Sorting on this field would
-		// result in sorting alphabetically, not chronologically.
-		// ... So let's sort on the real date field, instead.
-		if (count($parts = explode('->', $alias)) > 1) {
-			array_pop($parts);
-			array_push($parts, $this->dateField);
-			return Query::quoteName(implode('->', $parts));
-		} else {
-			return $aliasable->getQualifiedName($this->dateField);
-		}
+	// Age virtual field is just for display... Sorting on this field would
+	// result in sorting alphabetically, not chronologically.
+	// ... So let's sort on the real date field, instead.
+	protected function doMakeSortClause(QueryAliasable $aliaser) {
+		return $aliaser->getQualifiedName($this->dateField);
 	}
 
 	protected function doGetClause(QueryAliasable $aliasable) {

@@ -2,6 +2,8 @@
 
 use eoko\cqlix\FieldMetadata;
 
+use eoko\cqlix\Aliaser\Aliaser;
+
 interface ModelField {
 
 	const T_INT = 'int';
@@ -22,6 +24,13 @@ interface ModelField {
 //	function select(ModelTableQuery $query);
 
 //	function orderClause($dir, $tableAlias = null);
+
+	/**
+	 * @return string
+	 */
+	function getSortClause($dir, QueryAliasable $aliaser);
+
+//	function getSortClause($dir, Aliaser $aliaser);
 
 	function getType();
 

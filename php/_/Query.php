@@ -880,11 +880,12 @@ class Query {
 				$this->getLogger()->warn('The next line is most probably wrong and causing problem with bindings');
 				$this->order[] = $field->buildSql(false, $this->bindings);
 			} else {
-				$alias = $this->getOrderFieldAlias($field);
-				if (!$alias) {
-					throw new IllegalArgumentException("Cannot find field: `$field`");
-				}
-				$order[] = $alias . " $dir";
+				$order[] = $this->getOrderFieldAlias($field, $dir);
+//				$alias = $this->getOrderFieldAlias($field);
+//				if (!$alias) {
+//					throw new IllegalArgumentException("Cannot find field: `$field`");
+//				}
+//				$order[] = $alias . " $dir";
 			}
 
 //			// Clear previous to add new order at the end of the list
@@ -900,7 +901,11 @@ class Query {
 		} else if ($this->defaultOrder !== false) {
 			$order = $this->defaultOrder;
 		} else {
-			return null;
+			return;
+		}
+		// $this->order or $this->defaultOrder can contain an empty array
+		if (!$order) {
+			return;
 		}
 		return ' ORDER BY ' . implode(', ', $order);
 	}

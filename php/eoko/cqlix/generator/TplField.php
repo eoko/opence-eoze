@@ -391,6 +391,8 @@ class TplField extends ModelColumn implements ConfigConstants {
 //			$enumConfig = str_replace(' )', ')', $enumConfig);
 //			$enumConfig = str_replace(',)', ')', $enumConfig);
 //			$enumConfig = str_replace('array (', 'array(', $enumConfig);
+		} else if (isset($this->meta['class'])) {
+			$ModelColumn = $this->meta['class'];
 		} else {
 			$ModelColumn = 'ModelColumn';
 		}
