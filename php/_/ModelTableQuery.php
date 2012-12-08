@@ -192,55 +192,8 @@ class ModelTableQuery extends Query implements QueryAliasable {
 				new QualifiedNameConverter($this, $bindings));
 	}
 
-	public function getOrderFieldAlias($field) {
-		if ($this->table->hasColumn($field)) {
-			$tableAlias = $this->tableAlias !== null ? $this->tableAlias : $this->dbTable;
-			return "`$tableAlias`.`$field`";
-		} else if ($this->table->hasVirtual($field)) {
-			return $this->table->getVirtual($field)->getOrderFieldAlias($this);
-//			return "`$field`";
-		} else {
-			if (count($parts = explode('->', $field)) > 1) {
-				$fieldName = array_pop($parts);
-				$relationName = implode('->', $parts);
-				$relation = $this->table->getRelationInfo($relationName);
-				if ($relation->targetTable->hasRelation($fieldName)) {
-					// TODO rx search on linked fields
-					// That won't work... the alias is not authorized in the where clause.
-					// Either a @variable must be used, or the aliased thing must be
-					// repeated... In both cases, it must be found what has been
-					// aliased by the relation. That means:
-					// - The type of select that has been done
-					// The @variable solution is preferable to avoid code dupplication
-					// and potential naming problem (though a name clash doesn't
-					// seem possible).
-					return Query::quoteName($field);
-				} else if ($relation->targetTable->hasVirtual($fieldName)) {
-					// Virtual field on foreign table
-					// eg. Contact->age
-					return $relation->targetTable->getVirtual($fieldName)
-							->getOrderFieldAlias($this, $field);
-//					return Query::quoteName($field);
-				} else if ($relation->targetTable->hasColumn($fieldName)) {
-					// to be analysed and probably corrected
-					return Query::quoteName($field);
-				} else {
-					throw new IllegalArgumentException("No field '$field' in $this->dbTable");
-				}
-			} else if (count($parts = explode('.', $field)) == 2) {
-				throw new IllegalArgumentException('DEPRECATED');
-				list($relationName, $fieldName) = $parts;
-			} else {
-				$relationName = $field;
-				$fieldName = null;
-			}
-
-			if ($this->table->hasRelation($relationName)) {
-				$relation = $this->table->getRelationInfo($relationName);
-				if ($fieldName === null) $fieldName = $relation->getTargetTable()->getNameFieldName();
-				return $this->join($relation)->getQualifiedName($fieldName);
-			}
-		}
+	public function getOrderFieldAlias($field, $dir) {
+		return $this->table->getField($field, true)->getSortClause($dir, $this);
 	}
 
 	public function getQualifiedAlias($field) {
@@ -360,7 +313,7 @@ class ModelTableQuery extends Query implements QueryAliasable {
 	}
 
 	public function getRelationInfo($relationName, $requireType = false) {
-		return $this->table->getRelationInfo($name, $requireType);
+		return $this->table->getRelationInfo($relationName, $requireType);
 	}
 
 	function makeRelationName($targetRelationName) {

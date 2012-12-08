@@ -223,6 +223,18 @@ abstract class ModelRelationInfo extends ModelFieldBase {
 		}
 	}
 
+	/**
+	 * @internal this code is legacy from ModelTableQuery::getOrderFieldAlias() v5.0
+	 *
+	 * @param ModelTableQuery $query
+	 * @param QueryAliasable $aliaser
+	 * @return string
+	 */
+	public function makeSortClause(ModelTableQuery $query, QueryAliasable $aliaser) {
+		$fieldName = $this->getTargetTable()->getNameFieldName();
+		return $query->join($this)->getQualifiedName($fieldName);
+	}
+
 	public function getNameClause(ModelTableQuery $query, $relationName = null, $alias = null) {
 		if (!$this->selectable) return null;
 
@@ -490,6 +502,17 @@ class ModelRelationInfoField extends ModelFieldBase {
 		$dir = Query::protectDir($dir);
 		$relationName = $this->info->name;
 		return new SqlVariable("`$relationName->$this->fieldName` $dir");
+	}
+
+	public function assembleSortClause($dir, ModelTableQuery $query, QueryAliasable $aliaser) {
+		// TODO the join should probably be passed the aliaser
+		$join = $query->join($this->info);
+		$field = $this->getActualField();
+		if ($field instanceof ModelFieldBase) {
+			return $field->assembleSortClause($dir, $query, $join);
+		} else {
+			return $field->getSortClause($dir, $query, $join);
+		}
 	}
 
 	public function getName() {

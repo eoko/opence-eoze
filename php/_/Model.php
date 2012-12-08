@@ -686,8 +686,7 @@ abstract class Model {
 	/**
 	 * Returns true if the specified field or fields have been modified.
 	 *
-	 * If the method is called with no arguments, it will return true if *any* field
-	 * has been modified.
+	 * If the method is called with no arguments,
 	 *
 	 * @param null|string|string[] $fieldName
 	 * @param ...
