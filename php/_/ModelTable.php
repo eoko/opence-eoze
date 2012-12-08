@@ -38,23 +38,21 @@ use eoko\config\ConfigManager;
  * underscore prefix; their execution consists in calling the corresponding
  * parent method from the child class from their static singleton instance.
  *
- * @method ModelTable getInstance()
- * @method String getDBTable()
- * @method Bool hasPrimaryKey()
- * @method String getPrimaryKeyName()
+ * @method static ModelTable getInstance()
+ * @method string getDBTable()
+ * @method bool hasPrimaryKey()
+ * @method string getPrimaryKeyName()
  * @method ModelColumn getPrimaryKeyColumn()
- * @method ModelTableQuery createQuery()
  *
- * @method ModelColumn getColumn($name) Get a ModelTableColumn of
  * %%ModelTable%% from its name. This method is static in concrete ModelTable
  * implementations, but it is abstract in ModelTable class.
  * @method ModelColumn[] getColumns($excludeAutoOperation = false, $excludeFinal = false) This
  * method is static in concrete ModelTable implementations, but it is abstract
  * in ModelTable class.
  * 
- * @property public $modelName		name/class of the associated Model
- * @property public $tableName		name/class of this instance
- * @property public $dbTableName	name of the associated database table
+ * @property string $modelName		name/class of the associated Model
+ * @property string $tableName		name/class of this instance
+ * @property string $dbTableName	name of the associated database table
  */
 abstract class ModelTable extends ModelTableProxy {
 
@@ -143,6 +141,7 @@ abstract class ModelTable extends ModelTableProxy {
 		);
 
 		foreach ($this->relations as $name => $relation) {
+			/** @var ModelRelationInfo $relation */
 			$relation->configureMeta(
 				isset($this->config['relations'][$name])
 					? $this->config['relations'][$name]
@@ -151,6 +150,7 @@ abstract class ModelTable extends ModelTableProxy {
 		}
 
 		foreach ($this->virtuals as $name => $virtual) {
+			/** @var VirtualField $virtual */
 			$virtual->configureMeta(
 				isset($this->config['virtuals'][$name])
 					? $this->config['virtuals'][$name]
@@ -165,11 +165,11 @@ abstract class ModelTable extends ModelTableProxy {
 		}
 		foreach ($virtuals as $virtual) {
 			if (is_array($virtual)) {
-				foreach ($virtual as $name => $virtual) {
+				foreach ($virtual as $name => $field) {
 					if (is_string($name)) {
-						$this->addVirtual($virtual, $name);
+						$this->addVirtual($field, $name);
 					} else {
-						$this->addVirtual($virtual);
+						$this->addVirtual($field);
 					}
 				}
 			} else {
@@ -201,6 +201,7 @@ abstract class ModelTable extends ModelTableProxy {
 	 * @return bool
 	 */
 	public function isAutomaticCascadeEngine() {
+		/** @noinspection PhpUndefinedFieldInspection */
 		return $this->engineAutomaticCascade;
 	}
 
@@ -295,7 +296,7 @@ abstract class ModelTable extends ModelTableProxy {
 
 	/**
 	 *
-	 * @param String $colName
+	 * @param string $colName
 	 * @return ModelColumn
 	 */
 	abstract static protected function getColumn($colName);
@@ -307,7 +308,7 @@ abstract class ModelTable extends ModelTableProxy {
 	abstract static public function isInstanceOfModel($obj);
 
 	/**
-	 * @param String $modelName
+	 * @param string $modelName
 	 * @return ModelTable
 	 */
 	static function getModelTable($modelName) {
@@ -315,7 +316,7 @@ abstract class ModelTable extends ModelTableProxy {
 	}
 
 	/**
-	 * @param String $modelName
+	 * @param string $modelName
 	 * @return ModelTable
 	 */
 	public static function getTable($tableName) {
@@ -324,9 +325,14 @@ abstract class ModelTable extends ModelTableProxy {
 	}
 
 	/**
+	 * Creates a new Query based on this table.
+	 *
+	 * @param array $context
 	 * @return Query
 	 */
-	public abstract static function createQuery(array $params = null);
+	public static function createQuery(array $context = null) {
+		return static::doCreateQuery($context);
+	}
 
 	/**
 	 * Gets the default controller for CRUD operation on this table's model.
@@ -455,7 +461,7 @@ abstract class ModelTable extends ModelTableProxy {
 
 	/**
 	 *
-	 * @param String $name
+	 * @param string $name
 	 * @return Bool
 	 */
 	protected function _hasColumn($name) {
@@ -663,7 +669,7 @@ abstract class ModelTable extends ModelTableProxy {
 				case ModelTable::LOAD_NONE: break;
 				case ModelTable::LOAD_FULL: throw new UnsupportedOperationException();
 				default:
-					throw new IllegalArgumentException("Invalid \$relationMode: $relationMode");
+					throw new IllegalArgumentException("Invalid \$relationMode: $relationsMode");
 			}
 		}
 
@@ -872,13 +878,14 @@ abstract class ModelTable extends ModelTableProxy {
 		}
 	}
 
-	public static function proxy(&$tableVar, $tableName, $dbTableName = null, $modelName = null) {
-		if ($dbTableName === null) {
-			return new ModelTableProxy($tableVar, $tableName);
-		} else {
-			return new ModelTableProxyEx($tableVar, $tableName, $dbTableName, $modelName);
-		}
-	}
+// REM 2012-12-11
+//	public static function proxy(&$tableVar, $tableName, $dbTableName = null, $modelName = null) {
+//		if ($dbTableName === null) {
+//			return new ModelTableProxy($tableVar, $tableName);
+//		} else {
+//			return new ModelTableProxyEx($tableVar, $tableName, $dbTableName, $modelName);
+//		}
+//	}
 
 	/**
 	 * Get all %%ModelTable%%'s columns names in an array
@@ -923,7 +930,7 @@ abstract class ModelTable extends ModelTableProxy {
 
 	/**
 	 *
-	 * @param String $col
+	 * @param string $col
 	 * @param mixed $value
 	 * @param Const $mode
 	 * @return ModelSet
@@ -971,7 +978,7 @@ abstract class ModelTable extends ModelTableProxy {
 
 	/**
 	 *
-	 * @param String $col
+	 * @param string $col
 	 * @param mixed $value
 	 * @return %%Model%%
 	 */

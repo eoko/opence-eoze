@@ -14,7 +14,6 @@ $required_dirs = array(
 	MODEL_PATH,
 	MODEL_BASE_PATH,
 	MODEL_PROXY_PATH,
-	MODEL_QUERY_PATH,
 	LOG_PATH,
 	CACHE_PATH,
 );

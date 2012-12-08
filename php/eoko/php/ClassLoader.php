@@ -103,13 +103,14 @@ class ClassLoader {
 				}
 			}
 		}
-		if (substr($classPath, -5) === 'Query') {
-			if (defined('MODEL_QUERY_PATH')
-					&& file_exists($filename = MODEL_QUERY_PATH . "$classPath$suffix.php")) {
-				require_once $filename;
-				return true;
-			}
-		}
+// REM 2012-12-11
+//		if (substr($classPath, -5) === 'Query') {
+//			if (defined('MODEL_QUERY_PATH')
+//					&& file_exists($filename = MODEL_QUERY_PATH . "$classPath$suffix.php")) {
+//				require_once $filename;
+//				return true;
+//			}
+//		}
 		if (substr($classPath, -5) === 'Proxy') {
 			if (defined('MODEL_PROXY_PATH')
 					&& file_exists($filename = MODEL_PROXY_PATH . "$classPath$suffix.php")) {
