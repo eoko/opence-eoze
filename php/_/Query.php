@@ -151,8 +151,8 @@ class Query {
 	 * @param String $table
 	 * @return Query
 	 */
-	public static function create(ModelTable $table = null, array $context = array()) {
-		return new Query($table, $context);
+	public static function create(ModelTable $table = null, array $context = null) {
+		return new static($table, $context);
    	}
 
 	/**
@@ -1357,9 +1357,9 @@ class Query {
 				if ($errorHandler === false) {
 					return false;
 				} else if (is_callable($errorHandler)) {
-					call_user_func($errorHandler, $this, $sth->errorInfo());
+					call_user_func($errorHandler, get_called_class(), $sth->errorInfo());
 				} else if ($errorHandler instanceof QueryErrorHandler) {
-					$errorHandler->process($this, $sth->errorInfo());
+					$errorHandler->process(get_called_class(), $sth->errorInfo());
 				} else {
 					throw new IllegalArgumentException('$errorHandler => ' . $errorHandler);
 				}

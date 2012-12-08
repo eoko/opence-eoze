@@ -1,5 +1,3 @@
-require_once MODEL_QUERY_PATH . '<?php echo $modelName ?>Query.php';
-
 /**
  * Base of the <?php echo $modelName ?> Table.
  *
@@ -90,11 +88,10 @@ abstract class <?php echo $tableName ?>Base extends <?php echo $baseTableName ?>
 	}
 
 	/**
-	 * @return <?php echo $modelName ?>Query
+	 * @return <?php echo $baseQueryName . PHP_EOL ?>
 	 */
-	protected static function doCeateQuery(array $context = null) {
-		$getQuery = <?php echo $baseQueryName ?>::create(static::getInstance(), $context);
-		return $getQuery;
+	protected static function doCreateQuery(array $context = null) {
+		return <?php echo $baseQueryName ?>::create(static::getInstance(), $context);
 	}
 
 	/**
