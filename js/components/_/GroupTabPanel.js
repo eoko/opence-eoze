@@ -6,24 +6,56 @@
  */
 Ext.ns('Ext.ux');
 
+/**
+ * @xtype grouptabpanel
+ */
 Ext.ux.GroupTabPanel = Ext.extend(Ext.TabPanel, {
+	/**
+	 * @cfg
+	 */
     tabPosition: 'left',
 
+	/**
+	 * @cfg
+	 */
     alternateColor: false,
 
+	/**
+	 * @cfg
+	 */
     alternateCls: 'x-grouptabs-panel-alt',
 
+	/**
+	 * @cfg
+	 */
     defaultType: 'grouptab',
 
+	/**
+	 * @cfg
+	 */
     deferredRender: false,
 
+	/**
+	 * @cfg
+	 */
     activeGroup : null,
 
     initComponent: function(){
         Ext.ux.GroupTabPanel.superclass.initComponent.call(this);
         
         this.addEvents(
+	        /**
+	         * @event
+	         * @param {Ext.ux.GroupTabPanel} this
+	         * @param {Ext.ux.GroupTab} newGroup
+	         * @param {Ext.ux.GroupTab} currentGroup
+	         */
             'beforegroupchange',
+	        /**
+	         * @event
+	         * @param {Ext.ux.GroupTabPanel} this
+	         * @param {Ext.ux.GroupTab} group
+	         */
             'groupchange'
         );
         this.elements = 'body,header';
@@ -250,6 +282,10 @@ Ext.ux.GroupTabPanel = Ext.extend(Ext.TabPanel, {
         });
     },
 
+	/**
+	 * @param group
+	 * @return {Boolean}
+	 */
     setActiveGroup: function(group) {
         group = this.getComponent(group);
         if(!group){

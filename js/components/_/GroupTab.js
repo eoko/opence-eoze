@@ -4,6 +4,11 @@
  * licensing@extjs.com
  * http://www.extjs.com/license
  */
+
+/**
+ *
+ * @xtype grouptab
+ */
 Ext.ux.GroupTab = Ext.extend(Ext.Container, {
     mainItem: 0,
     
