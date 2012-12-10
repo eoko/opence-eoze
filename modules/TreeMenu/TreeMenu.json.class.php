@@ -7,6 +7,9 @@ use MenuNode, MenuNodeTable;
 use UserSession;
 use eoko\database\Database;
 
+/**
+ * @method \eoko\modules\TreeMenu\TreeMenu getModule()
+ */
 class Json extends JsonExecutor {
 
 	public function loadUserMenu() {
@@ -121,6 +124,7 @@ class Json extends JsonExecutor {
 		$module = $this->getModule();
 		$families = array();
 		foreach ($this->getModule()->getMenuFamilies() as $family) {
+			/** @var MenuFamily $family */
 			if (null !== $data = $family->toArray(false, $module)) {
 				$families[$family->getId()] = $data;
 			}
