@@ -194,12 +194,23 @@ Ext.define = function(cls, o, createFn) {
 
 // --- Ext.create
 
-Ext.widget = Ext.create;
+Ext.ComponentMgr.create = function() {
+	var uber = Ext.ComponentMgr.create;
+	return function(config, defaultType) {
+		if (config.xclass) {
+			var cls = Ext.ns(config.xclass);
+			return new cls(config);
+		} else {
+			return uber.apply(this, arguments);
+		}
+	}
+}();
+
+Ext.widget = Ext.ComponentMgr.create;
 
 Ext.create = function(cls, config) {
-	var c = Ext.isString(cls) && cls || cls.xclass;
-	if (c) {
-		c = resolve(c);
+	if (Ext.isString(cls)) {
+		var c = resolve(cls);
 		return new c(config);
 	} else {
 		return Ext.widget.apply(Ext, arguments);
