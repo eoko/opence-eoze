@@ -45,6 +45,7 @@ class TreeMenu extends Module implements HasMenuActions {
 
 		$r = array();
 		foreach (ModuleManager::listModules() as $module) {
+			/** @var Module $module */
 			if ($module instanceof HasMenuActions
 					&& !$module->isAbstract()
 					&& !$module->isDisabled()) {
