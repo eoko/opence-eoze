@@ -429,7 +429,7 @@ class ModuleManager {
 
 			$module = null;
 			if (null !== $class = $location->searchModuleClass($cacheDeps)) {
-				if (null !== $module = $this->createModule($name, $class)) {
+				if (null !== $module = $this->createModule($location, $class)) {
 					return $module;
 				}
 			}
@@ -448,7 +448,7 @@ class ModuleManager {
 				if (is_array($cacheDeps)) {
 					$cacheDeps[] = class_extend($class = "$location->namespace$name", $superclass);
 				}
-				$module = $this->createModule($name, $class);
+				$module = $this->createModule($location, $class);
 			}
 
 			// if the method has not returned yet, that means that the module
@@ -459,7 +459,12 @@ class ModuleManager {
 		}
 	}
 
-	private function createModule($name, $class) {
+	private function createModule(ModuleLocation $location, $class) {
+		$name = $location->moduleName;
+		return new $class($location, $name);
+
+		// --- WTF from here ---
+
 		return new $class(ModuleLocation::create($this->getTopLevelDirectory(), $name));
 
 		// if this is used, that may break the possibility to find parent Modules
@@ -538,7 +543,7 @@ class ModuleManager {
 		}
 
 		// create an instance of the newly created class
-		$module = $this->createModule($location->moduleName, $class);
+		$module = $this->createModule($location, $class);
 		if ($setExtraConfig) $module->setExtraConfig($config);
 		return $module;
 	}
