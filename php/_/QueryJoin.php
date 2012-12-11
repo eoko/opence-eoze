@@ -305,6 +305,19 @@ abstract class QueryJoin implements QueryAliasable {
 		return $this->query->context;
 	}
 
+	/**
+	 * @inheritdoc
+	 */
+	public function alias($name) {
+		return $this->getQualifiedName($name);
+	}
+
+	/**
+	 * @inheritdoc
+	 */
+	public function aliases($clause, array &$bindings = null) {
+		return \eoko\cqlix\legacy\QueryAliasableToAliaser::aliases($this, $clause, $bindings);
+	}
 }
 
 class QueryJoinAliasable implements QueryAliasable {
@@ -322,7 +335,7 @@ class QueryJoinAliasable implements QueryAliasable {
 	}
 
 	public function __toString() {
-		$side;
+		$side = null;
 		switch ($this->side) {
 			case QueryJoin::TABLE_LEFT: $side = 'LEFT'; break;
 			case QueryJoin::TABLE_RIGHT: $side = 'RIGHT'; break;
@@ -337,7 +350,7 @@ class QueryJoinAliasable implements QueryAliasable {
 	}
 
 	public function createWhere($conditions = null, $inputs = null) {
-		return $this->join->createWhere($condition, $inputs);
+		return $this->join->createWhere($conditions, $inputs);
 	}
 
 	public function &getContext() {
@@ -356,10 +369,24 @@ class QueryJoinAliasable implements QueryAliasable {
 	}
 
 	public function getRelationInfo($targetRelationName, $requireType = false) {
-		return $this->join->getRelationInfo($relationName, $requireType);
+		return $this->join->getRelationInfo($targetRelationName, $requireType);
 	}
 
 	public function makeRelationName($targetRelationName) {
 		return $this->join->makeRelationName($targetRelationName);
+	}
+
+	/**
+	 * @inheritdoc
+	 */
+	public function alias($name) {
+		return $this->getQualifiedName($name);
+	}
+
+	/**
+	 * @inheritdoc
+	 */
+	public function aliases($clause, array &$bindings = null) {
+		return \eoko\cqlix\legacy\QueryAliasableToAliaser::aliases($this, $clause, $bindings);
 	}
 }

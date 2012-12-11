@@ -8,6 +8,7 @@
  */
 
 use eoko\database\Database;
+use eoko\cqlix\Aliaser;
 
 /**
  * Utility class to submit queries to the database
@@ -1882,7 +1883,7 @@ class QueryErrorHandler {
 	}
 }
 
-interface QueryAliasable {
+interface QueryAliasable extends Aliaser {
 
 	function getQualifiedName($fieldName, $table = QueryJoin::TABLE_RIGHT);
 

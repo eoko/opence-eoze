@@ -33,7 +33,7 @@ class ModelTableQuery extends Query implements QueryAliasable {
 			if ($aliasPrefix === null) {
 				$this->select = null;
 			} else {
-				throw new UnsupportedActionException();
+				throw new UnsupportedOperationException();
 			}
 		} else if ($field_s instanceof SqlVariable) {
 			$this->select[] = $field_s;
@@ -166,8 +166,7 @@ class ModelTableQuery extends Query implements QueryAliasable {
 		return $in[1] . $this->getQualifiedName($in[2]) . $in[3];
 	}
 
-	public function doConvertQualifiedNames($preSql,
-			QualifiedNameConverter $converter) {
+	public function doConvertQualifiedNames($preSql, QualifiedNameConverter $converter) {
 
 		$staticPlaceHolder = '#S#T#A#T#I#C#P#H#';
 		$preSql = str_replace('``', $staticPlaceHolder, $preSql);
@@ -410,7 +409,9 @@ class ModelTableQuery extends Query implements QueryAliasable {
 	 */
 	public function whereContext($context = null) {
 		if ($context !== null) {
-			$this->table->addAssocWhere($this->where, $this);
+			/** @noinspection PhpUndefinedFieldInspection */
+			$where = $this->were;
+			$this->table->addAssocWhere($where, $this);
 		}
 		return $this;
 	}
@@ -455,6 +456,19 @@ class ModelTableQuery extends Query implements QueryAliasable {
 		return $this;
 	}
 
+	/**
+	 * @inheritdoc
+	 */
+	public function alias($name) {
+		return $this->getQualifiedName($name);
+	}
+
+	/**
+	 * @inheritdoc
+	 */
+	public function aliases($clause, array &$bindings = null) {
+		return \eoko\cqlix\legacy\QueryAliasableToAliaser::aliases($this, $clause, $bindings);
+	}
 }
 
 class QualifiedNameConverter {
