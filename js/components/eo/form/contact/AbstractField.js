@@ -252,6 +252,8 @@ eo.form.contact.AbstractField = Ext.extend(Ext.form.CompositeField, {
 			if (Ext.isArray(field)) {
 				r.push(new Ext.form.CompositeField({
 					items: this.flexHorizontalItemGroup(field)
+					,combineErrors: this.combineErrors
+					,msgTarget: this.msgTarget
 				}));
 			} else {
 				r.push(field);
