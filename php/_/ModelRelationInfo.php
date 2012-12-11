@@ -1,6 +1,7 @@
 <?php
 
 use eoko\cqlix\FieldMetadata;
+use eoko\cqlix\Aliaser;
 
 interface ModelRelationInfoHasOne extends ModelRelationMarkerHasOne {}
 interface ModelRelationInfoHasMany extends ModelRelationMarkerHasMany {}
@@ -230,9 +231,10 @@ abstract class ModelRelationInfo extends ModelFieldBase {
 	 * @param QueryAliasable $aliaser
 	 * @return string
 	 */
-	public function makeSortClause(ModelTableQuery $query, QueryAliasable $aliaser) {
+	protected function doGetSortClause(QueryAliasable $aliaser) {
+		$query = $aliaser->getQuery();
 		$fieldName = $this->getTargetTable()->getNameFieldName();
-		return $query->join($this)->getQualifiedName($fieldName);
+		return $query->join($this)->alias($fieldName);
 	}
 
 	public function getNameClause(ModelTableQuery $query, $relationName = null, $alias = null) {
@@ -504,15 +506,13 @@ class ModelRelationInfoField extends ModelFieldBase {
 		return new SqlVariable("`$relationName->$this->fieldName` $dir");
 	}
 
-	public function assembleSortClause($dir, ModelTableQuery $query, QueryAliasable $aliaser) {
-		// TODO the join should probably be passed the aliaser
-		$join = $query->join($this->info);
+	/**
+	 * @inheritdoc
+	 */
+	public function getSortClause($dir, Aliaser $aliaser) {
+		$join = $aliaser->getQuery()->join($this->info);
 		$field = $this->getActualField();
-		if ($field instanceof ModelFieldBase) {
-			return $field->assembleSortClause($dir, $query, $join);
-		} else {
-			return $field->getSortClause($dir, $query, $join);
-		}
+		return $field->getSortClause($dir, $join);
 	}
 
 	public function getName() {

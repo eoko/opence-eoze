@@ -192,7 +192,12 @@ class ModelTableQuery extends Query implements QueryAliasable {
 	}
 
 	public function getOrderFieldAlias($field, $dir) {
-		return $this->table->getField($field, true)->getSortClause($dir, $this);
+		// protected dir against injections
+		$dir = $this->protectDir($dir);
+
+		$field = $this->table->getField($field, true);
+
+		return $field->getSortClause($dir, $this);
 	}
 
 	public function getQualifiedAlias($field) {

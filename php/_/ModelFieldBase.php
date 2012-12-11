@@ -1,7 +1,7 @@
 <?php
 
 use eoko\cqlix\ModelFieldHelper;
-use eoko\cqlix\Aliaser\Aliaser;
+use eoko\cqlix\Aliaser;
 
 /**
  * Base class implementation for {@link ModelField}.
@@ -72,38 +72,21 @@ abstract class ModelFieldBase implements ModelField {
 		}
 	}
 
-	final public function getSortClause($dir, QueryAliasable $aliaser) {
-		$query = $aliaser->getQuery();
-		// protected dir
-		$dir = $query->protectDir($dir);
-		return $this->assembleSortClause($dir, $query, $aliaser);
+	/**
+	 * @inheritdoc
+	 */
+	public function getSortClause($dir, Aliaser $aliaser) {
+		return $this->doGetSortClause($aliaser) . ' ' . $dir;
 	}
 
 	/**
-	 * @param string $dir Direction clause, already protected.
-	 * @param ModelTableQuery $query
-	 * @param QueryAliasable $aliaser
+	 * Delegate of {@link getSortClause()} with a simpler signature.
+	 *
+	 * @param eoko\cqlix\Aliaser $aliaser
 	 * @return string
 	 */
-	protected function assembleSortClause($dir, ModelTableQuery $query, QueryAliasable $aliaser) {
-		return $this->makeSortClause($query, $aliaser) . ' ' . $dir;
-	}
-
-	/**
-	 * @param ModelTableQuery $query
-	 * @param QueryAliasable $aliaser
-	 * @return string
-	 */
-	protected function makeSortClause(ModelTableQuery $query, QueryAliasable $aliaser) {
-		return $this->doMakeSortClause($aliaser);
-	}
-
-	/**
-	 * @param QueryAliasable $aliaser
-	 * @return string
-	 */
-	protected function doMakeSortClause(QueryAliasable $aliaser) {
-		return $aliaser->getQualifiedName($this->getName());
+	protected function doGetSortClause(Aliaser $aliaser) {
+		return $aliaser->alias($this->getName());
 	}
 
 }
