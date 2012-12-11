@@ -2,7 +2,7 @@
 
 use eoko\cqlix\FieldMetadata;
 
-use eoko\cqlix\Aliaser\Aliaser;
+use eoko\cqlix\Aliaser;
 
 interface ModelField {
 
@@ -26,11 +26,18 @@ interface ModelField {
 //	function orderClause($dir, $tableAlias = null);
 
 	/**
+	 * Gets the sort clause for this field, for the specified direction, and the given `Aliaser`.
+	 *
+	 * **Important** this method expected the passed direction string to be protected from SQL
+	 * injection, so you must take care of that when calling this method.
+	 *
+	 * @see \Query::protectDir()
+	 *
+	 * @param string $dir
+	 * @param eoko\cqlix\Aliaser $aliaser
 	 * @return string
 	 */
-	function getSortClause($dir, QueryAliasable $aliaser);
-
-//	function getSortClause($dir, Aliaser $aliaser);
+	function getSortClause($dir, Aliaser $aliaser);
 
 	function getType();
 

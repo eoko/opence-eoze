@@ -187,8 +187,8 @@ class AgeVirtualField extends VirtualFieldBase {
 	// Age virtual field is just for display... Sorting on this field would
 	// result in sorting alphabetically, not chronologically.
 	// ... So let's sort on the real date field, instead.
-	protected function doMakeSortClause(QueryAliasable $aliaser) {
-		return $aliaser->getQualifiedName($this->dateField);
+	protected function doGetSortClause(QueryAliasable $aliaser) {
+		return $aliaser->alias($this->dateField);
 	}
 
 	protected function doGetClause(QueryAliasable $aliasable) {
@@ -232,10 +232,12 @@ class FormattedVirtualField extends AbstractVirtualField {
 	protected $nullable = true;
 	protected $type = ModelColumn::T_STRING;
 
+	protected $defaultAlias = null;
+
 	protected $nullField  = null;
 	protected $nullString = '?';
 
-	function __construct($format = null, $defaultAlias = null, $nullable = null, $nullField = null, 
+	function __construct($format = null, $defaultAlias = null, $nullable = null, $nullField = null,
 			$nullString = null) {
 		parent::__construct($defaultAlias);
 
