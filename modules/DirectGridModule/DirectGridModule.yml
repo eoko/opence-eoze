@@ -1,0 +1,6 @@
+class: DirectModule
+abstract: true
+
+config:
+  mainViewClass: eo.DirectGridModule.MainView
+
