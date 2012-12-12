@@ -72,6 +72,14 @@ Ext.Function.createSequence = function (originalFn, newFn, scope) {
 	}
 };
 
+Ext.Function.createDelegate = function(fn, obj, args, appendArgs) {
+	var args = Array.prototype.slice.call(arguments, 0),
+		fn = args.shift();
+	return fn.createDelegate.apply(fn, args);
+};
+
+Ext.bind = Ext.Function.createDelegate;
+
 (function() {
 var reg = Ext.reg;
 var resolve = function resolve(name, force) {
