@@ -115,6 +115,10 @@
 	padding-right : 3px;
 }
 
+.x-panel-icon.ico {
+    display: block;
+}
+
 .x-grouptabs-text.ico,
 .x-window-header.ico {
 	width: auto;
