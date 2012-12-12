@@ -424,6 +424,9 @@ Ext.ux.ToolbarReorderer = Ext.extend(Ext.ux.Reorderer, {
             items  = tbar.items,
             totalX = tbar.getEl().getBox(true).x;
 
+		// Clear (some button may have disappeared)
+		this.buttonXCache = {};
+
         items.each(function(item) {
             this.buttonXCache[item.id] = totalX;
 
