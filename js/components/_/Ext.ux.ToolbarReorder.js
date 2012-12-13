@@ -376,6 +376,20 @@ Ext.ux.ToolbarReorderer = Ext.extend(Ext.ux.Reorderer, {
 							button.menu.un('beforeshow', menuDisabler, me);
 						}
 
+						// <rx 2012-12-13 23:13>
+						//
+						// Fixes the toolbar layout
+						//
+						// After the animation, the dropped item will have a X position set
+						// (relative to its parent TD), but we want each item to be at x=0
+						// in its own parent TD (other part of the code are expecting that,
+						// e.g. ToolbarDroppable, and even this very plugin...)
+						tbar.items.each(function(c) {
+							c.setPosition(0,0);
+						});
+						tbar.doLayout();
+						// </rx>
+
 						tbar.fireEvent('reordered', button, tbar);
 					}
 				});
