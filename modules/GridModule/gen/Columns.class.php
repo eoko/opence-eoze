@@ -461,7 +461,7 @@ class Columns {
 			$filterMeta = $field->getMeta()->filterable;
 			if ($filterMeta) {
 				$filterable = array('filterable' => $filterMeta);
-				Arrays::apply($colConfig, $filterable, false);
+				Arrays::applyIf($colConfig, $filterable, false);
 			}
 		}
 	}
