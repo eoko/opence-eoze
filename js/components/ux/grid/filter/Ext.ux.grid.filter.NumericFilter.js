@@ -71,9 +71,12 @@ iconCls : {
      * </pre>
      */
     iconCls : {
+        gte : 'ux-rangemenu-gte',
+        lte : 'ux-rangemenu-lte',
         gt : 'ux-rangemenu-gt',
         lt : 'ux-rangemenu-lt',
-        eq : 'ux-rangemenu-eq'
+        eq : 'ux-rangemenu-eq',
+        neq : 'ux-rangemenu-neq'
     },
 
     /**
@@ -100,7 +103,7 @@ menuItemCfgs : {
      * menuItems : ['lt','gt','-','eq']
      * </pre>
      */
-    menuItems : ['lt', 'gt', '-', 'eq'],
+    menuItems : ['lt', 'lte', 'gt', 'gte', '-', 'eq', 'neq'],
 
     /**  
      * @private

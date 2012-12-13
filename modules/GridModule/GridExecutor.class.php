@@ -10,6 +10,7 @@ use eoko\cqlix\table_filters\TableHasFilters;
 use eoko\database\Database;
 use eoko\util\Strings;
 use eoko\module\ModuleManager;
+use eoko\util\date\Date;
 
 use eoko\cqlix\Exception\ModelAlreadyDeletedException;
 
@@ -506,14 +507,29 @@ abstract class GridExecutor extends JsonExecutor {
 
 	private static $filter_acceptedOperators = array(
 		'eq' => '=',
+		'neq' => '!=',
 		'gt' => '>',
 		'lt' => '<',
+		'gte' => '>=',
+		'lte' => '<=',
 	);
 
 	private static $filter_acceptedOperators_date = array(
 		'eq' => '=',
+		'neq' => '!=',
 		'gt' => '>=',
 		'lt' => '<',
+//		'gte' => '>=',
+//		'lte' => '<',
+	);
+
+	private static $filter_acceptedOperators_age = array(
+		'neq' => '!=',
+		'eq' => '=',
+		'gt' => '<',
+		'lt' => '>',
+		'gte' => '<=',
+		'lte' => '>=',
 	);
 
 	private static $filter_acceptedTypes = array(
@@ -522,6 +538,7 @@ abstract class GridExecutor extends JsonExecutor {
 		'list' => 'list',
 		'numeric' => 'numeric',
 		'string' => 'string',
+		'age' => 'age',
 	);
 
 	protected function createLoadQuery_filters(ModelTableQuery $query) {
@@ -578,6 +595,32 @@ abstract class GridExecutor extends JsonExecutor {
 					case 'string':
 						$query->andWhere("`$field` LIKE ?", 
 								$this->createLoadQuery_processColumnFilterString($value));
+						break;
+
+					case 'age':
+						if ($value !== null) {
+							// operator
+							$op = self::$filter_acceptedOperators_age[$filter['comparison']];
+
+							// reference date
+							$context = $query->getContext();
+							if (!isset($context['date'])) {
+								throw new \MissingRequiredRequestParamException('Missing date');
+							}
+							$now = Date::parseDate($context['date']);
+							$date = $now->sub(new \DateInterval($value))->format('Y-m-d');
+
+							// dob column
+							$field = $this->table->getField($filter['field']);
+							if ($field->getActualField() instanceof \AgeVirtualField) {
+								/** @var \AgeVirtualField $field */
+								$dobField = $field->getDateField($query);
+							} else {
+								throw new \RuntimeException("Not an age field: $filter[field]");
+							}
+
+							$query->andWhere("`$dobField` $op ?", $date);
+						}
 						break;
 				}
 			}
