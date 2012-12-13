@@ -23,6 +23,13 @@ Oce.MultipleSortJsonStore = Ext.extend(Ext.data.JsonStore, {
 			direction = direction.toggle("ASC", "DESC");
 		}
 
+		// 2012-12-13 22:05
+		// Avoid applying the same sort twice
+		if (this.multiSortInfo) {
+			if (Ext.encode(this.multiSortInfo.sorters) === Ext.encode(sorters)) {
+				return;
+			}
+		}
 
 		/**
          * @property multiSortInfo
