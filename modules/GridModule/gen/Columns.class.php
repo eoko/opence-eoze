@@ -451,9 +451,17 @@ class Columns {
 	private function applyFormMeta(array &$colConfig, $name) {
 		$field = $this->table->getField($name, false);
 		if ($field) {
+			// Form
 			$formMeta = $field->getMeta()->form;
 			if ($formMeta) {
 				self::setColFormItemIf($colConfig, $formMeta);
+			}
+
+			// Filterable
+			$filterMeta = $field->getMeta()->filterable;
+			if ($filterMeta) {
+				$filterable = array('filterable' => $filterMeta);
+				Arrays::apply($colConfig, $filterable, false);
 			}
 		}
 	}
