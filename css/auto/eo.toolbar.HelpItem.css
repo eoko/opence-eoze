@@ -24,3 +24,7 @@
 .xtb-help:hover {
     cursor: pointer;
 }
+
+.x-tip.eo-help .x-tip-body {
+    padding: .4em .3em .6em;
+}
