@@ -9,10 +9,11 @@ Ext.ns('eo.form');
 /**
  * @xtype agefield
  */
-eo.form.AgeField = Ext.extend(Ext.form.TextField, {
+Ext.defined('eo.form.AgeField', {
+	extend: 'Ext.form.TextField'
 	
 	// private
-	age: null
+	,age: null
 	
 	/**
 	 * @cfg {Boolean} returnObject
