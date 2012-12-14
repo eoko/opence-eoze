@@ -506,15 +506,6 @@ class ModelRelationInfoField extends ModelFieldBase {
 		return new SqlVariable("`$relationName->$this->fieldName` $dir");
 	}
 
-	/**
-	 * @inheritdoc
-	 */
-	public function getSortClause($dir, Aliaser $aliaser) {
-		$join = $aliaser->getQuery()->join($this->info);
-		$field = $this->getActualField();
-		return $field->getSortClause($dir, $join);
-	}
-
 	public function getName() {
 		return $this->name;
 	}
@@ -539,6 +530,15 @@ class ModelRelationInfoField extends ModelFieldBase {
 		return $this->getActualField()->getLength();
 	}
 
+	/**
+	 * @inheritdoc
+	 */
+	public function getSortClause($dir, Aliaser $aliaser) {
+		$join = $aliaser->getQuery()->join($this->info);
+		$field = $this->getActualField();
+		return $field->getSortClause($dir, $join);
+	}
+
 	public function getActualField() {
 		return $this->info->targetTable->getField($this->fieldName, true);
 	}
@@ -546,6 +546,12 @@ class ModelRelationInfoField extends ModelFieldBase {
 	public function __call($method, $args) {
 		$field = $this->getActualField();
 		if (method_exists($field, $method)) {
+			// Replaces Aliaser arguments with join aliasers
+			foreach ($args as &$arg) {
+				if ($arg instanceof Aliaser) {
+					$arg = $arg->getQuery()->join($this->info);
+				}
+			}
 			return call_user_func_array(array($field, $method), $args);
 		} else {
 			throw new IllegalStateException('Call to undefined method ' . get_class($this)
