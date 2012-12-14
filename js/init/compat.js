@@ -152,6 +152,15 @@ var define = function(cls, o, createFn) {
 	} else {
 		parent = Object;
 	}
+
+	if (o.requires) {
+		if (deps) {
+			deps = [deps];
+			deps = deps.concat(o.requires);
+		} else {
+			deps = o.requires;
+		}
+	}
 	
 	var define = function() {
 		var c = Ext.extend(parent, o);
