@@ -10,6 +10,9 @@ Oce.MultipleSortJsonStore = Ext.extend(Ext.data.JsonStore, {
 
 	multiSort: function(sorters, direction) {
 
+		// Must clone sorters to avoid depending on an object that could be modified externally
+		sorters = Ext.clone(sorters, true);
+
 		if (sorters.length < 2) {
 			this.singleSort(sorters[0].field, sorters[0].direction);
 			return;
@@ -53,12 +56,19 @@ Oce.MultipleSortJsonStore = Ext.extend(Ext.data.JsonStore, {
 
 	// Overriden to clear the multisort
 	singleSort: function(fieldName, dir) {
-		
-		delete this.sortInfo.json;
-		this.hasMultiSort = false;
-		this.fireEvent('singlesort');
-
-		Oce.MultipleSortJsonStore.superclass.singleSort.apply(this, arguments);
+		if (!dir) {
+			if (this.sortInfo && this.sortInfo.field === fieldName) {
+				dir = this.sortInfo.dir;
+			} else {
+				dir = 'ASC';
+			}
+		}
+		if (false !== this.fireEvent('beforesinglesort', this, fieldName, dir)) {
+			delete this.sortInfo.json;
+			this.hasMultiSort = false;
+			Oce.MultipleSortJsonStore.superclass.singleSort.apply(this, arguments);
+			this.fireEvent('singlesort', this, fieldName, this.sortInfo.direction)
+		}
 	},
 
 	applyRemoteSort: function(fieldName, dir) {
