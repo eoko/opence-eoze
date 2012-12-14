@@ -11,10 +11,7 @@ Ext.ns('eo.form');
  */
 Ext.define('eo.form.AgeField', {
 	extend: 'Ext.form.TextField'
-	
-	// private
-	,age: null
-	
+
 	/**
 	 * @cfg {Boolean} returnObject
 	 * 
@@ -198,11 +195,6 @@ Ext.define('eo.form.AgeField', {
 	}
 	
 	,setValue: function(v) {
-		if (Ext.isObject(v)) {
-			this.age = v;
-		} else {
-			v = this.age = this.parseValue(v);
-		}
 		if (this.rendered) {
 			this.setRawValue(v ? this.formatAge(v) : '');
 		} else {
@@ -217,7 +209,7 @@ Ext.define('eo.form.AgeField', {
 	}
 	
 	,getValue: function() {
-		var a = this.age;
+		var a = this.parseValue(this.getRawValue());
 		if (this.returnObject) {
 			return a;
 		} else if (a) {
@@ -231,7 +223,7 @@ Ext.define('eo.form.AgeField', {
 	}
 	
 	,beforeBlur: function() {
-		var age = this.age = this.parseValue(this.getRawValue());
+		var age = this.parseValue(this.getRawValue());
 		if (!Ext.isEmpty(age)) {
 			this.setRawValue(this.formatAge(age));
 		}
