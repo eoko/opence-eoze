@@ -9,7 +9,7 @@ Ext.ns('eo.form');
 /**
  * @xtype agefield
  */
-Ext.defined('eo.form.AgeField', {
+Ext.define('eo.form.AgeField', {
 	extend: 'Ext.form.TextField'
 	
 	// private
