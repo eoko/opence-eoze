@@ -1,0 +1,5 @@
+extra.menu:
+  
+  family:
+    id: %module%
+    label: %title%

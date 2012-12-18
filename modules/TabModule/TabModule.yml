@@ -1,0 +1,8 @@
+abstract: true
+class: BaseModule
+
+jsNamespace: Oce.Modules
+jsParentClass: eo.modules.TabModule
+
+extra:
+  iconCls: ico %module% %action%

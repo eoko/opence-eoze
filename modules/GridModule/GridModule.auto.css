@@ -1,0 +1,14 @@
+
+.ico.loading.gm-tab-loading {
+	background-image: url(_images/default/grid/loading.gif) !important;
+}
+
+/* Fixes the width of tabs which have an iconCls */
+.ico.x-tab-strip-text {
+	width: auto;
+}
+
+.x-tab-strip span.x-tab-strip-text.ico {
+	background-position: 0 3px;
+	height: 14px;
+}
