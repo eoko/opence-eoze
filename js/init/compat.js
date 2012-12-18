@@ -181,7 +181,9 @@ var define = function(cls, o, createFn) {
 	
 	if (deps) {
 		Oce.deps.wait(deps, function() {
-			parent = resolve(parentCls);
+			if (parentCls) {
+				parent = resolve(parentCls);
+			}
 			define();
 		});
 	} else {
