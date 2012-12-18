@@ -43,6 +43,16 @@ abstract class TemplateExecutor extends ExecutorBase {
 		return $this->getTemplate()->getData();
 	}
 
+	/**
+	 * Sets one or multiple data variable value.
+	 *
+	 * @param string|array $name
+	 * @param mixed|null $value
+	 */
+	public function set($name, $value = null) {
+		$this->getTemplate()->set($name, $value);
+	}
+
 	public function __set($name, $value) {
 		if ($this->myTemplate) {
 			$this->myTemplate->__set($name, $value);
