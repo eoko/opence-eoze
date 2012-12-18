@@ -279,4 +279,8 @@ Ext.String.format = function() {
 	return String.format.apply(String, arguments);
 };
 
+
+// Mixed collection
+Ext.util.MixedCollection.prototype.sortByKey = Ext.util.MixedCollection.prototype.keySort;
+
 } // end of compat patches
