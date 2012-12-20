@@ -3291,7 +3291,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	}
 
 	,initMultisortPlugin: function() {
-		if (!this.extra.multisort) {
+		if (this.extra.multisort) {
 			this.afterInitStore = Ext.Function.createSequence(this.afterInitStore, this.doInitMultisortPlugin, this);
 		}
 	}
