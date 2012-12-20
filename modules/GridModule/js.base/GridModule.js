@@ -3152,11 +3152,16 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			lastFilters.all = allActive;
 			this.storeBaseParams.json_filters = encodeURIComponent(Ext.encode(activeFilters));
 			// create menu (needs the last filters)
+			var me = this;
 			this.actions.filter = {
 				xtype: 'oce.rbbutton'
 				,text: 'Filtres'
 				,iconCls: 'b_ico_filter'
-				,menu: this.createFilterMenu(filterItems, lastFilters)
+				// The menu must be rebuilt for each new button
+				,initComponent: function() {
+					this.menu = me.createFilterMenu(filterItems, lastFilters);
+					Ext.ComponentMgr.types[this.xtype].prototype.initComponent.apply(this, arguments);
+				}
 			};
 		}
 	}
@@ -3286,35 +3291,34 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	}
 
 	,initMultisortPlugin: function() {
-
-		if (!this.extra.multisort) return;
-
-		this.afterInitStore = Ext.Function.createSequence(this.afterInitStore, function(store) {
-			this.doInitMultisortPlugin(store);
-		}, this)
+		if (!this.extra.multisort) {
+			this.afterInitStore = Ext.Function.createSequence(this.afterInitStore, this.doInitMultisortPlugin, this);
+		}
 	}
 
+	/**
+	 * @private
+	 */
 	,doInitMultisortPlugin: function(store) {
-
-		var me = this;
-
-		var tbar = Ext.create('Eoze.GridModule.multisort.Toolbar', {
-			getDefaultSortParams: function() {
-				return [
-					me.defaultSortColumn || me.getDefaultSortColumn(me.grid),
-					me.defaultSortDirection || 'ASC'
-				];
-			}
-		});
-
 		this.beforeCreateGrid = Ext.Function.createSequence(this.beforeCreateGrid, function(config) {
+			var tbar = Ext.create('Eoze.GridModule.multisort.Toolbar', {
+				getDefaultSortParams: function() {
+					return [
+						this.defaultSortColumn || this.getDefaultSortColumn(this.grid),
+						this.defaultSortDirection || 'ASC'
+					];
+				}
+			});
+
 			config.tbar = tbar;
-		});
 
-		// --- Override initGrid ---
-
-		this.on('aftercreategrid', function(me, grid) {
-			tbar.bindGrid(grid);
+			this.on({
+				single: true
+				,scope: this
+				,aftercreategrid: function(me, grid) {
+					tbar.bindGrid(grid);
+				}
+			})
 		}, this);
 	}
 
