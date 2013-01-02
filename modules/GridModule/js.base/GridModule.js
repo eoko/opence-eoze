@@ -102,7 +102,12 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	 */
 
 	,constructor: function(config) {
-		
+
+		// Initial hidden state
+		Ext.each(this.columns, function(col) {
+			col.initialHidden = !!col.hidden;
+		});
+
 		this.addAsyncConstructTask(this.onApplyPreferences, this);
 
 		this.my = Ext.apply({
@@ -2640,7 +2645,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 					}
 					this.autoExpandColumn = col.id;
 				}
-				
+
 				this.gridColumns.push(col);
 				columnConfigMap[col.name] = col;
 			}
@@ -3546,6 +3551,29 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			this.store.reload(o);
 		}
 	}
+
+	/**
+	 * Reset displayed columns according to default initial config.
+	 *
+	 * @private
+	 */
+	,resetHiddenColumns: function() {
+		var grid = this.grid,
+			view = grid.view,
+			cm = grid.getColumnModel(),
+			colCount = cm.getColumnCount(),
+			config;
+		for (var i = 0; i < colCount; i++) {
+			config = cm.config[i];
+			config.hidden = config.initialHidden;
+			delete cm.totalWidth;
+		}
+
+		view.refresh(true);
+		cm.fireEvent('bulkhiddenchange', cm);
+
+		this.reload();
+	}
 	
 	// private
 	,columnMenu_onBeforeShow: function(colMenu) {
@@ -3554,6 +3582,15 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			checkGroups = [];
 
 		colMenu.removeAll();
+
+		// Reset defaults item
+		colMenu.add({
+			text: "Reset" // i18n
+			,tooltip: "Afficher les colonnes par défaut" // i18n
+			,iconCls: 'ico reset'
+			,scope: this
+			,handler: this.resetHiddenColumns
+		});
 		
 		// --- Select all ---
 		var checkAllItem = new Ext.menu.CheckItem({
@@ -3561,7 +3598,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			,checked:!(this.checkIndexes instanceof Array)
 			,hideOnClick:false
 		});
-		colMenu.add(checkAllItem,'-');
+		colMenu.add(checkAllItem, '-');
 
 		var checkAllGroup = Ext.create('eo.form.SelectableCheckGroup', checkAllItem);
 		colMenu.checkGroup = checkAllGroup;
