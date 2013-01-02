@@ -554,9 +554,15 @@ abstract class GridExecutor extends JsonExecutor {
 						break;
 
 					case 'list':
+						$f = $this->table->getField($field);
+
+						while (method_exists($f, 'getColumnFilterField')) {
+							$field = $f->getColumnFilterField();
+							$f = $this->table->getField($field);
+						}
+
 						// If the field points directly to a relation (not a relation
 						// field), we must specify that we aim at the id field
-						$f = $this->table->getField($field);
 						if ($f instanceof ModelRelationInfo) {
 							$field .= '->' . $f->getTargetTable()->getPrimaryKeyName();
 						}
@@ -576,8 +582,8 @@ abstract class GridExecutor extends JsonExecutor {
 						break;
 
 					case 'string':
-						$query->andWhere("`$field` LIKE ?", 
-								$this->createLoadQuery_processColumnFilterString($value));
+						$query->andWhere("`$field` LIKE ?",
+							$this->createLoadQuery_processColumnFilterString($value));
 						break;
 				}
 			}
