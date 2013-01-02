@@ -3307,12 +3307,12 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	,doInitMultisortPlugin: function(store) {
 		this.beforeCreateGrid = Ext.Function.createSequence(this.beforeCreateGrid, function(config) {
 			var tbar = Ext.create('Eoze.GridModule.multisort.Toolbar', {
-				getDefaultSortParams: function() {
+				getDefaultSortParams: Ext.bind(function() {
 					return [
 						this.defaultSortColumn || this.getDefaultSortColumn(this.grid),
 						this.defaultSortDirection || 'ASC'
 					];
-				}
+				}, this)
 			});
 
 			config.tbar = tbar;
