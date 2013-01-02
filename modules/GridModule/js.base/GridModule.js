@@ -3330,6 +3330,10 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			destination = Oce.mx.application.getMainDestination();
 		}
 
+		if (this.tab && this.tab.isDestroyed) {
+			this.destroy();
+		}
+
 		if (!this.tab) {
 			this.tab = this.create(config);
 			destination.add(this.tab);
