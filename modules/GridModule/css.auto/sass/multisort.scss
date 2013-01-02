@@ -1,0 +1,85 @@
+/**
+ * Copyright (C) 2012 Eoko
+ *
+ * This file is part of Opence.
+ *
+ * Opence is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Opence is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Opence. If not, see <http://www.gnu.org/licenses/gpl.txt>.
+ *
+ * @copyright Copyright (C) 2012 Eoko
+ * @licence http://www.gnu.org/licenses/gpl.txt GPLv3
+ * @author Éric Ortega <eric@eoko.fr>
+ */
+
+/**
+ *
+ * @since 2012-12-12 17:40
+ */
+
+$prefix: eo;
+$ns: #{$prefix}-grid-multisort-toolbar;
+
+.#{$ns} {
+
+  &.x-toolbar {
+    //background-image: none;
+  }
+
+  //.x-toolbar-cell {
+  //  padding-right: 5px;
+  //}
+
+  .x-btn-text-icon .x-btn-icon-small-left .x-btn-text {
+      height: 18px;
+  }
+
+  .x-btn.pill {
+    border: 1px solid #99BBE8;
+    position: relative;
+    -moz-border-radius: 6px;
+    -webkit-border-radius: 6px;
+    border-radius: 6px;
+    o-border-radius: 6px;
+    khtml-border-radius: 6px;
+    //border: 1px solid #CAD8F3;
+    background-color: #DEE7F8;
+    padding: 1px 20px 1px 5px;
+  }
+
+  .close-button {
+    background: url(../images/multisort/close.png) no-repeat scroll left 0px;
+    border: none;
+    cursor: default;
+    font-size: 1px;
+    height: 16px;
+    padding: 0;
+    position: absolute;
+    right: 0px;
+    top: 2px;
+    width: 13px;
+    display: block;
+    cursor: pointer;
+
+    &:hover, &:active {
+      background-position: left -12px;
+    }
+  }
+
+  .ico.clear {
+    background: url(../images/multisort/clear.png) no-repeat scroll left 0px;
+  }
+  .x-btn-over .ico.clear {
+    background-position: left -16px;
+  }
+
+}
