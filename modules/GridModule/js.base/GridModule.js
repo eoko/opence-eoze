@@ -2383,7 +2383,10 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		}
 
 		if (opts) {
-			if (opts.form) {
+			if (opts.window) {
+				win = opts.window;
+				win.okHandler = doRequest;
+			} else if (opts.form) {
 
 				var form = !Ext.isArray(opts.form) ? opts.form : {
 					xtype: 'oce.form'
