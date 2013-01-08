@@ -29,5 +29,6 @@
 .eo-form-panel .x-panel-body,
 .eo-form {
     padding: 10px;
-    border: 2px solid red;
+    background-color: transparent;
+    /*border: 2px solid red;*/
 }
