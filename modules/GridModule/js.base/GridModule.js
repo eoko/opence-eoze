@@ -1958,6 +1958,26 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				this.onEditWindowExternallyModified(win, external)
 			}
 		}, this);
+
+		// Route
+		var route = eo.AjaxRouter.getRoute(this.name + '.edit');
+		if (route) {
+			win.href = route.assemble({
+				id: recordId
+			});
+
+			// Tab panel
+			var tabPanel = win.formPanel.items.items[0];
+			if (tabPanel instanceof Ext.TabPanel) {
+				tabPanel.on('tabchange', function(tabPanel, item) {
+					win.href = route.assemble({
+						id: recordId
+						,tab: item.slug || item.tabName
+					});
+					eo.AjaxRouter.setActivePage(win);
+				});
+			}
+		}
 	}
 
 	,parseContextHelpItems: function(win) {
