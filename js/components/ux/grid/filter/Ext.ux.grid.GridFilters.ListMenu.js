@@ -49,6 +49,12 @@ Ext.ux.menu.ListMenu = Ext.extend(Ext.menu.Menu, {
         );
       
         Ext.ux.menu.ListMenu.superclass.constructor.call(this, cfg = cfg || {});
+
+		// <rx>
+		if (Ext.isString(this.store)) {
+			this.store = Ext.create(this.store);
+		}
+		// </rx>
     
         if(!cfg.store && cfg.options){
             var options = [];

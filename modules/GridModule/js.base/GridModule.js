@@ -102,7 +102,12 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	 */
 
 	,constructor: function(config) {
-		
+
+		// Initial hidden state
+		Ext.each(this.columns, function(col) {
+			col.initialHidden = !!col.hidden;
+		});
+
 		this.addAsyncConstructTask(this.onApplyPreferences, this);
 
 		this.my = Ext.apply({
@@ -2378,7 +2383,10 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		}
 
 		if (opts) {
-			if (opts.form) {
+			if (opts.window) {
+				win = opts.window;
+				win.okHandler = doRequest;
+			} else if (opts.form) {
 
 				var form = !Ext.isArray(opts.form) ? opts.form : {
 					xtype: 'oce.form'
@@ -2640,7 +2648,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 					}
 					this.autoExpandColumn = col.id;
 				}
-				
+
 				this.gridColumns.push(col);
 				columnConfigMap[col.name] = col;
 			}
@@ -3165,11 +3173,16 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			lastFilters.all = allActive;
 			this.storeBaseParams.json_filters = encodeURIComponent(Ext.encode(activeFilters));
 			// create menu (needs the last filters)
+			var me = this;
 			this.actions.filter = {
 				xtype: 'oce.rbbutton'
 				,text: 'Filtres'
 				,iconCls: 'b_ico_filter'
-				,menu: this.createFilterMenu(filterItems, lastFilters)
+				// The menu must be rebuilt for each new button
+				,initComponent: function() {
+					this.menu = me.createFilterMenu(filterItems, lastFilters);
+					Ext.ComponentMgr.types[this.xtype].prototype.initComponent.apply(this, arguments);
+				}
 			};
 		}
 	}
@@ -3299,35 +3312,34 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	}
 
 	,initMultisortPlugin: function() {
-
-		if (!this.extra.multisort) return;
-
-		this.afterInitStore = Ext.Function.createSequence(this.afterInitStore, function(store) {
-			this.doInitMultisortPlugin(store);
-		}, this)
+		if (this.extra.multisort) {
+			this.afterInitStore = Ext.Function.createSequence(this.afterInitStore, this.doInitMultisortPlugin, this);
+		}
 	}
 
+	/**
+	 * @private
+	 */
 	,doInitMultisortPlugin: function(store) {
-
-		var me = this;
-
-		var tbar = Ext.create('Eoze.GridModule.multisort.Toolbar', {
-			getDefaultSortParams: function() {
-				return [
-					me.defaultSortColumn || me.getDefaultSortColumn(me.grid),
-					me.defaultSortDirection || 'ASC'
-				];
-			}
-		});
-
 		this.beforeCreateGrid = Ext.Function.createSequence(this.beforeCreateGrid, function(config) {
+			var tbar = Ext.create('Eoze.GridModule.multisort.Toolbar', {
+				getDefaultSortParams: Ext.bind(function() {
+					return [
+						this.defaultSortColumn || this.getDefaultSortColumn(this.grid),
+						this.defaultSortDirection || 'ASC'
+					];
+				}, this)
+			});
+
 			config.tbar = tbar;
-		});
 
-		// --- Override initGrid ---
-
-		this.on('aftercreategrid', function(me, grid) {
-			tbar.bindGrid(grid);
+			this.on({
+				single: true
+				,scope: this
+				,aftercreategrid: function(me, grid) {
+					tbar.bindGrid(grid);
+				}
+			})
 		}, this);
 	}
 
@@ -3335,7 +3347,13 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		
 		this.opening = true;
 		
-		if (!destination) destination = Oce.mx.application.getMainDestination();
+		if (!destination) {
+			destination = Oce.mx.application.getMainDestination();
+		}
+
+		if (this.tab && this.tab.isDestroyed) {
+			this.destroy();
+		}
 
 		if (!this.tab) {
 			this.tab = this.create(config);
@@ -3549,6 +3567,29 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			this.store.reload(o);
 		}
 	}
+
+	/**
+	 * Reset displayed columns according to default initial config.
+	 *
+	 * @private
+	 */
+	,resetHiddenColumns: function() {
+		var grid = this.grid,
+			view = grid.view,
+			cm = grid.getColumnModel(),
+			colCount = cm.getColumnCount(),
+			config;
+		for (var i = 0; i < colCount; i++) {
+			config = cm.config[i];
+			config.hidden = config.initialHidden;
+			delete cm.totalWidth;
+		}
+
+		view.refresh(true);
+		cm.fireEvent('bulkhiddenchange', cm);
+
+		this.reload();
+	}
 	
 	// private
 	,columnMenu_onBeforeShow: function(colMenu) {
@@ -3557,6 +3598,15 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			checkGroups = [];
 
 		colMenu.removeAll();
+
+		// Reset defaults item
+		colMenu.add({
+			text: "Reset" // i18n
+			,tooltip: "Afficher les colonnes par défaut" // i18n
+			,iconCls: 'ico reset'
+			,scope: this
+			,handler: this.resetHiddenColumns
+		});
 		
 		// --- Select all ---
 		var checkAllItem = new Ext.menu.CheckItem({
@@ -3564,7 +3614,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			,checked:!(this.checkIndexes instanceof Array)
 			,hideOnClick:false
 		});
-		colMenu.add(checkAllItem,'-');
+		colMenu.add(checkAllItem, '-');
 
 		var checkAllGroup = Ext.create('eo.form.SelectableCheckGroup', checkAllItem);
 		colMenu.checkGroup = checkAllGroup;
