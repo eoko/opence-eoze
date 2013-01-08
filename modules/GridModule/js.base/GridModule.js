@@ -2885,10 +2885,23 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		return tab;
 	}
 
+	/**
+	 * @return {eo.AjaxRouter.Route}
+	 */
+	,getRoute: function() {
+		return eo.AjaxRouter.getRoute(this.name + '.index')
+			|| eo.AjaxRouter.getRoute(this.name);
+	}
+
 	,beforeCreateTabPanel: function(config) {
 		// toolbar plugin
 		if (this.toolbarConfig !== false) {
 			config.tbar = this.getToolbar(true);
+		}
+		// route
+		var route = this.getRoute();
+		if (route) {
+			config.href = route.assemble();
 		}
 	}
 	
