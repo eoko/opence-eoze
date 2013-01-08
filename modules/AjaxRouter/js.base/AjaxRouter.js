@@ -66,6 +66,11 @@ Ext.define('eo.AjaxRouter', {
 	,constructor: function() {
 		this.routes = Ext.create('Ext.util.MixedCollection');
 		this.lookup = {};
+
+		// URL update is buffered for those that burst in at the same time
+		this.updateTask = new Ext.util.DelayedTask(function() {
+			window.location.hash = this.hash;
+		}, this);
 	}
 
 	/**
@@ -222,6 +227,12 @@ Ext.define('eo.AjaxRouter', {
 		return this.lookup[name];
 	}
 
+	/**
+	 * Sets the active page. If the passed object has an href property, it will be
+	 * set as the current url.
+	 *
+	 * @param {Object} page
+	 */
 	,setActivePage: function(page) {
 		var hash;
 		if (page) {
@@ -236,7 +247,9 @@ Ext.define('eo.AjaxRouter', {
 		} else {
 			hash = '';
 		}
-		window.location.hash = hash;
+
+		this.hash = hash;
+		this.updateTask.delay(100);
 	}
 
 }, function() {
@@ -267,16 +280,18 @@ Ext.define('eo.AjaxRouter', {
 		});
 	});
 
-//	// Hack windows
-//	var spp = Ext.Window.prototype.initComponent;
-//	Ext.Window.prototype.initComponent = Ext.Function.createSequence(spp, function() {
-//		this.on({
-//			activate: function() {
-//				console.log('pop');
-//			}
-//			,deactivate: function() {
-//				console.log('paf');
-//			}
-//		})
-//	});
+	// Hack windows
+	var spp = Ext.Window.prototype.initComponent;
+	Ext.Window.prototype.initComponent = Ext.Function.createSequence(spp, function() {
+		this.on({
+			activate: function() {
+				eo.AjaxRouter.setActivePage(this);
+			}
+			,deactivate: function() {
+				var module = Oce.mx.application.getFrontModule(),
+					tab = module && module.tab;
+				eo.AjaxRouter.setActivePage(tab);
+			}
+		})
+	});
 });

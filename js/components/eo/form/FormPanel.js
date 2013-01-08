@@ -131,6 +131,7 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
         Ext.each(this.findBy(function(o) { return !Ext.isEmpty(o.tabName) }), function(item) {
             lu[item.tabName] = item;
 			var slug = item.slug || item.tabName.toLowerCase().replace(/\s/g, '-');
+			item.slug = slug;
 			slu[slug] = item;
         });
 
