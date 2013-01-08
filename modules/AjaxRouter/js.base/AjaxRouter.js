@@ -266,4 +266,17 @@ Ext.define('eo.AjaxRouter', {
 			}
 		});
 	});
+
+//	// Hack windows
+//	var spp = Ext.Window.prototype.initComponent;
+//	Ext.Window.prototype.initComponent = Ext.Function.createSequence(spp, function() {
+//		this.on({
+//			activate: function() {
+//				console.log('pop');
+//			}
+//			,deactivate: function() {
+//				console.log('paf');
+//			}
+//		})
+//	});
 });
