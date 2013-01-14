@@ -110,9 +110,13 @@
 	background : no-repeat transparent;
 	height : 16px;
 	width : 16px;
-	display: block;
+	display: inline-block;
 	margin : 0 auto;
 	padding-right : 3px;
+}
+
+.x-panel-icon.ico {
+    display: block;
 }
 
 .x-grouptabs-text.ico,
@@ -218,6 +222,9 @@
 .ico.user,
 .ico_user {
 	background-image: url("../images/icons/user.png") !important;
+}
+.ico.reset {
+    background-image: url("../images/icons/arrow_rotate_anticlockwise.png") !important;
 }
 .ico.tick,
 .ico_tick {
