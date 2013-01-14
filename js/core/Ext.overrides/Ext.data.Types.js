@@ -22,13 +22,32 @@
  */
 
 /**
- *
- * @since 2012-12-11 18:41
+ * @since 2012-12-18 12:48 (Code previously living in overrides.js)
  */
 
-.eo-form-panel .x-panel-body,
-.eo-form {
-    padding: 10px;
-    background-color: transparent;
-    /*border: 2px solid red;*/
-}
+// Fix Int data type to actually return NULL if the value cannot be parsed
+Ext.data.Types.INT.convert = function(v) {
+	var r = v !== undefined && v !== null && v !== '' ?
+		parseInt(String(v).replace(Ext.data.Types.stripRe, ''), 10)
+		: (this.useNull ? null : 0);
+	return Ext.isNumber(r) ? r : (this.useNull ? null : 0);
+};
+
+(function() {
+	var o = Ext.data.Types.DATE,
+		uber = o.convert,
+		iso = {
+			dateFormat: 'Y-m-d\\TH:i:s'
+		},
+		sql = {
+			dateFormat: 'Y-m-d H:i:s'
+		};
+
+	o.convert = function(v) {
+		if (!v) return null;
+		if (Ext.isDate(v)) return v;
+		return uber.call(this, v) || uber.call(iso, v) || uber.call(sql, v);
+	}
+})();
+
+Oce.deps.reg('eo.Ext.data.Types');
