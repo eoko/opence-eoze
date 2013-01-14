@@ -1,0 +1,124 @@
+div.wizard.progress.simple {
+	float: right;
+	width: 50%;
+}
+
+div.wizard.progress.simple h2,
+div.wizard.progress.simple h1 {
+	border-bottom: 1px solid #99BBE8;
+/*	text-align: right;*/
+	float: right;
+	clear: both;
+	padding-right: 10px;
+	padding-left: 15px;
+	width: 100%;
+}
+div.wizard.progress.simple h2 {
+	margin-top: 0;
+	font-weight: normal;
+	width: 80%;
+}
+
+div.wizard.progress ul.progress {
+	clear: both;
+/*	text-align: justify;*/
+/*	float: right;*/
+/*	margin-right: 10px;*/
+}
+
+div.wizard.progress.detailled ul.progress li {
+	margin-bottom: 5px;
+	margin-top: 5px;
+	/* padding-right must be compasated for sublists, to avoid reccursively
+		apply the padding
+		=> see div.wizard.progress.detailled ul ul.bullets */
+	padding-right: 15px; 
+	text-align: left;
+}
+div.wizard.progress.detailled ul ul.bullets {
+	/* prevent from incrementing the padding for each sublist */
+	margin-right: -15px;
+}	
+
+div.wizard.progress.detailled ul.progress ul.progress li {
+	margin-bottom: 3px;
+	margin-top: 3px;
+}
+div.wizard.progress.detailled ul ul {
+	margin-left: 10px;
+}
+
+div.wizard.progress ul.progress li {
+	background-repeat: no-repeat;
+	background-position: top right;
+	background-image: url(../../images/icons/bullet_white.png);
+}
+div.wizard.progress.simple ul li {
+/*	display: inline;*/
+	width: 16px;
+	height: 16px;
+}
+div.wizard.progress.simple ul li {
+	float: left;
+	margin: 0 5px;
+}
+
+div.wizard.progress span.currentParent {
+	font-weight: bold;
+}
+
+div.wizard.progress ul li.current {
+	background-image: url(../../images/icons/bullet_green.png);
+	font-weight: bold;
+	border-bottom: 1px solid #99BBE8;
+}
+
+div.wizard.progress ul li.final {
+	background-image: url(../../images/icons/bullet_star_white.png);
+}
+div.wizard.progress ul li.final.current {
+	background-image: url(../../images/icons/bullet_star.png);
+}
+
+div.wizard.progress ul li.unresolved {
+	background-image: url(../../images/icons/bullet_yellow.png);
+}
+
+div.wizard.progress ul li.hasSub {
+	background-image: url(../../images/icons/bullet_arrow_down_white.png);
+}
+div.wizard.progress ul li.hasSub.activeTree {
+	background-image: url(../../images/icons/bullet_arrow_down.png);
+}
+
+div.wizard.progress div.desc {
+/*	margin-top: 15px;*/
+}
+div.wizard.progress .desc hr {
+	border: 0;
+/*	border-top: 1px solid #99BBE8;*/
+	width: 50%;
+	margin: 10px auto;
+}
+div.wizard.progress .desc h1 {
+	color: #15428B;
+	margin-bottom: 5px;
+	border-bottom: 1px solid;
+}
+div.wizard.progress .desc h2 {
+	margin-top: 5px;
+}
+div.wizard.progress .desc h2 span.desc,
+div.wizard.progress .desc h1 span.desc {
+	display: block;
+	font-weight: normal;
+	color: #444;
+}
+div.wizard.progress .desc p.explain {
+	font-style: oblique;
+	margin-top: 5px;
+}
+
+div.wizard.progress .desc p.explain strong {
+	font-weight: bold;
+}
