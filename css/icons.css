@@ -110,9 +110,13 @@
 	background : no-repeat transparent;
 	height : 16px;
 	width : 16px;
-	display: block;
+	display: inline-block;
 	margin : 0 auto;
 	padding-right : 3px;
+}
+
+.x-panel-icon.ico {
+    display: block;
 }
 
 .x-grouptabs-text.ico,
