@@ -11,7 +11,6 @@
 Ext4.define('Eoze.modules.DataSnapshots.view.Main', {
 	
 	extend: 'Ext4.Panel'
-	,mixins: ['Deft.mixin.Controllable']
 	,controller: 'Eoze.modules.DataSnapshots.controller.Module'
 	
 	,requires: [
