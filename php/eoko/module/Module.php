@@ -197,7 +197,9 @@ class Module implements file\Finder {
 			throw new \RuntimeException('Cannot parse namespace: ' . $phpNamespace);
 		}
 
-		$namespace = $matches['prefix'] . '.' . $matches['middle'] . '.' . ucfirst($matches['suffix']);
+		$namespace = $matches['prefix']
+			. ($matches['middle'] ? '.' . $matches['middle'] : '')
+			. '.' . ucfirst($matches['suffix']);
 
 		// Namespace aliases
 		foreach (ConfigManager::get(__CLASS__ . '/extjs4/namespaceAliases') as $base => $alias) {
