@@ -8,5 +8,6 @@
 
 .eo-form-body {
 	padding: 5px;
-	background: #eee;
+	/*background: #eee;*/
+	background: transparent;
 }
