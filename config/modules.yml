@@ -17,6 +17,7 @@ used:
   eoko:
     - GridModule
     - root
+    - AjaxRouter
     - MediaManager
     - CrocodocViewer
     - AccessControl

@@ -1,3 +1,4 @@
+<?php
 /**
  * Copyright (C) 2012 Eoko
  *
@@ -21,14 +22,36 @@
  * @author Éric Ortega <eric@eoko.fr>
  */
 
-/**
- *
- * @since 2012-12-11 18:41
- */
+namespace eoko\modules\AjaxRouter;
 
-.eo-form-panel .x-panel-body,
-.eo-form {
-    padding: 10px;
-    background-color: transparent;
-    /*border: 2px solid red;*/
+use eoko\module\executor\JsonExecutor;
+use eoko\module\ModuleManager;
+
+/**
+ * Executor providing configuration for AjaxRouter.
+ *
+ * @category Eoze
+ * @package AjaxRouter
+ * @subpackage Module
+ * @since 2012-12-18 10:27
+ */
+class Config extends JsonExecutor {
+
+	public function getRoutesConfig() {
+
+		$routes = array();
+
+		foreach (ModuleManager::listModules() as $module) {
+			/** @var \eoko\module\Module $module */
+			if ($module instanceof HasAjaxRoutes || method_exists($module, 'getAjaxRoutes')) {
+				/** @var HasAjaxRoutes $module */
+				$moduleRoutes = $module->getAjaxRoutes();
+				$routes = array_merge($routes, $module->getAjaxRoutes());
+			}
+		}
+
+		$this->set('routes', $routes);
+
+		return true;
+	}
 }

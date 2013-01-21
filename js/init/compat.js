@@ -182,7 +182,9 @@ var define = function(cls, o, createFn) {
 	
 	if (deps) {
 		Oce.deps.wait(deps, function() {
-			parent = resolve(parentCls);
+			if (parentCls) {
+				parent = resolve(parentCls);
+			}
 			define();
 		});
 	} else {
@@ -279,6 +281,13 @@ Ext.String.format = function() {
 };
 
 
+// --- Mixed collection ---
+
+(function(p) {
+	p.sortByKey = p.keySort;
+})(Ext.util.MixedCollection.prototype);
+
+
 // --- QuickTips: use only Ext4 manager, dismiss Ext3's entirely ---
 
 if (Ext.QuickTips.isEnabled()) {
@@ -323,7 +332,9 @@ Ext.Window.prototype.beforeResize = Ext.Function.createSequence(Ext.Window.proto
 // Fix menu z-index
 Ext.menu.Menu.prototype.zIndex = 60000;
 
+
 // --- Element ---
+
 (function(p) {
 	p.addCls = p.addClass;
 	p.removeCls = p.removeClass;

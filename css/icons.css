@@ -223,6 +223,9 @@
 .ico_user {
 	background-image: url("../images/icons/user.png") !important;
 }
+.ico.reset {
+    background-image: url("../images/icons/arrow_rotate_anticlockwise.png") !important;
+}
 .ico.tick,
 .ico_tick {
 	background-image: url("../images/icons/tick.png") !important;

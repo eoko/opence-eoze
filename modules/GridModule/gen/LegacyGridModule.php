@@ -108,6 +108,17 @@ class LegacyGridModule {
 			}
 		}
 
+//// This was expected to be used by Ajax router... Not been yet.
+//
+//		// --- Slug ---
+//		if (!isset($extra['slug'])) {
+//			if (isset($moduleConfig['slug'])) {
+//				$extra['slug'] = $moduleConfig['slug'];
+//			} else {
+//				$extra['slug'] = strtolower($module->getName());
+//			}
+//		}
+
 		// --- Year ---
 		if (method_exists($table, 'isAnnualized')) {
 			if (isset($extra['year'])) {
