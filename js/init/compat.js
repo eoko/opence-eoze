@@ -303,6 +303,9 @@ Ext.Window.prototype.beforeResize = Ext.Function.createSequence(Ext.Window.proto
 	this.toFront(false);
 });
 
+// Fix menu z-index
+Ext.menu.Menu.prototype.zIndex = 60000;
+
 // --- Element ---
 (function(p) {
 	p.addCls = p.addClass;
