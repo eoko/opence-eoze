@@ -122,6 +122,26 @@
 					// (the module main tab resizing itself 50ms after they
 					// are shown)
 					,layoutOnTabChange: true
+
+					,itemTpl: new Ext.Template(
+						'<li class="{cls}" id="{id}"><a class="x-tab-strip-close"></a>',
+						'<a class="x-tab-right" href="{href}"><em class="x-tab-left">',
+						'<span class="x-tab-strip-inner"><span class="x-tab-strip-text {iconCls}">{text}</span></span>',
+						'</em></a></li>'
+					)
+					,getTemplateArgs: function(item) {
+						var args = Ext.TabPanel.prototype.getTemplateArgs.apply(this, arguments);
+						return Ext.apply(args, {
+							href: item.href
+						});
+					}
+
+					,listeners: {
+						tabchange: function(panel, tab) {
+							eo.AjaxRouter.setActivePage(tab);
+						}
+					}
+
 				}, Oce.mx.TaskBar = new Oce.TaskBarToolbar({
 					height: 26
 					,id:"window-dock"

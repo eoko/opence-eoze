@@ -181,7 +181,9 @@ var define = function(cls, o, createFn) {
 	
 	if (deps) {
 		Oce.deps.wait(deps, function() {
-			parent = resolve(parentCls);
+			if (parentCls) {
+				parent = resolve(parentCls);
+			}
 			define();
 		});
 	} else {
@@ -276,5 +278,9 @@ Ext.ns('Ext.String');
 Ext.String.format = function() {
 	return String.format.apply(String, arguments);
 };
+
+
+// Mixed collection
+Ext.util.MixedCollection.prototype.sortByKey = Ext.util.MixedCollection.prototype.keySort;
 
 } // end of compat patches

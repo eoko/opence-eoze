@@ -1,3 +1,4 @@
+<?php
 /**
  * Copyright (C) 2012 Eoko
  *
@@ -21,14 +22,16 @@
  * @author Éric Ortega <eric@eoko.fr>
  */
 
-/**
- *
- * @since 2012-12-11 18:41
- */
+namespace eoko\modules\AjaxRouter;
 
-.eo-form-panel .x-panel-body,
-.eo-form {
-    padding: 10px;
-    background-color: transparent;
-    /*border: 2px solid red;*/
+/**
+ * Interface for modules exposing client-side Ajax routes.
+ *
+ * @category Eoze
+ * @package AjaxRouter
+ * @since 2012-12-18 10:30
+ */
+interface HasAjaxRoutes {
+
+	public function getAjaxRoutes();
 }
