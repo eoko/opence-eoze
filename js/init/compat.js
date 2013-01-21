@@ -303,4 +303,10 @@ Ext.Window.prototype.beforeResize = Ext.Function.createSequence(Ext.Window.proto
 	this.toFront(false);
 });
 
+// --- Element ---
+(function(p) {
+	p.addCls = p.addClass;
+	p.removeCls = p.removeClass;
+})(Ext.Element.prototype);
+
 } // end of compat patches
