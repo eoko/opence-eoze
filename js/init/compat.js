@@ -8,7 +8,8 @@ if (Ext.Compat) {
 //	Ext.Compat.silent = true;
 }
 
-else if (console && console.warn) {
+else {
+//else if (console && console.warn) {
 
 //console.warn('Dead code');
 
@@ -280,7 +281,63 @@ Ext.String.format = function() {
 };
 
 
-// Mixed collection
-Ext.util.MixedCollection.prototype.sortByKey = Ext.util.MixedCollection.prototype.keySort;
+// --- Mixed collection ---
+
+(function(p) {
+	p.sortByKey = p.keySort;
+})(Ext.util.MixedCollection.prototype);
+
+
+// --- QuickTips: use only Ext4 manager, dismiss Ext3's entirely ---
+
+if (Ext.QuickTips.isEnabled()) {
+	Ext.QuickTips.disable();
+	Ext4.tip.QuickTipManager.enable();
+}
+Ext.QuickTips = Ext4.tip.QuickTipManager;
+
+
+// --- Ext3 & 4 window z-index conflicts ---
+
+// Use Ext4.WindowManager
+Ext.WindowMgr = Ext4.WindowManager;
+
+// Ext4.WindowManager rely on the presence of isComponent
+Ext.Component.prototype.isComponent = true;
+
+// setZIndex must return the next index to be used
+Ext.Window.prototype.setZIndex = (function() {
+	var uber = Ext.Window.prototype.setZIndex;
+	return function(index) {
+		uber.apply(this, arguments);
+		return Ext.isDefined(this.lastZIndex) ? this.lastZIndex : index + 10;
+	}
+})();
+
+// A window ghost be use the same z-index as the window (which has probably just
+// been brought to front by startDrag).
+Ext.Window.DD.prototype.startDrag = Ext.Function.createSequence(Ext.Window.DD.prototype.startDrag, function() {
+	var w = this.win,
+		g = w.activeGhost;
+	if (g) {
+		g.setStyle('z-index', w.el.getZIndex());
+	}
+});
+
+// The window should be brought to front before resize
+Ext.Window.prototype.beforeResize = Ext.Function.createSequence(Ext.Window.prototype.beforeResize, function () {
+	this.toFront(false);
+});
+
+// Fix menu z-index
+Ext.menu.Menu.prototype.zIndex = 60000;
+
+
+// --- Element ---
+
+(function(p) {
+	p.addCls = p.addClass;
+	p.removeCls = p.removeClass;
+})(Ext.Element.prototype);
 
 } // end of compat patches

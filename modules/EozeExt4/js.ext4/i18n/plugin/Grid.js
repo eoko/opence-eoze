@@ -8,8 +8,6 @@ Ext4.define('Eoze.i18n.plugin.Grid', {
 	
 	extend: 'Ext4.AbstractPlugin'
 	
-	,mixins: ['Deft.mixin.Injectable']
-	
 	,inject: ['locale']
 	
 	,alias: ['plugin.i18n.Grid']
