@@ -266,7 +266,7 @@ class Router {
 		}
 
 		// Log roll
-		if ($this->requestMonitorRecord->getId() % 100 === 0) {
+		if ($this->requestMonitorRecord && $this->requestMonitorRecord->getId() % 100 === 0) {
 			MonitorRequestTable::createQuery()
 				->andWhere('(`finish_state` != "OK" AND `datetime` < DATE_SUB(NOW(), INTERVAL 14 DAY))'
 				. 'OR (`finish_state` = "OK" AND `datetime` < DATE_SUB(NOW(), INTERVAL 2 DAY))')
