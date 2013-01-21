@@ -10,8 +10,6 @@ Ext4.define('Eoze.i18n.plugin.Form', {
 	
 	extend: 'Ext4.AbstractPlugin'
 	
-	,mixins: ['Deft.mixin.Injectable']
-	
 	,inject: ['locale']
 	
 	,alias: ['plugin.i18n.Form']
