@@ -230,9 +230,13 @@ if (!Array.prototype.indexOf) {
     }
 }
 
-eo.warn = function() {
+eo.warn = function(message) {
 	if (console) {
-		(console.warn || console.log).apply(console, arguments);
+		if (console.warn) {
+			console.warn(message);
+		} else if (console.log) {
+			console.log(message);
+		}
 	}
 };
 
