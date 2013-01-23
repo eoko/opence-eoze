@@ -118,7 +118,7 @@ Ext.reg = function(xtype, cls) {
 var setClass = function(cls, o) {
 	var parts = cls.split('.'),
 		name = parts.pop();
-	Ext.namespace(parts.join('.'))[name] = o;
+	return Ext.namespace(parts.join('.'))[name] = o;
 };
 
 var alias = function(aliases, c) {
@@ -169,10 +169,10 @@ var define = function(cls, o, createFn) {
 		c.prototype.$className = cls;
 		alias(o.alias, c);
 		if (cls) {
-			setClass(cls, c);
+			var C = setClass(cls, c);
 
 			if (previous) {
-				Ext.apply(cls, previous);
+				Ext.apply(C, previous);
 			}
 
 			Ext.reg(cls, cls);
