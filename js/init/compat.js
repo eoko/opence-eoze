@@ -142,7 +142,8 @@ var alias = function(aliases, c) {
 var define = function(cls, o, createFn) {
 	var parentCls,
 		parent,
-		deps;
+		deps,
+		previous = cls && resolve(cls, false);
 
 	if (o.extend) {
 		parentCls = o.extend;
@@ -169,6 +170,11 @@ var define = function(cls, o, createFn) {
 		alias(o.alias, c);
 		if (cls) {
 			setClass(cls, c);
+
+			if (previous) {
+				Ext.apply(cls, previous);
+			}
+
 			Ext.reg(cls, cls);
 			Oce.deps.reg(cls);
 		}
