@@ -28,7 +28,7 @@
  */
 Ext.define('eo.AjaxRouter.Route', {
 
-	requires: ['eo.AjaxRouter']
+//	requires: ['eo.AjaxRouter']
 
 	/**
 	 * @property {RegExp|RegExp[]} regex
@@ -51,7 +51,7 @@ Ext.define('eo.AjaxRouter.Route', {
 	 * @param {String} [config.regex]
 	 * @param {Object} config.constraints RegExp associated to the param name in the spec.
 	 */
-	,constructor: function(config) {
+	constructor: function(config) {
 		Ext.apply(this, config);
 
 		// name as array
