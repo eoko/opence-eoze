@@ -26,4 +26,4 @@ RewriteRule ^doc\b                                  doc
 RewriteRule ^eoze/doc\b                             eoze/doc
 
 RewriteRule ^$                                      index.php
-RewriteRule !\.(js|ico|gif|jpg|png|css)$            index.php
+RewriteRule !\.(js|ico|gif|jpg|png|css|svg)$            index.php
