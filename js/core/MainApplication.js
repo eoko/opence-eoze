@@ -57,17 +57,37 @@
 		}
 
 		,loadConfiguration: function(callback) {
-			eo.Ajax.request({
-				params: {
-					controller: 'root.application'
-					,action: 'configure'
+			Ext4.onReady(function() {
+				var latch = 2,
+					dt;
+
+				function next() {
+					if (--latch === 0) {
+						callback(dt.config, dt);
+					}
 				}
-				,scope: this
-				,success: function(data) {
-					var cfg = this.initialConfig = data.config;
-					callback(cfg, data);
-				}
-			});
+
+				Opence.Opence.model.Configuration.load('default', {
+					scope: this
+					,success: function(record) {
+						this.openceConfiguration = record;
+						next();
+					}
+				});
+
+				eo.Ajax.request({
+					params: {
+						controller: 'root.application'
+						,action: 'configure'
+					}
+					,scope: this
+					,success: function(data) {
+						dt = data;
+						this.initialConfig = data.config;
+						next();
+					}
+				});
+			}, this);
 		}
 
 		,doStart: function(config) {
