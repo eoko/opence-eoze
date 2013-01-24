@@ -1,0 +1,183 @@
+/* 
+    Document   : eo.form.calendar
+    Created on : 14 déc. 2011, 17:04:15
+    Author     : eric
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+/* 
+   TODO customize this sample style
+   Syntax recommendation http://www.w3.org/TR/REC-CSS2/
+*/
+
+.eo-calendar-month-ct {
+	clear: both;
+	position: relative;
+}
+
+.eo-calendar-month-handle {
+	width: 20px;
+	background-color: #0F0;
+/*	margin: 0 2px;*/
+	float: left;
+	border: 1px solid #FFF;
+	background: #Fee url(../../images/icons_fatcow/16x16/lock.png) 50% 50% no-repeat;
+}
+.eo-calendar-month-ct.editable .eo-calendar-month-handle {
+	background: #eFe url(../../images/icons_fatcow/16x16/lock_open.png) 50% 50% no-repeat;
+}
+.eo-calendar-month-ct.editable .eo-calendar-month-handle:hover {
+	cursor: pointer;
+/*	border: 1px solid #F77;*/
+	background-color: #FFe;
+	background-image: url(../../images/icons_fatcow/16x16/lock.png);
+}
+.eo-calendar-month-ct.editable .eo-calendar-month-handle:active {
+	background-color: #Fbb;
+}
+
+.eo-calendar-month-table-ct {
+	position: relative;
+	margin-bottom: 4px;
+}
+
+.eo-calendar-month-mask {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	
+	background-color: #FEE;
+	opacity: .4;
+	
+	display: none;
+}
+.eo-calendar-month-mask {
+    text-align: center;
+    font-size: 25px;
+    font-weight: bold;
+    padding-top: 43px;
+}
+.eo-calendar-month-ct.readOnly .eo-calendar-month-mask {
+	display: block;
+}
+
+table.eo-calendar-month {
+	font-family: monospace;
+	border-collapse: collapse;
+	border: 1px solid #E6E6E6;
+	border: 1px solid #FFF;
+}
+.eo-calendar-month-ct.lockable table.eo-calendar-month {
+/*	margin-left: 21px;*/
+}
+
+table.eo-calendar-month th {
+	font-weight: bold;
+	padding: 0 2px;
+}
+
+table.eo-calendar-month th,
+table.eo-calendar-month td {
+	text-align: center;
+	width: 30px;
+}
+
+/**
+ * Disabled cells (TD & TH)
+ */
+table.eo-calendar-month th.disabled.day.week-end,
+table.eo-calendar-month td.disabled.day.week-end {
+	background-color: #F0DFDF;
+}
+table.eo-calendar-month th.disabled,
+table.eo-calendar-month td.disabled {
+	background-color: #F9EDED;
+}
+table.eo-calendar-month tr.zone td.disabled .marker {
+	opacity: .3;
+}
+/**************************************************************************************************/
+
+table.eo-calendar-month thead {
+	border-bottom: 1px solid #FFF;
+}
+table.eo-calendar-month tr.zone.group-first {
+	border-top: 1px solid #FFF;
+}
+
+table.eo-calendar-month .day {
+	background-color: #F6F6F6;
+}
+table.eo-calendar-month .day.week-end {
+	background-color: #E6E6E6;
+}
+
+table.eo-calendar-month .row-label {
+	background-color: #AC1C73;
+	color: #fff;
+	line-height: 100%;
+	width: 40px;
+}
+table.eo-calendar-month .row-label div {
+	overflow: hidden;
+	width: 40px;
+}
+
+table.eo-calendar-month .row-label.main {
+	padding-left: 4px;
+	padding-right: 4px;
+	font-size: 13px;
+}
+
+table.eo-calendar-month tr.zone {
+	height: 16px;
+}
+
+table.eo-calendar-month tr.zone td {
+	padding: 2px 0;
+}
+
+table.eo-calendar-month tr.zone td .marker {
+	width: 100%;
+	height: 12px;
+	position: relative;
+	opacity: .7;
+}
+table.eo-calendar-month tr.zone td .marker.on {
+	background-color: red;
+	background-color: #FA7384;
+}
+
+table.eo-calendar-month tr.zone.editable th:hover,
+table.eo-calendar-month tr.zone.editable td:hover {
+	cursor: pointer;
+/*	border: 1px solid red;*/
+}
+
+/** Custom zones **/
+table.eo-calendar-month tr.zone.A .marker.on {
+	background-color: #F5B963;
+}
+table.eo-calendar-month tr.zone.B .marker.on {
+	background-color: #63B2ED;
+}
+table.eo-calendar-month tr.zone.C .marker.on {
+	background-color: #ABE200;
+}
+
+table.eo-calendar-month tr.zone.M .marker.on {
+	background-color: #FAF673;
+}
+
+table.eo-calendar-month tr.zone .marker.B {
+	background-color: #F5B963;
+}
+table.eo-calendar-month tr.zone .marker.M {
+	background-color: #FAF673;
+}
+table.eo-calendar-month tr.zone .marker.H {
+	background-color: #FA7384;
+}

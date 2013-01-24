@@ -1,0 +1,13 @@
+/* 
+    Document   : Ext4.form.Panel
+    Created on : 4 oct. 2012, 13:47:21
+    Author     : eric
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+.eo-form-body {
+	padding: 5px;
+	/*background: #eee;*/
+	background: transparent;
+}
