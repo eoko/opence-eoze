@@ -82,13 +82,6 @@ eo.app.Application = Ext.extend(Ext.util.Observable, {
 		this.prefsManager.get(path, callback, scope);
 	}
 
-	/**
-	 * @return {Opence.Opence.model.Configuration}
-	 */
-	,getOpenceConfiguration: function() {
-		return this.app.openceConfiguration;
-	}
-
 });
 
 (function() {
@@ -99,6 +92,12 @@ eo.app.Application = Ext.extend(Ext.util.Observable, {
 	eo.getApplication = function() {
 		return app;
 	};
+	/**
+	 * @return {Opence.Opence.model.Configuration}
+	 */
+	eo.getOpenceConfiguration = function() {
+		return app.app.openceConfiguration;
+	}
 })(); // closure
 
 Oce.deps.reg('eo.app.Application');

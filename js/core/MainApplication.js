@@ -57,6 +57,7 @@
 		}
 
 		,loadConfiguration: function(callback) {
+			Ext4.require('Opence.Opence.model.Configuration');
 			Ext4.onReady(function() {
 				var latch = 2,
 					dt;
