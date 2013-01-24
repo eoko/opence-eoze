@@ -6,9 +6,9 @@
  */
 Ext.define('eo.ext4.compat.Ext4Container', {
 	
-	extend: 'Ext.Container'
+	extend: 'Ext.BoxComponent'
 	,alias: ['widget.compat.container']
-	
+
 	,afterRender: function() {
 		
 		this.on('resize', function() {
