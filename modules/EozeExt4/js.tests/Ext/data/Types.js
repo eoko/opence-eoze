@@ -25,7 +25,9 @@
  *
  * @since 2012-11-28 16:40
  */
-describe('Eoze.Ext.data.Types', function () {
+describe('Eoze.Ext.data.Types', function (Ext) {
+
+	Ext = window.Ext4 || window.Ext;
 
 	it('DAYDATE type should exist', function () {
 		expect(Ext.data.Types.DAYDATE).toBeDefined();
