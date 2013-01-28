@@ -269,7 +269,7 @@ Ext4.define('Eoze.context.Context', {
 	 */
 	,onSet: function(field, value) {
 		var data = this.data,
-			previousValue = data[value];
+			previousValue = data[field];
 
 		value = Ext4.value(value, null);
 
