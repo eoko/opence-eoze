@@ -25,11 +25,19 @@ Ext.ns('eo');
 
 /**
  *
+ * Child options:
+ *
+ * -   `flex`
+ *     Percentage string or ratio float.
+ *     If applied, the child item height will be kept at this ration of the ScrollPanel height.
+ *
  * @since 2013-01-27 20:10
  */
 eo.ScrollPanel = Ext.extend(Ext.Panel, {
 
 	autoScroll: true
+
+	,cls: 'eo-scroll-panel'
 
 	,initComponent: function() {
 
@@ -57,12 +65,51 @@ eo.ScrollPanel = Ext.extend(Ext.Panel, {
 				text: title
 				,scrollTarget: item
 				,itemId: 'nav-' + item.id
+				,isNavButton: true
 			}, defaults));
 
 			if (i === 0) {
 				button.toggle(true);
 			}
 		}, this);
+	}
+
+	,onResize: function() {
+		this.callParent(arguments);
+
+		if (!this.resizingChildren) {
+			this.resizingChildren = true;
+
+			var bodyHeight = this.body.getHeight();
+
+			this.items.each(function(item) {
+				var flex = item.flex;
+				if (flex) {
+					var grep = /^(\d+)\s*%$/.exec(flex),
+						pc = grep ? grep[1] / 100 : flex;
+					item.setHeight(bodyHeight * pc - item.el.getMargins('tb'));
+				}
+			});
+
+			this.resizingChildren = false;
+		}
+
+		// Scroll active component into view
+		var currentNavTarget = this.getCurrentNavTarget();
+		if (currentNavTarget) {
+			this.scrollChildIntoView(currentNavTarget);
+		}
+	}
+
+	/**
+	 * @return {Ext.Component}
+	 * @private
+	 */
+	,getCurrentNavTarget: function() {
+		var activeNavButton = this.getTopToolbar().findBy(function(button) {
+			return button.isNavButton && button.pressed;
+		});
+		return activeNavButton && activeNavButton[0].scrollTarget;
 	}
 
 	,afterRender: function() {
@@ -148,10 +195,10 @@ eo.ScrollPanel = Ext.extend(Ext.Panel, {
 
 	,onScrollToChild: function(button) {
 //		button.scrollTarget.el.scrollIntoView(this.body, false, true);
-		this.scrollToChild(button.scrollTarget, false, true);
+		this.scrollChildIntoView(button.scrollTarget, false, true);
 	}
 
-	,scrollToChild: function(item, hscroll, animate) {
+	,scrollChildIntoView: function(item, hscroll, animate) {
 		var itemEl = item.el,
 			container = this.body;
 
