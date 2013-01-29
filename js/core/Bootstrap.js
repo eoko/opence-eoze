@@ -50,7 +50,10 @@ Oce.Bootstrap = function() {
 }
 
 Ext.onReady(function() {
-	if (!eo.isUnitTestEnv()) {
-		new Oce.Bootstrap().start();
-	}
+	// Wait for Ext4 Loader to be ready too
+	Ext4.onReady(function() {
+		if (!eo.isUnitTestEnv()) {
+			new Oce.Bootstrap().start();
+		}
+	});
 });
