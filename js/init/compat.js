@@ -269,6 +269,7 @@ if (Ext.QuickTips.isEnabled()) {
 	Ext4.tip.QuickTipManager.enable();
 }
 Ext.QuickTips = Ext4.tip.QuickTipManager;
+Ext4.require('Eoze.Ext3.CompatibilityFixes');
 
 
 // --- Ext3 & 4 window z-index conflicts ---
