@@ -87,7 +87,7 @@ Ext4.define('Eoze.modules.CkEditor.form.field.CkEditor', {
 		};
 	}()
 
-	,setValue: function(value) {
+	,setRawValue: function(value) {
 		this.callParent(arguments);
 		if (this.editorReady) {
 
@@ -101,8 +101,11 @@ Ext4.define('Eoze.modules.CkEditor.form.field.CkEditor', {
 		return this;
 	}
 
-	,getValue: function() {
-		return this.ckEditor.getData();
+	,getRawValue: function() {
+		var me = this,
+			v = (me.editorReady ? this.ckEditor.getData() : Ext.value(me.rawValue, ''));
+		me.rawValue = v;
+		return v;
 	}
 
 	,afterComponentLayout:function (width, height) {
