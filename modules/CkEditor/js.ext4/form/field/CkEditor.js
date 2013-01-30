@@ -53,17 +53,9 @@ Ext4.define('Eoze.modules.CkEditor.form.field.CkEditor', {
 
 		editor.on('instanceReady', function() {
 			editor.resize(this.width, this.height);
-
-			// Inject content style
-			if (this.contentStyle) {
-				this.injectInlineStyle(this.contentStyle);
-			}
+			this.editorReady = true;
+			this.setValue(this.value || '');
 		}, this);
-
-		// Value
-		if (this.value) {
-			editor.setData(this.value);
-		}
 	}
 
 	// private
@@ -97,8 +89,14 @@ Ext4.define('Eoze.modules.CkEditor.form.field.CkEditor', {
 
 	,setValue: function(value) {
 		this.callParent(arguments);
-		if (this.ckEditor) {
+		if (this.editorReady) {
+
 			this.ckEditor.setData(value);
+
+			// Inject content style
+			if (this.editorReady) {
+				this.injectInlineStyle(this.contentStyle);
+			}
 		}
 		return this;
 	}
