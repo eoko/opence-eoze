@@ -330,6 +330,15 @@ JS;
 				);
 			}
 			$baseJsFiles = array_merge($baseJsFiles, $module->listLineFilesUrl('glob:*.js', 'js.base', true));
+
+			if ($module instanceof \eoko\module\traits\HasJavascriptFiles) {
+				$moduleJsUrls = $module->getModuleJavascriptUrls();
+				if (isset($moduleJsUrls['base'])) {
+					$baseJsFiles = array_merge($baseJsFiles, $moduleJsUrls['base']);
+					unset($moduleJsUrls['base']);
+				}
+				$autoJsFiles = array_merge($autoJsFiles, $moduleJsUrls);
+			}
 		}
 
 		foreach($baseJsFiles as $url) {

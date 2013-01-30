@@ -21,6 +21,8 @@ Ext4.define('Eoze.lib.Eoze', {
 		// Date
 		'Eoze.Ext.Date',
 		// Model
-		'Eoze.Ext.data.association.HasOne'
+		'Eoze.Ext.data.association.HasOne',
+		// CkEditor
+		'Eoze.modules.CkEditor.form.field.CkEditor'
 	]
 });
