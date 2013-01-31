@@ -28,10 +28,10 @@ use eoko\module\Module;
 use eoko\module\traits\HasJavascriptFiles;
 
 /**
+ * CkEditor module.
  *
- * @category Opence
- * @package
- * @subpackage
+ * @category Eoze
+ * @package CkEditor
  * @since 2013-01-30 14:32
  */
 class CkEditor extends Module implements HasJavascriptFiles {
