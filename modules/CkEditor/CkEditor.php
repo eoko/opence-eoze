@@ -38,9 +38,8 @@ class CkEditor extends Module implements HasJavascriptFiles {
 
 	public function getModuleJavascriptUrls() {
 		return array(
-			'base' => array($this->getBaseUrl() . 'ckeditor_custom/ckeditor.js'),
-//			'base' => array($this->getBaseUrl() . 'ckeditor/ckeditor.js'),
-//			'base' => array($this->getBaseUrl() . 'ckeditor_basic/ckeditor.js'),
+			// the ? will prevent merge/compilation of this file
+			'base' => array($this->getBaseUrl() . 'ckeditor_custom/ckeditor.js?!'),
 		);
 	}
 
