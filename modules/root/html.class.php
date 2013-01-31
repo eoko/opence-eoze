@@ -13,6 +13,7 @@ use eoko\template\HtmlRootTemplate\PassThroughCompiler;
 use eoko\template\HtmlRootTemplate\JavascriptCompiler;
 use eoko\template\HtmlRootTemplate\CssCompiler;
 use eoko\template\HtmlRootTemplate\ExtJsCompiler;
+use eoko\module\traits\HasJavascriptFiles;
 
 class Html extends BasicHtmlExecutor {
 
@@ -331,7 +332,8 @@ JS;
 			}
 			$baseJsFiles = array_merge($baseJsFiles, $module->listLineFilesUrl('glob:*.js', 'js.base', true));
 
-			if ($module instanceof \eoko\module\traits\HasJavascriptFiles) {
+			if ($module instanceof HasJavascriptFiles) {
+				/** @var HasJavascriptFiles $module */
 				$moduleJsUrls = $module->getModuleJavascriptUrls();
 				if (isset($moduleJsUrls['base'])) {
 					$baseJsFiles = array_merge($baseJsFiles, $moduleJsUrls['base']);
