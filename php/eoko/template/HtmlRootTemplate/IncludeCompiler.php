@@ -35,6 +35,9 @@ abstract class IncludeCompiler {
 
 	protected $force = false;
 
+	/**
+	 * @var Callback
+	 */
 	private $builder;
 
 	private $urls;
@@ -120,8 +123,11 @@ abstract class IncludeCompiler {
 	 */
 	public function compile($prioritizedUrls) {
 
-		$names = $this->getTargetNames();
-		extract($names);
+		/** @var $mergedFile */
+		/** @var $mergedUrl */
+		/** @var $compressedFile */
+		/** @var $compressedUrl */
+		extract($this->getTargetNames());
 
 		// Merge
 		if ($this->is('merge')) {
@@ -166,12 +172,15 @@ abstract class IncludeCompiler {
 	private function build() {
 
 		$names = $this->getTargetNames();
-		extract($names); // mergedFile & mergedUrl
+
+		/** @var $mergedFile */
+		/** @var $mergedUrl */
+		extract($names);
 
 		// if configured to merge
 		if ($this->is('merge')) {
 			// if already merged: done
-			if (file_exists($mergedFile)) {
+			if (false && file_exists($mergedFile)) {
 				$this->urls = array($mergedUrl);
 				return;
 			}
@@ -233,7 +242,7 @@ abstract class IncludeCompiler {
 	 *	 array(
 	 *		 'http://my.url/myFile.js' => 1,
 	 *	 )
-	 * @param bool $keepRemoteUrls `true` to add raw remote URLs to the returned array.
+	 * @param int[] &$url
 	 * @param bool $removeLocalUrls `true` to remove local URLs from the passed $urls array.
 	 * @return string[]
 	 */
@@ -252,6 +261,12 @@ abstract class IncludeCompiler {
 					unset($urls[$url]);
 				}
 			} else if (!$this->isPreserveRemoteUrl()) {
+				// Including ?! at the end of the URL is a mean to prevent them from being
+				// merged, but that may also burst the browser cache. We don't want that,
+				// so we clean the url.
+				if (substr($url, -2) === '?!') {
+					$url = substr($url, 0, -2);
+				}
 				$files[$priority][] = $url;
 			}
 		}
