@@ -1,3 +1,4 @@
+//noinspection JSLastCommaInArrayLiteral
 /**
  *
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
@@ -23,6 +24,8 @@ Ext4.define('Eoze.lib.Eoze', {
 		// Model
 		'Eoze.Ext.data.association.HasOne',
 		// CkEditor
-		'Eoze.modules.CkEditor.form.field.CkEditor'
+		'Eoze.modules.CkEditor.form.field.CkEditor',
+		// Cursor
+		'Eoze.Cursor',
 	]
 });
