@@ -13,7 +13,7 @@ RewriteRule ^jsod/([^/]*)/([^/]*)\.mod\.js$         index.php?controller=$1&acti
 RewriteRule ^jsod/([^/]*)/([^/]*).js$	            index.php?controller=$1&action=get_js&name=$2
 
 # Modules images
-RewriteRule ^(?:modules|Opence)/(?:[^/]*)/_images/(.*)$	    eoze/images/$1
+RewriteRule ^(?:modules|Opence)/(?:.*)/_images/(.*)$	    eoze/images/$1
 
 # Protect configuration files
 RewriteRule \.(sql|yml|ini|xml)$                    eoze/php/error404.php [L]
