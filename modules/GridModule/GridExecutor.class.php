@@ -1277,6 +1277,10 @@ MSG;
 		return $this->earl;
 	}
 
+	protected function getCeAddress() {
+		return '';
+	}
+
 	public function export() {
 
 		set_time_limit(180);
@@ -1368,12 +1372,7 @@ MSG;
 		$user = UserSession::getUser();
 
 		$report = $earl->createReport()
-				->setAddress(<<<TXT
-CE Rhodia - Site Belle Étoile
-BP 103
-69192 SAINT FONS CEDEX
-TXT
-				)
+				->setAddress($this->getCeAddress())
 				->setTitle($this->makePdfTitle())
 				->setUser($user->getDisplayName(User::DNF_PRETTY))
 				->setUserEmail($user->getEmail());
