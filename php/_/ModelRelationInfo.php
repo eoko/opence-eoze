@@ -568,8 +568,27 @@ abstract class ModelRelationInfoByReference extends ModelRelationInfo {
 
 	protected $uniqueBy;
 
+	protected $whereJoin;
+
 	function  __construct($name, ModelTableProxy $localTable, ModelTableProxy $targetTableProxy, $referenceField) {
 		parent::__construct($name, $localTable, $targetTableProxy);
+
+		if (is_array($referenceField)) {
+			// Extract join where
+			if (isset($referenceField['where'])) {
+				$this->whereJoin = $referenceField['where'];
+			}
+
+			// Extract reference field name
+			if (isset($referenceField['name'])) {
+				$referenceField = $referenceField['name'];
+			} else if (isset($referenceField['field'])) {
+				$referenceField = $referenceField['field'];
+			} else {
+				throw new IllegalArgumentException('Reference field must contain "name" or "field".');
+			}
+		}
+
 		$this->referenceField = $referenceField;
 	}
 
@@ -577,14 +596,18 @@ abstract class ModelRelationInfoByReference extends ModelRelationInfo {
 
 		$this->targetTable->addJoinWhere($join);
 
+		if ($this->whereJoin) {
+			$join->andWhere($this->whereJoin);
+		}
+
 		if ($this->uniqueBy) {
 			foreach ($this->uniqueBy as $foreign => $local) {
 				if (is_array($local)) {
-						if (isset($local['value'])) {
-							$join->whereAssoc($foreign, $local['value']);
-						} else {
-							throw new UnsupportedOperationException();
-						}
+					if (isset($local['value'])) {
+						$join->whereAssoc($foreign, $local['value']);
+					} else {
+						throw new UnsupportedOperationException();
+					}
 				} else {
 					$join->andWhere(
 						$join->getQualifiedName($local, QueryJoin::TABLE_LOCAL)
