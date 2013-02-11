@@ -2650,8 +2650,10 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				name: col.dataIndex || col.name
 			}, col.store));
 		}
-		
-		if (this.columnPositions) {
+
+		if (this.columnPositions
+				// ensure that columns have not changed since the prefs were saved
+				&& (this.gridColumns.length == this.gridColumns.length - initialColumns.length)) {
 			var ordered = initialColumns;
 			Ext.each(this.columnPositions, function(name) {
 				ordered.push(columnConfigMap[name]);
