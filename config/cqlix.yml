@@ -1,0 +1,4 @@
+config.node: eoko\cqlix\Generator
+
+relation:
+  trimLocalTablePrefix: true

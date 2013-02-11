@@ -1,0 +1,35 @@
+/*!
+ * Ext JS Library 3.3.0
+ * Copyright(c) 2006-2010 Ext JS, Inc.
+ * licensing@extjs.com
+ * http://www.extjs.com/license
+ */
+/**
+ * RangeMenu Styles
+ **/
+.ux-rangemenu-gte {
+	background-image: url(images/filters/gte.png) !important;
+}
+
+.ux-rangemenu-lte {
+    background-image: url(images/filters/lte.png) !important;
+}
+
+.ux-rangemenu-gt {
+	/*background-image: url(../images/greater_than.png) !important;*/
+	background-image: url(images/filters/gt.png) !important;
+}
+
+.ux-rangemenu-lt {
+	/*background-image: url(../images/less_than.png) !important;*/
+    background-image: url(images/filters/lt.png) !important;
+}
+
+.ux-rangemenu-eq {
+	/*background-image: url(../images/equals.png) !important;*/
+    background-image: url(images/filters/eq.png) !important;
+}
+
+.ux-rangemenu-neq {
+    background-image: url(images/filters/neq.png) !important;
+}
