@@ -2656,7 +2656,12 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				&& (this.gridColumns.length == this.gridColumns.length - initialColumns.length)) {
 			var ordered = initialColumns;
 			Ext.each(this.columnPositions, function(name) {
-				ordered.push(columnConfigMap[name]);
+				var col = columnConfigMap[name];
+				if (col) {
+					ordered.push(columnConfigMap[name]);
+				} else {
+					eo.warn("Missing configuration for column: " + name);
+				}
 			});
 			this.gridColumns = ordered;
 		}
