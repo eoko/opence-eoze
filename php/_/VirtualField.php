@@ -1,6 +1,7 @@
 <?php
 
 use eoko\cqlix\FieldMetadata;
+use eoko\cqlix\Aliaser;
 
 interface VirtualField extends ModelField {
 
@@ -184,10 +185,20 @@ class AgeVirtualField extends VirtualFieldBase {
 		return true;
 	}
 
+	public function getSortClause($dir, Aliaser $aliaser) {
+		// Invert dir, because date is growing in the opposite direction compared to age
+		$dir = $dir === 'DESC' ? 'ASC' : 'DESC';
+		return parent::getSortClause($dir, $aliaser);
+	}
+
+	public function getDateField(Aliaser $aliaser) {
+		return $aliaser->alias($this->dateField);
+	}
+
 	// Age virtual field is just for display... Sorting on this field would
 	// result in sorting alphabetically, not chronologically.
 	// ... So let's sort on the real date field, instead.
-	protected function doGetSortClause(QueryAliasable $aliaser) {
+	protected function doGetSortClause(Aliaser $aliaser) {
 		return $aliaser->alias($this->dateField);
 	}
 
