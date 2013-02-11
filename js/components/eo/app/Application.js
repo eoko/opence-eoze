@@ -66,8 +66,25 @@ eo.app.Application = Ext.extend(Ext.util.Observable, {
 		}, this);
 
 		app.afterStart = Ext.Function.createSequence(app.afterStart, function() {
+			this.started = true;
 			this.fireEvent('started', this);
 		}, this);
+	}
+
+	/**
+	 * @param {Function} callback
+	 * @param {Object} scope
+	 */
+	,onStarted: function(callback, scope) {
+		if (this.started) {
+			callback.call(scope || this, this);
+		} else {
+			this.on({
+				single: true
+				,started: callback
+				,scope: scope
+			});
+		}
 	}
 
 	,getYearManager: function() {

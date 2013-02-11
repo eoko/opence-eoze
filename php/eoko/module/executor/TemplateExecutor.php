@@ -3,7 +3,6 @@
 namespace eoko\module\executor;
 
 use eoko\template\Template;
-use \UnsupportedOperationException, \IllegalStateException;
 
 /**
  * Base class for executors, that implements __get and __set methods for the
@@ -12,7 +11,7 @@ use \UnsupportedOperationException, \IllegalStateException;
 abstract class TemplateExecutor extends ExecutorBase {
 
 	/** 
-	 * @var HtmlTemplate the current action default template
+	 * @var \eoko\template\HtmlTemplate the current action default template
 	 */
 	private $myTemplate = null;
 
@@ -44,6 +43,16 @@ abstract class TemplateExecutor extends ExecutorBase {
 		return $this->getTemplate()->getData();
 	}
 
+	/**
+	 * Sets one or multiple data variable value.
+	 *
+	 * @param string|array $name
+	 * @param mixed|null $value
+	 */
+	public function set($name, $value = null) {
+		$this->getTemplate()->set($name, $value);
+	}
+
 	public function __set($name, $value) {
 		if ($this->myTemplate) {
 			$this->myTemplate->__set($name, $value);
@@ -73,6 +82,8 @@ abstract class TemplateExecutor extends ExecutorBase {
 	}
 
 	/**
+	 * @param string $in
+	 * @param mixed $value
 	 * @return Template
 	 */
 	protected function push($in, $value) {
@@ -80,6 +91,9 @@ abstract class TemplateExecutor extends ExecutorBase {
 	}
 
 	/**
+	 * @param string $in
+	 * @param string $key
+	 * @param mixed $value
 	 * @return Template
 	 */
 	protected function put($in, $key, $value) {
@@ -88,7 +102,7 @@ abstract class TemplateExecutor extends ExecutorBase {
 
 	/**
 	 * @param string|array Array $_1
-	 * @param array|unset $_2
+	 * @param array $_2
 	 * @return Template
 	 */
 	protected function merge($_1, $_2 = null) {
