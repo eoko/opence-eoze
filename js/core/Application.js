@@ -148,15 +148,24 @@ Oce.MainApplication = {
 	,getMainDestination: function() {
 		return Ext.getCmp('main-destination');
 	}
-    
+
+	/**
+	 * Get the currently displayed module.
+	 *
+	 * @return {Oce.BaseModule/null}
+	 */
     ,getFrontModule: function() {
         var md = this.getMainDestination(),
             t = md && md.getActiveTab();
-        if (t && t.getActiveModule) {
-            return t.getActiveModule();
-        } else {
-            return t.module;
-        }
+        if (t) {
+			if (t.getActiveModule) {
+				return t.getActiveModule();
+			} else {
+				return t.module;
+			}
+		} else {
+			return null;
+		}
     }
 };
 
