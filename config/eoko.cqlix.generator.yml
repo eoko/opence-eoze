@@ -1,0 +1,10 @@
+*:
+  applies: /^.*$/
+  modelNameFormat: $1
+#  extends: myModel
+  # alternative syntaxe:
+  extends:
+    model: myModel | eoko\cqlix\ExtendedModel
+    table: myModelTable | ModelTable
+    query: myQuery | ModelTableQuery
+    proxy: ModelTableProxy

@@ -1,0 +1,1 @@
+This folder contains overrides of Ext4 classes by Eoze i18n bundle.
