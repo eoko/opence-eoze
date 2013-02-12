@@ -337,6 +337,17 @@ Ext.Window.prototype.beforeResize = Ext.Function.createSequence(Ext.Window.proto
 
 // Fix menu z-index
 Ext.menu.Menu.prototype.zIndex = 60000;
+// Fix combo list z-index
+Ext.form.ComboBox.prototype.getZIndex = function(listParent){
+	listParent = listParent || Ext.getDom(this.getListParent() || Ext.getBody());
+	var zindex = parseInt(Ext.fly(listParent).getStyle('z-index'), 10);
+	if(!zindex){
+		zindex = this.getParentZIndex();
+	}
+	// rx: changed 12000 to 62000
+	return (zindex || 62000) + 5;
+};
+
 
 
 // --- Element ---

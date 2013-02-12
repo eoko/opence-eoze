@@ -17,15 +17,15 @@ Oce.deps.wait('eo.form.ClearableComboBox', function() {
 		}
 
 		,constructor: function(cfg) {
-			
+
 			if (!cfg) cfg = {};
-			
+
 			if (!cfg.data) {
 				cfg = Ext.apply({
 					data: []
 				}, cfg);
 			}
-			
+
 			this.oData = {};
 
 			var data;
@@ -88,7 +88,7 @@ Oce.deps.wait('eo.form.ClearableComboBox', function() {
 //			debugger;
 //			Oce.form.SimpleChainedCombo.superclass.doQuery.apply(this, arguments);
 //		}
-			
+
 		,afterRender: function() {
 			Oce.form.SimpleChainedCombo.superclass.afterRender.apply(this, arguments);
 
@@ -116,7 +116,7 @@ Oce.deps.wait('eo.form.ClearableComboBox', function() {
 								return true;
 							}
 						}
-						
+
 						if (!ch && v == recV) ch = true;
 
 						return false;
@@ -125,11 +125,11 @@ Oce.deps.wait('eo.form.ClearableComboBox', function() {
 					if (ch) {
 						me.setValue(store.data.items[0] !== undefined ? store.data.items[0].data.value : null);
 					}
-					
+
 					me.onFocus();
 				}
 			}
-			
+
 			var listener = function(combo, record, i) {
 				filter(record.data[me.chainedField]);
 			};
@@ -148,11 +148,11 @@ Oce.deps.wait('eo.form.ClearableComboBox', function() {
 //					}
 //				});
 			}
-			
+
 			me.doQuery(); // this will set the lastQuery value, else the first
 			// doQuery call will clearFilter on the store
 			filter(other.getValue());
-			
+
 			if (other instanceof Ext.util.Observable) {
 				other.on('select', listener, this);
 			} else if (Ext.isString(other)) {
@@ -165,6 +165,11 @@ Oce.deps.wait('eo.form.ClearableComboBox', function() {
 
 	Ext.reg('oce.simplechainedcombo', 'Oce.form.SimpleChainedCombo');
 
+	/**
+	 * @class Oce.form.ForeignComboBox
+	 * @deprecated The design of this class is too old and suffers from inexperience beyond repair. Use
+	 * cached combos or develop alternatives from scratch.
+	 */
 	Oce.form.ForeignComboBox = Ext.extend(eo.form.ClearableComboBox, {
 
 //REM (unused) 		hasLoading: true
@@ -177,17 +182,17 @@ Oce.deps.wait('eo.form.ClearableComboBox', function() {
 		 * and won't depend on server side processing after that.
 		 */
 		remoteOnce: false
-		
+
 		,triggerAction: 'all'
 
 		,constructor: function(cfg) {
 
 			var me = this;
-			
+
 			// inherits class config (very dirty hack, yeah... this class
 			// is doomed anyway)
 //			cfg = Ext.apply(Ext.apply({}, this), cfg);
-			
+
 			var storeBaseParams = Ext.apply({
 				controller: cfg.controller,
 				action: cfg.action || 'auto_complete'
@@ -201,7 +206,7 @@ Oce.deps.wait('eo.form.ClearableComboBox', function() {
 				url: 'index.php'
 
 				,baseParams: storeBaseParams
-				
+
 				,root: 'data'
 				,fields: ['id', 'name']
 
@@ -252,7 +257,7 @@ Oce.deps.wait('eo.form.ClearableComboBox', function() {
 								this.onStoreFirstLoaded();
 								storeLoaded = true;
 							}
-							
+
 							// If the selected item is not in the first page size
 							// limit, then the server will send an additional row
 							// for the selected value, so that the value can correctly
@@ -363,7 +368,7 @@ Oce.deps.wait('eo.form.ClearableComboBox', function() {
 		}
 
 		,onStoreFirstLoaded: function() {
-			
+
 			if (this.remoteOnce) this.mode = 'local';
 
 			// init setValue
@@ -417,7 +422,7 @@ Oce.deps.wait('eo.form.ClearableComboBox', function() {
 //				me.setValue = Oce.form.ForeignComboBox.superclass.setValue;
 				this.setValue = this.doSetValue;
 			}
-			
+
 			// initialisation value callback
 			if (this.initialisationValueCallback) {
 				this.initialisationValueCallback.call(
@@ -432,7 +437,7 @@ Oce.deps.wait('eo.form.ClearableComboBox', function() {
 		}
 
 		,initialisationValue: undefined
-		
+
 		// private
 		,doSetValue: function(v) {
 			if (v === undefined) {
@@ -537,4 +542,5 @@ Oce.deps.wait('eo.form.ClearableComboBox', function() {
 	Ext.reg('oce.foreigncombo', 'Oce.form.ForeignComboBox');
 
 	Oce.deps.reg('Oce.form.ForeignComboBox');
-})
+});
+
