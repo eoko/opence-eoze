@@ -51,6 +51,12 @@ class BaseModule extends Module implements HasTitle, HasMenuActions {
 		return $this->actionProvider;
 	}
 
+	protected function setPrivateState(&$vals) {
+		$this->actionProvider = $vals['actionProvider'];
+		unset($vals['actionProvider']);
+		parent::setPrivateState($vals);
+	}
+
 	public function getTitle() {
 		$config = $this->getConfig()->get('module');
 		if (isset($config['title'])) {
