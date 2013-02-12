@@ -25,6 +25,12 @@ class JsonExecutor extends TemplateExecutor {
 	}
 
 	protected function processResult($result, $return = false) {
+		// Hack upon legacy
+		if (is_array($result)) {
+			$this->getTemplate()->merge($result);
+			$result = true;
+		}
+		// Legacy
 		if (is_bool($result)) {
 			$tpl = $this->getTemplate();
 			$tpl->mergeWithWarning(ExtJSResponse::toArray(), $this);
