@@ -126,9 +126,13 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
             }
         });
         
-        var lu = this.tabsByName = {};
+        var lu = this.tabsByName = {},
+			slu = this.tabsBySlug = {};
         Ext.each(this.findBy(function(o) { return !Ext.isEmpty(o.tabName) }), function(item) {
             lu[item.tabName] = item;
+			var slug = item.slug || item.tabName.toLowerCase().replace(/\s/g, '-');
+			item.slug = slug;
+			slu[slug] = item;
         });
 
         this.modified = false;
@@ -358,7 +362,9 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
     ,setTab: function(tabName) {
         if (this.tabsByName[tabName]) {
             this.tabsByName[tabName].show();
-        }
+        } else if (this.tabsBySlug[tabName]) {
+			this.tabsBySlug[tabName].show();
+		}
     }
 
     ,whenLoaded: function(callback, scope) {
