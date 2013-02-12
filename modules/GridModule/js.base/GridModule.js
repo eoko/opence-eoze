@@ -725,7 +725,10 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			}
 		});
 		this.savePrefs('columns', config);
-		this.savePrefs('columnPositions', positions);
+		this.savePrefs('columnPositions', {
+			columns: positions
+			,version: eo.getApplication().getOpenceVersion()
+		});
 	}
 	
 	/**
@@ -2606,7 +2609,9 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	
 	,buildGridColumnsConfig: function() {
 		
-		var defaults = this.getGridColumnDefaults();
+		var defaults = this.getGridColumnDefaults(),
+			columns = this.columns,
+			renderers = this.renderers;
 		
 		var columnConfigMap = {},
 			initialColumns = [];
@@ -2616,9 +2621,9 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		});
 
 		var col;
-		for (var i=0,l=this.columns.length; i<l; i++) {
+		for (var i=0,l=columns.length; i<l; i++) {
 
-			col = this.columns[i];
+			col = columns[i];
 
 			// Primary
 			if (col.primary) {
@@ -2634,7 +2639,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			});
 
 			if (Ext.isString(col.renderer)) {
-				col.renderer = this.renderers[col.renderer];
+				col.renderer = renderers[col.renderer];
 			}
 			if (((col.formField && col.formField.xtype === "htmleditor")
 					|| (col.type && col.type === "htmleditor"))
@@ -2680,19 +2685,23 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			}, col.store));
 		}
 
-		if (this.columnPositions
-				// ensure that columns have not changed since the prefs were saved
-				&& (this.gridColumns.length == this.gridColumns.length - initialColumns.length)) {
-			var ordered = initialColumns;
-			Ext.each(this.columnPositions, function(name) {
-				var col = columnConfigMap[name];
-				if (col) {
-					ordered.push(columnConfigMap[name]);
-				} else {
-					eo.warn("Missing configuration for column: " + name);
-				}
-			});
-			this.gridColumns = ordered;
+		// --- User Preference: positions of the columns
+
+		var columnPositions = this.columnPositions;
+		if (columnPositions && columnPositions.version === eo.getApplication().getOpenceVersion()) {
+			var positions = columnPositions && columnPositions.columns;
+			if (positions) {
+				var ordered = initialColumns;
+				Ext.each(positions, function(name) {
+					var col = columnConfigMap[name];
+					if (col) {
+						ordered.push(columnConfigMap[name]);
+					} else {
+						eo.warn("Missing configuration for column: " + name);
+					}
+				});
+				this.gridColumns = ordered;
+			}
 		}
 	}
 
