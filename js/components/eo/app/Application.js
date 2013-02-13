@@ -99,6 +99,18 @@ eo.app.Application = Ext.extend(Ext.util.Observable, {
 		this.prefsManager.get(path, callback, scope);
 	}
 
+	/**
+	 * Gets the version of the currently running Opence client/server pair.
+	 *
+	 * Can be used to clean version dependent cache, like for example user preferences depending
+	 * on the existence of some specific fields.
+	 *
+	 * @return {String}
+	 */
+	,getOpenceVersion: function () {
+		return eo.getOpenceConfiguration().get('versionId');
+	}
+
 });
 
 (function() {
