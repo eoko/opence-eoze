@@ -26,6 +26,7 @@
  * @since 2013-01-29 05:54
  */
 
+.x4-mask-msg.x-mask-loading-bar,
 .ext-el-mask-msg.x-mask-loading-bar {
     border: 0;
 
@@ -37,6 +38,7 @@
     background: transparent url("../images/Eoze.LoadMask/loading-bar.gif") no-repeat center;
     background-size: contain;
 }
+.x4-mask-msg.x-mask-loading-bar div,
 .ext-el-mask-msg.x-mask-loading-bar div {
     background: none;
     border: 0;
