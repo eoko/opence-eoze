@@ -28,7 +28,7 @@ class SessionManager {
 
 	public function __construct() {
 
-		$path = MY_EOZE_PATH . '/sessions';
+		$path = TMP_PATH . '/sessions';
 		session_save_path($path);
 		if (!file_exists($path)) {
 			mkdir($path, 0700);
