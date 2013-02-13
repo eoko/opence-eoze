@@ -27,5 +27,7 @@ Ext4.define('Eoze.lib.Eoze', {
 		'Eoze.modules.CkEditor.form.field.CkEditor',
 		// Cursor
 		'Eoze.Cursor',
+		// Plugins
+		'Eoze.form.field.mixin.DependsOnCheckbox',
 	]
 });
