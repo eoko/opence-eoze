@@ -163,6 +163,12 @@ class ModuleManager {
 		return self::$modulesDirectories;
 	}
 
+	/**
+	 * List all modules.
+	 *
+	 * @param bool $onlyWithDir
+	 * @return Module[]
+	 */
 	public static function listModules($onlyWithDir = false) {
 		$self = self::getInstance();
 		$config = ConfigManager::get(__NAMESPACE__);
