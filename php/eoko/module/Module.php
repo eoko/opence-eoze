@@ -481,6 +481,14 @@ MSG
 		return $this->name;
 	}
 
+	/**
+	 * @param string $separator
+	 * @return string
+	 */
+	public function getFullyQualifiedName($separator = '/') {
+		return str_replace('.', $separator, $this->makeExt4Namespace($this->namespace));
+	}
+
 	public function getBasePath() {
 		if ($this->basePath === null) {
 			throw new IllegalStateException("Module $this->name has no directory");
