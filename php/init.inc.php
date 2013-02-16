@@ -184,79 +184,26 @@ if ((!isset($test) || !$test) && (!isset($is_script) || !$is_script)
 	require_once (PHP_PATH . '_/ExceptionHandler.php');
 }
 
-// --- Class loader --
-// Autoload for helpers in /inc
-require_once PHP_PATH . 'eoko' . DS . 'php' . DS . 'ClassLoader.php';
-$classLoader = eoko\php\ClassLoader::register();
 
-$classLoader->addIncludePath(array(
-	PHP_PATH,
-	APP_PHP_PATH,
-));
+// === Bootstrap ===
 
-foreach (explode(':', get_include_path()) as $path) {
-	if ($path !== '.') {
-		$classLoader->addIncludePath($path);
-	}
-}
-
-if (USE_CONTROLLER_CACHE) $classLoader->addIncludePath(CACHE_PATH . 'php');
-
-// removed on 2/26/11 2:27 PM
-//foreach ($phpSubDirs as $dir) {
-//	$classLoader->addIncludePath(PHP_PATH . $dir . DS);
-//	$classLoader->addIncludePath(APP_PHP_PATH . $dir . DS);
-//}
-
-// === Configure application ===
+// ClassLoader not plugged yet!
+require_once __DIR__ . '/eoko/application/Bootstrap.php';
+require_once __DIR__ . '/eoko/application/BaseBootstrap.php';
 
 if (function_exists('configure_application')) {
 	$bootstrap = configure_application();
 }
-if (!isset($bootstrap)) $bootstrap = new \eoko\application\BaseBootstrap();
+
+if (!isset($bootstrap)) {
+	$bootstrap = new \eoko\application\BaseBootstrap();
+}
+
 $bootstrap();
 
 
-// Load directories configuration (from eoze\application)
-function loadAppConfig($classLoader) {
-	$appConfig = ConfigManager::get('eoze\application');
-	if (isset($appConfig['directories'])) {
-		$dc = $appConfig['directories'];
-		if (isset($dc['models'])) {
-			$m = $dc['models'];
-			if (substr($m, -1) !== DS) $m .= DS;
-			define('MODEL_PATH', ROOT . $m);
-			define('MODEL_BASE_PATH', MODEL_PATH . 'base' . DS);
-			define('MODEL_PROXY_PATH', MODEL_PATH . 'proxy' . DS);
-
-			$classLoader->addIncludePath(array(
-				MODEL_PATH, MODEL_PROXY_PATH
-			));
-		}
-	}
-}
-
-loadAppConfig($classLoader);
-
-// === Configure Plugins ===
-
-eoko\plugin\PluginManager::init();
-
-$sessionManager = new eoko\php\SessionManager();
-Application::setDefaultSessionManager($sessionManager);
-$userSession = new \eoko\security\UserSessionHandler\LegacyWrapper($sessionManager);
-
-if (ConfigManager::get('eoko/routing', 'comet', false)) {
-	CometEvents::start(TMP_PATH, $userSession, $sessionManager);
-}
-
-// Finally, start the session (must be done after the autoloader has been set,
-// so that object stored in session (notably: UserSession) can be instantiated)
-//session_start();
-
-//require_once 'debug.inc.php'; // there's nothing in there...
-
 // == Logging ==
+
 if (ConfigManager::get('eoko/log/appenders/Output') || isset($_GET['olog'])) {
 	Logger::addAppender(new LoggerOutputAppender());
 }
@@ -279,7 +226,13 @@ if (!defined('ADD_LOG_APPENDERS') || ADD_LOG_APPENDERS) {
 	}
 }
 
+
+// == File types ==
+
 \eoko\util\file\FileTypes::getInstance();
+
+
+// == Routing ==
 
 if ((!isset($test) || !$test)
 		&& (!isset($is_script) || !$is_script)
