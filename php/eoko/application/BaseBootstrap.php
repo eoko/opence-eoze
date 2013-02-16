@@ -57,10 +57,6 @@ class BaseBootstrap extends Bootstrap {
 			}
 		}
 
-		if (USE_CONTROLLER_CACHE) {
-			$classLoader->addIncludePath(CACHE_PATH . 'php');
-		}
-
 		$classLoader->addIncludePath(array(
 			MODEL_PATH, MODEL_PROXY_PATH
 		));
@@ -93,12 +89,16 @@ class BaseBootstrap extends Bootstrap {
 	}
 
 	/**
+	 *
+	 * Requires: paths, config
+	 *
 	 * @param SessionManager $sessionManager
 	 * @param UserSession $userSession
 	 */
 	protected function initCometEvents(SessionManager $sessionManager, $userSession) {
 		if (ConfigManager::get('eoko/routing', 'comet', false)) {
-			CometEvents::start(TMP_PATH, $userSession, $sessionManager);
+			$path = Application::getInstance()->resolvePath('tmp');
+			CometEvents::start($path, $userSession, $sessionManager);
 		}
 	}
 }
