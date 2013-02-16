@@ -10,7 +10,7 @@ Oce.ClassLoader = function() {
     var loadedClasses = {};
 
     var rawRequestMaker = function(controller, action, name) {
-        return 'index.php?controller=' + controller + '&action=' + action + '&name=' + name;
+        return 'api?controller=' + controller + '&action=' + action + '&name=' + name;
     };
     var htaccessRequestMaker = function(controller, action, name) {
         return 'jsod/' + controller + '/' + name + (action == 'get_module' ? '.mod' : '') + '.js';

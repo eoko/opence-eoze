@@ -84,7 +84,7 @@ Ext.define('eo.ui.menu.tree.Menu', {
 			})
 			
 			,iconStore: new Ext.ux.data.PagingStore({
-				url: 'index.php'
+				url: 'api'
 				,autoLoad: false
 				,baseParams: {
 					controller: this.controller

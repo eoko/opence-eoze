@@ -291,7 +291,7 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 
 //		var store = this.store = new Ext.data.JsonStore(Ext.apply({
 		var store = this.store = Ext.widget(Ext.apply({
-			url: 'index.php'
+			url: 'api'
 			,totalProperty: 'count'
 			,idProperty: this.pkName
 			,baseParams: Ext.apply({

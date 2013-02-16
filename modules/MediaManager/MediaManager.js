@@ -143,7 +143,7 @@ Oce.Modules.MediaManager.MediaManager = Ext.extend(Oce.Modules.MediaManager.Medi
 
     ,uploadFile: function(fileSelector, v, path) {
         this.uploadForm.submit({
-            url: "index.php"
+            url: "api"
             ,params: {
                 controller: "media.grid" // TODO modularize
                 ,action: "upload"

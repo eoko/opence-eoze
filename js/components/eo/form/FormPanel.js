@@ -18,7 +18,7 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
         });
 
         config = Ext.applyIf(config || {}, {
-             url:"index.php"
+             url:"api"
             ,bodyStyle: "background:transparent"
             ,padding: 10
             ,border: false
@@ -385,7 +385,7 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
         var win = this.win;
         
         var options = {
-            url: "index.php"
+            url: "api"
 //            ,params: params
             ,waitMsg: "Chargement des données" // i18n
             ,waitTitle: "Veuillez patientez" // i18n

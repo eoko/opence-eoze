@@ -198,7 +198,7 @@ Oce.deps.wait('eo.form.ClearableComboBox', function() {
 			}
 
 			this.store = new Ext.data.JsonStore({
-				url: 'index.php'
+				url: 'api'
 
 				,baseParams: storeBaseParams
 				
