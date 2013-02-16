@@ -206,11 +206,15 @@ Ext.define = function(cls, o, createFn) {
 			var matches = /^(?:(.*)\.)?([^.]+)$/.exec(cls),
 				name = matches[2],
 				ns = matches[1],
-				node = window;
+				node = window,
+				previous = node[name];
 			if (ns) {
 				node = resolve(ns, true);
 			}
 			node[name] = instance;
+			if (previous) {
+				Ext.apply(node[name], previous);
+			}
 		}
 		return instance;
 	} else {
