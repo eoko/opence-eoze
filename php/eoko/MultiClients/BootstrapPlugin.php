@@ -72,7 +72,7 @@ class BootstrapPlugin {
 	 * @param \eoko\php\SessionManager $sessionManager
 	 */
 	public function initUserSession(SessionManager $sessionManager) {
-		$clientsConfigFile = $this->rootPath . '/Clients.config.php';
+		$clientsConfigFile = $this->rootPath . '/MultiClients.config.php';
 		if (file_exists($clientsConfigFile)) {
 			$clientsConfig = require $clientsConfigFile;
 			UserSession::setLoginAdapter(new LoginAdapter($clientsConfig, $sessionManager));
