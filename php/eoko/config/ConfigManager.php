@@ -153,10 +153,23 @@ class ConfigManager {
 	}
 
 	/**
+	 * This method will throw an exception if the configuration has already been loaded in memory.
+	 *
+	 * @throws \RuntimeException
+	 */
+	public static function init() {
+		if (self::$instance) {
+			throw new \RuntimeException('Already started');
+		}
+	}
+
+	/**
 	 * @return ConfigManager
 	 */
 	public static function getInstance() {
-		if (self::$instance === null) self::$instance = new ConfigManager();
+		if (self::$instance === null) {
+			self::$instance = new ConfigManager();
+		}
 		return self::$instance;
 	}
 
