@@ -200,20 +200,20 @@ var define = function(cls, o, createFn) {
 
 Ext.define = function(cls, o, createFn) {
 	if (o.singleton) {
-		var constructor = define(cls, o, createFn),
+		var previous = resolve(cls, false),
+			constructor = define(cls, o, createFn),
 			instance = new constructor;
 		if (cls) {
 			var matches = /^(?:(.*)\.)?([^.]+)$/.exec(cls),
 				name = matches[2],
 				ns = matches[1],
-				node = window,
-				previous = node[name];
+				node = window;
 			if (ns) {
 				node = resolve(ns, true);
 			}
 			node[name] = instance;
 			if (previous) {
-				Ext.apply(node[name], previous);
+				Ext.apply(instance, previous);
 			}
 		}
 		return instance;
