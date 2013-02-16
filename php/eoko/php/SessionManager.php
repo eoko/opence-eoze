@@ -26,13 +26,13 @@ class SessionManager {
 
 	private $data = null;
 
-	public function __construct() {
+	public function __construct($path) {
 
-		$path = TMP_PATH . '/sessions';
-		session_save_path($path);
 		if (!file_exists($path)) {
 			mkdir($path, 0700);
 		}
+
+		session_save_path($path);
 
 		session_set_save_handler(
 			array($this, "open"), 

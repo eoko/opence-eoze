@@ -17,11 +17,11 @@ class BaseBootstrap extends Bootstrap {
 
 		$classLoader = $this->registerClassLoader();
 
-		parent::__invoke();
-
-		$this->loadDirectoriesConfiguration($classLoader);
-
 		$sessionManager = $this->initSessionManager();
+
+		$this->initConfigManager($sessionManager);
+
+		parent::__invoke();
 
 		$userSession = $this->initUserSession($sessionManager);
 
@@ -61,43 +61,27 @@ class BaseBootstrap extends Bootstrap {
 			$classLoader->addIncludePath(CACHE_PATH . 'php');
 		}
 
+		$classLoader->addIncludePath(array(
+			MODEL_PATH, MODEL_PROXY_PATH
+		));
+
 		return $classLoader;
-	}
-
-	protected function loadDirectoriesConfiguration($classLoader) {
-
-		$appConfig = ConfigManager::get('eoze\application');
-
-		if (isset($appConfig['directories'])) {
-
-			$dc = $appConfig['directories'];
-
-			if (isset($dc['models'])) {
-
-				$m = $dc['models'];
-
-				if (substr($m, -1) !== DS) {
-					$m .= DS;
-				}
-
-				define('MODEL_PATH', ROOT . $m);
-				define('MODEL_BASE_PATH', MODEL_PATH . 'base' . DS);
-				define('MODEL_PROXY_PATH', MODEL_PATH . 'proxy' . DS);
-
-				$classLoader->addIncludePath(array(
-					MODEL_PATH, MODEL_PROXY_PATH
-				));
-			}
-		}
 	}
 
 	/**
 	 * @return SessionManager
 	 */
 	protected function initSessionManager() {
-		$sessionManager = new SessionManager();
+		$sessionManager = new SessionManager(ROOT . '/.eoze/session');
 		Application::setDefaultSessionManager($sessionManager);
 		return $sessionManager;
+	}
+
+	/**
+	 * @param SessionManager $sessionManager
+	 */
+	protected function initConfigManager(SessionManager $sessionManager) {
+		ConfigManager::init();
 	}
 
 	/**

@@ -99,7 +99,9 @@ class ModuleManager {
 		// The class autoloader may be called before the ModuleManager instance
 		// has been created, or in the process of its creation. In this case,
 		// these are not Modules classes that are searched.
-		if (!self::$instance) return false;
+		if (!self::$instance) {
+			return false;
+		}
 
 		if (false !== $module = self::$instance->testGetModuleNamespace($class)) {
 			$module = self::getModule($module);
@@ -209,8 +211,11 @@ class ModuleManager {
 	 * @return ModuleManager
 	 */
 	public static function getInstance() {
-		if (self::$instance) return self::$instance;
-		else return self::createInstance();
+		if (self::$instance) {
+			return self::$instance;
+		} else {
+			return self::createInstance();
+		}
 	}
 
 	/**
