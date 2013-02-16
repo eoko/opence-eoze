@@ -3,7 +3,7 @@
 namespace eoko\cqlix;
 
 use eoko\modules\Kepler\CometEvents;
-use eoko\modules\Kepler\Observable as CometObservable;
+//use eoko\modules\Kepler\Observable as CometObservable;
 
 /**
  * Intermediary {@link Model} class, intended to hold overridings that should
@@ -13,7 +13,9 @@ use eoko\modules\Kepler\Observable as CometObservable;
  * @author Éric Ortega <eric@planysphere.fr>
  * @since 1 déc. 2011
  */
-abstract class ExtendedModel extends Model implements CometObservable {
+abstract class ExtendedModel extends Model {
+	// ExtendedModel implements eoko\modules\Kepler\Observable, but we don't declare it
+	// because some model may be created before the module class loader is set
 
 	protected $cometEvents = true;
 

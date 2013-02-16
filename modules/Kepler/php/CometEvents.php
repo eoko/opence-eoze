@@ -156,7 +156,9 @@ class CometEvents {
 	 */
 	private function pushIn(&$queue, $fromOther, $category, $class, $name, array $args = null) {
 		if (is_object($class)) {
-			if ($class instanceof Observable) {
+			// We cannot rely on the interface Observable because it is implemented by models
+			// which may be required to be initializable before the module class loader is set
+			if (method_exists($class, 'getCometObservableName')) {
 				$class = $class->getCometObservableName();
 			} else {
 				$class = get_class($class);
