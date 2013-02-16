@@ -154,6 +154,9 @@ class UserSession {
 	private static $loginAdapter;
 
 	public static function setLoginAdapter(LoginAdapter $adapter) {
+		if (self::$loginAdapter) {
+			throw new \RuntimeException('LoginAdapter already set!');
+		}
 		self::$loginAdapter = $adapter;
 	}
 
