@@ -33,21 +33,6 @@ if (file_exists($filename = ROOT . '../config.php')
 if (!defined('APP_NAME')) define('APP_NAME', 'opence');
 if (!defined('APP_TITLE')) define('APP_TITLE', 'Open.CE');
 
-// removed on 2/26/11 2:27 PM
-//$phpSubDirs = array(
-//	'GridModule'
-//);
-
-// deprecated on 2/26/11 2:10 PM
-//if (!isset($dbConfig)) {
-//	$dbConfig = array(
-//		'user' => 'root'
-//		,'host' => 'localhost'
-//		,'database' => 'oce_dev'
-//		,'password' => 'root'
-//	);
-//}
-
 if (!defined('WEB_DIR')) define('WEB_DIR', 'public');
 if (!defined('WEB_DIR_URL')) define('WEB_DIR_URL', SITE_BASE_URL . WEB_DIR . '/');
 if (!defined('WEB_DIR_PATH')) define('WEB_DIR_PATH', ROOT . WEB_DIR . DS);
@@ -111,7 +96,10 @@ if (defined('APP_MODULES_DIR')) {
 
 if (!defined('MODULES_NAMESPACE')) define('MODULES_NAMESPACE', 'eoko\\modules\\');
 
-//exec('rm -rf ' . TMP_PATH);
+// Models
+if (!defined('MODEL_PATH')) define('MODEL_PATH', ROOT . 'models' . DS);
+if (!defined('MODEL_BASE_PATH')) define('MODEL_BASE_PATH', ROOT . 'models' . DS . 'base' . DS);
+if (!defined('MODEL_PROXY_PATH')) define('MODEL_PROXY_PATH', ROOT . 'models' . DS . 'proxy' . DS);
 
 function createEozeDirIf($path) {
 	if (!file_exists($path)) {
