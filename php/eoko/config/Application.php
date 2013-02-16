@@ -21,7 +21,7 @@ class Application implements FileFinder {
 	/**
 	 * @var bool[MODE]
 	 */
-	private $modes;
+	private $modes = false; // let null available for caching
 
 	/**
 	 * @var SessionManager
@@ -30,14 +30,17 @@ class Application implements FileFinder {
 
 	private static $defaultSessionManager;
 
+	/**
+	 * @var Paths
+	 */
+	private $paths;
+
 	private function __construct(SessionManager $sessionManager) {
 		$this->sessionManager = $sessionManager;
 
-		// Configure modes
-		$this->modes = $this->getConfig()->get('modes');
-		if (!isset($this->modes['dev'])) {
-			$this->modes['dev'] = $this->findDevMode();
-		}
+		// Paths
+		$this->paths = new Paths\Defaults();
+		$this->paths->setPath('home', MY_EOZE_PATH);
 	}
 
 	private function getConfig() {
@@ -45,6 +48,35 @@ class Application implements FileFinder {
 			$this->config = ConfigManager::get('eoze/application');
 		}
 		return new Config($this->config);
+	}
+
+	/**
+	 * Alias for {@link Paths::resolve() $this->paths->resolve}.
+	 *
+	 * @param string $path
+	 * @param bool $create True to create the directory if needed.
+	 * @throws \RuntimeException
+	 * @return string
+	 */
+	public function resolvePath($path, $create = true) {
+		$path = $this->paths->resolve($path);
+
+		if (!is_dir($path)) {
+			if (file_exists($path)) {
+				throw new \RuntimeException('Cannot create directory in place of existing file: ' . $path);
+			} else {
+				@mkdir($path, 0700, true);
+			}
+		}
+
+		return $path;
+	}
+
+	/**
+	 * @return Paths
+	 */
+	public function getPaths() {
+		return $this->paths;
 	}
 
 	public static function setDefaultSessionManager(SessionManager $sessionManager) {
@@ -80,6 +112,21 @@ class Application implements FileFinder {
 	}
 
 	/**
+	 * Configures modes. We don't want to do that in the constructor because we cannot offer
+	 * a dependency on the ConfigManager there...
+	 */
+	private function getModes() {
+		// Configure modes
+		if ($this->modes === false) {
+			$this->modes = $this->getConfig()->get('modes', null);
+			if (!isset($this->modes['dev'])) {
+				$this->modes['dev'] = $this->findDevMode();
+			}
+		}
+		return $this->modes;
+	}
+
+	/**
 	 * Returns `true` if the specified tag matches an active execution mode.
 	 * A unique execution mode may have multiple aliases tags.
 	 *
@@ -89,7 +136,8 @@ class Application implements FileFinder {
 	 * @return bool
 	 */
 	public function isMode($tag) {
-		return isset($this->modes[$tag]) && $this->modes[$tag];
+		$modes = $this->getModes();
+		return isset($modes[$tag]) && $modes[$tag];
 	}
 
 	/**

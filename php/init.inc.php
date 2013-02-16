@@ -53,11 +53,9 @@ if (!defined('PHP_PATH')) define('PHP_PATH', EOZE_PATH . PHP_DIR . DS);
 if (!defined('APP_PATH')) define('APP_PATH', ROOT . 'app' . DS);
 if (!defined('APP_PHP_PATH')) define('APP_PHP_PATH', APP_PATH . PHP_DIR . DS);
 
+// Home directory
 if (!defined('MY_EOZE_PATH')) define('MY_EOZE_PATH', ROOT . '.eoze' . DS);
-if (!defined('TMP_PATH')) define('TMP_PATH', MY_EOZE_PATH . 'tmp' . DS);
-if (!defined('VAR_PATH')) define('VAR_PATH', MY_EOZE_PATH . 'var' . DS);
-if (!defined('CACHE_PATH')) define('CACHE_PATH', TMP_PATH . 'cache' . DS);
-if (!defined('LOG_PATH')) define('LOG_PATH', VAR_PATH . 'log' . DS);
+
 if (!defined('HELP_PATH')) define('HELP_PATH', ROOT . 'help' . DS);
 if (!defined('LIBS_PATH')) define('LIBS_PATH', PHP_PATH . 'lib' . DS);
 if (!defined('DATABASE_DUMP_PATH')) define('DATABASE_DUMP_PATH', ROOT . 'mysql' . DS);
@@ -110,10 +108,6 @@ createEozeDirIf(MY_EOZE_PATH);
 if (!file_exists(MY_EOZE_PATH . '.htaccess')) {
 	file_put_contents(MY_EOZE_PATH . '.htaccess', 'DENY FROM ALL' . PHP_EOL);
 }
-createEozeDirIf(CACHE_PATH);
-createEozeDirIf(LOG_PATH);
-createEozeDirIf(TMP_PATH);
-createEozeDirIf(VAR_PATH);
 
 // web dir
 createEozeDirIf(WEB_DIR_PATH);

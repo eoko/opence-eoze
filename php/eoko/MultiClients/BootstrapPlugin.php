@@ -27,6 +27,7 @@ namespace eoko\MultiClients;
 use eoko\php\SessionManager;
 use eoko\config\ConfigManager;
 use UserSession;
+use eoko\config\Application;
 
 /**
  * Config bootstrap listener.
@@ -43,10 +44,33 @@ class BootstrapPlugin {
 	private $configDirectory;
 
 	/**
+	 * @var array|false
+	 */
+	private $config = null;
+
+	/**
 	 * @param string $configDirectory Path of the directory where config will be read.
 	 */
 	public function __construct($configDirectory) {
 		$this->configDirectory = $configDirectory;
+	}
+
+	/**
+	 * Gets the config array by reading a MultiClients.config.php file, if it exists in the config
+	 * directory.
+	 *
+	 * @return array|false
+	 */
+	private function getConfig() {
+		if ($this->config === null) {
+			$clientsConfigFile = $this->configDirectory . '/MultiClients.config.php';
+			/** @noinspection PhpIncludeInspection */
+			$this->config = file_exists($clientsConfigFile)
+				? require $clientsConfigFile
+				: false;
+		}
+		return $this->config;
+
 	}
 
 	/**
@@ -63,12 +87,43 @@ class BootstrapPlugin {
 		if (isset($sessionData['UserSession'])) {
 			if (isset($sessionData['eoko\MultiClients\clientConfig'])) {
 				/** @var Client $client */
-				$client = $sessionData['eoko\MultiClients\clientConfig'];
-				ConfigManager::put('eoko\database\database', $client->getDatabaseName());
+				$this->setClient($sessionData['eoko\MultiClients\clientConfig']);
 			} else {
 				throw new Exception\RuntimeException('Client installation information missing.');
 			}
 		}
+	}
+
+	private function setClient(Client $client) {
+
+		// --- Home directory
+
+		$paths = Application::getInstance()->getPaths();
+
+		$config = $this->getConfig();
+		if (!isset($config['homeDirectory'])) {
+			throw new Exception\RuntimeException('Missing config for MultiClients: homeDirectory');
+		}
+
+		$basePath = rtrim($config['homeDirectory'], '/') . '/'
+			. rtrim($client->getHomeDirectory(), '/') . '/';
+
+		$realPath = realpath($basePath);
+
+		if (!$realPath) {
+			throw new Exception\RuntimeException('Directory must exist: ' . $basePath);
+		}
+
+		$paths->setPath('home', $realPath);
+
+
+		// --- Database
+
+		// MUST BE DONE **AFTER** HOME DIRECTORY
+		// (because the following call will trigger loading in-memory config, and possibly the
+		// Cache, that needs to knows the location of the cache directory...)
+
+		ConfigManager::put('eoko\database\database', $client->getDatabaseName());
 	}
 
 	/**
@@ -78,10 +133,9 @@ class BootstrapPlugin {
 	 * @param \eoko\php\SessionManager $sessionManager
 	 */
 	public function initUserSession(SessionManager $sessionManager) {
-		$clientsConfigFile = $this->configDirectory . '/MultiClients.config.php';
-		if (file_exists($clientsConfigFile)) {
-			$clientsConfig = require $clientsConfigFile;
-			UserSession::setLoginAdapter(new LoginAdapter($clientsConfig, $sessionManager));
+		$config = $this->getConfig();
+		if ($config !== false) {
+			UserSession::setLoginAdapter(new LoginAdapter($config, $sessionManager));
 		}
 	}
 }
