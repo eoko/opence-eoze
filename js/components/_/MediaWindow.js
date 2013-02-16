@@ -28,7 +28,7 @@ eo.MediaPanel = Ext.extend(Ext.Panel, {
         
         // Store
         var store = new Ext.data.JsonStore({
-            url: "index.php"
+            url: "api"
             ,baseParams: {
                 controller: "media.grid"
                 ,action: "load"

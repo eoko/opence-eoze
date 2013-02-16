@@ -29,7 +29,7 @@ Oce.AutoloadPanel = Ext.extend(Ext.Panel, {
 			id: idPrefix + config.name,
 			
 			autoLoad: {
-				 url: 'index.php'
+				 url: 'api'
 				,params: Ext.apply(params, config.params)
 				,raw: true
 

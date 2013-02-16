@@ -16,7 +16,7 @@ eo.Kepler = Ext.extend(Ext.util.Observable, {
 	,failureCount: 0
 	
 	,conn: new eo.data.Connection({
-		url: 'index.php'
+		url: 'api'
 		,accept: 'json'
 	})
 	

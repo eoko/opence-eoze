@@ -473,7 +473,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 					controller: controller
 					,action:'load'
 				}, this.storeBaseParams),
-				url: 'index.php',
+				url: 'api',
 				root: 'data',
 				idProperty: this.primaryKeyName,
 				totalProperty: 'count',
@@ -1176,7 +1176,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			}
 			
 			var opts = {
-				url: 'index.php'
+				url: 'api'
 				
 				// post process data
 				,win: win

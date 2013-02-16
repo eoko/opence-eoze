@@ -9,7 +9,7 @@
 
 	NS.view = function(doc) {
 		Ext.Ajax.request({
-			url: "index.php"
+			url: "api"
 			,params: {
 				filename: doc.data.filename
 				,controller: "croco.json"
