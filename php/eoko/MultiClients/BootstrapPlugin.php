@@ -37,10 +37,16 @@ use UserSession;
  */
 class BootstrapPlugin {
 
-	private $rootPath;
+	/**
+	 * @var string Path of the directory where config will be read.
+	 */
+	private $configDirectory;
 
+	/**
+	 * @param string $configDirectory Path of the directory where config will be read.
+	 */
 	public function __construct($configDirectory) {
-		$this->rootPath = $configDirectory;
+		$this->configDirectory = $configDirectory;
 	}
 
 	/**
@@ -72,7 +78,7 @@ class BootstrapPlugin {
 	 * @param \eoko\php\SessionManager $sessionManager
 	 */
 	public function initUserSession(SessionManager $sessionManager) {
-		$clientsConfigFile = $this->rootPath . '/MultiClients.config.php';
+		$clientsConfigFile = $this->configDirectory . '/MultiClients.config.php';
 		if (file_exists($clientsConfigFile)) {
 			$clientsConfig = require $clientsConfigFile;
 			UserSession::setLoginAdapter(new LoginAdapter($clientsConfig, $sessionManager));
