@@ -349,7 +349,6 @@ Ext.form.ComboBox.prototype.getZIndex = function(listParent){
 };
 
 
-
 // --- Element ---
 
 (function(p) {
