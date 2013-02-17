@@ -331,8 +331,10 @@ abstract class ModelTable extends ModelTableProxy {
 	 * @return Query
 	 */
 	public static function createQuery(array $context = null) {
-		return static::doCreateQuery($context);
+		return static::getInstance()->doCreateQuery($context);
 	}
+
+	protected function
 
 	/**
 	 * Gets the default controller for CRUD operation on this table's model.

@@ -1,12 +1,16 @@
-require_once MODEL_BASE_PATH . '<?php echo $className ?>Base.php';
+<?php if (isset($namespace)): ?>
+namespace <?php echo $namespace ?>;
+
+<?php endif ?>
+require_once __DIR__ . '/<?php echo $className ?>Base.php';
 
 /**
- * @package <?php echo $package ?>
-
- * @subpackage models
+ *
+ * @category <?php echo $this->modelCategory, PHP_EOL ?>
+ * @package <?php echo $this->modelPackage, PHP_EOL ?>
+ * @subpackage <?php echo $this->tableSubPackage, PHP_EOL ?>
 <?php if ($version): ?>
- * @since <?php echo $version ?>
-
+ * @since <?php echo $version, PHP_EOL ?>
 <?php endif ?>
  */
 class <?php echo $className ?> extends <?php echo $className ?>Base {

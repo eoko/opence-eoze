@@ -1,13 +1,16 @@
+<?php if (isset($namespace)): ?>
+namespace <?php echo $namespace ?>;
+<?php endif ?>
+
 /**
  * Base of the <?php echo $modelName ?> Table.
  *
- * @category <?php echo $package . PHP_EOL ?>
- * @package models
- * @subpackage models_base
+ * @category <?php echo $this->modelCategory, PHP_EOL ?>
+ * @package <?php echo $this->modelPackage, PHP_EOL ?>
+ * @subpackage <?php echo $this->baseSubPackage, PHP_EOL ?>
  *
 <?php if ($version): ?>
- * @since <?php echo $version ?>
-
+ * @since <?php echo $version, PHP_EOL ?>
 <?php endif ?>
  *
 <?php foreach ($fields as $field): ?>
@@ -90,8 +93,8 @@ abstract class <?php echo $tableName ?>Base extends <?php echo $baseTableName ?>
 	/**
 	 * @return <?php echo $baseQueryName . PHP_EOL ?>
 	 */
-	protected static function doCreateQuery(array $context = null) {
-		return <?php echo $baseQueryName ?>::create(static::getInstance(), $context);
+	protected function doCreateQuery(array $context = null) {
+		return <?php echo $baseQueryName ?>::create($this, $context);
 	}
 
 	/**

@@ -1,34 +1,31 @@
-<?php if (isset($namespace)): ?>
-namespace <?php echo $namespace ?>;
-<?php endif ?>
+<?php
+
+namespace eoko\MultiClients\bin\Model;
 
 /**
- * Proxy of the <?php echo $modelName ?> Table.
+ * Proxy of the User Table.
  *
- * @category <?php echo $this->modelCategory, PHP_EOL ?>
- * @package <?php echo $this->modelPackage, PHP_EOL ?>
- * @subpackage <?php echo $this->proxySubPackage, PHP_EOL ?>
-<?php if ($version): ?>
- * @since <?php echo $version, PHP_EOL ?>
-<?php endif ?>
+ * @category opence
+ * @package Model
+ * @subpackage Proxy
  */
-class <?php echo $tableName ?>Proxy extends \ModelTableProxy {
+class UserTableProxy extends \ModelTableProxy {
 
 	private static $tableVars = array();
 
-	public static $tableName = '<?php echo $tableName ?>';
-	public static $modelName = '<?php echo $modelName ?>';
-	public static $dbTableName = '<?php echo $dbTable ?>';
+	public static $tableName = 'UserTable';
+	public static $modelName = 'User';
+	public static $dbTableName = 'users';
 
 	private static $instance = null;
 
 	public static function get() {
-		if (self::$instance === null) self::$instance = new <?php echo $tableName ?>Proxy;
+		if (self::$instance === null) self::$instance = new UserTableProxy;
 		return self::$instance;
 	}
 
 	public static function getInstance() {
-		$table = <?php echo $tableName ?>::getInstance();
+		$table = UserTable::getInstance();
 		foreach (self::$tableVars as &$pointer) {
 			$pointer = $table;
 		}
@@ -69,7 +66,7 @@ class <?php echo $tableName ?>Proxy extends \ModelTableProxy {
 	}
 
 	public static function getTableName() {
-		return '<?php echo $tableName ?>';
+		return 'UserTable';
 	}
 
 	public static function getDBTableName() {
@@ -79,12 +76,7 @@ class <?php echo $tableName ?>Proxy extends \ModelTableProxy {
 	public static function getModelName() {
 		return self::$modelName;
 	}
-<?php
-/* The primary key name must be proxyied in order to avoid infinite recursion
- * between two separate tables which have an IndirectHasMany relationship.
- */
-?>
 	public static function getPrimaryKeyName() {
-		return '<?php echo $primaryKeyName ?>';
+		return 'id';
 	}
 }

@@ -1,10 +1,14 @@
 <?php use \ModelColumn ?>
+<?php if (isset($namespace)): ?>
+namespace <?php echo $namespace ?>;
+<?php endif ?>
+
 /**
  * Base of the <?php echo $modelName ?> Model.
  *
- * @package <?php echo $package ?>
-
- * @subpackage models_base
+ * @category <?php echo $this->modelCategory, PHP_EOL ?>
+ * @package <?php echo $this->modelPackage, PHP_EOL ?>
+ * @subpackage <?php echo $this->baseSubPackage, PHP_EOL ?>
 <?php if ($version): ?>
  * @since <?php echo $version, PHP_EOL ?>
 <?php endif ?>
