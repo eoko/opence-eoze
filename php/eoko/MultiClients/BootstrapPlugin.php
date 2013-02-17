@@ -61,7 +61,7 @@ class BootstrapPlugin {
 	 *
 	 * @return array|false
 	 */
-	private function getConfig() {
+	public function getConfig() {
 		if ($this->config === null) {
 			$clientsConfigFile = $this->configDirectory . '/MultiClients.config.php';
 			/** @noinspection PhpIncludeInspection */
@@ -134,7 +134,11 @@ class BootstrapPlugin {
 	public function initUserSession(SessionManager $sessionManager) {
 		$config = $this->getConfig();
 		if ($config !== false) {
-			UserSession::setLoginAdapter(new LoginAdapter($config, $sessionManager));
+			if (isset($config['database'])) {
+				UserSession::setLoginAdapter(new LoginAdapter($config['database'], $sessionManager));
+			} else {
+				throw new \RuntimeException('Missing configuration: database');
+			}
 		}
 	}
 }

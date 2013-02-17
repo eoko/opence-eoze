@@ -15,8 +15,20 @@ class Database {
 
 	private function __construct() {}
 
-	public static function reset() {
-		self::$defaultProxy = null;
+	/**
+	 * @param array $config
+	 * @return DatabaseProxy|null
+	 */
+	public static function setDefaultProxy(array $config = null) {
+		$previous = self::$defaultProxy;
+
+		if ($config !== null) {
+			self::$defaultProxy = new DatabaseProxy($config);
+		} else {
+			self::$defaultProxy = null;
+		}
+
+		return $previous;
 	}
 
 	/**

@@ -7,6 +7,7 @@ use eoko\database\Database;
 use eoko\template\Template;
 use eoko\plugin\PluginManager;
 use eoko\config\ConfigManager;
+use eoko\config\Paths;
 
 use PDO;
 use ModelColumn;
@@ -95,6 +96,14 @@ class Generator extends Script {
 
 	private $config;
 
+	/**
+	 * @var \eoko\config\Paths
+	 */
+	protected $paths = array(
+		'base' => ':model/base',
+		'proxy' => ':model/proxy',
+	);
+
 	public function __construct() {
 
 		// We want exceptions to show off at the face of the user, not being
@@ -107,7 +116,11 @@ class Generator extends Script {
 
 		$this->config = ConfigManager::get('eoko/cqlix/Generator');
 
-		$this->tplPath = dirname(__FILE__) . DS . 'templates' . DS;
+		$this->tplPath = __DIR__ . DS . 'templates' . DS;
+
+		$this->paths = new Paths($this->paths);
+		$this->paths->setPath('model', MODEL_PATH);
+
 
 		// TODO
 		// I think this is not really used, and its initial objective has been
@@ -212,7 +225,10 @@ class Generator extends Script {
 
 		// --- Process -----------------------------------------------------------------
 
-		foreach (array(MODEL_BASE_PATH, MODEL_PROXY_PATH) as $dir) {
+		$paths = $this->paths;
+
+		// Clean base & proxy paths
+		foreach ($paths->resolve(array('base', 'proxy')) as $dir) {
 			if (!file_exists($dir)) {
 				mkdir($dir, 0744);
 			} else {
@@ -222,17 +238,19 @@ class Generator extends Script {
 			}
 		}
 
+		list($modelPath, $modelBasePath, $proxyPath) = $paths->resolve(array('model', 'base', 'proxy'));
+
 		foreach ($this->tableFields as $table => $fields) {
 
 			$modelName = NameMaker::modelFromDB($table);
 			$tableName = NameMaker::tableFromDB($table);
 
-			$modelFilename = MODEL_PATH . $modelName . '.php';
-			$modelBaseFilename = MODEL_BASE_PATH . $modelName . 'Base' . '.php';
+			$modelFilename = $modelPath . $modelName . '.php';
+			$modelBaseFilename = $modelBasePath . $modelName . 'Base' . '.php';
 
-			$tableFilename = MODEL_PATH . $tableName . '.php';
-			$tableBaseFilename = MODEL_BASE_PATH . $tableName . 'Base' . '.php';
-			$tableProxyFilename = MODEL_PROXY_PATH . $tableName . 'Proxy' . '.php';
+			$tableFilename = $modelPath . $tableName . '.php';
+			$tableBaseFilename = $modelBasePath . $tableName . 'Base' . '.php';
+			$tableProxyFilename = $proxyPath . $tableName . 'Proxy' . '.php';
 
 			$params = array($table, $fields);
 
@@ -673,10 +691,37 @@ class Generator extends Script {
 		}
 	}
 
+	/**
+	 * @var string
+	 */
+	protected $modelNamespace = null;
+
+	// Used in the templates
+	/**
+	 * @var string
+	 */
+	protected $modelCategory = APP_NAME;
+	/**
+	 * @var string
+	 */
+	private $modelPackage = 'Model';
+	/**
+	 * @var string
+	 */
+	private $tableSubPackage = 'Table';
+	/**
+	 * @var string
+	 */
+	private $baseSubPackage = 'Base';
+	/**
+	 * @var string
+	 */
+	private $proxySubPackage = 'Proxy';
+
 	function tplModel($tableName, $fields) {
 		$modelName = NameMaker::modelFromDB($tableName);
-		$package = APP_NAME;
 		$version = $this->getVersionString();
+		$namespace = $this->modelNamespace;
 		ob_start();
 		include $this->tplPath . 'Model.tpl.php';
 		return ob_get_clean();
@@ -691,11 +736,9 @@ class Generator extends Script {
 		$modelInfos = $this->baseConfig->buildModelInfo($table);
 		extract($modelInfos);
 
-//		$modelName = NameMaker::modelFromDB($table);
-//		$tableName = NameMaker::tableFromDB($table);
 		$primaryField = self::getPrimaryField($fields);
-		$package = APP_NAME;
 		$version = $this->getVersionString();
+		$namespace = $this->modelNamespace;
 
 		$proxyMethods = $this->proxyModelMethods;
 		foreach ($proxyMethods as &$method) {
@@ -757,8 +800,8 @@ class Generator extends Script {
 
 	function tplTable($tableName, $fields) {
 		$className = NameMaker::tableFromDB($tableName);
-		$package = APP_NAME;
 		$version = $this->getVersionString();
+		$namespace = $this->modelNamespace;
 		ob_start();
 		include $this->tplPath . 'ModelTable.tpl.php';
 		return ob_get_clean();
@@ -816,8 +859,15 @@ class Generator extends Script {
 
 		if (!is_array($tpl->relations)) $tpl->relations = array();
 
-		$tpl->package = APP_NAME;
 		$tpl->version = $this->getVersionString();
+		$tpl->namespace = $this->modelNamespace;
+
+		$tpl->set(array(
+			'modelCategory' => $this->modelCategory,
+			'modelPackage' => $this->modelPackage,
+			'baseSubPackage' => $this->baseSubPackage,
+			'proxySubPackage' => $this->proxySubPackage,
+		));
 	}
 
 	function tplTableBase($tableName, $fields) {

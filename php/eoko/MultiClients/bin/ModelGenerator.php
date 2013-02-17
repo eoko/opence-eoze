@@ -22,20 +22,44 @@
  * @author Éric Ortega <eric@eoko.fr>
  */
 
-namespace eoko\MultiClients;
+namespace eoko\MultiClients\bin;
+
+use eoko\script\Script;
+use eoko\cqlix\generator\Generator;
+use eoko\database\Database;
+use eoko\application\Bootstrap;
 
 /**
  *
  * @category Opence
  * @package
  * @subpackage
- * @since 2013-02-18 06:42
+ * @since 2013-02-18 07:04
  */
-class UserService {
+class ModelGenerator extends Generator {
 
+	protected function run() {
 
+		$this->modelNamespace = __NAMESPACE__ . '\\Model';
 
-	public function __construct($config) {
+		$mcConfig = Bootstrap::getCurrent()->getMultiClient()->getConfig();
 
+		if ($mcConfig === false) {
+			throw new \RuntimeException('Multi client is not configured.');
+		}
+		if (!isset($mcConfig['database'])) {
+			throw new \RuntimeException('Multi client database is not configured.');
+		}
+
+		// Use multi client database
+		$previous = Database::setDefaultProxy($mcConfig['database']);
+
+		// Use multi client model paths
+		$this->paths->setPath('model', __DIR__ . '/../Model');
+
+		parent::run();
+
+		// Restore previous proxy
+		Database::setDefaultProxy($previous);
 	}
 }

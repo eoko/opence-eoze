@@ -22,20 +22,22 @@
  * @author Éric Ortega <eric@eoko.fr>
  */
 
-namespace eoko\MultiClients;
+namespace eoko\MultiClients\bin;
+
+use eoko\script\Script;
+
+use eoko\MultiClients\bin\Model\UserTableBase;
 
 /**
  *
  * @category Opence
  * @package
  * @subpackage
- * @since 2013-02-18 06:42
+ * @since 2013-02-18 09:14
  */
-class UserService {
+class ModelGeneratorTest extends Script {
 
-
-
-	public function __construct($config) {
-
+	protected function run() {
+		dump(\UserTable::findAll()->toArray());
 	}
 }

@@ -22,20 +22,16 @@
  * @author Éric Ortega <eric@eoko.fr>
  */
 
-namespace eoko\MultiClients;
+namespace eoko\MultiClients\bin;
 
 /**
  *
- * @category Opence
- * @package
- * @subpackage
- * @since 2013-02-18 06:42
+ * @since 2013-02-18 07:04
  */
-class UserService {
 
+chdir(realpath(__DIR__ . '/../../../../bin/'));
 
+$class = 'eoko\MultiClients\bin\ModelGenerator';
+//$class = 'eoko\MultiClients\bin\ModelGeneratorTest';
 
-	public function __construct($config) {
-
-	}
-}
+require 'doRun.php';

@@ -921,6 +921,25 @@ class Query {
 	}
 
 	/**
+	 * @return PDO
+	 */
+	protected function getConnection() {
+		if (!$this->pdo) {
+			$this->pdo = Database::getDefaultConnection();
+		}
+		return $this->pdo;
+	}
+
+	/**
+	 * @var PDO
+	 */
+	private $pdo = null;
+
+	public function setConnection(PDO $connection) {
+		$this->pdo = $connection;
+	}
+
+	/**
 	 *
 	 * @return PDOStatement
 	 */
@@ -928,7 +947,7 @@ class Query {
 
 		self::$executionCount++;
 
-		$pdo = Database::getDefaultConnection();
+		$pdo = $this->getConnection();
 		$pdoStatement = $pdo->prepare($this->sql);
 
 		$logger = $this->getLogger();
