@@ -199,19 +199,53 @@ var define = function(cls, o, createFn) {
 };
 
 Ext.define = function(cls, o, createFn) {
+//	if (o.singleton) {
+//		var previous = resolve(cls, false),
+//			constructor = define(cls, o, createFn),
+//			instance = new constructor;
+//		if (cls) {
+//			var matches = /^(?:(.*)\.)?([^.]+)$/.exec(cls),
+//				name = matches[2],
+//				ns = matches[1],
+//				node = window;
+//			if (ns) {
+//				node = resolve(ns, true);
+//			}
+//			node[name] = instance;
+//			if (previous) {
+//				Ext.apply(instance, previous);
+//			}
+//		}
+//		return instance;
+//	} else {
+//		return define(cls, o, createFn);
+//	}
 	if (o.singleton) {
-		var constructor = define(cls, o, createFn),
+		var previous = resolve(cls, false),
+			instance;
+
+		var postCreate = function() {
+			var constructor = this;
 			instance = new constructor;
-		if (cls) {
-			var matches = /^(?:(.*)\.)?([^.]+)$/.exec(cls),
-				name = matches[2],
-				ns = matches[1],
-				node = window;
-			if (ns) {
-				node = resolve(ns, true);
+			if (cls) {
+				var matches = /^(?:(.*)\.)?([^.]+)$/.exec(cls),
+					name = matches[2],
+					ns = matches[1],
+					node = window;
+				if (ns) {
+					node = resolve(ns, true);
+				}
+				node[name] = instance;
+				if (previous) {
+					Ext.apply(instance, previous);
+				}
 			}
-			node[name] = instance;
-		}
+
+			Ext4.callback(createFn, this, arguments);
+		};
+
+		constructor = define(cls, o, postCreate);
+
 		return instance;
 	} else {
 		return define(cls, o, createFn);
@@ -301,6 +335,7 @@ if (Ext.QuickTips.isEnabled()) {
 	Ext4.tip.QuickTipManager.enable();
 }
 Ext.QuickTips = Ext4.tip.QuickTipManager;
+Ext4.require('Eoze.Ext3.CompatibilityFixes');
 
 
 // --- Ext3 & 4 window z-index conflicts ---
