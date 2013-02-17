@@ -77,9 +77,9 @@ if (!defined('LIB_BASE_URL')) define('LIB_BASE_URL', SITE_BASE_URL . LIB_DIR . '
 if (!defined('LIB_IMAGES_BASE_URL')) define('LIB_IMAGES_BASE_URL', LIB_BASE_URL . 'images' . '/');
 if (!defined('LIB_PHP_BASE_URL')) define('LIB_PHP_BASE_URL', LIB_BASE_URL . PHP_DIR . '/');
 
-if (!defined('MEDIA_PATH')) define('MEDIA_PATH', ROOT . 'medias' . DS);
+//if (!defined('MEDIA_PATH')) define('MEDIA_PATH', ROOT . 'medias' . DS);
 if (!defined('MEDIA_BASE_URL')) define('MEDIA_BASE_URL', SITE_BASE_URL . 'medias/');
-if (!defined('EXPORTS_PATH')) define('EXPORTS_PATH', MEDIA_PATH . 'exports' . DS);
+//if (!defined('EXPORTS_PATH')) define('EXPORTS_PATH', MEDIA_PATH . 'exports' . DS);
 if (!defined('EXPORTS_BASE_URL')) define('EXPORTS_BASE_URL', MEDIA_BASE_URL . 'exports/');
 
 if (!defined('BACKUPS_PATH')) define('BACKUPS_PATH', ROOT . 'backup' . DS);

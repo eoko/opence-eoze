@@ -46,6 +46,10 @@ class Defaults extends Paths {
 
 			'cache' => ':tmp/cache',
 			'log' => ':var/log',
+
+			'media' => ':home/documents',
+			// deprecated
+			'medias' => ':home/documents',
 		));
 	}
 }

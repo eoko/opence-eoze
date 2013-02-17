@@ -6,6 +6,7 @@ use DataStore;
 use eoko\util\Files;
 use eoko\file\FileType;
 use eoko\log\Logger;
+use eoko\config\Application;
 
 use SecurityException;
 use RuntimeException;
@@ -180,12 +181,28 @@ class Grid extends GridBase {
 		return $r;
 	}
 
+	private function resolveMediaPath($path) {
+		if (!$path) {
+			return '';
+		}
+		$path = trim($path, '/\\');
+		$destination = Application::getInstance()->resolvePath('media/') . $path;
+//		$path = str_replace('//', '/', $path);
+		// TODO this security is *weak*
+		if (strstr($path, '..')) {
+			throw new SecurityException('Trying to resolve restricted path: ' . $destination);
+		}
+		return $destination;
+	}
+
 	public function upload() {
-		if (!isset($_FILES['image'])) return false;
+		if (!isset($_FILES['image'])) {
+			return false;
+		}
 		$img = $_FILES['image'];
-		$path = $this->request->get('path', '');
-		if ($path) $path .= DS;
-		move_uploaded_file($img['tmp_name'], MEDIA_PATH . $path . $img['name']);
+		$filename = ltrim($img['name'], '\\/');
+		$path = trim($this->request->get('path', ''), '/\\');
+		move_uploaded_file($img['tmp_name'], $this->resolveMediaPath($path . $filename));
 		return true;
 	}
 
@@ -197,7 +214,7 @@ class Grid extends GridBase {
         if ($file === '..') {
             return false;
         }
-		$filename = MEDIA_PATH . $dir . $file;
+		$filename = $this->resolveMediaPath($dir . $file);
         return self::recursiveDelete($filename);
 	}
     
