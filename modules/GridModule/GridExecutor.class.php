@@ -11,6 +11,7 @@ use eoko\database\Database;
 use eoko\util\Strings;
 use eoko\module\ModuleManager;
 use eoko\util\date\Date;
+use eoko\config\Application;
 
 use eoko\cqlix\Exception\ModelAlreadyDeletedException;
 
@@ -1465,7 +1466,7 @@ MSG;
 
 		$slug = $this->getSlug();
 		$slugDir = $slug ? "$slug/" : null;
-		$directory = EXPORTS_PATH . $slugDir;
+		$directory = Application::getInstance()->resolvePath('media/exports/') . $slugDir;
 		$filename = $this->makeExportFilename($directory, $format);
 
 		$file = $directory . $filename;

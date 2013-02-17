@@ -94,9 +94,9 @@ defineIf('LIB_BASE_URL', SITE_BASE_URL . LIB_DIR . '/');
 defineIf('LIB_IMAGES_BASE_URL', LIB_BASE_URL . 'images' . '/');
 defineIf('LIB_PHP_BASE_URL', LIB_BASE_URL . PHP_DIR . '/');
 
-defineIf('MEDIA_PATH', ROOT . 'medias' . DS);
+//defineIf('MEDIA_PATH', ROOT . 'medias' . DS);
 defineIf('MEDIA_BASE_URL', SITE_BASE_URL . 'medias/');
-defineIf('EXPORTS_PATH', MEDIA_PATH . 'exports' . DS);
+//defineIf('EXPORTS_PATH', MEDIA_PATH . 'exports' . DS);
 defineIf('EXPORTS_BASE_URL', MEDIA_BASE_URL . 'exports/');
 
 defineIf('BACKUPS_PATH', ROOT . 'backup' . DS);

@@ -12,7 +12,9 @@ use eoko\module\executor\ExecutorBase;
  */
 class download extends ExecutorBase {
 
-	protected function processResult($result) {}
+	protected function processResult($result) {
+		return true;
+	}
 
 	public function download() {
 

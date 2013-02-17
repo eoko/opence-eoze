@@ -20,7 +20,7 @@ RewriteRule \.(sql|yml|ini|xml)$                    eoze/php/error404.php [L]
 RewriteRule (^|/)config(/|$)                        eoze/php/error404.php [L]
 
 # Route medias directory downloads through the application
-#RewriteRule ^medias/?(.*)$                          index.php/medias/$1 [L]
+RewriteRule ^medias/?(.*)$                          index.php/medias/$1 [L]
 
 RewriteRule ^doc\b                                  doc
 RewriteRule ^eoze/doc\b                             eoze/doc
