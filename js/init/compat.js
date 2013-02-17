@@ -118,7 +118,7 @@ Ext.reg = function(xtype, cls) {
 var setClass = function(cls, o) {
 	var parts = cls.split('.'),
 		name = parts.pop();
-	Ext.namespace(parts.join('.'))[name] = o;
+	return Ext.namespace(parts.join('.'))[name] = o;
 };
 
 var alias = function(aliases, c) {
@@ -142,7 +142,8 @@ var alias = function(aliases, c) {
 var define = function(cls, o, createFn) {
 	var parentCls,
 		parent,
-		deps;
+		deps,
+		previous = cls && resolve(cls, false);
 
 	if (o.extend) {
 		parentCls = o.extend;
@@ -168,7 +169,12 @@ var define = function(cls, o, createFn) {
 		c.prototype.$className = cls;
 		alias(o.alias, c);
 		if (cls) {
-			setClass(cls, c);
+			var C = setClass(cls, c);
+
+			if (previous) {
+				Ext.apply(C, previous);
+			}
+
 			Ext.reg(cls, cls);
 			Oce.deps.reg(cls);
 		}
@@ -182,7 +188,9 @@ var define = function(cls, o, createFn) {
 	
 	if (deps) {
 		Oce.deps.wait(deps, function() {
-			parent = resolve(parentCls);
+			if (parentCls) {
+				parent = resolve(parentCls);
+			}
 			define();
 		});
 	} else {
@@ -277,6 +285,13 @@ Ext.ns('Ext.String');
 Ext.String.format = function() {
 	return String.format.apply(String, arguments);
 };
+
+
+// --- Mixed collection ---
+
+(function(p) {
+	p.sortByKey = p.keySort;
+})(Ext.util.MixedCollection.prototype);
 
 
 // --- QuickTips: use only Ext4 manager, dismiss Ext3's entirely ---

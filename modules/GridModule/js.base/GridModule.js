@@ -102,7 +102,12 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	 */
 
 	,constructor: function(config) {
-		
+
+		// Initial hidden state
+		Ext.each(this.columns, function(col) {
+			col.initialHidden = !!col.hidden;
+		});
+
 		this.addAsyncConstructTask(this.onApplyPreferences, this);
 
 		this.my = Ext.apply({
@@ -1953,6 +1958,26 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				this.onEditWindowExternallyModified(win, external)
 			}
 		}, this);
+
+		// Route
+		var route = eo.AjaxRouter.getRoute(this.name + '.edit');
+		if (route) {
+			win.href = route.assemble({
+				id: recordId
+			});
+
+			// Tab panel
+			var tabPanel = win.formPanel.items.items[0];
+			if (tabPanel instanceof Ext.TabPanel) {
+				tabPanel.on('tabchange', function(tabPanel, item) {
+					win.href = route.assemble({
+						id: recordId
+						,tab: item.slug || item.tabName
+					});
+					eo.AjaxRouter.setActivePage(win);
+				});
+			}
+		}
 	}
 
 	,parseContextHelpItems: function(win) {
@@ -2378,7 +2403,10 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		}
 
 		if (opts) {
-			if (opts.form) {
+			if (opts.window) {
+				win = opts.window;
+				win.okHandler = doRequest;
+			} else if (opts.form) {
 
 				var form = !Ext.isArray(opts.form) ? opts.form : {
 					xtype: 'oce.form'
@@ -2640,7 +2668,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 					}
 					this.autoExpandColumn = col.id;
 				}
-				
+
 				this.gridColumns.push(col);
 				columnConfigMap[col.name] = col;
 			}
@@ -2892,10 +2920,23 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		return tab;
 	}
 
+	/**
+	 * @return {eo.AjaxRouter.Route}
+	 */
+	,getRoute: function() {
+		return eo.AjaxRouter.getRoute(this.name + '.index')
+			|| eo.AjaxRouter.getRoute(this.name);
+	}
+
 	,beforeCreateTabPanel: function(config) {
 		// toolbar plugin
 		if (this.toolbarConfig !== false) {
 			config.tbar = this.getToolbar(true);
+		}
+		// route
+		var route = this.getRoute();
+		if (route) {
+			config.href = route.assemble();
 		}
 	}
 	
@@ -3309,12 +3350,12 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	,doInitMultisortPlugin: function(store) {
 		this.beforeCreateGrid = Ext.Function.createSequence(this.beforeCreateGrid, function(config) {
 			var tbar = Ext.create('Eoze.GridModule.multisort.Toolbar', {
-				getDefaultSortParams: function() {
+				getDefaultSortParams: Ext.bind(function() {
 					return [
 						this.defaultSortColumn || this.getDefaultSortColumn(this.grid),
 						this.defaultSortDirection || 'ASC'
 					];
-				}
+				}, this)
 			});
 
 			config.tbar = tbar;
@@ -3333,7 +3374,13 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		
 		this.opening = true;
 		
-		if (!destination) destination = Oce.mx.application.getMainDestination();
+		if (!destination) {
+			destination = Oce.mx.application.getMainDestination();
+		}
+
+		if (this.tab && this.tab.isDestroyed) {
+			this.destroy();
+		}
 
 		if (!this.tab) {
 			this.tab = this.create(config);
@@ -3547,6 +3594,29 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			this.store.reload(o);
 		}
 	}
+
+	/**
+	 * Reset displayed columns according to default initial config.
+	 *
+	 * @private
+	 */
+	,resetHiddenColumns: function() {
+		var grid = this.grid,
+			view = grid.view,
+			cm = grid.getColumnModel(),
+			colCount = cm.getColumnCount(),
+			config;
+		for (var i = 0; i < colCount; i++) {
+			config = cm.config[i];
+			config.hidden = config.initialHidden;
+			delete cm.totalWidth;
+		}
+
+		view.refresh(true);
+		cm.fireEvent('bulkhiddenchange', cm);
+
+		this.reload();
+	}
 	
 	// private
 	,columnMenu_onBeforeShow: function(colMenu) {
@@ -3555,6 +3625,15 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			checkGroups = [];
 
 		colMenu.removeAll();
+
+		// Reset defaults item
+		colMenu.add({
+			text: "Reset" // i18n
+			,tooltip: "Afficher les colonnes par défaut" // i18n
+			,iconCls: 'ico reset'
+			,scope: this
+			,handler: this.resetHiddenColumns
+		});
 		
 		// --- Select all ---
 		var checkAllItem = new Ext.menu.CheckItem({
@@ -3562,7 +3641,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			,checked:!(this.checkIndexes instanceof Array)
 			,hideOnClick:false
 		});
-		colMenu.add(checkAllItem,'-');
+		colMenu.add(checkAllItem, '-');
 
 		var checkAllGroup = Ext.create('eo.form.SelectableCheckGroup', checkAllItem);
 		colMenu.checkGroup = checkAllGroup;

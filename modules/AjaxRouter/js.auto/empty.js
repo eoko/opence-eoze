@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012 Eoko
+ * Copyright (C) 2013 Eoko
  *
  * This file is part of Opence.
  *
@@ -16,19 +16,14 @@
  * You should have received a copy of the GNU General Public License
  * along with Opence. If not, see <http://www.gnu.org/licenses/gpl.txt>.
  *
- * @copyright Copyright (C) 2012 Eoko
+ * @copyright Copyright (C) 2013 Eoko
  * @licence http://www.gnu.org/licenses/gpl.txt GPLv3
  * @author Éric Ortega <eric@eoko.fr>
  */
 
 /**
+ * This file is here to workaround a bug: if there is no .js file in auto.js, the
+ * content of js.base seems to be ignored...
  *
- * @since 2012-12-11 18:41
+ * @since 2013-01-08 15:06
  */
-
-.eo-form-panel .x-panel-body,
-.eo-form {
-    padding: 10px;
-    background-color: transparent;
-    /*border: 2px solid red;*/
-}
