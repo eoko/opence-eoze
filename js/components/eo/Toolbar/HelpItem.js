@@ -22,9 +22,15 @@ eo.toolbar.HelpItem = Ext.extend(Ext.toolbar.TextItem, {
      */
     
     helpWidth: 300
-    
+
+	,iconCls: 'ico help'
+
     ,onRender: function(ct, position) {
-        this.autoEl = {cls: 'xtb-text xtb-help', html: this.text || ''};
+        var cls = 'xtb-text xtb-help';
+		if (Ext.isEmpty(this.text)) {
+			cls += ' xtb-no-text';
+		}
+        this.autoEl = {cls: cls, html: this.text || ''};
         Ext.toolbar.TextItem.superclass.onRender.call(this, ct, position);
         if (this.iconCls) {
             this.el.addClass('x-icon');

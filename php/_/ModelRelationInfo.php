@@ -506,15 +506,6 @@ class ModelRelationInfoField extends ModelFieldBase {
 		return new SqlVariable("`$relationName->$this->fieldName` $dir");
 	}
 
-	/**
-	 * @inheritdoc
-	 */
-	public function getSortClause($dir, Aliaser $aliaser) {
-		$join = $aliaser->getQuery()->join($this->info);
-		$field = $this->getActualField();
-		return $field->getSortClause($dir, $join);
-	}
-
 	public function getName() {
 		return $this->name;
 	}
@@ -539,6 +530,15 @@ class ModelRelationInfoField extends ModelFieldBase {
 		return $this->getActualField()->getLength();
 	}
 
+	/**
+	 * @inheritdoc
+	 */
+	public function getSortClause($dir, Aliaser $aliaser) {
+		$join = $aliaser->getQuery()->join($this->info);
+		$field = $this->getActualField();
+		return $field->getSortClause($dir, $join);
+	}
+
 	public function getActualField() {
 		return $this->info->targetTable->getField($this->fieldName, true);
 	}
@@ -546,6 +546,12 @@ class ModelRelationInfoField extends ModelFieldBase {
 	public function __call($method, $args) {
 		$field = $this->getActualField();
 		if (method_exists($field, $method)) {
+			// Replaces Aliaser arguments with join aliasers
+			foreach ($args as &$arg) {
+				if ($arg instanceof Aliaser) {
+					$arg = $arg->getQuery()->join($this->info);
+				}
+			}
 			return call_user_func_array(array($field, $method), $args);
 		} else {
 			throw new IllegalStateException('Call to undefined method ' . get_class($this)
@@ -562,8 +568,27 @@ abstract class ModelRelationInfoByReference extends ModelRelationInfo {
 
 	protected $uniqueBy;
 
+	protected $whereJoin;
+
 	function  __construct($name, ModelTableProxy $localTable, ModelTableProxy $targetTableProxy, $referenceField) {
 		parent::__construct($name, $localTable, $targetTableProxy);
+
+		if (is_array($referenceField)) {
+			// Extract join where
+			if (isset($referenceField['where'])) {
+				$this->whereJoin = $referenceField['where'];
+			}
+
+			// Extract reference field name
+			if (isset($referenceField['name'])) {
+				$referenceField = $referenceField['name'];
+			} else if (isset($referenceField['field'])) {
+				$referenceField = $referenceField['field'];
+			} else {
+				throw new IllegalArgumentException('Reference field must contain "name" or "field".');
+			}
+		}
+
 		$this->referenceField = $referenceField;
 	}
 
@@ -571,14 +596,18 @@ abstract class ModelRelationInfoByReference extends ModelRelationInfo {
 
 		$this->targetTable->addJoinWhere($join);
 
+		if ($this->whereJoin) {
+			$join->andWhere($this->whereJoin);
+		}
+
 		if ($this->uniqueBy) {
 			foreach ($this->uniqueBy as $foreign => $local) {
 				if (is_array($local)) {
-						if (isset($local['value'])) {
-							$join->whereAssoc($foreign, $local['value']);
-						} else {
-							throw new UnsupportedOperationException();
-						}
+					if (isset($local['value'])) {
+						$join->whereAssoc($foreign, $local['value']);
+					} else {
+						throw new UnsupportedOperationException();
+					}
 				} else {
 					$join->andWhere(
 						$join->getQualifiedName($local, QueryJoin::TABLE_LOCAL)
