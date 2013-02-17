@@ -2650,11 +2650,18 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				name: col.dataIndex || col.name
 			}, col.store));
 		}
-		
-		if (this.columnPositions) {
+
+		if (this.columnPositions
+				// ensure that columns have not changed since the prefs were saved
+				&& (this.gridColumns.length == this.gridColumns.length - initialColumns.length)) {
 			var ordered = initialColumns;
 			Ext.each(this.columnPositions, function(name) {
-				ordered.push(columnConfigMap[name]);
+				var col = columnConfigMap[name];
+				if (col) {
+					ordered.push(columnConfigMap[name]);
+				} else {
+					eo.warn("Missing configuration for column: " + name);
+				}
 			});
 			this.gridColumns = ordered;
 		}
@@ -3291,190 +3298,34 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	}
 
 	,initMultisortPlugin: function() {
-
-		if (!this.extra.multisort) return;
-
-		this.afterInitStore = Ext.Function.createSequence(this.afterInitStore, function(store) {
-			this.doInitMultisortPlugin(store);
-		}, this)
+		if (this.extra.multisort) {
+			this.afterInitStore = Ext.Function.createSequence(this.afterInitStore, this.doInitMultisortPlugin, this);
+		}
 	}
 
+	/**
+	 * @private
+	 */
 	,doInitMultisortPlugin: function(store) {
-
 		this.beforeCreateGrid = Ext.Function.createSequence(this.beforeCreateGrid, function(config) {
-
-			var reorderer = new Ext.ux.ToolbarReorderer();
-
-			var droppable = this.gridTbarDroppable = new Ext.ux.ToolbarDroppable({
-				/**
-				 * Creates the new toolbar item from the drop event
-				 */
-				createItem: function(data) {
-					var column = this.getColumnFromDragDrop(data);
-
-					return createSorterButton({
-						text    : column.header,
-						sortData: {
-							field: column.dataIndex,
-							direction: "ASC"
-						}
-					});
-				},
-
-				calculateEntryIndex: function(e) {
-					var baseEntryIndex = this.calculateBaseEntryIndex(e);
-					return Math.max(2, this.calculateBaseEntryIndex(e)); // label cannot be moved
-				},
-
-				/**
-				 * Custom canDrop implementation which returns true if a column can be added to the toolbar
-				 * @param {Object} data Arbitrary data from the drag source
-				 * @return {Boolean} True if the drop is allowed
-				 */
-				canDrop: function(dragSource, event, data) {
-					var sorters = getSorters(),
-						column  = this.getColumnFromDragDrop(data);
-
-					for (var i=0; i < sorters.length; i++) {
-						if (sorters[i].field == column.dataIndex) return false;
-					}
-
-					return true;
-				},
-
-				afterLayout: doSort,
-
-				/**
-				 * Helper function used to find the column that was dragged
-				 * @param {Object} data Arbitrary data from
-				 */
-				getColumnFromDragDrop: function(data) {
-					var index    = data.header.cellIndex,
-						colModel = this.grid.colModel,
-						column   = colModel.getColumnById(colModel.getColumnId(index));
-
-					return column;
-				}.createDelegate(this)
-			});
-
-			var tbar = config.tbar = new Ext.Toolbar({
-				plugins: [reorderer, droppable],
-				items  : [{
-						xtype: 'tbtext'
-						,text: 'Trier par :'
-					}, {
-						iconCls: 'ico_cross'
-						,handler: clearSort.createDelegate(this)
-					}]
-				,listeners: {
-					scope    : this,
-					reordered: function(button) {
-						changeSortDirection(button, false);
-					}
+			var tbar = Ext.create('Eoze.GridModule.multisort.Toolbar', {
+				getDefaultSortParams: function() {
+					return [
+						this.defaultSortColumn || this.getDefaultSortColumn(this.grid),
+						this.defaultSortDirection || 'ASC'
+					];
 				}
 			});
 
-			/**
-			 * Callback handler used when a sorter button is clicked or reordered
-			 * @param {Ext.Button} button The button that was clicked
-			 * @param {Boolean} changeDirection True to change direction (default). Set to false for reorder
-			 * operations as we wish to preserve ordering there
-			 */
-			function changeSortDirection(button, changeDirection) {
-				var sortData = button.sortData,
-					iconCls  = button.iconCls;
+			config.tbar = tbar;
 
-				if (sortData != undefined) {
-					if (changeDirection !== false) {
-						button.sortData.direction = button.sortData.direction.toggle("ASC", "DESC");
-						button.setIconClass(iconCls.toggle("sort-asc", "sort-desc"));
-					}
-
-					store.clearFilter();
-					doSort();
+			this.on({
+				single: true
+				,scope: this
+				,aftercreategrid: function(me, grid) {
+					tbar.bindGrid(grid);
 				}
-			}
-
-			/**
-			 * Convenience function for creating Toolbar Buttons that are tied to sorters
-			 * @param {Object} config Optional config object
-			 * @return {Ext.Button} The new Button object
-			 */
-			function createSorterButton(config) {
-				config = config || {};
-
-				Ext.applyIf(config, {
-					listeners: {
-						click: function(button, e) {
-							changeSortDirection(button, true);
-						}
-					},
-					iconCls: 'sort-' + config.sortData.direction.toLowerCase(),
-					reorderable: true
-				});
-
-				return new Ext.Button(config);
-			}
-
-			var hasMultiSort = false, ignoreSingleSort = false;
-
-			function doSort() {
-				hasMultiSort = true;
-				ignoreSingleSort = true;
-				store.sort(getSorters(), "ASC");
-			}
-
-			var clearSortToolbar = function() {
-				hasMultiSort = false;
-				Ext.each(tbar.findByType('button'), function(button) {
-					if (button.reorderable) {
-						tbar.remove(button);
-					}
-				});
-			}
-
-			function clearSort() {
-				clearSortToolbar();
-				store.sort(
-					this.defaultSortColumn || this.getDefaultSortColumn(this.grid),
-					this.defaultSortDirection || 'ASC'
-				);
-				store.reload();
-			}
-
-			/**
-			 * Returns an array of sortData from the sorter buttons
-			 * @return {Array} Ordered sort data from each of the sorter buttons
-			 */
-			function getSorters() {
-				var sorters = [];
-
-				Ext.each(tbar.findByType('button'), function(button) {
-					if (button.reorderable) {
-						sorters.push(button.sortData);
-					}
-				}, this);
-
-				return sorters;
-			}
-
-			// --- Store Sort Event ---
-
-			this.store.on('singlesort', function() {
-				if (hasMultiSort && !ignoreSingleSort) clearSortToolbar();
-				else ignoreSingleSort = false;
-			}, this);
-		}, this)
-
-		// --- Override initGrid ---
-
-		this.on('aftercreategrid', function(me, grid) {
-			grid.on('render', function() {
-				var dragProxy = grid.getView().columnDrag,
-					ddGroup   = dragProxy.ddGroup;
-
-				this.gridTbarDroppable.addDDGroup(ddGroup);
-			}, this);
+			})
 		}, this);
 	}
 

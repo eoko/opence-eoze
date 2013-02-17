@@ -76,7 +76,9 @@ abstract class ModelFieldBase implements ModelField {
 	 * @inheritdoc
 	 */
 	public function getSortClause($dir, Aliaser $aliaser) {
-		return $this->doGetSortClause($aliaser) . ' ' . $dir;
+		$clause = $this->doGetSortClause($aliaser);
+		// Sorting by IS NULL first to always have empty value at the end of the list
+		return  "$clause IS NULL, $clause $dir";
 	}
 
 	/**
