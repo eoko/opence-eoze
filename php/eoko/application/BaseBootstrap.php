@@ -68,7 +68,8 @@ class BaseBootstrap extends Bootstrap {
 	 * @return SessionManager
 	 */
 	protected function initSessionManager() {
-		$sessionManager = new SessionManager(ROOT . '/.eoze/session');
+		// Don't have access to application's Paths yet
+		$sessionManager = new SessionManager(ROOT . '/.eoze/sessions');
 		Application::setDefaultSessionManager($sessionManager);
 		return $sessionManager;
 	}
