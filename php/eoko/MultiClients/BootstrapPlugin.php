@@ -70,7 +70,6 @@ class BootstrapPlugin {
 				: false;
 		}
 		return $this->config;
-
 	}
 
 	/**
