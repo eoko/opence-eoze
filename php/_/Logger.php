@@ -536,7 +536,7 @@ class LoggerFileAppender implements LoggerAppender {
 	function __construct($filename = 'log.txt', $directory = null) {
 		// Default directory
 		if ($directory === null) {
-			$directory = \eoko\config\Application::getInstance()->resolvePath('log');
+			$directory = \eoko\config\Application::getInstance()->resolvePath('log/');
 		}
 		$this->filename = $directory . $filename;
 	}
