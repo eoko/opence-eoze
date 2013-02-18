@@ -45,7 +45,11 @@ class Paths {
 	private $dependentSpecs = array();
 	private $previousDependencyRoots = array();
 
-	public function __construct() {
+	public function __construct(array $paths = null) {
+		if ($paths) {
+			$this->setPaths($paths);
+		}
+
 		$this->init(null);
 	}
 
