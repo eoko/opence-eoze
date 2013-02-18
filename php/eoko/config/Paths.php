@@ -116,16 +116,25 @@ class Paths {
 	 * For example, `'tmp/myDir/myFile'` will return the path for the file `myDir/myFile` in the
 	 * symbolic directory `tmp`.
 	 *
-	 * @param string $path
-	 * @return string
+	 * @param string|string[] $path
+	 * @return string|string[]
 	 * @throws \RuntimeException
 	 */
 	public function resolve($path) {
+		// Array form
+		if (is_array($path)) {
+			$paths = array();
+			foreach ($path as $path) {
+				$paths[] = $this->resolve($path);
+			}
+			return $paths;
+		}
+
 		if (isset($this->pathRoots[$path])) {
 			return $this->pathRoots[$path];
 		} else if (preg_match('|^:?(?<root>[^/]+)(?:/(?<path>.*))?$|', $path, $matches)) {
 			if (isset($this->pathRoots[$matches['root']])) {
-				return $this->pathRoots[$matches['root']] . '/' . $matches['path'];
+				return $this->pathRoots[$matches['root']] . $matches['path'];
 			} else {
 				throw new \RuntimeException('Cannot resolve path: ' . $path);
 			}
