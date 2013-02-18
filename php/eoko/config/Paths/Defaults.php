@@ -41,6 +41,8 @@ class Defaults extends Paths {
 		parent::init();
 		$this->setPaths(array(
 
+			'home' => ':opence',
+
 			'tmp' => ':home/tmp',
 			'var' => ':home/var',
 
