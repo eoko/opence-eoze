@@ -72,6 +72,10 @@ class DatabaseProxy {
 				Arrays::apply($config, $envConfig);
 			}
 
+			if (isset($config['username']) && !isset($config['user'])) {
+				$config['user'] = $config['username'];
+			}
+
 			$this->config = new \eoko\util\collection\ImmutableMap($config);
 		}
 		return $this->config;
