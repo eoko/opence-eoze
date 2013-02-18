@@ -45,7 +45,9 @@ class Defaults extends Paths {
 			'var' => ':home/var',
 
 			'cache' => ':tmp/cache',
-			'log' => ':var/log',
+
+			// Keep all logs in the opence directory (not in individual installs)
+			'log' => ':home/log',
 
 			'media' => ':home/documents',
 			// deprecated

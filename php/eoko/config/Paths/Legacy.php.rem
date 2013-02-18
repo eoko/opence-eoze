@@ -36,9 +36,8 @@ class Legacy extends Defaults {
 	public function init() {
 		parent::init();
 		$this->setPaths(array(
-			'home' => MY_EOZE_PATH,
-//			'tmp' => TMP_PATH,
-//			'var' => VAR_PATH,
+			'opence' => MY_EOZE_PATH,
+			'home' => ':opence',
 		));
 	}
 }
