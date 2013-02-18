@@ -40,7 +40,7 @@ class Application implements FileFinder {
 
 		// Paths
 		$this->paths = new Paths\Defaults();
-		$this->paths->setPath('home', MY_EOZE_PATH);
+		$this->paths->setPath('opence', MY_EOZE_PATH);
 	}
 
 	private function getConfig() {
