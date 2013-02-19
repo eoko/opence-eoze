@@ -109,6 +109,7 @@ class Json extends JsonExecutor {
 			}
 		}
 
+		$children = array();
 		foreach ($children as $node) {
 			$node instanceof MenuNode;
 			if (isset($lookup[$node->getParentMenuNodesId()])) {
