@@ -1,9 +1,11 @@
-<?php if (isset($namespace)): ?>
-namespace <?php echo $namespace ?>;
+<?php if (isset($modelNamespace)): ?>
+namespace <?php echo $modelNamespace ?>;
 
 <?php endif ?>
-require_once __DIR__ . '/<?php echo $modelName ?>Base.php';
+<?php if (!isset($modelBaseNamespace)): ?>
+require_once __DIR__ . '/base/<?php echo $modelName ?>Base.php';
 
+<?php endif ?>
 /**
  * @category <?php echo $this->modelCategory, PHP_EOL ?>
  * @package <?php echo $this->modelPackage, PHP_EOL ?>
@@ -11,7 +13,7 @@ require_once __DIR__ . '/<?php echo $modelName ?>Base.php';
  * @since <?php echo $version, PHP_EOL ?>
 <?php endif ?>
  */
-class <?php echo $modelName ?> extends <?php echo $modelName ?>Base {
+class <?php echo $modelName ?> extends <?php echo $modelBaseClass ?> {
 
 	/**
 	 * It is not safe for Model concrete implementations to override their

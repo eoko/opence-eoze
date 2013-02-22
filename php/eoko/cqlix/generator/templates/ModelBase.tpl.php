@@ -1,6 +1,6 @@
 <?php use \ModelColumn ?>
-<?php if (isset($namespace)): ?>
-namespace <?php echo $namespace ?>;
+<?php if (isset($modelBaseNamespace)): ?>
+namespace <?php echo $modelBaseNamespace ?>;
 <?php endif ?>
 
 /**
@@ -49,8 +49,9 @@ abstract class <?php echo $modelName ?>Base extends <?php echo $baseModelName ?>
 <?php endif ?>
 
 	/**
-	 * @param array $values an array of values ($fieldName => $value) to initially set
+	 * @param array $initValues an array of values ($fieldName => $value) to initially set
 	 * the <?php echo $modelName ?> with.
+	 * @param bool $strict
 	 * @param array $context
 	 */
 	protected function __construct($initValues = null, $strict = false, array $context = null) {
@@ -82,6 +83,7 @@ abstract class <?php echo $modelName ?>Base extends <?php echo $baseModelName ?>
 
 	/**
 	 * Get the name of this class's Model.
+	 *
 	 * @return string
 	 */
 	protected function getModelName() {
@@ -91,36 +93,38 @@ abstract class <?php echo $modelName ?>Base extends <?php echo $baseModelName ?>
 	/**
 	 * Create a new <?php echo $modelName ?>
 	 *
-	 * The new reccord will be considered new until its primary key is set.
+	 * The new record will be considered new until its primary key is set.
 	 *
-	 * An array of values can be given to initialize the reccord's fields. It
+	 * An array of values can be given to initialize the record's fields. It
 	 * is not required for all model's fields to have a value in the given
 	 * array; the absent fields will be set to NULL.
 	 *
 	 * @param array $initValues an array containing values with which the
 	 * Model's fields will be initialized. This
 	 *
+	 * @param bool $strict
+	 *
 	 * @param array $context
-	 * 
-	 * @return <?php echo $modelName, PHP_EOL ?>
+	 *
+	 * @return <?php echo $modelClass, PHP_EOL ?>
 	 */
-	static function create($initValues = null, $strict = false, array $context = null) {
-		return new <?php echo $modelName ?>($initValues, $strict, $context);
+	public static function create($initValues = null, $strict = false, array $context = null) {
+		return new <?php echo $modelClass ?>($initValues, $strict, $context);
 	}
 
 <?php if ($primaryField !== null): ?>
 
 	/**
-	 * Set the value of this Reccord's primary key.
+	 * Set the value of this record's primary key.
 	 */
-	function setPrimaryKeyValue($value) {
+	public function setPrimaryKeyValue($value) {
 		$this->setPrimaryKeyValueImpl('<?php echo $primaryField->getName(true) ?>', $value);
 	}
 
 	/**
-	 * @return mixed the value of this Reccord's primary key.
+	 * @return mixed the value of this record's primary key.
 	 */
-	function getPrimaryKeyValue() {
+	public function getPrimaryKeyValue() {
 		return $this->get<?php echo $primaryField->getVarName(true) ?>();
 	}
 
@@ -132,12 +136,12 @@ abstract class <?php echo $modelName ?>Base extends <?php echo $baseModelName ?>
 	 *
 	 * @param array $context
 	 * 
-	 * @return <?php echo $modelName ?> the data Model from the loaded reccord, or null if no
-	 * reccord matching the given primary key has been found
+	 * @return <?php echo $modelClass ?> the data Model from the loaded record, or null if no
+	 * record matching the given primary key has been found
 	 */
 	public static function load($<?php echo $primaryField->getVarName(false) ?>, array $context = null) {
 
-		$model = new <?php echo $modelName ?>(array(
+		$model = new <?php echo $modelClass ?>(array(
 			'<?php echo $primaryField->getName() ?>' => $<?php echo $primaryField->getVarName(false) ?>
 		), false, $context);
 
@@ -154,7 +158,8 @@ abstract class <?php echo $modelName ?>Base extends <?php echo $baseModelName ?>
 	 * the model's data). If NULL, initial values will be used if they exist,
 	 * else it will be tried to load the model from the datastore, eventually
 	 * throwing an Exception if no method works.
-	 * @return <?php echo $modelName ?> 
+	 *
+	 * @return <?php echo $modelClass, PHP_EOL ?>
 	 */
 	public function getStoredCopy($loadFromDB = null) {
 		return $this->doGetStoredCopy($loadFromDB);
@@ -167,7 +172,7 @@ abstract class <?php echo $modelName ?>Base extends <?php echo $baseModelName ?>
 	 * Model doesn't have a primary key.
 	 */
 	public function setPrimaryKeyValue($value) {
-		throw new UnsupportedOperationException('The model <?php echo $modelName ?> has no primary key');
+		throw new \UnsupportedOperationException('The model <?php echo $modelName ?> has no primary key');
 	}
 
 	/**
@@ -175,7 +180,7 @@ abstract class <?php echo $modelName ?>Base extends <?php echo $baseModelName ?>
 	 * Model doesn't have a primary key.
 	 */
 	function getPrimaryKeyValue() {
-		throw new UnsupportedOperationException('The model <?php echo $modelName ?> has no primary key');
+		throw new \UnsupportedOperationException('The model <?php echo $modelName ?> has no primary key');
 	}
 
 	/**
@@ -183,7 +188,7 @@ abstract class <?php echo $modelName ?>Base extends <?php echo $baseModelName ?>
 	 * Model doesn't have a primary key.
 	 */
 	public static function load($id, array $context = null) {
-		throw new UnsupportedOperationException('The model <?php echo $modelName ?> has no primary key');
+		throw new \UnsupportedOperationException('The model <?php echo $modelName ?> has no primary key');
 	}
 <?php endif ?>
 
@@ -191,66 +196,61 @@ abstract class <?php echo $modelName ?>Base extends <?php echo $baseModelName ?>
 	 * Load a %%Model%% from the given data. All model's fields must have a
 	 * set value in the $data array. The model will be considered loaded and
 	 * not-new, when being created this way.
-	 * @param ModelTable $table
+	 *
 	 * @param array $data
 	 * @param array $context
-	 * @return %%Model%%
+	 * @return <?php echo $modelClass, PHP_EOL ?>
 	 * @ignore
 	 */
 	public static function loadFromData(array $data, array $context = null) {
-//		$model = new <?php echo $modelName ?>();
-//		$model->params = $model->context = $context;
-//		$model->setAllFieldsFromDatabase($data);
-//		return $model;
-		return new <?php echo $modelName ?>($data, true, $context);
+		return new <?php echo $modelClass ?>($data, true, $context);
 	}
 
 	/**
-	 * @return <?php echo $tableName ?>
-
+	 * @return <?php echo $tableClass, PHP_EOL ?>
 	 */
-	static function getTable() {
-		return <?php echo $tableName ?>::getInstance();
+	public static function getTable() {
+		return <?php echo $tableClass ?>::getInstance();
 	}
-<?php foreach ($fields as $field): $field instanceof ModelColumn; // DBG ?>
+<?php foreach ($fields as $field): /** @var \ModelColumn $field */ ?>
 
 <?php if ($field->getType() == ModelColumn::T_BOOL): ?>
 	/**
 	 * Get the value of the <?php echo $field->getVarName() ?> field.
-	 * @return <?php echo $field->getPhpType() ?>
-
+	 *
+	 * @return <?php echo $field->getPhpType(), PHP_EOL ?>
 	 */
-	function is<?php echo $field->getVarName(true) ?>() {
+	public function is<?php echo $field->getVarName(true) ?>() {
 		$value = $this->getField('<?php echo $field->getName() ?>');
 		return $value === null ? null : ($value ? true : false);
 	}
 <?php elseif ($field->getType() == ModelColumn::T_DATE): ?>
 	/**
 	 * Get the value of the <?php echo $field->getVarName() ?> field.
-	 * @return <?php echo $field->getPhpType() ?>
-
+	 *
+	 * @return <?php echo $field->getPhpType(), PHP_EOL ?>
 	 */
-	function get<?php echo $field->getVarName(true) ?>($format = DateHelper::SQL_DATE) {
+    public function get<?php echo $field->getVarName(true) ?>($format = DateHelper::SQL_DATE) {
 		$datetime = $this->getField('<?php echo $field->getName() ?>');
 		return DateHelper::getDateTimeAs($datetime, $format);
 	}
 <?php elseif ($field->getType() == ModelColumn::T_DATETIME): ?>
 	/**
 	 * Get the value of the <?php echo $field->getVarName() ?> field.
-	 * @return <?php echo $field->getPhpType() ?>
-
+	 *
+	 * @return <?php echo $field->getPhpType(), PHP_EOL ?>
 	 */
-	function get<?php echo $field->getVarName(true) ?>($format = DateHelper::SQL_DATETIME) {
+	public function get<?php echo $field->getVarName(true) ?>($format = DateHelper::SQL_DATETIME) {
 		$datetime = $this->getField('<?php echo $field->getName() ?>');
 		return DateHelper::getDateTimeAs($datetime, $format);
 	}
 <?php else: ?>
 	/**
 	 * Get the value of the <?php echo $field->getVarName() ?> field.
-	 * @return <?php echo $field->getPhpType() ?>
-
+	 *
+	 * @return <?php echo $field->getPhpType(), PHP_EOL ?>
 	 */
-	function get<?php echo $field->getVarName(true) ?>() {
+	public function get<?php echo $field->getVarName(true) ?>() {
 		$v = $this->getField('<?php echo $field->getName() ?>');
 		return $v === null ? null : <?php echo $field->getPhpConvertTypeString() ?> $v;
 	}
@@ -258,24 +258,15 @@ abstract class <?php echo $modelName ?>Base extends <?php echo $baseModelName ?>
 
 	/**
 	 * Set the value of the <?php echo $field->getVarName() ?> field.
-	 * @param <?php echo $field->getPhpType() ?> $value
-	 * @return <?php echo $modelName ?> 
-
+	 *
+	 * @param <?php echo $field->getPhpType() ?> $<?php echo $field->getVarName(), PHP_EOL ?>
+	 * @param <?php echo $field->isNullable() ? '$ignoredArgument' : '$forceAcceptNull', PHP_EOL ?>
+	 * @return <?php echo $modelClass, PHP_EOL ?>
 	 */
-	function set<?php echo $field->getVarName(true) ?>($<?php echo $field->getVarName() ?>
+	public function set<?php echo $field->getVarName(true) ?>($<?php echo $field->getVarName() ?>
 , <?php echo $field->isNullable() ? '$ignoredArgument' : '$forceAcceptNull' ?> = false) {
 		$this->setColumn('<?php echo $field->getName() ?>', $<?php echo $field->getVarName() ?>
 , <?php echo $field->isNullable() ? '$ignoredArgument' : '$forceAcceptNull' ?>);
-<?php /*
-<?php if (!$field->isPrimary()): ?>
-		// $this->setField('<?php echo $field->getName() ?>', $<?php echo $field->getVarName() ?>
-
-		$this->setColumn('<?php echo $field->getName() ?>', $<?php echo $field->getVarName() ?>
-, <?php echo $field->isNullable() ? '$ignoredArgument' : '$forceAcceptNull' ?>);
-<?php else: ?>
-		$this->setPrimaryKeyValue($<?php echo $field->getVarName() ?>);
-<?php endif ?>
- */ ?>
 		return $this;
 	}
 <?php endforeach ?>
@@ -292,7 +283,7 @@ foreach ($proxyMethods as $method) {
 	 * @param array $overrideContext
 	 * @return <?php echo $relation->getTargetType('get') . PHP_EOL ?>
 	 */
-	function get<?php echo $relation->getName() ?>(array $overrideContext = null) {
+	public function get<?php echo $relation->getName() ?>(array $overrideContext = null) {
 		return $this->getForeignModel('<?php echo $relation->getName() ?>', $overrideContext);
 	}
 	/**
@@ -300,7 +291,7 @@ foreach ($proxyMethods as $method) {
 	 * @param <?php echo $relation->getTargetType('set') . ' $' . lcfirst($relation->getName()) . PHP_EOL ?>
 	 * @return <?php echo $relation->getTargetType('set') . PHP_EOL ?>
 	 */
-	function set<?php echo $relation->getName() ?>(<?php echo $relation->getTargetType('set', true) ?> $<?php echo lcfirst($relation->getName()) ?>) {
+	public function set<?php echo $relation->getName() ?>(<?php echo $relation->getTargetType('set', true) ?> $<?php echo lcfirst($relation->getName()) ?>) {
 		// return $this->getRelation('<?php echo $relation->getName() ?>')->get($this);
 		return $this->setForeignModel('<?php echo $relation->getName() ?>', $<?php echo lcfirst($relation->getName()) ?>);
 	}

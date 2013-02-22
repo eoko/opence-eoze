@@ -24,14 +24,17 @@
 
 namespace eoko\MultiClients\bin;
 
+use eoko\script\Script;
+use eoko\MultiClients\Model\UserTable;
+
 /**
- * Generates model for multi client installations database.
+ * Test (debug) script for model generator.
  *
  * @since 2013-02-18 07:04
  */
 
 chdir(realpath(__DIR__ . '/../../../../bin/'));
 
-$class = 'eoko\MultiClients\bin\ModelGenerator';
+$class = 'eoko\MultiClients\bin\ModelGeneratorTest';
 
 require 'doRun.php';

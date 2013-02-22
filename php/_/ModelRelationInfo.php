@@ -228,10 +228,10 @@ abstract class ModelRelationInfo extends ModelFieldBase {
 	 * @internal this code is legacy from ModelTableQuery::getOrderFieldAlias() v5.0
 	 *
 	 * @param ModelTableQuery $query
-	 * @param QueryAliasable $aliaser
+	 * @param Aliaser $aliaser
 	 * @return string
 	 */
-	protected function doGetSortClause(QueryAliasable $aliaser) {
+	protected function doGetSortClause(Aliaser $aliaser) {
 		$query = $aliaser->getQuery();
 		$fieldName = $this->getTargetTable()->getNameFieldName();
 		return $query->join($this)->alias($fieldName);
@@ -287,7 +287,7 @@ abstract class ModelRelationInfo extends ModelFieldBase {
 		return $query;
 	}
 
-	public function selectId(Query $query, $alias = null) {
+	public function selectId(ModelTableQuery $query, $alias = null) {
 		if (!$this->selectable) return $query;
 
 		$this->parseSelectJoinAlias($alias, $joinAlias, $leftAlias);
@@ -1510,7 +1510,7 @@ abstract class ModelRelationInfoChain extends ModelRelationInfo {
 
 	// overriden so that the target relation (ie the last one in the chain) 
 	// uses the correct $alias and not its own one
-	public function selectId(Query $query, $alias = null) {
+	public function selectId(ModelTableQuery $query, $alias = null) {
 		parent::selectId(
 			$query,
 			$alias !== null ? $alias : $this->name

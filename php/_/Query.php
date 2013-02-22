@@ -64,6 +64,11 @@ class Query {
 
 	private static $executionCount = 0;
 
+	/**
+	 * @var PDO
+	 */
+	private $pdo = null;
+
 	private $db = null;
 
 	private $table = null;
@@ -490,7 +495,7 @@ class Query {
 	}
 
 	/**
-	 * @return PDOStatement
+	 * @return Query
 	 */
 	public function delete() {
 		$this->action = self::DELETE;
@@ -930,11 +935,6 @@ class Query {
 		return $this->pdo;
 	}
 
-	/**
-	 * @var PDO
-	 */
-	private $pdo = null;
-
 	public function setConnection(PDO $connection) {
 		$this->pdo = $connection;
 	}
@@ -1263,7 +1263,8 @@ class Query {
 //			$s .= '{ NULL }';
 //		} else {
 //			$s .= count($this->table) == 1 ? 'on table ' : 'on tables ';
-			$s .= "on table $this->dbTable";
+//			$s .= "on table $this->dbTable";
+			$s .= "on ";
 			$s .= $this->buildTable();
 
 			if ($this->action === null) {

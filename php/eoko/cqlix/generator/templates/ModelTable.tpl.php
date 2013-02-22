@@ -1,9 +1,11 @@
-<?php if (isset($namespace)): ?>
-namespace <?php echo $namespace ?>;
+<?php if (isset($tableNamespace)): ?>
+namespace <?php echo $tableNamespace ?>;
 
 <?php endif ?>
-require_once __DIR__ . '/<?php echo $className ?>Base.php';
+<?php if (!isset($tableBaseNamespace)): ?>
+require_once __DIR__ . '/base/<?php echo $className ?>Base.php';
 
+<?php endif ?>
 /**
  *
  * @category <?php echo $this->modelCategory, PHP_EOL ?>
@@ -13,7 +15,7 @@ require_once __DIR__ . '/<?php echo $className ?>Base.php';
  * @since <?php echo $version, PHP_EOL ?>
 <?php endif ?>
  */
-class <?php echo $className ?> extends <?php echo $className ?>Base {
+class <?php echo $className ?> extends <?php echo $tableBaseClass ?> {
 
 	/**
 	 * It is not safe for ModelTable concrete implementations to override their

@@ -28,34 +28,48 @@ use eoko\script\Script;
 use eoko\cqlix\generator\Generator;
 use eoko\database\Database;
 use eoko\application\Bootstrap;
+use eoko\MultiClients\MultiClients;
 
 /**
+ * Model generator for multi client installations.
  *
- * @category Opence
- * @package
- * @subpackage
+ * @category Eoze
+ * @package MultiClients
+ * @subpackage bin
  * @since 2013-02-18 07:04
  */
 class ModelGenerator extends Generator {
 
-	protected function run() {
+	protected $modelCategory = 'Eoze';
 
-		$this->modelNamespace = __NAMESPACE__ . '\\Model';
+	protected $databaseProxyName = MultiClients::DATABASE_PROXY_NAME;
 
-		$mcConfig = Bootstrap::getCurrent()->getMultiClient()->getConfig();
+	protected $modelNamespace = 'eoko\MultiClients\Model';
 
-		if ($mcConfig === false) {
-			throw new \RuntimeException('Multi client is not configured.');
-		}
-		if (!isset($mcConfig['database'])) {
-			throw new \RuntimeException('Multi client database is not configured.');
-		}
+	protected $namespaces = array(
+		'model' => 'eoko\MultiClients\Model',
+		'modelBase' => ':model\Base',
+		'table' => ':model',
+		'tableBase' => ':table\Base',
+		'proxy' => ':proxy\Proxy',
+	);
 
-		// Use multi client database
-		$previous = Database::setDefaultProxy($mcConfig['database']);
+	public function __construct() {
+
+		$this->database = new Database($this->databaseProxyName);
 
 		// Use multi client model paths
-		$this->paths->setPath('model', __DIR__ . '/../Model');
+		$this->paths['model'] = __DIR__ . '/../Model';
+
+		$this->namespaces['model'] = substr(__NAMESPACE__, 0, -4);
+
+		parent::__construct();
+	}
+
+	protected function run() {
+
+		// Use multi client database
+		$previous = Database::setDefaultProxy(MultiClients::DATABASE_PROXY_NAME);
 
 		parent::run();
 

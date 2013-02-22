@@ -15,15 +15,15 @@ class ModelColumn extends ModelFieldBase {
 	/** @var string an alias that can be used to reference the field */
 	private $alias;
 
-	/** @var Const String */
+	/** @var const */
 	public $type;
 	protected $sqlType;
-	/** @var Int */
+	/** @var int */
 	public $length;
-	/** @var <mixed> */
+	/** @var mixed */
 	public $default;
 	/**
-	 * @var <mixed>
+	 * @var mixed
 	 * <p>NULL if autoValue if off for all operations.
 	 * <p>May be an Array OPERATION => {$value | NULL} to precise different 
 	 * autoValue for different operations.
@@ -281,7 +281,8 @@ class ModelColumn extends ModelFieldBase {
 	}
 
 	function getPhpType() {
-		return ucfirst($this->type);
+		return $this->type;
+//		return ucfirst($this->type);
 	}
 
 	public function getPhpConvertTypeString() {

@@ -1,16 +1,14 @@
 <?php
 
-namespace eoko\MultiClients\bin\Model;
-
-require_once __DIR__ . '/ClientTableBase.php';
+namespace eoko\MultiClients\Model;
 
 /**
  *
- * @category opence
+ * @category Eoze
  * @package Model
- * @subpackage Table
+ * @subpackage 
  */
-class ClientTable extends ClientTableBase {
+class ClientTable extends \eoko\MultiClients\Model\Base\ClientTableBase {
 
 	/**
 	 * It is not safe for ModelTable concrete implementations to override their

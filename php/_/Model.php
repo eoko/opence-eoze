@@ -26,10 +26,6 @@
  * provide functionnalities of the model's generic properties (as opposed to
  * the model's reccords properties). See {@link ModelTable} for details.
  *
- * @method ModelTable getTable() Get the ModelTable corresponding to this Model.
- * This function can be statically called from concrete implementations of Model
- * (but not in, or from, the Model class itself, where it is not defined).
- *
  * @internal The methods of the Model class which are protected, and
  * prefixed with a single underscore (eg _load) will have a static alias created
  * in the generated ModelBase classes. These alias method will consist of a
@@ -162,7 +158,13 @@ abstract class Model {
 	}
 
 	/**
+	 * Get the ModelTable corresponding to this Model.
+	 *
+	 * This function can be statically called from concrete implementations of Model
+	 * (but not in, or from, the Model class itself, where it is not defined).
+	 *
 	 * @return ModelTable
+	 * @noinspection PhpAbstractStaticMethodInspection
 	 */
 	abstract public static function getTable();
 
@@ -292,6 +294,7 @@ abstract class Model {
 				case ModelField::T_BOOLEAN:
 					return $value ? 'Oui' : 'Non';
 				case ModelField::T_ENUM:
+					/** @var \eoko\cqlix\EnumField $mf */
 					return $mf->getEnumLabelForValue($value);
 				default:
 					return $value;
@@ -303,18 +306,11 @@ abstract class Model {
 
 	private function doRenderField($field, $value = null) {
 		$v = $this->getFieldValue($field, $model, $field);
-		if ($value === null) $value = $v;
+		if ($value === null) {
+			$value = $v;
+		}
+		/** @var Model $model */
 		return $model->formatForRender($field, $value);
-//		if ($this->table->renderers !== null
-//				&& isset($this->table->renderers[$field])) {
-//			return ModelFieldRenderer::apply(
-//				$this->table->renderers[$field],
-//				$value !== null ? $value : $this->__get($field),
-//				$this
-//			);
-//		} else {
-//			return $value !== null ? $value : $this->__get($field);
-//		}
 	}
 
 	public function renderField($field) {
@@ -451,6 +447,7 @@ abstract class Model {
 				if ($data instanceof ModelSet) {
 					$setData = array();
 					foreach ($data as $model) {
+						/** @var Model $model */
 						$setData[] = $model->getData();
 					}
 					$data = $setData;
@@ -501,6 +498,7 @@ abstract class Model {
 					// we have a HasMany relation here...
 					$hasManyData = array();
 					foreach ($foreignModel as $model) {
+						/** @var Model $model */
 						if ($params) {
 							$hasManyData[] = $model->getDataEx($params);
 						} else {
@@ -609,25 +607,26 @@ abstract class Model {
 				// Cache fields's col
 				if (!$this->table->hasVirtual($k)) {
 					$col = $this->table->getColumn($k);
-				}
 
-				// If the reccord is new and the field final, and it has not
-				// been explicitely set, we *must* find an auto or default value
-				if ($this->isNew() && $col->isFinal()) {
-					if ($col->isAuto($operation)) {
+					// If the record is new and the field final, and it has not
+					// been explicitly set, we *must* find an auto or default value
+					if ($this->isNew() && $col->isFinal()) {
+						if ($col->isAuto($operation)) {
+							$r[$k] = $col->getAutoValue($operation);
+						} else if (!$col->hasDefault()) {
+							throw new IllegalStateException(
+								'Final col not set: ' . get_class($this) . "->$col->name"
+							);
+						}
+
+						// ... else, process auto value (eg. update date)
+					} else if ($col->isAuto($operation)) {
 						$r[$k] = $col->getAutoValue($operation);
-					} else if (!$col->hasDefault()) {
-						throw new IllegalStateException(
-							'Final col not set: ' . get_class($this) . "->$col->name"
-						);
 					}
-
-				// ... else, process auto value (eg. update date)
-				} else if ($col->isAuto($operation)) {
-					$r[$k] = $col->getAutoValue($operation);
 				}
 			}
 		}
+
 		return $r;
 	}
 
@@ -993,6 +992,7 @@ abstract class Model {
 		$this->events->fire(self::EVT_BEFORE_SAVE_RELATION, $relation);
 		$this->beforeSaveRelation($relation, $parentWasNew);
 
+		/** @noinspection PhpVoidFunctionResultUsedInspection */
 		if (!$relation->save($parentWasNew)) {
 			Logger::get($this)->error(
 				"Error saving relation: " . get_class($this) . '.' .
@@ -1081,11 +1081,9 @@ abstract class Model {
 	protected function beforeDelete($isSaving) {}
 
 	protected function onDeleteInternal() {
-		$tableName = $this->table->getTableName();
 		foreach ($this->table->getRelationsInfo() as $relInfo) {
 			if ($relInfo instanceof ModelRelationInfoIsRefered) {
 				$relInfo->notifyDeleteToRefering($this);
-//				$this->getRelation($relInfo->name)->notifyDeleteToRefering($this);
 			}
 		}
 	}
@@ -1170,6 +1168,7 @@ abstract class Model {
 	 * Implements the delete query of the model. When this method is called,
 	 * it is guaranteed that the data representing the actual model in the
 	 * database do exist.
+	 *
 	 * @return bool `true` on success, `false` on failure.
 	 */
 	protected function doDeleteQuery() {
@@ -1346,16 +1345,12 @@ abstract class Model {
 			}
 
 			if ($wait) {
-				$l = new ModelMultipleFieldDeterminationListener($fieldName, $callback);
-				if ($this->determinationMultifieldListeners[$fieldName]) {
-					$this->determinationMultifieldListeners[$fieldName][] = $l;
-				} else {
-					$this->determinationMultifieldListeners[$fieldName][] = array($l);
-				}
+				$listener = new ModelMultipleFieldDeterminationListener($fieldName, $callback);
+				$this->determinationMultifieldListeners[] = $listener;
 			} else {
 				$values = array();
 				foreach ($fieldName as $field) {
-					$values[$field] = $m->__get($field);
+					$values[$field] = $this->__get($field);
 				}
 				$callback($values);
 			}
@@ -1396,9 +1391,9 @@ abstract class Model {
 				unset($this->determinationListeners[$fieldName]);
 			}
 
-			if ($this->determinationMultifieldListeners !== null) {
+			if (!empty($this->determinationMultifieldListeners)) {
 				foreach ($this->determinationMultifieldListeners as $i => $l) {
-					$l instanceof ModelMultipleFieldDeterminationListener;
+					/** @var ModelMultipleFieldDeterminationListener $l */
 					if ($l->test($this)) {
 						unset($this->determinationMultifieldListeners[$i]);
 					}
@@ -1702,8 +1697,9 @@ abstract class Model {
 				Logger::getLogger($this)->warn('Model "{}" not synchronized: '
 						. 'missing virtual field `{}` in database result', get_class($this), $virtual);
 			} else {
-				$this->internal->dbValues[$field] = 
-				$this->internal->fields[$virtual] = $setters[$virtual];
+				$this->internal->dbValues[$field]
+					= $this->internal->fields[$virtual]
+					= $setters[$virtual];
 			}
 		}
 		$this->dbImage = true;

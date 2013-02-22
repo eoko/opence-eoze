@@ -39,37 +39,25 @@ use eoko\config\Application;
 class BootstrapPlugin {
 
 	/**
-	 * @var string Path of the directory where config will be read.
+	 * @var MultiClients
 	 */
-	private $configDirectory;
-
-	/**
-	 * @var array|false
-	 */
-	private $config = null;
+	private $multiClient;
 
 	/**
 	 * @param string $configDirectory Path of the directory where config will be read.
 	 */
 	public function __construct($configDirectory) {
-		$this->configDirectory = $configDirectory;
+		$this->multiClient = MultiClients::forDirectory($configDirectory);
 	}
 
 	/**
 	 * Gets the config array by reading a MultiClients.config.php file, if it exists in the config
 	 * directory.
 	 *
-	 * @return array|false
+	 * @return array|bool
 	 */
 	public function getConfig() {
-		if ($this->config === null) {
-			$clientsConfigFile = $this->configDirectory . '/MultiClients.config.php';
-			/** @noinspection PhpIncludeInspection */
-			$this->config = file_exists($clientsConfigFile)
-				? require $clientsConfigFile
-				: false;
-		}
-		return $this->config;
+		return $this->multiClient->getConfig();
 	}
 
 	/**
@@ -93,6 +81,13 @@ class BootstrapPlugin {
 		}
 	}
 
+	/**
+	 * Sets the client to be used. This method will affect the application configuration & environment
+	 * to match the specified client.
+	 *
+	 * @param Client $client
+	 * @throws Exception\RuntimeException
+	 */
 	private function setClient(Client $client) {
 
 		// --- Home directory
@@ -130,12 +125,13 @@ class BootstrapPlugin {
 	 * and storing client data in session on successful log in.
 	 *
 	 * @param \eoko\php\SessionManager $sessionManager
+	 * @throws \RuntimeException
 	 */
 	public function initUserSession(SessionManager $sessionManager) {
 		$config = $this->getConfig();
 		if ($config !== false) {
 			if (isset($config['database'])) {
-				UserSession::setLoginAdapter(new LoginAdapter($config['database'], $sessionManager));
+				UserSession::setLoginAdapter(new LoginAdapter($this->multiClient, $sessionManager));
 			} else {
 				throw new \RuntimeException('Missing configuration: database');
 			}
