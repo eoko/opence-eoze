@@ -22,15 +22,19 @@
  * @author Éric Ortega <eric@eoko.fr>
  */
 
-namespace eoko\MultiClients\Exception;
+namespace eoko\MultiClient\bin;
+
+use eoko\script\Script;
+use eoko\MultiClient\Model\UserTable;
 
 /**
- * Marker interface for MultiClients exceptions.
+ * Test (debug) script for model generator.
  *
- * @category Eoze
- * @package MultiClients
- * @since 2013-02-16 04:08
+ * @since 2013-02-18 07:04
  */
-interface Exception {
 
-}
+chdir(realpath(__DIR__ . '/../../../../bin/'));
+
+$class = 'eoko\MultiClient\bin\ModelGeneratorTest';
+
+require 'doRun.php';

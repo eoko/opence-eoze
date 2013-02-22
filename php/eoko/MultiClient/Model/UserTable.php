@@ -1,6 +1,6 @@
 <?php
 
-namespace eoko\MultiClients\Model;
+namespace eoko\MultiClient\Model;
 
 /**
  *
@@ -8,7 +8,7 @@ namespace eoko\MultiClients\Model;
  * @package Model
  * @subpackage 
  */
-class UserTable extends \eoko\MultiClients\Model\Base\UserTableBase {
+class UserTable extends \eoko\MultiClient\Model\Base\UserTableBase {
 
 	/**
 	 * It is not safe for ModelTable concrete implementations to override their

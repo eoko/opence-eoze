@@ -22,19 +22,19 @@
  * @author Éric Ortega <eric@eoko.fr>
  */
 
-namespace eoko\MultiClients\bin;
+namespace eoko\MultiClient\bin;
 
 use eoko\script\Script;
 use eoko\cqlix\generator\Generator;
 use eoko\database\Database;
 use eoko\application\Bootstrap;
-use eoko\MultiClients\MultiClients;
+use eoko\MultiClient\MultiClient;
 
 /**
  * Model generator for multi client installations.
  *
  * @category Eoze
- * @package MultiClients
+ * @package MultiClient
  * @subpackage bin
  * @since 2013-02-18 07:04
  */
@@ -42,12 +42,12 @@ class ModelGenerator extends Generator {
 
 	protected $modelCategory = 'Eoze';
 
-	protected $databaseProxyName = MultiClients::DATABASE_PROXY_NAME;
+	protected $databaseProxyName = MultiClient::DATABASE_PROXY_NAME;
 
-	protected $modelNamespace = 'eoko\MultiClients\Model';
+	protected $modelNamespace = 'eoko\MultiClient\Model';
 
 	protected $namespaces = array(
-		'model' => 'eoko\MultiClients\Model',
+		'model' => 'eoko\MultiClient\Model',
 		'modelBase' => ':model\Base',
 		'table' => ':model',
 		'tableBase' => ':table\Base',
@@ -69,7 +69,7 @@ class ModelGenerator extends Generator {
 	protected function run() {
 
 		// Use multi client database
-		$previous = Database::setDefaultProxy(MultiClients::DATABASE_PROXY_NAME);
+		$previous = Database::setDefaultProxy(MultiClient::DATABASE_PROXY_NAME);
 
 		parent::run();
 

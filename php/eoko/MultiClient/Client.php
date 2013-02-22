@@ -22,13 +22,13 @@
  * @author Éric Ortega <eric@eoko.fr>
  */
 
-namespace eoko\MultiClients;
+namespace eoko\MultiClient;
 
 /**
  * Client data object for multiple clients installations.
  *
  * @category Eoze
- * @package MultiClients
+ * @package MultiClient
  * @since 2013-02-16 04:44
  */
 class Client {

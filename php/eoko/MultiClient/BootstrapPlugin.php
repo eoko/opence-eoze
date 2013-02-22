@@ -22,7 +22,7 @@
  * @author Éric Ortega <eric@eoko.fr>
  */
 
-namespace eoko\MultiClients;
+namespace eoko\MultiClient;
 
 use eoko\php\SessionManager;
 use eoko\config\ConfigManager;
@@ -33,13 +33,13 @@ use eoko\config\Application;
  * Config bootstrap listener.
  *
  * @category Eoze
- * @package MultiClients
+ * @package MultiClient
  * @since 2013-02-16 04:48
  */
 class BootstrapPlugin {
 
 	/**
-	 * @var MultiClients
+	 * @var MultiClient
 	 */
 	private $multiClient;
 
@@ -47,11 +47,11 @@ class BootstrapPlugin {
 	 * @param string $configDirectory Path of the directory where config will be read.
 	 */
 	public function __construct($configDirectory) {
-		$this->multiClient = MultiClients::forDirectory($configDirectory);
+		$this->multiClient = MultiClient::forDirectory($configDirectory);
 	}
 
 	/**
-	 * Gets the config array by reading a MultiClients.config.php file, if it exists in the config
+	 * Gets the config array by reading a MultiClient.config.php file, if it exists in the config
 	 * directory.
 	 *
 	 * @return array|bool
@@ -72,9 +72,9 @@ class BootstrapPlugin {
 
 		// We want to search for a user's client only if someone is identified!
 		if (isset($sessionData['UserSession'])) {
-			if (isset($sessionData['eoko\MultiClients\clientConfig'])) {
+			if (isset($sessionData['eoko\MultiClient\clientConfig'])) {
 				/** @var Client $client */
-				$this->setClient($sessionData['eoko\MultiClients\clientConfig']);
+				$this->setClient($sessionData['eoko\MultiClient\clientConfig']);
 			} else {
 				throw new Exception\RuntimeException('Client installation information missing.');
 			}
@@ -96,7 +96,7 @@ class BootstrapPlugin {
 
 		$config = $this->getConfig();
 		if (!isset($config['homeDirectory'])) {
-			throw new Exception\RuntimeException('Missing config for MultiClients: homeDirectory');
+			throw new Exception\RuntimeException('Missing config for MultiClient: homeDirectory');
 		}
 
 		$basePath = rtrim($config['homeDirectory'], '/') . '/'

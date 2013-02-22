@@ -22,7 +22,7 @@
  * @author Éric Ortega <eric@eoko.fr>
  */
 
-namespace eoko\MultiClients;
+namespace eoko\MultiClient;
 
 /**
  *

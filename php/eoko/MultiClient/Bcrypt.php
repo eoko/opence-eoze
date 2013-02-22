@@ -1,6 +1,6 @@
 <?php
 
-namespace eoko\MultiClients;
+namespace eoko\MultiClient;
 
 use Exception;
 

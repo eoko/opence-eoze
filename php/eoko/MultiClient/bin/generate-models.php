@@ -22,15 +22,16 @@
  * @author Éric Ortega <eric@eoko.fr>
  */
 
-namespace eoko\MultiClients\Exception;
+namespace eoko\MultiClient\bin;
 
 /**
- * Runtime exception for MultiClients.
+ * Generates model for multi client installations database.
  *
- * @category Eoze
- * @package MultiClients
- * @since 2013-02-16 04:08
+ * @since 2013-02-18 07:04
  */
-class RuntimeException extends \RuntimeException implements Exception {
 
-}
+chdir(realpath(__DIR__ . '/../../../../bin/'));
+
+$class = 'eoko\MultiClient\bin\ModelGenerator';
+
+require 'doRun.php';

@@ -1,13 +1,13 @@
 <?php
 
-namespace eoko\MultiClients\Model\Base;
+namespace eoko\MultiClient\Model\Base;
 
 use ModelSet;
 use ModelColumn;
 
 
 /**
- * Base of the User Table.
+ * Base of the Client Table.
  *
  * @category Eoze
  * @package Model
@@ -16,57 +16,48 @@ use ModelColumn;
  *
  * @method mixed findById($id)
  * @method mixed findFirstById($id)
- * @method mixed findByClientId($clientId)
- * @method mixed findFirstByClientId($clientId)
- * @method mixed findByUsername($username)
- * @method mixed findFirstByUsername($username)
- * @method mixed findByPassword($password)
- * @method mixed findFirstByPassword($password)
- * @method mixed findByLevel($level)
- * @method mixed findFirstByLevel($level)
- * @method mixed findByFirstName($firstName)
- * @method mixed findFirstByFirstName($firstName)
- * @method mixed findByLastName($lastName)
- * @method mixed findFirstByLastName($lastName)
+ * @method mixed findByName($name)
+ * @method mixed findFirstByName($name)
+ * @method mixed findByHomeDirectory($homeDirectory)
+ * @method mixed findFirstByHomeDirectory($homeDirectory)
+ * @method mixed findByDatabaseName($databaseName)
+ * @method mixed findFirstByDatabaseName($databaseName)
  */
-abstract class UserTableBase extends \myModelTable {
+abstract class ClientTableBase extends \myModelTable {
 
 	private static $singleton = null;
 
-	protected $databaseProxyName = 'eoko\MultiClients\MultiClients';
+	protected $databaseProxyName = 'eoko\MultiClient\MultiClient';
 
-	public $modelName = 'User';
-	public $tableName = 'UserTable';
-	public $dbTableName = 'users';
+	public $modelName = 'Client';
+	public $tableName = 'ClientTable';
+	public $dbTableName = 'clients';
 
 	protected $engineAutomaticCascade = true;
 
 	protected function __construct() {
 		$cols = array(
 				'id' => new ModelColumn('id', ModelColumn::T_INT, '10', false, null, true, null, true, true, null),
-				'client_id' => new ModelColumn('client_id', ModelColumn::T_INT, '10', false, null, false, \eoko\MultiClients\Model\Proxy\ClientTableProxy::get(), false, false, null),
-				'username' => new ModelColumn('username', ModelColumn::T_STRING, '255', false, null, true, null, false, false, null),
-				'password' => new ModelColumn('password', ModelColumn::T_STRING, '255', false, null, false, null, false, false, null),
-				'level' => new ModelColumn('level', ModelColumn::T_INT, '11', false, null, false, null, false, false, null),
-				'first_name' => new ModelColumn('first_name', ModelColumn::T_STRING, '255', true, null, false, null, false, false, null),
-				'last_name' => new ModelColumn('last_name', ModelColumn::T_STRING, '255', true, null, false, null, false, false, null)
+				'name' => new ModelColumn('name', ModelColumn::T_STRING, '255', false, null, false, null, false, false, null),
+				'home_directory' => new ModelColumn('home_directory', ModelColumn::T_STRING, '255', false, null, false, null, false, false, null),
+				'database_name' => new ModelColumn('database_name', ModelColumn::T_STRING, '255', false, null, false, null, false, false, null)
 		);
 
 		$relations = array(
-				'Client' => new \ModelRelationInfoReferencesOne(array(
-					'name' => 'Client',
-				), $this, \eoko\MultiClients\Model\Proxy\ClientTableProxy::get(), 'client_id')
+				'Users' => new \ModelRelationInfoReferedByMany(array(
+					'name' => 'Users',
+				), $this, \eoko\MultiClient\Model\Proxy\UserTableProxy::get(), 'client_id')
 		);
 
 		parent::__construct($cols, $relations);
 	}
 
 	/**
-	 * @return \eoko\MultiClients\Model\UserTable
+	 * @return \eoko\MultiClient\Model\ClientTable
 	 */
 	public static function getInstance() {
 		if (self::$singleton == null) {
-			self::$singleton = new \eoko\MultiClients\Model\UserTable();
+			self::$singleton = new \eoko\MultiClient\Model\ClientTable();
 		}
 		return self::$singleton;
 	}
@@ -77,31 +68,31 @@ abstract class UserTableBase extends \myModelTable {
 	 * @return String
 	 */
 	public static function getModelName() {
-		return 'User';
+		return 'Client';
 	}
 
 	/**
 	 * @return String
 	 */
 	public static function getTableName() {
-		return 'UserTable';
+		return 'ClientTable';
 	}
 
 	/**
 	 * @return String
 	 */
 	public static function getDBTable() {
-		return 'users';
+		return 'clients';
 	}
 
 	/**
 	 * Get whether the given object is an instance of this table's model.
 	 *
 	 * @param object $obj
-	 * @return bool TRUE if $obj is an instance of \eoko\MultiClients\Model\User
+	 * @return bool TRUE if $obj is an instance of \eoko\MultiClient\Model\Client
 	 */
 	public static function isInstanceOfModel($obj) {
-		return $obj instanceof \eoko\MultiClients\Model\User;
+		return $obj instanceof \eoko\MultiClient\Model\Client;
 	}
 
 	/**
@@ -122,7 +113,7 @@ abstract class UserTableBase extends \myModelTable {
 	}
 
 	/**
-	 * Create a new User.
+	 * Create a new Client.
 	 *
 	 * The new record will be considered new until its primary key is set.
 	 *
@@ -139,10 +130,10 @@ abstract class UserTableBase extends \myModelTable {
 	 *
 	 * @param array $context
 	 *
-	 * @return \eoko\MultiClients\Model\User
+	 * @return \eoko\MultiClient\Model\Client
 	 */
 	public static function createModel($initValues = null, $strict = false, array $context = null) {
-		return \eoko\MultiClients\Model\User::create($initValues, $strict, $context);
+		return \eoko\MultiClient\Model\Client::create($initValues, $strict, $context);
 	}
 
 	/**
@@ -171,35 +162,35 @@ abstract class UserTableBase extends \myModelTable {
 	}
 
 	/**
-	 * Load a User record from the database, selected by
+	 * Load a Client record from the database, selected by
 	 * its primary key.
 	 *
 	 * @param mixed $id
 	 * @param array $context
 	 *
-	 * @return \eoko\MultiClients\Model\User the data Model from the loaded record, or null if no
+	 * @return \eoko\MultiClient\Model\Client the data Model from the loaded record, or null if no
 	 * record matching the given primary key has been found
 	 */
 	public static function loadModel($id, array $context = null) {
-		return \eoko\MultiClients\Model\User::load($id, $context);
+		return \eoko\MultiClient\Model\Client::load($id, $context);
 	}
 
 	/**
 	 * @param $id
 	 * @param array $context
-	 * @return \eoko\MultiClients\Model\User
+	 * @return \eoko\MultiClient\Model\Client
 	 */
 	public static function findByPrimaryKey($id, array $context = null) {
-		return \eoko\MultiClients\Model\User::load($id, $context);
+		return \eoko\MultiClient\Model\Client::load($id, $context);
 	}
 
 	/**
 	 * @param $id
 	 * @param array $context
-	 * @return \eoko\MultiClients\Model\User
+	 * @return \eoko\MultiClient\Model\Client
 	 */
 	public static function findFirstByPrimaryKey($id, array $context = null) {
-		return \eoko\MultiClients\Model\User::load($id, $context);
+		return \eoko\MultiClient\Model\Client::load($id, $context);
 	}
 
 	/**
@@ -216,16 +207,16 @@ abstract class UserTableBase extends \myModelTable {
 	}
 
 	/**
-	 * Create a new User record initialized by the given $data
+	 * Create a new Client record initialized by the given $data
 	 * array. All the model's fields must have a value set in the $data array.
-	 * The User record will be considered loaded and not-new.
+	 * The Client record will be considered loaded and not-new.
 	 *
 	 * @param array $data
 	 * @param array $context
-	 * @return \eoko\MultiClients\Model\User
+	 * @return \eoko\MultiClient\Model\Client
 	 */
 	public static function loadModelFromData(array $data, array $context = null) {
-		return \eoko\MultiClients\Model\User::loadFromData($data, $context);
+		return \eoko\MultiClient\Model\Client::loadFromData($data, $context);
 	}
 
 	/**
@@ -271,7 +262,7 @@ abstract class UserTableBase extends \myModelTable {
 	}
 
 	/**
-	 * Get a ModelTableColumn of UserTable from its name.
+	 * Get a ModelTableColumn of ClientTable from its name.
 	 *
 	 * @param string $name
 	 * @param bool $require
@@ -396,7 +387,7 @@ abstract class UserTableBase extends \myModelTable {
 	}
 
 	/**
-	 * Get all UserTable's columns names in an array
+	 * Get all ClientTable's columns names in an array
 	 * @return Array the name of the columns as an array of strings
 	 */ 
 	public static function getColumnNames() {
@@ -404,7 +395,7 @@ abstract class UserTableBase extends \myModelTable {
 	}
 
 	/**
-	 * Delete a User reccord, selected by its primary key
+	 * Delete a Client reccord, selected by its primary key
 	 * @param mixed $primaryKeyValue the value of the primary key of the reccord
 	 * to be deleted
 	 * @return Boolean TRUE if a row was successfuly deleted in the database,
@@ -415,7 +406,7 @@ abstract class UserTableBase extends \myModelTable {
 	}
 
 	/**
-	 * Starts a search in UserTable
+	 * Starts a search in ClientTable
 	 * @param $condition
 	 * @param $inputs,...
 	 * @return ModelTableFinder
@@ -440,7 +431,7 @@ abstract class UserTableBase extends \myModelTable {
 	 *
 	 * @param string $col
 	 * @param mixed $value
-	 * @return User
+	 * @return Client
 	 */ 
 	public static function findFirstBy($col, $value) {
 		return self::getInstance()->_findFirstBy($col, $value);
@@ -450,7 +441,7 @@ abstract class UserTableBase extends \myModelTable {
 	 * @param \QueryWhere $where
 	 * @param array $context
 	 * @param callback $aliasingCallback
-	 * @return \Model|null User
+	 * @return \Model|null Client
 	 */ 
 	public static function findFirst(\QueryWhere $where = null, array $context = null, $aliasingCallback = null) {
 		return self::getInstance()->_findFirst($where, $context, $aliasingCallback);
@@ -458,7 +449,7 @@ abstract class UserTableBase extends \myModelTable {
 
 	/**
 	 * @param array $context
-	 * @return User
+	 * @return Client
 	 */ 
 	public static function findFirstWhere($condition = null, $inputs = null, array $context = null, $aliasingCallback = null) {
 		return self::getInstance()->_findFirstWhere($condition, $inputs, $context, $aliasingCallback);
@@ -468,14 +459,14 @@ abstract class UserTableBase extends \myModelTable {
 	 * Find the Model corresponding the given condition, when only one result
 	 * is expected. If no corresponding model is found, NULL is returned. But, if
 	 * more than one is found, an Exception is thrown.
-	 * @return User
+	 * @return Client
 	 */ 
 	public static function findOneWhere($condition = null, $inputs = null, array $context = null, $aliasingCallback = null) {
 		return self::getInstance()->_findOneWhere($condition, $inputs, $context, $aliasingCallback);
 	}
 
 	/**
-	 * Execute a search in UserTable, and returns the result as a ModelSet
+	 * Execute a search in ClientTable, and returns the result as a ModelSet
 	 *
 	 * <b>Attention</b>: this method's syntax differs from the other find...
 	 * methods; the $inputs argument must necessarily be given as an array!

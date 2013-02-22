@@ -1,6 +1,6 @@
 <?php
 
-namespace eoko\MultiClients\Model\Base;
+namespace eoko\MultiClient\Model\Base;
 
 /**
  * Base of the Client Model.
@@ -64,10 +64,10 @@ abstract class ClientBase extends \myModel {
 	 *
 	 * @param array $context
 	 *
-	 * @return \eoko\MultiClients\Model\Client
+	 * @return \eoko\MultiClient\Model\Client
 	 */
 	public static function create($initValues = null, $strict = false, array $context = null) {
-		return new \eoko\MultiClients\Model\Client($initValues, $strict, $context);
+		return new \eoko\MultiClient\Model\Client($initValues, $strict, $context);
 	}
 
 
@@ -93,12 +93,12 @@ abstract class ClientBase extends \myModel {
 	 *
 	 * @param array $context
 	 * 
-	 * @return \eoko\MultiClients\Model\Client the data Model from the loaded record, or null if no
+	 * @return \eoko\MultiClient\Model\Client the data Model from the loaded record, or null if no
 	 * record matching the given primary key has been found
 	 */
 	public static function load($id, array $context = null) {
 
-		$model = new \eoko\MultiClients\Model\Client(array(
+		$model = new \eoko\MultiClient\Model\Client(array(
 			'id' => $id		), false, $context);
 
 		return $model->doLoad($context);
@@ -115,7 +115,7 @@ abstract class ClientBase extends \myModel {
 	 * else it will be tried to load the model from the datastore, eventually
 	 * throwing an Exception if no method works.
 	 *
-	 * @return \eoko\MultiClients\Model\Client
+	 * @return \eoko\MultiClient\Model\Client
 	 */
 	public function getStoredCopy($loadFromDB = null) {
 		return $this->doGetStoredCopy($loadFromDB);
@@ -129,18 +129,18 @@ abstract class ClientBase extends \myModel {
 	 *
 	 * @param array $data
 	 * @param array $context
-	 * @return \eoko\MultiClients\Model\Client
+	 * @return \eoko\MultiClient\Model\Client
 	 * @ignore
 	 */
 	public static function loadFromData(array $data, array $context = null) {
-		return new \eoko\MultiClients\Model\Client($data, true, $context);
+		return new \eoko\MultiClient\Model\Client($data, true, $context);
 	}
 
 	/**
-	 * @return \eoko\MultiClients\Model\ClientTable
+	 * @return \eoko\MultiClient\Model\ClientTable
 	 */
 	public static function getTable() {
-		return \eoko\MultiClients\Model\ClientTable::getInstance();
+		return \eoko\MultiClient\Model\ClientTable::getInstance();
 	}
 
 	/**
@@ -158,7 +158,7 @@ abstract class ClientBase extends \myModel {
 	 *
 	 * @param int $id
 	 * @param $forceAcceptNull
-	 * @return \eoko\MultiClients\Model\Client
+	 * @return \eoko\MultiClient\Model\Client
 	 */
 	public function setId($id, $forceAcceptNull = false) {
 		$this->setColumn('id', $id, $forceAcceptNull);
@@ -180,7 +180,7 @@ abstract class ClientBase extends \myModel {
 	 *
 	 * @param string $name
 	 * @param $forceAcceptNull
-	 * @return \eoko\MultiClients\Model\Client
+	 * @return \eoko\MultiClient\Model\Client
 	 */
 	public function setName($name, $forceAcceptNull = false) {
 		$this->setColumn('name', $name, $forceAcceptNull);
@@ -202,7 +202,7 @@ abstract class ClientBase extends \myModel {
 	 *
 	 * @param string $homeDirectory
 	 * @param $forceAcceptNull
-	 * @return \eoko\MultiClients\Model\Client
+	 * @return \eoko\MultiClient\Model\Client
 	 */
 	public function setHomeDirectory($homeDirectory, $forceAcceptNull = false) {
 		$this->setColumn('home_directory', $homeDirectory, $forceAcceptNull);
@@ -224,7 +224,7 @@ abstract class ClientBase extends \myModel {
 	 *
 	 * @param string $databaseName
 	 * @param $forceAcceptNull
-	 * @return \eoko\MultiClients\Model\Client
+	 * @return \eoko\MultiClient\Model\Client
 	 */
 	public function setDatabaseName($databaseName, $forceAcceptNull = false) {
 		$this->setColumn('database_name', $databaseName, $forceAcceptNull);
@@ -241,8 +241,8 @@ abstract class ClientBase extends \myModel {
 	}
 	/**
 	 *
-	 * @param \eoko\MultiClients\Model\User[] $users
-	 * @return \eoko\MultiClients\Model\User[]
+	 * @param \eoko\MultiClient\Model\User[] $users
+	 * @return \eoko\MultiClient\Model\User[]
 	 */
 	public function setUsers(array $users) {
 		// return $this->getRelation('Users')->get($this);
