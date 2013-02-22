@@ -30,7 +30,7 @@ abstract class <?php echo $modelName ?>Base extends <?php echo $baseModelName ?>
 <?php foreach ($fields as $field): ?>
 <?php if ($field->isEnum()): ?>
 <?php foreach ($field->getEnumValues() as $enumCode => $enumVal): ?>
-	const <?php echo self::makeEnumConstName($field, $enumCode) ?> = <?php echo $enumVal === null 
+	const <?php echo call_user_func($makeEnumConstName, $field, $enumCode) ?> = <?php echo $enumVal === null
 			? 'null' 
 			: is_string($enumVal) ? "'$enumVal'" : $enumVal ?>;
 <?php endforeach ?>
@@ -41,7 +41,7 @@ abstract class <?php echo $modelName ?>Base extends <?php echo $baseModelName ?>
 <?php foreach ($enumLabels as $fieldName => $codeLabels): ?>
 		'<?php echo $fieldName ?>' => array(
 <?php foreach ($codeLabels as $code => $label): ?>
-			self::<?php echo self::makeEnumConstName($fieldName, $code) ?> => '<?php echo str_replace("'", "\'", $label) ?>',
+			self::<?php echo call_user_func($makeEnumConstName, $fieldName, $code) ?> => '<?php echo str_replace("'", "\'", $label) ?>',
 <?php endforeach ?>
 		),
 <?php endforeach ?>

@@ -38,7 +38,14 @@ class TplTable implements ConfigConstants {
 	 */
 	private $indirectRelations = array();
 
-	public function __construct($dbTableName) {
+	/**
+	 * @var ClassLookup
+	 */
+	private $classLookup;
+
+	public function __construct(ClassLookup $classLookup, $dbTableName) {
+
+		$this->classLookup = $classLookup;
 
 		NameMaker::generateTableEntries($dbTableName);
 
@@ -101,8 +108,8 @@ class TplTable implements ConfigConstants {
 	}
 
 	private function configureColumns($config) {
-		foreach ($config as $field => $config) {
-			$this->getField($field)->configure($config);
+		foreach ($config as $field => $cfg) {
+			$this->getField($field)->configure($cfg);
 		}
 	}
 
@@ -112,7 +119,7 @@ class TplTable implements ConfigConstants {
 
 		if (!$this->config) return;
 
-		$colConfig;
+		$colConfig = null;
 		if (isset($this->config[self::CFG_COLUMNS])) {
 			$colConfig = $this->config[self::CFG_COLUMNS];
 		}
@@ -161,6 +168,7 @@ class TplTable implements ConfigConstants {
 					$excludedFields[] = $relation['referenceField'];
 
 					$relations[] = $rel = new TplRelationReferencesOne(
+						$this->classLookup,
 						$this->dbTable,
 						NameMaker::dbFromModel($relation['target']),
 						$alias,

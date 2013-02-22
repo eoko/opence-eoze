@@ -116,7 +116,7 @@ class Generator extends Script {
 	/**
 	 * @var ClassLookup
 	 */
-	private $classLookup;
+	protected $classLookup;
 
 	/**
 	 * @var string
@@ -374,7 +374,7 @@ class Generator extends Script {
 
 		$this->tables = array();
 		foreach ($tables as $table) {
-			$this->tables[$table] = new TplTable($table);
+			$this->tables[$table] = new TplTable($this->classLookup, $table);
 		}
 	}
 
@@ -697,11 +697,11 @@ class Generator extends Script {
 
 							if ($leftRelationType !== null && $rightRelationType !== null) {
 								$leftRelation = new $leftRelationType(
-										null, $leftTable, $rightTable, null, $dbTable, $leftReferencingField,
+										$this->classLookup, null, $leftTable, $rightTable, null, $dbTable, $leftReferencingField,
 										$rightReferencingField);
 
 								$rightRelation = new $rightRelationType(
-										null, $rightTable, $leftTable, $leftRelation, $dbTable, $rightReferencingField,
+										$this->classLookup, null, $rightTable, $leftTable, $leftRelation, $dbTable, $rightReferencingField,
 										$leftReferencingField);
 
 								Logger::get('CQLIX')->info('Adding secondary relation: ' . $rightRelation);
@@ -888,6 +888,7 @@ class Generator extends Script {
 				'fields' => $fields,
 				'primaryField' => self::getPrimaryField($fields),
 				'hasEnum' => $hasEnum,
+				'enumLabels' => $enumLabels,
 				'relations' => $relations,
 				'proxyMethods' => $proxyMethods,
 			)
@@ -954,8 +955,12 @@ class Generator extends Script {
 			'proxySubPackage' => $this->proxySubPackage,
 		));
 
-		foreach (array('model', 'modelBase', 'table', 'tableBase', 'proxy') as $ns) {
-			$template->set($ns . 'Namespace', $this->classLookup->resolveNamespace($ns));
+		$template->set('makeEnumConstName', array($this, 'makeEnumConstName'));
+
+		if (isset($this->modelNamespace)) {
+			foreach (array('model', 'modelBase', 'table', 'tableBase', 'proxy') as $ns) {
+				$template->set($ns . 'Namespace', $this->classLookup->resolveNamespace($ns));
+			}
 		}
 
 		// Arguments
