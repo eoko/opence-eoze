@@ -13,8 +13,10 @@ class AccessControl extends Module implements HasJavascript {
 	protected $defaultExecutor = 'login';
 
 	protected function prepareLoginTemplate(Template $tpl) {
-		$tpl->help = false;
-		$tpl->text = 'Bonjour, veuillez vous identifier pour accéder à la console d\'administration.';
+		$tpl->set(array(
+			'help' => false,
+			'text' => 'Bonjour, veuillez vous identifier pour accéder à Open.ce.',
+		));
 	}
 
 	public function getJavascriptAsString() {

@@ -6,7 +6,9 @@ namespace eoko\MultiClient\Model;
  *
  * @category Eoze
  * @package Model
- * @subpackage 
+ * @subpackage
+ *
+ * @method static \eoko\MultiClient\Model\User findOneWhere($condition = null, $input = null, array $context = null, $aliasingCallback = null)
  */
 class UserTable extends \eoko\MultiClient\Model\Base\UserTableBase {
 

@@ -170,19 +170,22 @@ class UserSession {
 		return self::$loginAdapter;
 	}
 
+	/**
+	 * @param string $username
+	 * @param string $password
+	 * @return bool
+	 */
 	public static function login($username, $password) {
-		try {
-			$user = self::getLoginAdapter()->tryLogin($username, $password, $reason);
-			if ($user) {
-				self::startIdentifiedSession($user, true);
-				ExtJSResponse::put('loginInfos', self::getLoginInfos());
-				self::fireLoginEvent($user);
-				return true;
-			} else {
-				throw new LoginFailedException($reason);
-			}
-		} catch (MissingRequiredRequestParamException $ex) {
-			throw new LoginFailedException(lang('L\'identification a échoué.'));
+
+		$user = self::getLoginAdapter()->tryLogin($username, $password, $reason);
+
+		if ($user) {
+			self::startIdentifiedSession($user, true);
+			self::fireLoginEvent($user);
+
+			return self::getLoginInfos();
+		} else {
+			return null;
 		}
 	}
 
@@ -333,17 +336,6 @@ class UserSession {
 		}
 	}
 
-}
-
-class LoginFailedException extends UserException {
-
-	function __construct($msg = null) {
-		if ($msg === null){
-			$msg = lang('L\'identification a échoué. Veuillez vérifier votre '
-					. 'identifiant et/ou mot de passe');
-		}
-		parent::__construct($msg, lang('Échec de l\'identification'));
-	}
 }
 
 class UserSessionTimeout extends UserException {

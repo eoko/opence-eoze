@@ -22,6 +22,16 @@ use ModelColumn;
  * @method mixed findFirstByHomeDirectory($homeDirectory)
  * @method mixed findByDatabaseName($databaseName)
  * @method mixed findFirstByDatabaseName($databaseName)
+ * @method mixed findByDatabasePassword($databasePassword)
+ * @method mixed findFirstByDatabasePassword($databasePassword)
+ * @method mixed findByDatabaseUser($databaseUser)
+ * @method mixed findFirstByDatabaseUser($databaseUser)
+ * @method mixed findByDatabaseHost($databaseHost)
+ * @method mixed findFirstByDatabaseHost($databaseHost)
+ * @method mixed findByComments($comments)
+ * @method mixed findFirstByComments($comments)
+ * @method mixed findByCompanyName($companyName)
+ * @method mixed findFirstByCompanyName($companyName)
  */
 abstract class ClientTableBase extends \myModelTable {
 
@@ -39,8 +49,13 @@ abstract class ClientTableBase extends \myModelTable {
 		$cols = array(
 				'id' => new ModelColumn('id', ModelColumn::T_INT, '10', false, null, true, null, true, true, null),
 				'name' => new ModelColumn('name', ModelColumn::T_STRING, '255', false, null, false, null, false, false, null),
-				'home_directory' => new ModelColumn('home_directory', ModelColumn::T_STRING, '255', false, null, false, null, false, false, null),
-				'database_name' => new ModelColumn('database_name', ModelColumn::T_STRING, '255', false, null, false, null, false, false, null)
+				'home_directory' => new ModelColumn('home_directory', ModelColumn::T_STRING, '255', true, null, false, null, false, false, null),
+				'database_name' => new ModelColumn('database_name', ModelColumn::T_STRING, '255', true, null, false, null, false, false, null),
+				'database_password' => new ModelColumn('database_password', ModelColumn::T_STRING, '64', true, null, false, null, false, false, null),
+				'database_user' => new ModelColumn('database_user', ModelColumn::T_STRING, '64', true, null, false, null, false, false, null),
+				'database_host' => new ModelColumn('database_host', ModelColumn::T_STRING, '255', true, null, false, null, false, false, null),
+				'comments' => new ModelColumn('comments', ModelColumn::T_TEXT, NULL, true, null, false, null, false, false, null),
+				'company_name' => new ModelColumn('company_name', ModelColumn::T_STRING, '255', false, null, false, null, false, false, null)
 		);
 
 		$relations = array(

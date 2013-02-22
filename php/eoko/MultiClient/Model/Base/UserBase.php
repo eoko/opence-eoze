@@ -16,6 +16,16 @@ namespace eoko\MultiClient\Model\Base;
  * @property $level
  * @property $first_name
  * @property $last_name
+ * @property $email
+ * @property $comment
+ * @property $phone
+ * @property $date_add
+ * @property $date_mod
+ * @property $user_mod
+ * @property $disabled
+ * @property $end_use
+ * @property $deleted
+ * @property $role
  * @property-read $client
  */
 abstract class UserBase extends \myModel {
@@ -27,6 +37,16 @@ abstract class UserBase extends \myModel {
 	const F_LEVEL = 'level';
 	const F_FIRST_NAME = 'first_name';
 	const F_LAST_NAME = 'last_name';
+	const F_EMAIL = 'email';
+	const F_COMMENT = 'comment';
+	const F_PHONE = 'phone';
+	const F_DATE_ADD = 'date_add';
+	const F_DATE_MOD = 'date_mod';
+	const F_USER_MOD = 'user_mod';
+	const F_DISABLED = 'disabled';
+	const F_END_USE = 'end_use';
+	const F_DELETED = 'deleted';
+	const F_ROLE = 'role';
 
 	/**
 	 * @param array $initValues an array of values ($fieldName => $value) to initially set
@@ -43,7 +63,17 @@ abstract class UserBase extends \myModel {
 				'password' => null,
 				'level' => null,
 				'first_name' => null,
-				'last_name' => null
+				'last_name' => null,
+				'email' => null,
+				'comment' => null,
+				'phone' => null,
+				'date_add' => null,
+				'date_mod' => null,
+				'user_mod' => null,
+				'disabled' => null,
+				'end_use' => null,
+				'deleted' => null,
+				'role' => null
 		);
 
 		parent::__construct($fields, $initValues, $strict, $context);
@@ -303,6 +333,226 @@ abstract class UserBase extends \myModel {
 	 */
 	public function setLastName($lastName, $ignoredArgument = false) {
 		$this->setColumn('last_name', $lastName, $ignoredArgument);
+		return $this;
+	}
+
+	/**
+	 * Get the value of the email field.
+	 *
+	 * @return string
+	 */
+	public function getEmail() {
+		$v = $this->getField('email');
+		return $v === null ? null : (string) $v;
+	}
+
+	/**
+	 * Set the value of the email field.
+	 *
+	 * @param string $email
+	 * @param $ignoredArgument
+	 * @return \eoko\MultiClient\Model\User
+	 */
+	public function setEmail($email, $ignoredArgument = false) {
+		$this->setColumn('email', $email, $ignoredArgument);
+		return $this;
+	}
+
+	/**
+	 * Get the value of the comment field.
+	 *
+	 * @return text
+	 */
+	public function getComment() {
+		$v = $this->getField('comment');
+		return $v === null ? null :  $v;
+	}
+
+	/**
+	 * Set the value of the comment field.
+	 *
+	 * @param text $comment
+	 * @param $ignoredArgument
+	 * @return \eoko\MultiClient\Model\User
+	 */
+	public function setComment($comment, $ignoredArgument = false) {
+		$this->setColumn('comment', $comment, $ignoredArgument);
+		return $this;
+	}
+
+	/**
+	 * Get the value of the phone field.
+	 *
+	 * @return string
+	 */
+	public function getPhone() {
+		$v = $this->getField('phone');
+		return $v === null ? null : (string) $v;
+	}
+
+	/**
+	 * Set the value of the phone field.
+	 *
+	 * @param string $phone
+	 * @param $ignoredArgument
+	 * @return \eoko\MultiClient\Model\User
+	 */
+	public function setPhone($phone, $ignoredArgument = false) {
+		$this->setColumn('phone', $phone, $ignoredArgument);
+		return $this;
+	}
+
+	/**
+	 * Get the value of the dateAdd field.
+	 *
+	 * @return date
+	 */
+    public function getDateAdd($format = DateHelper::SQL_DATE) {
+		$datetime = $this->getField('date_add');
+		return DateHelper::getDateTimeAs($datetime, $format);
+	}
+
+	/**
+	 * Set the value of the dateAdd field.
+	 *
+	 * @param date $dateAdd
+	 * @param $forceAcceptNull
+	 * @return \eoko\MultiClient\Model\User
+	 */
+	public function setDateAdd($dateAdd, $forceAcceptNull = false) {
+		$this->setColumn('date_add', $dateAdd, $forceAcceptNull);
+		return $this;
+	}
+
+	/**
+	 * Get the value of the dateMod field.
+	 *
+	 * @return date
+	 */
+    public function getDateMod($format = DateHelper::SQL_DATE) {
+		$datetime = $this->getField('date_mod');
+		return DateHelper::getDateTimeAs($datetime, $format);
+	}
+
+	/**
+	 * Set the value of the dateMod field.
+	 *
+	 * @param date $dateMod
+	 * @param $forceAcceptNull
+	 * @return \eoko\MultiClient\Model\User
+	 */
+	public function setDateMod($dateMod, $forceAcceptNull = false) {
+		$this->setColumn('date_mod', $dateMod, $forceAcceptNull);
+		return $this;
+	}
+
+	/**
+	 * Get the value of the userMod field.
+	 *
+	 * @return string
+	 */
+	public function getUserMod() {
+		$v = $this->getField('user_mod');
+		return $v === null ? null : (string) $v;
+	}
+
+	/**
+	 * Set the value of the userMod field.
+	 *
+	 * @param string $userMod
+	 * @param $forceAcceptNull
+	 * @return \eoko\MultiClient\Model\User
+	 */
+	public function setUserMod($userMod, $forceAcceptNull = false) {
+		$this->setColumn('user_mod', $userMod, $forceAcceptNull);
+		return $this;
+	}
+
+	/**
+	 * Get the value of the disabled field.
+	 *
+	 * @return int
+	 */
+	public function getDisabled() {
+		$v = $this->getField('disabled');
+		return $v === null ? null : (int) $v;
+	}
+
+	/**
+	 * Set the value of the disabled field.
+	 *
+	 * @param int $disabled
+	 * @param $forceAcceptNull
+	 * @return \eoko\MultiClient\Model\User
+	 */
+	public function setDisabled($disabled, $forceAcceptNull = false) {
+		$this->setColumn('disabled', $disabled, $forceAcceptNull);
+		return $this;
+	}
+
+	/**
+	 * Get the value of the endUse field.
+	 *
+	 * @return date
+	 */
+    public function getEndUse($format = DateHelper::SQL_DATE) {
+		$datetime = $this->getField('end_use');
+		return DateHelper::getDateTimeAs($datetime, $format);
+	}
+
+	/**
+	 * Set the value of the endUse field.
+	 *
+	 * @param date $endUse
+	 * @param $forceAcceptNull
+	 * @return \eoko\MultiClient\Model\User
+	 */
+	public function setEndUse($endUse, $forceAcceptNull = false) {
+		$this->setColumn('end_use', $endUse, $forceAcceptNull);
+		return $this;
+	}
+
+	/**
+	 * Get the value of the deleted field.
+	 *
+	 * @return int
+	 */
+	public function getDeleted() {
+		$v = $this->getField('deleted');
+		return $v === null ? null : (int) $v;
+	}
+
+	/**
+	 * Set the value of the deleted field.
+	 *
+	 * @param int $deleted
+	 * @param $forceAcceptNull
+	 * @return \eoko\MultiClient\Model\User
+	 */
+	public function setDeleted($deleted, $forceAcceptNull = false) {
+		$this->setColumn('deleted', $deleted, $forceAcceptNull);
+		return $this;
+	}
+
+	/**
+	 * Get the value of the role field.
+	 *
+	 * @return string
+	 */
+	public function getRole() {
+		$v = $this->getField('role');
+		return $v === null ? null : (string) $v;
+	}
+
+	/**
+	 * Set the value of the role field.
+	 *
+	 * @param string $role
+	 * @param $forceAcceptNull
+	 * @return \eoko\MultiClient\Model\User
+	 */
+	public function setRole($role, $forceAcceptNull = false) {
+		$this->setColumn('role', $role, $forceAcceptNull);
 		return $this;
 	}
 
