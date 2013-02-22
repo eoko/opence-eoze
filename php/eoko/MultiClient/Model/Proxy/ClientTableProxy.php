@@ -1,6 +1,6 @@
 <?php
 
-namespace eoko\MultiClients\Model\Proxy;
+namespace eoko\MultiClient\Model\Proxy;
 
 /**
  * Proxy of the Client Table.
@@ -28,7 +28,7 @@ class ClientTableProxy extends \ModelTableProxy {
 	 * @return ClientTableProxy
 	 */
 	public static function getInstance() {
-		$table = \eoko\MultiClients\Model\ClientTable::getInstance();
+		$table = \eoko\MultiClient\Model\ClientTable::getInstance();
 		foreach (self::$tableVars as &$pointer) {
 			$pointer = $table;
 		}

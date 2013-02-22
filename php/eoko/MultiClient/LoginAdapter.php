@@ -22,7 +22,7 @@
  * @author Éric Ortega <eric@eoko.fr>
  */
 
-namespace eoko\MultiClients;
+namespace eoko\MultiClient;
 
 use eoko\security\LoginAdapter as Base;
 use User;
@@ -57,11 +57,11 @@ class LoginAdapter implements Base {
 	private $sessionManager;
 
 	/**
-	 * @var MultiClients
+	 * @var MultiClient
 	 */
 	private $multiClient;
 
-	public function __construct(MultiClients $multiClient, SessionManager $sessionManager) {
+	public function __construct(MultiClient $multiClient, SessionManager $sessionManager) {
 		$this->sessionManager = $sessionManager;
 		$this->multiClient = $multiClient;
 //
@@ -140,7 +140,7 @@ SQL;
 			)),
 		));
 
-		$this->sessionManager->put('eoko\MultiClients\clientConfig', new Client(array(
+		$this->sessionManager->put('eoko\MultiClient\clientConfig', new Client(array(
 			'name' => $data->clientName,
 			'homeDirectory' => $data->clientHomeDirectory,
 			'databaseName' => $data->clientDatabaseName,

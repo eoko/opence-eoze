@@ -1,12 +1,12 @@
 <?php
 
-namespace eoko\MultiClients\Model;
+namespace eoko\MultiClient\Model;
 
 /**
  * @category Eoze
  * @package Model
  */
-class Client extends \eoko\MultiClients\Model\Base\ClientBase {
+class User extends \eoko\MultiClient\Model\Base\UserBase {
 
 	/**
 	 * It is not safe for Model concrete implementations to override their

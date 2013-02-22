@@ -1,6 +1,6 @@
 <?php
 
-namespace eoko\MultiClients\Model\Base;
+namespace eoko\MultiClient\Model\Base;
 
 /**
  * Base of the User Model.
@@ -73,10 +73,10 @@ abstract class UserBase extends \myModel {
 	 *
 	 * @param array $context
 	 *
-	 * @return \eoko\MultiClients\Model\User
+	 * @return \eoko\MultiClient\Model\User
 	 */
 	public static function create($initValues = null, $strict = false, array $context = null) {
-		return new \eoko\MultiClients\Model\User($initValues, $strict, $context);
+		return new \eoko\MultiClient\Model\User($initValues, $strict, $context);
 	}
 
 
@@ -102,12 +102,12 @@ abstract class UserBase extends \myModel {
 	 *
 	 * @param array $context
 	 * 
-	 * @return \eoko\MultiClients\Model\User the data Model from the loaded record, or null if no
+	 * @return \eoko\MultiClient\Model\User the data Model from the loaded record, or null if no
 	 * record matching the given primary key has been found
 	 */
 	public static function load($id, array $context = null) {
 
-		$model = new \eoko\MultiClients\Model\User(array(
+		$model = new \eoko\MultiClient\Model\User(array(
 			'id' => $id		), false, $context);
 
 		return $model->doLoad($context);
@@ -124,7 +124,7 @@ abstract class UserBase extends \myModel {
 	 * else it will be tried to load the model from the datastore, eventually
 	 * throwing an Exception if no method works.
 	 *
-	 * @return \eoko\MultiClients\Model\User
+	 * @return \eoko\MultiClient\Model\User
 	 */
 	public function getStoredCopy($loadFromDB = null) {
 		return $this->doGetStoredCopy($loadFromDB);
@@ -138,18 +138,18 @@ abstract class UserBase extends \myModel {
 	 *
 	 * @param array $data
 	 * @param array $context
-	 * @return \eoko\MultiClients\Model\User
+	 * @return \eoko\MultiClient\Model\User
 	 * @ignore
 	 */
 	public static function loadFromData(array $data, array $context = null) {
-		return new \eoko\MultiClients\Model\User($data, true, $context);
+		return new \eoko\MultiClient\Model\User($data, true, $context);
 	}
 
 	/**
-	 * @return \eoko\MultiClients\Model\UserTable
+	 * @return \eoko\MultiClient\Model\UserTable
 	 */
 	public static function getTable() {
-		return \eoko\MultiClients\Model\UserTable::getInstance();
+		return \eoko\MultiClient\Model\UserTable::getInstance();
 	}
 
 	/**
@@ -167,7 +167,7 @@ abstract class UserBase extends \myModel {
 	 *
 	 * @param int $id
 	 * @param $forceAcceptNull
-	 * @return \eoko\MultiClients\Model\User
+	 * @return \eoko\MultiClient\Model\User
 	 */
 	public function setId($id, $forceAcceptNull = false) {
 		$this->setColumn('id', $id, $forceAcceptNull);
@@ -189,7 +189,7 @@ abstract class UserBase extends \myModel {
 	 *
 	 * @param int $clientId
 	 * @param $forceAcceptNull
-	 * @return \eoko\MultiClients\Model\User
+	 * @return \eoko\MultiClient\Model\User
 	 */
 	public function setClientId($clientId, $forceAcceptNull = false) {
 		$this->setColumn('client_id', $clientId, $forceAcceptNull);
@@ -211,7 +211,7 @@ abstract class UserBase extends \myModel {
 	 *
 	 * @param string $username
 	 * @param $forceAcceptNull
-	 * @return \eoko\MultiClients\Model\User
+	 * @return \eoko\MultiClient\Model\User
 	 */
 	public function setUsername($username, $forceAcceptNull = false) {
 		$this->setColumn('username', $username, $forceAcceptNull);
@@ -233,7 +233,7 @@ abstract class UserBase extends \myModel {
 	 *
 	 * @param string $password
 	 * @param $forceAcceptNull
-	 * @return \eoko\MultiClients\Model\User
+	 * @return \eoko\MultiClient\Model\User
 	 */
 	public function setPassword($password, $forceAcceptNull = false) {
 		$this->setColumn('password', $password, $forceAcceptNull);
@@ -255,7 +255,7 @@ abstract class UserBase extends \myModel {
 	 *
 	 * @param int $level
 	 * @param $forceAcceptNull
-	 * @return \eoko\MultiClients\Model\User
+	 * @return \eoko\MultiClient\Model\User
 	 */
 	public function setLevel($level, $forceAcceptNull = false) {
 		$this->setColumn('level', $level, $forceAcceptNull);
@@ -277,7 +277,7 @@ abstract class UserBase extends \myModel {
 	 *
 	 * @param string $firstName
 	 * @param $ignoredArgument
-	 * @return \eoko\MultiClients\Model\User
+	 * @return \eoko\MultiClient\Model\User
 	 */
 	public function setFirstName($firstName, $ignoredArgument = false) {
 		$this->setColumn('first_name', $firstName, $ignoredArgument);
@@ -299,7 +299,7 @@ abstract class UserBase extends \myModel {
 	 *
 	 * @param string $lastName
 	 * @param $ignoredArgument
-	 * @return \eoko\MultiClients\Model\User
+	 * @return \eoko\MultiClient\Model\User
 	 */
 	public function setLastName($lastName, $ignoredArgument = false) {
 		$this->setColumn('last_name', $lastName, $ignoredArgument);
@@ -309,17 +309,17 @@ abstract class UserBase extends \myModel {
 	/**
 	 *
 	 * @param array $overrideContext
-	 * @return \eoko\MultiClients\Model\Client
+	 * @return \eoko\MultiClient\Model\Client
 	 */
 	public function getClient(array $overrideContext = null) {
 		return $this->getForeignModel('Client', $overrideContext);
 	}
 	/**
 	 *
-	 * @param \eoko\MultiClients\Model\Client $client
-	 * @return \eoko\MultiClients\Model\Client
+	 * @param \eoko\MultiClient\Model\Client $client
+	 * @return \eoko\MultiClient\Model\Client
 	 */
-	public function setClient(\eoko\MultiClients\Model\Client $client) {
+	public function setClient(\eoko\MultiClient\Model\Client $client) {
 		// return $this->getRelation('Client')->get($this);
 		return $this->setForeignModel('Client', $client);
 	}

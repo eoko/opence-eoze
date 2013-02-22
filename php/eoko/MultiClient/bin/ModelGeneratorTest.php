@@ -22,16 +22,38 @@
  * @author Éric Ortega <eric@eoko.fr>
  */
 
-namespace eoko\MultiClients\bin;
+namespace eoko\MultiClient\bin;
+
+use eoko\script\Script;
+
+use eoko\MultiClient\Model\User;
+use eoko\MultiClient\Model\Client;
 
 /**
- * Generates model for multi client installations database.
+ * Test (debug) class for {@link ModelGenerator}.
  *
- * @since 2013-02-18 07:04
+ * @category Eoze
+ * @package MultiClient
+ * @subpackage bin
+ * @since 2013-02-18 09:14
  */
+class ModelGeneratorTest extends Script {
 
-chdir(realpath(__DIR__ . '/../../../../bin/'));
+	protected function run() {
+		$client = Client::create(array(
+			'name' => 'Test3',
+			'home_directory' => '/dev/null',
+			'database_name' => 'tests',
+		));
 
-$class = 'eoko\MultiClients\bin\ModelGenerator';
+		$user = User::create(array(
+			'username' => 'test-user-2',
+			'password' => 'x',
+			'level' => 10,
+		));
 
-require 'doRun.php';
+		$user->setClient($client);
+
+		$user->save();
+	}
+}

@@ -22,38 +22,15 @@
  * @author Éric Ortega <eric@eoko.fr>
  */
 
-namespace eoko\MultiClients\bin;
-
-use eoko\script\Script;
-
-use eoko\MultiClients\Model\User;
-use eoko\MultiClients\Model\Client;
+namespace eoko\MultiClient\Exception;
 
 /**
- * Test (debug) class for {@link ModelGenerator}.
+ * Runtime exception for MultiClient.
  *
  * @category Eoze
- * @package MultiClients
- * @subpackage bin
- * @since 2013-02-18 09:14
+ * @package MultiClient
+ * @since 2013-02-16 04:08
  */
-class ModelGeneratorTest extends Script {
+class RuntimeException extends \RuntimeException implements Exception {
 
-	protected function run() {
-		$client = Client::create(array(
-			'name' => 'Test2',
-			'home_directory' => '/dev/null',
-			'database_name' => 'tests',
-		));
-
-		$user = User::create(array(
-			'username' => 'test-user-1',
-			'password' => 'x',
-			'level' => 10,
-		));
-
-		$user->setClient($client);
-
-		$user->save();
-	}
 }

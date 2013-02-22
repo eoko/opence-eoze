@@ -22,7 +22,7 @@
  * @author Éric Ortega <eric@eoko.fr>
  */
 
-namespace eoko\MultiClients;
+namespace eoko\MultiClient;
 
 use eoko\database\Database;
 
@@ -32,7 +32,7 @@ use eoko\database\Database;
  * @package MultiClient
  * @since 2013-02-19 01:13
  */
-class MultiClients {
+class MultiClient {
 
 	const DATABASE_PROXY_NAME = __CLASS__;
 
@@ -57,24 +57,24 @@ class MultiClients {
 
 	/**
 	 * @param $configDirectory
-	 * @return MultiClients
+	 * @return MultiClient
 	 */
 	public static function forDirectory($configDirectory) {
 		if (!isset(self::$instances[$configDirectory])) {
-			self::$instances[$configDirectory] = new MultiClients($configDirectory);
+			self::$instances[$configDirectory] = new MultiClient($configDirectory);
 		}
 		return self::$instances[$configDirectory];
 	}
 
 	/**
-	 * Gets the config array by reading a MultiClients.config.php file, if it exists in the config
+	 * Gets the config array by reading a MultiClient.config.php file, if it exists in the config
 	 * directory.
 	 *
 	 * @return array|bool
 	 */
 	public function getConfig() {
 		if ($this->config === null) {
-			$clientsConfigFile = $this->configDirectory . '/MultiClients.config.php';
+			$clientsConfigFile = $this->configDirectory . '/MultiClient.config.php';
 			/** @noinspection PhpIncludeInspection */
 			$this->config = file_exists($clientsConfigFile)
 				? require $clientsConfigFile
