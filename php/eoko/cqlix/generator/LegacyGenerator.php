@@ -34,6 +34,8 @@ namespace eoko\cqlix\generator;
  */
 class LegacyGenerator extends Generator {
 
+	protected $modelNamespace = null;
+
 	public function __construct() {
 
 		// Use legacy paths
@@ -44,5 +46,12 @@ class LegacyGenerator extends Generator {
 		);
 
 		parent::__construct();
+
+		$this->classLookup->setPaths(array(
+			'modelBase' => '',
+			'table' => '',
+			'tableBase' => '',
+			'proxy' => '',
+		));
 	}
 }
