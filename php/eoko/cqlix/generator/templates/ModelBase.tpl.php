@@ -1,4 +1,8 @@
-<?php use \ModelColumn ?>
+
+<?php
+	/** @noinspection PhpNonCompoundUseInspection */
+	use \ModelColumn;
+?>
 <?php if (isset($modelBaseNamespace)): ?>
 namespace <?php echo $modelBaseNamespace ?>;
 <?php endif ?>
