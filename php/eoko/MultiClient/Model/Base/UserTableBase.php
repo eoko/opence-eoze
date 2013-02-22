@@ -28,6 +28,26 @@ use ModelColumn;
  * @method mixed findFirstByFirstName($firstName)
  * @method mixed findByLastName($lastName)
  * @method mixed findFirstByLastName($lastName)
+ * @method mixed findByEmail($email)
+ * @method mixed findFirstByEmail($email)
+ * @method mixed findByComment($comment)
+ * @method mixed findFirstByComment($comment)
+ * @method mixed findByPhone($phone)
+ * @method mixed findFirstByPhone($phone)
+ * @method mixed findByDateAdd($dateAdd)
+ * @method mixed findFirstByDateAdd($dateAdd)
+ * @method mixed findByDateMod($dateMod)
+ * @method mixed findFirstByDateMod($dateMod)
+ * @method mixed findByUserMod($userMod)
+ * @method mixed findFirstByUserMod($userMod)
+ * @method mixed findByDisabled($disabled)
+ * @method mixed findFirstByDisabled($disabled)
+ * @method mixed findByEndUse($endUse)
+ * @method mixed findFirstByEndUse($endUse)
+ * @method mixed findByDeleted($deleted)
+ * @method mixed findFirstByDeleted($deleted)
+ * @method mixed findByRole($role)
+ * @method mixed findFirstByRole($role)
  */
 abstract class UserTableBase extends \myModelTable {
 
@@ -49,7 +69,17 @@ abstract class UserTableBase extends \myModelTable {
 				'password' => new ModelColumn('password', ModelColumn::T_STRING, '255', false, null, false, null, false, false, null),
 				'level' => new ModelColumn('level', ModelColumn::T_INT, '11', false, null, false, null, false, false, null),
 				'first_name' => new ModelColumn('first_name', ModelColumn::T_STRING, '255', true, null, false, null, false, false, null),
-				'last_name' => new ModelColumn('last_name', ModelColumn::T_STRING, '255', true, null, false, null, false, false, null)
+				'last_name' => new ModelColumn('last_name', ModelColumn::T_STRING, '255', true, null, false, null, false, false, null),
+				'email' => new ModelColumn('email', ModelColumn::T_STRING, '255', true, null, false, null, false, false, null),
+				'comment' => new ModelColumn('comment', ModelColumn::T_TEXT, NULL, true, null, false, null, false, false, null),
+				'phone' => new ModelColumn('phone', ModelColumn::T_STRING, '64', true, null, false, null, false, false, null),
+				'date_add' => new ModelColumn('date_add', ModelColumn::T_DATE, NULL, false, null, false, null, false, false, null),
+				'date_mod' => new ModelColumn('date_mod', ModelColumn::T_DATE, NULL, false, null, false, null, false, false, null),
+				'user_mod' => new ModelColumn('user_mod', ModelColumn::T_STRING, '255', false, null, false, null, false, false, null),
+				'disabled' => new ModelColumn('disabled', ModelColumn::T_INT, '4', false, 1, false, null, false, false, null),
+				'end_use' => new ModelColumn('end_use', ModelColumn::T_DATE, NULL, false, null, false, null, false, false, null),
+				'deleted' => new ModelColumn('deleted', ModelColumn::T_INT, '4', false, 0, false, null, false, false, null),
+				'role' => new ModelColumn('role', ModelColumn::T_STRING, '255', false, null, false, null, false, false, null)
 		);
 
 		$relations = array(

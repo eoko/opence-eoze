@@ -25,8 +25,10 @@
 namespace eoko\MultiClient;
 
 use eoko\security\LoginAdapter as Base;
-use User;
 use eoko\php\SessionManager;
+
+use eoko\MultiClient\Model\User;
+use User as LegacyUser;
 
 /**
  * Login adapter on external MySQL database for multi clients.
@@ -64,11 +66,6 @@ class LoginAdapter implements Base {
 	public function __construct(MultiClient $multiClient, SessionManager $sessionManager) {
 		$this->sessionManager = $sessionManager;
 		$this->multiClient = $multiClient;
-//
-//		$this->host = isset($config['host']) ? $config['host'] : null;
-//		$this->username = isset($config['username']) ? $config['username'] : null;
-//		$this->password = isset($config['password']) ? $config['password'] : null;
-//		$this->databaseName = isset($config['database']) ? $config['database'] : null;
 	}
 
 	/**
@@ -79,74 +76,39 @@ class LoginAdapter implements Base {
 	 * @return \User
 	 */
 	public function tryLogin($username, $password, &$reason = null) {
-//		dump($this);
 
-//		$dbHost = $this->host;
-//		$dbUsername = $this->username;
-//		$dbPassword = $this->password;
-//		$dbName = $this->databaseName;
-//
-//		$mysql = mysql_connect($dbHost, $dbUsername, $dbPassword);
-//
-//		mysql_query('SET NAMES utf8');
-//
-//		if (!$mysql) {
-//			throw new Exception\RuntimeException('Cannot connect to clients mysql server.');
-//		}
-//
-//		if (!mysql_select_db($dbName, $mysql)) {
-//			throw new Exception\RuntimeException('Cannot select database ' . $dbName . ' on clients mysql server.');
-//		}
-//
-//		$username = mysql_real_escape_string($username, $mysql);
+		$user = User::getTable()->findOneWhere('BINARY `username` = ?', $username);
 
-		$sql = <<<SQL
-SELECT
-		`User`.*,
-		`Client`.`name` AS `clientName`,
-		`Client`.`home_directory` AS `clientHomeDirectory`,
-		`Client`.`database_name` AS `clientDatabaseName`
-	FROM `$this->userTable` AS `User`
-	LEFT JOIN `$this->clientTable` AS `Client` ON `User`.`client_id` = `Client`.`id`
-	WHERE BINARY `username` = "$username" LIMIT 1;
-SQL;
-
-		$result = $this->multiClient->getDatabase()->query($sql);
-		$data = $result->fetchObject();
-//		$result = mysql_query($sql, $mysql);
-//
-//		$data = mysql_fetch_object($result);
-//
-//		mysql_close($mysql);
-
-		if (!$data) {
+		if (!$user) {
 			$reason = 'Identifiant ou mot de passe incorrect.';
 			return null;
 		}
 
-		if (!$this->verify($password, $data->password)) {
+		if (!$this->verify($password, $user->getPassword())) {
 			$reason = 'Identifiant ou mot de passe incorrect.';
 			return null;
 		}
 
-		$user = \User::create(array(
-			'id' => $data->id,
-			'username' => $data->username,
-			'nom' => $data->last_name,
-			'prenom' => $data->first_name,
+		$legacyUser = \User::create(array(
+			'id' => $user->getId(),
+			'username' => $user->getUsername(),
+			'nom' => $user->getLastName(),
+			'prenom' => $user->getFirstName(),
 			'Level' => \Level::create(array(
-				'level' => $data->level,
+				'level' => $user->getLevel(),
 				'actif' => true,
 			)),
 		));
 
+		$client = $user->getClient();
+
 		$this->sessionManager->put('eoko\MultiClient\clientConfig', new Client(array(
-			'name' => $data->clientName,
-			'homeDirectory' => $data->clientHomeDirectory,
-			'databaseName' => $data->clientDatabaseName,
+			'name' => $client->getName(),
+			'homeDirectory' => $client->getHomeDirectory(),
+			'databaseName' => $client->getDatabaseName(),
 		)));
 
-		return $user;
+		return $legacyUser;
 	}
 
 	private function verify($input, $existingHash) {

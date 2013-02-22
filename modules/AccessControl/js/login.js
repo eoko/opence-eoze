@@ -69,13 +69,15 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 						}
 					}
 				}
+//			},{
+//				xtype: 'component'
+//				,html: '<a href="">Un oubli&nbsp;?</a>'
 			}]
 		});
 		
-//		var loginWindow = new Oce.DefaultWin({
 		var loginWindow = new Ext4.Window({
 			
-			title: 'Identification'
+			title: "Connexion"
 			
 			,defaultFocus: 'loginField'
 			,width: 380
@@ -244,7 +246,7 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 					}
 					if (success) {
 						// Success
-						if (data.success) {
+						if (data.success && data.loginInfos) {
 							loginWindow.close();
 							this.fireEvent('login', data.loginInfos);
 						}
@@ -252,9 +254,9 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 						// Failure
 						else {
 							Ext.Msg.alert(
-								data.title || 'Erreur'
+								data.title || "Échec de l'identification" // i18n
 								,data.errorMessage || data.message || data.msg 
-									|| "L'identification a échoué."
+									|| "Identifiant ou mot de passe incorrect." // i18n
 								,function() {
 									loginWindow.defaultButton.focus();
 								}
