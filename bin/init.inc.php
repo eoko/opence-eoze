@@ -19,4 +19,6 @@ $endDumpPre = "\n";
 
 ExtJSResponse::setEnabled(false);
 
-ob_end_flush();
+if (ob_get_status()) {
+	ob_end_flush();
+}

@@ -1,14 +1,12 @@
 <?php
 
-namespace eoko\MultiClients\bin\Model;
-
-require_once __DIR__ . '/ClientBase.php';
+namespace eoko\MultiClients\Model;
 
 /**
- * @category opence
+ * @category Eoze
  * @package Model
  */
-class Client extends ClientBase {
+class Client extends \eoko\MultiClients\Model\Base\ClientBase {
 
 	/**
 	 * It is not safe for Model concrete implementations to override their

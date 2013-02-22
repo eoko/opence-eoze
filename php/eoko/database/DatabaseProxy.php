@@ -100,7 +100,7 @@ class DatabaseProxy {
 	}
 
 	/**
-	 * @return PDO
+	 * @return \PDO
 	 */
 	public function getConnection() {
 		if (!$this->connection) {

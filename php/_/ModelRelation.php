@@ -514,7 +514,7 @@ class ModelRelationReferredByOneAssoc extends ModelRelationReferedByOne {
 //
 class ModelRelationReferedByOneOnMultipleFields extends ModelRelationReferedByOne {
 
-	protected function getStoredModel($createIfNone, array $context) {
+	protected function getStoredModel($createIfNone, array $context = null) {
 
 		$model = null;
 

@@ -56,13 +56,19 @@ class LoginAdapter implements Base {
 	 */
 	private $sessionManager;
 
-	public function __construct($config, SessionManager $sessionManager) {
-		$this->sessionManager = $sessionManager;
+	/**
+	 * @var MultiClients
+	 */
+	private $multiClient;
 
-		$this->host = isset($config['host']) ? $config['host'] : null;
-		$this->username = isset($config['username']) ? $config['username'] : null;
-		$this->password = isset($config['password']) ? $config['password'] : null;
-		$this->databaseName = isset($config['database']) ? $config['database'] : null;
+	public function __construct(MultiClients $multiClient, SessionManager $sessionManager) {
+		$this->sessionManager = $sessionManager;
+		$this->multiClient = $multiClient;
+//
+//		$this->host = isset($config['host']) ? $config['host'] : null;
+//		$this->username = isset($config['username']) ? $config['username'] : null;
+//		$this->password = isset($config['password']) ? $config['password'] : null;
+//		$this->databaseName = isset($config['database']) ? $config['database'] : null;
 	}
 
 	/**
@@ -75,24 +81,24 @@ class LoginAdapter implements Base {
 	public function tryLogin($username, $password, &$reason = null) {
 //		dump($this);
 
-		$dbHost = $this->host;
-		$dbUsername = $this->username;
-		$dbPassword = $this->password;
-		$dbName = $this->databaseName;
-
-		$mysql = mysql_connect($dbHost, $dbUsername, $dbPassword);
-
-		mysql_query('SET NAMES utf8');
-
-		if (!$mysql) {
-			throw new Exception\RuntimeException('Cannot connect to clients mysql server.');
-		}
-
-		if (!mysql_select_db($dbName, $mysql)) {
-			throw new Exception\RuntimeException('Cannot select database ' . $dbName . ' on clients mysql server.');
-		}
-
-		$username = mysql_real_escape_string($username, $mysql);
+//		$dbHost = $this->host;
+//		$dbUsername = $this->username;
+//		$dbPassword = $this->password;
+//		$dbName = $this->databaseName;
+//
+//		$mysql = mysql_connect($dbHost, $dbUsername, $dbPassword);
+//
+//		mysql_query('SET NAMES utf8');
+//
+//		if (!$mysql) {
+//			throw new Exception\RuntimeException('Cannot connect to clients mysql server.');
+//		}
+//
+//		if (!mysql_select_db($dbName, $mysql)) {
+//			throw new Exception\RuntimeException('Cannot select database ' . $dbName . ' on clients mysql server.');
+//		}
+//
+//		$username = mysql_real_escape_string($username, $mysql);
 
 		$sql = <<<SQL
 SELECT
@@ -105,11 +111,13 @@ SELECT
 	WHERE BINARY `username` = "$username" LIMIT 1;
 SQL;
 
-		$result = mysql_query($sql, $mysql);
-
-		$data = mysql_fetch_object($result);
-
-		mysql_close($mysql);
+		$result = $this->multiClient->getDatabase()->query($sql);
+		$data = $result->fetchObject();
+//		$result = mysql_query($sql, $mysql);
+//
+//		$data = mysql_fetch_object($result);
+//
+//		mysql_close($mysql);
 
 		if (!$data) {
 			$reason = 'Identifiant ou mot de passe incorrect.';

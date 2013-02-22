@@ -1,31 +1,34 @@
 <?php
 
-namespace eoko\MultiClients\bin\Model;
+namespace eoko\MultiClients\Model\Proxy;
 
 /**
- * Proxy of the User Table.
+ * Proxy of the Client Table.
  *
- * @category opence
+ * @category Eoze
  * @package Model
  * @subpackage Proxy
  */
-class UserTableProxy extends \ModelTableProxy {
+class ClientTableProxy extends \ModelTableProxy {
 
 	private static $tableVars = array();
 
-	public static $tableName = 'UserTable';
-	public static $modelName = 'User';
-	public static $dbTableName = 'users';
+	public static $tableName = 'ClientTable';
+	public static $modelName = 'Client';
+	public static $dbTableName = 'clients';
 
 	private static $instance = null;
 
 	public static function get() {
-		if (self::$instance === null) self::$instance = new UserTableProxy;
+		if (self::$instance === null) self::$instance = new ClientTableProxy;
 		return self::$instance;
 	}
 
+	/**
+	 * @return ClientTableProxy
+	 */
 	public static function getInstance() {
-		$table = UserTable::getInstance();
+		$table = \eoko\MultiClients\Model\ClientTable::getInstance();
 		foreach (self::$tableVars as &$pointer) {
 			$pointer = $table;
 		}
@@ -33,7 +36,8 @@ class UserTableProxy extends \ModelTableProxy {
 	}
 
 	/**
-	 * @return ModelTableProxy
+	 * @param $pointer
+	 * @return \ModelTableProxy
 	 */
 	public function attach(&$pointer) {
 		self::$tableVars[] =& $pointer;
@@ -66,7 +70,7 @@ class UserTableProxy extends \ModelTableProxy {
 	}
 
 	public static function getTableName() {
-		return 'UserTable';
+		return 'ClientTable';
 	}
 
 	public static function getDBTableName() {

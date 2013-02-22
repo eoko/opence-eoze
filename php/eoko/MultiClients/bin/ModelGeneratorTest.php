@@ -26,18 +26,34 @@ namespace eoko\MultiClients\bin;
 
 use eoko\script\Script;
 
-use eoko\MultiClients\bin\Model\UserTableBase;
+use eoko\MultiClients\Model\User;
+use eoko\MultiClients\Model\Client;
 
 /**
+ * Test (debug) class for {@link ModelGenerator}.
  *
- * @category Opence
- * @package
- * @subpackage
+ * @category Eoze
+ * @package MultiClients
+ * @subpackage bin
  * @since 2013-02-18 09:14
  */
 class ModelGeneratorTest extends Script {
 
 	protected function run() {
-		dump(\UserTable::findAll()->toArray());
+		$client = Client::create(array(
+			'name' => 'Test2',
+			'home_directory' => '/dev/null',
+			'database_name' => 'tests',
+		));
+
+		$user = User::create(array(
+			'username' => 'test-user-1',
+			'password' => 'x',
+			'level' => 10,
+		));
+
+		$user->setClient($client);
+
+		$user->save();
 	}
 }

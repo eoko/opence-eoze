@@ -22,16 +22,27 @@
  * @author Éric Ortega <eric@eoko.fr>
  */
 
-namespace eoko\MultiClients\bin;
+namespace eoko\cqlix\generator;
 
 /**
- * Generates model for multi client installations database.
+ * Legacy model generator, use legacy paths & options.
  *
- * @since 2013-02-18 07:04
+ * @category Eoze
+ * @package Cqlix
+ * @subpackage generator
+ * @since 2013-02-21 16:38
  */
+class LegacyGenerator extends Generator {
 
-chdir(realpath(__DIR__ . '/../../../../bin/'));
+	public function __construct() {
 
-$class = 'eoko\MultiClients\bin\ModelGenerator';
+		// Use legacy paths
+		$this->paths = array(
+			'base' => ':model/base',
+			'proxy' => ':model/proxy',
+			'model' => MODEL_PATH,
+		);
 
-require 'doRun.php';
+		parent::__construct();
+	}
+}

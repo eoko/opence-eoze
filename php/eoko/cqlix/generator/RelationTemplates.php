@@ -51,8 +51,14 @@ abstract class TplRelation {
 
 	public $config;
 
-	function __construct($alias, $localTableName, $targetTableName, $reciproque) {
+	/**
+	 * @var ClassLookup
+	 */
+	protected $classLookup;
+
+	function __construct(ClassLookup $classLookup, $alias, $localTableName, $targetTableName, $reciproque) {
 //		dump_trace();
+		$this->classLookup = $classLookup;
 		$this->alias = $alias;
 		$this->localDBTableName = $localTableName;
 		$this->targetDBTableName = $targetTableName;
@@ -65,11 +71,11 @@ abstract class TplRelation {
 	}
 
 	public function getClass() {
-		return substr(get_class($this), 3);
+		return '\\' . substr(get_class($this), 3);
 	}
 
 	protected function getInfoClass() {
-		return 'ModelRelationInfo';
+		return '\ModelRelationInfo';
 	}
 
 	public function getInfoDeclaration($additionalParams = '', $closing = true) {
@@ -98,10 +104,12 @@ abstract class TplRelation {
 			$config = str_replace("'%onDeleteAction%'", $this->exportOnDeleteAction(), $config);
 		}
 
+		$targetProxy = $this->classLookup->proxyForTable($this->getTargetTableName());
+
 		ob_start();
 ?>
 new <?php echo $this->getInfoClass() ?>(<?php echo $config ?>
-, $this, <?php echo $this->getTargetTableName() ?>Proxy::get()<?php
+, $this, <?php echo $targetProxy ?>::get()<?php
 if ($additionalParams !== '') echo ', ' . $additionalParams; ?>
 <?php
 /*
@@ -195,22 +203,22 @@ new <?php echo $this->getClass() ?>(<?php echo $head ? $rTabs : '' ?>
 
 	public function getTargetType($operation, $php = false) {
 		if ($this instanceof ModelRelationHasOne) {
-			return NameMaker::modelFromDB($this->targetDBTableName);
+			return $this->classLookup->modelFromDb($this->targetDBTableName);
 		} else if ($this instanceof ModelRelationHasMany) {
 			switch ($operation) {
-				case 'get': return 'ModelSet';
-				case 'set': return $php ? 'array' : $this->getTargetModelName() . '[]';
+				case 'get': return '\ModelSet';
+				case 'set': return $php ? 'array' : $this->getTargetModelClass() . '[]';
 				default:
 					throw new InvalidArgumentException('$operation must be "get" or "set"');
 			}
 		} else {
 			print_r($this);
-			throw new IllegalStateException(get_class($this) . ' => ' . $this);
+			throw new \IllegalStateException(get_class($this) . ' => ' . $this);
 		}
 	}
 
-	public function getTargetModelName() {
-		return NameMaker::modelFromDB($this->targetDBTableName);
+	public function getTargetModelClass() {
+		return $this->classLookup->modelFromDb($this->targetDBTableName);
 	}
 
 	public function getTargetTableName() {
@@ -292,16 +300,16 @@ abstract class TplRelationByReference extends TplRelation {
 	public $referenceField;
 	public $prefix;
 
-	function __construct($localTableName, $targetTableName, $alias, $reciproque,
+	function __construct(ClassLookup $classLookup, $localTableName, $targetTableName, $alias, $reciproque,
 			$referenceField, $prefix) {
 
-		parent::__construct($alias, $localTableName, $targetTableName, $reciproque);
+		parent::__construct($classLookup, $alias, $localTableName, $targetTableName, $reciproque);
 		$this->referenceField = $referenceField;
 		$this->prefix = $prefix;
 	}
 
 	protected function  getInfoClass() {
-		return 'ModelRelationInfoByReference';
+		return '\\ModelRelationInfoByReference';
 	}
 
 	public function getDeclaration($head = true, $ignored = '', $ignored2 = true) {
@@ -339,7 +347,7 @@ class TplRelationReferencesOne extends TplRelationByReference
 		implements ModelRelationHasOne {
 
 	protected function getInfoClass() {
-		return 'ModelRelationInfoReferencesOne';
+		return '\ModelRelationInfoReferencesOne';
 	}
 
 	public function __toString() {
@@ -376,7 +384,7 @@ class TplRelationReferedByOne extends TplRelationReferencesOne implements TplRel
 	protected $referencingAlias;
 
 	protected function getInfoClass() {
-		return 'ModelRelationInfoReferedByOne';
+		return '\ModelRelationInfoReferedByOne';
 	}
 
 	public function setReferencingAlias($referencingAlias) {
@@ -430,7 +438,7 @@ class TplRelationReferedByMany extends TplRelationByReference
 	}
 
 	protected function getInfoClass() {
-		return 'ModelRelationInfoReferedByMany';
+		return '\ModelRelationInfoReferedByMany';
 	}
 }
 
@@ -440,10 +448,10 @@ abstract class TplRelationByAssoc extends TplRelation {
 	public $localForeignKey;
 	public $otherForeignKey;
 
-	function __construct($alias, $localTableName, $targetTableName, $reciproque,
+	function __construct(ClassLookup $classLookup, $alias, $localTableName, $targetTableName, $reciproque,
 			$assocTableName, $localForeignKey, $otherForeignKey) {
 
-		parent::__construct($alias, $localTableName, $targetTableName, $reciproque);
+		parent::__construct($classLookup, $alias, $localTableName, $targetTableName, $reciproque);
 
 		$this->assocTableName = $assocTableName;
 		$this->localForeignKey = $localForeignKey;
@@ -458,7 +466,7 @@ abstract class TplRelationByAssoc extends TplRelation {
 	}
 
 	protected function getInfoClass() {
-		return 'ModelRelationInfoByAssoc';
+		return '\ModelRelationInfoByAssoc';
 	}
 
 	public function getInfoDeclaration($additionalParams = '', $closing = true) {

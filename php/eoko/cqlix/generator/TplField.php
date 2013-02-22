@@ -42,11 +42,17 @@ class TplField extends ModelColumn implements ConfigConstants {
 
 	public $unsigned = false;
 
-	function __construct($field, $type, $length = null, $canNull = false,
+	/**
+	 * @var ClassLookup
+	 */
+	private $classLookup;
+
+	function __construct(ClassLookup $classLookup, $field, $type, $length = null, $canNull = false,
 			$default = null, $unique = false, $foreignKeyToTable = null,
 			$primaryKey = false, $autoIncrement = false) {
 
 		$meta = null;
+		$this->classLookup = $classLookup;
 
 		// Length
 		if ($length !== null && preg_match('/(\d+),(\d+)/', $length, $m)) {
@@ -372,9 +378,14 @@ class TplField extends ModelColumn implements ConfigConstants {
 //			. "$nullable, {$this->getTplDefault()}, $primary)";
 
 		if ($this->foreignKeyToTable !== null) {
-			$name = NameMaker::tableFromDB($this->foreignKeyToTable);
-			if ($name === $tableName) $foreignKeyToTable = '$this';
-			else $foreignKeyToTable = $name . 'Proxy::get()';
+//			$name = NameMaker::tableFromDB($this->foreignKeyToTable);
+//			if ($name === $tableName) {
+//				$foreignKeyToTable = '$this';
+//			} else {
+//				$foreignKeyToTable = $name . 'Proxy::get()';
+//			}
+			$proxyClass = $this->classLookup->proxyFromDb($this->foreignKeyToTable);
+			$foreignKeyToTable = $proxyClass . '::get()';
 		} else {
 			$foreignKeyToTable = 'null';
 		}

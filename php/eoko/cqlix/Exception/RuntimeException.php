@@ -22,16 +22,16 @@
  * @author Éric Ortega <eric@eoko.fr>
  */
 
-namespace eoko\MultiClients\bin;
+namespace eoko\cqlix\Exception;
 
 /**
- * Generates model for multi client installations database.
+ * Cqlix runtime exception.
  *
- * @since 2013-02-18 07:04
+ * @category Eoze
+ * @package cqlix
+ * @subpackage Exception
+ * @since 2013-02-21 17:01
  */
+class RuntimeException extends \RuntimeException {
 
-chdir(realpath(__DIR__ . '/../../../../bin/'));
-
-$class = 'eoko\MultiClients\bin\ModelGenerator';
-
-require 'doRun.php';
+}

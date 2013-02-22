@@ -1,5 +1,9 @@
-<?php if (isset($namespace)): ?>
-namespace <?php echo $namespace ?>;
+<?php if (isset($tableBaseNamespace)): ?>
+namespace <?php echo $tableBaseNamespace ?>;
+
+use ModelSet;
+use ModelColumn;
+
 <?php endif ?>
 
 /**
@@ -21,6 +25,10 @@ namespace <?php echo $namespace ?>;
 abstract class <?php echo $tableName ?>Base extends <?php echo $baseTableName ?> {
 
 	private static $singleton = null;
+
+<?php if (isset($databaseProxyName)): ?>
+	protected $databaseProxyName = '<?php echo $databaseProxyName ?>';
+<?php endif ?>
 
 	public $modelName = '<?php echo $modelName ?>';
 	public $tableName = '<?php echo $tableName ?>';
@@ -52,10 +60,12 @@ abstract class <?php echo $tableName ?>Base extends <?php echo $baseTableName ?>
 	}
 
 	/**
-	 * @return <?php echo $tableName . PHP_EOL ?>
+	 * @return <?php echo $tableClass . PHP_EOL ?>
 	 */
 	public static function getInstance() {
-		if (self::$singleton == null) self::$singleton = new <?php echo $tableName ?>();
+		if (self::$singleton == null) {
+			self::$singleton = new <?php echo $tableClass ?>();
+		}
 		return self::$singleton;
 	}
 
@@ -83,14 +93,17 @@ abstract class <?php echo $tableName ?>Base extends <?php echo $baseTableName ?>
 	}
 
 	/**
-	 * Get whether the given object is an instance of this table's model
-	 * @return Bool TRUE if $obj is an instance of <?php echo $modelName ?> 
+	 * Get whether the given object is an instance of this table's model.
+	 *
+	 * @param object $obj
+	 * @return bool TRUE if $obj is an instance of <?php echo $modelClass, PHP_EOL ?>
 	 */
 	public static function isInstanceOfModel($obj) {
-		return $obj instanceof <?php echo $modelName ?>;
+		return $obj instanceof <?php echo $modelClass ?>;
 	}
 
 	/**
+	 * @param array $context
 	 * @return <?php echo $baseQueryName . PHP_EOL ?>
 	 */
 	protected function doCreateQuery(array $context = null) {
@@ -98,8 +111,9 @@ abstract class <?php echo $tableName ?>Base extends <?php echo $baseTableName ?>
 	}
 
 	/**
-	 * @params array $context
-	 * @return <?php echo $modelName ?>Query
+	 * @param $getQuery
+	 * @param array $context
+	 * @return <?php echo $baseQueryName . PHP_EOL ?>
 	 */
 	public static function createQueryGet(&$getQuery, array $context = null) {
 		return self::createQuery($context, $getQuery);
@@ -108,25 +122,25 @@ abstract class <?php echo $tableName ?>Base extends <?php echo $baseTableName ?>
 	/**
 	 * Create a new <?php echo $modelName ?>.
 	 *
-	 * The new reccord will be considered new until its primary key is set.
+	 * The new record will be considered new until its primary key is set.
 	 *
-	 * An array of values can be given to initialize the reccord's fields. It
+	 * An array of values can be given to initialize the record's fields. It
 	 * is not required for all model's fields to have a value in the given
 	 * array; the absent fields will be set to NULL.
 	 *
 	 * @param array $initValues an array containing values with which the
 	 * Model's fields will be initialized.
 	 *
-	 * @param Bool $strict if set to TRUE, then all field of the model will be
+	 * @param bool $strict if set to TRUE, then all field of the model will be
 	 * required to be set in $initValues, or an IllegalArgumentException will
 	 * be thrown.
 	 *
 	 * @param array $context
 	 *
-	 * @return <?php echo $modelName, PHP_EOL ?>
+	 * @return <?php echo $modelClass, PHP_EOL ?>
 	 */
 	public static function createModel($initValues = null, $strict = false, array $context = null) {
-		return <?php echo $modelName ?>::create($initValues, $strict, $context);
+		return <?php echo $modelClass ?>::create($initValues, $strict, $context);
 	}
 
 <?php /* if ($table->defaultController): ?>
@@ -136,7 +150,7 @@ abstract class <?php echo $tableName ?>Base extends <?php echo $baseTableName ?>
 
 <?php endif */ ?>
 	/**
-	 * @return Bool
+	 * @return bool
 	 */
 	public static function hasPrimaryKey() {
 		return <?php echo $primaryColName !== null ? 'true' : 'false' ?>;
@@ -145,7 +159,8 @@ abstract class <?php echo $tableName ?>Base extends <?php echo $baseTableName ?>
 <?php if ($primaryColName !== null): ?>
 	/**
 	 * Get the name of the primary key field.
-	 * @return String
+	 *
+	 * @return string
 	 */
 	public static function getPrimaryKeyName() {
 		return '<?php echo $primaryColName ?>';
@@ -153,6 +168,7 @@ abstract class <?php echo $tableName ?>Base extends <?php echo $baseTableName ?>
 
 	/**
 	 * Get the column representing the primary key.
+	 *
 	 * @return ModelColumn
 	 */
 	public static function getPrimaryKeyColumn() {
@@ -160,33 +176,35 @@ abstract class <?php echo $tableName ?>Base extends <?php echo $baseTableName ?>
 	}
 
 	/**
-	 * Load a <?php echo $modelName ?> reccord from the database, selected by
+	 * Load a <?php echo $modelName ?> record from the database, selected by
 	 * its primary key.
 	 *
 	 * @param mixed $<?php echo $primaryField->getVarName(false), PHP_EOL ?>
 	 * @param array $context
 	 *
-	 * @return Model the data Model from the loaded reccord, or null if no
-	 * reccord matching the given primary key has been found
+	 * @return <?php echo $modelClass ?> the data Model from the loaded record, or null if no
+	 * record matching the given primary key has been found
 	 */
 	public static function loadModel($<?php echo $primaryField->getVarName(false) ?>, array $context = null) {
-		return <?php echo $modelName ?>::load($<?php echo $primaryField->getVarName(false) ?>, $context);
+		return <?php echo $modelClass ?>::load($<?php echo $primaryField->getVarName(false) ?>, $context);
 	}
 
 	/**
-	 *
-	 * @return <?php echo $modelName ?>
+	 * @param $<?php echo $primaryField->getVarName(false), PHP_EOL ?>
+	 * @param array $context
+	 * @return <?php echo $modelClass, PHP_EOL ?>
 	 */
 	public static function findByPrimaryKey($<?php echo $primaryField->getVarName(false) ?>, array $context = null) {
-		return <?php echo $modelName ?>::load($<?php echo $primaryField->getVarName(false) ?>, $context);
+		return <?php echo $modelClass ?>::load($<?php echo $primaryField->getVarName(false) ?>, $context);
 	}
 
 	/**
-	 *
-	 * @return <?php echo $modelName ?> 
+	 * @param $<?php echo $primaryField->getVarName(false), PHP_EOL ?>
+	 * @param array $context
+	 * @return <?php echo $modelClass, PHP_EOL ?>
 	 */
 	public static function findFirstByPrimaryKey($<?php echo $primaryField->getVarName(false) ?>, array $context = null) {
-		return <?php echo $modelName ?>::load($<?php echo $primaryField->getVarName(false) ?>, $context);
+		return <?php echo $modelClass ?>::load($<?php echo $primaryField->getVarName(false) ?>, $context);
 	}
 <?php else: ?>
 	/**
@@ -232,6 +250,8 @@ abstract class <?php echo $tableName ?>Base extends <?php echo $baseTableName ?>
 
 	/**
 	 *
+	 * @param array $context
+	 * @param const $mode
 	 * @return ModelSet
 	 */
 	public static function findAll(array $context = null, $mode = ModelSet::ONE_PASS) {
@@ -242,15 +262,16 @@ abstract class <?php echo $tableName ?>Base extends <?php echo $baseTableName ?>
 	}
 
 	/**
-	 * Create a new <?php echo $modelName ?> reccord initialized by the given $data
+	 * Create a new <?php echo $modelName ?> record initialized by the given $data
 	 * array. All the model's fields must have a value set in the $data array.
-	 * The <?php echo $modelName ?> reccord will be considered loaded and not-new.
+	 * The <?php echo $modelName ?> record will be considered loaded and not-new.
+	 *
 	 * @param array $data
 	 * @param array $context
-	 * @return <?php echo $modelName, PHP_EOL ?>
+	 * @return <?php echo $modelClass, PHP_EOL ?>
 	 */
 	public static function loadModelFromData(array $data, array $context = null) {
-		return <?php echo $modelName ?>::loadFromData($data, $context);
+		return <?php echo $modelClass ?>::loadFromData($data, $context);
 	}
 
 <?php

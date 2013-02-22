@@ -1,11 +1,11 @@
 <?php
 
-namespace eoko\MultiClients\bin\Model;
+namespace eoko\MultiClients\Model\Base;
 
 /**
  * Base of the User Model.
  *
- * @category opence
+ * @category Eoze
  * @package Model
  * @subpackage Base
  *
@@ -29,8 +29,9 @@ abstract class UserBase extends \myModel {
 	const F_LAST_NAME = 'last_name';
 
 	/**
-	 * @param array $values an array of values ($fieldName => $value) to initially set
+	 * @param array $initValues an array of values ($fieldName => $value) to initially set
 	 * the User with.
+	 * @param bool $strict
 	 * @param array $context
 	 */
 	protected function __construct($initValues = null, $strict = false, array $context = null) {
@@ -50,6 +51,7 @@ abstract class UserBase extends \myModel {
 
 	/**
 	 * Get the name of this class's Model.
+	 *
 	 * @return string
 	 */
 	protected function getModelName() {
@@ -58,35 +60,37 @@ abstract class UserBase extends \myModel {
 
 	/**
 	 * Create a new User	 *
-	 * The new reccord will be considered new until its primary key is set.
+	 * The new record will be considered new until its primary key is set.
 	 *
-	 * An array of values can be given to initialize the reccord's fields. It
+	 * An array of values can be given to initialize the record's fields. It
 	 * is not required for all model's fields to have a value in the given
 	 * array; the absent fields will be set to NULL.
 	 *
 	 * @param array $initValues an array containing values with which the
 	 * Model's fields will be initialized. This
 	 *
+	 * @param bool $strict
+	 *
 	 * @param array $context
-	 * 
-	 * @return User
+	 *
+	 * @return \eoko\MultiClients\Model\User
 	 */
-	static function create($initValues = null, $strict = false, array $context = null) {
-		return new User($initValues, $strict, $context);
+	public static function create($initValues = null, $strict = false, array $context = null) {
+		return new \eoko\MultiClients\Model\User($initValues, $strict, $context);
 	}
 
 
 	/**
-	 * Set the value of this Reccord's primary key.
+	 * Set the value of this record's primary key.
 	 */
-	function setPrimaryKeyValue($value) {
+	public function setPrimaryKeyValue($value) {
 		$this->setPrimaryKeyValueImpl('id', $value);
 	}
 
 	/**
-	 * @return mixed the value of this Reccord's primary key.
+	 * @return mixed the value of this record's primary key.
 	 */
-	function getPrimaryKeyValue() {
+	public function getPrimaryKeyValue() {
 		return $this->getId();
 	}
 
@@ -98,12 +102,12 @@ abstract class UserBase extends \myModel {
 	 *
 	 * @param array $context
 	 * 
-	 * @return User the data Model from the loaded reccord, or null if no
-	 * reccord matching the given primary key has been found
+	 * @return \eoko\MultiClients\Model\User the data Model from the loaded record, or null if no
+	 * record matching the given primary key has been found
 	 */
 	public static function load($id, array $context = null) {
 
-		$model = new User(array(
+		$model = new \eoko\MultiClients\Model\User(array(
 			'id' => $id		), false, $context);
 
 		return $model->doLoad($context);
@@ -119,7 +123,8 @@ abstract class UserBase extends \myModel {
 	 * the model's data). If NULL, initial values will be used if they exist,
 	 * else it will be tried to load the model from the datastore, eventually
 	 * throwing an Exception if no method works.
-	 * @return User 
+	 *
+	 * @return \eoko\MultiClients\Model\User
 	 */
 	public function getStoredCopy($loadFromDB = null) {
 		return $this->doGetStoredCopy($loadFromDB);
@@ -130,163 +135,173 @@ abstract class UserBase extends \myModel {
 	 * Load a %%Model%% from the given data. All model's fields must have a
 	 * set value in the $data array. The model will be considered loaded and
 	 * not-new, when being created this way.
-	 * @param ModelTable $table
+	 *
 	 * @param array $data
 	 * @param array $context
-	 * @return %%Model%%
+	 * @return \eoko\MultiClients\Model\User
 	 * @ignore
 	 */
 	public static function loadFromData(array $data, array $context = null) {
-//		$model = new User();
-//		$model->params = $model->context = $context;
-//		$model->setAllFieldsFromDatabase($data);
-//		return $model;
-		return new User($data, true, $context);
+		return new \eoko\MultiClients\Model\User($data, true, $context);
 	}
 
 	/**
-	 * @return UserTable
+	 * @return \eoko\MultiClients\Model\UserTable
 	 */
-	static function getTable() {
-		return UserTable::getInstance();
+	public static function getTable() {
+		return \eoko\MultiClients\Model\UserTable::getInstance();
 	}
 
 	/**
 	 * Get the value of the id field.
-	 * @return Int
+	 *
+	 * @return int
 	 */
-	function getId() {
+	public function getId() {
 		$v = $this->getField('id');
 		return $v === null ? null : (int) $v;
 	}
 
 	/**
 	 * Set the value of the id field.
-	 * @param Int $value
-	 * @return User 
-
+	 *
+	 * @param int $id
+	 * @param $forceAcceptNull
+	 * @return \eoko\MultiClients\Model\User
 	 */
-	function setId($id, $forceAcceptNull = false) {
+	public function setId($id, $forceAcceptNull = false) {
 		$this->setColumn('id', $id, $forceAcceptNull);
 		return $this;
 	}
 
 	/**
 	 * Get the value of the clientId field.
-	 * @return Int
+	 *
+	 * @return int
 	 */
-	function getClientId() {
+	public function getClientId() {
 		$v = $this->getField('client_id');
 		return $v === null ? null : (int) $v;
 	}
 
 	/**
 	 * Set the value of the clientId field.
-	 * @param Int $value
-	 * @return User 
-
+	 *
+	 * @param int $clientId
+	 * @param $forceAcceptNull
+	 * @return \eoko\MultiClients\Model\User
 	 */
-	function setClientId($clientId, $forceAcceptNull = false) {
+	public function setClientId($clientId, $forceAcceptNull = false) {
 		$this->setColumn('client_id', $clientId, $forceAcceptNull);
 		return $this;
 	}
 
 	/**
 	 * Get the value of the username field.
-	 * @return String
+	 *
+	 * @return string
 	 */
-	function getUsername() {
+	public function getUsername() {
 		$v = $this->getField('username');
 		return $v === null ? null : (string) $v;
 	}
 
 	/**
 	 * Set the value of the username field.
-	 * @param String $value
-	 * @return User 
-
+	 *
+	 * @param string $username
+	 * @param $forceAcceptNull
+	 * @return \eoko\MultiClients\Model\User
 	 */
-	function setUsername($username, $forceAcceptNull = false) {
+	public function setUsername($username, $forceAcceptNull = false) {
 		$this->setColumn('username', $username, $forceAcceptNull);
 		return $this;
 	}
 
 	/**
 	 * Get the value of the password field.
-	 * @return String
+	 *
+	 * @return string
 	 */
-	function getPassword() {
+	public function getPassword() {
 		$v = $this->getField('password');
 		return $v === null ? null : (string) $v;
 	}
 
 	/**
 	 * Set the value of the password field.
-	 * @param String $value
-	 * @return User 
-
+	 *
+	 * @param string $password
+	 * @param $forceAcceptNull
+	 * @return \eoko\MultiClients\Model\User
 	 */
-	function setPassword($password, $forceAcceptNull = false) {
+	public function setPassword($password, $forceAcceptNull = false) {
 		$this->setColumn('password', $password, $forceAcceptNull);
 		return $this;
 	}
 
 	/**
 	 * Get the value of the level field.
-	 * @return Int
+	 *
+	 * @return int
 	 */
-	function getLevel() {
+	public function getLevel() {
 		$v = $this->getField('level');
 		return $v === null ? null : (int) $v;
 	}
 
 	/**
 	 * Set the value of the level field.
-	 * @param Int $value
-	 * @return User 
-
+	 *
+	 * @param int $level
+	 * @param $forceAcceptNull
+	 * @return \eoko\MultiClients\Model\User
 	 */
-	function setLevel($level, $forceAcceptNull = false) {
+	public function setLevel($level, $forceAcceptNull = false) {
 		$this->setColumn('level', $level, $forceAcceptNull);
 		return $this;
 	}
 
 	/**
 	 * Get the value of the firstName field.
-	 * @return String
+	 *
+	 * @return string
 	 */
-	function getFirstName() {
+	public function getFirstName() {
 		$v = $this->getField('first_name');
 		return $v === null ? null : (string) $v;
 	}
 
 	/**
 	 * Set the value of the firstName field.
-	 * @param String $value
-	 * @return User 
-
+	 *
+	 * @param string $firstName
+	 * @param $ignoredArgument
+	 * @return \eoko\MultiClients\Model\User
 	 */
-	function setFirstName($firstName, $ignoredArgument = false) {
+	public function setFirstName($firstName, $ignoredArgument = false) {
 		$this->setColumn('first_name', $firstName, $ignoredArgument);
 		return $this;
 	}
 
 	/**
 	 * Get the value of the lastName field.
-	 * @return String
+	 *
+	 * @return string
 	 */
-	function getLastName() {
+	public function getLastName() {
 		$v = $this->getField('last_name');
 		return $v === null ? null : (string) $v;
 	}
 
 	/**
 	 * Set the value of the lastName field.
-	 * @param String $value
-	 * @return User 
-
+	 *
+	 * @param string $lastName
+	 * @param $ignoredArgument
+	 * @return \eoko\MultiClients\Model\User
 	 */
-	function setLastName($lastName, $ignoredArgument = false) {
+	public function setLastName($lastName, $ignoredArgument = false) {
 		$this->setColumn('last_name', $lastName, $ignoredArgument);
 		return $this;
 	}
@@ -294,17 +309,17 @@ abstract class UserBase extends \myModel {
 	/**
 	 *
 	 * @param array $overrideContext
-	 * @return Client
+	 * @return \eoko\MultiClients\Model\Client
 	 */
-	function getClient(array $overrideContext = null) {
+	public function getClient(array $overrideContext = null) {
 		return $this->getForeignModel('Client', $overrideContext);
 	}
 	/**
 	 *
-	 * @param Client $client
-	 * @return Client
+	 * @param \eoko\MultiClients\Model\Client $client
+	 * @return \eoko\MultiClients\Model\Client
 	 */
-	function setClient(Client $client) {
+	public function setClient(\eoko\MultiClients\Model\Client $client) {
 		// return $this->getRelation('Client')->get($this);
 		return $this->setForeignModel('Client', $client);
 	}

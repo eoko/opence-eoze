@@ -1,7 +1,7 @@
 #!usr/bin/php
 <?php
 
-$class = 'eoko\\cqlix\\generator\\Generator';
+$class = 'eoko\\cqlix\\generator\\LegacyGenerator';
 require __DIR__ . '/doRun.php';
 
 $syncDbAction = 'dump';

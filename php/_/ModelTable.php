@@ -7,6 +7,7 @@
  */
 
 use eoko\config\ConfigManager;
+use eoko\database\Database;
 
 /**
  * Base class of model's tables
@@ -39,14 +40,14 @@ use eoko\config\ConfigManager;
  * parent method from the child class from their static singleton instance.
  *
  * @method static ModelTable getInstance()
- * @method string getDBTable()
- * @method bool hasPrimaryKey()
- * @method string getPrimaryKeyName()
- * @method ModelColumn getPrimaryKeyColumn()
+ * @method static string getDBTable()
+ * @method static bool hasPrimaryKey()
+ * @method static string getPrimaryKeyName()
+ * @method static ModelColumn getPrimaryKeyColumn()
  *
  * %%ModelTable%% from its name. This method is static in concrete ModelTable
  * implementations, but it is abstract in ModelTable class.
- * @method ModelColumn[] getColumns($excludeAutoOperation = false, $excludeFinal = false) This
+ * @method static ModelColumn[] getColumns($excludeAutoOperation = false, $excludeFinal = false) This
  * method is static in concrete ModelTable implementations, but it is abstract
  * in ModelTable class.
  * 
@@ -244,7 +245,7 @@ abstract class ModelTable extends ModelTableProxy {
 	 * @param array $initValues see {@link createModel()}
 	 * @param boolean $strict   see {@link createModel()}
 	 * @param array $context     see {@link createModel()}
-	 * @return Model
+	 * @return \Model
 	 */
 	protected function _createNewModel($initValues = null, $strict = false, array $context = null) {
 		return $this->createModel($initValues, $strict, $context)->forceNew();
@@ -299,10 +300,12 @@ abstract class ModelTable extends ModelTableProxy {
 	 * @param string $colName
 	 * @return ModelColumn
 	 */
-	abstract static protected function getColumn($colName);
+	abstract static public function getColumn($colName);
 
 	/**
-	 * Get whether the given object is an instance of this table's model
+	 * Get whether the given object is an instance of this table's model.
+	 *
+	 * @param $obj
 	 * @return Bool TRUE if $obj is an instance of <?php echo $modelName ?>
 	 */
 	abstract static public function isInstanceOfModel($obj);
@@ -331,10 +334,37 @@ abstract class ModelTable extends ModelTableProxy {
 	 * @return Query
 	 */
 	public static function createQuery(array $context = null) {
-		return static::getInstance()->doCreateQuery($context);
+		return static::getInstance()->onCreateQuery($context);
 	}
 
-	protected function
+	/**
+	 * Name of the database {@link \eoko\database\Database::registerProxy() named proxy} to
+	 * use.
+	 *
+	 * @var string|null
+	 */
+	protected $databaseProxyName = null;
+
+	/**
+	 * @param array $context
+	 * @return Query
+	 */
+	private function onCreateQuery(array $context = null) {
+		$query = $this->doCreateQuery($context);
+
+		if (isset($this->databaseProxyName)) {
+			$pdo = Database::getProxy($this->databaseProxyName)->getConnection();
+			$query->setConnection($pdo);
+		}
+
+		return $query;
+	}
+
+	/**
+	 * @param array $context
+	 * @return Query
+	 */
+	protected abstract function doCreateQuery(array $context = null);
 
 	/**
 	 * Gets the default controller for CRUD operation on this table's model.
@@ -472,11 +502,13 @@ abstract class ModelTable extends ModelTableProxy {
 
 	// TODO field/col disambiguation
 	/**
-	 * Get a ModelTableColumn of %%ModelTable%% from its name
+	 * Get a ModelTableColumn of %%ModelTable%% from its name.
+	 *
 	 * @param string $name
+	 * @param bool $require
+	 * @throws \IllegalStateException
 	 * @return ModelColumn the column matching the given field name, or NULL if
 	 * this Model have no field matching this name
-	 * @ignore
 	 */
 	protected function _getColumn($name, $require = true) {
 		if (isset($this->cols[$name])) {
@@ -542,7 +574,7 @@ abstract class ModelTable extends ModelTableProxy {
 	 * If you don't want a field with such a name to be considered as the
 	 * display name, overrides this method and/or {@link hasName()}.
 	 * 
-	 * @param {Boolean} $require If `true`, the method will throw an 
+	 * @param bool $require If `true`, the method will throw an
 	 * {@link IllegalStateException} if it cannot find a display name.
 	 * 
 	 * @return string
@@ -574,7 +606,7 @@ abstract class ModelTable extends ModelTableProxy {
 	 * Creates a Query with its WHERE claused configured to match only
 	 * 
 	 * @param array $context
-	 * @return ModelTableQuery 
+	 * @return \ModelTableQuery 
 	 */
 	abstract public static function createReadQuery(array $context = null);
 
@@ -592,12 +624,15 @@ abstract class ModelTable extends ModelTableProxy {
 	const LOAD_FULL   = 3;
 
 	/**
-	 * @return ModelTableQuery
+	 * @param const $relationsMode
+	 * @param array $context
+	 * @param array $columns
+	 * @return \ModelTableQuery
 	 */
 	abstract public static function createLoadQuery($relationsMode = ModelTable::LOAD_NAME, 
 			array $context = null, $columns = null);
 	/**
-	 * @return ModelTableQuery
+	 * @return \ModelTableQuery
 	 */
 	protected function _createLoadQuery($relationsMode = ModelTable::LOAD_NAME, 
 			array $context = null, $columns = null) {
@@ -681,14 +716,19 @@ abstract class ModelTable extends ModelTableProxy {
 	protected function applyLoadQueryDefaultOrder(Query $query) {}
 
 	/**
-	 * @return ModelRelationInfo
+	 * @param string $name
+	 * @param bool $requireType
+	 * @return \ModelRelationInfo
 	 */
 	public abstract static function getRelationInfo($name, $requireType = false);
 
 	/**
 	 *
 	 * @param string $name
-	 * @return ModelRelationInfo
+	 * @param bool $requireType
+	 * @throws \IllegalStateException
+	 * @throws \IllegalArgumentException
+	 * @return \ModelRelationInfo
 	 */
 	protected function _getRelationInfo($name, $requireType = false) {
 
@@ -1002,12 +1042,14 @@ abstract class ModelTable extends ModelTableProxy {
 	 */
 	abstract public static function findFirst(QueryWhere $where = null, array $context = null, 
 			$aliasingCallback = null);
+
 	/**
-	 * @param QueryWhere $where
+	 * @param \QueryWhere $where
 	 * @param array $context
-	 * @return %%Model%%
+	 * @param callback $aliasingCallback
+	 * @return \Model|null %%Model%%
 	 */
-	protected function _findFirst(QueryWhere $where = null, array $context = null, 
+	protected function _findFirst(\QueryWhere $where = null, array $context = null,
 			$aliasingCallback = null) {
 
 		$query = $this->createQuery($context);
@@ -1051,7 +1093,7 @@ abstract class ModelTable extends ModelTableProxy {
 	}
 
 	/**
-	 * @return ModelTableQuery
+	 * @return \ModelTableQuery
 	 */
 	private function createFindOneQuery($condition, $inputs, $context, $aliasingCallback) {
 
@@ -1705,7 +1747,7 @@ class ModelTableFinder extends QueryWhere {
 
 	/**
 	 * Accesses the query used internally by the Finder.
-	 * @return ModelTableQuery
+	 * @return \ModelTableQuery
 	 */
 	public function getQuery() {
 		return $this->query;
@@ -1713,7 +1755,7 @@ class ModelTableFinder extends QueryWhere {
 
 	/**
 	 * Gets a clone of the finder's query.
-	 * @return ModelTableQuery
+	 * @return \ModelTableQuery
 	 */
 	public function cloneQuery() {
 		$q = clone $this->query;
