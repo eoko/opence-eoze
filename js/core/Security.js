@@ -35,7 +35,7 @@ Oce.Security = function() {
 		if (pingTimeout) {
 			clearTimeout(pingTimeout);
 		}
-		
+
 		if (identified) {
 			appLoaded = true;
 			loginInfos = args;
@@ -57,7 +57,7 @@ Oce.Security = function() {
 	this.getLoginInfos = function() {
 		return loginInfos;
 	};
-	
+
 	this.whenIdentified = function(fn) {
 		if (this.isIdentified()) {
 			fn();
@@ -82,23 +82,23 @@ Oce.Security = function() {
 					});
 					m[loginFn](modal, text);
 				}
-			)
+			);
 		}
-	}
+	};
 
 	this.logout = function() {
 		setIdentified(false);
-	}
+	};
 
 	this.get = function() {
 		Oce.Security = new Oce.Security();
 		return Oce.Security;
-	}
+	};
 
 	appLoaded = Oce.Security.initIdentified;
 	setIdentified(Oce.Security.initIdentified, Oce.Security.loginInfos);
 
 	return this;
-}
+};
 
 Oce.Functionality('Security', Oce.Security);
