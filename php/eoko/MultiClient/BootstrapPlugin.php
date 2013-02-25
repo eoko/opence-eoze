@@ -93,27 +93,32 @@ class BootstrapPlugin {
 		// --- Home directory
 
 		$paths = Application::getInstance()->getPaths();
+		$clientHomeDirectory = $client->getHomeDirectory();
 
 		$config = $this->getConfig();
 		if (!isset($config['homeDirectory'])) {
 			throw new Exception\RuntimeException('Missing config for MultiClient: homeDirectory');
 		}
 
-		if (empty($client->getHomeDirectory())) {
+		if (empty($clientHomeDirectory)) {
 			throw new Exception\RuntimeException('Missing home directory for client: ' . $client->getName());
 		}
 
-		$basePath = rtrim($config['homeDirectory'], '/') . '/'
-			. rtrim($client->getHomeDirectory(), '/') . '/';
+		$basePath = realpath($config['homeDirectory']) . '/'
+			. rtrim($clientHomeDirectory, '/') . '/';
 
 		$realPath = realpath($basePath);
 
 		if (!$realPath) {
-			throw new Exception\RuntimeException('Directory must exist: ' . $basePath);
+			mkdir($basePath, 0744);
+			$realPath = realpath($basePath);
+		}
+
+		if (!$realPath) {
+			throw new Exception\RuntimeException('Cannot create directory: ' . $basePath);
 		}
 
 		$paths->setPath('home', $realPath);
-
 
 		// --- Database
 
