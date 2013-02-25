@@ -99,6 +99,10 @@ class BootstrapPlugin {
 			throw new Exception\RuntimeException('Missing config for MultiClient: homeDirectory');
 		}
 
+		if (empty($client->getHomeDirectory())) {
+			throw new Exception\RuntimeException('Missing home directory for client: ' . $client->getName());
+		}
+
 		$basePath = rtrim($config['homeDirectory'], '/') . '/'
 			. rtrim($client->getHomeDirectory(), '/') . '/';
 
