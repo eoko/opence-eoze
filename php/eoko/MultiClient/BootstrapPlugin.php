@@ -110,7 +110,7 @@ class BootstrapPlugin {
 		$realPath = realpath($basePath);
 
 		if (!$realPath) {
-			mkdir($basePath, 0744);
+			mkdir($basePath, 0700);
 			$realPath = realpath($basePath);
 		}
 
