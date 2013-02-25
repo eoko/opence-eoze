@@ -62,28 +62,46 @@ class TplField extends ModelColumn implements ConfigConstants {
 
 		// Type
 		switch ($type) {
-			case 'date': $type = self::T_DATE; break;
-			case 'datetime': $type = self::T_DATETIME; break;
-			case 'time': $type = self::T_TIME; break;
+			case 'date':
+				$type = self::T_DATE;
+				break;
+			case 'datetime':
+				$type = self::T_DATETIME;
+				break;
+			case 'time':
+				$type = self::T_TIME;
+				break;
+			case 'timestamp':
 			case 'bigint':
-			case 'int': // TODO DBG => int(1) == bool
-//				if ($length == null || $length != 1) { $type = self::T_INT; break; }
-//				if ($length == null || $length != 1) { $type = self::T_INT; break; }
-				$type = self::T_INT; break;
+			case 'int':
+				$type = self::T_INT;
+				break;
 			case 'tinyint':
-				if ($length != null && $length != 1) $type = self::T_INT;
-				else $type = self::T_BOOL; break;
-			case 'bool': $type = self::T_BOOL; break;
+				$type = $length != null && $length != 1
+					? self::T_INT
+					: self::T_BOOL;
+				break;
+			case 'bool':
+				$type = self::T_BOOL;
+				break;
 			case 'decimal':
-				$type = self::T_DECIMAL; break;
+				$type = self::T_DECIMAL;
+				break;
 			case 'tinytext':
-			case 'text': $type = self::T_TEXT; break;
+			case 'text':
+				$type = self::T_TEXT;
+				break;
 			case 'varchar':
 			case 'blob':
-			case 'char': $type = self::T_STRING; break;
+			case 'char':
+				$type = self::T_STRING;
+				break;
 			case 'double':
-			case 'float': $type = self::T_FLOAT; break;
-			default: throw new IllegalStateException('Unrecognized type: "' . $type . '"');
+			case 'float':
+				$type = self::T_FLOAT;
+				break;
+			default:
+				throw new IllegalStateException('Unrecognized type: "' . $type . '"');
 		}
 
 		$this->columnName = $field;
@@ -204,6 +222,7 @@ class TplField extends ModelColumn implements ConfigConstants {
 	public function getConfiguredRelation() {
 		if (isset($this->relationConfig['foreignModel'])) {
 			return new TplRelationReferencesOne(
+				$this->classLookup,
 				$this->parentTable->dbTable,
 				NameMaker::dbFromModel($this->relationConfig['foreignModel']),
 				$this->localRelationAlias,
