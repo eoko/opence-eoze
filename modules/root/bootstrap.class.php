@@ -32,14 +32,6 @@ class Bootstrap extends \eoko\module\executor\JsFileExecutor {
 		ExtJSResponse::answer(false);
 	}
 
-	/**
-	 * Needed for member space.
-	 * @TODO see why...
-	 */
-	public function logout() {
-		$this->forward('root.login', 'logout');
-	}
-
 	protected function prepareLoginTemplate(Template $tpl) {
 
 		$tpl->help = false;
