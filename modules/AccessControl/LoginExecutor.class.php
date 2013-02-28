@@ -20,18 +20,16 @@ class LoginExecutor extends JsonExecutor {
 	}
 
 	public function login() {
+
 		$username = $this->request->req('username', true);
 		$password = $this->request->req('password', true);
 
-//		dump(array(
-//			$username, $password
-//		));
-
 		if (UserSession::logIn($username, $password)) {
+			$this->loginInfos = UserSession::getLoginInfos();
 			return true;
 		} else {
-			// The logIn() method should have already fired any needed exception...
-			throw new IllegalStateException('Unreachable code');
+			// TODO deprecated
+			throw new \LoginFailedException();
 		}
 	}
 
