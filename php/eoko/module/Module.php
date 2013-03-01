@@ -112,8 +112,16 @@ class Module implements file\Finder {
     /**
      * Gets the application config used by this Module.
      * @return Application
+     * @deprecated
      */
     public function getApplicationConfig() {
+        return Application::getInstance();
+    }
+    /**
+     * Gets the application config used by this Module.
+     * @return Application
+     */
+    public function getApplication() {
         return Application::getInstance();
     }
 
