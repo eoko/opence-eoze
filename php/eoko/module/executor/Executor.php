@@ -149,6 +149,13 @@ abstract class Executor implements file\Finder {
 	}
 
 	/**
+	 * @return \eoko\config\Application
+	 */
+	public function getApplication() {
+		return $this->module->getApplicationConfig();
+	}
+
+	/**
 	 * Gets the Logger for this executor's context.
 	 * @return Logger
 	 */
