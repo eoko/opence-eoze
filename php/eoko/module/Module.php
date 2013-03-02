@@ -125,17 +125,6 @@ class Module implements file\Finder {
 	}
 
 	/**
-	 * @todo Clean out #getSessionManager
-	 * @return \Zend\Session\SessionManager
-	 */
-	public function getSessionManager() {
-		// We don't keep a reference of the SessionManager because we don't
-		// want it to be serialized in the cache (because of the closures
-		// it contains)
-		return $this->getApplication()->getSessionManager();
-	}
-
-	/**
 	 * Gets the Eoze's class loader.
 	 * @return ClassLoader
 	 */
