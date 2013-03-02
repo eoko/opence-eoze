@@ -134,10 +134,12 @@ MSG
 	/**
 	 * Compiles javascript and css files to be included in the head section,
 	 * according to the specified options.
+	 * @param Renderer $headRenderer
 	 * @param array $options
+	 * @return void
 	 * @see setCompileOptions()
 	 */
-	private function onCompileIncludes(Renderer $headRenderer, $options) {
+	protected function onCompileIncludes(Renderer $headRenderer, $options) {
 
 		$java = isset($options['javaCommand'])
 				? $options['javaCommand']

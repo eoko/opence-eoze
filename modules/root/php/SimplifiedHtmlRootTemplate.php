@@ -14,6 +14,8 @@ use eoko\template\Renderer;
  * need to create their simple index.html file. Applications with complex MVC
  * requirements should not use Eoze MVC engine (but ZF2, for example).
  *
+ * @method static SimplifiedHtmlRootTemplate create(\eoko\file\Finder $fileFinder = null, $opts = null)
+ *
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  * @author Éric Ortega <eric@planysphere.fr>
  * @since 18 sept. 2012

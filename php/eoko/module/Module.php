@@ -114,7 +114,7 @@ class Module implements file\Finder {
      * @deprecated
      */
     public function getApplicationConfig() {
-        return Application::getInstance();
+        return $this->getApplication();
     }
     /**
      * Gets the application config used by this Module.
