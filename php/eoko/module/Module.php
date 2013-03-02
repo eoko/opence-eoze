@@ -111,14 +111,6 @@ class Module implements file\Finder {
     /**
      * Gets the application config used by this Module.
      * @return Application
-     * @deprecated
-     */
-    public function getApplicationConfig() {
-        return $this->getApplication();
-    }
-    /**
-     * Gets the application config used by this Module.
-     * @return Application
      */
     public function getApplication() {
         return Application::getInstance();
@@ -409,7 +401,7 @@ MSG
 	private function processConditionalConfig() {
 		// Conditional configuration
 		if (isset($this->config[''])) {
-			$app = $this->getApplicationConfig();
+			$app = $this->getApplication();
 			foreach ($this->config[''] as $tag => $envConfig) {
 				if ($app->isMode($tag)) {
 					$this->config->apply($envConfig);
@@ -991,7 +983,7 @@ MSG
 
 	protected function createFileFinder() {
 
-		$fallbackFinder = $this->getApplicationConfig();
+		$fallbackFinder = $this->getApplication();
 
 		$upperPathsUrl = array_reverse($this->pathsUrl, true);
 		if ($this->basePath) array_pop($upperPathsUrl);
