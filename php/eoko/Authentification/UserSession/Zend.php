@@ -41,7 +41,7 @@ use \User;
  * @subpackage UserSession
  * @since 2013-03-01 14:00
  */
-class Zend extends \eoko\security\UserSessionHandler implements \eoko\Authentification\UserSession {
+class Zend implements \eoko\Authentification\UserSession {
 
 	/**
 	 * @var \Zend\Authentication\AuthenticationService
@@ -54,19 +54,18 @@ class Zend extends \eoko\security\UserSessionHandler implements \eoko\Authentifi
 	private $dbAdapter;
 
 	/**
-	 * @var SessionManager
-	 */
-	private $sessionManager = null;
-
-	/**
 	 * Cache for User record.
 	 *
 	 * @var \User
 	 */
 	private $user = false;
 
+	/**
+	 * @var callback[]
+	 */
+	private $loginListeners = array();
+
 	public function __construct(DbAdapter $dbAdapter) {
-		$storage = null;
 
 		$this->dbAdapter = $dbAdapter;
 
@@ -190,7 +189,7 @@ class Zend extends \eoko\security\UserSessionHandler implements \eoko\Authentifi
 			$storage = $this->auth->getStorage();
 			$storage->write($userData, true);
 
-			$this->fireEvent(self::EVENT_LOGIN, $this->getUserId(true));
+			$this->fireLoginEvent($this->getUserId(true));
 		}
 
 		return $result;
@@ -200,73 +199,28 @@ class Zend extends \eoko\security\UserSessionHandler implements \eoko\Authentifi
 		$this->auth->clearIdentity();
 	}
 
-	public function setSessionManager(SessionManager $sessionManager) {
-		$this->sessionManager = $sessionManager;
-
-		// Register events for session destruction
-		$saveHandler = $sessionManager->getSaveHandler();
-		if ($saveHandler instanceof ObservableSaveHandler) {
-			$saveHandler->getEventManager()->attach(ObservableSaveHandler::EVENT_DESTROY, array($this, 'fireDestroyEvent'));
-		} else {
-			\Logger::get($this)->warn('Cannot monitor session destruction.');
-		}
-
+	public function onLogin($callback) {
+		$this->loginListeners[] = $callback;
 		return $this;
 	}
 
-	public function fireDestroyEvent() {
-		$this->fireEvent(self::EVENT_DESTROY);
+	private function fireLoginEvent($userId) {
+		foreach ($this->loginListeners as $callback) {
+			call_user_func($callback, $userId);
+		}
 	}
-
-//	private $loginListeners = array();
-//
-//	private function fireLoginEvent(\User $user) {
-//		foreach ($this->loginListeners as $callback) {
-//			call_user_func($callback, $user);
-//		}
-//	}
-//
-//	public function onLogin($callback) {
-//		$this->loginListeners[] = $callback;
-//	}
 }
 
+/**
+ * Session storage that automatically close the session on writing, unless otherwise specified.
+ */
 class Storage extends \Zend\Authentication\Storage\Session {
 
-//	/**
-//	 * Returns true if and only if storage is empty
-//	 *
-//	 * @throws \Zend\Authentication\Exception\ExceptionInterface If it is impossible to determine whether storage is empty
-//	 * @return boolean
-//	 */
-//	public function isEmpty() {
-//		// TODO: Implement isEmpty() method.
-//		return true;
-//	}
-
 	/**
-	 * Returns the contents of storage
-	 *
-	 * Behavior is undefined when storage is empty.
-	 *
-	 * @throws \Zend\Authentication\Exception\ExceptionInterface If reading contents from storage is impossible
-	 * @return mixed
-	 */
-//	public function read() {
-//		// TODO: Implement read() method.
-//		dump_trace(false);
-//		dump(parent::read());
-//		return parent::read();
-//	}
-
-	/**
-	 * Writes $contents to storage
-	 *
-	 * @param  mixed $contents
-	 * @throws \Zend\Authentication\Exception\ExceptionInterface If writing $contents to storage is impossible
-	 * @return void
+	 * @inheritdoc
 	 */
 	public function write($contents, $close = false) {
+		/** @noinspection PhpVoidFunctionResultUsedInspection */
 		$result = parent::write($contents);
 
 		if ($close) {
@@ -275,14 +229,4 @@ class Storage extends \Zend\Authentication\Storage\Session {
 
 		return $result;
 	}
-
-//	/**
-//	 * Clears contents from storage
-//	 *
-//	 * @throws \Zend\Authentication\Exception\ExceptionInterface If clearing contents from storage is impossible
-//	 * @return void
-//	 */
-//	public function clear() {
-//		// TODO: Implement clear() method.
-//	}
 }

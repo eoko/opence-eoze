@@ -22,52 +22,20 @@
  * @author Éric Ortega <eric@eoko.fr>
  */
 
-namespace eoko\Authentification;
+namespace Eoze\Session\SaveHandler;
+
+use Zend\EventManager\EventsCapableInterface;
 
 /**
- * UserSession package exposes authenticated user to application.
  *
  * @category Eoze
- * @package Authentification
- * @subpackage UserSession
- * @since 2013-02-28 13:14
+ * @package Session
+ * @subpackage SaveHandler
+ * @since 2013-03-06 19:28
  */
-interface UserSession {
+interface ObservableInterface extends EventsCapableInterface {
 
-	// public static $SESSION_LENGTH
+	const EVENT_DESTROY = 'destroy';
 
-	public function requireLoggedIn();
-
-	/**
-	 * @return \User|null
-	 */
-	public function getUser();
-
-	/**
-	 * @return int|null
-	 */
-	public function getUserId();
-
-	public function isAuthorized($level);
-
-
-	public function getLoginInfos();
-
-
-	public function setLoginAdapter($adapter);
-
-	/**
-	 * @param string $username
-	 * @param string $password
-	 * @return \Zend\Authentication\Result
-	 */
-	public function login($username, $password);
-	public function logout();
-
-
-	/**
-	 * @param callback $callback
-	 * @return UserSession
-	 */
-	public function onLogin($callback);
+	const IDENTIFIER = __CLASS__;
 }
