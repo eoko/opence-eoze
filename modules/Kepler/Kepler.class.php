@@ -22,22 +22,6 @@ class Kepler extends Module {
 
 	private $workingPath;
 
-	private $sessionManager = null;
-
-	/**
-	 * This method is overridden here to allow the unit tests to replace the session 
-	 * manager. This is bad practice but that seems the least worst when considering
-	 * the context (UserManager used as global everywhere...).
-	 * @return SessionManager
-	 */
-	public function getSessionManager() {
-		if ($this->sessionManager) {
-			return $this->sessionManager;
-		} else {
-			return parent::getSessionManager();
-		}
-	}
-
 	public function getWorkingPath($subDirectory = null) {
 		if ($this->workingPath === null) {
 			if (null !== $path = $this->getConfig()->getValue('workingPath')) {
@@ -54,7 +38,8 @@ class Kepler extends Module {
 	}
 
 	public function getQueueFilePath() {
-		return $this->getWorkingPath($this->getSessionManager()->getId());
+		$sessionId = $this->getApplication()->getSessionManager()->getId();
+		return $this->getWorkingPath($sessionId);
 	}
 
 	private function replacePathVariables($path) {
