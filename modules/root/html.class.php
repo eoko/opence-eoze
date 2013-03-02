@@ -70,7 +70,7 @@ class Html extends BasicHtmlExecutor {
 	private function buildIncludes() {
 
 		$options = $this->getModuleConfig()->get('compilation', false);
-		$app = $this->getModule()->getApplicationConfig();
+		$app = $this->getApplication();
 		$cdnConfig = $this->getModuleConfig()->get('cdn', false);
 
 		$java = isset($options['javaCommand'])
@@ -130,7 +130,7 @@ class Html extends BasicHtmlExecutor {
 		}
 
 		// Jasmine test runner
-		if ($this->getModule()->getApplicationConfig()->isDevMode() && $this->request->get('jasmineIndex', false)) {
+		if ($app->isDevMode() && $this->request->get('jasmineIndex', false)) {
 			$includes['css'][] = EOZE_BASE_URL . 'js/jasmine/jasmine.css';
 			$includes['js'][] = EOZE_BASE_URL . 'js/jasmine/jasmine.js';
 			$includes['js'][] = EOZE_BASE_URL . 'js/jasmine/jasmine-html.js';
@@ -268,7 +268,7 @@ JS;
 	 */
 	public function _buildModulesJavascriptIncludes($path, $url) {
 
-		$devMode = $this->getModule()->getApplicationConfig()->isDevMode();
+		$devMode = $this->getApplication()->isDevMode();
 
 		$contents = array();
 
