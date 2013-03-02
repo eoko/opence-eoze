@@ -1,10 +1,6 @@
 <?php
-/**
- * @package PS-ORM-1
- * @author Éric Ortéga <eric@mail.com>
- * @copyright Copyright (c) 2010, Éric Ortéga
- * @license http://www.planysphere.fr/licenses/psopence.txt
- */
+
+use eoko\config\Application;
 
 /**
  * Base class of Model classes
@@ -123,6 +119,13 @@ abstract class Model {
 
 		$this->initiated = true;
 		$this->events->fire(self::EVT_AFTER_INIT);
+	}
+
+	/**
+	 * @return eoko\config\Application
+	 */
+	public function getApplication() {
+		return Application::getInstance();
 	}
 
 	public function setContextIf($context) {
