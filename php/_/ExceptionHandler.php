@@ -12,8 +12,8 @@ class ExceptionHandler {
 	private static $instance;
 
 	public function __construct() {
-		set_exception_handler(array($this, 'process'));
-		ErrorException::registerErrorHandler();
+//		set_exception_handler(array($this, 'process'));
+//		ErrorException::registerErrorHandler();
 		self::$instance = $this;
 	}
 
