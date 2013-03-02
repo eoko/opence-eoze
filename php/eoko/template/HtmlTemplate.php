@@ -50,6 +50,7 @@ class HtmlTemplate extends Template {
 	}
 
 	/**
+	 * @param \eoko\file\Finder $fileFinder
 	 * @param array $opts
 	 * @return Renderer
 	 */

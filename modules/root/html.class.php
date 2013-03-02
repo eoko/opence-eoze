@@ -17,7 +17,7 @@ class Html extends BasicHtmlExecutor {
 	protected function createLayoutRenderer() {
 		return SimplifiedHtmlRootTemplate::create($this)
 				->setCompileOptions($this->getModuleConfig()->get('compilation', false))
-				->setApplicationConfig($this->getModule()->getApplicationConfig());
+				->setApplicationConfig($this->getApplication());
 	}
 
 	protected function onCreateLayout(SimplifiedHtmlRootTemplate $layout) {
