@@ -39,11 +39,7 @@ Oce.Security = function() {
 	}
 
 	function logout() {
-		setIdentified(false, {
-			// i18n
-			message: "Vous avez été déconnecté suite à une longue période d'inactivité. Veuillez entrer "
-				+ "vos identifiants pour continuer votre travail."
-		});
+		setIdentified(false);
 		eo.Ajax.request({
 			params: {
 				controller: 'AccessControl'
@@ -52,8 +48,12 @@ Oce.Security = function() {
 		});
 	}
 
-	this.notifyDisconnection = function(args) {
-		setIdentified(false, args);
+	this.notifyDisconnection = function() {
+		setIdentified(false, {
+			// i18n
+			message: "Vous avez été déconnecté suite à une longue période d'inactivité. Veuillez entrer "
+				+ "vos identifiants pour continuer votre travail."
+		});
 	};
 
 	this.isIdentified = function() {

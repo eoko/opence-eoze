@@ -23,10 +23,7 @@ Oce.Bootstrap = function() {
 			Oce.deps.reg('Oce.Bootstrap.start');
 
 			Oce.mx.Security.addListener('logout', function(src, info) {
-				var message = info
-					? info.text || info.message
-					: "Message";
-				Oce.mx.Security.requestLogin(true, message);
+				Oce.mx.Security.requestLogin(true, info && (info.text || info.message));
 			});
 
 			Oce.mx.Security.addListener('login', function() {
