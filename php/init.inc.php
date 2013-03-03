@@ -243,11 +243,10 @@ eoko\plugin\PluginManager::init();
 //$sessionManager = new eoko\php\SessionManager();
 
 $config = new \Zend\Session\Config\SessionConfig();
-//$config
-//	->setCookieLifetime(3600*24*7)
-//	->setName('Eoze_Authentication')
-//	->setCookieLifetime(20)
-//	;
+$config
+	->setCookieLifetime(3600*24)
+	->setRememberMeSeconds(3600*24)
+	->setName('Eoze_Authentication');
 $sessionManager = new \Zend\Session\SessionManager($config);
 
 $dbAdapter = new \Zend\Db\Adapter\Adapter(array(
