@@ -201,21 +201,30 @@ var define = function(cls, o, createFn) {
 Ext.define = function(cls, o, createFn) {
 	if (o.singleton) {
 		var previous = resolve(cls, false),
-			constructor = define(cls, o, createFn),
+			instance;
+
+		var postCreate = function() {
+			var constructor = this;
 			instance = new constructor;
-		if (cls) {
-			var matches = /^(?:(.*)\.)?([^.]+)$/.exec(cls),
-				name = matches[2],
-				ns = matches[1],
-				node = window;
-			if (ns) {
-				node = resolve(ns, true);
+			if (cls) {
+				var matches = /^(?:(.*)\.)?([^.]+)$/.exec(cls),
+					name = matches[2],
+					ns = matches[1],
+					node = window;
+				if (ns) {
+					node = resolve(ns, true);
+				}
+				node[name] = instance;
+				if (previous) {
+					Ext.apply(instance, previous);
+				}
 			}
-			node[name] = instance;
-			if (previous) {
-				Ext.apply(instance, previous);
-			}
-		}
+
+			Ext4.callback(createFn, this, arguments);
+		};
+
+		define(cls, o, postCreate);
+
 		return instance;
 	} else {
 		return define(cls, o, createFn);
@@ -308,6 +317,17 @@ Ext.QuickTips = Ext4.tip.QuickTipManager;
 Ext4.require('Eoze.Ext3.CompatibilityFixes');
 
 
+// --- Standard functions ---
+
+Ext.copyTo(Ext4, Ext, [
+	'apply',
+	'applyIf',
+	// Copy
+	'copyTo',
+	// Clone
+	'clone'
+]);
+
 // --- Ext3 & 4 window z-index conflicts ---
 
 // Use Ext4.WindowManager
@@ -342,6 +362,17 @@ Ext.Window.prototype.beforeResize = Ext.Function.createSequence(Ext.Window.proto
 
 // Fix menu z-index
 Ext.menu.Menu.prototype.zIndex = 60000;
+// Fix combo list z-index
+Ext.form.ComboBox.prototype.getZIndex = function(listParent){
+	listParent = listParent || Ext.getDom(this.getListParent() || Ext.getBody());
+	var zindex = parseInt(Ext.fly(listParent).getStyle('z-index'), 10);
+	if(!zindex){
+		zindex = this.getParentZIndex();
+	}
+	// rx: changed 12000 to 62000
+	return (zindex || 62000) + 5;
+};
+
 
 
 // --- Element ---

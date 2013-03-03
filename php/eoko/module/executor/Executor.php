@@ -12,6 +12,7 @@ use eoko\util\Arrays;
 use eoko\config\Config;
 use Request;
 use Logger;
+use Zend\Http\Response;
 
 use Zend\Mvc\Router\RouteStackInterface;
 
@@ -103,15 +104,31 @@ abstract class Executor implements file\Finder {
 		return $this->router;
 	}
 
+	/**
+	 * @var Response
+	 */
+	private $response = null;
+
+	/**
+	 * @return Response
+	 */
+	protected function getResponse() {
+		if (!$this->response) {
+			$this->response = new \Zend\Http\PhpEnvironment\Response();
+		}
+		return $this->response;
+	}
+
 	private function getDefaultAction() {
 		return $this->request->get($this->actionParam, $this->defaultAction);
 	}
 
 	/**
 	 * Execute the action with name $name.
+	 * @param $name
 	 * @param Pointer $returnValue A variable that will be set to the action return
 	 * value, if the action is executed by this executor.
-	 * @returns true if the action was executed, else false.
+	 * @return bool true if the action was executed, else false.
 	 */
 	public function executeAction($name, &$returnValue) {
 		return false;
@@ -149,6 +166,13 @@ abstract class Executor implements file\Finder {
 	}
 
 	/**
+	 * @return \eoko\config\Application
+	 */
+	public function getApplication() {
+		return $this->module->getApplication();
+	}
+
+	/**
 	 * Gets the Logger for this executor's context.
 	 * @return Logger
 	 */
@@ -164,6 +188,12 @@ abstract class Executor implements file\Finder {
 		return $this->name;
 	}
 
+	/**
+	 * @param bool $return
+	 * @return \Zend\Http\Response|null
+	 * @throws \IllegalStateException
+	 * @throws \Exception
+	 */
 	public final function __invoke($return = false) {
 
 		if ($this->executed) {
@@ -246,7 +276,15 @@ abstract class Executor implements file\Finder {
 
 	protected function beforeAction() {}
 
-	abstract protected function processResult($result);
+	/**
+	 * @param mixed $result
+	 * @return Response|null
+	 */
+	protected function processResult($result) {
+		if ($result instanceof Response) {
+			return $result;
+		}
+	}
 
 	/**
 	 * Get the name of the action currently being executed. If this method is

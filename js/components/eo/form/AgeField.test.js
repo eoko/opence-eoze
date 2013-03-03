@@ -18,6 +18,8 @@ eo.Testing.addUnitTest('AgeField', function() {
 		,fieldLabel: 'Le champ'
 		,flex: 1
 	});
+
+	var valueField;
 	
 	var fp = new Ext.FormPanel({
 		defaultType: 'textfield'
@@ -29,6 +31,17 @@ eo.Testing.addUnitTest('AgeField', function() {
 			,{fieldLabel: 'Un autre'}
 			,{fieldLabel: 'Et encore un'}
 		]
+		,tbar: [valueField = Ext.create({
+			xtype: 'textfield'
+			,value: 'P18Y7D'
+		}),{
+			text: 'Charger'
+			,handler: function() {
+				var value = valueField.getValue();
+				console.log('Value: ' + value);
+				field.setValue(value);
+			}
+		}]
 	});
 	
 	var form = fp.form;

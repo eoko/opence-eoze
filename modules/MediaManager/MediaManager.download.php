@@ -3,6 +3,7 @@
 namespace eoko\modules\MediaManager;
 
 use eoko\module\executor\ExecutorBase;
+use Zend\Http\Response;
 
 /**
  *
@@ -12,26 +13,39 @@ use eoko\module\executor\ExecutorBase;
  */
 class download extends ExecutorBase {
 
-	protected function processResult($result) {
-		return true;
-	}
-
+// 2013-03-14 10:49
+//<<<<<<< local
+//	protected function processResult($result) {
+//		return true;
+//	}
+//
+//=======
+//>>>>>>> other
 	public function download() {
 
-		// TODO session
-		if (!\UserSession::isIdentified()) {
-			header('Status: 403 Forbidden');
-			die;
+		$app = $this->getApplication();
+		$response = $this->getResponse();
+
+		// #auth
+		if (!$app->getUserSession()->isAuthorized(100)) {
+			if ($app->getActiveUserId() !== null) {
+				$response->setStatusCode(Response::STATUS_CODE_403);
+			} else {
+				$response->setStatusCode(Response::STATUS_CODE_401);
+			}
+			return $response;
 		}
 
 		$path = $this->getModule()->getDownloadPath($this->request->req('path'));
+
 		if (file_exists($path)) {
-			header('Content-Type: ' . self::getMime($path));
-			echo file_get_contents($path);
+			$response->getHeaders()->addHeaderLine('Content-Type: ' . self::getMime($path));
+			$response->setContent(file_get_contents($path));
 		} else {
-			header('Status: 404 Not Found');
-			require EOZE_PATH . 'php/error404.php';
+			$response->setStatusCode(Response::STATUS_CODE_404);
 		}
+
+		return $response;
 	}
 
 	private static function getMime($filename) {

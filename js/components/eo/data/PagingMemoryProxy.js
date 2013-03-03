@@ -20,7 +20,7 @@ if (!Array.prototype.map) {
 Ext.ns('eo.data');
 
 eo.data.PagingMemoryProxy = Ext.extend(Ext.data.MemoryProxy, {
-    
+
 	constructor : function(data){
         
 		this.requestProcessors = [];
@@ -441,8 +441,32 @@ eo.data.ProxyJsonStore = Ext.extend(Ext.data.JsonStore, {
 		eo.data.ProxyJsonStore.superclass.constructor.call(this, config);
 		
 		this.relayEvents(this.proxy, ['datachanged']);
+
+		// Automatically register request processors
+		if (this.processRequest !== Ext.emptyFn) {
+			this.proxy.addRequestProcessor(this.processRequest, this);
+		}
 	}
-	
+
+	/**
+	 * This method will be added to the {@link eo.data.PagingMemoryProxy#addRequestProcessor
+	 * proxy request processors}.
+	 *
+	 * The method should call its parent if it doesn't want to suppress other possible
+	 * overrides.
+	 *
+	 * @param result
+	 * @param action
+	 * @param rs
+	 * @param params
+	 * @param reader
+	 * @param callback
+	 * @param scope
+	 * @param options
+	 * @template
+	 */
+	,processRequest: Ext.emptyFn
+
 	/**
 	 * Get the Record with the specified id, event if it the record has been filtered
 	 * out of the store by the last requets (see {@link eo.data.ProxyJsonStore the

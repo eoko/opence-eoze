@@ -1,10 +1,6 @@
 <?php
-/**
- * @package PS-ORM-1
- * @author Éric Ortéga <eric@mail.com>
- * @copyright Copyright (c) 2010, Éric Ortéga
- * @license http://www.planysphere.fr/licenses/psopence.txt
- */
+
+use eoko\config\Application;
 
 /**
  * Base class of Model classes
@@ -125,6 +121,15 @@ abstract class Model {
 		$this->events->fire(self::EVT_AFTER_INIT);
 	}
 
+	/**
+	 * @return eoko\config\Application
+	 */
+	protected function getApplication() {
+	// 2013-03-14 11:06 Changed public to protected
+	// public function getApplication() {
+		return Application::getInstance();
+	}
+
 	public function setContextIf($context) {
 		if ($context !== null && count($context) !== 0 
 			&& ($this->context === null || count($this->context) == 0)) {
@@ -160,7 +165,7 @@ abstract class Model {
 	/**
 	 * Get the ModelTable corresponding to this Model.
 	 *
-	 * This function can be statically called from concrete implementations of Model
+	 * This method can be statically called from concrete implementations of Model
 	 * (but not in, or from, the Model class itself, where it is not defined).
 	 *
 	 * @return ModelTable
@@ -187,6 +192,7 @@ abstract class Model {
 	 * @param string $field
 	 * @param Model $model
 	 * @param ModelField $modelField
+	 * @throws IllegalArgumentException
 	 * @return mixed
 	 */
 	private function getFieldValue($field, &$model = null, &$modelField = null) {
@@ -1218,6 +1224,8 @@ abstract class Model {
 	}
 
 	/**
+	 * @param $id
+	 * @param array $context
 	 * @return Model
 	 */
 	abstract static public function load($id, array $context = array());
@@ -1445,6 +1453,8 @@ abstract class Model {
 	 *
 	 * @param String $name
 	 * @param mixed $value
+	 * @param bool $forceAcceptNull
+	 * @throws IllegalStateException
 	 * @return Model $this
 	 */
 	public function setField($name, $value, $forceAcceptNull = false) {
@@ -1568,10 +1578,13 @@ abstract class Model {
 	 * the batch setting functions ({@link setFields()} and {@link setAllFields()}).
 	 * @param String $name
 	 * @param mixed $value
+	 * @param bool $forceAcceptNull
+	 * @param null $testChanged
+	 * @throws DeprecatedException
+	 * @throws IllegalArgumentException
 	 * @return Model
 	 */
-	private function setColumnNoLoadCheck($name, $value, $forceAcceptNull = false,
-			$testChanged = null) {
+	private function setColumnNoLoadCheck($name, $value, $forceAcceptNull = false, $testChanged = null) {
 
 		if ($testChanged !== null) {
 			throw new DeprecatedException('$testChanged parameter has been deprecated');
@@ -1605,6 +1618,8 @@ abstract class Model {
 			} else {
 				return false;
 			}
+		} else {
+			return false;
 		}
 	}
 
@@ -1697,7 +1712,9 @@ abstract class Model {
 				Logger::getLogger($this)->warn('Model "{}" not synchronized: '
 						. 'missing virtual field `{}` in database result', get_class($this), $virtual);
 			} else {
-				$this->internal->dbValues[$field]
+				$this->internal->dbValues[$virtual]
+				// 2013-03-14 11:12 Changed $field to $virtual (seems like a mistype)
+				// $this->internal->dbValues[$field]
 					= $this->internal->fields[$virtual]
 					= $setters[$virtual];
 			}
@@ -1901,6 +1918,10 @@ class ModelUndeterminedFieldException extends SystemException {
 
 }
 
+/**
+ * @deprecated 2013-03-14 11:14
+ * @todo #deprecated
+ */
 class ModelMultipleFieldDeterminationListener {
 
 	public $fields;
@@ -1918,7 +1939,7 @@ class ModelMultipleFieldDeterminationListener {
 
 		// done
 		$values = array();
-		foreach ($this->field as $field) {
+		foreach ($this->fields as $field) {
 			$values[$field] = $m->__get($field);
 		}
 		$fn = $this->callback;

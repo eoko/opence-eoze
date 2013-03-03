@@ -7,8 +7,6 @@ use eoko\template\HtmlRootTemplate;
 use eoko\template\HtmlTemplate;
 use eoko\module\ModuleManager;
 
-use \UserSession;
-
 use eoko\template\HtmlRootTemplate\PassThroughCompiler;
 use eoko\template\HtmlRootTemplate\JavascriptCompiler;
 use eoko\template\HtmlRootTemplate\CssCompiler;
@@ -20,7 +18,7 @@ class Html extends BasicHtmlExecutor {
 	protected function createLayoutRenderer() {
 		return SimplifiedHtmlRootTemplate::create($this)
 				->setCompileOptions($this->getModuleConfig()->get('compilation', false))
-				->setApplicationConfig($this->getModule()->getApplicationConfig());
+				->setApplicationConfig($this->getApplication());
 	}
 
 	protected function onCreateLayout(SimplifiedHtmlRootTemplate $layout) {
@@ -42,6 +40,12 @@ class Html extends BasicHtmlExecutor {
 		$layout->head->set('beforeJs', $js, false);
 		/** @noinspection PhpUndefinedFieldInspection */
 		$extra = $layout->head->extra = $this->createTemplate('head_extra_script');
+
+		$userSession = $this->getApplication()->getUserSession();
+		if ($userSession->getUserId() !== null) {
+			$loginInfos = $userSession->getLoginInfos();
+			$extra->loginInfos = $loginInfos === null ? null : json_encode($loginInfos);
+		}
 
 		if (null !== $env = $this->request->get('env')) {
 			/** @noinspection PhpUndefinedFieldInspection */
@@ -67,7 +71,7 @@ class Html extends BasicHtmlExecutor {
 	private function buildIncludes() {
 
 		$options = $this->getModuleConfig()->get('compilation', false);
-		$app = $this->getModule()->getApplicationConfig();
+		$app = $this->getApplication();
 		$cdnConfig = $this->getModuleConfig()->get('cdn', false);
 
 		$java = isset($options['javaCommand'])
@@ -127,7 +131,7 @@ class Html extends BasicHtmlExecutor {
 		}
 
 		// Jasmine test runner
-		if ($this->getModule()->getApplicationConfig()->isDevMode() && $this->request->get('jasmineIndex', false)) {
+		if ($app->isDevMode() && $this->request->get('jasmineIndex', false)) {
 			$includes['css'][] = EOZE_BASE_URL . 'js/jasmine/jasmine.css';
 			$includes['js'][] = EOZE_BASE_URL . 'js/jasmine/jasmine.js';
 			$includes['js'][] = EOZE_BASE_URL . 'js/jasmine/jasmine-html.js';
@@ -265,7 +269,7 @@ JS;
 	 */
 	public function _buildModulesJavascriptIncludes($path, $url) {
 
-		$devMode = $this->getModule()->getApplicationConfig()->isDevMode();
+		$devMode = $this->getApplication()->isDevMode();
 
 		$contents = array();
 
@@ -390,7 +394,7 @@ JS;
 	}
 
 	protected function beforeRender(HtmlTemplate &$tpl) {
-		$tpl->user = UserSession::getUser();
+		$tpl->user = $this->getApplication()->getActiveUser();
 	}
 
 	public function index() {

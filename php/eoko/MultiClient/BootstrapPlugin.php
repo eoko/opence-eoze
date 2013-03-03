@@ -28,6 +28,8 @@ use eoko\php\SessionManager;
 use eoko\config\ConfigManager;
 use UserSession;
 use eoko\config\Application;
+use Zend\Session\Container as SessionContainer;
+use Zend\Session\ManagerInterface as SessionManagerInterface;
 
 /**
  * Config bootstrap listener.
@@ -64,21 +66,37 @@ class BootstrapPlugin {
 	 * Inspects session data for clients data, and override in-memory config accordingly. The method
 	 * crashes if no client data can be found (multi client requires a known client to run).
 	 *
-	 * @param \eoko\php\SessionManager $sessionManager
 	 * @throws Exception\RuntimeException
 	 */
-	public function initConfigManager(SessionManager $sessionManager) {
-		$sessionData = $sessionManager->getData(false);
+	public function initConfigManager(SessionManagerInterface $sessionManager) {
+		// TODO #multiClient (check working)
+
+		if (!$this->multiClient->isEnabled()) {
+			return;
+		}
+
+		$sessionData = new SessionContainer('eoko\MultiClient', $sessionManager);
 
 		// We want to search for a user's client only if someone is identified!
-		if (isset($sessionData['UserSession'])) {
-			if (isset($sessionData['eoko\MultiClient\clientConfig'])) {
+		if (Application::getInstance()->getActiveUserId() !== null) {
+			if (isset($sessionData['clientConfig'])) {
 				/** @var Client $client */
-				$this->setClient($sessionData['eoko\MultiClient\clientConfig']);
+				$this->setClient($sessionData['clientConfig']);
 			} else {
 				throw new Exception\RuntimeException('Client installation information missing.');
 			}
 		}
+//		$sessionData = $sessionManager->getData(false);
+//
+//		// We want to search for a user's client only if someone is identified!
+//		if (isset($sessionData['UserSession'])) {
+//			if (isset($sessionData['eoko\MultiClient\clientConfig'])) {
+//				/** @var Client $client */
+//				$this->setClient($sessionData['eoko\MultiClient\clientConfig']);
+//			} else {
+//				throw new Exception\RuntimeException('Client installation information missing.');
+//			}
+//		}
 	}
 
 	/**
@@ -130,16 +148,17 @@ class BootstrapPlugin {
 	}
 
 	/**
-	 * Replaces the login adapter with a custom adapter supporting multi clients authentification,
+	 * Replaces the login adapter with a custom adapter supporting multi client authentification,
 	 * and storing client data in session on successful log in.
 	 *
-	 * @param \eoko\php\SessionManager $sessionManager
+	 * @param \Zend\Session\ManagerInterface $sessionManager
 	 * @throws \RuntimeException
 	 */
-	public function initUserSession(SessionManager $sessionManager) {
+	public function initUserSession(SessionManagerInterface $sessionManager) {
 		$config = $this->getConfig();
 		if ($config !== false) {
 			if (isset($config['database'])) {
+				// TODO #multiClient
 				UserSession::setLoginAdapter(new LoginAdapter($this->multiClient, $sessionManager));
 			} else {
 				throw new \RuntimeException('Missing configuration: database');

@@ -23,14 +23,8 @@ Oce.Bootstrap = function() {
 			Oce.deps.reg('Oce.Bootstrap.start');
 
 			Oce.mx.Security.addListener('logout', function(src, info) {
-				Oce.mx.Security.requestLogin(true, info.text || info.message);
+				Oce.mx.Security.requestLogin(true, info && (info.text || info.message));
 			});
-//			Oce.mx.Security.addListener('logout', function(){
-//				Oce.mx.application.close(true, function(accepted){
-//					if (!accepted) throw new 'IllegalState';
-//					Oce.mx.Security.requestLogin();
-//				});
-//			})
 
 			Oce.mx.Security.addListener('login', function() {
 				if (firstLogin) {

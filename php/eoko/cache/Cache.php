@@ -2,7 +2,9 @@
 
 namespace eoko\cache;
 
+use eoko\config\Application;
 use eoko\log\Logger;
+use eoko\php\ClassLoader;
 
 /**
  * @todo real implementation
@@ -32,10 +34,10 @@ class Cache {
 
 	private static function getNamespacePath($ns) {
 		if (!self::$path) {
-			self::$path = \eoko\config\Application::getInstance()->resolvePath('cache/php/');
+			self::$path = Application::getInstance()->resolvePath('cache/php/');
 
 			if (USE_CONTROLLER_CACHE) {
-				\eoko\php\ClassLoader::getInstance()->addIncludePath(self::$path);
+				ClassLoader::getInstance()->addIncludePath(self::$path);
 			}
 		}
 		return self::$path . str_replace('\\', DS, trim($ns, '\\'));

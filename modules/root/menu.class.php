@@ -8,7 +8,6 @@ use eoko\util\YmlReader as YAML;
 use eoko\util\Arrays;
 
 use \ExtJSResponse;
-use \UserSession;
 use \Inflector;
 
 use \IllegalArgumentException;
@@ -55,7 +54,8 @@ class menu extends BasicHtmlExecutor {
 	}
 
 	/**
-	 * @param string $name
+	 * @param $menu
+	 * @internal param string $name
 	 * @return HtmlTemplate
 	 */
 	private function createMenu($menu) {
@@ -65,8 +65,11 @@ class menu extends BasicHtmlExecutor {
 		$avMenuItems = $menuData['menu-items'];
 		$menuItems = array();
 
+		$userSession = $this->getApplication()->getUserSession();
+
 		foreach ($this->getMenuGroup($menu) as $level => $items) {
-			if (UserSession::isAuthorized((int) $level)) {
+			// #auth
+			if ($userSession->isAuthorized((int) $level)) {
 				foreach ($items as $item) {
 					if (is_array($item)) {
 						$array = $item;
@@ -94,6 +97,7 @@ class menu extends BasicHtmlExecutor {
 		return $tpl;
 	}
 
+	// TODO #ExtJSResponse
 	public function bunchGet() {
 		$content = array();
 		foreach ($this->request->req('names') as $name) {

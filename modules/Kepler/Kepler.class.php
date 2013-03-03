@@ -5,6 +5,7 @@ namespace eoko\modules\Kepler;
 use eoko\module\Module;
 use eoko\module\ModuleLocation;
 use eoko\util\GlobalEvents;
+use Zend\Session\SessionManager;
 
 /**
  *
@@ -20,22 +21,6 @@ class Kepler extends Module {
 	protected $defaultExecutor = 'json';
 
 	private $workingPath;
-
-	private $sessionManager = null;
-
-	/**
-	 * This method is overridden here to allow the unit tests to replace the session 
-	 * manager. This is bad practice but that seems the least worst when considering
-	 * the context (UserManager used as global everywhere...).
-	 * @return \eoko\php\SessionManager
-	 */
-	public function getSessionManager() {
-		if ($this->sessionManager) {
-			return $this->sessionManager;
-		} else {
-			return parent::getSessionManager();
-		}
-	}
 
 	public function getWorkingPath($subDirectory = null) {
 		if ($this->workingPath === null) {
@@ -53,14 +38,15 @@ class Kepler extends Module {
 	}
 
 	public function getQueueFilePath() {
-		return $this->getWorkingPath($this->getSessionManager()->getId());
+		$sessionId = $this->getApplication()->getSessionManager()->getId();
+		return $this->getWorkingPath($sessionId);
 	}
 
 	private function replacePathVariables($path) {
 		$search  = array();
 		$replace = array();
 		foreach (array(
-			'%var%' => $this->getApplicationConfig()->resolvePath('tmp'),
+			'%var%' => $this->getApplication()->resolvePath('tmp'),
 		) as $var => $rep) {
 			$search[]  = $var;
 			$replace[] = rtrim($rep, '\/');

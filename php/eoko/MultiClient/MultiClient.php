@@ -87,6 +87,10 @@ class MultiClient {
 		return $this->config;
 	}
 
+	public function isEnabled() {
+		return $this->getConfig() !== false;
+	}
+
 	/**
 	 * Registers the database proxy according to the multi client configuration.
 	 *

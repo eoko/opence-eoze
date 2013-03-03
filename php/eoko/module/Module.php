@@ -16,7 +16,6 @@ use eoko\cache\Cache;
 
 use eoko\config\ConfigManager;
 use eoko\config\Application;
-use eoko\php\SessionManager;
 use eoko\php\ClassLoader;
 
 /**
@@ -113,7 +112,7 @@ class Module implements file\Finder {
      * Gets the application config used by this Module.
      * @return Application
      */
-    public function getApplicationConfig() {
+    public function getApplication() {
         return Application::getInstance();
     }
 
@@ -123,16 +122,6 @@ class Module implements file\Finder {
 	 */
 	protected function getConfigManager() {
 		return ConfigManager::getInstance();
-	}
-
-	/**
-	 * @return SessionManager
-	 */
-	public function getSessionManager() {
-		// We don't keep a reference of the SessionManager because we don't
-		// want it to be serialized in the cache (because of the closures
-		// it contains)
-		return $this->getApplicationConfig()->getSessionManager();
 	}
 
 	/**
@@ -401,7 +390,7 @@ MSG
 	private function processConditionalConfig() {
 		// Conditional configuration
 		if (isset($this->config[''])) {
-			$app = $this->getApplicationConfig();
+			$app = $this->getApplication();
 			foreach ($this->config[''] as $tag => $envConfig) {
 				if ($app->isMode($tag)) {
 					$this->config->apply($envConfig);
@@ -991,7 +980,7 @@ MSG
 
 	protected function createFileFinder() {
 
-		$fallbackFinder = $this->getApplicationConfig();
+		$fallbackFinder = $this->getApplication();
 
 		$upperPathsUrl = array_reverse($this->pathsUrl, true);
 		if ($this->basePath) array_pop($upperPathsUrl);
