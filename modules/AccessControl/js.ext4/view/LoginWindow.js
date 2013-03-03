@@ -65,15 +65,10 @@ Ext4.define('Eoze.modules.AccessControl.view.LoginWindow', {
 			validateOnChange: false
 		}
 		,items: [{
-//			xtype: 'box',
-//			autoEl: {
-//				tag: 'div',
-//				html: '<div class="app-msg">'
-//					+ (text ? text : "<?php _jsString($text) ?>")
-//					+ '<br /><br />'
-//					+ '</div>'
-//			}
-//		},{
+			xtype: 'component'
+			,itemId: 'messageBox'
+			,tpl: '<div class="app-msg">{message}<br/><br/></div>'
+		},{
 			xtype: 'textfield'
 			,itemId: 'loginField'
 			,name: 'username'
@@ -114,6 +109,12 @@ Ext4.define('Eoze.modules.AccessControl.view.LoginWindow', {
 		}
 
 		this.callParent(arguments);
+
+		if (this.message) {
+			var messageBox = this.down('#messageBox');
+			messageBox.update(this);
+			messageBox.show();
+		}
 	}
 
 });
