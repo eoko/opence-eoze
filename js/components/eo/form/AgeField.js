@@ -174,24 +174,69 @@ Ext.define('eo.form.AgeField', {
 	
 	// private
 	,formatAge: function(age) {
-		var y = age.years,
-			m = age.months,
-			d = age.days,
-			lt = this.texts,
-			r = '';
-		function text(n, w) {
-			return n + ' ' + (Ext.isString(w) ? w : (w[0+(n>1)]));
+		if (Ext.isString(age)) {
+			return this.formatAge(this.intervalStringToAge(age));
+		} else if (Ext.isObject(age)) {
+			var y = age.years,
+				m = age.months,
+				d = age.days,
+				lt = this.texts,
+				r = '';
+			function text(n, w) {
+				return n + ' ' + (Ext.isString(w) ? w : (w[0+(n>1)]));
+			}
+			if (!Ext.isEmpty(y)) {
+				r += text(y, lt.year);
+			}
+			if (!Ext.isEmpty(m)) {
+				r += (r !== '' ? ' ' : '') + text(m, lt.month);
+			}
+			if (!Ext.isEmpty(d)) {
+				r += (r !== '' ? ' ' : '') + text(d, lt.day);
+			}
+			return r;
+		} else {
+			throw new Error('Illegal argument (must be string or object): ' + age);
 		}
-		if (!Ext.isEmpty(y)) {
-			r += text(y, lt.year);
+	}
+
+	/**
+	 * Converts an age string in the form 'PxYxMxD' to an age object.
+	 *
+	 * @param {String} interval
+	 * @return {Object/null}
+	 * @private
+	 */
+	,intervalStringToAge: function(interval) {
+
+		if (Ext.isEmpty(interval)) {
+			return null;
 		}
-		if (!Ext.isEmpty(m)) {
-			r += (r !== '' ? ' ' : '') + text(m, lt.month);
+
+		var specs = [
+			{re: /[^\d](\d+)Y/, prop: 'years'}
+			,{re: /[^\d](\d+)M/, prop: 'months'}
+			,{re: /[^\d](\d+)D/, prop: 'days'}
+		];
+
+		var age = {years: null, months: null, days: null};
+
+		interval = interval.toUpperCase();
+
+		if (interval.substr(0,1) === 'P') {
+			specs.forEach(function(o) {
+				var match = o.re.exec(interval);
+				if (match) {
+					age[o.prop] = match[1];
+				}
+			});
 		}
-		if (!Ext.isEmpty(d)) {
-			r += (r !== '' ? ' ' : '') + text(d, lt.day);
+		// Invalid format
+		else {
+			throw new Error('Invalid interval string: ' + interval);
 		}
-		return r;
+
+		return age;
 	}
 	
 	,setValue: function(v) {

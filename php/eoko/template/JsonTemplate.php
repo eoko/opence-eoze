@@ -2,7 +2,6 @@
 
 namespace eoko\template;
 
-use \ExtJSResponse;
 use eoko\util\Json;
 
 use eoko\output\Output;

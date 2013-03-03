@@ -2,10 +2,10 @@
 
 namespace eoko\cqlix\generator;
 
+use ModelRelationReferencesOne;
 use eoko\script\Script;
 use eoko\database\Database;
 use eoko\template\Template;
-use eoko\plugin\PluginManager;
 use eoko\config\ConfigManager;
 use eoko\config\Paths;
 
@@ -227,9 +227,10 @@ class Generator extends Script {
 		if (count($this->referencesOneRelations) > 0) {
 			foreach ($this->referencesOneRelations as $table => $rels) {
 				foreach ($rels as $r) {
-					$r instanceof ModelRelationReferencesOne;
-					$this->tableFields[$r->localDBTableName][$r->referenceField]
-							->setForeignKeyToTable($r->targetDBTableName);
+					/** @var TplRelationReferencesOne $r */
+					/** @var TplField $referenceField */
+					$referenceField = $this->tableFields[$r->localDBTableName][$r->referenceField];
+					$referenceField->setForeignKeyToTable($r->targetDBTableName);
 				}
 			}
 		}
@@ -369,12 +370,16 @@ class Generator extends Script {
 
 	private function discoverTables() {
 
+		$config = $this->modelsConfig;
+
 		$tables = $this->database->query("SHOW TABLES FROM `$this->databaseName`;")
 				->fetchAll(PDO::FETCH_COLUMN);
 
 		$this->tables = array();
 		foreach ($tables as $table) {
-			$this->tables[$table] = new TplTable($this->classLookup, $table);
+			if (!isset($config[$table]) || $config[$table] !== false) {
+				$this->tables[$table] = new TplTable($this->classLookup, $table);
+			}
 		}
 	}
 
@@ -827,9 +832,12 @@ class Generator extends Script {
 //		'deleted'
 	);
 
-	function tplModelBase($table, $fields) {
+	function tplModelBase($dbTable, $fields) {
 
 		// -- Proxy methods
+
+		$tableName = $this->classLookup->tableFromDb($dbTable);
+		$modelName = $this->classLookup->modelFromDb($dbTable);
 
 		$proxyMethods = $this->proxyModelMethods;
 		foreach ($proxyMethods as &$method) {
@@ -861,7 +869,7 @@ class Generator extends Script {
 
 		// -- Relations
 
-		$relations = $this->allRelations[$table];
+		$relations = $this->allRelations[$dbTable];
 
 		// TODO
 		// removing duplicates caused by mirror relations
@@ -883,7 +891,7 @@ class Generator extends Script {
 
 		$variables = array_merge(
 			// modelName & tableName
-			$this->baseConfig->buildModelInfo($table),
+			$this->baseConfig->buildModelInfo($dbTable),
 			array(
 				'fields' => $fields,
 				'primaryField' => self::getPrimaryField($fields),
@@ -894,7 +902,7 @@ class Generator extends Script {
 			)
 		);
 
-		return $this->createTemplate($table, 'ModelBase', $variables)->render(true);
+		return $this->createTemplate($dbTable, 'ModelBase', $variables)->render(true);
 	}
 
 	public static function makeEnumConstName($field, $code) {

@@ -64,7 +64,9 @@ class Router {
 	 * @return Router
 	 */
 	public static function getInstance() {
-		if (self::$instance === null) self::$instance = new Router();
+		if (self::$instance === null) {
+			self::$instance = new Router();
+		}
 		return self::$instance;
 	}
 
@@ -200,15 +202,20 @@ class Router {
 	}
 
 	public static function getActionTimestamp() {
-		return self::getInstance()->actionTimestamp;
+		// We don't use getInstance() to avoid initialization only for the timestamp (which will fail
+		// in most early crashes)
+		return self::$instance
+			? self::$instance->actionTimestamp
+			: null;
 	}
 
 	public static function getRequestId() {
-		if (null !== $record = self::getInstance()->requestMonitorRecord) {
-			return $record->getId();
-		} else {
-			return null;
+		if (self::$instance) {
+			if (null !== $record = self::getInstance()->requestMonitorRecord) {
+				return $record->getId();
+			}
 		}
+		return null;
 	}
 
 	private function isAllowMultipleRouteCalls() {

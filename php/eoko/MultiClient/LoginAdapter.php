@@ -40,6 +40,8 @@ use User as LegacyUser;
  * The client information are stored in the session, to be inspected later by
  * {@link BootstrapPlugin::initinitConfigManager()}.
  *
+ * @todo #multiClient
+ *
  * @category Eoze
  * @package Security
  * @since 2013-02-15 18:22

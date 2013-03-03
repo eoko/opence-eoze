@@ -18,7 +18,10 @@
 		Ext.get("l_disco").addListener("click", function() {
 			Oce.Ajax.request({
 				waitMsg: true,
-				params: {action: 'logout'},
+                params: {
+                    controller: 'AccessControl'
+                    ,action: 'logout'
+                },
 				onSuccess: function() {
 					window.location = 'index.php'
 				}

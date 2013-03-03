@@ -225,9 +225,9 @@ class Request implements Message {
 	 * @param String $key
 	 * @param Boolean $excludeEmptyString if set to true, the param will not be
 	 * considered set if it contains an empty string
-	 * @param String $exceptionMessage	a custom message for the exception
-	 * @return Boolean
+	 * @param bool|String $exceptionMessage a custom message for the exception
 	 * @throws MissingRequiredRequestParamException
+	 * @return mixed
 	 * @see hasKey()
 	 */
 	public function req($key, $excludeEmptyString = false, $exceptionMessage = false) {

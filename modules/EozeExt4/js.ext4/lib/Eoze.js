@@ -31,5 +31,8 @@ Ext4.define('Eoze.lib.Eoze', {
 		'Eoze.Cursor',
 		// Plugins
 		'Eoze.form.field.mixin.DependsOnCheckbox',
+
+		// -- UX --
+		'Ext.ux.ActivityMonitor'
 	]
 });

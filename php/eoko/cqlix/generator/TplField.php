@@ -77,7 +77,7 @@ class TplField extends ModelColumn implements ConfigConstants {
 				$type = self::T_INT;
 				break;
 			case 'tinyint':
-				$type = $length != null && $length != 1
+				$type = $length !== null && $length != 1
 					? self::T_INT
 					: self::T_BOOL;
 				break;

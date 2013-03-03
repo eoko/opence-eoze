@@ -7,6 +7,7 @@
  */
 
 use eoko\cqlix\FieldMetadata;
+use eoko\config\Application;
 
 class ModelColumn extends ModelFieldBase {
 
@@ -15,7 +16,7 @@ class ModelColumn extends ModelFieldBase {
 	/** @var string an alias that can be used to reference the field */
 	private $alias;
 
-	/** @var const */
+	/** @var string */
 	public $type;
 	protected $sqlType;
 	/** @var int */
@@ -151,7 +152,7 @@ class ModelColumn extends ModelFieldBase {
 
 	/**
 	 * Get the default field's value, as stored in the database.
-	 * @return <mixed>
+	 * @return mixed|null|void <mixed>
 	 */
 	public function getDefault() {
 		return $this->default;
@@ -167,21 +168,17 @@ class ModelColumn extends ModelFieldBase {
 
 	public function getAutoValue($operation) {
 		switch ($this->getAutoValueId($operation)) {
-			case self::AUTO_CURRENT_USER: 
-				if (!UserSession::isIdentified()) {
+			case self::AUTO_CURRENT_USER:
+				$activeUser = Application::getInstance()->getActiveUser();
+				if ($activeUser === null) {
 					throw new UserSessionTimeout();
-//					throw new UserException(
-//						lang('Vous avez été déconnecté suite à une période '
-//								. 'd\'inactivité ; veuillez vous identifier à nouveau '
-//								. 'pour continuer votre travail (cliquez sur "Déconnexion" '
-//								. 'ou rafraichissez la page).')
-//						,lang('Session expirée')
-//						,'Cannot set AUTO_CURRENT_USER if no one is connected!'
-//					);
+				} else {
+					return $activeUser->getDisplayName(User::DNF_FORMAL);
 				}
-				return UserSession::getUser()->getDisplayName(User::DNF_FORMAL);
-			case self::AUTO_NOW: return Query::SqlFunction('NOW()');
-			case self::AUTO_DELETED: return 0;
+			case self::AUTO_NOW:
+				return Query::SqlFunction('NOW()');
+			case self::AUTO_DELETED:
+				return 0;
 		}
 		return null;
 	}
@@ -199,7 +196,7 @@ class ModelColumn extends ModelFieldBase {
 
 		switch ($this->type) {
 			case self::T_BOOL: return rand(0, 1);
-			case self:T_TEXT:
+			case self::T_TEXT:
 			case self::T_STRING: return Debug::randomString(rand(
 					max(1, $this->getLength()-5), min($this->getLength(), 20)));
 			case self::T_DATE: return DateHelper::getTimeAs(time() + rand(0,50000), DateHelper::SQL_DATE);
@@ -211,7 +208,8 @@ class ModelColumn extends ModelFieldBase {
 	}
 
 	/**
-	 * @param Const $operation {ModelColumn::CREATE | ModelColumn::UPDATE }
+	 * @param string $operation {ModelColumn::CREATE | ModelColumn::UPDATE }
+	 * @return array|mixed|null
 	 */
 	public function getAutoValueId($operation) {
 		if ($this->autoValue === null) {
@@ -240,6 +238,7 @@ class ModelColumn extends ModelFieldBase {
 
 	/**
 	 * Whether the field is automatically set <b>by the model</b>.
+	 * @param $operation
 	 * @return Bool
 	 */
 	public function isAuto($operation) {
@@ -299,6 +298,7 @@ class ModelColumn extends ModelFieldBase {
 		return $this->name;
 	}
 
+	// TODO #deprecate
 	public function setConverter($converter) {
 		$this->converter = $converter;
 	}
@@ -357,7 +357,7 @@ class ModelColumn extends ModelFieldBase {
 
 	/**
 	 *
-	 * @param Query $query
+	 * @param \ModelTableQuery $query
 	 */
 	public function select(ModelTableQuery $query) {
 		if ($this->type === self::T_DATETIME) {

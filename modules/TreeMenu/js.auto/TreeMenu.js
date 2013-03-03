@@ -237,7 +237,7 @@ Ext.define('eo.ui.menu.tree.Menu', {
 			});
 		}
 		
-		if (Ext.isNumber(this.userId)) {
+		if (!Ext.isEmpty(this.userId)) {
 			this.load(this.executeDefaultCommands, this);
 		}
 	} // initComponent

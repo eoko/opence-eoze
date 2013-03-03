@@ -5,7 +5,13 @@ require_once 'init.inc.php';
 
 Logger::getLogger()->setLevel(Logger::ERROR);
 Logger::getLogger('eoko\cache\Cache')->setLevel(Logger::DEBUG);
-\eoko\modules\Kepler\CometEvents::disable();
+//\eoko\modules\Kepler\CometEvents::disable();
+
+// TODO remove global
+/** @var \eoko\modules\Kepler\CometEvents $comet */
+if (isset($comet)) {
+	$comet->disable();
+}
 
 function setPrimaryPhoneNumbers() {
 

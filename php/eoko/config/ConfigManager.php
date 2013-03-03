@@ -159,7 +159,7 @@ class ConfigManager {
 	 */
 	public static function init() {
 		if (self::$instance) {
-			throw new \RuntimeException('Already started');
+//			throw new \RuntimeException('Already started');
 		}
 	}
 

@@ -2,10 +2,14 @@
 
 namespace eoko\config;
 
+use eoko\database\Database;
 use eoko\file, eoko\file\Finder as FileFinder, eoko\file\FileType;
+use eoko\hg\Mercurial;
 use eoko\util\Files;
 use eoko\config\ConfigManager;
-use eoko\php\SessionManager;
+use Zend\Session\SessionManager;
+use eoko\Authentification\UserSession;
+use eoko\log\Logger;
 
 class Application implements FileFinder {
 
@@ -23,24 +27,34 @@ class Application implements FileFinder {
 	 */
 	private $modes = false; // let null available for caching
 
+	private static $defaultSessionManager;
+
 	/**
 	 * @var SessionManager
 	 */
-	private $sessionManager;
+	private $sessionManager = null;
 
-	private static $defaultSessionManager;
+	/**
+	 * @var UserSession
+	 */
+	private $userSession = null;
 
 	/**
 	 * @var Paths
 	 */
 	private $paths;
 
-	private function __construct(SessionManager $sessionManager) {
-		$this->sessionManager = $sessionManager;
-
+	private function __construct() {
 		// Paths
 		$this->paths = new Paths\Defaults();
 		$this->paths->setPath('opence', MY_EOZE_PATH);
+
+// 2013-03-14 13:14
+//		// Configure modes
+//		$this->modes = $this->getConfig()->get('modes');
+//		if (!isset($this->modes['dev'])) {
+//			$this->modes['dev'] = $this->findDevMode();
+//		}
 	}
 
 	private function getConfig() {
@@ -87,7 +101,9 @@ class Application implements FileFinder {
 	 * @return SessionManager
 	 */
 	public function getSessionManager() {
-		return $this->sessionManager;
+		return $this->sessionManager !== null
+			? $this->sessionManager
+			: self::$defaultSessionManager;
 	}
 
 	private function findDevMode() {
@@ -147,7 +163,7 @@ class Application implements FileFinder {
 		if (self::$instance) {
 			return self::$instance;
 		} else {
-			return self::$instance = new Application(self::$defaultSessionManager);
+			return self::$instance = new Application();
 		}
 	}
 
@@ -163,6 +179,10 @@ class Application implements FileFinder {
 		return $this->getFileFinder()->findPath($name, $type, $getUrl, $forbidUpward);
 	}
 
+	/**
+	 * @deprecated
+	 * @todo #broken
+	 */
 	private function getCssPathsUrl($urlPrefix = null) {
 		$r = array();
 		if (defined('APP_CSS_PATH')) $r[APP_CSS_PATH] = $urlPrefix . APP_CSS_URL;
@@ -170,6 +190,10 @@ class Application implements FileFinder {
 		return $r;
 	}
 
+	/**
+	 * @deprecated
+	 * @todo #broken
+	 */
 	private function getJSPathsUrl($urlPrefix = null) {
 		$r = array();
 		if (defined('APP_JS_PATH')) $r[APP_JS_PATH] = $urlPrefix . APP_JS_URL;
@@ -251,17 +275,68 @@ class Application implements FileFinder {
 
 	/**
 	 * Gets the code base version unique identifier.
+	 * @throws \Exception
 	 * @return string
 	 */
 	public function getVersionId() {
 		try {
-			$hg = new \eoko\hg\Mercurial(ROOT);
+			$hg = new Mercurial(ROOT);
 			return $hg->getId();
 		} catch (\Exception $ex) {
 			Logger::get($this)->error($ex);
 			// TODO implement a fallback if no repo is available
 			throw $ex;
 		}
+	}
+
+	/**
+	 *
+	 * #UserSession
+	 *
+	 * @return UserSession
+	 */
+	public function getUserSession() {
+		if ($this->userSession === null) {
+			$this->userSession = $this->createUserSession();
+		}
+		return $this->userSession;
+	}
+
+	/**
+	 *
+	 * #UserSession
+	 *
+	 * @param bool $requireAuthenticatedUser
+	 * @return \User|null
+	 */
+	public function getActiveUser($requireAuthenticatedUser = false) {
+		$userSession = $this->getUserSession();
+		if ($requireAuthenticatedUser) {
+			// TODO #auth
+			$userSession->requireLoggedIn();
+		}
+		return $userSession->getUser();
+	}
+
+	/**
+	 *
+	 * #UserSession
+	 *
+	 * @param bool $requireAuthenticatedUser
+	 * @return int|null
+	 */
+	public function getActiveUserId($requireAuthenticatedUser = false) {
+		$userSession = $this->getUserSession();
+		if ($requireAuthenticatedUser) {
+			// TODO #auth
+			$userSession->requireLoggedIn();
+		}
+		return $userSession->getUserId();
+	}
+
+	private function createUserSession() {
+		$dbAdapter = Database::getDefaultDbAdapter();
+		return new UserSession\Zend($dbAdapter);
 	}
 
 }

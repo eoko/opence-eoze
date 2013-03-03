@@ -9,273 +9,32 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 		Oce.Modules.AccessControl.login.superclass.constructor.call(this, config);
 
 		this.addEvents(
+			/**
+			 * @event login
+			 * @param {Object} loginInfos
+			 */
 			'login'
 		);
 	}
 
-	,x4_createLoginWindow: function(modal, text) {
-		var formPanel = new Ext4.form.Panel({
-			border: false
-			,padding: 20
-			,bodyStyle: {
-				backgroundColor: 'transparent'
-			}
-			,defaults: {
-				validateOnChange: false
-			}
-			,items: [{
-				xtype: 'box',
-				autoEl: {
-					tag: 'div',
-					html: '<div class="app-msg">'
-					+ (text ? text : "<?php _jsString($text) ?>")
-					+ '<br /><br />'
-					+ '</div>'
-				}
-			},{
-				xtype: 'textfield'
-				,itemId: 'loginField'
-				,name: 'username'
-				,fieldLabel: 'Identifiant'
-				,allowBlank: false
-				,minLength: 3
-				,maxLength: 45
-				,listeners: {
-					specialkey: {
-						scope: this
-						,fn: function(field, el) {
-							if (el.getKey() == Ext.EventObject.ENTER) {
-								this.onSubmitForm(loginWindow, formPanel);
-							}
-						}
-					}
-				}
-//			}),{
-			},{
-				xtype: 'textfield',
-				name: 'password',
-				fieldLabel: 'Mot de passe',
-				inputType: 'password',
-				allowBlank: false,
-				minLength: 4,
-				maxLength: 255,
-				listeners: {
-					specialkey: {
-						scope: this
-						,fn: function(field, el) {
-							if (el.getKey() == Ext.EventObject.ENTER) {
-								this.onSubmitForm(loginWindow, formPanel);
-							}
-						}
-					}
-				}
-//			},{
-//				xtype: 'component'
-//				,html: '<a href="">Un oubli&nbsp;?</a>'
-			}]
-		});
-		
-		var loginWindow = new Ext4.Window({
-			
-			title: "Connexion"
-			
-			,defaultFocus: 'loginField'
-			,width: 380
-			
-			,modal: modal
-			
-			,closable: false
-			,maximizable: false
-			,minimizable: false
-			,collapsible: false
-			,draggable: false
-			,resizable: false
-			
-			,items: formPanel
-			
-			,buttons: [
-				{ // Ok
-					text: 'Ok'
-					,scope: this
-					,handler: function() {
-						this.onSubmitForm(loginWindow, formPanel);
-					}
-				},{ // Reset
-						text: 'Réinitialiser',
-						handler: function() {
-							formPanel.getForm().reset();
-							formPanel.getComponent('loginField').focus();
-						}
-				}
-/*<?php if ($help): ?>*/
-				,{ // Help
-					iconCls: 'ico_help',
-					handler: this.showHelp
-				}
-/*<?php endif ?>*/
-			]
-		});
+	,createLoginWindow: function(config) {
 
-		return loginWindow;
+		var win = Ext4.create('Eoze.modules.AccessControl.view.LoginWindow', config),
+			service = win.getController().getLoginService();
+
+		// relay login event (legacy)
+		service.on('login', function(service, loginInfos) {
+			this.onLogin(loginInfos);
+		}, this);
+
+		return win;
 	}
 	
-	,createLoginWindow: function(modal, text) {
-		// TODO Ext4
-		if (window.Ext4) {
-			return this.x4_createLoginWindow(modal, text);
-		}
-		
-		var db;
-		
-		var formPanel = new Oce.DefaultFormPanel({
-			items: [{
-				xtype: 'box',
-				autoEl: {
-					tag: 'div',
-					html: '<div class="app-msg">'
-					+ (text ? text : "<?php _jsString($text) ?>")
-					+ '<br /><br />'
-					+ '</div>'
-				}
-			},db = Ext.widget({
-				xtype: 'textfield',
-				name: 'username',
-				fieldLabel: 'Identifiant',
-				allowBlank: false,
-				minLength: 3,
-				maxLength: 45,
-				listeners: {
-					specialkey: {
-						scope: this
-						,fn: function(field, el) {
-							if (el.getKey() == Ext.EventObject.ENTER) {
-								this.onSubmitForm(loginWindow, formPanel);
-							}
-						}
-					}
-				}
-			}),{
-				xtype: 'textfield',
-				name: 'password',
-				fieldLabel: 'Mot de passe',
-				inputType: 'password',
-				allowBlank: false,
-				minLength: 4,
-				maxLength: 255,
-				listeners: {
-					specialkey: {
-						scope: this
-						,fn: function(field, el) {
-							if (el.getKey() == Ext.EventObject.ENTER) {
-								this.onSubmitForm(loginWindow, formPanel);
-							}
-						}
-					}
-				}
-			}]
-		});
-		
-		var loginWindow = new Oce.DefaultWin({
-			
-			title: 'Identification'
-			
-			,defaultButton: db
-			,width: 380
-			
-			,modal: modal
-			
-			,closable: false
-			,maximizable: false
-			,minimizable: false
-			,collapsible: false
-			,draggable: false
-			,resizable: false
-			
-			,items: formPanel
-			
-			,buttons: [{ // Ok
-				text: 'Ok'
-				,scope: this
-				,handler: function() {
-					this.onSubmitForm(loginWindow, formPanel);
-				}
-			},{ // Reset
-					text: 'Réinitialiser',
-					handler: function() {
-						formPanel.getForm().reset();
-					}
-			}
-/*<?php if ($help): ?>*/
-			,{ // Help
-				iconCls: 'ico_help',
-				handler: this.showHelp
-			}
-/*<?php endif ?>*/
-				]
-		});
-
-		return loginWindow;
-	}
-	
-	// private
-	,onSubmitForm: function(loginWindow, formPanel) {
-
-		var form = formPanel.getForm();
-
-		if (form.isValid()) {
-
-			loginWindow.el.mask('Interrogation du serveur', 'x-mask-loading');
-
-			eo.Ajax.request({
-
-				params: {
-					controller: 'AccessControl.login'
-					,action: 'login'
-				}
-
-				,jsonData: {
-					'username': form.findField('username').getValue()
-					,'password': form.findField('password').getValue()
-				}
-
-				,scope: this
-				,callback: function(options, success, data) {
-					var maskEl = loginWindow.el;
-					if (maskEl) {
-						maskEl.unmask();
-					}
-					if (success) {
-						// Success
-						if (data.success && data.loginInfos) {
-							loginWindow.close();
-							this.fireEvent('login', data.loginInfos);
-						}
-						
-						// Failure
-						else {
-							Ext.Msg.alert(
-								data.title || "Échec de l'identification" // i18n
-								,data.errorMessage || data.message || data.msg 
-									|| "Identifiant ou mot de passe incorrect." // i18n
-								,function() {
-									loginWindow.defaultButton.focus();
-								}
-							);
-						}
-					} else {
-						// TODO handle error
-						debugger
-					}
-				}
-
-			});
-
-		} else {
-			Ext.MessageBox.alert(
-				"Erreur",
-				"Les informations que vous avez fourni ne sont pas corrects."
-			);
-		}
+	/**
+	 * @private
+	 */
+	,onLogin: function(loginInfos) {
+		this.fireEvent('login', loginInfos);
 	}
 
 	,showHelp: function() {
@@ -308,11 +67,19 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 
 	,start: function(modal, text) {
 		Ext.getBody().addClass('bg');
-		this.showLoginWindow(modal, text);
+		this.createLoginWindow({
+			modal: modal
+			,message: text
+			,exitButton: false
+		}).show();
 	}
 	
 	,showLoginWindow: function(modal, text) {
-		this.createLoginWindow(modal, text).show();
+		this.createLoginWindow({
+			modal: modal
+			,message: text
+			,exitButton: true
+		}).show();
 	}
 
 });
