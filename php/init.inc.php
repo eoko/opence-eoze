@@ -248,12 +248,7 @@ $config
 	->setRememberMeSeconds(3600*24);
 $sessionManager = new \Zend\Session\SessionManager($config);
 
-$dbAdapter = new \Zend\Db\Adapter\Adapter(array(
-	'driver' => 'PdoMysql',
-	'username' => 'root',
-	'password' => 'root',
-	'database' => 'oce_prod',
-));
+$dbAdapter = \eoko\database\Database::getDefaultDbAdapter();
 
 use Zend\Session\Validator\HttpUserAgent;
 use Zend\Session\Validator\RemoteAddr;

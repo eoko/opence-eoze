@@ -2,12 +2,12 @@
 
 namespace eoko\config;
 
+use eoko\database\Database;
 use eoko\file, eoko\file\Finder as FileFinder, eoko\file\FileType;
 use eoko\util\Files;
 use eoko\config\ConfigManager;
 use Zend\Session\SessionManager;
 use eoko\Authentification\UserSession;
-use Zend\Db\Adapter\Adapter as DbAdapter;
 
 class Application implements FileFinder {
 
@@ -258,30 +258,7 @@ class Application implements FileFinder {
 	}
 
 	private function createUserSession() {
-		$config = \eoko\database\Database::getDefaultConfig()->toArray();
-
-		$pairs = array(
-			'database' => 'database',
-			'host' => 'hostname',
-			'port' => 'port',
-			'characterSet' => 'charset',
-
-			'user' => 'username',
-			'password' => 'password',
-		);
-
-		$dbConfig = array(
-			'driver' => 'Pdo_Mysql', // TODO hardcoded = bad
-		);
-
-		foreach ($pairs as $src => $target) {
-			if (isset($config[$src])) {
-				$dbConfig[$target] = $config[$src];
-			}
-		}
-
-		$dbAdapter = new DbAdapter($dbConfig);
-
+		$dbAdapter = Database::getDefaultDbAdapter();
 		return new UserSession\Zend($dbAdapter);
 	}
 
