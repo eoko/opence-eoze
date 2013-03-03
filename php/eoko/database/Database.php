@@ -5,6 +5,7 @@ namespace eoko\database;
 use eoko\config\ConfigManager;
 use eoko\util\Arrays;
 use eoko\util\collection\ImmutableMap;
+use Zend\Db\Adapter\Adapter as DbAdapter;
 
 class Database {
 
@@ -49,5 +50,34 @@ class Database {
 	 */
 	public static function getDefaultConnection() {
 		return self::getDefaultProxy()->getConnection();
+	}
+
+	/**
+	 * @return DbAdapter
+	 */
+	public static function getDefaultDbAdapter() {
+		$config = self::getDefaultConfig()->toArray();
+
+		$pairs = array(
+			'database' => 'database',
+			'host' => 'hostname',
+			'port' => 'port',
+			'characterSet' => 'charset',
+
+			'user' => 'username',
+			'password' => 'password',
+		);
+
+		$dbConfig = array(
+			'driver' => 'Pdo_Mysql', // TODO hardcoded = bad
+		);
+
+		foreach ($pairs as $src => $target) {
+			if (isset($config[$src])) {
+				$dbConfig[$target] = $config[$src];
+			}
+		}
+
+		return new DbAdapter($dbConfig);
 	}
 }
