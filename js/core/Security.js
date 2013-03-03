@@ -1,10 +1,9 @@
+Ext4.require('Ext.ux.ActivityMonitor');
+
 Oce.Security = function() {
 
-//	var sessionPingInterval = 5*60*1000;
-	var sessionPingInterval = 60000; // First check after 1 min
 	var identified;
 	var eventManager = new Oce.EventManager(this);
-	var pingTimeout;
 	var loginInfos;
 	var appLoaded;
 
@@ -12,20 +11,45 @@ Oce.Security = function() {
 		if (flag === identified) return;
 
 		identified = flag;
-		if (pingTimeout) {
-			clearTimeout(pingTimeout);
-		}
-		
+
 		if (identified) {
 			appLoaded = true;
 			loginInfos = args;
 			eventManager.fire('login');
 
-			// TODO #pingSession
-//			setTimeout(pingSession, sessionPingInterval);
+			startIdleMonitor();
 		} else {
 			eventManager.fire('logout', args);
 		}
+	}
+
+	function startIdleMonitor() {
+		Ext4.onReady(function() {
+			var am = Ext4.ux.ActivityMonitor;
+			am.init({
+				maxInactive: 1000*60*30
+				,interval: 1000*60
+				//,verbose: true
+				,isInactive: function() {
+					logout();
+				}
+			});
+			am.start();
+		});
+	}
+
+	function logout() {
+		setIdentified(false, {
+			// i18n
+			message: "Vous avez été déconnecté suite à une longue période d'inactivité. Veuillez entrer "
+				+ "vos identifiants pour continuer votre travail."
+		});
+		eo.Ajax.request({
+			params: {
+				controller: 'AccessControl'
+				,action: 'logout'
+			}
+		});
 	}
 
 	this.notifyDisconnection = function(args) {
@@ -51,7 +75,6 @@ Oce.Security = function() {
 	var loginModule = null;
 
 	this.requestLogin = function(modal, text) {
-//		return; // TODO remove debug
 		var loginFn = appLoaded ? "showLoginWindow" : "start";
 		if (loginModule !== null) {
 			loginModule[loginFn](modal, text);
