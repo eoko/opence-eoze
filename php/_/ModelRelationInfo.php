@@ -19,6 +19,7 @@ class ModelRelationReciproqueFactory {
 	}
 
 	/**
+	 * @param Model $parentModel
 	 * @return ModelRelation
 	 */
 	public function init(Model $parentModel) {
@@ -1103,8 +1104,7 @@ class ModelRelationInfoReferedByMany extends ModelRelationInfoIsRefered
 		if (!$this->localTable->hasPrimaryKey()) {
 			$tableName = get_class($this->localTable);
 			throw new UnsupportedOperationException(
-				"Cannot natively select name from table $tableName with no primary key.",
-				$previous
+				"Cannot natively select name from table $tableName with no primary key."
 			);
 		}
 
@@ -1326,8 +1326,7 @@ class ModelRelationInfoIndirectHasMany extends ModelRelationInfoByAssoc
 		if (!$localTable->hasPrimaryKey()) {
 			$tableName = get_class($localTable);
 			throw new UnsupportedOperationException(
-				"Cannot natively select name from table $tableName with no primary key.",
-				$previous
+				"Cannot natively select name from table $tableName with no primary key."
 			);
 		}
 

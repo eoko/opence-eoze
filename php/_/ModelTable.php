@@ -332,7 +332,7 @@ abstract class ModelTable extends ModelTableProxy {
 	 * Creates a new Query based on this table.
 	 *
 	 * @param array $context
-	 * @return Query
+	 * @return ModelTableQuery
 	 */
 	public static function createQuery(array $context = null) {
 		return static::getInstance()->onCreateQuery($context);
