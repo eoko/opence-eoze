@@ -26,6 +26,7 @@ namespace eoko\MultiClient;
 
 use eoko\security\LoginAdapter as Base;
 use eoko\php\SessionManager;
+use Zend\Crypt\Password\Bcrypt;
 
 use eoko\MultiClient\Model\User;
 use User as LegacyUser;
@@ -112,7 +113,7 @@ class LoginAdapter implements Base {
 	}
 
 	private function verify($input, $existingHash) {
-		$bcrypt = new Bcrypt;
+		$bcrypt = new Bcrypt();
 		return $bcrypt->verify($input, $existingHash);
 	}
 }
