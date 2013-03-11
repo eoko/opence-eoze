@@ -16,6 +16,7 @@ class Json extends JsonExecutor {
 
 	public function index() {
 
+		/** @var Kepler $module  */
 		$module = $this->getModule();
 		$path = $module->getQueueFilePath();
 		$refreshRate = $module->getConfig()->getValue('refreshRate', 1);
