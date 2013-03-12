@@ -16,7 +16,6 @@ use eoko\cache\Cache;
 
 use eoko\config\ConfigManager;
 use eoko\config\Application;
-use eoko\php\SessionManager;
 use eoko\php\ClassLoader;
 
 /**
@@ -134,13 +133,14 @@ class Module implements file\Finder {
 	}
 
 	/**
-	 * @return SessionManager
+	 * @todo Clean out #getSessionManager
+	 * @return \Zend\Session\SessionManager
 	 */
 	public function getSessionManager() {
 		// We don't keep a reference of the SessionManager because we don't
 		// want it to be serialized in the cache (because of the closures
 		// it contains)
-		return $this->getApplicationConfig()->getSessionManager();
+		return $this->getApplication()->getSessionManager();
 	}
 
 	/**
