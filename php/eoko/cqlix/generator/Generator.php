@@ -254,12 +254,16 @@ class Generator extends Script {
 
 	private function discoverTables() {
 
+		$config = $this->modelsConfig;
+
 		$tables = Query::executeQuery("SHOW TABLES FROM `$this->database`;")
 				->fetchAll(PDO::FETCH_COLUMN);
 
 		$this->tables = array();
 		foreach ($tables as $table) {
-			$this->tables[$table] = new TplTable($table);
+			if (!isset($config[$table]) || $config[$table] !== false) {
+				$this->tables[$table] = new TplTable($table);
+			}
 		}
 	}
 
