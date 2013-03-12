@@ -7,8 +7,6 @@ use eoko\template\HtmlRootTemplate;
 use eoko\template\HtmlTemplate;
 use eoko\module\ModuleManager;
 
-use \UserSession;
-
 use eoko\template\HtmlRootTemplate\PassThroughCompiler;
 use eoko\template\HtmlRootTemplate\JavascriptCompiler;
 use eoko\template\HtmlRootTemplate\CssCompiler;
@@ -41,6 +39,12 @@ class Html extends BasicHtmlExecutor {
 		$layout->head->set('beforeJs', $js, false);
 		/** @noinspection PhpUndefinedFieldInspection */
 		$extra = $layout->head->extra = $this->createTemplate('head_extra_script');
+
+		$userSession = $this->getApplication()->getUserSession();
+		if ($userSession->getUserId() !== null) {
+			$loginInfos = $userSession->getLoginInfos();
+			$extra->loginInfos = $loginInfos === null ? null : json_encode($loginInfos);
+		}
 
 		if (null !== $env = $this->request->get('env')) {
 			/** @noinspection PhpUndefinedFieldInspection */
@@ -379,7 +383,7 @@ JS;
 	}
 
 	protected function beforeRender(HtmlTemplate &$tpl) {
-		$tpl->user = UserSession::getUser();
+		$tpl->user = $this->getApplication()->getActiveUser();
 	}
 
 	public function index() {

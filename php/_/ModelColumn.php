@@ -7,6 +7,7 @@
  */
 
 use eoko\cqlix\FieldMetadata;
+use eoko\config\Application;
 
 class ModelColumn extends ModelFieldBase {
 
@@ -15,7 +16,7 @@ class ModelColumn extends ModelFieldBase {
 	/** @var string an alias that can be used to reference the field */
 	private $alias;
 
-	/** @var Const String */
+	/** @var string */
 	public $type;
 	protected $sqlType;
 	/** @var Int */
@@ -167,21 +168,17 @@ class ModelColumn extends ModelFieldBase {
 
 	public function getAutoValue($operation) {
 		switch ($this->getAutoValueId($operation)) {
-			case self::AUTO_CURRENT_USER: 
-				if (!UserSession::isIdentified()) {
+			case self::AUTO_CURRENT_USER:
+				$activeUser = Application::getInstance()->getActiveUser();
+				if ($activeUser === null) {
 					throw new UserSessionTimeout();
-//					throw new UserException(
-//						lang('Vous avez été déconnecté suite à une période '
-//								. 'd\'inactivité ; veuillez vous identifier à nouveau '
-//								. 'pour continuer votre travail (cliquez sur "Déconnexion" '
-//								. 'ou rafraichissez la page).')
-//						,lang('Session expirée')
-//						,'Cannot set AUTO_CURRENT_USER if no one is connected!'
-//					);
+				} else {
+					return $activeUser->getDisplayName(User::DNF_FORMAL);
 				}
-				return UserSession::getUser()->getDisplayName(User::DNF_FORMAL);
-			case self::AUTO_NOW: return Query::SqlFunction('NOW()');
-			case self::AUTO_DELETED: return 0;
+			case self::AUTO_NOW:
+				return Query::SqlFunction('NOW()');
+			case self::AUTO_DELETED:
+				return 0;
 		}
 		return null;
 	}

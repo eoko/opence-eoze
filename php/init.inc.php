@@ -240,12 +240,50 @@ loadAppConfig($classLoader);
 
 eoko\plugin\PluginManager::init();
 
-$sessionManager = new eoko\php\SessionManager();
+//$sessionManager = new eoko\php\SessionManager();
+
+$config = new \Zend\Session\Config\SessionConfig();
+//$config
+//	->setCookieLifetime(3600*24*7)
+//	->setName('Eoze_Authentication')
+//	->setCookieLifetime(20)
+//	;
+$sessionManager = new \Zend\Session\SessionManager($config);
+
+$dbAdapter = new \Zend\Db\Adapter\Adapter(array(
+	'driver' => 'PdoMysql',
+	'username' => 'root',
+	'password' => 'root',
+	'database' => 'oce_prod',
+));
+$tableGateway = new \Zend\Db\TableGateway\TableGateway('zf_sessions', $dbAdapter);
+$saveHandlerOptions = new \Zend\Session\SaveHandler\DbTableGatewayOptions();
+// #sessionSaveHandler
+$saveHandler = new \Zend\Session\SaveHandler\DbTableGateway($tableGateway, $saveHandlerOptions);
+$sessionManager->setSaveHandler($saveHandler);
+
+//$sessionManager->setSaveHandler(new \Zend\Session\SaveHandler\Cache())
+
+//$sessionManager->start(true);
+//
+//dump($sessionManager->getId());
+
 Application::setDefaultSessionManager($sessionManager);
-$userSession = new \eoko\security\UserSessionHandler\LegacyWrapper($sessionManager);
+Zend\Session\Container::setDefaultManager($sessionManager);
+$userSession = Application::getInstance()->getUserSession();
+$userSession->setSessionManager($sessionManager);
 
 if (ConfigManager::get('eoko/routing', 'comet', false)) {
-	CometEvents::start(MY_EOZE_PATH, $userSession, $sessionManager);
+	$comet = new \eoko\modules\Kepler\CometEvents(MY_EOZE_PATH, $sessionManager->getId());
+	\eoko\cqlix\ExtendedModel::setDefaultCometEvents($comet);
+
+	$userSession
+		->onLogin(function() use($comet, $userSession) {
+			$comet->start($userSession->getUserId());
+		})
+		->onDestroy(function() use($comet) {
+			$comet->destroy();
+		});
 }
 
 // Finally, start the session (must be done after the autoloader has been set,

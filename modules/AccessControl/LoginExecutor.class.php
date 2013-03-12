@@ -6,9 +6,6 @@ use eoko\module\executor\JsonExecutor;
 use eoko\file\FileType;
 use eoko\template\Template;
 
-use UserSession;
-use IllegalStateException;
-
 /**
  * @internal Using alternate class name LoginExecutor (instead of simply login
  * to prevent the method login() from being considered a constructor...)
@@ -24,17 +21,26 @@ class LoginExecutor extends JsonExecutor {
 		$username = $this->request->req('username', true);
 		$password = $this->request->req('password', true);
 
-		if (UserSession::logIn($username, $password)) {
-			$this->loginInfos = UserSession::getLoginInfos();
+		$userSession = $this->getApplication()->getUserSession();
+
+		$result = $userSession->login($username, $password);
+
+		if ($result->isValid()) {
+			$this->loginInfos = $userSession->getLoginInfos();
 			return true;
 		} else {
-			// TODO deprecated
-			throw new \LoginFailedException();
+			//$this->messages = implode('<br/>', $result->getMessages());
+			$this->loginInfos = false;
+			$this->message = 'Identifiant ou mot de passe incorrect. Veuillez réessayer.';
+			return true;
 		}
 	}
 
 	public function logout() {
-		UserSession::logOut();
+		$this
+			->getApplication()
+			->getUserSession()
+			->logout();
 		return true;
 	}
 

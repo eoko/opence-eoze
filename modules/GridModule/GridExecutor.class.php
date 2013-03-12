@@ -25,7 +25,6 @@ use ModelRelationInfoReferencesOne;
 use Logger;
 use Request;
 use ExceptionHandler;
-use UserSession;
 use User;
 
 use Exception;
@@ -79,8 +78,9 @@ abstract class GridExecutor extends JsonExecutor {
 
 	protected function beforeAction() {
 		parent::beforeAction();
-		// TODO SECURITY real security management...
-		UserSession::requireLoggedIn();
+		// TODO #auth SECURITY real security management...
+		// #auth
+		$this->getApplication()->getUserSession()->requireLoggedIn();
 	}
 
 	protected final function callInTransaction($method) {
@@ -1301,7 +1301,7 @@ MSG;
 	private $earl;
 
 	/**
-	 * @return EarlReport\EarlReport
+	 * @return \EarlReport\EarlReport
 	 */
 	private function getEarl() {
 		if (!$this->earl) {
@@ -1408,7 +1408,7 @@ MSG;
 
 		$earl = $this->getEarl();
 
-		$user = UserSession::getUser();
+		$user = $this->getApplication()->getActiveUser();
 
 		$report = $earl->createReport()
 				->setAddress(<<<TXT
@@ -1521,18 +1521,4 @@ TXT
 
 		return $s;
 	}
-
-	protected function beforeWritePdf(\PdfExport $pdfExport) {}
-
-	public function exportPDF($result, $fields, ModelTable $table, $title) {
-		$pdfExport = new \PdfExport($result, $fields, $table, $title);
-
-		$this->beforeWritePdf($pdfExport);
-
-		$filename = $this->getFileName('pdf');
-		$pdfExport->writeFile(self::getAbsolutePath($filename));
-
-		return self::getUrl($filename);
-	}
-
 }

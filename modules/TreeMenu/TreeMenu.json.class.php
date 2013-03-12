@@ -4,7 +4,6 @@ namespace eoko\modules\TreeMenu;
 
 use eoko\module\executor\JsonExecutor;
 use MenuNode, MenuNodeTable;
-use UserSession;
 use eoko\database\Database;
 
 /**
@@ -139,13 +138,11 @@ class Json extends JsonExecutor {
 	}
 
 	public function resetFactoryDefaults() {
-		UserSession::requireLoggedIn();
-		$userId = UserSession::getUser()->id;
 
 		MenuNodeTable::createQuery()
-				->delete()
-				->where('users_id=?', $this->getUserId())
-				->execute();
+			->delete()
+			->where('users_id=?', $this->getUserId())
+			->execute();
 
 		return true;
 	}
@@ -159,9 +156,16 @@ class Json extends JsonExecutor {
 	private $userId = null;
 
 	private function getUserId() {
-		if ($this->userId !== null) return $this->userId;
-		UserSession::requireLoggedIn();
-		return $this->userId = UserSession::getUser()->id;
+
+		if ($this->userId !== null) {
+			return $this->userId;
+		}
+
+		$userSession = $this->getApplication()->getUserSession();
+		// #auth
+		$userSession->requireLoggedIn();
+
+		return $this->userId = $userSession->getUser()->id;
 	}
 
 	private function doSaveNode($data) {

@@ -5,7 +5,9 @@ namespace eoko\config;
 use eoko\file, eoko\file\Finder as FileFinder, eoko\file\FileType;
 use eoko\util\Files;
 use eoko\config\ConfigManager;
-use eoko\php\SessionManager;
+use Zend\Session\SessionManager;
+use eoko\Authentification\UserSession;
+use Zend\Db\Adapter\Adapter as DbAdapter;
 
 class Application implements FileFinder {
 
@@ -23,15 +25,24 @@ class Application implements FileFinder {
 	 */
 	private $modes;
 
+	private static $defaultSessionManager;
+
 	/**
 	 * @var SessionManager
 	 */
 	private $sessionManager;
 
-	private static $defaultSessionManager;
+	/**
+	 * @var UserSession
+	 */
+	private $userSession;
 
 	private function __construct(SessionManager $sessionManager) {
 		$this->sessionManager = $sessionManager;
+
+		// UserSession
+		// TODO service locator
+		$this->userSession = $this->createUserSession();
 
 		// Configure modes
 		$this->modes = $this->getConfig()->get('modes');
@@ -214,6 +225,64 @@ class Application implements FileFinder {
 			// TODO implement a fallback if no repo is available
 			throw $ex;
 		}
+	}
+
+	/**
+	 *
+	 * #UserSession
+	 *
+	 * @return UserSession
+	 */
+	public function getUserSession() {
+		return $this->userSession;
+	}
+
+	/**
+	 *
+	 * #UserSession
+	 *
+	 * @return \User|null
+	 */
+	public function getActiveUser() {
+		return $this->getUserSession()->getUser();
+	}
+
+	/**
+	 *
+	 * #UserSession
+	 *
+	 * @return int|null
+	 */
+	public function getActiveUserId() {
+		return $this->getUserSession()->getUserId();
+	}
+
+	private function createUserSession() {
+		$config = \eoko\database\Database::getDefaultConfig()->toArray();
+
+		$pairs = array(
+			'database' => 'database',
+			'host' => 'hostname',
+			'port' => 'port',
+			'characterSet' => 'charset',
+
+			'user' => 'username',
+			'password' => 'password',
+		);
+
+		$dbConfig = array(
+			'driver' => 'Pdo_Mysql', // TODO hardcoded = bad
+		);
+
+		foreach ($pairs as $src => $target) {
+			if (isset($config[$src])) {
+				$dbConfig[$target] = $config[$src];
+			}
+		}
+
+		$dbAdapter = new DbAdapter($dbConfig);
+
+		return new UserSession\Zend($dbAdapter);
 	}
 
 }
