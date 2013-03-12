@@ -195,17 +195,16 @@ abstract class GridExecutor extends JsonExecutor {
 //			throw new UserException($msg, lang('Formulaire Incomplet'));
 			foreach ($missingFields as $f) $errors[$f] = lang('Champ obligatoire');
 
-			$this->getResponse()
-					->merge('errors', $errors)
-					->set('errorHandlerVersion', '0.10.11')
-					->set('message', false)
-					->set('errorMessage', $msg)
-					->set('system', false)
-					->set('form', true)
-					;
-//			ExtJSResponse::put('errors', $errors);
-//			ExtJSResponse::put('system', false);
-//			ExtJSResponse::put('form', true);
+			$this
+				->getTemplate()
+				->merge('errors', $errors)
+				->set('errorHandlerVersion', '0.10.11')
+				->set('message', false)
+				->set('errorMessage', $msg)
+				->set('system', false)
+				->set('form', true)
+			;
+
 			return false;
 		}
 
@@ -218,10 +217,8 @@ abstract class GridExecutor extends JsonExecutor {
 		);
 
 		$this->saveModel($model, true);
-//		throw new \Exception('x');
 
 		$this->newId = $id = $model->getPrimaryKeyValue();
-//		ExtJSResponse::put('newId', $id = $model->getPrimaryKeyValue());
 
 		// Put full new model's data in answer, if requested
 		if ($this->request->get('dataInResponse', false)) {
@@ -243,6 +240,11 @@ abstract class GridExecutor extends JsonExecutor {
 
 	protected function prepareAddData(Request &$data) {}
 
+	/**
+	 * @param \Request $form
+	 * @param $setters
+	 * @return array|null
+	 */
 	protected function add_createContext(Request $form, $setters) {}
 
 	protected function add_getField(Request $request, $col, &$setters, &$missingFields) {
