@@ -8,26 +8,6 @@ Oce.Security = function() {
 	var loginInfos;
 	var appLoaded;
 
-	function pingSession() {
-		if (identified) {
-			Oce.Ajax.request({
-				params: {
-					action: 'ping_session'
-				}
-				,waitMsg: false
-				,onSuccess: function(data, obj) {
-					if (!obj.pong) {
-						setIdentified(false, obj);
-					} else {
-						setTimeout(pingSession, data.remainingTime * 1000)
-					}
-				}
-			});
-
-//			pingTimeout = setTimeout(pingSession, sessionPingInterval);
-		}
-	}
-
 	function setIdentified(flag, args) {
 		if (flag === identified) return;
 
@@ -40,7 +20,9 @@ Oce.Security = function() {
 			appLoaded = true;
 			loginInfos = args;
 			eventManager.fire('login');
-			setTimeout(pingSession, sessionPingInterval);
+
+			// TODO #pingSession
+//			setTimeout(pingSession, sessionPingInterval);
 		} else {
 			eventManager.fire('logout', args);
 		}
