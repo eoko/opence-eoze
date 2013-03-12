@@ -26,10 +26,6 @@
  * provide functionnalities of the model's generic properties (as opposed to
  * the model's reccords properties). See {@link ModelTable} for details.
  *
- * @method ModelTable getTable() Get the ModelTable corresponding to this Model.
- * This function can be statically called from concrete implementations of Model
- * (but not in, or from, the Model class itself, where it is not defined).
- *
  * @internal The methods of the Model class which are protected, and
  * prefixed with a single underscore (eg _load) will have a static alias created
  * in the generated ModelBase classes. These alias method will consist of a
@@ -162,6 +158,11 @@ abstract class Model {
 	}
 
 	/**
+	 * Get the ModelTable corresponding to this Model.
+	 *
+	 * This method can be statically called from concrete implementations of Model
+	 * (but not in, or from, the Model class itself, where it is not defined).
+	 *
 	 * @return ModelTable
 	 */
 	abstract public static function getTable();
