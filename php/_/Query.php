@@ -103,6 +103,13 @@ class Query {
 	private $sqlVarId = 0;
 
 	/**
+	 * If true, then 'FOR UPDATE' will be appended to select queries.
+	 *
+	 * @var bool
+	 */
+	private $forUpdate = false;
+
+	/**
 	 * Allowed dir (as in ORDER BY ... *DIR*) values -- used for input protection.
 	 * Trying to order by another dir value will throw an IllegalOffset error.
 	 * @todo check that this error is actually blocking in production settings...
@@ -303,6 +310,15 @@ class Query {
 	}
 
 	/**
+	 * @param bool $forUpdate
+	 * @return Query $query
+	 */
+	public function forUpdate($forUpdate = true) {
+		$this->forUpdate = $forUpdate;
+		return $this;
+	}
+
+	/**
 	 *
 	 * The $function argument can contains placeholders in the form {} or {0}, {1},
 	 * etc.
@@ -382,6 +398,7 @@ class Query {
 //		$this->sql = 'SELECT ' . 'DISTINCT ' // TODO rx HACK handle distinct ...
 		$this->sql = 'SELECT ' . ($this->selectDistinct ? 'DISTINCT ' : null) // TODO rx HACK handle distinct ...
 				. implode(', ', $parts)
+				. ($this->forUpdate ? ' FOR UPDATE' : '')
 				. $this->buildFrom()
 				. $this->buildJoinsClauses()
 				. $this->buildWhere()
@@ -1435,6 +1452,9 @@ SQL
 
 class SqlVariable implements SqlVar {
 
+	/**
+	 * @var string
+	 */
 	protected $code;
 
 	function __construct($code) {
@@ -1548,12 +1568,14 @@ class QuerySelect extends SqlVariable {
 
 	/**
 	 *
-	 * @param mixed $defaultTableName	TRUE: means that this select's table
+	 * @param mixed $defaultTableName    TRUE: means that this select's table
 	 * is the default one, it will be omited. FALSE: means that the table name
 	 * must be included. Finally, a tableName (or a ModelTable) can be precised,
 	 * and the table name will be omited only if this clause's table is the same.
+	 * @param $bindings
+	 * @return string
 	 */
-	public function buildSql($defaultTableName = true, &$bindings) {
+	public function buildSql($defaultTableName, &$bindings) {
 		// Cannot really group, because the type of the param must be excluded
 		// to be boolean first...
 		if ($this->table === null) $omit = true;
@@ -1826,7 +1848,7 @@ class SqlFunction {
 }
 
 interface SqlVar {
-	function buildSql($defaultTable, &$bindings);
+	public function buildSql($defaultTable, &$bindings);
 }
 
 class QueryErrorHandler {
