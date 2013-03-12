@@ -4,6 +4,7 @@ namespace eoko\mvc;
 
 use eoko\module\ModuleResolver;
 use eoko\module\executor\Executor;
+use Zend\Http\PhpEnvironment\Response;
 
 /**
  *
@@ -21,6 +22,10 @@ class LegacyRouter extends AbstractRouter {
 			$action->setRouter($this->router);
 		}
 
-		$action();
+		$response = $action();
+
+		if ($response instanceof Response) {
+			$response->send();
+		}
 	}
 }

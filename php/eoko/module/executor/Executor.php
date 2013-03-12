@@ -12,6 +12,7 @@ use eoko\util\Arrays;
 use eoko\config\Config;
 use Request;
 use Logger;
+use Zend\Http\Response;
 
 use Zend\Mvc\Router\RouteStackInterface;
 
@@ -103,6 +104,21 @@ abstract class Executor implements file\Finder {
 		return $this->router;
 	}
 
+	/**
+	 * @var Response
+	 */
+	private $response = null;
+
+	/**
+	 * @return Response
+	 */
+	protected function getResponse() {
+		if (!$this->response) {
+			$this->response = new \Zend\Http\PhpEnvironment\Response();
+		}
+		return $this->response;
+	}
+
 	private function getDefaultAction() {
 		return $this->request->get($this->actionParam, $this->defaultAction);
 	}
@@ -171,6 +187,12 @@ abstract class Executor implements file\Finder {
 		return $this->name;
 	}
 
+	/**
+	 * @param bool $return
+	 * @return \Zend\Http\Response|null
+	 * @throws \IllegalStateException
+	 * @throws \Exception
+	 */
 	public final function __invoke($return = false) {
 
 		if ($this->executed) {
@@ -253,7 +275,15 @@ abstract class Executor implements file\Finder {
 
 	protected function beforeAction() {}
 
-	abstract protected function processResult($result);
+	/**
+	 * @param mixed $result
+	 * @return Response|null
+	 */
+	protected function processResult($result) {
+		if ($result instanceof Response) {
+			return $result;
+		}
+	}
 
 	/**
 	 * Get the name of the action currently being executed. If this method is
