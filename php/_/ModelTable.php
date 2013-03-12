@@ -43,6 +43,7 @@ use eoko\config\ConfigManager;
  * @method bool hasPrimaryKey()
  * @method string getPrimaryKeyName()
  * @method ModelColumn getPrimaryKeyColumn()
+ * @method static Model createNewModel($initValues = null, $strict = false, array $context = null)
  *
  * %%ModelTable%% from its name. This method is static in concrete ModelTable
  * implementations, but it is abstract in ModelTable class.
