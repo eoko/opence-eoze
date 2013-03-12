@@ -5,7 +5,6 @@ namespace eoko\modules\UserPreferences;
 use eoko\module\executor\JsonExecutor;
 
 use ModelTable;
-use UserSession;
 
 /**
  *
@@ -26,10 +25,14 @@ class Json extends JsonExecutor {
 
 	public function getUserPreferences() {
 
-		UserSession::requireLoggedIn();
+		$userSession = $this->getApplication()->getUserSession();
+
+		// #auth
+		$userSession->requireLoggedIn();
+		$userId = $userSession->getUserId();
 
 		$row = $this->getTable()->createQuery()
-			->where('user_id = ?', UserSession::getUserId())
+			->where('user_id = ?', $userId)
 			->select('json_preferences')
 			->executeSelectFirst();
 
@@ -40,7 +43,8 @@ class Json extends JsonExecutor {
 
 	public function saveUserPreferences() {
 
-		$userId = UserSession::getUserId();
+		$userId = $this->getApplication()->getUserSession()->getUserId();
+
 		$table = $this->getTable();
 		$record = $table->findOneWhere('user_id = ?', $userId);
 

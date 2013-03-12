@@ -17,7 +17,6 @@ use eoko\modules\TreeMenu\HasMenuActions;
 use eoko\modules\TreeMenu\MenuAction;
 use eoko\modules\TreeMenu\MenuFamily;
 
-use UserSession;
 use Exception, IllegalStateException, IllegalArgumentException;
 
 class TreeMenu extends Module implements HasMenuActions {
@@ -104,8 +103,12 @@ class TreeMenu extends Module implements HasMenuActions {
 
 	public function createDefaultMenu() {
 
-		UserSession::requireLoggedIn();
-		$userId = UserSession::getUser()->id;
+		$userSession = $this->getApplication()->getUserSession();
+
+		// #auth
+		$userSession->requireLoggedIn();
+
+		$userId = $userSession->getUserId();
 		$items = $this->getConfig()->get('defaultMenu');
 
 		$nodes = $this->createMenuItems($items);
@@ -119,8 +122,12 @@ class TreeMenu extends Module implements HasMenuActions {
 
 	private function createMenuItem($name, $config) {
 
-		UserSession::requireLoggedIn();
-		$userId = UserSession::getUser()->id;
+		$userSession = $this->getApplication()->getUserSession();
+
+		// #auth
+		$userSession->requireLoggedIn();
+
+		$userId = $userSession->getUserId();
 
 		$children = null;
 		if (is_array($config)) {

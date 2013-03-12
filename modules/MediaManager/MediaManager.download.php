@@ -16,8 +16,8 @@ class download extends ExecutorBase {
 
 	public function download() {
 
-		// TODO session
-		if (!\UserSession::isIdentified()) {
+		// #auth
+		if (!$this->getApplication()->getUserSession()->isAuthorized(100)) {
 			header('Status: 403 Forbidden');
 			die;
 		}

@@ -244,7 +244,7 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 					}
 					if (success) {
 						// Success
-						if (data.success) {
+						if (data.loginInfos) {
 							loginWindow.close();
 							this.fireEvent('login', data.loginInfos);
 						}
@@ -256,7 +256,10 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 								,data.errorMessage || data.message || data.msg 
 									|| "L'identification a échoué."
 								,function() {
-									loginWindow.defaultButton.focus();
+									var defaultField = loginWindow.down('#loginField');
+									if (defaultField) {
+										defaultField.focus();
+									}
 								}
 							);
 						}
