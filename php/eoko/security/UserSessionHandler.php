@@ -10,6 +10,9 @@ namespace eoko\security;
  */
 abstract class UserSessionHandler {
 
+	const EVENT_LOGIN = 'login';
+	const EVENT_DESTROY = 'destroy';
+
 	private $listeners;
 
 	public function addListener($event, $fn) {
@@ -23,6 +26,16 @@ abstract class UserSessionHandler {
 				call_user_func_array($fn, $args);
 			}
 		}
+	}
+
+	public function onLogin($fn) {
+		$this->addListener(self::EVENT_LOGIN, $fn);
+		return $this;
+	}
+
+	public function onDestroy($fn) {
+		$this->addListener(self::EVENT_DESTROY, $fn);
+		return $this;
 	}
 
 	/**
