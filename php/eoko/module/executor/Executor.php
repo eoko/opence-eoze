@@ -152,7 +152,7 @@ abstract class Executor implements file\Finder {
 	 * @return \eoko\config\Application
 	 */
 	public function getApplication() {
-		return $this->module->getApplicationConfig();
+		return $this->module->getApplication();
 	}
 
 	/**
