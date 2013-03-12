@@ -3,8 +3,6 @@
 namespace eoko\modules\Kepler;
 
 use User;
-use eoko\php\SessionManager;
-use eoko\security\UserSessionHandler;
 use eoko\log\Logger;
 use eoko\config\ConfigManager;
 
@@ -16,8 +14,6 @@ use eoko\config\ConfigManager;
  */
 class CometEvents {
 
-	private static $instance;
-
 	private $myQueue;
 	private $othersQueue;
 
@@ -26,61 +22,55 @@ class CometEvents {
 
 	private $basePath;
 
-	/**
-	 * @var UserSessionHandler
-	 */
-	private $userSession;
-	/**
-	 * @var SessionManager
-	 */
-	private $sessionManager;
-
 	private $directory = 'Kepler';
 	private $channelFilename = 'channel-listeners';
 
-	private static $disabled = false;
+	private $disabled = false;
 
-	private function __construct($basePath, UserSessionHandler $userSession, 
-			SessionManager $sessionManager) {
+	private $id, $userId;
 
-		$this->userSession = $userSession;
-		$this->sessionManager = $sessionManager;
+	public function __construct($basePath, $id) {
+
+		$this->id = $id;
 
 		// Create var dir
-		$dir = $this->basePath = "$basePath/$this->directory";
+		$this->basePath = "$basePath/$this->directory";
 		if (!file_exists($this->basePath)) {
 			mkdir($this->basePath, 0700, true);
 		}
 
 		// Load channels
 		$this->channelListeners = $this->loadChannelListeners();
-		$channelListeners =& $this->channelListeners;
 
 		// make a copy
 		$this->initialChannelListeners = $this->channelListeners;
-
-		$maxLevel = ConfigManager::get($this, 'userLevel');
-
-		$userSession->addListener('login', 
-			function(User $user) use($userSession, $sessionManager, &$channelListeners, $maxLevel) {
-				if ($userSession->isAuthorized($maxLevel)) {
-					$channelListeners[$sessionManager->getId()] = true;
-				}
-			}
-		);
-
-		$sessionManager->addListener('delete', function($sessionId) use(&$channelListeners, $dir) {
-			// update channels list
-			unset($channelListeners[$sessionId]);
-			// delete remaining session data
-			if (file_exists($file = "$dir/$sessionId")) {
-				unlink($file);
-			}
-		});
 	}
 
 	public function __destruct() {
 		$this->commit();
+	}
+
+	public function start($userId) {
+		$this->userId = $userId;
+
+		// TODO
+//		$maxLevel = ConfigManager::get($this, 'userLevel');
+//		if ($this->isAuthorized($maxLevel)) {
+			$this->subscribeChannel($this->id);
+//		}
+	}
+
+	private function subscribeChannel($subscriberId) {
+		$this->channelListeners[$subscriberId] = true;
+	}
+
+	public function destroy() {
+		// update channels list
+		unset($this->channelListeners[$this->id]);
+		// delete remaining session data
+		if (file_exists($file = "$this->basePath/$this->id")) {
+			unlink($file);
+		}
 	}
 
 	public function commit() {
@@ -91,9 +81,8 @@ class CometEvents {
 		}
 		// Commit public queue
 		if ($this->othersQueue) {
-			$mySessionId = $this->sessionManager->getId();
 			foreach ($this->channelListeners as $sessionId => $active) {
-				if ($active && $sessionId !== $mySessionId) {
+				if ($active && $sessionId !== $this->id) {
 					$this->writeQueueIn($sessionId, $this->othersQueue);
 				}
 			}
@@ -101,7 +90,7 @@ class CometEvents {
 		}
 		// Commit private queue
 		if ($this->myQueue) {
-			$this->writeQueueIn($this->sessionManager->getId(), $this->myQueue);
+			$this->writeQueueIn($this->id, $this->myQueue);
 			$this->myQueue = null;
 		}
 	}
@@ -125,13 +114,6 @@ class CometEvents {
 		}
 	}
 
-	/**
-	 * @return CometEvents
-	 */
-	public static function start($varPath, UserSessionHandler $userSession, SessionManager $sessionManager) {
-		return self::$instance = new CometEvents($varPath, $userSession, $sessionManager);
-	}
-
 	private function writeQueueIn($sessionId, $queue) {
 
 		$filename = "$this->basePath/$sessionId";
@@ -149,9 +131,9 @@ class CometEvents {
 	 * @param array $queue
 	 * @param bool $fromOther `true` if the event originate from another **session** (could be
 	 * the same user in another browser)
-	 * @param type $category
-	 * @param type $class
-	 * @param type $name
+	 * @param string $category
+	 * @param string|Observable $class
+	 * @param string $name
 	 * @param array $args 
 	 */
 	private function pushIn(&$queue, $fromOther, $category, $class, $name, array $args = null) {
@@ -167,7 +149,7 @@ class CometEvents {
 			'data'     => array(
 				'class' => $class,
 				'name'  => $name,
-				'user'  => $this->userSession->getUserId(false),
+				'user'  => $this->userId,
 				'args'  => $args,
 				'fromOtherSession' => $fromOther,
 			),
@@ -182,20 +164,20 @@ class CometEvents {
 		$this->pushIn($this->othersQueue, true, $category, $class, $name, $args);
 	}
 
-	public static function fire($class, $name, $args = null) {
-		self::$instance->push('events', $class, $name, array_slice(func_get_args(), 2));
+	public function fire($class, $name, $args = null) {
+		$this->push('events', $class, $name, array_slice(func_get_args(), 2));
 	}
 
-	public static function publish($class, $name, $args = null) {
-		if (!self::$disabled) {
+	public function publish($class, $name, $args = null) {
+		if (!$this->disabled) {
 			$args = array_slice(func_get_args(), 2);
-			self::$instance->push('events', $class, $name, $args);
-			self::$instance->pushToOthers('events', $class, $name, $args);
+			$this->push('events', $class, $name, $args);
+			$this->pushToOthers('events', $class, $name, $args);
 		}
 	}
 
-	public static function disable() {
-		self::$disabled = true;
+	public function disable() {
+		$this->disabled = true;
 	}
 
 }

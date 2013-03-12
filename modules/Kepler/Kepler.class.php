@@ -5,6 +5,7 @@ namespace eoko\modules\Kepler;
 use eoko\module\Module;
 use eoko\module\ModuleLocation;
 use eoko\util\GlobalEvents;
+use Zend\Session\SessionManager;
 
 /**
  *
@@ -27,7 +28,7 @@ class Kepler extends Module {
 	 * This method is overridden here to allow the unit tests to replace the session 
 	 * manager. This is bad practice but that seems the least worst when considering
 	 * the context (UserManager used as global everywhere...).
-	 * @return \eoko\php\SessionManager
+	 * @return SessionManager
 	 */
 	public function getSessionManager() {
 		if ($this->sessionManager) {
