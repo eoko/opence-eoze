@@ -59,7 +59,7 @@ Ext.define('Eoze.modules.AccessControl.controller.LoginWindow', {
 
 		var exitButton = this.getExitButton();
 		if (exitButton) {
-			Ext4.getBody().on({
+			exitButton.mon(Ext4.getBody(), {
 				scope: this
 				,mousemove: this.stopExitButton
 				,keydown: this.stopExitButton
