@@ -35,4 +35,23 @@ use eoko\module\Module;
  */
 class EozeExt4 extends Module {
 
+	public function getExt4LoaderConfig() {
+		$paths = parent::getExt4LoaderConfig();
+
+		foreach ($this->getLocation()->getLineActualLocations(true) as $location) {
+			/** @var \eoko\module\ModuleLocation $location  */
+			$directory = $location->getDirectory();
+			$name = $location->moduleName;
+			$path = $directory->path . $name;
+			$url = $location->url;
+
+			$folder = 'js.ext4-ux';
+			if (is_dir($path . '/' . $folder)) {
+				$namespace = 'Ext.ux';
+				$paths[$namespace] = $url . $folder;
+			}
+		}
+
+		return $paths;
+	}
 }
