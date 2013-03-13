@@ -515,6 +515,11 @@ eo.Ajax = new eo.data.Connection({
 	}, false);
 	eo.Ajax.on('requestexception', function(conn, response, options) {
 		if (!leaving) {
+			if (response.status === 401) {
+				Oce.mx.Security.notifyDisconnection();
+				return;
+			}
+
 			var warn = function(msg) {
 				if (window.console) {
 					if (console.warn) {
