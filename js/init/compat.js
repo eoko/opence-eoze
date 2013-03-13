@@ -325,6 +325,11 @@ Ext.QuickTips = Ext4.tip.QuickTipManager;
 Ext4.require('Eoze.Ext3.CompatibilityFixes');
 
 
+// --- Clone ---
+
+Ext.clone = Ext4.clone;
+
+
 // --- Ext3 & 4 window z-index conflicts ---
 
 // Use Ext4.WindowManager
