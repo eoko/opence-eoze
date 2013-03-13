@@ -325,10 +325,16 @@ Ext.QuickTips = Ext4.tip.QuickTipManager;
 Ext4.require('Eoze.Ext3.CompatibilityFixes');
 
 
-// --- Clone ---
+// --- Standard functions ---
 
-Ext.clone = Ext4.clone;
-
+Ext.copyTo(Ext4, Ext, [
+	'apply',
+	'applyIf',
+	// Copy
+	'copyTo',
+	// Clone
+	'clone'
+]);
 
 // --- Ext3 & 4 window z-index conflicts ---
 
