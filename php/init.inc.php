@@ -255,6 +255,13 @@ $dbAdapter = new \Zend\Db\Adapter\Adapter(array(
 	'database' => 'oce_prod',
 ));
 
+use Zend\Session\Validator\HttpUserAgent;
+use Zend\Session\Validator\RemoteAddr;
+
+$validators = $sessionManager->getValidatorChain();
+$validators->attach('session.validate', array(new HttpUserAgent(), 'isValid'));
+$validators->attach('session.validate', array(new RemoteAddr(), 'isValid'));
+
 use Eoze\Session\SaveHandler\ObservableDbTableGateway;
 
 // --- Session Manager
