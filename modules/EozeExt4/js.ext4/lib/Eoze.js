@@ -1,5 +1,6 @@
 //noinspection JSLastCommaInArrayLiteral
 /**
+ * Eoze for ExtJS4 standard library. In essence, this class requires all standard Eoze classes.
  *
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  * @author Éric Ortega <eric@planysphere.fr>
@@ -23,6 +24,7 @@ Ext4.define('Eoze.lib.Eoze', {
 		'Eoze.Ext.Date',
 		// Model
 		'Eoze.Ext.data.association.HasOne',
+		'Eoze.data.proxy.GridModule',
 		// CkEditor
 		'Eoze.modules.CkEditor.form.field.CkEditor',
 		// Cursor
