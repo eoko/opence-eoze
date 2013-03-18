@@ -755,6 +755,15 @@ abstract class GridExecutor extends JsonExecutor {
 	 */
 	public function load() {
 
+		$id = $this->request->get(
+			$this->table->getPrimaryKeyName(),
+			$this->request->get('id', null)
+		);
+
+		if ($id !== null) {
+			return $this->load_one($id);
+		}
+
 		$this->beforeLoad();
 
 		$query = $this->createLoadQuery('grid');
