@@ -584,15 +584,22 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		return this.editRowById(recordId, startTab, cb, scope);
 	}
 
-	,editRowById: function(rowId, startTab, cb, scope) {
-		var win = this.getEditWindow(rowId, function(win) {
+	,editRowById: function(rowId, startTab, callback, scope, sourceEl) {
+		this.getEditWindow(rowId, function(win) {
 			if (!win.hasBeenLoaded) {
 				win.setRowId(rowId);
 				win.form.reset();
-				win.show();
+				win.show(sourceEl);
+
+				// 2011-12-15 05:56 added form.record for opence's season module
+				var form = win.formPanel.form;
+				if (form) {
+					form.record = row;
+				}
+
 				win.formPanel.refresh(function() {
 					win.hasBeenLoaded = true;
-					if (cb) cb.call(scope, win);
+					Ext.callback(callback, scope, [win]);
 				});
 			} else {
 				win.show();
@@ -607,31 +614,38 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	,editRow: function(row) {
 
 		var el,
-			index = this.grid.store.indexOf(row);
+			index = this.grid.store.indexOf(row),
+			id = row.data[this.primaryKeyName];
+
 		if (index >= 0) {
 			var rc = this.grid.view.resolveCell(index,0);
-			if (rc) el = Ext.get(rc.cell);
+			if (rc) {
+				el = Ext.get(rc.cell);
+			}
 		}
 
-		var win = this.getEditWindow(row.data[this.primaryKeyName], function(win) {
-			if (!win.hasBeenLoaded) {
-				win.setRow(row);
-//				win.form.reset();
-				win.show(el);
-				
-				// 15/12/11 05:56 added form.record for opence's season module
-				var form = win.formPanel.form;
-				if (form) {
-					form.record = row;
-				}
-				
-				win.formPanel.refresh(function() {
-					win.hasBeenLoaded = true;
-				});
-			} else {
-				win.show();
-			}
-		});
+		this.editRowById(id, undefined, undefined, undefined, el);
+
+// 2013-03-18 16:38 REM
+//		this.getEditWindow(row.data[this.primaryKeyName], function(win) {
+//			if (!win.hasBeenLoaded) {
+//				win.setRow(row);
+////				win.form.reset();
+//				win.show(el);
+//
+//				// 2011-12-15 05:56 added form.record for opence's season module
+//				var form = win.formPanel.form;
+//				if (form) {
+//					form.record = row;
+//				}
+//
+//				win.formPanel.refresh(function() {
+//					win.hasBeenLoaded = true;
+//				});
+//			} else {
+//				win.show();
+//			}
+//		});
 	}
 
 	,editReccordLine: function(grid, rowIndex) {
@@ -999,7 +1013,9 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	}
 
 	,afterAdded: function(newId) {
-		if (this.extra.editAfterAdd) this.editRowById(newId, this.extra.editAfterAddTab);
+		if (this.extra.editAfterAdd) {
+			this.editRowById(newId, this.extra.editAfterAddTab);
+		}
 	}
 	
 	,onFormSaveSuccess: function(form, data, options) {
