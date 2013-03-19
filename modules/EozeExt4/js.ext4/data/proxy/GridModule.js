@@ -29,9 +29,9 @@
 Ext4.define('Eoze.data.proxy.GridModule', {
 	extend: 'Ext.data.proxy.Ajax'
 
-	,alias: 'proxy.eoze'
+	,alias: 'proxy.gridmodule'
 
-	,construct: function(config) {
+	,constructor: function(config) {
 
 		config = config || {};
 
@@ -42,6 +42,13 @@ Ext4.define('Eoze.data.proxy.GridModule', {
 		config.api = Ext.apply({
 			read: url + '&action=load'
 		}, config.api);
+
+		if (!config.reader) {
+			config.reader = {
+				type: 'json'
+				,root: 'data'
+			}
+		}
 
 		this.callParent([config]);
 	}
