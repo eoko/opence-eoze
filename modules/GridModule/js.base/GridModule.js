@@ -573,7 +573,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	 *
 	 * This method also accepts params as documented for {@link #doEditRecord}.
 	 *
-	 * @param {Object/Ext.data.Record/String} param
+	 * @param {Object/Eoze.GridModule.EditRecordParams/Ext.data.Record/String} param
 	 * @param {String/Ext.data.Record} param.record
 	 * @param {Integer/String} [param.startTab]
 	 * @param {Function} [param.callback]
@@ -583,44 +583,8 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	 * @todo #gridmodule This should be moved to a controller.
 	 */
 	,editRecord: function(record, startTab, callback, scope, sourceEl) {
-		var recordId;
-		if (Ext.isEmpty(record)) {
-			throw new Error('Illegal arguments: record (or record id) is required.');
-		} else {
-			// Message or Record syntax
-			if (Ext.isObject(record)) {
-				// Record form
-				if (record instanceof Ext.data.Record) {
-					recordId = record.id;
-				}
-				// Message form: extract arguments
-				else {
-					startTab = record.startTab;
-					callback = record.callback;
-					scope = record.scope || this;
-					sourceEl = record.sourceEl;
-					recordId = record.id;
-					record = record.record;
-				}
-
-				// Extract record id from record if supplied
-				if (record && Ext.isEmpty(recordId)) {
-					recordId = record.id;
-				}
-			}
-			// Record id as first argument (other arguments are left untouched)
-			else {
-				recordId = record;
-				record = null;
-			}
-
-			// Integrity: ensure record id is present
-			if (Ext.isEmpty(recordId)) {
-				throw new Error('Illegal argument: record id is required.');
-			}
-		}
-		// Go, baby!
-		this.doEditRecord(recordId, record, startTab, callback, scope, sourceEl);
+		var params = Eoze.GridModule.EditRecordParams.parseArguments(arguments);
+		this.doEditRecord(params);
 	}
 
 	/**
@@ -630,38 +594,40 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	 * Only the record id is mandatory, all other arguments are optional and can be left blank. Even if
 	 * `record` is supplied, `recordId` must be passed as the first argument.
 	 *
-	 * @param {String} recordId
-	 * @param {Ext.data.Record} [record=null]
-	 * @param {Integer/String} [startTab]
-	 * @param {Function} [callback]
-	 * @param {Object} [scope]
-	 * @param {Ext.Element} [sourceEl]
+	 * @param {Eoze.GridModule.Params} params
 	 *
 	 * @protected
 	 *
 	 * @todo #gridmodule This should be moved to a controller.
 	 */
-	,doEditRecord: function(recordId, record, startTab, callback, scope, sourceEl) {
-		this.getEditWindow(recordId, function(win) {
+	,doEditRecord: function(params) {
+		this.getEditWindow(params.getRecordId()), function(win) {
+			var record = params.getRecord(),
+				startTab = params.getStartTab();
+
 			if (!win.hasBeenLoaded) {
 				if (record) {
-					win.setRow(record);
+					win.setRow(params.getRecord());
+
+					// 2011-12-15 05:56 added form.record for opence's season module
+					// 2013-03-19 13:50 (this snippet was after win.form.reset() and win.show -- see bellow)
+					var form = win.formPanel.form;
+					if (form) {
+						form.record = row;
+					}
 				} else {
-					win.setRowId(recordId);
+					win.setRowId(params.getRecordId());
 				}
 
 				win.form.reset();
-				win.show(sourceEl);
+				win.show(params.getSourceEl());
 
-				// 2011-12-15 05:56 added form.record for opence's season module
-				var form = win.formPanel.form;
-				if (form) {
-					form.record = row;
-				}
+				// 2013-03-19 13:50
+				// var form = win.formPanel.form [...] was here
 
 				win.formPanel.refresh(function() {
 					win.hasBeenLoaded = true;
-					Ext.callback(callback, scope, [win]);
+					params.triggerCallback(win);
 				});
 			} else {
 				win.show();
@@ -670,14 +636,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			if (startTab) {
 				win.setTab(startTab);
 			}
-		});
-	}
-
-	/**
-	 * @deprecated
-	 */
-	,editRowById: function(rowId, startTab, callback, scope, sourceEl) {
-		this.editRecord(rowId, startTab, callback, scope, sourceEl);
+		};
 	}
 
 	,editRow: function(row) {
