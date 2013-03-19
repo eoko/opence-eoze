@@ -568,26 +568,88 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		});
 	}
 
-	,editRecord: function(recordId, startTab, cb, scope) {
-		// Msg syntax
-		if (Ext.isObject(recordId)) {
-			cb = recordId.callback;
-			scope = recordId.scope || this;
-			startTab = recordId.tab;
-			recordId = recordId.id;
-		}
-		// Verify args
-		if (recordId === undefined || recordId === null) {
-			throw new Error('Record id is required');
+	/**
+	 * Initiates action for editing (or viewing the specified record).
+	 *
+	 * This method also accepts params as documented for {@link #doEditRecord}.
+	 *
+	 * @param {Object/Ext.data.Record/String} param
+	 * @param {String/Ext.data.Record} param.record
+	 * @param {Integer/String} [param.startTab]
+	 * @param {Function} [param.callback]
+	 * @param {Object} [param.scope]
+	 * @param {Ext.Element} [param.sourceEl]
+	 *
+	 * @todo #gridmodule This should be moved to a controller.
+	 */
+	,editRecord: function(record, startTab, callback, scope, sourceEl) {
+		var recordId;
+		if (Ext.isEmpty(record)) {
+			throw new Error('Illegal arguments: record (or record id) is required.');
+		} else {
+			// Message or Record syntax
+			if (Ext.isObject(record)) {
+				// Record form
+				if (record instanceof Ext.data.Record) {
+					recordId = record.id;
+				}
+				// Message form: extract arguments
+				else {
+					startTab = record.startTab;
+					callback = record.callback;
+					scope = record.scope || this;
+					sourceEl = record.sourceEl;
+					recordId = record.id;
+					record = record.record;
+				}
+
+				// Extract record id from record if supplied
+				if (record && Ext.isEmpty(recordId)) {
+					recordId = record.id;
+				}
+			}
+			// Record id as first argument (other arguments are left untouched)
+			else {
+				recordId = record;
+				record = null;
+			}
+
+			// Integrity: ensure record id is present
+			if (Ext.isEmpty(recordId)) {
+				throw new Error('Illegal argument: record id is required.');
+			}
 		}
 		// Go, baby!
-		return this.editRowById(recordId, startTab, cb, scope);
+		this.doEditRecord(recordId, record, startTab, callback, scope, sourceEl);
 	}
 
-	,editRowById: function(rowId, startTab, callback, scope, sourceEl) {
-		this.getEditWindow(rowId, function(win) {
+	/**
+	 * Actual implementation of {@link #editRecord}. This method should be preferred for overriding,
+	 * since all arguments preparing has been done beforehand.
+	 *
+	 * Only the record id is mandatory, all other arguments are optional and can be left blank. Even if
+	 * `record` is supplied, `recordId` must be passed as the first argument.
+	 *
+	 * @param {String} recordId
+	 * @param {Ext.data.Record} [record=null]
+	 * @param {Integer/String} [startTab]
+	 * @param {Function} [callback]
+	 * @param {Object} [scope]
+	 * @param {Ext.Element} [sourceEl]
+	 *
+	 * @protected
+	 *
+	 * @todo #gridmodule This should be moved to a controller.
+	 */
+	,doEditRecord: function(recordId, record, startTab, callback, scope, sourceEl) {
+		this.getEditWindow(recordId, function(win) {
 			if (!win.hasBeenLoaded) {
-				win.setRowId(rowId);
+				if (record) {
+					win.setRow(record);
+				} else {
+					win.setRowId(recordId);
+				}
+
 				win.form.reset();
 				win.show(sourceEl);
 
@@ -611,6 +673,13 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		});
 	}
 
+	/**
+	 * @deprecated
+	 */
+	,editRowById: function(rowId, startTab, callback, scope, sourceEl) {
+		this.editRecord(rowId, startTab, callback, scope, sourceEl);
+	}
+
 	,editRow: function(row) {
 
 		var el,
@@ -624,44 +693,25 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			}
 		}
 
-		this.editRowById(id, undefined, undefined, undefined, el);
-
-// 2013-03-18 16:38 REM
-//		this.getEditWindow(row.data[this.primaryKeyName], function(win) {
-//			if (!win.hasBeenLoaded) {
-//				win.setRow(row);
-////				win.form.reset();
-//				win.show(el);
-//
-//				// 2011-12-15 05:56 added form.record for opence's season module
-//				var form = win.formPanel.form;
-//				if (form) {
-//					form.record = row;
-//				}
-//
-//				win.formPanel.refresh(function() {
-//					win.hasBeenLoaded = true;
-//				});
-//			} else {
-//				win.show();
-//			}
-//		});
+		this.editRecord({
+			record: row
+			,sourceEl: el
+		});
 	}
 
-	,editReccordLine: function(grid, rowIndex) {
-		debugger // this method is deprecated (typo in its name)
-		return this.editRecordLine(grid, rowIndex);
-	}
-	
 	,editRecordLine: function(grid, rowIndex) {
 		if (this.my.recordEditable !== false) {
 			this.editRow(grid.store.getAt(rowIndex))
 		}
 	}
 
-	,beforeCreateGrid: function(config) {
-
-	}
+	/**
+	 * @param {Object} config
+	 *
+	 * @template
+	 * @protected
+	 */
+	,beforeCreateGrid: function(config) {}
 	
 	// private
 	,onSelectionChange: function(selectionModel) {
@@ -1014,7 +1064,10 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 
 	,afterAdded: function(newId) {
 		if (this.extra.editAfterAdd) {
-			this.editRowById(newId, this.extra.editAfterAddTab);
+			this.editRecord({
+				record: newId
+				,startTab: this.extra.editAfterAddTab
+			});
 		}
 	}
 	
