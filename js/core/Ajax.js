@@ -318,7 +318,7 @@ Oce.Ajax = function() {
 					successMsgHandler(msg);
 				}
 			} else {
-				handleError(opts, 'errors' in obj ? obj.errors : null, response, obj);
+				handleError(opts, obj.errors || null, response, obj);
 			}
 		}
 
