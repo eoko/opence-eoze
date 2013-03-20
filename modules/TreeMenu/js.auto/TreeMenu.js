@@ -258,8 +258,7 @@ Ext.define('eo.ui.menu.tree.Menu', {
 	// private
 	,executeDefaultCommands: function() {
 
-		var initialRoute = eo.AjaxRouter.pause(),
-			promises = [];
+		var promises = [];
 
 		function walk(node) {
 			if (node.data.open) {
@@ -272,6 +271,7 @@ Ext.define('eo.ui.menu.tree.Menu', {
 
 		Deft.Promise.all(promises).always(function() {
 			// all default commands have been run
+			eo.AjaxRouter.initialRoute();
 		});
 	}
 
