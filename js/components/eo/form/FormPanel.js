@@ -4,13 +4,20 @@ Ext.ns("Oce");
  * @xtype oce.form
  */
 Oce.FormPanel = Ext.extend(Ext.FormPanel, {
+
     idValue: undefined
+
     ,initFormItems: undefined
+
     ,constructor: function(config) {
+
+		this.loadingCallbacks = [];
+
         this.addEvents({
             modificationcleared: true
             ,modified: true
         });
+
         config = Ext.applyIf(config || {}, {
              url:'api'
             ,bodyStyle: 'background:transparent'
@@ -20,7 +27,9 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
             ,waitTitle: "Veuillez patientez" // i18n
             ,trackResetOnLoad: true
         });
+
         // --- Default Keys ---
+
         var keys = new Array();
         if (keys.length > 0) {
             if ("keys" in config) {
@@ -35,11 +44,15 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
                 config.keys = keys;
             }
         }
+
         Oce.FormPanel.superclass.constructor.call(this, config);
+
         if (this.formListeners) {
             this.form.on(this.formListeners);
         }
+
         // Mark the form as unmodified, after a successful submit action
+
         this.form.on({
             scope: this
             ,actioncomplete: function(form, action) {
@@ -49,18 +62,27 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
                 }
             }
         });
+
         var lu = this.tabsByName = {},
 			slu = this.tabsBySlug = {};
+
         Ext.each(this.findBy(function(o) { return !Ext.isEmpty(o.tabName) }), function(item) {
-            lu[item.tabName] = item;
+
+			lu[item.tabName] = item;
+
 			var slug = item.slug || item.tabName.toLowerCase().replace(/\s/g, '-');
+
 			item.slug = slug;
 			slu[slug] = item;
         });
+
         this.modified = false;
     }
+
     ,initComponent: function() {
+
         Oce.FormPanel.superclass.initComponent.apply(this, arguments);
+
         if (this.submitHandler) {
             var h = this.submitHandler,
                 l = function(field, el) {
@@ -71,18 +93,22 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
             });
         }
     }
+
     ,afterRender: function() {
         Oce.FormPanel.superclass.afterRender.apply(this, arguments);
         this.addFormChangeListeners();
     }
+
     ,isModified: function() {
         return this.modified;
     }
+
     // private
     ,formChangeListener: function() {
         var me = this,
             waitingToTest = this.waitingToTest,
             refreshDelay = this.refreshDelay;
+
         if (!me.preventModificationEvents) {
             // aggregate cumulated events
             if (waitingToTest) {
@@ -120,6 +146,7 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
             }
         }
     }
+
     ,addFormChangeListeners: function() {
         this.waitingToTest = false,
         this.refreshDelay = 100;
@@ -208,9 +235,10 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
                     walkItems(item);
                 }
             });
-        }
+        };
         walkItems(this);
     }
+
     ,clearModified: function() {
         this.modified = false;
         // clear dirty mark on form items
@@ -225,6 +253,7 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
         this.form.items.each(clearItemDirty);
         this.fireEvent('modificationcleared');
     }
+
     ,setWindow: function(win) {
         if (this.win !== win) {
             // remove previous event
@@ -239,6 +268,7 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
             win.on('aftersave', this.windowSaveListener = this.clearModified.createDelegate(this));
         }
     }
+
     ,setTab: function(tabName) {
         if (this.tabsByName[tabName]) {
             this.tabsByName[tabName].show();
@@ -246,6 +276,7 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
 			this.tabsBySlug[tabName].show();
 		}
     }
+
     ,whenLoaded: function(callback, scope) {
         if (this.loaded) {
             callback(this.form);
@@ -257,15 +288,47 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
             });
         }
     }
-    ,refresh: function(callback) {
-        var me = this;
-        var win = this.win;
+
+	/**
+	 * Reloads data, but only if the initial load has already finished.
+	 *
+	 * @param {Function} [callback]
+	 */
+	,refresh: function(callback) {
+		if (this.loaded) {
+			this.load(callback);
+		}
+	}
+
+	/**
+	 * Reloads data, but only if the initial load has already finished.
+	 *
+	 * @param {Function} [callback]
+	 */
+	,load: function(callback) {
+
+		if (callback) {
+			this.loadingCallbacks.push(callback);
+		}
+
+		if (this.loading) {
+			return;
+		}
+
+		var me = this,
+        	win = this.win;
+
         var options = {
             url: 'api'
             ,waitMsg: "Chargement des données" // i18n
             ,waitTitle: "Veuillez patientez" // i18n
             ,scope: this
-            ,success: function(response, action, type) {
+
+			,callback: function() {
+				this.loading = false;
+			}
+
+			,success: function(response, action, type) {
                 win.formPages = action.result.pages;
                 for (var i=0,l=win.formRefreshers.length; i<l; i++) {
                     win.formRefreshers[i]();
@@ -286,15 +349,20 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
 				this.preventModificationEvents = false;
 				this.clearModified();
                 this.fireEvent('afterload', this.form, action.result, this);
-                if (callback) {
-                    callback(this.form);
-                }
+
+				// Flush callbacks
+				var form = this.form;
+				this.loadingCallbacks.forEach(function(cb) {
+					cb(form)
+				}, this);
+				this.loadingCallbacks = [];
             }
-            ,failure: function(form, action) {
+
+			,failure: function(form, action) {
                 me.preventModificationEvents = false;
                 if (action && action.result && action.result.cause === 'sessionTimeout') {
                     Oce.mx.Security.onOnce('login', function() {
-                        me.refresh(callback);
+                        me.refresh();
                     });
                 } else {
                     win.close();
@@ -305,6 +373,7 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
                 }
             }
         };
+
         var params = {
             controller: this.controller
             ,action: 'load_one'
@@ -318,6 +387,7 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
         this.preventModificationEvents = true;
         this.form.load(options);
     }
+
     // Overridden to allow for JsonForm
     ,createForm: function() {
         var config = Ext.applyIf({listeners: {}}, this.initialConfig);
@@ -327,6 +397,7 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
             return new Ext.form.BasicForm(null, config);
         }
     }
+
     ,onRender:function() {
         // call parent
         Oce.FormPanel.superclass.onRender.apply(this, arguments);
@@ -334,7 +405,9 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
         this.getForm().waitMsgTarget = this.getEl();
     }
 }); // << FormPanel
+
 Ext.reg('oce.form', 'Oce.FormPanel')
+
 /**
  * @class Oce.columnContainer
  * @extends Ext.Container
