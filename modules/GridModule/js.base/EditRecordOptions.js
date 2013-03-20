@@ -25,7 +25,7 @@
  *
  * @since 2013-03-19 11:07
  */
-Ext4.define('Eoze.GridModule.EditRecordParams', {
+Ext4.define('Eoze.GridModule.EditRecordOptions', {
 
 	/**
 	 * @cfg {String} recordId
@@ -53,33 +53,25 @@ Ext4.define('Eoze.GridModule.EditRecordParams', {
 	 * The element from which the opening window (if any) will be animated.
 	 */
 
-	statics: {
-		/**
-		 * @param params
-		 * @throw Error If the passed params are not valid (integrity check).
-		 * @return {Eoze.GridModule.EditRecordParams}
-		 */
-		parseParams: function (params) {
-			var Params = Eoze.GridModule.EditRecordParams;
-			if (!(params instanceof Params)) {
-				params = new Params(params);
-			}
-			if (params.testIntegrity()) {
-				return params;
-			} else {
-				throw new Error('Illegal argument: record id is required.');
-			}
-		}
+	/**
+	 * @cfg {Object} [options]
+	 */
+
+	mixins: {
+		observable: 'Ext.util.Observable'
+	}
+
+	,statics: {
 
 		/**
 		 * @param {Objects} args The arguments to parse from.
-		 * @return {Eoze.GridModule.EditRecordParams}
+		 * @return {Eoze.GridModule.EditRecordOptions}
 		 */
-		,parseArguments: function() {
+		parseOperation: function() {
 
 			function parseConfig(record, startTab, callback, scope, sourceEl) {
 
-				var Params = Eoze.GridModule.EditRecordParams,
+				var Params = Eoze.GridModule.EditRecordOptions,
 					config = {};
 
 				if (arguments.length > 0) {
@@ -119,13 +111,58 @@ Ext4.define('Eoze.GridModule.EditRecordParams', {
 			}
 
 			return function(args) {
-				return new Eoze.GridModule.EditRecordParams(parseConfig.apply(this, args));
+				return new Eoze.GridModule.EditRecordOptions(parseConfig.apply(this, args));
 			};
 		}()
 	}
 
+	/**
+	 * @event aftercreatewindow
+	 *
+	 * Fires when the edit window has been created.
+	 *
+	 * @param {Eoze.GridModule.EditRecordOptions} this
+	 * @param {Ext.Window} window
+	 */
+	,EVENT_AFTER_CREATE_WINDOW: 'aftercreatewindow'
+	/**
+	 * @event windowready
+	 *
+	 * Fires when the window for the operation is available, if it was just created as well as if
+	 * it already existed. At this point, the window will not have been loaded yet.
+	 *
+	 * @param {Eoze.GridModule.EditRecordOptions} this
+	 * @param {Ext.Window} window
+	 */
+	,EVENT_WINDOW_READY: 'windowready'
+	/**
+	 * @event loaded
+	 *
+	 * Fires when a preparation loading has finished.
+	 *
+	 * @param {Eoze.GridModule.EditRecordOptions} this
+	 * @param {Ext.Window} window
+	 * @param {Boolean} first True if the loading was the initial one.
+	 */
+	,EVENT_LOADED: 'loaded'
+	/**
+	 * @event ready
+	 *
+	 * Fires when the edit form is ready (i.e. loaded). This event fires only once for each operation.
+	 *
+	 * @param {Eoze.GridModule.EditRecordOptions} this
+	 */
+	,EVENT_READY: 'ready'
+
 	,constructor: function(config) {
-		Ext.apply(this, config);
+		this.mixins.observable.constructor.call(this, config);
+
+		this.addEvents(
+			this.EVENT_AFTER_CREATE_WINDOW,
+			this.EVENT_WINDOW_READY,
+			this.EVENT_LOADED,
+			this.EVENT_READY
+		);
 	}
 
 	/**
@@ -153,19 +190,12 @@ Ext4.define('Eoze.GridModule.EditRecordParams', {
 
 	/**
 	 * @params {String} id
-	 * @return {Eoze.GridModule.EditRecordParams} this
+	 * @return {Eoze.GridModule.EditRecordOptions} this
 	 */
 	,setRecordId: function(id) {
 		this.recordId = id;
 		return this;
 	}
-//
-//	/**
-//	 * @return {Boolean}
-//	 */
-//	,hasRecord: function() {
-//		return this.record !== undefined;
-//	}
 
 	/**
 	 * @return {Ext.data.Record/undefined}
@@ -176,7 +206,7 @@ Ext4.define('Eoze.GridModule.EditRecordParams', {
 
 	/**
 	 * @params {Ext.data.Record} record
-	 * @return {Eoze.GridModule.EditRecordParams} this
+	 * @return {Eoze.GridModule.EditRecordOptions} this
 	 */
 	,setRecord: function(record) {
 		this.record = record;
@@ -209,7 +239,7 @@ Ext4.define('Eoze.GridModule.EditRecordParams', {
 	/**
 	 * @params {Function} callback
 	 * @params {Object} [scope]
-	 * @return {Eoze.GridModule.EditRecordParams} this
+	 * @return {Eoze.GridModule.EditRecordOptions} this
 	 */
 	,setCallback: function (callback, scope) {
 		this.callback = callback;
@@ -226,11 +256,106 @@ Ext4.define('Eoze.GridModule.EditRecordParams', {
 
 	/**
 	 * @param {Ext.Element} sourceEl
-	 * @return {Eoze.GridModule.EditRecordParams} this
+	 * @return {Eoze.GridModule.EditRecordOptions} this
 	 */
 	,setSourceEl: function (sourceEl) {
 		this.sourceEl = sourceEl;
 		return this;
 	}
 
+	/**
+	 * @return {Object}
+	 */
+	,getOptions: function() {
+		if (!this.options) {
+			this.options = {};
+		}
+		return this.options;
+	}
+
+	/**
+	 * @param {String/Object} name
+	 * @param {Mixed} [value]
+	 */
+	,setOption: Ext4.Function.flexSetter(function(name, value) {
+		var options = this.getOptions();
+		options[name] = value;
+	})
+
+	/**
+	 * @param {String/String[]} name
+	 */
+	,unsetOption: function(name) {
+		var options = this.options;
+		if (options) {
+			if (Ext.isArray(name)) {
+				name.forEach(function(name) {
+					delete options[name];
+				});
+			} else {
+				delete options[name];
+			}
+		}
+	}
+
+	/**
+	 * @param {Ext.Window} win
+	 * @param {Boolean} [existing=false] True if the window already existed.
+	 * @return {Eoze.GridModule.EditRecordOptions} this
+	 */
+	,setWindow: function(win, existing) {
+
+		if (this.win) {
+			throw new Error('Window already set.');
+		}
+
+		// Reference
+		this.win = win;
+
+		// Legacy callback (probably slightly broken, deprecate!)
+		Ext.callback(this.callback, this.scope, win);
+
+		// Event
+		if (!existing) {
+			this.fireEvent(this.EVENT_AFTER_CREATE_WINDOW, this, win);
+		}
+
+		this.fireEvent(this.EVENT_WINDOW_READY, this, win);
+
+		return this;
+	}
+
+	,getWindow: function() {
+		return this.win;
+	}
+
+	/**
+	 * Notifies that the edit form is ready (loaded).
+	 */
+	,notifyReady: function() {
+		if (!this.readyFired) {
+			this.readyFired = true;
+			this.fireEvent(this.EVENT_READY, this);
+		}
+	}
+
+	/**
+	 * Notifies that a preparation loading has finished.
+	 *
+	 * @param {Ext.Window} win
+	 * @param {Boolean} first True if it was the initial loading.
+	 */
+	,notifyLoaded: function(win, first) {
+		this.triggerCallback(win);
+
+		if (first) {
+			this.notifyReady();
+		}
+
+		this.fireEvent(this.EVENT_LOADED, this, win, first);
+	}
+
+	,notifyClosed: function() {
+
+	}
 });
