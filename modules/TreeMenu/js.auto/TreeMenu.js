@@ -257,18 +257,22 @@ Ext.define('eo.ui.menu.tree.Menu', {
 	
 	// private
 	,executeDefaultCommands: function() {
-		
-		var walk = function(node) {
+
+		var promises = [];
+
+		function walk(node) {
 			if (node.data.open) {
-				node.run();
+				promises.push(node.run());
 			}
 			node.eachChild(walk);
-		};
-		
-		return function() {
-			walk(this.getRootNode());
-		};
-	}()
+		}
+
+		walk(this.getRootNode());
+
+		Deft.Promise.all(promises).always(function() {
+			// all default commands have been run
+		});
+	}
 
 	// private
 	,createTreeNodeClass: function() {
