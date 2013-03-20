@@ -7,11 +7,11 @@
 
 /**
  * TreeMenu panel.
- * 
+ *
  * @xtype applicationmenu
  */
 Ext.define('eo.ui.menu.tree.Menu', {
-	
+
 	extend: 'Ext.tree.TreePanel'
 	,alias: ['widget.applicationmenu']
 	,requires: [
@@ -33,7 +33,7 @@ Ext.define('eo.ui.menu.tree.Menu', {
 		'Oce.FormPanel',
 		'Oce.FormWindow'
 	]
-	
+
 	/**
 	 * @cfg {Boolean}
 	 * If `true`, the menu nodes can be added, moved, removed and edited (name,
@@ -41,48 +41,48 @@ Ext.define('eo.ui.menu.tree.Menu', {
 	 * menu to reset the menu to the default.
 	 */
 	,editable: false
-	
+
 	/**
 	 * @cfg {String} controller
 	 * Name of the server side controller.
 	 */
-	
+
 	/**
 	 * @cfg {Boolean}
 	 * Adds a toolbar to filter menu items.
 	 */
 	,filterable: true
-	
+
 	,initEvents: function() {
-		this.addEvents(["actionsloaded", "ready"]);
+		this.addEvents(['actionsloaded', 'ready']);
 		this.callParent(arguments);
 	}
-	
+
 	,initComponent: function() {
-		
+
 		this.sjax = new eo.Sjax;
 
 		// customizing the prototype's TreeNode class with this menu's config
 		this.TreeNode = this.createTreeNodeClass();
-		
+
 		Ext.apply(this, {
-			title: "Navigation"
+			title: "Navigation" // i18n
 			,border: false
-			
+
 			,autoScroll: true
 
 			,enableDD: true
 			,useArrows: true
 			,animate: true
 			,containerScroll: true
-		
+
 			,rootVisible: false
-			
+
 			,root: new this.TreeNode({
 				text: 'root'
 				,id: 'root'
 			})
-			
+
 			,iconStore: new Ext.ux.data.PagingStore({
 				url: 'api'
 				,autoLoad: false
@@ -90,18 +90,18 @@ Ext.define('eo.ui.menu.tree.Menu', {
 					controller: this.controller
 					,action: 'listIcons'
 				}
-				
+
 				,reader: new Ext.data.JsonReader({
 					fields: ['id', 'class', 'label']
 					,root: 'data'
 				})
-				
+
 				,whenLoaded: function(cb, scope) {
 					if (this.firstLoadDone) {
 						if (cb) cb.call(scope || this, this);
 					} else {
 						if (cb) this.addLoadingWaiter(cb, scope);
-						
+
 						if (!this.loading) {
 							this.loading = true
 							this.on({
@@ -117,14 +117,14 @@ Ext.define('eo.ui.menu.tree.Menu', {
 						}
 					}
 				}
-				
+
 				// private
 				,addLoadingWaiter: function(cb, scope) {
 					var list = this.loadingWaiters = this.loadingWaiters || [];
 					if (scope) cb = cb.createDelegate(scope);
 					list.push(cb);
 				}
-				
+
 				// private
 				,onFirstLoad: function() {
 					this.loading = false;
@@ -138,7 +138,7 @@ Ext.define('eo.ui.menu.tree.Menu', {
 				}
 			})
 		});
-		
+
 		// gear menu
 		if (this.editable) {
 			Ext.apply(this, {
@@ -158,22 +158,22 @@ Ext.define('eo.ui.menu.tree.Menu', {
 				})
 			});
 		}
-		
+
 		// context menu
 		if (this.editable) {
 			this.contextMenu = new Ext.menu.Menu({
 				items: [{
-					text: "Propriétés..."
+					text: "Propriétés..." // i18n
 					,iconCls: 'ico application_form_edit'
 					,handler: this.onNodeEdit
 					,scope: this
 				},'-',{
-					text: "Ajouter..."
+					text: "Ajouter..." // i18n
 					,iconCls: 'ico add'
 					,handler: this.onNodeAdd
 					,scope: this
 				},{
-					text: "Supprimer"
+					text: "Supprimer" // i18n
 					,iconCls: 'ico delete'
 					,handler: this.onNodeRemove
 					,scope: this
@@ -185,13 +185,13 @@ Ext.define('eo.ui.menu.tree.Menu', {
 		if (this.filterable) {
 			this.tbar = new Ext.Toolbar({
 				layout: {
-					type: "hbox"
-					,align: "middle"
+					type: "hbox" // i18n
+					,align: 'middle'
 				}
 				,items: [{
-					xtype: "eo.search"
+					xtype: 'eo.search'
 					,flex: 1
-					,emptyText: "Filtrer"
+					,emptyText: "Filtrer" // i18n
 					,listeners: {
 						scope: this
 						,search: function(f) {
@@ -211,23 +211,23 @@ Ext.define('eo.ui.menu.tree.Menu', {
 				,new Ext.Toolbar.Separator({
 					width: 10
 				}), {
-					iconCls: "menu icon-expand-all"
-					,tooltip: "Développer tout"
+					iconCls: 'menu icon-expand-all'
+					,tooltip: "Développer tout" // i18n
 					,handler: function() {this.root.expand(true)}
 					,scope: this
 				},{
-					iconCls: "menu icon-collapse-all"
-					,tooltip: "Réduire tout"
+					iconCls: 'menu icon-collapse-all'
+					,tooltip: "Réduire tout" // i18n
 					,handler: function() {this.root.collapse(true)}
 					,scope: this
 				}]
 			})
 		}
-		
+
 		this.callParent(arguments);
-		
-		this.addClass("eozeTreeMenu");
-		
+
+		this.addClass('eozeTreeMenu');
+
 		if (this.editable) {
 			this.on({
 				scope: this
@@ -236,12 +236,12 @@ Ext.define('eo.ui.menu.tree.Menu', {
 				,movenode: this.onNodeDrop
 			});
 		}
-		
+
 		if (!Ext.isEmpty(this.userId)) {
 			this.load(this.executeDefaultCommands, this);
 		}
 	} // initComponent
-	
+
 //	// private
 //	,clearCache: function() {
 //		Oce.Ajax.request({
@@ -254,11 +254,12 @@ Ext.define('eo.ui.menu.tree.Menu', {
 //			}
 //		});
 //	}
-	
+
 	// private
 	,executeDefaultCommands: function() {
 
-		var promises = [];
+		var initialRoute = eo.AjaxRouter.pause(),
+			promises = [];
 
 		function walk(node) {
 			if (node.data.open) {
@@ -279,11 +280,11 @@ Ext.define('eo.ui.menu.tree.Menu', {
 		var me = this;
 		return Ext.define(null, {
 			extend: 'eo.ui.menu.tree.Node'
-			
+
 			,ownerTreeMenu: this
-			
+
 			,sjax: this.sjax
-			
+
 			// Node in fixed menu are not draggable
 			,draggable: this.editable
 
@@ -358,7 +359,7 @@ Ext.define('eo.ui.menu.tree.Menu', {
 					me.sjax.request({
 						params: {
 							controller: me.controller
-							,action: "resetFactoryDefaults"
+							,action: 'resetFactoryDefaults'
 						}
 						,onSuccess: function() {
 							me.setLoadingMask(true);
@@ -370,10 +371,10 @@ Ext.define('eo.ui.menu.tree.Menu', {
 			}
 		);
 	}
-	
+
 	// private
 	,onNodeClick: function(node, e) {}
-	
+
 	,onNodeDrop: function(tree, node, oldParent, newParent) {
 		if (oldParent !== newParent) {
 			oldParent.saveFullNode(function() {
@@ -383,7 +384,7 @@ Ext.define('eo.ui.menu.tree.Menu', {
 			newParent.saveFullNode();
 		}
 	}
-	
+
 	,createEditWindow: function(config) {
 
 		var node = config && config.node || new this.TreeNode(),
@@ -393,11 +394,11 @@ Ext.define('eo.ui.menu.tree.Menu', {
 		if (config.parentNode) {
 			node.setCreationParent(config.parentNode)
 		}
-		
+
 		var actionStore = new Ext.data.JsonStore({
-			fields: ["id", "label", "color", "iconCls", "command", "expanded", "open"]
+			fields: ['id', 'label', 'color', 'iconCls', 'command', 'expanded', 'open']
 		});
-		
+
 		if (!!data.action_family) {
 			var fam = this.availableActions[data.action_family];
 			if (fam) {
@@ -407,44 +408,44 @@ Ext.define('eo.ui.menu.tree.Menu', {
 				return null;
 			}
 		}
-		
+
 		var formPanel = new Oce.FormPanel({
 			defaults: {
 				allowBlank: true
-				,anchor: "0"
+				,anchor: '0'
 			}
 			,items: [{
-				xtype: "compositefield"
-				,fieldLabel: "Action"
+				xtype: 'compositefield'
+				,fieldLabel: "Action" // i18n
 				,items: [{
-					xtype: "combo"
+					xtype: 'combo'
 					,store: this.actionFamiliesStore
-					,mode: "local"
-					,name: "action_family"
-					,displayField: "label"
-					,valueField: "id"
-					,triggerAction: "all"
+					,mode: 'local'
+					,name: 'action_family'
+					,displayField: 'label'
+					,valueField: 'id'
+					,triggerAction: 'all'
 					,minChars: 1
 					,value: data.action_family
 					,selectOnFocus: true
 					,flex: 1
 					,listeners: {
 						select: function(combo, familyRecord) {
-							var actions = eo.hashToArray(familyRecord.get("actions"));
+							var actions = eo.hashToArray(familyRecord.get('actions'));
 							actionStore.loadData(actions);
-							formPanel.form.findField("action").setValue();
+							formPanel.form.findField('action').setValue();
 						}
 					}
 				},{
-					xtype: "combo"
-					,name: "action"
+					xtype: 'combo'
+					,name: 'action'
 					,flex: 1
-					,triggerAction: "all"
+					,triggerAction: 'all'
 					,store: actionStore
 					,minChars: 1
-					,mode: "local"
-					,displayField: "label"
-					,valueField: "id"
+					,mode: 'local'
+					,displayField: 'label'
+					,valueField: 'id'
 					,value: data.action
 					,selectOnFocus: true
 					,listeners: {
@@ -457,42 +458,42 @@ Ext.define('eo.ui.menu.tree.Menu', {
 						}
 					}
 				},{
-					xtype: "button"
-					,iconCls: "ico cross"
+					xtype: 'button'
+					,iconCls: 'ico cross'
 					,handler: function() {
 						var f = formPanel.form;
-						f.findField("action_family").setValue();
-						f.findField("action").setValue();
-						f.findField("command").setValue();
+						f.findField('action_family').setValue();
+						f.findField('action').setValue();
+						f.findField('command').setValue();
 					}
 				}]
 			},{
-				xtype: "textfield"
-				,name: "label"
-				,fieldLabel: "Label"
+				xtype: 'textfield'
+				,name: 'label'
+				,fieldLabel: "Label" // i18n
 				,allowBlank: false
 				,value: data.label
 			},{
-				xtype: "hidden"
-				,name: "command"
-				,fieldLabel: "command"
+				xtype: 'hidden'
+				,name: 'command'
+				,fieldLabel: 'command'
 				,value: data.command
 			},{
-				xtype: "compositefield"
-				,fieldLabel: "Icône"
+				xtype: 'compositefield'
+				,fieldLabel: "Icône" // i18n
 				,items: [{
-					xtype: "iconcombo"
-					,name: "iconCls"
-					,triggerAction: "all"
+					xtype: 'iconcombo'
+					,name: 'iconCls'
+					,triggerAction: 'all'
 					,store: this.iconStore
-					,mode: "local"
-					,displayField: "label"
-					,valueField: "class"
+					,mode: 'local'
+					,displayField: 'label'
+					,valueField: 'class'
 					//,value: data.iconCls
 					,pageSize: 10
-					,iconClsField: "class"
+					,iconClsField: 'class'
 					,flex: 1
-					,pagingToolbarXtype: "ux.paging"
+					,pagingToolbarXtype: 'ux.paging'
 					,minListWidth: 235
 					// we want the paging toolbar (hence the list) to be created
 					// before the afterrender event
@@ -503,7 +504,7 @@ Ext.define('eo.ui.menu.tree.Menu', {
 								var tb = f.pageTb;
 								if (data.iconCls) {
 									var s = f.store,
-										i = s.find("class", data.iconCls),
+										i = s.find('class', data.iconCls),
 										p = i / tb.pageSize + (i % tb.pageSize > 0 ? 1 : 0);
 									f.setValue(data.iconCls);
 									tb.changePage(p + 1); // counting from 1...
@@ -514,95 +515,95 @@ Ext.define('eo.ui.menu.tree.Menu', {
 						}
 						,scope: this
 					}
- 
+
 				},{
-					xtype: "button"
-					,iconCls: "ico cross"
+					xtype: 'button'
+					,iconCls: 'ico cross'
 					,handler: function() {
 						var f = formPanel.form;
-						f.findField("iconCls").setValue();
+						f.findField('iconCls').setValue();
 					}
 				}]
 			},{
-				xtype: "colorpicker"
-				,name: "color"
-				,fieldLabel: "Couleur"
+				xtype: 'colorpicker'
+				,name: 'color'
+				,fieldLabel: "Couleur" // i18n
 				,value: data.color || this.TreeNode.prototype.defaultColor
 				,defaultColor: data.color || this.TreeNode.prototype.defaultColor
 			},{
-				xtype: "container"
-				,layout: "form"
+				xtype: 'container'
+				,layout: 'form'
 				,labelWidth: 135
 				,items: [{
-					xtype: "checkbox"
-					,name: "expanded"
-					,fieldLabel: "Développé par défaut"
+					xtype: 'checkbox'
+					,name: 'expanded'
+					,fieldLabel: "Développé par défaut" // i18n
 					,checked: !!data.expanded
 				},{
-					xtype: "checkbox"
-					,name: "open"
-					,fieldLabel: "Exécuter au démarrage"
+					xtype: 'checkbox'
+					,name: 'open'
+					,fieldLabel: "Exécuter au démarrage" // i18n
 					,checked: !!data.open
 				}]
 			}]
 		});
-		
+
 		var win = new Oce.FormWindow(Ext.apply({
 			formPanel: formPanel
 			,width: 640
-			
+
 			,maximizable: false
 			,minimizable: false
-			
+
 			,submitButton: 0
-			
+
 			,buttons: [{
-				text: "Ok"
+				text: "Ok" // i18n
 				,handler: function() {
 					var form = formPanel.form;
 					if (form.isValid()) {
 						node.update(Ext.apply(form.getFieldValues(), {
-							action_family: form.findField("action_family").getValue()
-							,action: form.findField("action").getValue()
-							,iconCls: form.findField("iconCls").getValue() || null
+							action_family: form.findField('action_family').getValue()
+							,action: form.findField('action').getValue()
+							,iconCls: form.findField('iconCls').getValue() || null
 						}));
 						node.save();
 						win.close();
 					}
 				}
 			}, {
-				text: "Annuler"
+				text: "Annuler" // i18n
 				,handler: function() {win.close()}
 			}]
 		}, config));
-		
+
 		return win;
 	}
-	
+
 	// private
 	,onNodeEdit: function() {
 		var win = this.createEditWindow({
 			node: this.contextMenu.node
 			,modal: true
-			,title: "Édition du menu"
-			,iconCls: "ico application_form_edit"
+			,title: "Édition du menu" // i18n
+			,iconCls: 'ico application_form_edit'
 		});
 		// if an error has occured, no win is returned
 		if (win) win.show();
 	}
-	
+
 	// private
 	,onNodeAdd: function() {
 		var win = this.createEditWindow({
 			modal: true
-			,title: "Nouvel élément de menu"
-			,iconCls: "ico add"
+			,title: "Nouvel élément de menu" // i18n
+			,iconCls: 'ico add'
 			,parentNode: this.contextMenu.node
 		});
 		// if an error has occured, no win is returned
 		if (win) win.show();
 	}
-	
+
 	// private
 	,onNodeRemove: function() {
 		var n = this.contextMenu.node;
@@ -611,7 +612,7 @@ Ext.define('eo.ui.menu.tree.Menu', {
 			this.contextMenu.node = null;
 		}
 	}
-	
+
 	// private
 	,onNodeRightClick: function(node, e) {
 		if (node instanceof Ext.tree.TreePanel) {
@@ -622,37 +623,37 @@ Ext.define('eo.ui.menu.tree.Menu', {
 		menu.node = node;
 		menu.showAt(e.getXY());
 	}
-	
+
 	// private
 	,onRender: function() {
 		this.callParent(arguments);
 		if (this.hasLoadingMask) this.setLoadingMask(true);
 	}
-	
+
 	,loadingLatch: 0
-	
+
 	,addLoading: function() {
 		if (++this.loadingLatch) {
 			this.setLoadingMask(true);
 		}
 	}
-	
+
 	,removeLoading: function() {
 		if (!--this.loadingLatch) {
 			this.setLoadingMask(false);
 			this.setReady();
 		}
 	}
-	
+
 	,setLoadingMask: function(set) {
 		var el = this.body;
 		if (set) {
 			if (el) {
 				if (!this.loadingEl) {
 					this.loadingEl = Ext.get(Ext.DomHelper.createDom({
-						tag: "div"
-						,cls: "loading-indicator"
-						,html: "Chargement du menu..."
+						tag: 'div'
+						,cls: 'loading-indicator'
+						,html: "Chargement du menu..." // i18n
 					}));
 					el.appendChild(this.loadingEl);
 				}
@@ -667,30 +668,30 @@ Ext.define('eo.ui.menu.tree.Menu', {
 			this.hasLoadingMask = false;
 		}
 	}
-	
+
 	,whenReady: function(fn, scope) {
 		if (this.ready) {
 			fn.call(scope || this);
 		} else {
-			this.on("ready", fn, scope, {single: true});
+			this.on('ready', fn, scope, {single: true});
 		}
 	}
-	
+
 	,setReady: function() {
 		if (!this.ready) {
 			this.ready = true;
-			this.fireEvent("ready");
+			this.fireEvent('ready');
 		}
 	}
-	
+
 	,load: function(callback, scope) {
 
 		this.addLoading();
-		
+
 		this.sjax.request({
 			params: {
 				controller: this.controller
-				,action: "loadUserMenu"
+				,action: 'loadUserMenu'
 			}
 			,onSuccess: function(data) {
 				this.removeLoading();
@@ -702,13 +703,13 @@ Ext.define('eo.ui.menu.tree.Menu', {
 			,onFailure: function() {
 				this.removeLoading();
 				var a = Ext.get(Ext.DomHelper.createDom({
-					tag: "a"
-					,html: "Réessayer"
+					tag: 'a'
+					,html: "Réessayer" // i18n
 				}));
 				var div = Ext.get(Ext.DomHelper.createDom({
-					tag: "div"
-					,html: "<p>Une erreur a empêché le chargement de ce menu.</p>"
-					,cls: "menu-message error"
+					tag: 'div'
+					,html: "<p>Une erreur a empêché le chargement de ce menu.</p>" // i18n
+					,cls: 'menu-message error'
 				}));
 				div.appendChild(a);
 				var retry = this.load.createDelegate(this);
@@ -717,16 +718,16 @@ Ext.define('eo.ui.menu.tree.Menu', {
 					retry();
 				});
 				this.body.appendChild(div);
-				
+
 				return false;
 			}.createDelegate(this)
 		});
-		
+
 		if (!this.availableActions) {
 			this.loadActions();
 		}
 	}
-	
+
 	// TODO this is probably slightly buggy...
 	,reloadActions: function(delay) {
 		if (delay) {
@@ -743,26 +744,26 @@ Ext.define('eo.ui.menu.tree.Menu', {
 			this.load();
 		}
 	}
-	
+
 	,loadActions: function(cb) {
-		
+
 		if (this.availableActions === false) return;
-		
+
 		this.availableActions = false;
-		
+
 		var me = this;
-		
+
 		this.addLoading();
 		this.sjax.request({
 			params: {
 				controller: this.controller
-				,action: "getAvailableActions"
+				,action: 'getAvailableActions'
 			}
 			,onSuccess: function(data) {
 				me.availableActions = data.families;
 				me.createActionStores();
 				me.removeLoading();
-				me.fireEvent("actionsloaded", me, me.availableActions);
+				me.fireEvent('actionsloaded', me, me.availableActions);
 			}
 			,onFaillure: function() {
 				me.removeLoading();
@@ -770,15 +771,15 @@ Ext.define('eo.ui.menu.tree.Menu', {
 			}
 		});
 	}
-	
+
 	// private
 	,createActionStores: function() {
-		
+
 		if (this.actionFamiliesStore) {
 			this.actionFamiliesStore.loadData(eo.hashToArray(this.availableActions));
 		} else {
 			this.actionFamiliesStore = new Ext.data.JsonStore({
-				fields: ["id","label","actions","iconCls"]
+				fields: ['id','label','actions','iconCls']
 				,data: eo.hashToArray(this.availableActions)
 			});
 		}
@@ -791,14 +792,14 @@ Ext.define('eo.ui.menu.tree.Menu', {
 			});
 		}
 	}
-	
+
 	,loadNodeData: function(data) {
-		
+
 		var root = this.getRootNode(),
 			listeners = {click: this.onNodeClick, scope : this};
-			
+
 		root.removeAll();
-			
+
 		Ext.each(data, function(nodeData) {
 			root.appendChild(
 				new this.TreeNode({
@@ -807,7 +808,7 @@ Ext.define('eo.ui.menu.tree.Menu', {
 				})
 			);
 		}, this);
-		
+
 		this.resetCollapse();
 	}
 });
