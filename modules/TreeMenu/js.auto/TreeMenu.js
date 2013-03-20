@@ -290,8 +290,7 @@ Ext.define('eo.ui.menu.tree.Menu', {
 
 			,getFamilyStore: function(cb) {
 				if (!me.actionFamiliesStore) {
-					var waitingList =
-							me.waitingFamiliesStore = me.waitingFamiliesStore || [];
+					var waitingList = me.waitingFamiliesStore = me.waitingFamiliesStore || [];
 					waitingList.push(cb);
 				} else {
 					return me.actionFamiliesStore;
