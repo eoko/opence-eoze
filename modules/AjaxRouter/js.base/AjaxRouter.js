@@ -237,15 +237,34 @@ Ext.define('eo.AjaxRouter', {
 	 * Sets the active page. If the passed object has an href property, it will be
 	 * set as the current url.
 	 *
+	 * Front pages
+	 * -----------
+	 *
+	 * Floating components like windows are considered as front pages. If the current
+	 * active page is a front page and `setActivePage` is called for a page that is
+	 * not a front page, this page will be ignored. That is to say, front pages have
+	 * higher priority than normal, non front, pages.
+	 *
+	 * This behaviour can be overridden be specifying the {@link #previousPage previous
+	 * page}. If the currently active page is the same as the passed previous page, then
+	 * the active page will be changed, regardless of front priority.
+	 *
 	 * @param {Object} page
+	 * @param {Object} [previousPage]
 	 */
-	,setActivePage: function(page) {
-		var hash;
-		if (page) {
-			if (page.href) {
-				hash = page.href;
-			}
+	,setActivePage: function(page, previousPage) {
+
+		// Front pages are not replaced with back pages
+		var activePage = this.activePage;
+		if (page && activePage && activePage !== previousPage
+			&& this.isFrontPage(activePage)
+			&& !this.isFrontPage(page)) {
+			return;
 		}
+
+		// Hash
+		var hash = page && page.href;
+
 		if (hash) {
 			if (hash.substr(0,2) !== '#!') {
 				hash = '#!/' + hash;
@@ -254,8 +273,19 @@ Ext.define('eo.AjaxRouter', {
 			hash = '';
 		}
 
+		// Apply
+		this.activePage = page;
 		this.hash = hash;
 		this.updateTask.delay(100);
+	}
+
+	/**
+	 * @param {Object} page
+	 *
+	 * @private
+	 */
+	,isFrontPage: function(page) {
+		return page && page.floating;
 	}
 
 }, function() {
@@ -296,7 +326,7 @@ Ext.define('eo.AjaxRouter', {
 			,deactivate: function() {
 				var module = Oce.mx.application.getFrontModule(),
 					tab = module && module.tab;
-				eo.AjaxRouter.setActivePage(tab);
+				eo.AjaxRouter.setActivePage(tab, this);
 			}
 		})
 	});
