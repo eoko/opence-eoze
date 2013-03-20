@@ -101,6 +101,15 @@ Ext.define('eo.AjaxRouter', {
 	}
 
 	/**
+	 * Handler for hash change.
+	 *
+	 * @private
+	 */
+	,onHashChange: function() {
+		this.route();
+	}
+
+	/**
 	 * @param {String} path
 	 * @return {eo.AjaxRouter.Route}
 	 */
@@ -288,9 +297,20 @@ Ext.define('eo.AjaxRouter', {
 		return page && page.floating;
 	}
 
+	/**
+	 * Process the initial route.
+	 */
+	,initialRoute: function() {
+		this.route();
+	}
+
 }, function() {
 
 	var initialPath = this.prototype.getCurrentPath();
+
+	this.prototype.initialRoute = function() {
+		this.route(initialPath);
+	};
 
 	Ext.onReady(function() {
 
@@ -306,11 +326,11 @@ Ext.define('eo.AjaxRouter', {
 				me.register(data.routes);
 
 				eo.getApplication().onStarted(function() {
-					me.route(initialPath);
+					me.initialRoute();
 				});
 
 				Ext.fly(window).on('hashchange', function() {
-					eo.AjaxRouter.route();
+					eo.AjaxRouter.onHashChange();
 				});
 			}
 		});
