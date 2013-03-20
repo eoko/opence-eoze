@@ -81,6 +81,12 @@ Ext.define('eo.AjaxRouter', {
 		if (!path) {
 			path = this.getCurrentPath();
 		}
+
+		// Do not execute the action if the url has been changed with setActivePage
+		if (this.hash === '#!/' + path) {
+			return;
+		}
+
 		var match = null;
 		this.getSortedRoutes().each(function(routes) {
 			Ext.each(routes, function(route) {
