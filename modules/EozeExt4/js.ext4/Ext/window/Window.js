@@ -7,18 +7,22 @@
  */
 Ext4.define('Eoze.Ext.window.Window', {
 	override: 'Ext4.window.Window'
+
+	,constrainHeader: true
 	
 	/**
 	 * @cfg {Boolean}
+	 *
 	 * True to animate the window with the default {@link #animateTarget} when it 
-	 * is shown. If an animateTarget is explicitely passed to the {@link #show}
+	 * is shown. If an animateTarget is explicitly passed to the {@link #show}
 	 * method, this option will not prevent it.
 	 */
 	,animShow: true
 	/**
 	 * @cfg {Boolean}
+	 *
 	 * True to animate the window with the default {@link #animateTarget} when it 
-	 * is hidden. If an animateTarget is explicitely passed to the {@link #hide}
+	 * is hidden. If an animateTarget is explicitly passed to the {@link #hide}
 	 * method, this option will not prevent it.
 	 */
 	,animHide: true
