@@ -864,7 +864,7 @@ MSG;
 
 		$this->loadOne_addExtraData($data, $model);
 
-		$this->data = $data;
+		$this->set('data', $data);
 
 		return true;
 	}
