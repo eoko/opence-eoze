@@ -961,21 +961,24 @@ abstract class ModelTable extends ModelTableProxy {
 	/**
 	 * Starts a search in %%ModelTable%%
 	 * @param $condition
-	 * @param $inputs,...
+	 * @param $inputs
+	 * @param array $context
 	 * @return ModelTableFinder
 	 * @see QueryWhere for the syntax of a search
 	 * @ignore
 	 */
-	protected function _find($condition = null, $inputs = null) {
-		if (func_num_args() > 2) $inputs = array_splice(func_get_args(), 1);
-		return new ModelTableFinder($this, $condition, $inputs);
+	protected function _find($condition = null, $inputs = null, array $context = null) {
+		// 2013-03-21 Deprecated multiple inputs args
+		// if (func_num_args() > 2) $inputs = array_splice(func_get_args(), 1);
+		return new ModelTableFinder($this, $condition, $inputs, $context);
 	}
 
 	/**
 	 *
 	 * @param string $col
 	 * @param mixed $value
-	 * @param Const $mode
+	 * @param int $mode
+	 * @throws IllegalArgumentException
 	 * @return ModelSet
 	 */
 	protected function _findBy($col, $value, $mode) {
@@ -1166,12 +1169,21 @@ EX
 //	}
 
 	/**
+	 * @param string $condition
+	 * @param array $inputs
+	 * @param array $context
 	 * @return ModelTableFinder
 	 * @ignore
 	 */
-	abstract public static function find($condition = null, $inputs = null);
+	abstract public static function find($condition = null, $inputs = null, array $context = null);
 
 	/**
+	 * @param string $condition
+	 * @param array $inputs
+	 * @param int $mode
+	 * @param array $context
+	 * @param callback $aliasingCallback
+	 * @param ModelRelationReciproqueFactory $reciproqueFactory
 	 * @return ModelSet
 	 * @ignore
 	 */
@@ -1182,16 +1194,19 @@ EX
 		$aliasingCallback = null,
 		ModelRelationReciproqueFactory $reciproqueFactory = null
 	);
+
 	/**
 	 * Execute a search in %%ModelTable%%, and returns the result as a ModelSet
 	 *
 	 * <b>Attention</b>: this method's syntax differs from the other find...
 	 * methods; the $inputs argument must necessarily be given as an array!
 	 *
-	 * @param $condition
+	 * @param string $condition
 	 * @param array $inputs
-	 * @param Const $mode one of the {@link ModelSet} format constants
-	 * @param ModelRelation $existingRelation
+	 * @param int $mode one of the {@link ModelSet} format constants
+	 * @param array $context
+	 * @param callback $aliasingCallback
+	 * @param ModelRelationReciproqueFactory $reciproqueFactory
 	 *
 	 * @return ModelSet
 	 * @see QueryWhere::where() for the syntax of a search
@@ -1221,6 +1236,11 @@ EX
 	}
 
 	/**
+	 * @param array $ids
+	 * @param int $modelSet
+	 * @param array $context
+	 * @param callback $aliasingCallback
+	 * @param ModelRelationReciproqueFactory $reciproqueFactory
 	 * @return ModelSet
 	 */
 	abstract public static function findWherePkIn(
@@ -1501,10 +1521,13 @@ class RandomAccessModelSet extends ModelSet implements ArrayAccess {
 		$this->set = array();
 
 		if ($query !== null) {
-			foreach ($query->executeSelect() as $results) {
-				$this->set[] = $table->loadModelFromData($results, $query->context);
-			}
+
 			$this->context = $query->context;
+
+			foreach ($query->executeSelect() as $results) {
+				/** @var ModelTable $table */
+				$this->set[] = $table->loadModelFromData($results, $this->context);
+			}
 		}
 
 		if ($reciproqueFactory !== null) {
@@ -1739,11 +1762,10 @@ class ModelTableFinder extends QueryWhere {
 	/** @var ModelTableQuery */
 	public $query;
 
-	public function __construct(ModelTable $table, $condition = null, $inputs = null) {
+	public function __construct(ModelTable $table, $condition = null, $inputs = null, $context = null) {
 		$this->table = $table;
-		$this->query = $this->table->createQuery();
+		$this->query = $this->table->createQuery($context);
 		parent::__construct($this->query, $condition, $inputs);
-//		if ($condition !== null) $this->where($condition, $inputs);
 	}
 
 	/**
@@ -1765,14 +1787,13 @@ class ModelTableFinder extends QueryWhere {
 	}
 
 	/**
-	 * DEPRECATED DOC !!!
-	 * Execute the search query and returns the result as a {@link ModelSet}
-	 * @param Const $mode one of the {@link ModelSet} format constants
-	 * @param ModelRelation $existingRelation
+	 * @param int $mode one of the {@link ModelSet}
+	format constants
 	 * @return ModelSet
 	 */
 	public function execute($mode = ModelSet::ONE_PASS) {
-		return ModelSet::create($this->table, $this->query->andWhere($this), $mode);
+		$this->query->andWhere($this);
+		return ModelSet::create($this->table, $this->query, $mode);
 	}
 
 }
