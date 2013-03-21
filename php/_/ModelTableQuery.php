@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @method ModelTableQuery where
+ */
 class ModelTableQuery extends Query implements QueryAliasable {
 
 	public $dbTable;
@@ -16,7 +19,9 @@ class ModelTableQuery extends Query implements QueryAliasable {
 	/**
 	 *
 	 * @param SqlVariable $field_s
-	 * @param <type> $aliasPrefix
+	 * @param string $aliasPrefix
+	 * @throws IllegalArgumentException
+	 * @throws UnsupportedOperationException
 	 * @return ModelTableQuery
 	 */
 	public function select($field_s = null, $aliasPrefix = null) {
@@ -82,11 +87,14 @@ class ModelTableQuery extends Query implements QueryAliasable {
 
 			// Process assoc relations (in the type <AssocRelationName>fieldName)
 			else if (ModelTable::parseAssocRelationField($fieldName, $relation, $field)) {
-				$this->table->getRelationInfo($relation)->getAssocRelationInfo()
-						->selectAssocFields(
-							$this,
-							array($fieldAlias !== null ? "$fieldAlias" : "$fieldName" => $field)
-						);
+				/** @var $assocRelation ModelRelationInfoByAssoc */
+				$assocRelation = $this->table->getRelationInfo($relation);
+				$assocRelation
+					->getAssocRelationInfo()
+					->selectAssocFields(
+						$this,
+						array($fieldAlias !== null ? "$fieldAlias" : "$fieldName" => $field)
+					);
 				return;
 			}
 
@@ -218,7 +226,7 @@ class ModelTableQuery extends Query implements QueryAliasable {
 					// repeated... In both cases, it must be found what has been
 					// aliased by the relation. That means:
 					// - The type of select that has been done
-					// The @variable solution is preferable to avoid code dupplication
+					// The @variable solution is preferable to avoid code duplication
 					// and potential naming problem (though a name clash doesn't
 					// seem possible).
 					return Query::quotename($field);
@@ -231,7 +239,6 @@ class ModelTableQuery extends Query implements QueryAliasable {
 				}
 			} else if (count($parts = explode('.', $field)) == 2) {
 				throw new IllegalArgumentException('DEPRECATED');
-				list($relationName, $fieldName) = $parts;
 			} else {
 				$relationName = $field;
 				$fieldName = null;
@@ -243,9 +250,14 @@ class ModelTableQuery extends Query implements QueryAliasable {
 				return $this->join($relation)->getQualifiedName($fieldName);
 			}
 		}
+		// else
+		return null;
 	}
 
 	/**
+	 * @param string $field
+	 * @param int $ignored
+	 * @throws IllegalArgumentException
 	 * @return string
 	 */
 	public function getQualifiedName($field, $ignored = QueryJoin::TABLE_RIGHT) {
@@ -280,7 +292,7 @@ class ModelTableQuery extends Query implements QueryAliasable {
 //					// repeated... In both cases, it must be found what has been
 //					// aliased by the relation. That means:
 //					// - The type of select that has been done
-//					// The @variable solution is preferable to avoid code dupplication
+//					// The @variable solution is preferable to avoid code duplication
 //					// and potential naming problem (though a name clash doesn't
 //					// seem possible).
 //					return "`$field`";
@@ -289,7 +301,6 @@ class ModelTableQuery extends Query implements QueryAliasable {
 //				}
 			} else if (count($parts = explode('.', $field)) == 2) {
 				throw new IllegalArgumentException('DEPRECATED');
-				list($relationName, $fieldName) = $parts;
 			} else {
 				$relationName = $field;
 				$fieldName = null;
@@ -331,9 +342,12 @@ class ModelTableQuery extends Query implements QueryAliasable {
 	protected $joinReferences = array();
 
 	/**
+	 * @param ModelRelationInfo $relation
+	 * @param string $alias
+	 * @param string $leftTableName
 	 * @return QueryJoin
-	 * 
-	 * 11/06/12 12:25 Changed 3rd param $leftAlias to $leftTableName
+	 *
+	 * @version 2012-06-11 12:25 Changed 3rd param $leftAlias to $leftTableName
 	 */
 	public function join(ModelRelationInfo $relation, $alias = null, $leftTableName = null) {
 		$index = $alias !== null ? $alias : $relation->name;
@@ -372,8 +386,9 @@ class ModelTableQuery extends Query implements QueryAliasable {
 		//     isset($this->joins) // $this->joins is null at initialization
 		//
 		if ($this->dbTable !== $leftTableName && isset($this->joins)) {
+			/** @noinspection PhpUnusedLocalVariableInspection */
 			foreach ($this->joins as $joinAlias => $join) {
-				assert('$join instanceof QueryJoin');
+				/** @var QueryJoin $join */
 				if ($join->getForeignTableName() === $leftTableName) {
 					$leftTableName = $join->getForeignTableAlias();
 				}
@@ -391,6 +406,7 @@ class ModelTableQuery extends Query implements QueryAliasable {
 			// built before it.
 			$bindings = array();
 			if (is_array($join = $relation->createJoin($this, $alias, $leftTableName))) {
+				/** @var QueryJoin[] $join */
 				$join[0]->buildSql($bindings); // see upper
 				return $this->joinReferences[$index] = $join[0];
 			} else {
@@ -422,12 +438,17 @@ class ModelTableQuery extends Query implements QueryAliasable {
 	}
 
 	/**
+	 * @param string $alias
+	 * @param bool $require
+	 * @throws IllegalStateException
 	 * @return ModelTableQuery
 	 */
 	public function getSelectSubQuery($alias, $require = true) {
 		foreach ($this->select as $select) {
 			if ($select instanceof QuerySelectSub) {
-				if ($select->alias === $alias) return $select->query;
+				if ($select->alias === $alias) {
+					return $select->query;
+				}
 			}
 		}
 		if ($require) {
@@ -449,7 +470,7 @@ class ModelTableQuery extends Query implements QueryAliasable {
 	 *
 	 * @param ModelTable $table
 	 * @param string|QueryWhere $condition
-	 * @param array|scalar $inputs
+	 * @param array|mixed $inputs
 	 * @return ModelTableQuery 
 	 */
 	public function applyAssocWhere(ModelTable $table, $condition = null, $inputs = null) {
