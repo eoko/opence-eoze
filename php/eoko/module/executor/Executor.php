@@ -5,6 +5,7 @@ namespace eoko\module\executor;
 use eoko\module\Module;
 use eoko\module\ModuleResolver;
 
+use eoko\url\Maker as UrlMaker;
 use eoko\util\Files as FileHelper;
 use SecurityException, IllegalStateException;
 use eoko\file;
@@ -21,7 +22,10 @@ const ACTION_CANCELLED = -1;
 /**
  * @internal This function is externalized from the {@link Executor} class, to
  * limit its access to the Executor's public methods.
- * @param Executor $executor 
+ * @param Executor $executor
+ * @param $action
+ * @throws \IllegalStateException
+ * @return
  */
 function execute(Executor $executor, $action) {
 	if (method_exists($executor, $action)) {
@@ -126,7 +130,7 @@ abstract class Executor implements file\Finder {
 	/**
 	 * Execute the action with name $name.
 	 * @param $name
-	 * @param Pointer $returnValue A variable that will be set to the action return
+	 * @param mixed $returnValue A variable that will be set to the action return
 	 * value, if the action is executed by this executor.
 	 * @return bool true if the action was executed, else false.
 	 */
@@ -206,7 +210,7 @@ abstract class Executor implements file\Finder {
 		if ($this->beforeAction() === false) {
 			$this->cancelled = true;
 			$this->executed = true;
-			return;
+			return null;
 		}
 
 		try {
@@ -223,7 +227,7 @@ abstract class Executor implements file\Finder {
 		$this->executed = true;
 
 		if ($this->cancelled) {
-			return;
+			return null;
 		}
 
 		$this->afterAction();
@@ -283,6 +287,8 @@ abstract class Executor implements file\Finder {
 	protected function processResult($result) {
 		if ($result instanceof Response) {
 			return $result;
+		} else {
+			return null;
 		}
 	}
 
@@ -328,7 +334,7 @@ abstract class Executor implements file\Finder {
 
 	public function redirectTo($url) {
 		$this->cancel();
-		header('Location: ' . \eoko\url\Maker::makeAbsolute($url));
+		header('Location: ' . UrlMaker::makeAbsolute($url));
 	}
 
 	/**

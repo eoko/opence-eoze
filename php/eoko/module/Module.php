@@ -6,6 +6,7 @@ use Request;
 use SystemException, SecurityException, UnsupportedOperationException,
 	IllegalStateException, IllegalArgumentException;
 
+use eoko\module\Exception\MissingExecutorException;
 use eoko\util\Files;
 use eoko\file, eoko\file\FileType;
 use eoko\config\Config;
@@ -994,13 +995,4 @@ MSG
 		);
 	}
 
-}
-
-class MissingExecutorException extends SystemException {
-
-	public function __construct($module, $executor, \Exception $previous = null) {
-		parent::__construct(
-			'Missing executor "' . $executor . '" for module "' . $module . '"',			'', $previous
-		);
-	}
 }
