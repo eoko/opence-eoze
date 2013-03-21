@@ -141,9 +141,9 @@ abstract class Executor implements file\Finder {
 
 	/**
 	 * Returns the qualified name of the executor, that is:
-	 * 
+	 *
 	 * controllerName.executorSuffix
-	 * 
+	 *
 	 * @return string
 	 */
 	public function __toString() {
@@ -358,7 +358,7 @@ abstract class Executor implements file\Finder {
 				$this, array(
 					'forbidUpwardResolution' => true,
 					'finderFnName' => '_getFileFinderFor%s',
-				), 
+				),
 				$this->module
 			);
 		}
