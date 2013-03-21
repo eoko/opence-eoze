@@ -761,7 +761,7 @@ abstract class GridExecutor extends JsonExecutor {
 		);
 
 		if ($id !== null) {
-			return $this->load_one($id);
+			return $this->loadOne($id);
 		}
 
 		$this->beforeLoad();
@@ -821,6 +821,9 @@ abstract class GridExecutor extends JsonExecutor {
 	 // LOAD -- One Model
 	//////////////////////////////////////////////////////////////////////////
 
+	/**
+	 * @deprecated Use `loadOne()` instead.
+	 */
 	public function load_one($id = null) {
 		Logger::get($this)->warn('Deprecated, use loadOne');
 		return $this->loadOne($id);
