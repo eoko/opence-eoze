@@ -110,7 +110,6 @@ abstract class Model {
 			if ($strict) {
 				$this->setAllFieldsFromDatabase($initValues);
 			} else {
-//				$this->setFields($initValues, false);
 				$this->setFields($initValues, true);
 			}
 		}
@@ -356,7 +355,10 @@ abstract class Model {
 	const F_ALL = 31;
 
 	/**
-	 * @return Array	$fieldName => $value
+	 * @param string[] $fields
+	 * @throws IllegalStateException
+	 * @throws IllegalArgumentException
+	 * @return array $fieldName => $value
 	 */
 	public function getFields($fields = null) {
 		if ($fields === null) {
@@ -1793,9 +1795,9 @@ abstract class Model {
 	final public function getRelation($name) {
 		// Instantiate
 		if (!isset($this->internal->relations[$name])) {
-			$this->internal->relations[$name] = $this->internal->relations[$name] = $this->table
-					->getRelationInfo($name)
-					->createRelation($this);
+			$this->internal->relations[$name] = $this->table
+				->getRelationInfo($name)
+				->createRelation($this);
 		}
 		// Return
 		return $this->internal->relations[$name];
