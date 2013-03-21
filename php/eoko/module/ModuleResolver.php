@@ -99,6 +99,10 @@ class ModuleResolver {
 	 */
 	public static function parseAction($controller, $action, $request) {
 
+		if ($controller instanceof Executor) {
+			return $controller;
+		}
+
 		self::parseModule($controller, $module, $executor);
 		// $module instanceof Module;
 
