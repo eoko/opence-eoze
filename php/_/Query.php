@@ -642,6 +642,9 @@ class Query {
 	/**
 	 * Set the WHERE condition of the Query, overriding any previously set
 	 * WHERE clause.
+	 *
+	 * @param string|QueryWhere $condition
+	 * @param array|string[] $inputs
 	 * @return Query
 	 */
 	public function where($condition, $inputs = null) {
@@ -654,6 +657,8 @@ class Query {
 
 	/**
 	 *
+	 * @param string|QueryWhere $condition
+	 * @param array|string[] $inputs
 	 * @return Query
 	 * @see where
 	 */
