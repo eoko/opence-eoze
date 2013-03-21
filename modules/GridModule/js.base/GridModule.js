@@ -121,6 +121,8 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		Ext.apply(this, this.my);
 		
 		Ext.apply(this, config);
+
+		this.editWindowAdapter = this.createEditWindowAdapter();
 		
 		this.sc = this.extra.shortcuts;
 
@@ -261,6 +263,15 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				});
 			}, this);
 		}
+	}
+
+	/**
+	 * @return Eoze.GridModule.form.EditWindowAdapter
+	 */
+	,createEditWindowAdapter: function() {
+		return Ext4.create('Eoze.GridModule.form.EditWindowAdapter', {
+			module: this
+		});
 	}
 	
 	/**
@@ -573,70 +584,53 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	 *
 	 * This method also accepts params as documented for {@link #doEditRecord}.
 	 *
-	 * @param {Object/Eoze.GridModule.EditRecordParams/Ext.data.Record/String} param
+	 * @param {Object/Eoze.GridModule.EditRecordOptions/Ext.data.Record/String} param
 	 * @param {String/Ext.data.Record} param.record
 	 * @param {Integer/String} [param.startTab]
-	 * @param {Function} [param.callback]
+	 * @param {Function} [param.callback] Callback triggered after loading.
 	 * @param {Object} [param.scope]
 	 * @param {Ext.Element} [param.sourceEl]
+	 *
+	 * @return {Eoze.GridModule.EditRecordOptions} operation
 	 *
 	 * @todo #gridmodule This should be moved to a controller.
 	 */
 	,editRecord: function(record, startTab, callback, scope, sourceEl) {
-		var params = Eoze.GridModule.EditRecordParams.parseArguments(arguments);
-		this.doEditRecord(params);
+		var operation = Eoze.GridModule.EditRecordOptions.parseOperation(arguments);
+		this.doEditRecord(operation);
+		return operation;
 	}
 
 	/**
 	 * Actual implementation of {@link #editRecord}. This method should be preferred for overriding,
-	 * since all arguments preparing has been done beforehand.
+	 * since all arguments preparation has been done beforehand.
 	 *
 	 * Only the record id is mandatory, all other arguments are optional and can be left blank. Even if
 	 * `record` is supplied, `recordId` must be passed as the first argument.
 	 *
-	 * @param {Eoze.GridModule.Params} params
+	 * @param {Eoze.GridModule.EditRecordOptions} params
 	 *
 	 * @protected
 	 *
 	 * @todo #gridmodule This should be moved to a controller.
 	 */
-	,doEditRecord: function(params) {
-		this.getEditWindow(params.getRecordId()), function(win) {
-			var record = params.getRecord(),
-				startTab = params.getStartTab();
+	,doEditRecord: function(operation) {
 
-			if (!win.hasBeenLoaded) {
-				if (record) {
-					win.setRow(params.getRecord());
+		var adapter = this.editWindowAdapter;
 
-					// 2011-12-15 05:56 added form.record for opence's season module
-					// 2013-03-19 13:50 (this snippet was after win.form.reset() and win.show -- see bellow)
-					var form = win.formPanel.form;
-					if (form) {
-						form.record = row;
-					}
-				} else {
-					win.setRowId(params.getRecordId());
+		this.getEditWindow(operation)
+
+			.then({
+				success: function() {
+					adapter.showWindow(operation);
+					adapter.loadWindow(operation);
 				}
+			})
 
-				win.form.reset();
-				win.show(params.getSourceEl());
-
-				// 2013-03-19 13:50
-				// var form = win.formPanel.form [...] was here
-
-				win.formPanel.refresh(function() {
-					win.hasBeenLoaded = true;
-					params.triggerCallback(win);
-				});
-			} else {
-				win.show();
-			}
-
-			if (startTab) {
-				win.setTab(startTab);
-			}
-		};
+			.otherwise(function() {
+				debugger
+			});
+//			.otherwise(adapter.handleError, adapter); // TODO
 	}
 
 	,editRow: function(row) {
@@ -866,17 +860,17 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	 * @protected
 	 */
 	,onEditWindowExternallyModified: function(win, external) {
-		
+
 		var actionMsg, okHandler;
 
 		if (win.refresh) {
-			
+
 			// If the form is not dirty, reload without confirmation
 			if (!win.formPanel.isModified()) {
 				win.refresh(true);
 				return;
 			}
-			
+
 			else {
 				actionMsg = "Les données vont être rechargées.";
 				okHandler = function() {
@@ -898,7 +892,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			,modalGroup: 'refresh'
 
 			,title: 'Modification' + (external ? ' extérieure' : '')
-			,message: "L'enregistrement a été modifié"  
+			,message: "L'enregistrement a été modifié"
 				+ (external ? ' par un autre utilisateur. ' : '. ')
 				+ actionMsg
 
@@ -910,7 +904,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			}
 		});
 	}
-	
+
 	,onEditWindowExternallyDeleted: function(win) {
 		NS.AlertWindow.show({
 
@@ -926,7 +920,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				this.close();
 				win.close();
 			}
-			
+
 			,cancelHandler: function() {
 				// Restore the normal warning on close behavior
 				win.forceClosing = false;
@@ -1779,113 +1773,65 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	,afterFormLoad: function(form, data, formPanel) {}
 	,onConfigureAddFormPanel: function(formConfig) {}
 
-	,getEditWindow: function(rowId, cb, opts) { // 08/12/11 21:03 added opts
+	/**
+	 * @version 2011-12-08 21:03 Added opts
+	 * @version 2013-03-19 14:26 Removed opts
+	 * @version 2013-03-19 16:20 Removed callback
+	 *
+	 * @params {Eoze.GridModule.EditRecordOptions} operation
+	 * @return {Deft.Promise} Promise of a {@link Ext.Window}.
+	 *
+	 * @protected
+	 */
+	,getEditWindow: function(operation) {
 
-		if (rowId !== null && rowId in this.editWindows) {
-			if (cb) cb(this.editWindows[rowId]);
-			return this.editWindows[rowId];
+		var deferred = Ext4.create('Deft.Deferred'),
+			recordId = operation.getRecordId(),
+			editWindows = this.editWindows;
+
+		// Test for already existing window
+		var existingWindow = recordId && editWindows[recordId];
+
+		// Already opened window
+		if (existingWindow) {
+			operation.setWindow(existingWindow, true);
+			deferred.resolve(existingWindow);
 		}
 
-		var fn = function(win) {
+		// New window
+		else {
+			this.createEditWindow(operation).then({
+				scope: this
+				,success: function(win) {
 
-			this.editWindows[rowId] = win;
-			
-			this.fireEvent('aftercreatewindow', this, win, 'edit', rowId, opts);
-			this.afterCreateWindow(win, 'edit', rowId, opts); // 08/12/11 21:04 added opts
-			this.afterCreateEditWindow(win, rowId, opts); // 08/12/11 21:04 added opts
+					// Operation
+					operation.setWindow(win);
 
-	//		win.on('destroy', function(){
-	//			delete this.editWindows[rowId]
-	//		}.createDelegate(this))
+					// Instance lookup
+					editWindows[recordId] = win;
 
-			win.forceClosing = false;
-			win.forceClose = function() {
-				win.forceClosing = true;
-				win.close();
-			};
-			win.on({
-				// 17/09/12 21:22 change from hide to close, in prevision of future
-				// support for focus edit panel
-				close: function() {
-					this.editWindows[rowId].destroy();
-					delete this.editWindows[rowId];
+					win.on({
+						close: function() {
+							editWindows[recordId].destroy();
+							delete editWindows[recordId];
+
+							// Notify operation
+							operation.notifyClosed();
+						}
+					});
+
+					// Events
+					this.fireEvent('aftercreatewindow', this, win, 'edit', recordId, operation);
+					this.afterCreateWindow(win, 'edit', recordId, operation);
+					this.afterCreateEditWindow(win, recordId, operation);
+
+					// Promise
+					deferred.resolve(win);
 				}
-				,beforerefresh: function(win) {
-					if (win.formPanel.isModified()) {
-						NS.AlertWindow.show({
-							modalTo: win
-							// i18n
-							,title: "Confirmer le rechargement"
-							,msg: "Cette fenêtre comporte des modifications qui n'ont pas été "
-								+ "enregistrées. Si elle est rechargée maintenant, ces "
-								+ "modifications seront perdues. Souhaitez-vous continuer "
-								+ "en abandonnant les modifications ?"
-							,buttons: {
-								yes: "Recharger"
-								,cancel: "Annuler"
-							}
-							,fn: function(btn) {
-								switch (btn) {
-									case 'yes':
-										win.refresh(true);
-										break;
-									case 'cancel':
-										break;
-								}
-							}
-						});
-
-						return false;
-					}
-					return true;
-				}
-				,beforeclose: function() {
-					if (win.forceClosing) {
-						return true;
-					}
-					if (win.formPanel.isModified()) {
-						// i18n
-						NS.AlertWindow.show({
-							modalTo: win
-							,title: "Confirmer la fermeture"
-							,msg: "Cette fenêtre comporte des modifications qui n'ont pas été "
-								+ "enregistrées. Souhaitez-vous les enregistrer ?"
-							,buttons: {
-								yes: "Oui"
-								,no: "Non"
-								,cancel: "Annuler"
-							}
-							,fn: function(btn) {
-								switch (btn) {
-									case 'yes':
-										win.formPanel.save(function(){
-											win.forceClosing = true;
-											win.close();
-										});
-										break;
-									case 'no':
-										win.forceClosing = true;
-										win.close();
-										break;
-									case 'cancel':
-										break;
-								}
-							}
-						});
-						return false;
-					}
-					return true;
-				}
-				,scope: this
 			});
+		}
 
-			if (cb) cb(win);
-		}.createDelegate(this);
-
-		var win = this.createEditWindow(rowId, fn, opts); // 08/12/11 21:03 added opts
-		if (win) fn(win);
-
-		return undefined;
+		return deferred.promise;
 	}
 
 	/**
@@ -1943,10 +1889,12 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	 * @param {String/Integer} recordId If the action was `'edit'`,
 	 * then the id of the record being edited will passed as the
 	 * third argument.
+	 *
+	 * @param {Eoze.GridModule.EditRecordOptions} operation
 	 * 
 	 * @protected
 	 */
-	,afterCreateWindow: function(win, action, recordId) {
+	,afterCreateWindow: function(win, action, recordId, operation) {
 		var me = this;
 		win.getKeplerOriginString = function() {
 			return me.makeKeplerOriginString(win);
@@ -1971,15 +1919,18 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	 * @param {String/Integer} recordId If the action was `'edit'`,
 	 * then the id of the record being edited will passed as the
 	 * third argument.
+	 *
+	 * @param {Eoze.GridModule.EditRecordOptions} operation
 	 * 
 	 * @protected
 	 */
-	,afterCreateEditWindow: function(win, recordId) {
+	,afterCreateEditWindow: function(win, recordId, operation) {
+
 		this.parseContextHelpItems(win);
-		
+
+		// Change event
 		var event = String.format('{0}#{1}:modified', this.modelName, recordId);
 		
-		// Change event
 		win.mon(eo.Kepler, event, function(e, origin) {
 			var instanceId = Oce.mx.application.instanceId;
 			if (origin !== instanceId + '/' + win.id) {
@@ -1991,14 +1942,15 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		}, this);
 
 		// Route
-		var route = eo.AjaxRouter.getRoute(this.name + '.edit');
+		var route = eo.AjaxRouter.getRoute(this.name + '.open')
+				|| eo.AjaxRouter.getRoute(this.name + '.edit');
 		if (route) {
 			win.href = route.assemble({
 				id: recordId
 			});
 
 			// Tab panel
-			var tabPanel = win.formPanel.items.items[0];
+			var tabPanel = win.formPanel.items.get(0);
 			if (tabPanel instanceof Ext.TabPanel) {
 				tabPanel.on('tabchange', function(tabPanel, item) {
 					win.href = route.assemble({
@@ -2024,7 +1976,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 					helpItems.push({
 						cmp: item
 						,topic: topic
-					})
+					});
 				}
 				if (item instanceof Ext.Container && item.items) {
 					walkChildren(item);
@@ -2185,8 +2137,10 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	
 	/**
 	 * Builds the title for the edit window from the given data.
+	 *
 	 * @param {Object} data The data from the record, or as loaded into
 	 * the form.
+	 *
 	 * @protected
 	 */
 	,buildEditWindowTitle: function(data) {
@@ -2212,10 +2166,15 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	 * by the GridModule. Any other use should use the getEditWindow, which
 	 * takes keeps track of already opened edit windows, to avoid opening twice
 	 * the same record for edit
+	 *
+	 * @version 2013-03-19 15:33 Replaced arguments with single operation param.
+	 *
+	 * @param {Eoze.GridModule.EditRecordOperation} [operation]
+	 * @return {Deft.Promise}
 	 */
-	,createEditWindow: function(recordId, cb) {
-		
-		var moduleTitle = this.title,
+	,createEditWindow: function(operation) {
+
+		var recordId = operation.getRecordId(),
 			me = this;
 			
 		var winConfig = Ext.apply({}, this.applyExtraWinConfig('edit', {
@@ -2241,7 +2200,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		this.beforeCreateWindow(winConfig, 'edit', recordId);
 		this.beforeCreateEditWindow(winConfig, recordId);
 
-		return this.createFormWindow(
+		var win = this.createFormWindow(
 			this.getEditFormConfig(),
 			winConfig,
 			this.saveEdit,
@@ -2251,6 +2210,8 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				,saveWithoutCloseButton: true
 			}
 		);
+
+		return Deft.Promise.when(win);
 	}
 	
 	,applyExtraWinConfig: function(action, config) {
