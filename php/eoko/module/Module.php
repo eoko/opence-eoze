@@ -55,30 +55,40 @@ class Module implements file\Finder {
 	 * Base path for this module's top level actual directory. If this module
 	 * does not have a concrete directory in the top level location, $basePath
 	 * will be NULL.
+	 *
 	 * @var string
 	 */
 	protected $basePath;
 	protected $baseUrl;
 
 	private $pathsUrl;
-	/** @var array[ModulesLocation] */
+	/**
+	 * @var array[ModulesLocation]
+	 */
 	private $lineageLocations;
-	/** @var ModuleLocation */
+	/**
+	 * @var ModuleLocation
+	 */
 	private $location;
 
 	private $dependantCacheFiles, $dependantCacheKey;
 
-	/** @var Config */
+	/**
+	 * @var Config
+	 */
 	private $config = null;
-	/** 
-	 * @var Config this is used to allow injection of extra configuration,
-	 * when the configuration inheritance will take place. The extra config
-	 * will be the last config applied, that is, it will override every other
-	 * existing items with same names.
+	/**
+	 * This is used to allow injection of extra configuration, when the configuration
+	 * inheritance will take place. The extra config will be the last config applied,
+	 * that is, it will override every other existing items with same names.
+	 *
+	 * @var Config
 	 */
 	private $extraConfig = null;
 
-	/** @var file\Finder */
+	/**
+	 * @var file\Finder
+	 */
 	private $fileFinder = null;
 
 	protected $createExecutorMethodNameFormat = 'create%sExecutor'; // TODO unused
@@ -99,7 +109,9 @@ class Module implements file\Finder {
 		$lineage = $this->getParentNames(true);
 		// purge duplicates
 		$lineageItems = array();
-		foreach ($lineage as $item) $lineageItems[$item] = true;
+		foreach ($lineage as $item) {
+			$lineageItems[$item] = true;
+		}
 		$lineage = array_keys($lineageItems);
 
 		$this->pathsUrl = $location->getDirectory()->getLineagePathsUrl($lineage);
@@ -107,7 +119,6 @@ class Module implements file\Finder {
 
 		$this->construct($location);
 	}
-    
     /**
      * Gets the application config used by this Module.
      * @return Application
@@ -170,7 +181,7 @@ class Module implements file\Finder {
 	 * Builds an ExtJS4 namespace for the specified namespace.
 	 *
 	 * This method will use the config map at eoko.modules.Module.extjs4.namespaceAliases,
-	 * and replace alias matching the *begining* of the namespace.
+	 * and replace alias matching the *beginning* of the namespace.
 	 *
 	 * E.g. If the alias foo => Bar is configured, then the namespace foo.baz will be
 	 * transformed to Bar.baz, but bar.foo won't be transformed to bar.Baz.
@@ -202,17 +213,12 @@ class Module implements file\Finder {
 
 	/**
 	 * Returns an array of configs for Ext4.Loader.setConfig.
-	 * 
-	 * Returns an associative array of the form:
-	 * 
-	 *     array(
+	 *	 * Returns an associative array of the form:
+	 *	 *     array(
 	 *         JAVASCRIPT_NAMESPACE => BASE_URL,
 	 *     )
-	 * 
-	 * @todo OCE-575 This should be done on a per-module basis (all modules 
-	 *       do not necessarily expose Ext4 namespaces).
-	 * 
-	 * @return string[]
+	 *	 * @todo OCE-575 This should be done on a per-module basis (all modules	 *       do not necessarily expose Ext4 namespaces).
+	 *	 * @return string[]
 	 * @since 05/10/12 03:07
 	 */
 	public function getExt4LoaderConfig() {
@@ -531,8 +537,7 @@ MSG
 
 		return $this->createExecutor(
 			$overrideExecutor,
-			$request->get('action', null), 
-			$request,
+			$request->get('action', null),			$request,
 			false
 		);
 	}
@@ -550,8 +555,11 @@ MSG
 	 */
 	public function createExecutor($type, $action = null, Request $request = null, $internal = false) {
 
-		if ($type === null || $type === self::DEFAULT_EXECUTOR) $type = $this->defaultExecutor;
-		else if ($type === self::DEFAULT_INTERNAL_EXECUTOR) $type = $this->defaultInternalExecutor;
+		if ($type === null || $type === self::DEFAULT_EXECUTOR) {
+			$type = $this->defaultExecutor;
+		} else if ($type === self::DEFAULT_INTERNAL_EXECUTOR) {
+			$type = $this->defaultInternalExecutor;
+		}
 
 		$class = $this->loadExecutorTopLevelClass($type);
 
@@ -671,37 +679,21 @@ MSG
 	 * for the top level class for this Executor type.
 	 *
 	 * The top level class is the class defined in the top level module
-	 * directory, if there is one. If no such class exists, then the top level 
-	 * class will be a class aliasing the first defined class found in the 
-	 * module lineage (that would end to be the Executor class if no class is 
-	 * defined for this executor type in the module lineage).
-	 * 
-	 * {@internal The complete Executor classes hierarchy will be as follow:
-	 * 
-	 * Executor 
-	 * [<- TypeExecutor0i] 
-	 * [<- GenExecutorBase] 
-	 * <- [Executor defined in TL dir] || [Alias prev Executor in lineage] 
-	 * 
-	 * Executor
-	 * 
-	 * <- TypeExecutor0 <- GeneratedExecutor0
+	 * directory, if there is one. If no such class exists, then the top level	 * class will be a class aliasing the first defined class found in the	 * module lineage (that would end to be the Executor class if no class is	 * defined for this executor type in the module lineage).
+	 *	 * {@internal The complete Executor classes hierarchy will be as follow:
+	 *	 * Executor	 * [<- TypeExecutor0i]	 * [<- GenExecutorBase]	 * <- [Executor defined in TL dir] || [Alias prev Executor in lineage]	 *	 * Executor
+	 *	 * <- TypeExecutor0 <- GeneratedExecutor0
 	 * <- TypeExecutor1 <- GeneratedExecutor1
 	 * ...
-	 * 
-	 * <- [TL executor [<- TL GeneratedExecutor]] || Alias of the last Executor in the lineage
+	 *	 * <- [TL executor [<- TL GeneratedExecutor]] || Alias of the last Executor in the lineage
 	 * }
-	 * 
-	 * The legitimate use of a generated base class is to push the values of
+	 *	 * The legitimate use of a generated base class is to push the values of
 	 * configuration options into the PHP code. This method must return boolean
 	 * FALSE if no generated base class must be used.
-	 * 
-	 * If a generated base class is to be used, this method can return either
+	 *	 * If a generated base class is to be used, this method can return either
 	 * a {@link PHPCompiler} or a string containing the code of the class.
-	 * 
-	 * @param string $type Executor type
-	 * @param string $namespace the namespace in which the class must be 
-	 * generated
+	 *	 * @param string $type Executor type
+	 * @param string $namespace the namespace in which the class must be	 * generated
 	 * @param string $className the name that the generated class must use
 	 * @param string $baseClass the fully qualified name of the class the
 	 * generated class must extend
@@ -772,10 +764,8 @@ MSG
 
 		if (!$locations) {
 			$locations = array();
-		} else {
-			if ($locations[0]->namespace === $this->namespace) {
-				array_shift($locations);
-			}
+		} else if ($locations[0]->namespace === $this->namespace) {
+			array_shift($locations);
 		}
 
 		$basePath = $this->location->findTopLevelActualLocation()->path;
@@ -785,8 +775,7 @@ MSG
 		// NB. We must not search if this file exist in $this->basePath, but
 		// in $basePath, which is the $path of the TopLevelActualLocation of
 		// this module.
-		// 
-		// In fact, I'm not sure for now that it is the right place to search
+		//		// In fact, I'm not sure for now that it is the right place to search
 		// but, for sure, $this->path is not, since it can easily be NULL when
 		// the Module is not overridden at the topmost level(s).
 		//
@@ -798,15 +787,11 @@ MSG
 		} else {
 			$ns = $this->namespace;
 			$finalClassLoader = function() use($type, $ns) {
-				// We must test that the class doesn't already exist, for the 
-				// case where the module itself has not been overridden at all.
-				// 
-				// eg. if the module root is not overridden at all
-				// (ie. there is only one dir root in only one modules dir), then 
-				// $this->namespace will be the same as the original module,
+				// We must test that the class doesn't already exist, for the				// case where the module itself has not been overridden at all.
+				//				// eg. if the module root is not overridden at all
+				// (ie. there is only one dir root in only one modules dir), then				// $this->namespace will be the same as the original module,
 				// and the class will have already been loaded).
-				// 
-				// TODO: what if the module is just not present at the topmost
+				//				// TODO: what if the module is just not present at the topmost
 				// level ?
 				//
 				if (!class_exists("$ns$type")) {
@@ -815,15 +800,12 @@ MSG
 				}
 			};
 		}
-        
 		$prevNamespace = null;
 
 		$baseLoaders = array();
-        
 		foreach ($locations as $location) {
-			if (null !== $classFile = $this->findExecutorClassFile(
-					$type, $location->path, $location->moduleName)) {
-
+			$classFile = $this->findExecutorClassFile($type, $location->path, $location->moduleName);
+			if (null !== $classFile) {
 				$baseLoaders[] = array(
 					$classFile,
 					$prevNamespace,
@@ -906,7 +888,7 @@ MSG
 			// TODO use real declared path for $type
 			$path = "$basePath" . strtolower($type) . DS . $dir;
 			$files = array_merge(
-				$files, 
+				$files,
 				Files::listFilesIfDirExists($path, $pattern, false, true)
 			);
 		}
@@ -916,14 +898,22 @@ MSG
 	public function listFilesUrl($pattern, $dir, $type = null) {
 		$r = array();
 		foreach ($this->pathsUrl as $basePath => $baseUrl) {
-			if ($baseUrl === null) continue;
+
+			if ($baseUrl === null) {
+				continue;
+			}
+
 			// TODO use real declared path for $type
 			$dir = str_replace('\\', '/', $dir);
 			$typeDir = ($type ? strtolower($type) . '/' : '') . $dir . ($dir ? '/' : '');
 			$path = "$basePath$typeDir";
 			$baseUrl .= $typeDir;
 			$urls = Files::listFilesIfDirExists($path, $pattern, false, false);
-			foreach ($urls as &$url) $url = "$baseUrl$url";
+
+			foreach ($urls as &$url) {
+				$url = "$baseUrl$url";
+			}
+
 			$r = array_merge($r, $urls);
 		}
 		return $r;
@@ -938,10 +928,14 @@ MSG
 		}
 		foreach (array_reverse($this->location->getLineActualLocations()) as $loc) {
 			/** @var ModuleLocation $loc */
-			if (!$loc->url) continue;
+			if (!$loc->url) {
+				continue;
+			}
 			$baseUrl = $loc->url . $urlDir;
 			$urls = Files::listFilesIfDirExists($loc->path . $dir, $pattern, $recursive, false);
-			foreach ($urls as &$url) $url = "$baseUrl$url";
+			foreach ($urls as &$url) {
+				$url = "$baseUrl$url";
+			}
 			$r = array_merge($r, $urls);
 		}
 		return $r;
@@ -949,8 +943,7 @@ MSG
 
 	private function createTypeFinder($path, $url, $fallbackFinder) {
 		return new file\TypeFinder(
-			$path, $url, 
-			array(
+			$path, $url,			array(
 				null => array($path => ''),
 				FileType::CSS      => 'css',
 
@@ -983,14 +976,17 @@ MSG
 		$fallbackFinder = $this->getApplication();
 
 		$upperPathsUrl = array_reverse($this->pathsUrl, true);
-		if ($this->basePath) array_pop($upperPathsUrl);
+
+		if ($this->basePath) {
+			array_pop($upperPathsUrl);
+		}
+
 		foreach ($upperPathsUrl as $path => $url) {
 			$fallbackFinder = $this->createTypeFinder($path, $url, $fallbackFinder);
 		}
 
 		return $this->fileFinder = new file\ObjectFinder(
-			$this, 
-			array(
+			$this,			array(
 				'forbidUpwardResolution' => true,
 			),
 			// fallback
@@ -1004,8 +1000,7 @@ class MissingExecutorException extends SystemException {
 
 	public function __construct($module, $executor, \Exception $previous = null) {
 		parent::__construct(
-			'Missing executor "' . $executor . '" for module "' . $module . '"', 
-			'', $previous
+			'Missing executor "' . $executor . '" for module "' . $module . '"',			'', $previous
 		);
 	}
 }
