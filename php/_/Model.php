@@ -85,7 +85,7 @@ abstract class Model {
 
 	public $context;
 
-	protected function __construct(&$fields, array $initValues = null, 
+	protected function __construct(&$fields, array $initValues = null,
 			$strict = false, array $context = null) {
 
 		$this->events = new EventManager();
@@ -131,7 +131,7 @@ abstract class Model {
 	}
 
 	public function setContextIf($context) {
-		if ($context !== null && count($context) !== 0 
+		if ($context !== null && count($context) !== 0
 			&& ($this->context === null || count($this->context) == 0)) {
 
 			$this->context = $context;
@@ -144,11 +144,11 @@ abstract class Model {
 
 	/**
 	 * Initialize the Model reccord
-	 * 
+	 *
 	 * This method is intended to be used instead of the constructor, to do
 	 * configuration and initialization tasks.It is indeed not safe for Model
 	 * concrete implementations to override their parent's constructor.
-	 * 
+	 *
 	 * This method is called each time a new reccord Object is created.
 	 *
 	 * @internal This empty implementation is kept in the base class, in case the
@@ -201,7 +201,7 @@ abstract class Model {
 			$model = $this;
 			$modelField = $field;
 			return $this->getField($field);
-		} 
+		}
 
 		else if ($this->table->hasVirtual($field)
 				|| $this->table->hasVirtual($field = lcfirst($field))) {
@@ -216,7 +216,7 @@ abstract class Model {
 			$r = $this->table
 					->createQuery($this->context)
 					->select($field)
-					->where("`{$this->getPrimaryKeyName()}`=?", 
+					->where("`{$this->getPrimaryKeyName()}`=?",
 							$this->getPrimaryKeyValue())
 					->executeSelectValue();
 
@@ -404,26 +404,26 @@ abstract class Model {
 
 	/**
 	 * Get the value of each field in the given array.
-	 * 
+	 *
 	 * The names of the field in the returned array can be aliased by
 	 * specifying this alias as the key of the field in the passed
 	 * $fields array.
-	 * 
+	 *
 	 * Example:
 	 * <code>
 	 *     $alias => $field
 	 * </code>
-	 * 
+	 *
 	 * If no alias is specified, the name of the field will be used.
-	 * 
+	 *
 	 * Special value '*' is allowed to add all base fields of the Model
 	 * to the returned array.
-	 * 
-	 * This method will extend the passed fields to the model's virtual 
+	 *
+	 * This method will extend the passed fields to the model's virtual
 	 * fields, relations, and fields of its relations.
-	 * 
+	 *
 	 * The following field specification are all legal:
-	 * 
+	 *
 	 * <code>
 	 *     '*', // alias for all the model's base fields
 	 *     'my_simple_field',
@@ -431,7 +431,7 @@ abstract class Model {
 	 *     'MyRelation',
 	 *     'MyRelation->id',
 	 * </code>
-	 * 
+	 *
 	 * @param array $fields
 	 * @return array
 	 */
@@ -574,7 +574,7 @@ abstract class Model {
 	}
 
 	/**
-	 * Marks all fields as modified. This will has effect until after the 
+	 * Marks all fields as modified. This will has effect until after the
 	 * next successful saving operation.
 	 */
 	public function touchAllFields() {
@@ -805,9 +805,9 @@ abstract class Model {
 	/**
 	 * Event method called unconditionnaly before any save operation, that is
 	 * even if the Model's data won't be persisted to the datastore (which
-	 * occurs only if the Model is new or modified). See {@link Model::beforeSave} 
+	 * occurs only if the Model is new or modified). See {@link Model::beforeSave}
 	 * and {@link Model::afterSave} for conditionnal events.
-	 * @param boolean $new 
+	 * @param boolean $new
 	 */
 	protected function onPrepareForSave(&$new, $deleted) {}
 
@@ -947,7 +947,7 @@ abstract class Model {
 
 	/**
 	 * Commits the updated fields of the model to the database.
-	 * 
+	 *
 	 * @return bool `true` if the model was modified, else `false`. If the model
 	 * is not found modified, no database query will be issued.
 	 */
@@ -1026,7 +1026,7 @@ abstract class Model {
 	 *
 	 * @see Model::delete() to delete the model such that the change is
 	 * immediatly commited to the database.
-	 * 
+	 *
 	 * @internal CHANGE 16/12/10 23:28 renamed to markDeleted, to fulfill the
 	 * no method named get/set in model (to avoid conflict with models business
 	 * get/set methods)
@@ -1069,7 +1069,7 @@ abstract class Model {
 	 * datastore.
 	 * @param boolean $isSaving TRUE if the delete operation is taking place in
 	 * the save procedure (ie. the Model's {@link Model::save() save()} method),
-	 * FALSE if the delete operation has been triggered directly. This 
+	 * FALSE if the delete operation has been triggered directly. This
 	 * information can be useful, since if the delete operation occurs in the
 	 * process of saving the model (that is, when $isSaving would be TRUE),
 	 * that means that the Model's relations will all be saved subsequently to
@@ -1116,17 +1116,17 @@ abstract class Model {
 	/**
 	 * Delete this Model by {@link Model::delete() deleting} it from the DB or,
 	 * if the Model is new, prevent it from being later persisted in the DB.
-	 * 
+	 *
 	 * This method is using the {@link Model::delete() delete()} method
 	 * internally, so all related events are fired the same way. Note, however,
 	 * than no delete-related events will be fired if there exists no data
 	 * from the Model to be actually removed from the database (ie. if the
 	 * Model was {@link Model::isNew() new}.
-	 * 
+	 *
 	 * @return boolean TRUE if the Model is successfully deleted, or if it was
-	 * new; FALSE if the Model's data exists in the DB and cannot be 
+	 * new; FALSE if the Model's data exists in the DB and cannot be
 	 * successfully removed.
-	 * 
+	 *
 	 * @see Model::delete(), Model::markDeleted()
 	 */
 	public function discard() {
@@ -1259,12 +1259,12 @@ abstract class Model {
 
 	/**
 	 * @param boolean $loadFromDb
-	 * 
+	 *
 	 * -   TRUE to force loading from database;
 	 * -   FALSE to never load from database (using cached copy or already loaded
 	 *     values instead;
 	 * -   NULL to load from database if data have not been loaded already.
-	 * 
+	 *
 	 * @return Model
 	 */
 	protected function doGetStoredCopy($loadFromDb = false) {
@@ -1477,12 +1477,12 @@ abstract class Model {
 				// call_user_method($m, $this, $value, $forceAcceptNull);
 			} else if ($this->getTable()->hasColumn($name)) {
 				$this->setColumnNoLoadCheck($name, $value, $forceAcceptNull);
-			} 
+			}
 
 			// Let pass virtual fields... (they are loaded in certain cases and
 			// may be returned to the server as is)
 			else if ($this->getTable()->hasVirtual($name)) {
-			} 
+			}
 
 			else {
 				Logger::get($this)->debug("'$name' is not a field from " . get_class($this));
@@ -1606,7 +1606,7 @@ abstract class Model {
 			}
 
 			// 11/12/11 23:04 changed:
-			// if ($this->internal->fields[$name] != $v || !$testChanged) { 
+			// if ($this->internal->fields[$name] != $v || !$testChanged) {
 			// 02/11/12 12:24 changed
  			// if ($this->internal->fields[$name] !== $v || !$testChanged) {
 			if (!$this->dbImage || $v !== $previous) {
@@ -1786,13 +1786,13 @@ abstract class Model {
 	/**
 	 * Get the relation with the specified $name, creating it if it has not
 	 * already been instanciated.
+	 *
 	 * @param String $name
 	 * @return ModelRelation
 	 */
 	final public function getRelation($name) {
-		// Instanciate
+		// Instantiate
 		if (!isset($this->internal->relations[$name])) {
-//			require_once PHP_PATH . '_/ModelRelation.class.php';
 			$this->internal->relations[$name] = $this->internal->relations[$name] = $this->table
 					->getRelationInfo($name)
 					->createRelation($this);
@@ -1804,11 +1804,13 @@ abstract class Model {
 	/**
 	 * Get the specified relation if it has been modified (ie. set) in the
 	 * current Model.
+	 *
 	 * @param string $name
 	 * @return ModelRelation
+	 *
 	 * @throws IllegalArgumentException if the Model doesn't have a relation
 	 * named $name {@internal (if a relation with the given name has been
-	 * instanciated in the Model, it will be returned and no Exception will
+	 * instantiated in the Model, it will be returned and no Exception will
 	 * be thrown, even if the Model's ModelTable doesn't declare the said
 	 * relation)}}.
 	 */
@@ -1828,6 +1830,7 @@ abstract class Model {
 	 * Will delete the link with the given relation, if it exists. This change
 	 * will <b>NOT</b> be committed to the database (ie. the currently reccorded
 	 * relation will be kept).
+	 *
 	 * @param string|ModelRelation $relation
 	 */
 	public function unlinkRelation($relation) {
@@ -1849,7 +1852,6 @@ abstract class Model {
 	}
 
 	/**
-	 *
 	 * @return ModelInternal
 	 */
 	public function getInternal() {
@@ -1899,17 +1901,17 @@ class ModelSaveException extends SystemException {
 /**
  * This exception is thrown when a model's field which is in an undetermined
  * state is tried to be written or read.
- * 
+ *
  * Undetermined state means that an event is being waited for, in order to set
  * the field's value. Until that happens, the field cannot be read, since its
  * value is not yet known; and it cannot be written, because when the event
- * happens, it will not be possible to know which value should be used, 
+ * happens, it will not be possible to know which value should be used,
  * between the newly set one and the event's one.
- * 
+ *
  * If you encounter this exception in your code, you should change your design
  * so that you can be sure that the setField method (or any method depending on
  * it) is called before or after the undetermination is resolved.
- * 
+ *
  * Methods that creates undetermination are mainly the ones that must wait for
  * another model to be saved in order to read value(s) from it (for example:
  * {@link Model::setFieldFromModelPk}.
