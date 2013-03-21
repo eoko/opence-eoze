@@ -113,8 +113,6 @@ Oce.Modules.GridModule.AlertWindow = Ext.extend(eo.Window, {
 	/**
 	 * Overrides the `show()` method to register itself as the current modal dialog
 	 * for the configured modal target & group.
-	 *
-	 * @private
 	 */
 	,show: function() {
 		var modalTo = this.modalTo,

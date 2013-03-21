@@ -1256,7 +1256,7 @@ eo.form.GridField = Oce.form.GridField = Ext.extend(Ext.form.Field, {
 		Oce.mx.application.getModuleInstance(
 			this.editModule
 			,function(module) {
-				module.editRowById(id, null, function(win) {
+				module.editRecord(id, null, function(win) {
 					win.on('aftersave', function() {
 						var el = me.grid.bwrap;
 						if (el) {
