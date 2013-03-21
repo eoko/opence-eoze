@@ -59,6 +59,7 @@ abstract class Executor implements file\Finder {
 
 	private $cancelled = false;
 	private $executed = false;
+	private $forwardResult = null;
 
 	protected $actionParam = 'action';
 	protected $defaultAction = 'index';
@@ -204,8 +205,10 @@ abstract class Executor implements file\Finder {
 			throw new IllegalStateException('Already executed');
 		}
 
-		Logger::get($this)->debug('Executing {}.{}->{}',
-				$this->module, $this->name, $this->action);
+		Logger::get($this)->debug(
+			'Executing {}.{}->{}',
+			$this->module, $this->name, $this->action
+		);
 
 		if ($this->beforeAction() === false) {
 			$this->cancelled = true;
@@ -225,6 +228,11 @@ abstract class Executor implements file\Finder {
 		}
 
 		$this->executed = true;
+
+		// Forwarded
+		if ($this->forwardResult) {
+			return $this->forwardResult;
+		}
 
 		if ($this->cancelled) {
 			return null;
@@ -326,10 +334,14 @@ abstract class Executor implements file\Finder {
 		$this->request->remove('module', 'executor', 'controller');
 
 		$action = ModuleResolver::parseAction($controller, $action, $this->request, false);
+
 		if ($action instanceof Executor) {
 			$action->setRouter($this->getRouter());
 		}
-		$action();
+
+		$this->forwardResult = $action();
+
+		return $this->forwardResult;
 	}
 
 	public function redirectTo($url) {
