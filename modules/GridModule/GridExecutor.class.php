@@ -140,7 +140,7 @@ abstract class GridExecutor extends JsonExecutor {
 					$this->errorMessage = "La valeur '$matches[value]' "
 							. ($label ? "pour le champ <em>$label</em> " : null)
 							. 'doit être unique.';
-				} 
+				}
 				break;
 		}
 		return false;
@@ -731,26 +731,26 @@ abstract class GridExecutor extends JsonExecutor {
 
 	/**
 	 * Loads the grid records.
-	 * 
-	 * 
+	 *
+	 *
 	 * @option int|bool [limit = 20]
-	 * 
+	 *
 	 * A positive integer sets the row limit to that number.
-	 * 
+	 *
 	 * `false` means no limit.
-	 * 
-	 * 
+	 *
+	 *
 	 * @option int [start = 0]
-	 * 
+	 *
 	 * Sets the index of the first record to load.
-	 * 
-	 * 
+	 *
+	 *
 	 * @option int [realstart = null]
-	 * 
+	 *
 	 * Will be used instead of start, to set the index of the first record to loard,
 	 * if specified.
-	 * 
-	 * 
+	 *
+	 *
 	 * @version 1.0.0 25/04/12 22:37
 	 */
 	public function load() {
@@ -894,7 +894,7 @@ MSG;
 		//			break;
 		//		}
 		//	}
-		// 
+		//
 		// return $model->getDataAs($specs);
 	}
 	protected function loadOne_addExtraData(array &$data, Model $model) {}
@@ -1117,7 +1117,7 @@ MSG;
 
 		try {
 			return $this->callInTransaction('doDelete');
-		} 
+		}
 
 		catch (ModelAlreadyDeletedException $ex) {
 
@@ -1492,7 +1492,7 @@ MSG;
 //		$exporter->setDirectory($this->getSlug());
 //
 //		switch ($format) {
-//			case 'csv': 
+//			case 'csv':
 //				$url = $exporter->exportCSV($result);
 //				break;
 //			case 'pdf':
