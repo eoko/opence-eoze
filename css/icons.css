@@ -267,6 +267,9 @@
 .ico_help {
 	background-image: url("../images/icons/help.png") !important;
 }
+.ico.lightning {
+    background-image: url("../images/icons/lightning.png") !important;
+}
 .ico.lock {
 	background-image: url("../images/icons/lock.png") !important;
 }
