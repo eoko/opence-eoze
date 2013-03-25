@@ -8,22 +8,14 @@
  */
 Ext4.define('Eoze.lib.Eoze', {
 	requires: [
-		// adds support for lazy instance creation by xclass
-		'Eoze.Ext.ComponentManager',
-		// adds animOpen & animClose options
-		'Eoze.Ext.window.Window',
+		// Ext4 Overrides
+		'Eoze.Ext.OverridesLoader',
+
 		// i18n
 		'Eoze.i18n.Locale',
 		// Locale
 		'Eoze.locale.fr.Locale',
-		// Formats
-		'Eoze.Ext.util.Format',
-		// Data types
-		'Eoze.Ext.data.Types',
-		// Date
-		'Eoze.Ext.Date',
-		// Model
-		'Eoze.Ext.data.association.HasOne',
+		// Proxy
 		'Eoze.data.proxy.GridModule',
 		// CkEditor
 		'Eoze.modules.CkEditor.form.field.CkEditor',
