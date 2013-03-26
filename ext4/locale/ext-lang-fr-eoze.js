@@ -25,12 +25,34 @@
  *
  * @since 2013-03-26 09:49
  */
-Ext4.define('Eoze.locale.fr.form.Labelable', {
-	override: 'Ext.form.Labellable'
+Ext4.onReady(function() {
 
-	,labelSeparator: '&nbsp;:'
+	Ext4.define('Eoze.locale.fr.form.Labelable', {
+		override: 'Ext.form.Labellable'
 
-//	,trimLabelSeparator: function() {
-//		this.callParent(arguments);
-//	}
-});
+		,labelSeparator: '&nbsp;:'
+
+	//	,trimLabelSeparator: function() {
+	//		this.callParent(arguments);
+	//	}
+	});
+
+	Ext4.define('Ext4.locale.fr.picker.Date', {
+		override: 'Ext4.picker.Date'
+		,format: 'd/m/Y'
+	});
+
+	Ext4.define('Ext4.locale.fr.form.field.Date', {
+		override: 'Ext4.form.field.Date'
+		,format: 'd/m/Y'
+		,altFormats: 'j/n/Y|j/n/y|j/n|j n Y|j n y|j n|Y-m-d|Y n j'
+	});
+
+	Ext4.define('Ext4.locale.fr.form.field.Time', {
+		override: 'Ext4.form.field.Time'
+	//	,format: 'H:i'
+	//	,altFormats: 'g:ia|g:iA|g:i a|g:i A|h:i|g:i|H:i|ga|h a|g a|g A|gi|hi|Hi|gia|hia|g|H'
+		,altFormats: 'G:i|G:i|G i|Gi|G|G:i:s|G i s'
+	});
+
+}); // onReady
