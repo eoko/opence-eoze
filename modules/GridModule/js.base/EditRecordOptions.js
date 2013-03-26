@@ -111,7 +111,15 @@ Ext4.define('Eoze.GridModule.EditRecordOptions', {
 			}
 
 			return function(args) {
-				return new Eoze.GridModule.EditRecordOptions(parseConfig.apply(this, args));
+				var Operation = Eoze.GridModule.EditRecordOptions;
+				if (args instanceof Operation) {
+					return args;
+				} else {
+					var config = parseConfig.apply(this, args);
+					return config instanceof Operation
+						? config
+						: new Operation(config);
+				}
 			};
 		}()
 	}
