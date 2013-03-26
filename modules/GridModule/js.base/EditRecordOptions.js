@@ -71,7 +71,7 @@ Ext4.define('Eoze.GridModule.EditRecordOptions', {
 
 			function parseConfig(record, startTab, callback, scope, sourceEl) {
 
-				var Params = Eoze.GridModule.EditRecordOptions,
+				var Operation = Eoze.GridModule.EditRecordOptions,
 					config = {};
 
 				if (arguments.length > 0) {
@@ -79,8 +79,8 @@ Ext4.define('Eoze.GridModule.EditRecordOptions', {
 					// Message or Record syntax
 					if (Ext.isObject(record)) {
 						// Params form
-						if (record instanceof Params) {
-							return records;
+						if (record instanceof Operation) {
+							return record;
 						}
 						// Record form
 						else if (record instanceof Ext.data.Record) {
@@ -89,7 +89,7 @@ Ext4.define('Eoze.GridModule.EditRecordOptions', {
 						}
 						// Message form: extract arguments
 						else {
-							return new Params(record);
+							return new Operation(record);
 						}
 					}
 					// Record id as first argument (other arguments are left untouched)
@@ -97,7 +97,7 @@ Ext4.define('Eoze.GridModule.EditRecordOptions', {
 						config.recordId = record;
 					}
 
-					return new Params(Ext.apply(config, {
+					return new Operation(Ext.apply(config, {
 						startTab: startTab
 						,callback: callback
 						,scope: scope
@@ -106,7 +106,7 @@ Ext4.define('Eoze.GridModule.EditRecordOptions', {
 				}
 				// No arguments
 				else {
-					return new Params;
+					return new Operation;
 				}
 			}
 
