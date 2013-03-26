@@ -272,7 +272,15 @@ Ext.define('eo.AjaxRouter', {
 		}
 
 		// Hash
-		var hash = page && page.href;
+		var hash;
+
+		if (page) {
+			if (page.hrefRoute) {
+				hash = this.assemble(page.hrefRoute);
+			} else if (page.href) {
+				hash = page.href;
+			}
+		}
 
 		if (hash) {
 			if (hash.substr(0,2) !== '#!') {
@@ -295,6 +303,21 @@ Ext.define('eo.AjaxRouter', {
 	 */
 	,isFrontPage: function(page) {
 		return page && page.floating;
+	}
+
+	/**
+	 * @private (implementation not definitive)
+	 */
+	,assemble: function(config) {
+		if (config) {
+			if (Ext.isString(config)) {
+				return this.getByName(config).assemble();
+			} else {
+				return this.getByName(config.route).assemble(config);
+			}
+		} else {
+			throw new Error('Illegal argument');
+		}
 	}
 
 	/**
@@ -348,6 +371,24 @@ Ext.define('eo.AjaxRouter', {
 					tab = module && module.tab;
 				eo.AjaxRouter.setActivePage(tab, this);
 			}
-		})
+		});
+	});
+	// ... Ext4 ones too
+	Ext4.define('eo.AjaxRouter.override.Ext.Window', {
+		override: 'Ext.Window'
+
+		,initComponent: function() {
+			this.callParent(arguments);
+			this.on({
+				activate: function() {
+					eo.AjaxRouter.setActivePage(this);
+				}
+				,close: function() {
+					var module = Oce.mx.application.getFrontModule(),
+						tab = module && module.tab;
+					eo.AjaxRouter.setActivePage(tab, this);
+				}
+			});
+		}
 	});
 });
