@@ -286,6 +286,9 @@
 .ico.layout_content {
 	background-image: url("../images/icons/layout_content.png") !important;
 }
+.ico.plugin {
+    background-image: url("../images/icons/plugin.png") !important;
+}
 .ico_male {
 	background-image: url("../images/icons/male.png") !important;
 }
