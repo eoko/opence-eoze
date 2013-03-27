@@ -33,6 +33,8 @@
 Ext4.define('Eoze.mvc.controller.mixin.HasAjaxRouterTabs', {
 	extend: 'Eoze.mvc.ControllerMixin'
 
+	,requires: ['eo.AjaxRouter']
+
 	/**
 	 * @inheritdoc
 	 */
