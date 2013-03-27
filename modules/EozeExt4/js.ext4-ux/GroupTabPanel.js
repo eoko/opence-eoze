@@ -298,11 +298,14 @@ Ext.define('Ext.ux.GroupTabPanel', {
 						iconCls: leafItem.iconCls,
 						activeGroup: groupRoot.activeGroup,
 						activeTab: false
+						// <rx> Adds support for hidden nodes (see Eoze.Ext.tree.HideableNodeOverride}
+						,hidden: !!leafItem.hidden
+						// </rx>
 					};
 					groupRoot.children.push(child);
 				}
 
-				// <rx>
+				// <rx> Monitor item title change
 				leafItem.on('titlechange', function(item, title) {
 					var tree = me.down('treepanel'),
 						record = tree && tree.getStore().getById(item.id);
@@ -350,7 +353,12 @@ Ext.define('Ext.ux.GroupTabPanel', {
 			var tree = this.down('treepanel'),
 				store = tree.getStore(),
 				selModel = tree.getSelectionModel(),
+				node;
+			if (card instanceof Ext4.data.Model) {
+				node = card;
+			} else {
 				node = store.getById(card.id);
+			}
 			this.onNodeSelect(selModel, node);
 		} else {
 			this.on('afterrender', function() {
