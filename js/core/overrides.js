@@ -272,7 +272,7 @@ Ext.override(Ext.Component, {
 Ext.grid.Column.types.datecolumn =
 	Ext.grid.DateColumn = Ext.extend(Ext.grid.Column, {
 
-	format : 'm/d/Y',
+	format : 'd/m/Y',
 	constructor: function(cfg){
 		Ext.grid.DateColumn.superclass.constructor.call(this, cfg);
 //		this.renderer = Ext.util.Format.dateRenderer(this.format);
