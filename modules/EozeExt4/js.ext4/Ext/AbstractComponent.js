@@ -28,10 +28,20 @@
 Ext4.define('Eoze.Ext.AbstractComponent', {
 	override: 'Ext.AbstractComponent'
 
+	/**
+	 * {@link #disable Disable} or {@link #enable enable} the component.
+	 *
+	 * @param {Boolean} enabled
+	 */
 	,setEnabled: function(enabled) {
 		this.setDisabled(!enabled);
 	}
 
+	/**
+	 * {@link #hide Hide} or {@link #show show} the component.
+	 *
+	 * @param {Boolean} hidden
+	 */
 	,setHidden: function(hidden) {
 		this.setVisible(!hidden);
 	}
