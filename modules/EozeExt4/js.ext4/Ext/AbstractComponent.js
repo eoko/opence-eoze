@@ -22,31 +22,18 @@
  */
 
 /**
- * Requires Eoze overrides.
  *
- * @since 2013-03-26 10:33
+ * @since 2013-03-27 15:37
  */
-Ext4.define('Eoze.Ext.OverridesLoader', {
-	singleton: true
+Ext4.define('Eoze.Ext.AbstractComponent', {
+	override: 'Ext.AbstractComponent'
 
-	,requires: [
-		// adds support for lazy instance creation by xclass
-		'Eoze.Ext.ComponentManager',
-		// adds animOpen & animClose options
-		'Eoze.Ext.window.Window',
-		// Formats
-		'Eoze.Ext.util.Format',
-		// Data types
-		'Eoze.Ext.data.Types',
-		// Date
-		'Eoze.Ext.Date',
-		// Model
-		'Eoze.Ext.data.association.HasOne',
-		// Component
-		'Eoze.Ext.AbstractComponent',
+	,setEnabled: function(enabled) {
+		this.setDisabled(!enabled);
+	}
 
-		// Fields
-		'Eoze.Ext.form.field.Trigger',
-		'Eoze.Ext.form.field.Text'
-	]
+	,setHidden: function(hidden) {
+		this.setVisible(!hidden);
+	}
+
 });
