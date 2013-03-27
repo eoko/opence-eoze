@@ -24,7 +24,7 @@
 /**
  * Ajax (i.e. client side) route.
  *
- * @alias eo.AjaxRouter.Route
+ * @alias Eoze.modules.AjaxRouter.AjaxRouter.Route
  *
  * @since 2012-12-17 14:57
  */

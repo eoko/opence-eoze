@@ -24,7 +24,7 @@
 /**
  * AjaxRouter provides routing for the client-side.
  *
- * @alias eo.AjaxRouter
+ * @alias Eoze.modules.AjaxRouter.AjaxRouter
  *
  * @since 2012-12-17 14:42
  */
@@ -114,7 +114,7 @@ Ext4.define('Eoze.modules.AjaxRouter.AjaxRouter', {
 
 	/**
 	 * @param {String} [path]
-	 * @return {eo.AjaxRouter.Route}
+	 * @return {Eoze.modules.AjaxRouter.AjaxRouter.Route}
 	 */
 	,route: function(path) {
 
@@ -155,7 +155,7 @@ Ext4.define('Eoze.modules.AjaxRouter.AjaxRouter', {
 
 	/**
 	 * @param {String} path
-	 * @return {eo.AjaxRouter.Route}
+	 * @return {Eoze.modules.AjaxRouter.AjaxRouter.Route}
 	 */
 	,getMatch: function(path) {
 		var matchedRoute = undefined;
@@ -195,13 +195,13 @@ Ext4.define('Eoze.modules.AjaxRouter.AjaxRouter', {
 	 * ### Method signatures
 	 *
 	 *     // Register one route
-	 *     eo.AjaxRouter.register(route)
+	 *     Eoze.modules.AjaxRouter.AjaxRouter.register(route)
 	 *
 	 *     // Register one route with priority
-	 *     eo.AjaxRouter.register(route, priority)
+	 *     Eoze.modules.AjaxRouter.AjaxRouter.register(route, priority)
 	 *
 	 *     // Register multiple routes
-	 *     eo.AjaxRouter.register([...])
+	 *     Eoze.modules.AjaxRouter.AjaxRouter.register([...])
 	 *
 	 * ### Priority
 	 *
@@ -218,8 +218,8 @@ Ext4.define('Eoze.modules.AjaxRouter.AjaxRouter', {
 	 * - AFTER_MIDDLE
 	 * - AFTER_LAST
 	 *
-	 * @param {Object/eo.AjaxRouter.Route} route
-	 * @param {Integer/String} [priority = eo.AjaxRouter.priority.MED]
+	 * @param {Object/Eoze.modules.AjaxRouter.AjaxRouter.Route} route
+	 * @param {Integer/String} [priority = Eoze.modules.AjaxRouter.AjaxRouter.priority.MED]
 	 * @return {Object}
 	 */
 	,register: function(route, priority) {
@@ -257,8 +257,8 @@ Ext4.define('Eoze.modules.AjaxRouter.AjaxRouter', {
 				priority = this.priority[priority.toUpperCase()];
 			}
 
-			if (!(route instanceof eo.AjaxRouter.Route)) {
-				route = Ext4.create(route.xclass || 'eo.AjaxRouter.Route', route);
+			if (!(route instanceof Eoze.modules.AjaxRouter.AjaxRouter.Route)) {
+				route = Ext4.create(route.xclass || 'Eoze.modules.AjaxRouter.AjaxRouter.Route', route);
 			}
 			if (!this.routes.get(priority)) {
 				this.routes.add(priority, []);
@@ -298,7 +298,7 @@ Ext4.define('Eoze.modules.AjaxRouter.AjaxRouter', {
 	/**
 	 * Get a named route by name.
 	 *
-	 * @return eo.AjaxRouter.Route
+	 * @return Eoze.modules.AjaxRouter.AjaxRouter.Route
 	 */
 	,getRoute: function(name) {
 		return this.lookup[name];
@@ -400,8 +400,8 @@ Ext4.define('Eoze.modules.AjaxRouter.AjaxRouter', {
 	var me = this;
 
 	// Legacy aliases
-	eo.AjaxRouter = this;
-	eo.AjaxRouter.Route = Eoze.modules.AjaxRouter.Route;
+	Eoze.modules.AjaxRouter.AjaxRouter = this;
+	Eoze.modules.AjaxRouter.AjaxRouter.Route = Eoze.modules.AjaxRouter.Route;
 
 	//noinspection JSUnresolvedFunction
 	var initialPath = this.getCurrentPath();
@@ -428,7 +428,7 @@ Ext4.define('Eoze.modules.AjaxRouter.AjaxRouter', {
 
 				Ext.fly(window).on('hashchange', function() {
 					//noinspection JSAccessibilityCheck
-					eo.AjaxRouter.onHashChange();
+					Eoze.modules.AjaxRouter.AjaxRouter.onHashChange();
 				});
 			}
 		});
@@ -439,29 +439,29 @@ Ext4.define('Eoze.modules.AjaxRouter.AjaxRouter', {
 	Ext.Window.prototype.initComponent = Ext.Function.createSequence(spp, function() {
 		this.on({
 			activate: function() {
-				eo.AjaxRouter.setActivePage(this);
+				Eoze.modules.AjaxRouter.AjaxRouter.setActivePage(this);
 			}
 			,deactivate: function() {
 				var module = Oce.mx.application.getFrontModule(),
 					tab = module && module.tab;
-				eo.AjaxRouter.setActivePage(tab, this);
+				Eoze.modules.AjaxRouter.AjaxRouter.setActivePage(tab, this);
 			}
 		});
 	});
 	// ... Ext4 ones too
-	Ext4.define('eo.AjaxRouter.override.Ext.Window', {
+	Ext4.define('Eoze.modules.AjaxRouter.AjaxRouter.override.Ext.Window', {
 		override: 'Ext.Window'
 
 		,initComponent: function() {
 			this.callParent(arguments);
 			this.on({
 				activate: function() {
-					eo.AjaxRouter.setActivePage(this);
+					Eoze.modules.AjaxRouter.AjaxRouter.setActivePage(this);
 				}
 				,close: function() {
 					var module = Oce.mx.application.getFrontModule(),
 						tab = module && module.tab;
-					eo.AjaxRouter.setActivePage(tab, this);
+					Eoze.modules.AjaxRouter.AjaxRouter.setActivePage(tab, this);
 				}
 			});
 		}

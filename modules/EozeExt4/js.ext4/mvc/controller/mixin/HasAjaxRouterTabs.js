@@ -22,7 +22,7 @@
  */
 
 /**
- * A mixin that handles {@link eo.AjaxRouter ajax routing} for tabbed views.
+ * A mixin that handles {@link Eoze.modules.AjaxRouter.AjaxRouter ajax routing} for tabbed views.
  *
  * The view component associated to the controller must expose a {@link Ext4.tab.Panel#getActiveTab
  * getActiveTab} method, that returns the currently active tab's component, and a
@@ -33,7 +33,7 @@
 Ext4.define('Eoze.mvc.controller.mixin.HasAjaxRouterTabs', {
 	extend: 'Eoze.mvc.ControllerMixin'
 
-	,requires: ['eo.AjaxRouter']
+	,requires: ['Eoze.modules.AjaxRouter.AjaxRouter']
 
 	/**
 	 * @inheritdoc
@@ -72,7 +72,7 @@ Ext4.define('Eoze.mvc.controller.mixin.HasAjaxRouterTabs', {
 			} else {
 				win.hrefRoute.tab = slug;
 			}
-			eo.AjaxRouter.setActivePage(win);
+			Eoze.modules.AjaxRouter.AjaxRouter.setActivePage(win);
 		}
 	}
 

@@ -153,7 +153,7 @@ eo.modules.ModuleGroupModule = Ext.extend(eo.modules.TabModule, {
 
 		// client routing
 		this.tab.href = tab.component.href;
-		eo.AjaxRouter.setActivePage(tab.component);
+		Eoze.modules.AjaxRouter.AjaxRouter.setActivePage(tab.component);
 	}
 
 	,createTabConfig: function() {
