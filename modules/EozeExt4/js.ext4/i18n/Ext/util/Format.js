@@ -7,7 +7,7 @@
  */
 Ext4.define('Eoze.i18n.Ext.util.Format', {
 	override: 'Ext4.util.Format'
-	
+
 	/**
 	 * @property {Boolean}
 	 * If set to true, all date format will be automatically localized. If not,
@@ -32,29 +32,30 @@ Ext4.define('Eoze.i18n.Ext.util.Format', {
 			return "";
 		}
 		if (!Ext.isDate(v)) {
+			//noinspection JSValidateTypes
 			v = new Date(Date.parse(v));
 		}
 		return Ext4.Date.dateFormat(v, this.localizeDateFormat(format || Ext4.Date.defaultFormat));
 	}
-	
+
 	/**
-	 * Localize the specified format... Or not, dependending on the value of the
-	 * {@link #localizeAllDates} option, and optionnal specifiers in the format
+	 * Localize the specified format... Or not, depending on the value of the
+	 * {@link #localizeAllDates} option, and optional specifiers in the format
 	 * string.
-	 * 
+	 *
 	 * The following two specifiers are supported:
-	 * 
-	 * -   **@** will force the localization of the format, independantly of the
+	 *
+	 * -   **@** will force the localization of the format, independently of the
 	 *     value of the localizeAllDates option;
-	 * 
-	 * -  **@!** will prevent the localization of the format, independantly of the
+	 *
+	 * -  **@!** will prevent the localization of the format, independently of the
 	 *    value of the localizeAllDates option.
-	 *    
+	 *
 	 * E.g.:
 	 *     "@Y-m-d" // will always be localized
 	 *     "@!H:i:s" // will never be localized
 	 *     "H:i" // will be localized according to the localizeAllDates option
-	 * 
+	 *
 	 * @param {String} format
 	 */
 	,localizeDateFormat: function(format) {
@@ -70,14 +71,14 @@ Ext4.define('Eoze.i18n.Ext.util.Format', {
 			return format;
 		}
 	}
-	
+
 	/**
 	 * Localize the specified format.
-	 * 
+	 *
 	 * As opposed to {@link #localizeDateFormat}, config options and modifiers are
-	 * not taken into account. This method is used internally by 
+	 * not taken into account. This method is used internally by
 	 * {@link #localizeDateFormat}.
-	 * 
+	 *
 	 * @private
 	 */
 	,doLocalizeDateFormat: function(format) {
