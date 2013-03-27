@@ -24,11 +24,11 @@
 /**
  * Ajax (i.e. client side) route.
  *
+ * @alias eo.AjaxRouter.Route
+ *
  * @since 2012-12-17 14:57
  */
-Ext.define('eo.AjaxRouter.Route', {
-
-//	requires: ['eo.AjaxRouter']
+Ext4.define('Eoze.modules.AjaxRouter.Route', {
 
 	/**
 	 * @property {RegExp|RegExp[]} regex

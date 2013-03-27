@@ -24,11 +24,15 @@
 /**
  * AjaxRouter provides routing for the client-side.
  *
+ * @alias eo.AjaxRouter
+ *
  * @since 2012-12-17 14:42
  */
-Ext4.define('eo.AjaxRouter', {
+Ext4.define('Eoze.modules.AjaxRouter.AjaxRouter', {
 
 	singleton: true
+
+	,requires: ['Eoze.modules.AjaxRouter.Route']
 
 	,configController: 'AjaxRouter.config'
 
@@ -64,12 +68,12 @@ Ext4.define('eo.AjaxRouter', {
 	 * @private
 	 */
 	,constructor: function() {
-		this.routes = Ext.create('Ext.util.MixedCollection');
+		this.routes = Ext4.create('Ext.util.MixedCollection');
 		this.lookup = {};
 		this.lazyRoutes = [];
 
 		// URL update is buffered for those that burst in at the same time
-		this.updateTask = new Ext.util.DelayedTask(function() {
+		this.updateTask = Ext4.create('Ext.util.DelayedTask', function() {
 			window.location.hash = this.hash;
 		}, this);
 	}
@@ -129,7 +133,7 @@ Ext4.define('eo.AjaxRouter', {
 
 		var match = null;
 		this.getSortedRoutes().each(function(routes) {
-			Ext.each(routes, function(route) {
+			routes.forEach(function(route) {
 				if (route.run(path)) {
 					match = route;
 					return false;
@@ -156,7 +160,7 @@ Ext4.define('eo.AjaxRouter', {
 	,getMatch: function(path) {
 		var matchedRoute = undefined;
 		this.getSortedRoutes().each(function(routes) {
-			Ext.each(routes, function(route) {
+			routes.forEach(function(route) {
 				if (route.test(path)) {
 					matchedRoute = route;
 					return false;
@@ -180,7 +184,7 @@ Ext4.define('eo.AjaxRouter', {
 	 */
 	,getSortedRoutes: function() {
 		if (!this.sorted) {
-			this.routes.keySort();
+			this.routes.sortByKey();
 			this.sorted = true;
 		}
 		return this.routes;
@@ -232,7 +236,7 @@ Ext4.define('eo.AjaxRouter', {
 		// Array form
 		else if (Ext.isArray(route)) {
 			var routes = [];
-			Ext.each(route, function(route) {
+			route.forEach(function(route) {
 				route = this.register(route, priority);
 				routes.push(route);
 			}, this);
@@ -254,7 +258,7 @@ Ext4.define('eo.AjaxRouter', {
 			}
 
 			if (!(route instanceof eo.AjaxRouter.Route)) {
-				route = Ext.create(route.xclass || 'eo.AjaxRouter.Route', route);
+				route = Ext4.create(route.xclass || 'eo.AjaxRouter.Route', route);
 			}
 			if (!this.routes.get(priority)) {
 				this.routes.add(priority, []);
@@ -265,7 +269,7 @@ Ext4.define('eo.AjaxRouter', {
 
 			// Route lookup
 			var lu = this.lookup;
-			Ext.each(route.getAliases(), function(alias) {
+			route.getAliases().forEach(function(alias) {
 				lu[alias] = route;
 			});
 
@@ -393,6 +397,12 @@ Ext4.define('eo.AjaxRouter', {
 
 }, function() {
 
+	var me = this;
+
+	// Legacy aliases
+	eo.AjaxRouter = this;
+	eo.AjaxRouter.Route = Eoze.modules.AjaxRouter.Route;
+
 	//noinspection JSUnresolvedFunction
 	var initialPath = this.getCurrentPath();
 
@@ -401,9 +411,6 @@ Ext4.define('eo.AjaxRouter', {
 	};
 
 	Ext4.onReady(function() {
-
-		var me = eo.AjaxRouter;
-
 		// Load configuration
 		eo.Ajax.request({
 			params: {
