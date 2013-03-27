@@ -74,6 +74,30 @@ Ext4.define('eo.AjaxRouter', {
 	}
 
 	/**
+	 * Cleans a string to make it usable as an ajax routing address.
+	 *
+	 * @param {String} string
+	 * @return {String}
+	 */
+	,slugify: function(string) {
+		return string.toLowerCase()
+			.replace(/[àäâ]/g, 'a')
+			.replace(/[éèêë]/g, 'e')
+			.replace(/[îï]/g, 'i')
+			.replace(/[ôö]/g, 'o')
+			.replace(/[ûüù]/g, 'u')
+			.replace(/[ÿŷ]/g, 'y')
+			.replace(/[ç]/g, 'c')
+			.replace(/[²]/g, '2')
+			.replace(/[æ]/g, 'ae')
+			.replace(/[œ]/g, 'oe')
+			.replace(/[€]/g, 'euro')
+			.replace(/[$]/g, 'dollar')
+			.replace(/[^a-z0-9]/g, '-')
+			;
+	}
+
+	/**
 	 * @param {String} [path]
 	 * @return {eo.AjaxRouter.Route}
 	 */
