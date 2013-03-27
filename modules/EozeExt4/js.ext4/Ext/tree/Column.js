@@ -22,34 +22,21 @@
  */
 
 /**
- * Requires Eoze overrides.
+ * This override adds support for `hidden` property of tree nodes, along with
+ * {@link Eoze.Ext.tree.View}.
  *
- * @since 2013-03-26 10:33
+ * @since 2013-03-27 16:46
  */
-Ext4.define('Eoze.Ext.OverridesLoader', {
-	singleton: true
+Ext4.define('Eoze.Ext.tree.Column', {
+	override: 'Ext.tree.Column'
 
-	,requires: [
-		// adds support for lazy instance creation by xclass
-		'Eoze.Ext.ComponentManager',
-		// adds animOpen & animClose options
-		'Eoze.Ext.window.Window',
-		// Formats
-		'Eoze.Ext.util.Format',
-		// Data types
-		'Eoze.Ext.data.Types',
-		// Date
-		'Eoze.Ext.Date',
-		// Model
-		'Eoze.Ext.data.association.HasOne',
-		// Component
-		'Eoze.Ext.AbstractComponent',
+	,treeRenderer: function(value, metaData, record, rowIdx, colIdx, store, view) {
 
-		// Tree
-		'Eoze.Ext.tree.View',
+		if (record.get('hidden')) {
+			metaData.style = metaData.style || '';
+			metaData.style += 'display: none;';
+		}
 
-		// Fields
-		'Eoze.Ext.form.field.Trigger',
-		'Eoze.Ext.form.field.Text'
-	]
+		return this.callParent(arguments);
+	}
 });
