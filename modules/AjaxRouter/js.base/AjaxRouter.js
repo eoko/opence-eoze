@@ -26,7 +26,7 @@
  *
  * @since 2012-12-17 14:42
  */
-Ext.define('eo.AjaxRouter', {
+Ext4.define('eo.AjaxRouter', {
 
 	singleton: true
 
@@ -84,7 +84,7 @@ Ext.define('eo.AjaxRouter', {
 
 		// Do not execute the action if the url has been changed with setActivePage
 		if (this.hash === '#!/' + path) {
-			return;
+			return undefined;
 		}
 
 		var match = null;
@@ -114,7 +114,7 @@ Ext.define('eo.AjaxRouter', {
 	 * @return {eo.AjaxRouter.Route}
 	 */
 	,getMatch: function(path) {
-		var matchedRoute;
+		var matchedRoute = undefined;
 		this.getSortedRoutes().each(function(routes) {
 			Ext.each(routes, function(route) {
 				if (route.test(path)) {
@@ -329,6 +329,7 @@ Ext.define('eo.AjaxRouter', {
 
 }, function() {
 
+	//noinspection JSUnresolvedFunction
 	var initialPath = this.prototype.getCurrentPath();
 
 	this.prototype.initialRoute = function() {
@@ -353,6 +354,7 @@ Ext.define('eo.AjaxRouter', {
 				});
 
 				Ext.fly(window).on('hashchange', function() {
+					//noinspection JSAccessibilityCheck
 					eo.AjaxRouter.onHashChange();
 				});
 			}
