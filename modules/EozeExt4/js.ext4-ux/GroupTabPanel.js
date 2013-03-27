@@ -302,9 +302,22 @@ Ext.define('Ext.ux.GroupTabPanel', {
 					groupRoot.children.push(child);
 				}
 
-				// Ensure the items do not get headers
-				delete leafItem.title;
-				delete leafItem.iconCls;
+				// <rx>
+				leafItem.on('titlechange', function(item, title) {
+					var tree = me.down('treepanel'),
+						record = tree && tree.getStore().getById(item.id);
+					if (record) {
+						record.data.text = title;
+						record.afterEdit();
+					}
+				});
+				// </rx>
+
+				// <rx-> Stupid, if we don't want headers, we use headers: false
+				//// Ensure the items do not get headers
+				//delete leafItem.title;
+				//delete leafItem.iconCls;
+				// </rx->
 				cards.push(leafItem);
 			});
 
@@ -322,6 +335,30 @@ Ext.define('Ext.ux.GroupTabPanel', {
 			}
 		});
 	},
+
+	// <rx>
+	/**
+	 * Set the currently active card. As opposed to {@link #setActiveTab}, this method
+	 * correctly update the menu.
+	 *
+	 * @param {Ext.Component} card
+	 *
+	 * @author Éric Ortega <eric@eoko.fr>
+	 */
+	selectTab: function(card) {
+		if (this.rendered) {
+			var tree = this.down('treepanel'),
+				store = tree.getStore(),
+				selModel = tree.getSelectionModel(),
+				node = store.getById(card.id);
+			this.onNodeSelect(selModel, node);
+		} else {
+			this.on('afterrender', function() {
+				this.selectTab(card);
+			}, this, {single: true});
+		}
+	},
+	// </rx>
 
 	/**
 	 * Returns the item that is currently active inside this GroupTabPanel.
