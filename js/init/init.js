@@ -242,7 +242,7 @@ eo.warn = function(message) {
 
 // Must be in init, very first, as to not override eo.app namespace
 eo.app = function(callback, scope) {
-	Oce.deps.wait('eo.app.Application', function() {
+	Oce.deps.wait('Eoze.app.Application', function() {
 		callback.call(scope || window, eo.getApplication());
 	});
 };

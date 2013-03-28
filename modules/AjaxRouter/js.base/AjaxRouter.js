@@ -81,20 +81,30 @@ Ext4.define('eo.AjaxRouter', {
 	 */
 	,slugify: function(string) {
 		return string.toLowerCase()
-			.replace(/[àäâ]/g, 'a')
-			.replace(/[éèêë]/g, 'e')
-			.replace(/[îï]/g, 'i')
-			.replace(/[ôö]/g, 'o')
-			.replace(/[ûüù]/g, 'u')
-			.replace(/[ÿŷ]/g, 'y')
-			.replace(/[ç]/g, 'c')
 			.replace(/[²]/g, '2')
 			.replace(/[æ]/g, 'ae')
 			.replace(/[œ]/g, 'oe')
 			.replace(/[€]/g, 'euro')
 			.replace(/[$]/g, 'dollar')
-			.replace(/[^a-z0-9]/g, '-')
+			.replace(/[^a-z0-9àäâéèêëîïôöûüùÿŷç]/g, '-')
 			;
+		// Code for replacing accents too
+		//
+		//return string.toLowerCase()
+		//	.replace(/[àäâ]/g, 'a')
+		//	.replace(/[éèêë]/g, 'e')
+		//	.replace(/[îï]/g, 'i')
+		//	.replace(/[ôö]/g, 'o')
+		//	.replace(/[ûüù]/g, 'u')
+		//	.replace(/[ÿŷ]/g, 'y')
+		//	.replace(/[ç]/g, 'c')
+		//	.replace(/[²]/g, '2')
+		//	.replace(/[æ]/g, 'ae')
+		//	.replace(/[œ]/g, 'oe')
+		//	.replace(/[€]/g, 'euro')
+		//	.replace(/[$]/g, 'dollar')
+		//	.replace(/[^a-z0-9]/g, '-')
+		//	;
 	}
 
 	/**
@@ -354,13 +364,13 @@ Ext4.define('eo.AjaxRouter', {
 }, function() {
 
 	//noinspection JSUnresolvedFunction
-	var initialPath = this.prototype.getCurrentPath();
+	var initialPath = this.getCurrentPath();
 
-	this.prototype.initialRoute = function() {
+	this.initialRoute = function() {
 		this.route(initialPath);
 	};
 
-	Ext.onReady(function() {
+	Ext4.onReady(function() {
 
 		var me = eo.AjaxRouter;
 
@@ -373,8 +383,10 @@ Ext4.define('eo.AjaxRouter', {
 			,success: function(data) {
 				me.register(data.routes);
 
-				eo.getApplication().onStarted(function() {
-					me.initialRoute();
+				eo.app(function(app) {
+					app.onStarted(function() {
+						me.initialRoute();
+					});
 				});
 
 				Ext.fly(window).on('hashchange', function() {

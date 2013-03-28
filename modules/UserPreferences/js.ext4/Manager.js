@@ -1,31 +1,51 @@
 /**
+ * Copyright (C) 2013 Eoko
  *
- * @license http://opensource.org/licenses/gpl-license.php GNU Public License
- * @author Éric Ortega <eric@planysphere.fr>
- * @since 5 sept. 2012
+ * This file is part of Opence.
+ *
+ * Opence is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Opence is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Opence. If not, see <http://www.gnu.org/licenses/gpl.txt>.
+ *
+ * @copyright Copyright (C) 2013 Eoko
+ * @licence http://www.gnu.org/licenses/gpl.txt GPLv3
+ * @author Éric Ortega <eric@eoko.fr>
  */
-Ext.ns('eo.modules.prefs');
 
-eo.modules.prefs.Manager = Ext.extend(Ext.util.Observable, {
-	
-	defaultCommitDelay: 5000
-	
+/**
+ *
+ * @since 2013-03-28 12:54
+ */
+Ext4.define('Eoze.modules.UserPreferences.Manager', {
+	extend: 'Ext.util.Observable'
+
+	,defaultCommitDelay: 5000
+
 	,constructor: function(config) {
-		
+
 		this.addEvents('loaded');
-		
+
 		this.callParent(arguments);
-		
+
 		// create commit task
 		this.commitTask = new eo.util.DelayedTask(this.doCommit, this);
-		
+
 		// init
 		this.data = {};
 		this.queue = [];
 
 		// load
 		var me = this;
-		
+
 		eo.app(function(app) {
 			app.getLoginManager().on('logged', function() {
 				eo.Ajax.request({
@@ -36,8 +56,8 @@ eo.modules.prefs.Manager = Ext.extend(Ext.util.Observable, {
 					,success: function(data) {
 						// decode
 						var o = data.preferences
-								? Ext.decode(data.preferences)
-								: {};
+							? Ext.decode(data.preferences)
+							: {};
 						// store data
 						me.data = o;
 						// handle queue
@@ -46,14 +66,14 @@ eo.modules.prefs.Manager = Ext.extend(Ext.util.Observable, {
 						}, me);
 						// flush
 						me.queue = [];
-						
+
 						me.initEvents();
 					}
 				});
 			});
 		});
 	}
-	
+
 	// private
 	,initEvents: function() {
 		Ext.EventManager.on(window, 'beforeunload', function() {
@@ -63,7 +83,7 @@ eo.modules.prefs.Manager = Ext.extend(Ext.util.Observable, {
 			}
 		}, this);
 	}
-	
+
 	,get: function(path, callback, scope) {
 		if (this.data) {
 			callback.call(scope, this, this.node(path));
@@ -71,7 +91,7 @@ eo.modules.prefs.Manager = Ext.extend(Ext.util.Observable, {
 			this.queue.push([path, callback, scope]);
 		}
 	}
-	
+
 	,set: function(path, value, commit) {
 		// update
 		if (Ext.isEmpty(path)) {
@@ -101,7 +121,7 @@ eo.modules.prefs.Manager = Ext.extend(Ext.util.Observable, {
 			throw new Error('Illegal argument: commit must be boolean or integer');
 		}
 	}
-	
+
 	/**
 	 * Handler for commit DelayedTask.
 	 * @private
@@ -122,7 +142,7 @@ eo.modules.prefs.Manager = Ext.extend(Ext.util.Observable, {
 			}
 		});
 	}
-	
+
 	/**
 	 * Commit.
 	 * @param {Integer} [delay=0]
@@ -134,7 +154,7 @@ eo.modules.prefs.Manager = Ext.extend(Ext.util.Observable, {
 		}
 		this.commitTask.delay(delay);
 	}
-	
+
 	// private
 	,node: function(path) {
 		if (!path) {
@@ -154,7 +174,4 @@ eo.modules.prefs.Manager = Ext.extend(Ext.util.Observable, {
 			return cursor;
 		}
 	}
-	
 });
-
-Oce.deps.reg('eo.modules.prefs.Manager');
