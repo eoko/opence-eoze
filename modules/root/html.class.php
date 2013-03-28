@@ -2,6 +2,7 @@
 
 namespace eoko\modules\root;
 
+use eoko\config\Application;
 use eoko\module\executor\html\BasicHtmlExecutor;
 use eoko\template\HtmlRootTemplate;
 use eoko\template\HtmlTemplate;
@@ -140,6 +141,11 @@ class Html extends BasicHtmlExecutor {
 			$includes['js'] = array_merge($includes['js'], $this->buildJasmineSpecIncludes());
 
 			$includes['js'][] = $this->getRouter()->assemble(array(), array('name' => 'index/jasmine/app'));
+		}
+
+		// Javascript bootstrap
+		if (file_exists(ROOT . 'app.js')) {
+			$includes['js'][] = SITE_BASE_URL . 'app.js';
 		}
 
 		return $includes;
