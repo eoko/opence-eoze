@@ -45,8 +45,8 @@ Ext4.define('Eoze.Ext.OverridesLoader', {
 		// Component
 		'Eoze.Ext.AbstractComponent',
 
-		// Tree
-		'Eoze.Ext.tree.View',
+		// Tree with hideable nodes
+		'Eoze.Ext.tree.HideableNodeOverride',
 
 		// Fields
 		'Eoze.Ext.form.field.Trigger',

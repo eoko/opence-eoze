@@ -22,14 +22,15 @@
  */
 
 /**
- * This override adds support for `hidden` property of tree nodes, along with
- * {@link Eoze.Ext.tree.Column}.
+ * This override is part of {@link Eoze.Ext.tree.HideableNodeOverride}.
+ *
+ * It adds the `hidden` field to the list of fields that the view must watch for changes
+ * to refresh itself.
  *
  * @since 2013-03-27 16:10
  */
 Ext4.define('Eoze.Ext.tree.View', {
 	override: 'Ext.tree.View'
-	,requires: ['Eoze.Ext.tree.Column']
 }, function() {
 	this.prototype.uiFields.push('hidden');
 });
