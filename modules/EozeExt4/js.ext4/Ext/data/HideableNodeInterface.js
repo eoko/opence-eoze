@@ -24,21 +24,19 @@
 /**
  * This override is part of {@link Eoze.Ext.tree.HideableNodeOverride}.
  *
- * It implements the actual hiding behaviour, by adding the style `display: none` to the
- * node's element if the record has its `hidden` field set to `true`.
+ * It adds the `hidden` field to decorated models.
  *
- * @since 2013-03-27 16:46
+ * @since 2013-03-27 17:08
  */
-Ext4.define('Eoze.Ext.tree.Column', {
-	override: 'Ext.tree.Column'
+Ext4.define('Eoze.Ext.data.HideableNodeInterface', {
+	override: 'Ext.data.NodeInterface'
 
-	,treeRenderer: function(value, metaData, record, rowIdx, colIdx, store, view) {
-
-		if (record.get('hidden')) {
-			metaData.style = metaData.style || '';
-			metaData.style += 'display: none;';
+	,statics: {
+		decorate: function(modelClass) {
+			this.callParent(arguments);
+			this.applyFields(modelClass, [
+				{name: 'hidden', type: 'bool', defaultValue: false}
+			]);
 		}
-
-		return this.callParent(arguments);
 	}
 });

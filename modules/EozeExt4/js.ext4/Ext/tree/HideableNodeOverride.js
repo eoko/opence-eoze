@@ -22,23 +22,14 @@
  */
 
 /**
- * This override is part of {@link Eoze.Ext.tree.HideableNodeOverride}.
+ * This override adds support for hiding {@link Ext.tree.Panel tree}'s nodes.
  *
- * It implements the actual hiding behaviour, by adding the style `display: none` to the
- * node's element if the record has its `hidden` field set to `true`.
- *
- * @since 2013-03-27 16:46
+ * @since 2013-03-28 09:27
  */
-Ext4.define('Eoze.Ext.tree.Column', {
-	override: 'Ext.tree.Column'
-
-	,treeRenderer: function(value, metaData, record, rowIdx, colIdx, store, view) {
-
-		if (record.get('hidden')) {
-			metaData.style = metaData.style || '';
-			metaData.style += 'display: none;';
-		}
-
-		return this.callParent(arguments);
-	}
+Ext4.define('Eoze.Ext.tree.HideableNodeOverride', {
+	requires: [
+		'Eoze.Ext.tree.View',
+		'Eoze.Ext.tree.Column',
+		'Eoze.Ext.data.HideableNodeInterface'
+	]
 });
