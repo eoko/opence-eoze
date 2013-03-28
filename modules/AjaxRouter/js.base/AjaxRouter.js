@@ -66,6 +66,7 @@ Ext4.define('eo.AjaxRouter', {
 	,constructor: function() {
 		this.routes = Ext.create('Ext.util.MixedCollection');
 		this.lookup = {};
+		this.lazyRoutes = [];
 
 		// URL update is buffered for those that burst in at the same time
 		this.updateTask = new Ext.util.DelayedTask(function() {
@@ -112,6 +113,11 @@ Ext4.define('eo.AjaxRouter', {
 	 * @return {eo.AjaxRouter.Route}
 	 */
 	,route: function(path) {
+
+		if (!this.started) {
+			this.start();
+		}
+
 		if (!path) {
 			path = this.getCurrentPath();
 		}
@@ -188,7 +194,7 @@ Ext4.define('eo.AjaxRouter', {
 	 *     eo.AjaxRouter.register(route)
 	 *
 	 *     // Register one route with priority
-	 *     eo.AjaxRouter.register(priority, route)
+	 *     eo.AjaxRouter.register(route, priority)
 	 *
 	 *     // Register multiple routes
 	 *     eo.AjaxRouter.register([...])
@@ -208,20 +214,26 @@ Ext4.define('eo.AjaxRouter', {
 	 * - AFTER_MIDDLE
 	 * - AFTER_LAST
 	 *
-	 * @param {Integer/String} [priority = eo.AjaxRouter.priority.MED]
 	 * @param {Object/eo.AjaxRouter.Route} route
+	 * @param {Integer/String} [priority = eo.AjaxRouter.priority.MED]
 	 * @return {Object}
 	 */
-	,register: function(priority, route) {
-		if (arguments.length === 1) {
-			route = priority;
-			priority = undefined;//this.priority.MIDDLE;
+	,register: function(route, priority) {
+
+		// Integrity
+		if (this.started) {
+			throw new Error('Routing has already started.');
+		}
+
+		// Proxy form
+		if (Ext.isString(route) || route.getRoutes) {
+			this.lazyRoutes.push(route);
 		}
 		// Array form
-		if (Ext.isArray(route)) {
+		else if (Ext.isArray(route)) {
 			var routes = [];
 			Ext.each(route, function(route) {
-				route = this.register(priority, route);
+				route = this.register(route, priority);
 				routes.push(route);
 			}, this);
 			return routes;
@@ -259,6 +271,24 @@ Ext4.define('eo.AjaxRouter', {
 
 			return route;
 		}
+	}
+
+	/**
+	 * @private
+	 */
+	,start: function() {
+
+		this.lazyRoutes.forEach(function(provider) {
+			if (Ext.isString(provider)) {
+				provider = Ext4.create(provider);
+			}
+			this.register(provider.getRoutes());
+		}, this);
+
+		// Free memory
+		delete this.lazyRoutes;
+
+		this.started = true;
 	}
 
 	/**
