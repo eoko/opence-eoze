@@ -1461,7 +1461,9 @@ abstract class Model {
 	 */
 	public function setField($name, $value, $forceAcceptNull = false) {
 
-		if ($value === '') $value = null;
+		if ($value === '') {
+			$value = null;
+		}
 
 		if (isset($this->undeterminedFields[$name])) {
 			throw new IllegalStateException(
@@ -1476,7 +1478,6 @@ abstract class Model {
 				$this->setForeignModel($name, $value, $forceAcceptNull);
 			} else if (method_exists($this, $m = 'set' . Inflector::camelCase($name, true))) {
 				$this->$m($value, $forceAcceptNull);
-				// call_user_method($m, $this, $value, $forceAcceptNull);
 			} else if ($this->getTable()->hasColumn($name)) {
 				$this->setColumnNoLoadCheck($name, $value, $forceAcceptNull);
 			}
@@ -1488,7 +1489,7 @@ abstract class Model {
 
 			else {
 				Logger::get($this)->debug("'$name' is not a field from " . get_class($this));
-//				throw new IllegalArgumentException("$name is not a field from " . get_class($this));
+				// throw new IllegalArgumentException("$name is not a field from " . get_class($this));
 			}
 		}
 
@@ -1536,12 +1537,11 @@ abstract class Model {
 	 * value of the field specified by $fieldName is read before its value could
 	 * have been set (that is, before the source model has been saved if it was
 	 * new), a ModelSaveException will also be raised.
+	 *
 	 * @param string $fieldName
 	 * @param Model $srcModel
-	 * @throws ModelSaveException if the source model is new and this model is
-	 * tried to be saved before the source model is saved ; or if the value of
-	 * the target field is tried to be read before the source model has been
-	 * saved.
+	 *
+	 * @throws IllegalArgumentException
 	 */
 	public function setFieldFromModelPk($fieldName, Model $srcModel) {
 		if ($srcModel === null) {
@@ -1599,7 +1599,10 @@ abstract class Model {
 			$v = $col->convertValueToSQL($value);
 
 			// 2012-11-20 moved here (see bellow)
-			$previous = isset($this->internal->fields[$name]) ? $this->internal->fields[$name] : null;
+			$previous = isset($this->internal->fields[$name])
+				? $this->internal->fields[$name]
+				: null;
+
 			$v = $this->applyFieldValue($name, $v);
 			$this->internal->fields[$name] = $v;
 
@@ -1649,7 +1652,9 @@ abstract class Model {
 	/**
 	 * Set multiple fields value. Setter keys that do not match any field in the
 	 * model will be silently ignored.
+	 *
 	 * @param array $setters
+	 * @param bool $forceAcceptNull
 	 */
 	public function setFields(array $setters, $forceAcceptNull = false) {
 		foreach ($setters as $k => $v) {
@@ -1657,27 +1662,6 @@ abstract class Model {
 			$this->setField($k, $v, $forceAcceptNull);
 		}
 	}
-
-// 02/11/12 12:23 Deprecated
-//	/**
-//	 * Set multiple columns value
-//	 * @param array $setters
-//	 */
-//	public function setColumns(array $setters, $forceAcceptNull = false, $testChanged = true) {
-//
-////REMLOAD		if ($this->internal->needsLoading) $this->doLoad();
-//
-////		$col = $this->getTable()->getColumn('conjoint__contacts_id');
-////		echo($col->convertValueToSQL($setters['conjoint__contacts_id']) === null);die;
-//
-//		foreach ($setters as $k => $v) {
-//			$this->setColumnNoLoadCheck($k, $v, $forceAcceptNull, $testChanged);
-////			if (!$this->setColumnNoLoadCheck($k, $v)) {
-////				Logger::getLogger('Model')->warn('Setting inexistant key in model: {}[{}]',
-////						$this->getModelName(), $k);
-////			}
-//		}
-//	}
 
 	/**
 	 * Convert the given value for the specified field using a custom algorithm. The default
@@ -1699,6 +1683,7 @@ abstract class Model {
 
 	protected function setAllFieldsFromDatabase(array $setters) {
 		$this->internal->dbValues = array();
+
 		foreach ($this->internal->fields as $field => $v) {
 			if (!array_key_exists($field, $setters)) {
 				throw new IllegalArgumentException('Missing field in ' . $this->getModelName() . ': ' . $field);
@@ -1706,6 +1691,7 @@ abstract class Model {
 			$this->internal->fields[$field] = $this->applyFieldValue($field, $setters[$field]);
 			$this->internal->dbValues[$field] = $setters[$field];
 		}
+
 		// Load virtual fields
 		// nota: that requires the given $setters to have been loaded by the
 		// table's createLoadQuery method
@@ -1721,8 +1707,13 @@ abstract class Model {
 					= $setters[$virtual];
 			}
 		}
+
 		$this->dbImage = true;
+
+		$this->afterValueInit();
 	}
+
+	protected function afterValueInit() {}
 
 	/**
 	 * Set all this Model's fields value. This method will throw an
