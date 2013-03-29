@@ -26,7 +26,7 @@
  *
  * @since 2013-01-30 14:44
  */
-Ext4.define('Eoze.modules.CkEditor.form.field.CkEditor', {
+Ext4.define('Eoze.CkEditor.form.field.CkEditor', {
 	extend: 'Ext.form.field.TextArea'
 	,alias: 'widget.ckeditor'
 	,alternateClassName: ['Eoze.form.field.CkEditor', 'Eoze.form.CkEditor']

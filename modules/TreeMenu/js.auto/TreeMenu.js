@@ -271,7 +271,7 @@ Ext.define('eo.ui.menu.tree.Menu', {
 
 		Deft.Promise.all(promises).always(function() {
 			// all default commands have been run
-			Eoze.modules.AjaxRouter.AjaxRouter.initialRoute();
+			Eoze.AjaxRouter.Router.initialRoute();
 		});
 	}
 

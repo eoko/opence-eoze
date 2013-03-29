@@ -18,7 +18,7 @@ Ext4.define('Eoze.lib.Eoze', {
 		// Proxy
 		'Eoze.data.proxy.GridModule',
 		// CkEditor
-		'Eoze.modules.CkEditor.form.field.CkEditor',
+		'Eoze.CkEditor.form.field.CkEditor',
 		// Cursor
 		'Eoze.Cursor',
 		// Plugins

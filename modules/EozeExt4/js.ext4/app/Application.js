@@ -31,7 +31,7 @@ Ext4.define('Eoze.app.Application', {
 
 	,requires: [
 		'Eoze.app.LoginManager.LegacyLoginManager',
-		'Eoze.modules.UserPreferences.Manager'
+		'Eoze.UserPreferences.Manager'
 	]
 
 	,mixins: {
@@ -45,7 +45,7 @@ Ext4.define('Eoze.app.Application', {
 	loginManager: undefined
 
 	/**
-	 * @property {Eoze.modules.UserPreferences.Manager}
+	 * @property {Eoze.UserPreferences.Manager}
 	 * @private
 	 */
 	,prefsManager: undefined
@@ -69,7 +69,7 @@ Ext4.define('Eoze.app.Application', {
 		this.loginManager = Ext4.create('Eoze.app.LoginManager.LegacyLoginManager');
 
 		// pref manager
-		this.prefsManager = Ext4.create('Eoze.modules.UserPreferences.Manager');
+		this.prefsManager = Ext4.create('Eoze.UserPreferences.Manager');
 
 		// Helper methods
 		this.registerEozeHelpers();
