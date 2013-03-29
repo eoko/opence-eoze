@@ -25,11 +25,11 @@
  *
  * @since 2013-03-13 16:49
  */
-Ext.define('Eoze.modules.AccessControl.controller.LoginWindow', {
+Ext.define('Eoze.AccessControl.controller.LoginWindow', {
 	extend: 'Deft.mvc.ViewController'
 
 	,requires: [
-		'Eoze.modules.AccessControl.service.Login'
+		'Eoze.AccessControl.service.Login'
 	]
 
 	,control: {
@@ -70,12 +70,12 @@ Ext.define('Eoze.modules.AccessControl.controller.LoginWindow', {
 	/**
 	 * Gets the attached login service.
 	 *
-	 * @return {Eoze.modules.AccessControl.service.Login}
+	 * @return {Eoze.AccessControl.service.Login}
 	 * @public
 	 */
 	,getLoginService: function() {
 		if (!this.loginService) {
-			this.loginService = new Eoze.modules.AccessControl.service.Login();
+			this.loginService = new Eoze.AccessControl.service.Login();
 		}
 		return this.loginService;
 	}

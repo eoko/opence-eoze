@@ -1942,8 +1942,8 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		}, this);
 
 		// Route
-		var route = Eoze.modules.AjaxRouter.AjaxRouter.getRoute(this.name + '.open')
-				|| Eoze.modules.AjaxRouter.AjaxRouter.getRoute(this.name + '.edit');
+		var route = Eoze.AjaxRouter.Router.getRoute(this.name + '.open')
+				|| Eoze.AjaxRouter.Router.getRoute(this.name + '.edit');
 		if (route) {
 			win.href = route.assemble({
 				id: recordId
@@ -1957,7 +1957,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 						id: recordId
 						,tab: item.slug || item.tabName
 					});
-					Eoze.modules.AjaxRouter.AjaxRouter.setActivePage(win);
+					Eoze.AjaxRouter.Router.setActivePage(win);
 				});
 			}
 		}
@@ -2920,11 +2920,11 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	}
 
 	/**
-	 * @return {Eoze.modules.AjaxRouter.AjaxRouter.Route}
+	 * @return {Eoze.AjaxRouter.Router.Route}
 	 */
 	,getRoute: function() {
-		return Eoze.modules.AjaxRouter.AjaxRouter.getRoute(this.name + '.index')
-			|| Eoze.modules.AjaxRouter.AjaxRouter.getRoute(this.name);
+		return Eoze.AjaxRouter.Router.getRoute(this.name + '.index')
+			|| Eoze.AjaxRouter.Router.getRoute(this.name);
 	}
 
 	,beforeCreateTabPanel: function(config) {

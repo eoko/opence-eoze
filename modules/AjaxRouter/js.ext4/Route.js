@@ -24,11 +24,11 @@
 /**
  * Ajax (i.e. client side) route.
  *
- * @alias Eoze.modules.AjaxRouter.AjaxRouter.Route
+ * @alias Eoze.AjaxRouter.Router.Route
  *
  * @since 2012-12-17 14:57
  */
-Ext4.define('Eoze.modules.AjaxRouter.Route', {
+Ext4.define('Eoze.AjaxRouter.Route', {
 
 	/**
 	 * @property {RegExp|RegExp[]} regex

@@ -25,7 +25,7 @@
  *
  * @since 2013-03-28 12:54
  */
-Ext4.define('Eoze.modules.UserPreferences.Manager', {
+Ext4.define('Eoze.UserPreferences.Manager', {
 	extend: 'Ext.util.Observable'
 
 	,defaultCommitDelay: 5000

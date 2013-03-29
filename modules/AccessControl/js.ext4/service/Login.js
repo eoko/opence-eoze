@@ -25,7 +25,7 @@
  *
  * @since 2013-03-13 17:19
  */
-Ext.define('Eoze.modules.AccessControl.service.Login', {
+Ext.define('Eoze.AccessControl.service.Login', {
 
 	mixins: {
 		observable: 'Ext.util.Observable'
@@ -37,7 +37,7 @@ Ext.define('Eoze.modules.AccessControl.service.Login', {
 		this.addEvents(
 			/**
 			 * @event login
-			 * @param {Eoze.modules.AccessControl.service.Login} this
+			 * @param {Eoze.AccessControl.service.Login} this
 			 * @param {Object} loginInfos
 			 */
 			'login'

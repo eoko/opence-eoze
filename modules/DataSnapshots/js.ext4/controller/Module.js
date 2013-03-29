@@ -4,7 +4,7 @@
  * @author Éric Ortega <eric@planysphere.fr>
  * @since 3 oct. 2012
  */
-Ext4.define('Eoze.modules.DataSnapshots.controller.Module', {
+Ext4.define('Eoze.DataSnapshots.controller.Module', {
 	
 	extend: 'Deft.mvc.ViewController'
 
@@ -13,13 +13,13 @@ Ext4.define('Eoze.modules.DataSnapshots.controller.Module', {
 		'Eoze.i18n.plugin.Form',
 		'Eoze.i18n.plugin.Grid',
 		
-		'Eoze.modules.DataSnapshots.model.DataSnapshot'
+		'Eoze.DataSnapshots.model.DataSnapshot'
 	]
 	
 	,uses: [
-		'Eoze.modules.DataSnapshots.view.SnapshotGrid',
-		'Eoze.modules.DataSnapshots.view.EditPanel',
-		'Eoze.modules.DataSnapshots.view.EditWindow'
+		'Eoze.DataSnapshots.view.SnapshotGrid',
+		'Eoze.DataSnapshots.view.EditPanel',
+		'Eoze.DataSnapshots.view.EditWindow'
 	]
 	
 	,control: {
@@ -42,7 +42,7 @@ Ext4.define('Eoze.modules.DataSnapshots.controller.Module', {
 	
 	,newSnapshot: function(animateTarget) {
 		Ext4.create({
-			xclass: 'Eoze.modules.DataSnapshots.view.EditWindow'
+			xclass: 'Eoze.DataSnapshots.view.EditWindow'
 			,animateTarget: animateTarget
 		});
 	}
@@ -58,7 +58,7 @@ Ext4.define('Eoze.modules.DataSnapshots.controller.Module', {
 			win.show();
 		} else {
 			win = Ext4.create({
-				xclass: 'Eoze.modules.DataSnapshots.view.EditWindow'
+				xclass: 'Eoze.DataSnapshots.view.EditWindow'
 				,animateTarget: animateTarget
 				,listeners: {
 					close: function() {

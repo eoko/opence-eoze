@@ -4,7 +4,7 @@
  * @author Éric Ortega <eric@planysphere.fr>
  * @since 3 oct. 2012
  */
-Ext4.define('Eoze.modules.DataSnapshots.view.SnapshotGrid', {
+Ext4.define('Eoze.DataSnapshots.view.SnapshotGrid', {
 	extend: 'Ext4.grid.Panel'
 	
 	,plugins: ['i18n.Grid']

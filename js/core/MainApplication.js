@@ -159,7 +159,7 @@
 
 					,listeners: {
 						tabchange: function(panel, tab) {
-							Eoze.modules.AjaxRouter.AjaxRouter.setActivePage(tab);
+							Eoze.AjaxRouter.Router.setActivePage(tab);
 						}
 					}
 
