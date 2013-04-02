@@ -753,21 +753,24 @@ Ext.define('eo.ui.menu.tree.Menu', {
 		var me = this;
 
 		this.addLoading();
-		this.sjax.request({
-			params: {
-				controller: this.controller
-				,action: 'getAvailableActions'
-			}
-			,onSuccess: function(data) {
-				me.availableActions = data.families;
-				me.createActionStores();
-				me.removeLoading();
-				me.fireEvent('actionsloaded', me, me.availableActions);
-			}
-			,onFaillure: function() {
-				me.removeLoading();
-				delete me.availableActions;
-			}
+
+		eo.getApplication().onStarted(function() {
+			me.sjax.request({
+				params: {
+					controller: me.controller
+					,action: 'getAvailableActions'
+				}
+				,onSuccess: function(data) {
+					me.availableActions = data.families;
+					me.createActionStores();
+					me.removeLoading();
+					me.fireEvent('actionsloaded', me, me.availableActions);
+				}
+				,onFaillure: function() {
+					me.removeLoading();
+					delete me.availableActions;
+				}
+			});
 		});
 	}
 
