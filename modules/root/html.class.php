@@ -144,7 +144,7 @@ class Html extends BasicHtmlExecutor {
 		}
 
 		// Javascript bootstrap
-		if (file_exists(ROOT . 'app.js')) {
+		else if (file_exists(ROOT . 'app.js')) {
 			$includes['js'][] = SITE_BASE_URL . 'app.js';
 		}
 
