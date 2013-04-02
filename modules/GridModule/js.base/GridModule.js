@@ -3902,7 +3902,7 @@ Oce.GridModule.plugins = {
 
 			Ext.apply(gm, {
 
-				beforeCreateWindow: Ext.Function.createSequence(gm.beforeCreateWindow, 
+				beforeCreateWindow: Ext.Function.createSequence(gm.beforeCreateWindow,
 					function(config, action) {
 						this.configWindowIcon(config, action);
 					}
@@ -3938,7 +3938,7 @@ Oce.GridModule.plugins = {
 						config.iconCls = ic;
 					}
 				}
-				
+
 				,afterCreateGridStore: Ext.Function.createSequence(gm.afterCreateGridStore, function(store) {
 					store.on({
 						scope: this
@@ -3961,15 +3961,20 @@ Oce.GridModule.plugins = {
 							}
 						}
 					});
-				})				
+				})
 
 			});
 		}
 	})
-}
+};
 
-Oce.deps.reg('Oce.GridModule');
-// Required for inheritance dependency
-Oce.deps.reg('Oce.Modules.GridModule.GridModule');
-	
+// Makes all children wait for the Ext4 application to be started
+Oce.deps.wait('Eoze.app.Application', function() {
+	eo.getApplication().onStarted(function() {
+		Oce.deps.reg('Oce.GridModule');
+		// Required for inheritance dependency
+		Oce.deps.reg('Oce.Modules.GridModule.GridModule');
+	});
+});
+
 })(); // closure
