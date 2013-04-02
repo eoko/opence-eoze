@@ -171,6 +171,7 @@ class Generator extends Script {
 
 		// Database
 		$this->databaseName = $this->database->getDatabaseName();
+		echo "Using database: $this->databaseName\n";
 
 		// Prepare paths
 		$this->prepareOutputDirectories();
