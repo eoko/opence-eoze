@@ -69,10 +69,12 @@ Ext.define('Eoze.Deft.ioc.Injector', {
 		Ext.Object.each(identifiers, function(key, value) {
 			var targetProperty = Ext.isArray(identifiers) ? value : key,
 				identifier = value,
-				provider = this.getProvider(identifier);
+				provider = this.getProvider(identifier, false);
 
-			if (provider.getGetter()) {
-				this.createInjectableGetter(provider, targetInstance, targetProperty);
+			// If provider cannot be resolved right now, it will be attempted to resolve it when
+			// the getter is called (that's why we also need the identifier here).
+			if (!provider || provider.getGetter()) {
+				this.createInjectableGetter(provider, targetInstance, targetProperty, identifier);
 			} else {
 				otherIdentifiers[targetProperty] = identifier;
 			}
@@ -82,14 +84,16 @@ Ext.define('Eoze.Deft.ioc.Injector', {
 	}
 
 	/**
+	 * @param {String} identifier
+	 * @param {Boolean} [require=true]
 	 * @return {Deft.ioc.DependencyProvider}
 	 * @protected
 	 */
-	,getProvider: function(identifier) {
+	,getProvider: function(identifier, require) {
 		var provider = this.providers[identifier];
 		if (provider != null) {
 			return provider;
-		} else {
+		} else if (require !== false) {
 			Ext.Error.raise({
 				msg: "Error while resolving value to inject: no dependency provider found for '" + identifier + "'."
 			});
@@ -97,25 +101,38 @@ Ext.define('Eoze.Deft.ioc.Injector', {
 	}
 
 	/**
-	 * @param {Deft.ioc.DependencyProvider} provider
+	 * Creates a getter method for the given target and provider. If the provider is not provided,
+	 * it will be attempted to resolve it with the given identifier, when the getter is called.
+	 *
+	 * @param {Deft.ioc.DependencyProvider/undefined} provider
 	 * @param {Object} targetInstance
 	 * @param {String} targetProperty
+	 * @param {String} identifier
 	 * @private
 	 */
-	,createInjectableGetter: function(provider, targetInstance, targetProperty) {
-		var capitalizedName = Ext.String.capitalize(targetProperty),
+	,createInjectableGetter: function(provider, targetInstance, targetProperty, identifier) {
+		var me = this,
+			capitalizedName = Ext.String.capitalize(targetProperty),
 			getterName = 'get' + capitalizedName,
 			setterName = 'set' + capitalizedName,
 			originalGetter = targetInstance[getterName],
-			setter = targetInstance[setterName],
-			emptyValue = provider.getEmptyValue();
+			setter = targetInstance[setterName];
+
+		if (!provider) {
+			Deft.Logger.info('Cannot resolve "' + identifier + '" right away. Hoping for late resolving.');
+		}
 
 		if (originalGetter) {
 			targetInstance[getterName] = function() {
+				// Late provider resolving
+				if (!provider) {
+					provider = me.getProvider(identifier);
+				}
+
 				var value = originalGetter.apply(this, arguments),
 					resolvedValue;
 
-				if (value === emptyValue) {
+				if (value === provider.getEmptyValue()) {
 					resolvedValue = provider.resolve(this)
 
 					// set value
@@ -134,10 +151,15 @@ Ext.define('Eoze.Deft.ioc.Injector', {
 			};
 		} else {
 			targetInstance[getterName] = function() {
+				// Late provider resolving
+				if (!provider) {
+					provider = me.getProvider(identifier);
+				}
+
 				var value = this[targetProperty],
 					resolvedValue;
 
-				if (value === emptyValue) {
+				if (value === provider.getEmptyValue()) {
 					resolvedValue = provider.resolve(this);
 
 					// set value
