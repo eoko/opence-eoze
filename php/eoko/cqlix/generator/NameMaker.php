@@ -60,6 +60,8 @@ class NameMaker extends Inflector {
 			}
 		} else if (preg_match('/\d$/', $name)) {
 			return $name;
+		} else if (static::isSingular($name)) {
+			return $name;
 		} else {
 			throw new \Exception('Not implemented, singularize for: ' . $name);
 		}
