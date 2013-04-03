@@ -2,6 +2,7 @@
 
 use eoko\cqlix\FieldMetadata;
 use eoko\cqlix\Aliaser;
+use eoko\cqlix\Model\RelationCardinality;
 
 interface ModelRelationInfoHasOne extends ModelRelationMarkerHasOne {}
 interface ModelRelationInfoHasMany extends ModelRelationMarkerHasMany {}
@@ -37,7 +38,7 @@ class ModelRelationReciproqueFactory {
  * @property myModelTable $targetTable
  * @property myModelTable $localTable
  */
-abstract class ModelRelationInfo extends ModelFieldBase {
+abstract class ModelRelationInfo extends ModelFieldBase implements RelationCardinality {
 
 	/** @var string */
 	public $name;
@@ -84,6 +85,17 @@ abstract class ModelRelationInfo extends ModelFieldBase {
 			'localTable' => $this->localTable,
 			'targetTable' => $this->targetTable
 		);
+	}
+
+	/**
+	 * @inheritdoc
+	 */
+	public function getCardinality() {
+		if ($this instanceof ModelRelationInfoHasOne) {
+			return self::ONE_TO_ONE;
+		} else if ($this instanceof ModelRelationInfoHasMany) {
+			return self::ONE_TO_MANY;
+		}
 	}
 
 	public function configureMeta(array $config = null) {
