@@ -92,6 +92,7 @@ class Generator extends Script {
 	/** @var Config */
 	private $baseConfig;
 
+	/** @var TplTable[] */
 	private $tables;
 	private $modelsConfig;
 
@@ -394,6 +395,7 @@ class Generator extends Script {
 			$result = $this->database->query("SHOW COLUMNS FROM `$dbTable` FROM `$this->databaseName`;");
 			$result = $result->fetchAll(PDO::FETCH_NAMED);
 
+			/** @var $fields TplField[] */
 			$fields = array();
 			foreach ($result as $r) {
 
