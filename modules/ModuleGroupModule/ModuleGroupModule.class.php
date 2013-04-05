@@ -4,9 +4,11 @@ namespace eoko\modules\ModuleGroupModule;
 
 use eoko\_getModule\TabModule;
 
+use eoko\module\Module;
 use eoko\module\ModuleManager;
 
 use eoko\modules\TreeMenu\ActionProvider\ModuleGroupProvider;
+use eoko\modules\TreeMenu\HasIconClass;
 
 /**
  * Base module class for ModuleGroupModules. ModuleGroupModules are modules that 
@@ -80,7 +82,7 @@ use eoko\modules\TreeMenu\ActionProvider\ModuleGroupProvider;
  * @package Modules\Eoko\ModuleGroupModule
  * @author Éric Ortéga <eric@planysphere.fr>
  */
-class ModuleGroupModule extends TabModule {
+class ModuleGroupModule extends TabModule implements HasIconClass{
 
 	public function getActionProvider() {
 		foreach ($this->getChildModules() as $module) {
@@ -129,4 +131,21 @@ class ModuleGroupModule extends TabModule {
 		return $properties;
 	}
 
+	/**
+	 * Get the icon class for the module (used as module tab icon, amongst other). The base
+	 * implementation concatenates its module name with the first child name.
+	 *
+	 * @return string
+	 */
+	public function getIconClass() {
+		/** @var $children \eoko\module\Module[] */
+		$children = $this->getChildModules();
+		if (count($children) > 0) {
+			$firstChild = $children[0];
+			$firstChildIconCls = $firstChild instanceof HasIconClass
+				? $firstChild->getIconClass()
+				: $firstChild->getName();
+			return $this->getName() . ' ' . $firstChildIconCls;
+		}
+	}
 }
