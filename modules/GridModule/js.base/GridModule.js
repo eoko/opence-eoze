@@ -27,8 +27,7 @@ var NS = Ext.ns('Oce.Modules.GridModule');
  * 
  * Actions
  * -------
- * 
- * 
+ *
  * ### Remove and Add Actions
  * 
  * If a GridModule has its action 'remove' disabled, then it doesn't display the 
@@ -47,6 +46,19 @@ var NS = Ext.ns('Oce.Modules.GridModule');
  *     
  * 2.  Second, make the action available through the module's config. This is done in the
  *     `extra.toolbar` config key.
+ *
+ *
+ * Edit module
+ * -----------
+ *
+ * It is possible to use another module for editing. In this case, configuration which is
+ * specific to record editing is not required for this module.
+ *
+ * In order to declare another module as taking responsability for editing jobs, use the
+ * {@link #editModule} config option, or override the {@link #getEditModule} mtethod.
+ *
+ * *Note*: the `editModule` support if all but complete for now (notably completely lacking
+ * to take record creation into consideration).
  * 
  */
 Oce.GridModule = Ext.extend(Ext.util.Observable, {
@@ -99,6 +111,12 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	 * @cfg {Object} winConfig
 	 * @cfg {Object} editWinConfig
 	 * @cfg {Object} addWinConfig
+	 */
+
+	/**
+	 * Name of the module to be used for editing, if different from this module.
+	 *
+	 * @cfg {String} [editModule=undefined]
 	 */
 
 	,constructor: function(config) {
@@ -200,6 +218,8 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 
 		this.initMultisortPlugin();
 		this.initFilterPlugin();
+
+		this.initEditModule();
 
 		Ext.iterate(this.extra, function(name, config) {
 			var pg = Oce.GridModule.plugins[
@@ -1744,10 +1764,21 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	,onConfigureAddFormPanel: function(formConfig) {}
 
 	/**
-	 * Name of the module to be used for editing, if different from this module.
+	 * Prepares this module to be used with an {@link #editModule external editing module}.
 	 *
-	 * @cfg {String} [editModule=undefined]
+	 * This method is called during the initialization phase of the module, and removes functionalities
+	 * that are specific to record editing. This allow modules that do not handle editing to provide
+	 * partial configuration.
+	 *
+	 * @private
 	 */
+	,initEditModule: function() {
+		if (this.editModule || this.extra.editModule) {
+			Ext.apply(this, {
+				buildFormsConfig: Ext.emptyFn
+			});
+		}
+	}
 
 	/**
 	 * Get the instance of the module to be used for editing. If editing is not done by another module,
