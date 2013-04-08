@@ -3673,10 +3673,12 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		};
 
 		// --- Items ---
-		var groups = {}, groupMenus;
+		var groups = {},
+			groupMenus,
+			groupSeparator;
 		if (this.extra.columnGroups) {
 			groupMenus = [];
-			Ext.iterate(this.extra.columnGroups.items, function(title,items) {
+			Ext.iterate(this.extra.columnGroups.items, function(title, items) {
 				var menu = new Ext.menu.Menu();
 
 				groupMenus.push(menu);
@@ -3711,12 +3713,21 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 					groups[item] = menu;
 				});
 			});
-			colMenu.add('-');
+
+			groupSeparator = colMenu.add('-');
 		}
+
+		var hasFreeItems = false;
 
 		for(var i = 0; i < colCount; i++){
 			if(cm.config[i].hideable !== false){
-				var dest = groups[cm.config[i].dataIndex] || colMenu;
+				var dest = groups[cm.config[i].dataIndex];
+
+				if (!dest) {
+					dest = colMenu;
+					hasFreeItems = true;
+				}
+
 				var item = new Ext.menu.CheckItem({
 					itemId: 'col-'+cm.getColumnId(i),
 					text: cm.getColumnHeader(i),
@@ -3759,6 +3770,10 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		Ext.each(checkGroups.reverse(), function(checkGroup) {
 			checkGroup.init();
 		});
+
+		if (groupSeparator && !hasFreeItems) {
+			groupSeparator.hide();
+		}
 	}
 	
 	/**
