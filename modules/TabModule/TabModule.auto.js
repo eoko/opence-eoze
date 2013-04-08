@@ -9,23 +9,23 @@ Ext.ns('eo.modules.TabModule');
  * Base class for TabModule modules.
  */
 eo.modules.TabModule = Ext.extend(Oce.BaseModule, {
-	
+
 	/**
 	 * @cfg {String} controller
 	 */
 	/**
 	 * @cfg {Object} config
 	 */
-	
+
 	constructor: function(config) {
-		
+
 		this.addEvents('open', 'close');
-		
+
 		Ext.apply(this, config);
-		
+
 		this.callParent(arguments);
 	}
-	
+
 	/**
 	 * True if this component fires an "open" event. Read-only.
 	 * @type Boolean
@@ -47,7 +47,7 @@ eo.modules.TabModule = Ext.extend(Oce.BaseModule, {
 		this.tab.show();
 		this.afterOpen();
 	}
-	
+
 	,baseModuleActions: {
 		open: function(cb, scope, args) {
 			this.on({
@@ -58,9 +58,9 @@ eo.modules.TabModule = Ext.extend(Oce.BaseModule, {
 			return this.open.apply(this, args);
 		}
 	}
-	
+
 	,moduleActions: ["open"]
-	
+
 	/**
 	 * Protected method. Must be called when the module is opened by children
 	 * classes, <b>only</b> if they completly replace the open() method (that
@@ -106,7 +106,7 @@ eo.modules.TabModule = Ext.extend(Oce.BaseModule, {
 			,iconCls: this.getIconCls()
 			,title: this.getTitle()
 		};
-		
+
 		var child = this.tabChild;
 		if (child) {
 			config = Ext.apply({
@@ -114,14 +114,14 @@ eo.modules.TabModule = Ext.extend(Oce.BaseModule, {
 				,items: [child]
 			}, config);
 		}
-		
+
 		return config;
 	}
-	
+
 	,getTitle: function() {
 		return this.title;
 	}
-	
+
 	,getIconCls: function(action) {
 		var c = this.iconCls;
 		if (c) {
@@ -129,5 +129,5 @@ eo.modules.TabModule = Ext.extend(Oce.BaseModule, {
 		}
 	}
 });
-	
+
 Oce.deps.reg('eo.modules.TabModule');
