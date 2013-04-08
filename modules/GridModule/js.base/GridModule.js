@@ -392,13 +392,13 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		var plugins = this.extra.plugins,
 			pp = this.plugins = [];
 		if (plugins) {
-			Ext.each(plugins, function(config) {
+			Ext4.Object.each(plugins, function(index, config) {
 				var ptype = Ext.isString(config) ? config : config.ptype,
 					c = Oce.GridModule.ptypes[ptype],
 					p = new c(config);
 				pp.push(p);
 			}, this);
-			Ext.each(pp, function(p) {
+			pp.forEach(function(p) {
 				p.init(this);
 			}, this);
 		}
