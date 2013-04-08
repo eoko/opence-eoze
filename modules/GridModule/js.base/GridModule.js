@@ -1743,7 +1743,51 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	,afterFormLoad: function(form, data, formPanel) {}
 	,onConfigureAddFormPanel: function(formConfig) {}
 
+	/**
+	 * Name of the module to be used for editing, if different from this module.
+	 *
+	 * @cfg {String} [editModule=undefined]
+	 */
+
+	/**
+	 * Get the instance of the module to be used for editing. If editing is not done by another module,
+	 * then this method will return `true`. In the contrary, the method will return `false` and use
+	 * the supplied callback to provide the module.
+	 *
+	 * This option can be set in configuration with {@link #editModule}.
+	 *
+	 * @param {Function} callback
+	 * @param {Object} [scope]
+	 * @return {Boolean}
+	 * @protected
+	 */
+	,getEditModule: function(callback, scope) {
+		var editModule = this.editModule || this.extra.editModule;
+
+		if (editModule) {
+			if (Ext.isString(editModule)) {
+				Oce.getModule(editModule, function(module) {
+					Ext.callback(callback, scope, [module]);
+				});
+			} else {
+				Ext.callback(callback, scope, [editModule]);
+			}
+			return false;
+		} else {
+			return true;
+		}
+	}
+
 	,getEditWindow: function(rowId, cb, opts) { // 08/12/11 21:03 added opts
+
+		var args = arguments,
+			editModule = this.getEditModule(function(module) {
+				module.getEditWindow.apply(module, args);
+			}, this);
+
+		if (editModule !== true) {
+			return;
+		}
 
 		if (rowId !== null && rowId in this.editWindows) {
 			if (cb) {
