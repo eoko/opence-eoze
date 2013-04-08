@@ -1746,8 +1746,11 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	,getEditWindow: function(rowId, cb, opts) { // 08/12/11 21:03 added opts
 
 		if (rowId !== null && rowId in this.editWindows) {
-			if (cb) cb(this.editWindows[rowId]);
-			return this.editWindows[rowId];
+			if (cb) {
+				cb(this.editWindows[rowId]);
+			} else {
+				return this.editWindows[rowId];
+			}
 		}
 
 		var fn = function(win) {
