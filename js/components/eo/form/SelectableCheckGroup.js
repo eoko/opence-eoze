@@ -39,8 +39,24 @@ Ext.define('eo.form.SelectableCheckGroup', {
 		this.parent = parent;
 
 		parent.on('checkchange', this.onParentCheckChange, this);
+	}
 
-		this.init = this.onChildCheckChange;
+	,init: function() {
+
+		if (this.isEmpty()) {
+			this.parent.hide();
+		}
+
+		this.onChildCheckChange();
+	}
+
+	/**
+	 * Returns `true` if this group contains no items.
+	 *
+	 * @return {Boolean}
+	 */
+	,isEmpty: function() {
+		return this.children.length === 0;
 	}
 
 	/**
