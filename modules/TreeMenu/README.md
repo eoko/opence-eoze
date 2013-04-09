@@ -20,6 +20,11 @@ Exposing a menu action from a module
      * In method `initActions` of MyModule instanceof of `Oce.GridModule#initActions`.
      */
 
-    this.addModuleAction('myActionName', function() {
-      // implement action here...
+    this.addModuleAction('myActionName', function(callback, scope, args) {
+
+        // implement action here...
+
+        // Important! The callback must be executed after the action is launched,
+        // so that the menu knows to stop representing the action as 'loading'.
+        Ext.callback(callback, scope);
     });
