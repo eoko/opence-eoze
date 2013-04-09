@@ -14,6 +14,8 @@ use eoko\util\date\Date;
 
 use eoko\cqlix\Exception\ModelAlreadyDeletedException;
 
+USE EarlReport\Data\Type as EarlType;
+
 use Model;
 use ModelField;
 use ModelTable;
@@ -1430,24 +1432,26 @@ TXT
 			$f = $this->table->getField($field);
 			switch ($f->getType()) {
 				case ModelField::T_INT:
+					$colFormat = EarlType::INT;
+					break;
 				case ModelField::T_FLOAT:
 				case ModelField::T_DECIMAL:
-					$colFormat = \EarlReport\Data\Type::FLOAT;
+					$colFormat = EarlType::FLOAT;
 					break;
 				case ModelField::T_DATE:
 					$colFormat = array(
-						'type' => \EarlReport\Data\Type::DATE,
+						'type' => EarlType::DATE,
 						'precision' => \EarlReport\Data\Format\Date::DAY,
 					);
 					break;
 				case ModelField::T_DATETIME:
 					$colFormat = array(
-						'type' => \EarlReport\Data\Type::DATE,
+						'type' => EarlType::DATE,
 						'precision' => \EarlReport\Data\Format\Date::SECOND,
 					);
 					break;
 				case ModelField::T_BOOL:
-					$colFormat = \EarlReport\Data\Type::BOOL;
+					$colFormat = EarlType::BOOL;
 					break;
 				case ModelField::T_ENUM:
 //					$f instanceof \eoko\cqlix\EnumColumn;
