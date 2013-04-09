@@ -21,6 +21,9 @@ Ext4.define('Eoze.lib.Eoze', {
 		// Model
 		'Eoze.Ext.data.association.HasOne',
 
+		// File upload field, fixes rendering
+		'Eoze.Ext.form.field.File',
+
 		// -- UX --
 		'Ext.ux.ActivityMonitor'
 	]
