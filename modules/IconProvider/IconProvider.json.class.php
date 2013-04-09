@@ -8,6 +8,7 @@ class Json extends JsonExecutor {
 
 	public function getIconList() {
 
+		/** @var $module IconProvider */
 		$module = $this->getModule();
 
 		$baseClass = $module->getConfig()->get('cssBaseClass');
