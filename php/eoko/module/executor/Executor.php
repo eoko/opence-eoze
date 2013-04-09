@@ -5,6 +5,7 @@ namespace eoko\module\executor;
 use eoko\module\Module;
 use eoko\module\ModuleResolver;
 
+use eoko\url\Maker as UrlMaker;
 use eoko\util\Files as FileHelper;
 use SecurityException, IllegalStateException;
 use eoko\file;
@@ -21,7 +22,10 @@ const ACTION_CANCELLED = -1;
 /**
  * @internal This function is externalized from the {@link Executor} class, to
  * limit its access to the Executor's public methods.
- * @param Executor $executor 
+ * @param Executor $executor
+ * @param $action
+ * @throws \IllegalStateException
+ * @return
  */
 function execute(Executor $executor, $action) {
 	if (method_exists($executor, $action)) {
@@ -55,6 +59,7 @@ abstract class Executor implements file\Finder {
 
 	private $cancelled = false;
 	private $executed = false;
+	private $forwardResult = null;
 
 	protected $actionParam = 'action';
 	protected $defaultAction = 'index';
@@ -125,9 +130,10 @@ abstract class Executor implements file\Finder {
 
 	/**
 	 * Execute the action with name $name.
-	 * @param Pointer $returnValue A variable that will be set to the action return
+	 * @param $name
+	 * @param mixed $returnValue A variable that will be set to the action return
 	 * value, if the action is executed by this executor.
-	 * @returns true if the action was executed, else false.
+	 * @return bool true if the action was executed, else false.
 	 */
 	public function executeAction($name, &$returnValue) {
 		return false;
@@ -135,9 +141,9 @@ abstract class Executor implements file\Finder {
 
 	/**
 	 * Returns the qualified name of the executor, that is:
-	 * 
+	 *
 	 * controllerName.executorSuffix
-	 * 
+	 *
 	 * @return string
 	 */
 	public function __toString() {
@@ -199,13 +205,15 @@ abstract class Executor implements file\Finder {
 			throw new IllegalStateException('Already executed');
 		}
 
-		Logger::get($this)->debug('Executing {}.{}->{}',
-				$this->module, $this->name, $this->action);
+		Logger::get($this)->debug(
+			'Executing {}.{}->{}',
+			$this->module, $this->name, $this->action
+		);
 
 		if ($this->beforeAction() === false) {
 			$this->cancelled = true;
 			$this->executed = true;
-			return;
+			return null;
 		}
 
 		try {
@@ -221,8 +229,13 @@ abstract class Executor implements file\Finder {
 
 		$this->executed = true;
 
+		// Forwarded
+		if ($this->forwardResult) {
+			return $this->forwardResult;
+		}
+
 		if ($this->cancelled) {
-			return;
+			return null;
 		}
 
 		$this->afterAction();
@@ -282,6 +295,8 @@ abstract class Executor implements file\Finder {
 	protected function processResult($result) {
 		if ($result instanceof Response) {
 			return $result;
+		} else {
+			return null;
 		}
 	}
 
@@ -319,15 +334,19 @@ abstract class Executor implements file\Finder {
 		$this->request->remove('module', 'executor', 'controller');
 
 		$action = ModuleResolver::parseAction($controller, $action, $this->request, false);
+
 		if ($action instanceof Executor) {
 			$action->setRouter($this->getRouter());
 		}
-		$action();
+
+		$this->forwardResult = $action();
+
+		return $this->forwardResult;
 	}
 
 	public function redirectTo($url) {
 		$this->cancel();
-		header('Location: ' . \eoko\url\Maker::makeAbsolute($url));
+		header('Location: ' . UrlMaker::makeAbsolute($url));
 	}
 
 	/**
@@ -339,7 +358,7 @@ abstract class Executor implements file\Finder {
 				$this, array(
 					'forbidUpwardResolution' => true,
 					'finderFnName' => '_getFileFinderFor%s',
-				), 
+				),
 				$this->module
 			);
 		}
