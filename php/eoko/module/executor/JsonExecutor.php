@@ -19,6 +19,12 @@ class JsonExecutor extends TemplateExecutor {
 	}
 
 	protected function processResult($result, $return = false) {
+		// Hack upon legacy
+		if (is_array($result)) {
+			$this->getTemplate()->merge($result);
+			$result = true;
+		}
+		// Legacy
 
 		/** @var \Zend\Http\PhpEnvironment\Response $response  */
 		$response = $this->getResponse();
