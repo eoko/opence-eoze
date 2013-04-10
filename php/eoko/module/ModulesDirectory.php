@@ -89,10 +89,15 @@ class ModulesDirectory extends Location {
 	 * performance is desired, since it will instanciate all the modules in the
 	 * directory, which requires quite a bit of file parsing and config file
 	 * reading...
-	 * @return array[Module]
+	 *
+	 * @param null $usedModules
+	 * @param bool $onlyWithDir
+	 * @return Module[]
 	 */
 	public function listModules($usedModules = null, $onlyWithDir = false) {
-		if ($usedModules === '*') $usedModules = null;
+		if ($usedModules === '*') {
+			$usedModules = null;
+		}
 		$r = array();
 		if ($this->path) {
 			foreach (Files::listDirs($this->path) as $dir) {
