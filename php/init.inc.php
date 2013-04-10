@@ -72,6 +72,7 @@ if (!defined('MY_EOZE_PATH')) define('MY_EOZE_PATH', ROOT . '.eoze' . DS);
 if (!defined('CACHE_PATH')) define('CACHE_PATH', MY_EOZE_PATH . 'cache' . DS);
 if (!defined('LOG_PATH')) define('LOG_PATH', MY_EOZE_PATH . 'log' . DS);
 if (!defined('TMP_PATH')) define('TMP_PATH', MY_EOZE_PATH . 'tmp' . DS);
+if (!defined('VAR_PATH')) define('VAR_PATH', MY_EOZE_PATH . 'var' . DS);
 if (!defined('HELP_PATH')) define('HELP_PATH', ROOT . 'help' . DS);
 if (!defined('LIBS_PATH')) define('LIBS_PATH', PHP_PATH . 'lib' . DS);
 if (!defined('DATABASE_DUMP_PATH')) define('DATABASE_DUMP_PATH', ROOT . 'mysql' . DS);
@@ -124,6 +125,7 @@ if (!file_exists(MY_EOZE_PATH . '.htaccess')) {
 createEozeDirIf(CACHE_PATH);
 createEozeDirIf(LOG_PATH);
 createEozeDirIf(TMP_PATH);
+createEozeDirIf(VAR_PATH);
 
 // web dir
 createEozeDirIf(WEB_DIR_PATH);
