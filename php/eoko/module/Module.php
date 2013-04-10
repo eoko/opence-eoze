@@ -106,6 +106,8 @@ class Module implements file\Finder {
 		$this->lineageLocations = $location->getDirectory()->getLineageLocations($lineage);
 
 		$this->construct($location);
+
+		$this->init();
 	}
     
     /**
@@ -148,6 +150,12 @@ class Module implements file\Finder {
 	protected function setPrivateState(&$vals) {}
 
 	protected function construct(ModuleLocation $location) {}
+
+	/**
+	 * This method is called at the end of the constructor. It can be used by child classes
+	 * to add initialization without the burden of handling constructor params.
+	 */
+	protected function init() {}
 
 	protected function getLocation() {
 		return $this->location;
