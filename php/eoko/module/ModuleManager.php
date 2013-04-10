@@ -166,15 +166,56 @@ class ModuleManager {
 		return self::$modulesDirectories;
 	}
 
-	public static function listModules($onlyWithDir = false) {
-		$self = self::getInstance();
+	/**
+	 * Read the configuration for used module names, and merges location aliases.
+	 *
+	 * Location aliases are of the form: myName(source1), myName(mySource2), etc. In these
+	 * examples, source1 and mySource2 are arbitrary source name, and the aliases all refer
+	 * to the location 'myName'.
+	 *
+	 * This merging allows multiple configuration files to declare used modules from the
+	 * same location.
+	 *
+	 * P.S. And yes, it may seems like the declaration style for used module in config is a
+	 * bit broken...
+	 *
+	 * @return array
+	 */
+	private function getUsedModulesConfig() {
 		$config = ConfigManager::get(__NAMESPACE__);
+
+		$result = array();
+
+		if (isset($config['used'])) {
+			foreach ($config['used'] as $locationName => $moduleNames) {
+				// extract true name
+				$name = preg_match('/^(?<name>.+)\(.+\)$/', $locationName, $matches)
+					? $matches['name']
+					: $locationName;
+				// merge in result
+				if (empty($result[$name])) {
+					$result[$name] = $moduleNames;
+				} else {
+					$result[$name] = array_merge($result[$name], $moduleNames);
+				}
+			}
+		}
+
+		return $result;
+	}
+
+	public static function listModules($onlyWithDir = false) {
+
+		// not sure if this is still useful :-s
+		$me = self::getInstance();
+
+		$usedModuleConfig = $me->getUsedModulesConfig();
 
 		$r = array();
 
 		foreach (self::$modulesDirectories as $modulesDir) {
-			$usedModules = isset($config['used'][$modulesDir->name])
-				? $config['used'][$modulesDir->name]
+			$usedModules = isset($usedModuleConfig[$modulesDir->name])
+				? $usedModuleConfig[$modulesDir->name]
 				: null;
 			foreach($modulesDir->listModules($usedModules, $onlyWithDir) as $module) {
 				/** @var $module Module */
@@ -185,6 +226,7 @@ class ModuleManager {
 		// Children modules
 		foreach ($r as $module) {
 			if ($module instanceof HasChildrenModules) {
+				/** @var $module HasChildrenModules */
 				$r = array_merge($r, $module->listChildrenModules());
 			}
 		}
@@ -208,8 +250,11 @@ class ModuleManager {
 	 * @return ModuleManager
 	 */
 	public static function getInstance() {
-		if (self::$instance) return self::$instance;
-		else return self::createInstance();
+		if (self::$instance) {
+			return self::$instance;
+		} else {
+			return self::createInstance();
+		}
 	}
 
 	/**
