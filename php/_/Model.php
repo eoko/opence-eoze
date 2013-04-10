@@ -757,6 +757,16 @@ abstract class Model {
 				$relation = $this->getForeignModel($relationName);
 				return $relation;
 			}
+		} else if (substr($name, 0, 2) === 'is') {
+			$fieldName = lcfirst(substr($name, 2));
+			if ($this->table->hasVirtual($fieldName)) {
+				return $this->__get($fieldName);
+			} else {
+				$fieldName = 'is' . ucfirst($fieldName);
+				if ($this->table->hasVirtual($fieldName)) {
+					return $this->__get($fieldName);
+				}
+			}
 		}
 		throw new Exception("Undefined method: $name()");
 	}
