@@ -6,6 +6,9 @@
  * @license http://www.planysphere.fr/licenses/psopence.txt
  */
 
+use Zend\EventManager\EventManager;
+use Zend\EventManager\EventManagerAwareInterface;
+use Zend\EventManager\EventManagerInterface;
 use eoko\config\ConfigManager;
 use eoko\database\Database;
 
@@ -56,7 +59,17 @@ use eoko\database\Database;
  * @property string $tableName		name/class of this instance
  * @property string $dbTableName	name of the associated database table
  */
-abstract class ModelTable extends ModelTableProxy {
+abstract class ModelTable extends ModelTableProxy implements EventManagerAwareInterface {
+
+	/**
+	 * Fired when a new model is created.
+	 */
+	const EVENT_MODEL_CREATED = 'modelCreated';
+
+	/**
+	 * @var EventManagerInterface
+	 */
+	private $events;
 
 	/**
 	 * @var array[string]ModelColumn
@@ -93,6 +106,7 @@ abstract class ModelTable extends ModelTableProxy {
 	 * xxxModelTableBase subclasses need to call their parent's one...
 	 *
 	 * @param array $cols
+	 * @param $relations
 	 */
 	protected function __construct(&$cols, &$relations) {
 
@@ -128,6 +142,31 @@ abstract class ModelTable extends ModelTableProxy {
 	 */
 	protected function configure() {
 		// initialization ...
+	}
+
+	/**
+	 * @inheritdoc
+	 */
+	public function setEventManager(EventManagerInterface $events) {
+		$events->setIdentifiers(array(__CLASS__, get_called_class()));
+		$this->events = $events;
+		return $this;
+	}
+
+	/**
+	 * @inheritdoc
+	 */
+	public function getEventManager() {
+		if (!$this->events) {
+			$this->setEventManager(new EventManager());
+		}
+		return $this->events;
+	}
+
+	public function onModelCreate(Model $model) {
+		$this->getEventManager()->trigger(self::EVENT_MODEL_CREATED, $this, array(
+			'model' => $model,
+		));
 	}
 
 	private $config;
@@ -719,6 +758,8 @@ abstract class ModelTable extends ModelTableProxy {
 	/**
 	 * @param string $name
 	 * @param bool $requireType
+	 * @throws \IllegalStateException
+	 * @throws \IllegalArgumentException
 	 * @return \ModelRelationInfo
 	 */
 	public abstract static function getRelationInfo($name, $requireType = false);
@@ -753,9 +794,13 @@ abstract class ModelTable extends ModelTableProxy {
 			return $relation;
 		} else {
 			if ($requireType === ModelRelation::HAS_MANY) {
-				if ($relation instanceof ModelRelationInfoHasMany) return $relation;
+				if ($relation instanceof ModelRelationInfoHasMany) {
+					return $relation;
+				}
 			} else if ($requireType === ModelRelation::HAS_ONE) {
-				if ($relation instanceof ModelRelationInfoHasOne) return $relation;
+				if ($relation instanceof ModelRelationInfoHasOne) {
+					return $relation;
+				}
 			} else {
 				throw new IllegalArgumentException('$requireType');
 			}
@@ -1381,6 +1426,7 @@ EX
 			$this->createModelSet($query->where($where), ModelSet::ONE_PASS)
 			as $model
 		) {
+			/** @var $model Model */
 			$model->notifyDelete();
 		}
 		// Actually remove the data from the data store
