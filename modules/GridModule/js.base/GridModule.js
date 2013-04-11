@@ -1342,17 +1342,23 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		//
 		this.activeAddWindows[win.getId()] = win;
 
-		win.on('destroy', function(){
+		win.on('destroy', function() {
 			delete this.activeAddWindows[win.getId()]
-		}.createDelegate(this))
+		}.createDelegate(this));
 
 		//
 		if (loadModelData) win.loadModelData = true;
 
 		if (initValues) {
-			Ext.iterate(initValues, function(field,val) {
-				win.form.findField(field).setValue(val);
-			})
+			// Some types of field will set their value after they're rendered.....
+			win.on('afterrender', function() {
+				Ext.iterate(initValues, function(fieldName, val) {
+					var field = win.form.findField(fieldName);
+					if (field) {
+						field.setValue(val);
+					}
+				});
+			}, this, {single: true});
 		}
 
 		var tb = this.getToolbar(false),
