@@ -311,10 +311,15 @@ class ModelColumn extends ModelFieldBase {
 			}
 		}
 
-		if ($value === '' || $value === null) return null;
+		if ($value === '' || $value === null) {
+			return null;
+		}
 
-		switch ($this->type) {
-			case self::T_BOOL: return $value === null || $value === '' ? null : ($value ? 1 : 0);
+		switch ($this->sqlType) {
+			case self::T_BOOL:
+				return $value === null || $value === ''
+					? null
+					: ($value ? '1' : '0');
 			case self::T_DATETIME:
 				if ($value instanceof DateTime) {
 					$value = $value->format('Y-m-d H:i:s');
@@ -326,16 +331,26 @@ class ModelColumn extends ModelFieldBase {
 				} else {
 					$value = DateHelper::dateExtToSql($value);
 				}
+				if ($value && preg_match('/^(?<date>[^T]+)T.+$/', $value, $matches)) {
+					$value = $matches['date'];
+				}
 				return $value;
-			case self::T_INT: return $value === null || $value === '' ? null
+			case self::T_INT:
 				// 2012-12-04 16:12 changed
 				// : (($value === 0 ? '0' : $value));
-				: "$value";
-			case self::T_FLOAT: return $value === null || $value === '' ? null
-				: (float) str_replace(',', '.', $value);
-			case self::T_DECIMAL: return $value === null || $value === '' ? null
-				: str_replace(',', '.', $value);
-			default: return $value;
+				return $value === null || $value === ''
+					? null
+					: "$value";
+			case self::T_FLOAT:
+				return $value === null || $value === ''
+					? null
+					: (float) str_replace(',', '.', $value);
+			case self::T_DECIMAL:
+				return $value === null || $value === ''
+					? null
+					: str_replace(',', '.', $value);
+			default:
+				return $value;
 		}
 	}
 

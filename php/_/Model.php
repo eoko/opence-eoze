@@ -5,7 +5,7 @@ use eoko\config\Application;
 /**
  * Base class of Model classes
  *
- * This class provides the common functionnalities of all models. It is used as
+ * This class provides the common functionality of all models. It is used as
  * the parent class for all xxxModel classes.
  *
  * For each data model of the application (actually each table), an xxxModel
@@ -15,12 +15,12 @@ use eoko\config\Application;
  * this class file will be generated only if it does not already exist.
  * On the contrary, the xxxModelBase will be overwritten each time the models
  * are updated. This class is not intended to be modified by the user. It
- * provides all functionnality which are specific to a given model, yet are
+ * provides all functionality which are specific to a given model, yet are
  * deciphered by the generation algorithm.
  *
  * Similarly, two xxxModelTable and xxxModelTableBase will be generated to
- * provide functionnalities of the model's generic properties (as opposed to
- * the model's reccords properties). See {@link ModelTable} for details.
+ * provide functionality of the model's generic properties (as opposed to
+ * the model's records properties). See {@link ModelTable} for details.
  *
  * @internal The methods of the Model class which are protected, and
  * prefixed with a single underscore (eg _load) will have a static alias created
@@ -66,10 +66,14 @@ abstract class Model {
 
 	protected $deleted = false;
 
-	const EVT_BEFORE_SAVE_BASE = 'beforeSave';
-	const EVT_AFTER_SAVE_BASE = 'afterSave';
+	const EVT_BEFORE_SAVE = 'beforeSave';
+	const EVT_AFTER_SAVE = 'afterSave';
+	const EVT_BEFORE_SAVE_BASE = 'beforeSaveBase';
+	const EVT_AFTER_SAVE_BASE = 'afterSaveBase';
 	const EVT_BEFORE_SAVE_RELATION = 'beforeSaveRelation';
 	const EVT_AFTER_SAVE_RELATION = 'afterSaveRelation';
+	const EVT_BEFORE_DELETE = 'beforeDelete';
+	const EVT_AFTER_DELETE = 'afterDelete';
 
 	const EVT_AFTER_INIT = 'afterInit';
 
@@ -114,6 +118,7 @@ abstract class Model {
 			}
 		}
 
+		$this->getTable()->onModelCreate($this);
 		$this->onModelCreate();
 
 		$this->initiated = true;
@@ -122,10 +127,10 @@ abstract class Model {
 
 	/**
 	 * @return eoko\config\Application
+	 *
+	 * @version 2013-03-14 11:06 Changed public to protected
 	 */
 	protected function getApplication() {
-	// 2013-03-14 11:06 Changed public to protected
-	// public function getApplication() {
 		return Application::getInstance();
 	}
 
@@ -138,20 +143,20 @@ abstract class Model {
 	}
 
 	protected function onModelCreate() {
-		// overriden
+		// overridden
 	}
 
 	/**
-	 * Initialize the Model reccord
+	 * Initialize the Model record.
 	 *
 	 * This method is intended to be used instead of the constructor, to do
 	 * configuration and initialization tasks.It is indeed not safe for Model
 	 * concrete implementations to override their parent's constructor.
 	 *
-	 * This method is called each time a new reccord Object is created.
+	 * This method is called each time a new record Object is created.
 	 *
 	 * @internal This empty implementation is kept in the base class, in case the
-	 * childs ones got deleted...
+	 * child's ones got deleted...
 	 */
 	protected function initialize() {
 		// initialization ...
@@ -355,7 +360,7 @@ abstract class Model {
 	const F_ALL = 31;
 
 	/**
-	 * @param string[] $fields
+	 * @param string[]|int $fields
 	 * @throws IllegalStateException
 	 * @throws IllegalArgumentException
 	 * @return array $fieldName => $value
@@ -385,6 +390,23 @@ abstract class Model {
 		} else {
 			throw new IllegalArgumentException();
 		}
+	}
+
+	/**
+	 * Gets field values for {@link __toString()}.
+	 *
+	 * @return array
+	 */
+	private function getDebugFields() {
+		$r = array();
+		foreach (array_keys($this->internal->fields) as $field) {
+			try {
+				$r[$field] = $this->getField($field);
+			} catch (\Exception $ex) {
+				$r[$field] = '**Exception**';
+			}
+		}
+		return $r;
 	}
 
 	/**
@@ -584,17 +606,22 @@ abstract class Model {
 	}
 
 	/**
-	 * Returns an array containing all the reccord's fields that have changed,
+	 * Returns an array containing all the record's fields that have changed,
 	 * and thus need to be modified in the database. The array's key are the
 	 * field's name in the database, and the value are the value (in a
 	 * form compatible with the SQL).
-	 * <p>This method can only be called when <b>actually</b> intending to
-	 * commit the changes, since it will check for some integrety (final fields),
-	 * and throw exceptions in case of problem.
-	 * <p>If some automatic set operations are associated with this Model's
+	 *
+	 * This method can only be called when <b>actually</b> intending to commit
+	 * the changes, since it will check for some integrity (final fields), and
+	 * throw exceptions in case of problem.
+	 *
+	 * If some automatic set operations are associated with this Model's
 	 * ModelColumns, then they will be set by this method, but only if the
 	 * matching field's value have not already been (ie. auto values do not
 	 * have priority over non-auto changes).
+	 *
+	 * @param $operation
+	 * @throws IllegalStateException
 	 * @return Array $colName => $value
 	 */
 	private function buildUpdatedFields($operation) {
@@ -764,13 +791,21 @@ abstract class Model {
 		throw new Exception("Undefined method: $name()");
 	}
 
+	/**
+	 * @return Model
+	 */
+	public function getDatabaseCopy() {
+		return $this->table->loadModel($this->getPrimaryKeyValue(), $this->context);
+	}
+
 	public function getInitialValue($fieldName) {
 		if ($this->internal->dbValues === null) {
 			if ($this->isNew()) {
 				return null;
 			} else {
 				$this->internal->dbValues = $this->table->loadModel(
-					$this->getPrimaryKeyValue()
+					$this->getPrimaryKeyValue(),
+					$this->context
 				)->internal->dbValues;
 				return $this->getInitialValue($fieldName);
 			}
@@ -809,7 +844,9 @@ abstract class Model {
 	 * even if the Model's data won't be persisted to the datastore (which
 	 * occurs only if the Model is new or modified). See {@link Model::beforeSave}
 	 * and {@link Model::afterSave} for conditionnal events.
-	 * @param boolean $new
+	 *
+	 * @param bool $new
+	 * @param bool $deleted
 	 */
 	protected function onPrepareForSave(&$new, $deleted) {}
 
@@ -833,6 +870,9 @@ abstract class Model {
 	 * Persists the reccord in the database. If the primary key of the reccord
 	 * has been set, this will result in an <b>update</b> operation; while if
 	 * it has been left blank, a new reccord will be created.
+	 *
+	 * @param bool $new
+	 * @throws ModelSaveException
 	 * @return Bool TRUE if succeeds, FALSE if fails.
 	 */
 	public function save($new = null) {
@@ -867,6 +907,8 @@ abstract class Model {
 		} else {
 
 			$this->saving = true;
+
+			$this->events->fire(self::EVT_BEFORE_SAVE, $this);
 
 			if ($new) {
 
@@ -929,6 +971,8 @@ abstract class Model {
 
 			$this->afterSaveRelations($new);
 			$this->saving = false;
+
+			$this->events->fire(self::EVT_AFTER_SAVE, $this);
 
 			if ($this->saveAgain) {
 				$this->saveAgain = false;
@@ -1059,16 +1103,17 @@ abstract class Model {
 	 */
 	public function notifyDelete() {
 		if (!$this->deleted) {
-			$this->beforeDelete(false);
+			$this->triggerBeforeDelete(false);
 			$this->deleted = true;
 			$this->onDeleteInternal();
-			$this->onDelete(false);
+			$this->triggerOnDelete(false);
 		}
 	}
 
 	/**
 	 * Event method called after a model's data has been removed from the
 	 * datastore.
+	 *
 	 * @param boolean $isSaving TRUE if the delete operation is taking place in
 	 * the save procedure (ie. the Model's {@link Model::save() save()} method),
 	 * FALSE if the delete operation has been triggered directly. This
@@ -1080,13 +1125,38 @@ abstract class Model {
 	protected function onDelete($isSaving) {}
 
 	/**
+	 * Proxy method for {@link onDelete()}, intended to protect against child classes not
+	 * calling the parent method in overrides (and so, breaking the event model).
+	 *
+	 * @param bool $isSaving
+	 * @see onDelete()
+	 */
+	private function triggerOnDelete($isSaving) {
+		$this->onDelete($isSaving);
+		$this->events->fire(self::EVT_AFTER_DELETE, $this);
+	}
+
+	/**
 	 * Hooking method called when the model is marked for deletion, or when
 	 * it is actually in the process of being deleted.
+	 *
 	 * @param boolean $isSaving TRUE if the model is actually being deleted,
 	 * FALSE if it is just marked for deletion (actual deletion will then
 	 * occur on the next call to the {@link save()} method of this model).
 	 */
 	protected function beforeDelete($isSaving) {}
+
+	/**
+	 * Proxy method for {@link beforeDelete()}, intended to protect against child classes not
+	 * calling the parent method in overrides (and so, breaking the event model).
+	 *
+	 * @param bool $isSaving
+	 * @see beforeDelete()
+	 */
+	private function triggerBeforeDelete($isSaving) {
+		$this->beforeDelete($isSaving);
+		$this->events->fire(self::EVT_BEFORE_DELETE, $this);
+	}
 
 	protected function onDeleteInternal() {
 		foreach ($this->table->getRelationsInfo() as $relInfo) {
@@ -1153,7 +1223,7 @@ abstract class Model {
 		}
 
 		if (!$this->deletedFromDB) {
-			$this->beforeDelete($isSaving);
+			$this->triggerBeforeDelete($isSaving);
 
 			if ($this->doDeleteQuery()) {
 
@@ -1161,7 +1231,7 @@ abstract class Model {
 				$this->deleted = true;
 
 				$this->onDeleteInternal();
-				$this->onDelete($isSaving);
+				$this->triggerOnDelete($isSaving);
 
 				return true;
 			} else {
@@ -1465,6 +1535,7 @@ abstract class Model {
 			$value = null;
 		}
 
+		if (is_array($name)) dump_trace();
 		if (isset($this->undeterminedFields[$name])) {
 			throw new IllegalStateException(
 				"The undetermination about the field $name must be released before it can be set"
@@ -1753,7 +1824,7 @@ abstract class Model {
 
 	public function __toString() {
 		try {
-			$fields = $this->getFields();
+			$fields = $this->getDebugFields();
 			$s = $this->getModelName() . '{ ';
 			$comma = '';
 			foreach ($fields as $k => $v) {
