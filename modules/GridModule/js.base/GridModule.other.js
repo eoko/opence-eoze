@@ -25,7 +25,7 @@ var x = {
 	 *
 	 * This option can be set in configuration with {@link #editModule}.
 	 *
-	 * @params {Eoze.GridModule.EditRecordOptions} operation
+	 * @params {Eoze.GridModule.EditRecordOperation} operation
 	 * @return {Deft.Promise|false}
 	 * @protected
 	 */
