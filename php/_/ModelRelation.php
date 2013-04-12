@@ -102,31 +102,24 @@ abstract class ModelRelation {
 	}
 
 	// TODO: make these abstract
-	protected function doSet($value, $forceAcceptNull = false) {
+	protected function doSet($values, $forceAcceptNull = false) {
 		if ($this instanceof ModelRelationHasOne) {
-			if ($value instanceof Model) {
-				$this->setFromModel($value);
-			} else if (is_array($value)) {
-				if (count($value) === 1
-						&& array_key_exists($this->targetTable->getPrimaryKeyName(), $value)) {
-					$this->setFromId($value[$this->targetTable->getPrimaryKeyName()]);
+			if ($values instanceof Model) {
+				$this->setFromModel($values);
+			} else if (is_array($values)) {
+				if (count($values) === 1
+						&& array_key_exists($this->targetTable->getPrimaryKeyName(), $values)) {
+					$this->setFromId($values[$this->targetTable->getPrimaryKeyName()]);
 				} else {
 					$this->setFromModel(
-						$this->targetTable->createModel($value, false, $this->parentModel->context)
+						$this->targetTable->createModel($values, false, $this->parentModel->context)
 					);
 				}
 			} else {
-				$this->setFromId($value, $forceAcceptNull);
+				$this->setFromId($values, $forceAcceptNull);
 			}
 		} else if ($this instanceof ModelRelationHasMany) {
 			throw new UnsupportedOperationException();
-//			if ($value === null) {
-//				throw new IllegalArgumentException('$value cannot be NULL');
-//			} else if (!is_array($value)) {
-//				throw new IllegalArgumentException('$value must be an array');
-//			} else {
-//
-//			}
 		} else {
 			throw new UnsupportedOperationException("$this::set()");
 		}
@@ -454,12 +447,12 @@ class ModelRelationReferedByOne extends ModelRelationByReference
 		return $model;
 	}
 
-	public function doSet($value, $forceAcceptNull = false) {
-		if (is_array($value)) {
+	public function doSet($values, $forceAcceptNull = false) {
+		if (is_array($values)) {
 			$model =& $this->getModelReference(true);
-			$model->setFields($value, $forceAcceptNull);
+			$model->setFields($values, $forceAcceptNull);
 		} else {
-			parent::doSet($value, $forceAcceptNull);
+			parent::doSet($values, $forceAcceptNull);
 		}
 	}
 
@@ -630,24 +623,32 @@ class ModelRelationReferedByMany extends ModelRelationByReference implements Mod
 //		);
 //	}
 
-	protected function doSet($value, $forceAcceptNull = false) {
+	protected function doSet($values, $forceAcceptNull = false) {
 		$id = $this->parentModel->getPrimaryKeyValue();
 
 		$models =& $this->cache->get();
 
 		$models = array();
 
-		if ($value) {
-			foreach ($value as $m) {
-				if (false == $m instanceof Model) {
-					if (is_array($m)) {
-						$m = $this->targetTable->createModel($m, false, $this->parentModel->context);
+		if ($values) {
+			foreach ($values as $value) {
+				if ($value instanceof Model) {
+					$record = $value;
+				} else {
+					if (is_array($value)) {
+						$record = $this->targetTable->createModel($value, false, $this->parentModel->context);
 					} else {
-						$m = $this->targetTable->loadModel($m, $this->parentModel->context);
+						$record = $this->targetTable->loadModel($value, $this->parentModel->context);
+
+						if (!$record) {
+							throw new IllegalStateException('Missing target: ' . $value);
+						}
 					}
 				}
-				$m->setFieldFromModelPk($this->referenceField, $this->parentModel);
-				$models[] = $m;
+
+				$record->setFieldFromModelPk($this->referenceField, $this->parentModel);
+
+				$models[] = $record;
 			}
 		}
 	}
@@ -737,16 +738,19 @@ class ModelRelationHasOneByAssoc
 class ModelRelationIndirectHasMany extends ModelRelationByAssoc
 		implements ModelRelationHasMany, IteratorAggregate {
 
+	/**
+	 * @var Model[]
+	 */
 	protected $assocModels = null;
 
-	protected function doSet($value, $forceAcceptNull = false) {
+	protected function doSet($values, $forceAcceptNull = false) {
 
 		$id = $this->parentModel->getPrimaryKeyValue();
 
 		$this->assocModels = array();
 
-		if ($value) {
-			foreach ($value as $v) {
+		if ($values) {
+			foreach ($values as $v) {
 				if (!is_array($v)) {
 					$v = array(
 						$this->localForeignKey => $id,
@@ -952,15 +956,11 @@ class ModelRelationIndirectHasMany extends ModelRelationByAssoc
 
 		$query = $this->targetTable->createLoadQuery(ModelTable::LOAD_NONE, $context);
 
-		$this->targetTable->addAssocWhere(
-			$query->createWhere()->whereIn($this->targetTable->getPrimaryKeyName(), $targetIds)
-			,$query
-		);
+		$where = $query->createWhere()->whereIn($this->targetTable->getPrimaryKeyName(), $targetIds);
 
-// 2013-03-21 14:23 Removed (syntax error)
-//		if (!$where->isNull()) {
-//			$query->where($where);
-//		}
+		$this->targetTable->addAssocWhere($where, $query);
+
+		$query->andWhere($where);
 
 		$models = $this->targetTable->createModelSet(
 			$query,

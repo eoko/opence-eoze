@@ -11,6 +11,7 @@ use Zend\EventManager\EventManagerAwareInterface;
 use Zend\EventManager\EventManagerInterface;
 use eoko\config\ConfigManager;
 use eoko\database\Database;
+use eoko\cqlix\Model\Relation\Info\Factory as ModelRelationInfoFactory;
 
 /**
  * Base class of model's tables
@@ -80,6 +81,11 @@ abstract class ModelTable extends ModelTableProxy implements EventManagerAwareIn
 	 * @var array[ModelRelationInfo]
 	 */
 	private $relations;
+
+	/**
+	 * @var string[]|null
+	 */
+	protected $uniqueIndexes = null;
 
 	/**
 	 * @var array[VirtualField]
@@ -236,11 +242,37 @@ abstract class ModelTable extends ModelTableProxy implements EventManagerAwareIn
 		$this->virtuals[$name] = $virtual;
 	}
 
-	protected function addRelation(ModelRelationInfo $relation) {
+	/**
+	 * Adds a relation to this table.
+	 *
+	 * This method must be called in {@link doConfigure()} or {@link preConfigure()}.
+	 *
+	 * @param string|array|ModelRelationInfo $relation
+	 * @return ModelRelationInfo
+	 * @throws IllegalStateException
+	 * @throws InvalidArgumentException
+	 * @throws UnsupportedOperationException
+	 */
+	protected function addRelation($relation) {
+
 		if ($this->constructed) {
 			throw new IllegalStateException('This operation is only allowed during initialization');
 		}
+
+		if ($relation instanceof ModelRelationInfo) {
+			return $this->addRelationInfo($relation);
+		} else if (is_string($relation)) {
+			return $this->addRelationInfo(ModelRelationInfoFactory::fromSpec($this, $relation));
+		} else if (is_array($relation)) {
+			throw new UnsupportedOperationException('TODO');
+		} else {
+			throw new InvalidArgumentException();
+		}
+	}
+
+	private function addRelationInfo(ModelRelationInfo $relation) {
 		$this->relations[$relation->getName()] = $relation;
+		return $relation;
 	}
 
 	/**
@@ -763,6 +795,28 @@ abstract class ModelTable extends ModelTableProxy implements EventManagerAwareIn
 	protected function applyLoadQueryDefaultOrder(Query $query) {}
 
 	/**
+	 * Gets the relation info with the specified name. As opposed to {@link getRelationInfo()},
+	 * this method won't try to expand chained relations, so it will be usable before the relation
+	 * graph has been constructed.
+	 *
+	 * @param string $name
+	 * @param bool $require
+	 * @return ModelRelationInfo
+	 * @throws IllegalStateException
+	 */
+	public function getRelationInfoDeclaration($name, $require = false) {
+		if (isset($this->relations[$name])) {
+			return $this->relations[$name];
+		} else {
+			if ($require) {
+				throw new IllegalStateException('No relation info declared with name: ' . $name);
+			} else {
+				return null;
+			}
+		}
+	}
+
+	/**
 	 * @param string $name
 	 * @param bool $requireType
 	 * @throws \IllegalStateException
@@ -972,6 +1026,27 @@ abstract class ModelTable extends ModelTableProxy implements EventManagerAwareIn
 		} else {
 			return false;
 		}
+	}
+
+	public function isUniqueBy($fields) {
+		if (!is_array($fields)) {
+			$fields = func_get_args();
+		}
+
+		$n = count($fields);
+
+		foreach ($this->uniqueIndexes as $indexFields) {
+			if (count($indexFields) === $n) {
+				foreach ($fields as $field) {
+					if (array_search($field, $indexFields, true) === false) {
+						continue 2;
+					}
+				}
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**

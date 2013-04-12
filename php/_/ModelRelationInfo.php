@@ -634,6 +634,10 @@ abstract class ModelRelationInfoByReference extends ModelRelationInfo {
 		$this->referenceField = $referenceField;
 	}
 
+	public function getReferenceFieldName() {
+		return $this->referenceField;
+	}
+
 	protected function addJoinWhere(QueryJoin $join) {
 
 		$this->targetTable->addJoinWhere($join);
@@ -999,7 +1003,10 @@ class ModelRelationInfoReferredByOneAssoc extends ModelRelationInfoReferedByOne 
 	}
 
 	protected final function doConstruct($info, $name, $referenceField) {
-		if ($name === null) $name = "$info->name*";
+		/** @var $info ModelRelationInfoIndirectHasOne */
+		if ($name === null) {
+			$name = "$info->name*";
+		}
 		$this->assocRelationInfo = $info;
 		parent::__construct(
 			$name, // name
@@ -1233,7 +1240,7 @@ abstract class ModelRelationInfoByAssoc extends ModelRelationInfo {
 
 	protected $whereAssoc;
 
-	function  __construct(
+	public function  __construct(
 		$name,
 		ModelTableProxy $localTable, ModelTableProxy $targetTableProxy,
 		ModelTableProxy $assocTableProxy,
@@ -1258,6 +1265,63 @@ abstract class ModelRelationInfoByAssoc extends ModelRelationInfo {
 	}
 
 	/**
+	 * @param array $config
+	 * @return ModelRelationInfoByAssoc
+	 * @throws InvalidArgumentException
+	 */
+	public static function create(array $config) {
+
+		$requiredParams = array('name', 'localTable', 'targetTable', 'assocTable');
+		$optionalParams = array('reciproqueRelation', 'assocRelation');
+		$proxies = array('localTable', 'targetTable', 'assocTable');
+
+		$aliases = array(
+			'reciproqueRelationName' => 'reciproqueRelation',
+			'assocRelationName' => 'assocRelation',
+		);
+
+		$params = array();
+
+		foreach ($config as $key => $value) {
+			$paramName = isset($aliases[$key])
+				? $aliases[$key]
+				: $key;
+
+			$params[$paramName] = $value;
+		}
+
+		foreach ($requiredParams as $name) {
+			if (!isset($params[$name])) {
+				throw new InvalidArgumentException('Missing required configuration key: ' . $name);
+			}
+		}
+
+		foreach ($optionalParams as $name) {
+			if (!isset($params[$name])) {
+				$params[$name] = null;
+			}
+		}
+
+		foreach ($proxies as $name) {
+			$params[$name] = ModelTableProxy::getFor($params[$name]);
+		}
+
+		/** @var $relationInfo ModelRelationInfo */
+		$relationInfo = new static(
+			$params['name'],
+			$params['localTable'],
+			$params['targetTable'],
+			$params['assocTable'],
+			$params['localForeignKey'],
+			$params['targetForeignKey'],
+			$params['reciproqueRelation'],
+			$params['assocRelation']
+		);
+
+		return $relationInfo;
+	}
+
+	/**
 	 * @return ModelRelationInfoReferedByMany
 	 * @throws IllegalStateException
 	 */
@@ -1276,6 +1340,18 @@ abstract class ModelRelationInfoByAssoc extends ModelRelationInfo {
 	 */
 	public function getAssocTable() {
 		return $this->assocTable;
+	}
+
+	/**
+	 * Get the relation info from the assoc table to the target table.
+	 *
+	 * @param bool $require
+	 * @return ModelRelationInfoHasReference|null
+	 * @throws IllegalStateException
+	 */
+	public function getAssocTableTargetRelationInfo($require = false) {
+		$assocTable = $this->assocTable;
+		return $assocTable->getFieldRelationInfo($this->getReferenceField(), $require);
 	}
 
 	protected function doCreateJoin(ModelTableQuery $query, $alias = null, $leftTableAlias = null) {
