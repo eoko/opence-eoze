@@ -6,6 +6,10 @@
  */
 Ext4.define('Eoze.lib.Eoze', {
 	requires: [
+		// Deft
+		// Add support callParent with generated getters
+		'Eoze.Deft.mvc.ViewController',
+
 		// adds support for lazy instance creation by xclass
 		'Eoze.Ext.ComponentManager',
 		// adds animOpen & animClose options
