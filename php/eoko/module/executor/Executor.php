@@ -67,7 +67,11 @@ abstract class Executor implements file\Finder {
 	protected $actionParam = 'action';
 	protected $defaultAction = 'index';
 
-	public final function __construct(Module $module, $name, $internal, $action, Request $request = null) {
+	public function __construct(Module $module, $name, $internal, $action, Request $request = null) {
+		$this->init($module, $name, $internal, $action, $request);
+	}
+
+	public function init(Module $module, $name, $internal, $action, Request $request = null) {
 
 		$this->module = $module;
 		$this->name = $name;
@@ -220,7 +224,12 @@ abstract class Executor implements file\Finder {
 			$this->module, $this->name, $this->action
 		);
 
-		if ($this->beforeAction() === false) {
+		$beforeActionResult = $this->beforeAction();
+		if ($beforeActionResult instanceof Response) {
+			$this->cancelled = true;
+			$this->executed = true;
+			return $beforeActionResult;
+		} else if ($beforeActionResult === false) {
 			$this->cancelled = true;
 			$this->executed = true;
 			return null;
