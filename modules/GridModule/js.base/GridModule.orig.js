@@ -6,7 +6,7 @@ var x = {
 	 * @version 2013-03-19 14:26 Removed opts
 	 * @version 2013-03-19 16:20 Removed callback
 	 *
-	 * @params {Eoze.GridModule.EditRecordOptions} operation
+	 * @params {Eoze.GridModule.EditRecordOperation} operation
 	 * @return {Deft.Promise} Promise of a {@link Ext.Window}.
 	 *
 	 * @protected

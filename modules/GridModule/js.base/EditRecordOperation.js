@@ -25,7 +25,7 @@
  *
  * @since 2013-03-19 11:07
  */
-Ext4.define('Eoze.GridModule.EditRecordOptions', {
+Ext4.define('Eoze.GridModule.EditRecordOperation', {
 
 	/**
 	 * @cfg {String} recordId
@@ -65,13 +65,13 @@ Ext4.define('Eoze.GridModule.EditRecordOptions', {
 
 		/**
 		 * @param {Objects} args The arguments to parse from.
-		 * @return {Eoze.GridModule.EditRecordOptions}
+		 * @return {Eoze.GridModule.EditRecordOperation}
 		 */
 		parseOperation: function() {
 
 			function parseConfig(record, startTab, callback, scope, sourceEl) {
 
-				var Operation = Eoze.GridModule.EditRecordOptions,
+				var Operation = Eoze.GridModule.EditRecordOperation,
 					config = {};
 
 				if (arguments.length > 0) {
@@ -111,7 +111,7 @@ Ext4.define('Eoze.GridModule.EditRecordOptions', {
 			}
 
 			return function(args) {
-				var Operation = Eoze.GridModule.EditRecordOptions;
+				var Operation = Eoze.GridModule.EditRecordOperation;
 				if (args instanceof Operation) {
 					return args;
 				} else {
@@ -129,7 +129,7 @@ Ext4.define('Eoze.GridModule.EditRecordOptions', {
 	 *
 	 * Fires when the edit window has been created.
 	 *
-	 * @param {Eoze.GridModule.EditRecordOptions} this
+	 * @param {Eoze.GridModule.EditRecordOperation} this
 	 * @param {Ext.Window} window
 	 */
 	,EVENT_AFTER_CREATE_WINDOW: 'aftercreatewindow'
@@ -139,7 +139,7 @@ Ext4.define('Eoze.GridModule.EditRecordOptions', {
 	 * Fires when the window for the operation is available, if it was just created as well as if
 	 * it already existed. At this point, the window will not have been loaded yet.
 	 *
-	 * @param {Eoze.GridModule.EditRecordOptions} this
+	 * @param {Eoze.GridModule.EditRecordOperation} this
 	 * @param {Ext.Window} window
 	 */
 	,EVENT_WINDOW_READY: 'windowready'
@@ -148,7 +148,7 @@ Ext4.define('Eoze.GridModule.EditRecordOptions', {
 	 *
 	 * Fires when a preparation loading has finished.
 	 *
-	 * @param {Eoze.GridModule.EditRecordOptions} this
+	 * @param {Eoze.GridModule.EditRecordOperation} this
 	 * @param {Ext.Window} window
 	 * @param {Boolean} first True if the loading was the initial one.
 	 */
@@ -158,7 +158,7 @@ Ext4.define('Eoze.GridModule.EditRecordOptions', {
 	 *
 	 * Fires when the edit form is ready (i.e. loaded). This event fires only once for each operation.
 	 *
-	 * @param {Eoze.GridModule.EditRecordOptions} this
+	 * @param {Eoze.GridModule.EditRecordOperation} this
 	 */
 	,EVENT_READY: 'ready'
 
@@ -198,7 +198,7 @@ Ext4.define('Eoze.GridModule.EditRecordOptions', {
 
 	/**
 	 * @params {String} id
-	 * @return {Eoze.GridModule.EditRecordOptions} this
+	 * @return {Eoze.GridModule.EditRecordOperation} this
 	 */
 	,setRecordId: function(id) {
 		this.recordId = id;
@@ -214,7 +214,7 @@ Ext4.define('Eoze.GridModule.EditRecordOptions', {
 
 	/**
 	 * @params {Ext.data.Record} record
-	 * @return {Eoze.GridModule.EditRecordOptions} this
+	 * @return {Eoze.GridModule.EditRecordOperation} this
 	 */
 	,setRecord: function(record) {
 		this.record = record;
@@ -247,7 +247,7 @@ Ext4.define('Eoze.GridModule.EditRecordOptions', {
 	/**
 	 * @params {Function} callback
 	 * @params {Object} [scope]
-	 * @return {Eoze.GridModule.EditRecordOptions} this
+	 * @return {Eoze.GridModule.EditRecordOperation} this
 	 */
 	,setCallback: function (callback, scope) {
 		this.callback = callback;
@@ -264,7 +264,7 @@ Ext4.define('Eoze.GridModule.EditRecordOptions', {
 
 	/**
 	 * @param {Ext.Element} sourceEl
-	 * @return {Eoze.GridModule.EditRecordOptions} this
+	 * @return {Eoze.GridModule.EditRecordOperation} this
 	 */
 	,setSourceEl: function (sourceEl) {
 		this.sourceEl = sourceEl;
@@ -309,7 +309,7 @@ Ext4.define('Eoze.GridModule.EditRecordOptions', {
 	/**
 	 * @param {Ext.Window} win
 	 * @param {Boolean} [existing=false] True if the window already existed.
-	 * @return {Eoze.GridModule.EditRecordOptions} this
+	 * @return {Eoze.GridModule.EditRecordOperation} this
 	 */
 	,setWindow: function(win, existing) {
 

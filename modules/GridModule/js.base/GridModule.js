@@ -604,19 +604,19 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	 *
 	 * This method also accepts params as documented for {@link #doEditRecord}.
 	 *
-	 * @param {Object/Eoze.GridModule.EditRecordOptions/Ext.data.Record/String} param
+	 * @param {Object/Eoze.GridModule.EditRecordOperation/Ext.data.Record/String} param
 	 * @param {String/Ext.data.Record} param.record
 	 * @param {Integer/String} [param.startTab]
 	 * @param {Function} [param.callback] Callback triggered after loading.
 	 * @param {Object} [param.scope]
 	 * @param {Ext.Element} [param.sourceEl]
 	 *
-	 * @return {Eoze.GridModule.EditRecordOptions} operation
+	 * @return {Eoze.GridModule.EditRecordOperation} operation
 	 *
 	 * @todo #gridmodule This should be moved to a controller.
 	 */
 	,editRecord: function(record, startTab, callback, scope, sourceEl) {
-		var operation = Eoze.GridModule.EditRecordOptions.parseOperation(arguments);
+		var operation = Eoze.GridModule.EditRecordOperation.parseOperation(arguments);
 		this.doEditRecord(operation);
 		return operation;
 	}
@@ -628,7 +628,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	 * Only the record id is mandatory, all other arguments are optional and can be left blank. Even if
 	 * `record` is supplied, `recordId` must be passed as the first argument.
 	 *
-	 * @param {Eoze.GridModule.EditRecordOptions} params
+	 * @param {Eoze.GridModule.EditRecordOperation} params
 	 *
 	 * @protected
 	 *
@@ -1823,7 +1823,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	 *
 	 * This option can be set in configuration with {@link #editModule}.
 	 *
-	 * @params {Eoze.GridModule.EditRecordOptions} operation
+	 * @params {Eoze.GridModule.EditRecordOperation} operation
 	 * @return {Deft.Promise|false}
 	 * @protected
 	 */
@@ -1859,7 +1859,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	 * @version 2013-03-19 14:26 Removed opts
 	 * @version 2013-03-19 16:20 Removed callback
 	 *
-	 * @params {Eoze.GridModule.EditRecordOptions} operation
+	 * @params {Eoze.GridModule.EditRecordOperation} operation
 	 * @return {Deft.Promise} Promise of a {@link Ext.Window}.
 	 *
 	 * @protected
@@ -1977,7 +1977,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	 * then the id of the record being edited will passed as the
 	 * third argument.
 	 *
-	 * @param {Eoze.GridModule.EditRecordOptions} operation
+	 * @param {Eoze.GridModule.EditRecordOperation} operation
 	 * 
 	 * @protected
 	 */
@@ -2007,7 +2007,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	 * then the id of the record being edited will passed as the
 	 * third argument.
 	 *
-	 * @param {Eoze.GridModule.EditRecordOptions} operation
+	 * @param {Eoze.GridModule.EditRecordOperation} operation
 	 * 
 	 * @protected
 	 */
