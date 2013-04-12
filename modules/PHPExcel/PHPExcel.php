@@ -1,3 +1,4 @@
+<?php
 /**
  * Copyright (C) 2013 Eoko
  *
@@ -21,37 +22,23 @@
  * @author Éric Ortega <eric@eoko.fr>
  */
 
+namespace eoko\modules\PHPExcel;
+
+use eoko\module\Module;
+
 /**
- * Requires Eoze overrides.
  *
- * @since 2013-03-26 10:33
+ * @category Eoze
+ * @package PHPExcel
+ * @since 2013-04-10 09:03
  */
-Ext4.define('Eoze.Ext.OverridesLoader', {
-	singleton: true
+class PHPExcel extends Module {
 
-	,requires: [
-		// adds support for lazy instance creation by xclass
-		'Eoze.Ext.ComponentManager',
-		// adds animOpen & animClose options
-		'Eoze.Ext.window.Window',
-		// Formats
-		'Eoze.Ext.util.Format',
-		// Data types
-		'Eoze.Ext.data.Types',
-		// Date
-		'Eoze.Ext.Date',
-		// Model
-		'Eoze.Ext.data.association.HasOne',
-		// Component
-		'Eoze.Ext.AbstractComponent',
+	private $loaded = false;
 
-		// Tree with hideable nodes
-		'Eoze.Ext.tree.HideableNodeOverride',
-
-		// Fields
-		'Eoze.Ext.form.field.Trigger',
-		'Eoze.Ext.form.field.Text',
-		// File upload field, fixes rendering
-		'Eoze.Ext.form.field.File'
-	]
-});
+	public function loadLibrary() {
+		if (!$this->loaded) {
+			require_once __DIR__ . '/PHPExcel-1.7.8.phar';
+		}
+	}
+}

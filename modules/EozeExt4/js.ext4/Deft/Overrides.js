@@ -28,6 +28,8 @@
 Ext4.define('Eoze.Deft.Overrides', {
 	requires: [
 		// Lazy getter injection
-		'Eoze.Deft.ioc.Injector'
+		'Eoze.Deft.ioc.Injector',
+		// Add support for callParent with generated getters
+		'Eoze.Deft.mvc.ViewController'
 	]
 });

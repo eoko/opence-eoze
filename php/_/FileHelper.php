@@ -107,10 +107,11 @@ class FileHelper {
 	/**
 	 *
 	 * @param string $directory
+	 * @param boolean $absolute
 	 * @param string $pattern
 	 * @param boolean $recursive
-	 * @param boolean $absolute
-	 * @return string
+	 * @throws IllegalArgumentException
+	 * @return string[]
 	 */
 	public static function listDirs($directory, $absolute = false, $pattern = null, $recursive = false) {
 

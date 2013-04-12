@@ -22,36 +22,20 @@
  */
 
 /**
- * Requires Eoze overrides.
  *
- * @since 2013-03-26 10:33
+ * @since 2013-04-09 20:18
  */
-Ext4.define('Eoze.Ext.OverridesLoader', {
-	singleton: true
+Ext4.define('Eoze.Ext.form.field.File', {
+	override: 'Ext.form.field.File'
 
-	,requires: [
-		// adds support for lazy instance creation by xclass
-		'Eoze.Ext.ComponentManager',
-		// adds animOpen & animClose options
-		'Eoze.Ext.window.Window',
-		// Formats
-		'Eoze.Ext.util.Format',
-		// Data types
-		'Eoze.Ext.data.Types',
-		// Date
-		'Eoze.Ext.Date',
-		// Model
-		'Eoze.Ext.data.association.HasOne',
-		// Component
-		'Eoze.Ext.AbstractComponent',
+	,onRender: function() {
+		this.callParent(arguments);
 
-		// Tree with hideable nodes
-		'Eoze.Ext.tree.HideableNodeOverride',
-
-		// Fields
-		'Eoze.Ext.form.field.Trigger',
-		'Eoze.Ext.form.field.Text',
-		// File upload field, fixes rendering
-		'Eoze.Ext.form.field.File'
-	]
+		// -- Fix --
+		//
+		// Don't know why, this class is not being applied... But without it, the rendering
+		// is all broken.
+		//
+		this.getEl().addCls(this.fieldBodyCls);
+	}
 });

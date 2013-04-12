@@ -14,7 +14,7 @@ locations:
 
 used:
 
-  eoko:
+  eoko(eoko):
     - GridModule
     - root
     - AjaxRouter
@@ -33,5 +33,3 @@ used:
     - UserPreferences
     - DataSnapshots
     - EozeExt4
-    - CkEditor
-    - CqlixHistory

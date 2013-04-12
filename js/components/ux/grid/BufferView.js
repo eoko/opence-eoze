@@ -110,13 +110,28 @@ Ext.ux.grid.BufferView = Ext.extend(Ext.grid.View, {
 			r = rs[j]; cb = [];
 			var rowIndex = (j+startRow),
 			    visible = rowIndex >= vr.first && rowIndex <= vr.last;
+			// <rx>
+			var brReplaceRegex = /<br\/?>/g;
+			// </rx>
 			if (visible) {
 				for (var i = 0; i < colCount; i++) {
 					c = cs[i];
 					p.id = c.id;
 					p.css = i === 0 ? 'x-grid3-cell-first ' : (i == last ? 'x-grid3-cell-last ' : '');
 					p.attr = p.cellAttr = "";
-					p.value = c.renderer(r.data[c.name], p, r, rowIndex, i, ds);
+					// <rx>
+					// Changed:
+					// Fixes renderer scope bug
+					// p.value = c.renderer(r.data[c.name], p, r, rowIndex, i, ds);
+					// To:
+					p.value = c.renderer.call(c.scope, r.data[c.name], p, r, rowIndex, i, ds);
+					// Added:
+					// Replaces <br> tags by colons to avoid multiline cell content (which breaks
+					// the grid layout because buffered view requires that all lines height is equal)
+					if (Ext.isString(p.value)) {
+						p.value = p.value.replace(brReplaceRegex, ', ');
+					}
+					// </rx>
 					p.style = c.style;
 					if (p.value === undefined || p.value === "") {
 						p.value = "&#160;";

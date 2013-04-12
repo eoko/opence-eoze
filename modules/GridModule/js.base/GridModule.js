@@ -27,8 +27,7 @@ var NS = Ext.ns('Oce.Modules.GridModule');
  * 
  * Actions
  * -------
- * 
- * 
+ *
  * ### Remove and Add Actions
  * 
  * If a GridModule has its action 'remove' disabled, then it doesn't display the 
@@ -47,6 +46,19 @@ var NS = Ext.ns('Oce.Modules.GridModule');
  *     
  * 2.  Second, make the action available through the module's config. This is done in the
  *     `extra.toolbar` config key.
+ *
+ *
+ * Edit module
+ * -----------
+ *
+ * It is possible to use another module for editing. In this case, configuration which is
+ * specific to record editing is not required for this module.
+ *
+ * In order to declare another module as taking responsability for editing jobs, use the
+ * {@link #editModule} config option, or override the {@link #getEditModule} mtethod.
+ *
+ * *Note*: the `editModule` support if all but complete for now (notably completely lacking
+ * to take record creation into consideration).
  * 
  */
 Oce.GridModule = Ext.extend(Ext.util.Observable, {
@@ -99,6 +111,12 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	 * @cfg {Object} winConfig
 	 * @cfg {Object} editWinConfig
 	 * @cfg {Object} addWinConfig
+	 */
+
+	/**
+	 * Name of the module to be used for editing, if different from this module.
+	 *
+	 * @cfg {String} [editModule=undefined]
 	 */
 
 	,constructor: function(config) {
@@ -207,6 +225,8 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 
 		this.initMultisortPlugin();
 		this.initFilterPlugin();
+
+		this.initEditModule();
 
 		Ext.iterate(this.extra, function(name, config) {
 			var pg = Oce.GridModule.plugins[
@@ -408,13 +428,13 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		var plugins = this.extra.plugins,
 			pp = this.plugins = [];
 		if (plugins) {
-			Ext.each(plugins, function(config) {
+			Ext4.Object.each(plugins, function(index, config) {
 				var ptype = Ext.isString(config) ? config : config.ptype,
 					c = Oce.GridModule.ptypes[ptype],
 					p = new c(config);
 				pp.push(p);
 			}, this);
-			Ext.each(pp, function(p) {
+			pp.forEach(function(p) {
 				p.init(this);
 			}, this);
 		}
@@ -1352,17 +1372,23 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		//
 		this.activeAddWindows[win.getId()] = win;
 
-		win.on('destroy', function(){
+		win.on('destroy', function() {
 			delete this.activeAddWindows[win.getId()]
-		}.createDelegate(this))
+		}.createDelegate(this));
 
 		//
 		if (loadModelData) win.loadModelData = true;
 
 		if (initValues) {
-			Ext.iterate(initValues, function(field,val) {
-				win.form.findField(field).setValue(val);
-			})
+			// Some types of field will set their value after they're rendered.....
+			win.on('afterrender', function() {
+				Ext.iterate(initValues, function(fieldName, val) {
+					var field = win.form.findField(fieldName);
+					if (field) {
+						field.setValue(val);
+					}
+				});
+			}, this, {single: true});
 		}
 
 		var tb = this.getToolbar(false),
@@ -1774,6 +1800,61 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	,onConfigureAddFormPanel: function(formConfig) {}
 
 	/**
+	 * Prepares this module to be used with an {@link #editModule external editing module}.
+	 *
+	 * This method is called during the initialization phase of the module, and removes functionalities
+	 * that are specific to record editing. This allow modules that do not handle editing to provide
+	 * partial configuration.
+	 *
+	 * @private
+	 */
+	,initEditModule: function() {
+		if (this.editModule || this.extra.editModule) {
+			Ext.apply(this, {
+				buildFormsConfig: Ext.emptyFn
+			});
+		}
+	}
+
+	/**
+	 * Get the instance of the module to be used for editing. If editing is not done by another module,
+	 * then this method will return `false`. In the contrary, the method will return a promise that
+	 * will resolve with the edit module's own {@link #getEditWindow} promise.
+	 *
+	 * This option can be set in configuration with {@link #editModule}.
+	 *
+	 * @params {Eoze.GridModule.EditRecordOptions} operation
+	 * @return {Deft.Promise|false}
+	 * @protected
+	 */
+	,getEditModule: function(operation) {
+		var editModule = this.editModule || this.extra.editModule;
+
+		// Using another edit module
+		if (editModule) {
+			if (Ext.isString(editModule)) {
+				var deferred = Ext4.create('Deft.Deferred');
+				Oce.getModule(editModule, function(module) {
+					module.getEditWindow(operation).then({
+						scope: deferred
+						,update: deferred.update
+						,success: deferred.resolve
+						,failure: deferred.reject
+					});
+				});
+				return deferred.getPromise();
+			} else {
+				return editModule.getEditWindow(operation);
+			}
+		}
+
+		// Not using another edit module
+		else {
+			return false;
+		}
+	}
+
+	/**
 	 * @version 2011-12-08 21:03 Added opts
 	 * @version 2013-03-19 14:26 Removed opts
 	 * @version 2013-03-19 16:20 Removed callback
@@ -1784,6 +1865,12 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	 * @protected
 	 */
 	,getEditWindow: function(operation) {
+
+		var editModulePromise = this.getEditModule(operation);
+
+		if (editModulePromise) {
+			return editModulePromise;
+		}
 
 		var deferred = Ext4.create('Deft.Deferred'),
 			recordId = operation.getRecordId(),
@@ -3673,10 +3760,12 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		};
 
 		// --- Items ---
-		var groups = {}, groupMenus;
+		var groups = {},
+			groupMenus,
+			groupSeparator;
 		if (this.extra.columnGroups) {
 			groupMenus = [];
-			Ext.iterate(this.extra.columnGroups.items, function(title,items) {
+			Ext.iterate(this.extra.columnGroups.items, function(title, items) {
 				var menu = new Ext.menu.Menu();
 
 				groupMenus.push(menu);
@@ -3711,12 +3800,21 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 					groups[item] = menu;
 				});
 			});
-			colMenu.add('-');
+
+			groupSeparator = colMenu.add('-');
 		}
+
+		var hasFreeItems = false;
 
 		for(var i = 0; i < colCount; i++){
 			if(cm.config[i].hideable !== false){
-				var dest = groups[cm.config[i].dataIndex] || colMenu;
+				var dest = groups[cm.config[i].dataIndex];
+
+				if (!dest) {
+					dest = colMenu;
+					hasFreeItems = true;
+				}
+
 				var item = new Ext.menu.CheckItem({
 					itemId: 'col-'+cm.getColumnId(i),
 					text: cm.getColumnHeader(i),
@@ -3759,6 +3857,10 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		Ext.each(checkGroups.reverse(), function(checkGroup) {
 			checkGroup.init();
 		});
+
+		if (groupSeparator && !hasFreeItems) {
+			groupSeparator.hide();
+		}
 	}
 	
 	/**

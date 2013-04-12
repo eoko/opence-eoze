@@ -318,6 +318,7 @@ Oce.Ajax = function() {
 					successMsgHandler(msg);
 				}
 			} else {
+				Ext4.Logger.error('Request error');
 				handleError(opts, obj.errors || null, response, obj);
 			}
 		}

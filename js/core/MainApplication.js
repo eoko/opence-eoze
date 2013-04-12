@@ -103,7 +103,9 @@
 				var fn = this["create" + region];
 				if (fn) {
 					var item = fn.call(this, config);
-					if (item) items.push(item);
+					if (item) {
+						items.push(item);
+					}
 				}
 			}, this);
 
@@ -200,14 +202,56 @@
 		}
 
 		,createSouth: function() {
+
 			return false;
-			return new Oce.AutoloadPanel({
-				name: 'bottom',
-				idPrefix: 'c_',
-				region : 'south',
-				height: 48,
-				baseCls : 'bottom',
-				collapsible: false
+
+			var dateMenu = new Ext.menu.DateMenu({
+				hideOnClick: false
+				,listeners: {
+					beforehide: function() {
+						if (!this.isForceHide) {
+							Ext.Function.defer(this.forceHide, 200, this);
+							return false;
+						}
+					}
+					,hide: function() {
+						clockItem.toggle(false);
+					}
+					,show: function() {
+						clockItem.toggle(true);
+					}
+				}
+				,forceHide: function() {
+					this.isForceHide = true;
+					this.hide();
+					this.isForceHide = false;
+				}
+			});
+
+			var clockItem = new Ext.Button({
+				style: 'font-family: monospace;'
+				,handler: function(button) {
+					if (dateMenu.isVisible()) {
+						dateMenu.forceHide();
+					} else {
+						dateMenu.show(button.el, 'br-tr?');
+					}
+				}
+			});
+
+			var format = 'D. j F H:i:s';
+			setInterval(function() {
+				clockItem.setText(
+					Ext.Date.format(new Date, format).toLowerCase()
+				);
+			}, 1000);
+
+			return Ext.create('Ext.Toolbar', {
+				region: 'south'
+				,height: 26
+				,items: ['->', clockItem, ' ', {
+					iconCls: 'ico add'
+				}]
 			});
 		}
 

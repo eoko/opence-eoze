@@ -28,6 +28,9 @@
 Ext4.define('Eoze.Ext.Date', {
 	override: 'Ext.Date'
 
+	// TODO move that to application domain
+	,defaultFormat: 'd/m/Y'
+
 	/**
 	 * This method is overridden to respect the `ignoreTime` option in dates.
 	 *
