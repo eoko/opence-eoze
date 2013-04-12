@@ -66,8 +66,6 @@ defineIf('PHP_PATH', EOZE_PATH . PHP_DIR . DS);
 defineIf('APP_PATH', ROOT . 'app' . DS);
 defineIf('APP_PHP_PATH', APP_PATH . PHP_DIR . DS);
 
-defineIf('CACHE_PATH', EOZE_PATH . 'cache' . DS);
-defineIf('LOG_PATH', EOZE_PATH . 'log' . DS);
 defineIf('HELP_PATH', ROOT . 'help' . DS);
 defineIf('LIBS_PATH', PHP_PATH . 'lib' . DS);
 defineIf('DATABASE_DUMP_PATH', ROOT . 'mysql' . DS);

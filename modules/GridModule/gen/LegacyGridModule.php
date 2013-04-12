@@ -97,7 +97,7 @@ class LegacyGridModule {
 				->toArray();
 
 		// --- Filters ---
-		if (isset($extra['filters'])) {
+		if (!empty($extra['filters'])) {
 			// Converting to assoc array (legacy expectation)
 			if (!Arrays::isAssocArray($extra['filters'])) {
 				$filters = array();

@@ -3,6 +3,7 @@
 namespace eoko\modules\TreeMenu\ActionProvider;
 
 use eoko\modules\TreeMenu\ActionProvider;
+use eoko\modules\TreeMenu\HasIconClass;
 use eoko\modules\TreeMenu\MenuAction;
 use eoko\modules\TreeMenu\MenuFamily;
 use eoko\module\Module;
@@ -46,6 +47,19 @@ class ModuleProvider implements ActionProvider {
 		}
 	}
 
+	private function getModuleIconCls() {
+		$module = $this->module;
+
+		if ($module instanceof HasIconClass) {
+			$iconCls = $module->getIconClass();
+			if ($iconCls !== null) {
+				return $iconCls;
+			}
+		}
+
+		return $this->getModuleName();
+	}
+
 	private function getPluginsConfig($key = null) {
 		if (($config = $this->getModuleConfig()->get('extra'))
 				|| ($config = $this->getModuleConfig()->get('plugins'))) {
@@ -64,7 +78,8 @@ class ModuleProvider implements ActionProvider {
 			$module = $this->getModuleName();
 		}
 		if (null !== $iconCls = $this->getPluginsConfig('iconCls')) {
-			$iconCls = str_replace('%module%', $module, $iconCls);
+			$moduleIconCls = $this->getModuleIconCls();
+			$iconCls = str_replace('%module%', $moduleIconCls, $iconCls);
 			if ($action !== null) {
 				if ($action === false) $action = '';
 				$iconCls = str_replace('%action%', $action, $iconCls);
@@ -89,7 +104,7 @@ class ModuleProvider implements ActionProvider {
 			}
 			return $in;
 		} else if (is_string($in)) {
-			$in = str_replace('%module%', $this->getModuleName(), $in);
+			$in = str_replace('%module%', $this->getModuleIconCls(), $in);
 			$in = str_replace('%title%', $this->getModuleTitle(), $in);
 			return $in;
 		} else {

@@ -11,6 +11,8 @@ Ext4.define('Eoze.lib.Eoze', {
 		// Ext4 Overrides
 		'Eoze.Ext.OverridesLoader',
 
+		// Deft
+		'Eoze.Deft.Overrides',
 		// i18n
 		'Eoze.i18n.Locale',
 		// Locale
@@ -23,8 +25,6 @@ Ext4.define('Eoze.lib.Eoze', {
 		'Eoze.Cursor',
 		// Plugins
 		'Eoze.form.field.mixin.DependsOnCheckbox',
-		// Deft
-		'Eoze.Deft.Overrides',
 
 		// -- UX --
 		'Ext.ux.ActivityMonitor'

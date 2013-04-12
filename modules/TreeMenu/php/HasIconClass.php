@@ -1,3 +1,4 @@
+<?php
 /**
  * Copyright (C) 2013 Eoko
  *
@@ -21,37 +22,19 @@
  * @author Éric Ortega <eric@eoko.fr>
  */
 
+namespace eoko\modules\TreeMenu;
+
 /**
- * Requires Eoze overrides.
+ * Interface for module that exposes a CSS icon class.
  *
- * @since 2013-03-26 10:33
+ * @category Eoze
+ * @package TreeMenu
+ * @since 2013-04-08 19:33
  */
-Ext4.define('Eoze.Ext.OverridesLoader', {
-	singleton: true
+interface HasIconClass {
 
-	,requires: [
-		// adds support for lazy instance creation by xclass
-		'Eoze.Ext.ComponentManager',
-		// adds animOpen & animClose options
-		'Eoze.Ext.window.Window',
-		// Formats
-		'Eoze.Ext.util.Format',
-		// Data types
-		'Eoze.Ext.data.Types',
-		// Date
-		'Eoze.Ext.Date',
-		// Model
-		'Eoze.Ext.data.association.HasOne',
-		// Component
-		'Eoze.Ext.AbstractComponent',
-
-		// Tree with hideable nodes
-		'Eoze.Ext.tree.HideableNodeOverride',
-
-		// Fields
-		'Eoze.Ext.form.field.Trigger',
-		'Eoze.Ext.form.field.Text',
-		// File upload field, fixes rendering
-		'Eoze.Ext.form.field.File'
-	]
-});
+	/**
+	 * @return string
+	 */
+	public function getIconClass();
+}

@@ -110,12 +110,16 @@
 
 /* Ico Grid */
 .ico {
-	background : no-repeat transparent;
-	height : 16px;
-	width : 16px;
-	display: inline-block;
-	margin : 0 auto;
-	padding-right : 3px;
+    /* Background properties must not be merged (in single background property),
+     * because that would break Ext css expectations! */
+	background-repeat: no-repeat;
+    background-color: transparent;
+	height: 16px;
+	width: 16px;
+}
+
+.ico.clickable:hover {
+    cursor: pointer;
 }
 
 .x-panel-icon.ico {
@@ -149,271 +153,271 @@
 }
 .ico.add,
 .ico_add {
-	background-image: url("../images/icons/add.png") !important;
+	background-image: url("../images/icons/add.png");
 }
 .ico.arrow_left {
-	background-image: url("../images/icons/arrow_left.png") !important;
+	background-image: url("../images/icons/arrow_left.png");
 }
 .ico.arrow_right {
-	background-image: url("../images/icons/arrow_right.png") !important;
+	background-image: url("../images/icons/arrow_right.png");
 }
 .ico.arrow_down {
-	background-image: url("../images/icons/arrow_down.png") !important;
+	background-image: url("../images/icons/arrow_down.png");
 }
 .ico.book_addresses {
-	background-image: url("../images/icons/book_addresses.png") !important;
+	background-image: url("../images/icons/book_addresses.png");
 }
 .ico.checkbox {
-	background-image: url("../images/icons/checkbox.png") !important;
+	background-image: url("../images/icons/checkbox.png");
 }
 .x-btn-pressed .ico.checkbox,
 .ico.checkbox.ticked {
-	background-image: url("../images/icons/checkbox_ticked_green.png") !important;
+	background-image: url("../images/icons/checkbox_ticked_green.png");
 }
 .ico.settings,
 .ico.cog {
-	background-image: url("../images/icons/cog.png") !important;
+	background-image: url("../images/icons/cog.png");
 }
 .ico.download {
-	background-image: url("../images/icons_fatcow/16x16/download.png") !important;
+	background-image: url("../images/icons_fatcow/16x16/download.png");
 }
 .ico.eye {
-	background-image: url("../images/icons/eye.png") !important;
+	background-image: url("../images/icons/eye.png");
 }
 .application_form_edit {
-	background-image: url("../images/icons/application_form_edit.png") !important;
+	background-image: url("../images/icons/application_form_edit.png");
 }
 .ico_undo, .ico.undo,
 .ico_arrow_undo {
-	background-image: url("../images/icons/arrow_undo.png") !important;
+	background-image: url("../images/icons/arrow_undo.png");
 }
 .ico.delete,
 .ico_delete {
-	background-image: url("../images/icons/delete.png") !important;
+	background-image: url("../images/icons/delete.png");
 }
 .ico.flags {
-	background-image: url("../images/icons/flags.png") !important;
+	background-image: url("../images/icons/flags.png");
 }
 .ico.help {
-	background-image: url("../images/icons_fugue/question-frame.png") !important;
+	background-image: url("../images/icons_fugue/question-frame.png");
 }
 .ico.collapse-all {
-	background-image: url("images/ext-tree-collapse-all.gif") !important;
+	background-image: url("images/ext-tree-collapse-all.gif");
 }
 .ico.expand-all {
-	background-image: url("images/ext-tree-expand-all.gif") !important;
+	background-image: url("images/ext-tree-expand-all.gif");
 }
 .ico.save,
 .ico_disk {
-	background-image: url("../images/icons/disk.png") !important;
+	background-image: url("../images/icons/disk.png");
 }
 .ico_world {
-	background-image: url("../images/icons/world.png") !important;
+	background-image: url("../images/icons/world.png");
 }
 .ico.box {
-	background-image: url("../images/icons/box.png") !important;
+	background-image: url("../images/icons/box.png");
 }
 .ico.box.add {
-	background-image: url("../images/icons/box_add.png") !important;
+	background-image: url("../images/icons/box_add.png");
 }
 .ico.box.delete {
-	background-image: url("../images/icons/box_delete.png") !important;
+	background-image: url("../images/icons/box_delete.png");
 }
 .ico_building {
-	background-image: url("../images/icons/building.png") !important;
+	background-image: url("../images/icons/building.png");
 }
 .ico.user,
 .ico_user {
-	background-image: url("../images/icons/user.png") !important;
+	background-image: url("../images/icons/user.png");
 }
 .ico.reset {
     background-image: url("../images/icons/arrow_rotate_anticlockwise.png") !important;
 }
 .ico.tick,
 .ico_tick {
-	background-image: url("../images/icons/tick.png") !important;
+	background-image: url("../images/icons/tick.png");
 }
 .ico.tick.clickable:hover {
-	background-image: url("../images/icons/cross.png") !important;
+	background-image: url("../images/icons/cross.png");
 }
 .ico.tick.pressable {
-	background-image: url("../images/icons/tick+gray.png") !important;
+	background-image: url("../images/icons/tick+gray.png");
 }
 .x-btn-pressed .ico.tick.pressable {
-	background-image: url("../images/icons/tick.png") !important;
+	background-image: url("../images/icons/tick.png");
 }
 .ico.cross,
 .ico_cross {
-	background-image: url("../images/icons/cross.png") !important;
+	background-image: url("../images/icons/cross.png");
 }
 .ico.cross.clickable:hover {
-	background-image: url("../images/icons/tick.png") !important;
+	background-image: url("../images/icons/tick.png");
 }
 .ico_8ball {
-	background-image: url("../images/icons/sport_8ball.png") !important;
+	background-image: url("../images/icons/sport_8ball.png");
 }
 .ico_user_add {
-	background-image: url("../images/icons/user_add.png") !important;
+	background-image: url("../images/icons/user_add.png");
 }
 .ico_bin {
-	background-image: url("../images/icons/bin.png") !important;
+	background-image: url("../images/icons/bin.png");
 }
 .ico_book {
-	background-image: url("../images/icons/book.png") !important;
+	background-image: url("../images/icons/book.png");
 }
 .ico.find {
-	background-image: url("../images/icons/find.png") !important;
+	background-image: url("../images/icons/find.png");
 }
 .ico_help {
-	background-image: url("../images/icons/help.png") !important;
+	background-image: url("../images/icons/help.png");
 }
 .ico.lightning {
     background-image: url("../images/icons/lightning.png") !important;
 }
 .ico.lock {
-	background-image: url("../images/icons/lock.png") !important;
+	background-image: url("../images/icons/lock.png");
 }
 .ico.lock.open,
 .ico.lock_open {
-	background-image: url("../images/icons/lock_open.png") !important;
+	background-image: url("../images/icons/lock_open.png");
 }
 .ico.lock_openable {
-	background-image: url("../images/icons/lock.png") !important;
+	background-image: url("../images/icons/lock.png");
 }
 .ico.lock_openable:hover {
-	background-image: url("../images/icons/lock_open.png") !important;
+	background-image: url("../images/icons/lock_open.png");
 }
 .ico.layout_content {
-	background-image: url("../images/icons/layout_content.png") !important;
+	background-image: url("../images/icons/layout_content.png");
 }
 .ico.plugin {
     background-image: url("../images/icons/plugin.png") !important;
 }
 .ico_male {
-	background-image: url("../images/icons/male.png") !important;
+	background-image: url("../images/icons/male.png");
 }
 .ico_female {
-	background-image: url("../images/icons/female.png") !important;
+	background-image: url("../images/icons/female.png");
 }
 .ico.email {
-	background-image: url("../images/icons/email.png") !important;
+	background-image: url("../images/icons/email.png");
 }
 .ico.email_go {
-	background-image: url("../images/icons/email_go.png") !important;
+	background-image: url("../images/icons/email_go.png");
 }
 .ico.play {
-	background-image: url("../images/icons/control_play_blue.png") !important;
+	background-image: url("../images/icons/control_play_blue.png");
 }
 .ico.play.black {
-	background-image: url("../images/icons/control_play.png") !important;
+	background-image: url("../images/icons/control_play.png");
 }
 .ico.pdf,
 .ico_pdf {
-	background-image: url("../images/icons/page_white_acrobat.png") !important;
+	background-image: url("../images/icons/page_white_acrobat.png");
 }
 .ico.edit,
 .ico_edit,
 .ico_pencil {
-	background-image: url("../images/icons/pencil.png") !important;
+	background-image: url("../images/icons/pencil.png");
 }
 .ico_bullet_green {
-	background-image: url("../images/icons/bullet_green.png") !important;
+	background-image: url("../images/icons/bullet_green.png");
 }
 .ico_bullet_red {
-	background-image: url("../images/icons/bullet_red.png") !important;
+	background-image: url("../images/icons/bullet_red.png");
 }
 .ico_clock {
-	background-image: url("../images/icons/clock.png") !important;
+	background-image: url("../images/icons/clock.png");
 }
 .ico_arrow_right {
-	background-image: url("../images/icons/arrow_right.png") !important;
+	background-image: url("../images/icons/arrow_right.png");
 }
 .ico_tick {
-	background-image: url("../images/icons/tick.png") !important;
+	background-image: url("../images/icons/tick.png");
 }
 .ico.report {
-	background-image: url("../images/icons/report.png") !important;
+	background-image: url("../images/icons/report.png");
 }
 .ico.star {
-	background-image: url("../images/icons/star.png") !important;
+	background-image: url("../images/icons/star.png");
 }
 .ico.star.empty {
-	background-image: url("../images/icons/star_empty.png") !important;
+	background-image: url("../images/icons/star_empty.png");
 }
 .ico.star.blue {
-	background-image: url("../images/icons/star_blue.png") !important;
+	background-image: url("../images/icons/star_blue.png");
 }
 .ico.star.green {
-	background-image: url("../images/icons/star_green.png") !important;
+	background-image: url("../images/icons/star_green.png");
 }
 .ico_stop {
-	background-image: url("../images/icons/stop.png") !important;
+	background-image: url("../images/icons/stop.png");
 }
 .ico.table {
-	background-image: url("../images/icons/table.png") !important;
+	background-image: url("../images/icons/table.png");
 }
 .ico_note{
-	background-image: url("../images/icons/note.png") !important;
+	background-image: url("../images/icons/note.png");
 }
 .ico_arrow_inout {
-	background-image: url("../images/icons/arrow_inout.png") !important;
+	background-image: url("../images/icons/arrow_inout.png");
 }
 .ico.refresh {
-	background-image: url("../images/icons/arrow_refresh.png") !important;
+	background-image: url("../images/icons/arrow_refresh.png");
 }
 .ico.reject {
-	background-image: url("../images/icons/delete.png") !important;
+	background-image: url("../images/icons/delete.png");
 }
 .ico.star {
-	background-image: url("../images/icons/star.png") !important;
+	background-image: url("../images/icons/star.png");
 }
 .ico_telephone {
-	background-image: url("../images/icons/telephone.png") !important;
+	background-image: url("../images/icons/telephone.png");
 }
 .ico.vcard {
-	background-image: url("../images/icons/vcard.png") !important;
+	background-image: url("../images/icons/vcard.png");
 }
 .ico.vcard.add {
-	background-image: url("../images/icons/vcard_add.png") !important;
+	background-image: url("../images/icons/vcard_add.png");
 }
 .ico.vcard.edit {
-	background-image: url("../images/icons/vcard_edit.png") !important;
+	background-image: url("../images/icons/vcard_edit.png");
 }
 .ico.wrench, .ico_wrench {
-	background-image: url("../images/icons/wrench.png") !important;
+	background-image: url("../images/icons/wrench.png");
 }
 
 .icon-magnifier {
-	background-image: url("../images/icons/magnifier.png") !important;
+	background-image: url("../images/icons/magnifier.png");
 }
 .icon-tranches {
-	background-image: url("../images/icons/timeline_marker.png") !important;
+	background-image: url("../images/icons/timeline_marker.png");
 }
 
 /* --- Fugue Icons --- */
 .fugico_arrow {
-	background-image: url("../images/icons_fugue/arrow.png") !important;
+	background-image: url("../images/icons_fugue/arrow.png");
 }
 .x-item-disabled .fugico_arrow {
-	background-image: url("../images/icons_fugue/arrow+disabled.png") !important;
+	background-image: url("../images/icons_fugue/arrow+disabled.png");
 }
 .fugico_arrow-180 {
-	background-image: url("../images/icons_fugue/arrow-180.png") !important;
+	background-image: url("../images/icons_fugue/arrow-180.png");
 }
 .x-item-disabled .fugico_arrow-180 {
-	background-image: url("../images/icons_fugue/arrow-180+disabled.png") !important;
+	background-image: url("../images/icons_fugue/arrow-180+disabled.png");
 }
 .arrow-circle-315 {
-	background-image: url("../images/icons_fugue/arrow-circle-315.png") !important;
+	background-image: url("../images/icons_fugue/arrow-circle-315.png");
 }
 .x-item-disabled .arrow-circle-315 {
-	background-image: url("../images/icons_fugue/arrow-circle-315+disabled.png") !important;
+	background-image: url("../images/icons_fugue/arrow-circle-315+disabled.png");
 }
 .fugico_question-frame {
-	background-image: url("../images/icons_fugue/question-frame.png") !important;
+	background-image: url("../images/icons_fugue/question-frame.png");
 }
 .fugico_question-balloon {
-	background-image: url("../images/icons_fugue/question-balloon.png") !important;
+	background-image: url("../images/icons_fugue/question-balloon.png");
 }
 
 

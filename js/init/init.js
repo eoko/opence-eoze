@@ -8,7 +8,9 @@ Ext.Ajax.url = 'api';
  * Eoze core utilities and functions.
  * @singleton
  */
-eo = {};
+eo = {
+	apiUrl: 'index.php'
+};
 
 if (typeof Oce)
 
