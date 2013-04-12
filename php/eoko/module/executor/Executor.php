@@ -41,7 +41,10 @@ abstract class Executor implements file\Finder {
 
 	/** @var Module */
 	public $module;
-	/** @var Request */
+	/**
+	 * @var Request
+	 * @deprecated Use {@link getRequest()} instead.
+	 */
 	protected $request;
 
 	/**
@@ -122,6 +125,13 @@ abstract class Executor implements file\Finder {
 			$this->response = new \Zend\Http\PhpEnvironment\Response();
 		}
 		return $this->response;
+	}
+
+	/**
+	 * @return Request
+	 */
+	protected function getRequest() {
+		return $this->request;
 	}
 
 	private function getDefaultAction() {
