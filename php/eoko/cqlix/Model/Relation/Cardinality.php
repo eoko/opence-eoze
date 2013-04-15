@@ -22,16 +22,17 @@
  * @author Éric Ortega <eric@eoko.fr>
  */
 
-namespace eoko\cqlix\Model;
+namespace eoko\cqlix\Model\Relation;
 
 /**
+ * Interface for relation cardinality.
  *
  * @category Opence
- * @package 
- * @subpackage 
+ * @package Model
+ * @subpackage Relation
  * @since 2013-04-03 10:03
  */
-interface RelationCardinality {
+interface Cardinality {
 
 	const ONE_TO_ONE = '1';
 	const ONE_TO_MANY = '1..*';
