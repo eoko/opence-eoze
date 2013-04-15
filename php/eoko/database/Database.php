@@ -177,6 +177,13 @@ class Database {
 	}
 
 	/**
+	 * @return \PDO
+	 */
+	public function getConnection() {
+		return self::getDefaultProxy()->getConnection();
+	}
+
+	/**
 	 * @return DbAdapter
 	 */
 	public static function getDefaultDbAdapter() {
