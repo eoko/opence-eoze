@@ -2,7 +2,9 @@
 
 use eoko\cqlix\FieldMetadata;
 use eoko\cqlix\Aliaser;
-use eoko\cqlix\Model\RelationCardinality;
+use eoko\cqlix\Model\Relation\Cardinality as RelationCardinality;
+
+require_once __DIR__ . '/../eoko/cqlix/Model/Relation/Cardinality.php';
 
 interface ModelRelationInfoHasOne extends ModelRelationMarkerHasOne {}
 interface ModelRelationInfoHasMany extends ModelRelationMarkerHasMany {}
