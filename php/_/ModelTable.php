@@ -171,6 +171,13 @@ abstract class ModelTable extends ModelTableProxy implements EventManagerAwareIn
 
 	private $config;
 
+	/**
+	 * @return Database
+	 */
+	public function getDatabase() {
+		return Database::getDefault();
+	}
+
 	protected function getConfig() {
 		return $this->config;
 	}
@@ -847,11 +854,67 @@ abstract class ModelTable extends ModelTableProxy implements EventManagerAwareIn
 		return $this->relations;
 	}
 
+	/**
+	 * @return ModelRelationInfo[]
+	 */
 	abstract public static function getRelationsInfo();
 
 	abstract public static function getRelationNames();
 	protected function _getRelationNames() {
 		return array_keys($this->getRelationsInfo());
+	}
+
+	/**
+	 * Result cache for method {@link getFieldRelationInfo()}.
+	 *
+	 * @var array
+	 */
+	private $relationInfoByFieldCache = null;
+
+	/**
+	 * Get the relation info for the given field in this table. This only works for *referred* relations,
+	 * that is if the reference field is owned by this table.
+	 *
+	 * @param string|ModelField $field
+	 * @param bool $require
+	 * @return ModelRelationInfoHasReference|null
+	 * @throws IllegalStateException
+	 */
+	public function getFieldRelationInfo($field, $require = false) {
+
+		$fieldName = $field instanceof ModelField
+			? $field->getName()
+			: $field;
+
+		if (!isset($this->relationInfoByFieldCache[$fieldName])) {
+			$this->relationInfoByFieldCache[$fieldName] = $this->discoverFieldRelationInfo($fieldName);
+		}
+
+		$relationInfo = $this->relationInfoByFieldCache[$fieldName];
+
+		if ($relationInfo === false) {
+			if ($require) {
+				$tableName = $this->getModelName();
+				throw new IllegalStateException("Cannot find relation for field: $tableName.$fieldName");
+			} else {
+				return null;
+			}
+		} else {
+			return $relationInfo;
+		}
+	}
+
+	private function discoverFieldRelationInfo($fieldName) {
+
+		foreach ($this->getRelationsInfo() as $relationInfo) {
+			if ($relationInfo instanceof ModelRelationInfoHasReference) {
+				if ($relationInfo->getReferenceFieldName() === $fieldName) {
+					return $relationInfo;
+				}
+			}
+		}
+
+		return false;
 	}
 
 	abstract public static function hasField($name);
@@ -1908,6 +1971,28 @@ abstract class ModelTableProxy {
 	public abstract static function getDBTableName();
 
 	public abstract static function getModelName();
+
+	/**
+	 * @param string|ModelTableProxy $table
+	 * @throws InvalidArgumentException
+	 * @return ModelTableProxy
+	 */
+	public static function getFor($table) {
+		if ($table instanceof ModelTableProxy) {
+			return $table;
+		} else if (is_string($table)) {
+			$proxyClass = $table;
+			if (substr($proxyClass, -5) !== 'Proxy') {
+				if (substr($proxyClass, -5) !== 'Table') {
+					$proxyClass .= 'Table';
+				}
+				$proxyClass .= 'Proxy';
+			}
+			return $proxyClass::get();
+		} else {
+			throw new InvalidArgumentException();
+		}
+	}
 }
 
 require_once __DIR__ . '/VirtualField.php';
