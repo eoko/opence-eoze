@@ -41,13 +41,21 @@ Ext4.define('Eoze.data.proxy.GridModule', {
 
 		config.api = Ext.apply({
 			read: url + '&action=load'
+			,update: url + '&action=mod'
 		}, config.api);
 
 		if (!config.reader) {
 			config.reader = {
 				type: 'json'
 				,root: 'data'
-			}
+			};
+		}
+
+		if (!config.writer) {
+			config.writer = {
+				type: 'json'
+				,root: 'data'
+			};
 		}
 
 		this.callParent([config]);
