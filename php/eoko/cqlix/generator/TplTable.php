@@ -43,6 +43,8 @@ class TplTable implements ConfigConstants {
 	 */
 	private $classLookup;
 
+	private $uniqueIndexes;
+
 	public function __construct(ClassLookup $classLookup, $dbTableName) {
 
 		$this->classLookup = $classLookup;
@@ -263,6 +265,14 @@ class TplTable implements ConfigConstants {
 		}
 
 		$this->columns[$field->getName()] = $field;
+	}
+
+	public function setUniqueIndexes(array $indexes = null) {
+		$this->uniqueIndexes = $indexes;
+	}
+
+	public function getUniqueIndexes() {
+		return $this->uniqueIndexes;
 	}
 
 //	public function addRelation(TplRelation $relation) {

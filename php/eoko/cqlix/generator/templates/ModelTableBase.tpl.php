@@ -36,6 +36,8 @@ abstract class <?php echo $tableName ?>Base extends <?php echo $baseTableName ?>
 
 	protected $engineAutomaticCascade = <?php echo $table->isEngineAutomaticCascade() ? 'true' : 'false' ?>;
 
+	protected $uniqueIndexes = <?php echo var_export($table->getUniqueIndexes(), true) ?>;
+
 	protected function __construct() {
 		$cols = array(
 <?php $comma = "\t\t\t\t"; ?>

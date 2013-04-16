@@ -439,6 +439,9 @@ class Generator extends Script {
 			}
 			$engine = $matches[1];
 
+			// Indexes
+			$table->setUniqueIndexes($this->parseCreateTableUniqueIndexes($createTable));
+
 			if (strtolower($engine) !== 'innodb') {
 				Logger::get($this)->warn('Table {} engine is not InnoDB (it is {})', $dbTable, $engine);
 			} else {
@@ -520,6 +523,30 @@ class Generator extends Script {
 			$table->setColumns($fields);
 			$this->tableFields[$dbTable] = $fields;
 		}
+	}
+
+	private function parseCreateTableUniqueIndexes($createTable) {
+
+		$pattern = '/UNIQUE\s*KEY\s*`(?<name>[^`]+)`\s*\((?<columns>[^\)]+)\)/';
+
+		if (preg_match_all($pattern, $createTable, $matches, PREG_SET_ORDER)) {
+
+			$indexes = array();
+
+			foreach ($matches as $match) {
+				$columns = explode(',', $match['columns']);
+
+				foreach ($columns as &$column) {
+					$column = trim($column, '` ');
+				}
+
+				$indexes[] = $columns;
+			}
+
+			return $indexes;
+		}
+
+		return null;
 	}
 
 	private function getTableConfig($table, $key = null, $default = null) {

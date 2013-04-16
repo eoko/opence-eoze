@@ -295,7 +295,8 @@ foreach ($proxyMethods as $method) {
 	 * @param <?php echo $relation->getTargetType('set') . ' $' . lcfirst($relation->getName()) . PHP_EOL ?>
 	 * @return <?php echo $relation->getTargetType('set') . PHP_EOL ?>
 	 */
-	public function set<?php echo $relation->getName() ?>(<?php echo $relation->getTargetType('set', true) ?> $<?php echo lcfirst($relation->getName()) ?>) {
+//	public function set<?php echo $relation->getName() ?>(<?php echo $relation->getTargetType('set', true) ?> $<?php echo lcfirst($relation->getName()) ?>) {
+	public function set<?php echo $relation->getName() ?>($<?php echo lcfirst($relation->getName()) ?>) {
 		// return $this->getRelation('<?php echo $relation->getName() ?>')->get($this);
 		return $this->setForeignModel('<?php echo $relation->getName() ?>', $<?php echo lcfirst($relation->getName()) ?>);
 	}
