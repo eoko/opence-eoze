@@ -398,12 +398,17 @@ abstract class ModelTable extends ModelTableProxy implements EventManagerAwareIn
 	}
 
 	/**
-	 * @param string $modelName
+	 * @param string|ModelTable|null $tableName
 	 * @return ModelTable
 	 */
-	public static function getTable($tableName) {
-		if ($tableName instanceof ModelTable) return $tableName;
-		return call_user_func(array($tableName, 'getInstance'));
+	public static function getTable($tableName = null) {
+		if ($tableName === null) {
+			return self::getInstance();
+		} else if ($tableName instanceof ModelTable) {
+			return $tableName;
+		} else {
+			return call_user_func(array($tableName, 'getInstance'));
+		}
 	}
 
 	/**
