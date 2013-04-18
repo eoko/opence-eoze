@@ -40,7 +40,7 @@ Ext.define('eo.ext4.compat.Ext4Container', {
 			if (child.render) {
 				return child;
 			} else {
-				if (child.xclass) {
+				if (Ext.isString(child) || child.xclass) {
 					return Ext4.create(child);
 				} else {
 					return Ext.widget(child);
