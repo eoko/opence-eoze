@@ -5,6 +5,8 @@
  * @subpackage Routing
  */
 
+use Zend\Http\PhpEnvironment\Request as HttpRequest;
+
 use eoko\util\Arrays;
 use eoko\util\Json;
 use eoko\url\Maker as UrlMaker;
@@ -14,6 +16,9 @@ use eoze\util\Data\DataArray;
 
 class Request implements Message {
 
+	/**
+	 * @var HttpRequest
+	 */
 	private static $httpRequest = null;
 
 	private $params;
@@ -30,7 +35,7 @@ class Request implements Message {
 	}
 
 	/**
-	 * @return Request
+	 * @return HttpRequest
 	 */
 	public static function getHttpRequest() {
 		if (self::$httpRequest === null) {
