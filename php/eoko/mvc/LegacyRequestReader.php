@@ -22,7 +22,12 @@ class LegacyRequestReader extends AbstractRequestReader {
 
 		if (
 			isset($_SERVER['REQUEST_METHOD'])
-				&& $_SERVER['REQUEST_METHOD'] === 'POST' 
+				&& (
+					$_SERVER['REQUEST_METHOD'] === 'POST'
+					|| $_SERVER['REQUEST_METHOD'] === 'PUT'
+					|| $_SERVER['REQUEST_METHOD'] === 'DELETE'
+					|| $_SERVER['REQUEST_METHOD'] === 'PATCH'
+				)
 				&& isset($_SERVER['CONTENT_TYPE'])
 				&& preg_match('/(?:\bapplication\/|\/)json(?:\b|;)/', $_SERVER['CONTENT_TYPE']) 
 			|| isset($_GET['contentType'])
