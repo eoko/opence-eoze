@@ -14,6 +14,8 @@ use eoze\util\Data\DataArray;
 
 class Request implements Message {
 
+	private static $httpRequest = null;
+
 	private $params;
 
 	private $originalParams = null;
@@ -31,10 +33,10 @@ class Request implements Message {
 	 * @return Request
 	 */
 	public static function getHttpRequest() {
-		if (self::$httpRequest !== null) {
-			return self::$httpRequest;
+		if (self::$httpRequest === null) {
+			self::$httpRequest = new HttpRequest();
 		}
-		return Router::getInstance()->request;
+		return self::$httpRequest;
 	}
 
 	public static function setHttpRequest($request) {
