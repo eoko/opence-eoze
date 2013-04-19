@@ -111,9 +111,7 @@ abstract class ModelRelation {
 						&& array_key_exists($this->targetTable->getPrimaryKeyName(), $values)) {
 					$this->setFromId($values[$this->targetTable->getPrimaryKeyName()]);
 				} else {
-					$this->setFromModel(
-						$this->targetTable->createModel($values, false, $this->parentModel->context)
-					);
+					$this->setFromData($values);
 				}
 			} else {
 				$this->setFromId($values, $forceAcceptNull);
@@ -126,6 +124,17 @@ abstract class ModelRelation {
 	}
 	public function setFromId($id, $forceAcceptNull = false) {
 		throw new UnsupportedOperationException("$this::setFromId()");
+	}
+
+	/**
+	 * Sets the relation's value from data.
+	 *
+	 * @param array $data
+	 */
+	protected function setFromData(array $data) {
+		$this->setFromModel(
+			$this->targetTable->createModel($data, false, $this->parentModel->context)
+		);
 	}
 	public function setFromModel(Model $model) {
 		throw new UnsupportedOperationException("$this::setFromModel()");
@@ -292,17 +301,46 @@ class ModelRelationReferencesOne extends ModelRelationHasReference
 		$this->parentModel->setColumn($this->referenceField, $id, $forceAcceptNull);
 	}
 
-	public function saveModelCallback() {
-		$this->parentModel->setColumn(
-			$this->referenceField,
-			$this->getAsModel()->getPrimaryKeyValue()
-		);
-	}
-
 	public function setFromModel(Model $model) {
 		$modelCache =& $this->cache->get();
 		$modelCache = $model;
 		$this->parentModel->setFieldFromModelPk($this->referenceField, $model);
+	}
+
+	/**
+	 * @inheritdoc
+	 */
+	protected function setFromData(array $data) {
+
+		$targetTable = $this->getTargetTable();
+		$targetPk = $targetTable->getPrimaryKeyName();
+
+		// Explicitly require a given record
+		if (array_key_exists($targetPk, $data)) {
+
+			$targetId = $data[$targetPk];
+			$context = $this->parentModel->context;
+
+			// Requires a new record
+			if ($targetId === null) {
+				$model = $this->targetTable->createModel($data, false, $context);
+			}
+			// Requires an existing record
+			else {
+				$model = $this->targetTable->loadModel($targetId, $context);
+				$model->setFields($data);
+			}
+
+			// Attach the model to this relation
+			$this->setFromModel($model);
+		}
+		// Implicit: updating existing model or create new one
+		else {
+			// Load existing model or create new one
+			$model = $this->getAsModel(true);
+			// Update
+			$model->setFields($data);
+		}
 	}
 
 	public function setField($fieldName, $value, $forceAcceptNull = false) {
@@ -315,14 +353,21 @@ class ModelRelationReferencesOne extends ModelRelationHasReference
 
 	public function doGetAsModel($createIfNone = false, array $overrideContext = null) {
 
-		if (null !== $model =& $this->cache->get($overrideContext)) return $model;
+		if (null !== $model =& $this->cache->get($overrideContext)) {
+			return $model;
+		}
 
-		$context = $overrideContext !== null ? $overrideContext : $this->parentModel->context;
+		$context = $overrideContext !== null
+			? $overrideContext
+			: $this->parentModel->context;
 
 		if (null !== $id = $this->getAsId()) {
 
-			if (null !== $uniqueBy = $this->info->getUniqueBy()) {
-//				dump($uniqueBy);
+			/** @var $info ModelRelationInfoReferencesOne */
+			$info = $this->info;
+
+			if (null !== $uniqueBy = $info->getUniqueBy()) {
+
 				$id = array(
 					$this->targetTable->getPrimaryKeyName() => $id,
 				);
@@ -344,8 +389,9 @@ class ModelRelationReferencesOne extends ModelRelationHasReference
 		}
 
 		if ($model === null && $createIfNone) {
+
 			if ($overrideContext !== null) {
-				throw new UnsupportedOperationException('Cannot create model for overriden contexts');
+				throw new UnsupportedOperationException('Cannot create model for overridden contexts.');
 			}
 
 			$model = $this->targetTable->createNewModel(
@@ -361,12 +407,20 @@ class ModelRelationReferencesOne extends ModelRelationHasReference
 
 	public function save() {
 		$success = true;
+
 		if (null !== $model = $this->getAsModel()) {
-			if (!$model->save()) $success = false;
+			if (!$model->save()) {
+				$success = false;
+			}
 		}
-		if ($this->parentModel->isModified()) {
-			if (!$this->parentModel->save()) $success = false;
+
+		// 2013-04-19
+		// Removed `if ($this->parentModel->isModified())` to follow modification
+		// of saveAgain behaviour in Model::save()
+		if (!$this->parentModel->save()) {
+			$success = false;
 		}
+
 		return $success;
 	}
 

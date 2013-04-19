@@ -60,9 +60,9 @@ abstract class Model {
 
 	private $forcedAllFieldsUpdate = false;
 
-	protected $determinationMultifieldListeners = null;
-	protected $determinationListeners = null;
-	protected $undeterminedFields = array();
+	private $determinationMultifieldListeners = null;
+	private $determinationListeners = null;
+	private $undeterminedFields = array();
 
 	protected $deleted = false;
 
@@ -850,10 +850,10 @@ abstract class Model {
 	}
 
 	/**
-	 * Event method called unconditionnaly before any save operation, that is
+	 * Event method called unconditionally before any save operation, that is
 	 * even if the Model's data won't be persisted to the datastore (which
 	 * occurs only if the Model is new or modified). See {@link Model::beforeSave}
-	 * and {@link Model::afterSave} for conditionnal events.
+	 * and {@link Model::afterSave} for conditional events.
 	 *
 	 * @param bool $new
 	 * @param bool $deleted
@@ -889,6 +889,7 @@ abstract class Model {
 
 		if ($this->saving) {
 			$this->saveAgain = true;
+			return true;
 		}
 
 		$new = $new === true || $this->isNew();
@@ -986,7 +987,9 @@ abstract class Model {
 
 			if ($this->saveAgain) {
 				$this->saveAgain = false;
-				$this->save();
+				if ($this->isModified()) {
+					$this->save();
+				}
 			}
 		}
 
@@ -1369,6 +1372,7 @@ abstract class Model {
 	 * the model's data). If NULL, initial values will be used if they exist,
 	 * else it will be tried to load the model from the datastore, eventually
 	 * throwing an Exception if no method works.
+	 * @throws IllegalStateException
 	 * @return Model
 	 */
 	private function doDoGetStoredCopy($loadFromDB = false) {
@@ -1414,14 +1418,8 @@ abstract class Model {
 		// $this->setField($primaryKeyName, $value, $forceAcceptNull);
 	}
 
-	protected function setUndetermined($fieldName, $reason) {
-		if (isset($this->undeterminedFields[$fieldName])) {
-			$this->undeterminedFields[$fieldName][$reason] = true;
-		} else {
-			$this->undeterminedFields[$fieldName] = array(
-				$reason => true
-			);
-		}
+	protected function setUndetermined($fieldName) {
+		$this->undeterminedFields[$fieldName] = true;
 	}
 
 	public function waitDetermination($fieldName, $callback) {
@@ -1458,35 +1456,27 @@ abstract class Model {
 		}
 	}
 
-	protected function releaseUndeterminedIf($fieldName, $reason) {
-		if (isset($this->undeterminedFields[$fieldName])) {
-			$this->releaseUndetermined($fieldName, $reason);
-		}
-	}
+	/**
+	 * Clears the undetermination on the given field, and fires determination listeners.
+	 *
+	 * @param string $fieldName
+	 */
+	private function clearUndetermined($fieldName) {
+		unset($this->undeterminedFields[$fieldName]);
 
-	protected function releaseUndetermined($fieldName, $reason) {
-		if (!isset($this->undeterminedFields[$fieldName])) {
-			throw new IllegalArgumentException("Field $fieldName is not in an undetermined state");
-		}
-		unset($this->undeterminedFields[$fieldName][$reason]);
-
-		if (count($this->undeterminedFields[$fieldName]) === 0) {
-			unset($this->undeterminedFields[$fieldName]);
-
-			if (isset($this->determinationListeners[$fieldName])) {
-				$v = $this->__get($fieldName);
-				foreach ($this->determinationListeners[$fieldName] as $l) {
-					$l($v);
-				}
-				unset($this->determinationListeners[$fieldName]);
+		if (isset($this->determinationListeners[$fieldName])) {
+			$v = $this->__get($fieldName);
+			foreach ($this->determinationListeners[$fieldName] as $l) {
+				$l($v);
 			}
+			unset($this->determinationListeners[$fieldName]);
+		}
 
-			if (!empty($this->determinationMultifieldListeners)) {
-				foreach ($this->determinationMultifieldListeners as $i => $l) {
-					/** @var ModelMultipleFieldDeterminationListener $l */
-					if ($l->test($this)) {
-						unset($this->determinationMultifieldListeners[$i]);
-					}
+		if (!empty($this->determinationMultifieldListeners)) {
+			foreach ($this->determinationMultifieldListeners as $i => $l) {
+				/** @var ModelMultipleFieldDeterminationListener $l */
+				if ($l->test($this)) {
+					unset($this->determinationMultifieldListeners[$i]);
 				}
 			}
 		}
@@ -1497,6 +1487,7 @@ abstract class Model {
 	}
 
 	public function getField($name) {
+
 		if (isset($this->undeterminedFields[$name])) {
 			throw new IllegalStateException(
 				"The field $name is in an undetermined state"
@@ -1545,12 +1536,8 @@ abstract class Model {
 			$value = null;
 		}
 
-		if (is_array($name)) dump_trace();
-		if (isset($this->undeterminedFields[$name])) {
-			throw new IllegalStateException(
-				"The undetermination about the field $name must be released before it can be set"
-			);
-		}
+		// 2013-04-19 Setting clear undetermination (while before it crashed)
+		$this->clearUndetermined($name);
 
 		if (count($parts = preg_split('/->/', $name, 2)) == 2) {
 			$this->setForeignModelValue($parts[0], $parts[1], $value, $forceAcceptNull);
@@ -1578,38 +1565,6 @@ abstract class Model {
 	}
 
 	/**
-	 * Internal method.
-	 * @internal Callback for {@link setFieldFromModelPk}.
-	 * @param <type> $fieldName
-	 * @param Model $srcModel
-	 */
-	public function cbSetFieldFromModelPk_srcAfterSave($fieldName, Model $srcModel) {
-		// Release undetermination on the field
-		// Must be done before setField (cannot set when undetermined)
-		$this->releaseUndetermined($fieldName, 'setFieldFromModelPk');
-		$this->setField($fieldName, $srcModel->getPrimaryKeyValue());
-	}
-
-	/**
-	 * Internal method.
-	 * @internal Callback for {@link setFieldFromModelPk}.
-	 * @param <type> $fieldName
-	 * @param Model $srcModel
-	 */
-	public function cbSetFieldFromModelPk_thisBeforeSave(Model $srcModel) {
-		if ($srcModel->isNew()) {
-			// 04/12/11 08:13
-			// Save the referred model before saving this model (instead of crashing)
-			$srcModel->save(true);
-//			dumpl(array(
-//				'this' => $this
-//				,'srcModel' => $srcModel
-//			));
-//			throw new ModelSaveException(get_class($srcModel) . ' needs to be saved before');
-		}
-	}
-
-	/**
 	 * Set the specified field of this Model to the value of the given $model
 	 * primary key's value. If the given Model is new, then it will be waited
 	 * until the source model is saved to get its primary key and set the value.
@@ -1629,15 +1584,21 @@ abstract class Model {
 			throw new IllegalArgumentException('$model cannot be null');
 		}
 		if ($srcModel->isNew()) {
-			$this->setUndetermined($fieldName, 'setFieldFromModelPk');
-			$srcModel->onOnce(self::EVT_AFTER_SAVE_BASE,
-				array($this, 'cbSetFieldFromModelPk_srcAfterSave'),
-				array($fieldName, $srcModel)
-			);
-			$this->onOnce(self::EVT_BEFORE_SAVE_BASE,
-				array($this, 'cbSetFieldFromModelPk_thisBeforeSave'),
-				array($srcModel)
-			);
+			$this->setUndetermined($fieldName);
+
+			$me = $this;
+
+			$srcModel->onOnce(self::EVT_AFTER_SAVE_BASE, function() use($me, $fieldName, $srcModel) {
+				$me->setField($fieldName, $srcModel->getPrimaryKeyValue());
+			});
+
+			$this->onOnce(self::EVT_BEFORE_SAVE_BASE, function() use($srcModel) {
+				// 04/12/11 08:13
+				// Save the referred model before saving this model (instead of crashing)
+				if ($srcModel->isNew()) {
+					$srcModel->save();
+				}
+			});
 		} else {
 			$this->setField($fieldName, $srcModel->getPrimaryKeyValue());
 		}
@@ -1645,11 +1606,8 @@ abstract class Model {
 
 	public function setColumn($name, $value, $forceAcceptNull = false) {
 
-		if (isset($this->undeterminedFields[$name])) {
-			throw new IllegalStateException(
-				"The undetermination about the field $name must be released before it can be set"
-			);
-		}
+		// 2013-04-19 Setting clear undetermination (while before it crashed)
+		$this->clearUndetermined($name);
 
 		return $this->setColumnNoLoadCheck($name, $value, $forceAcceptNull);
 	}
