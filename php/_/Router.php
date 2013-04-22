@@ -45,6 +45,9 @@ class Router {
 	 */
 	private $routeMatch;
 
+	/**
+	 * @var Request
+	 */
 	public $request;
 	public $actionTimestamp;
 
@@ -189,6 +192,7 @@ class Router {
 		$this->requestMonitorRecord = MonitorRequest::create(array(
 			'datetime' => date('Y-m-d H:i:s', $this->actionTimestamp),
 			'action_timestamp' => $this->actionTimestamp,
+			'http_method' => $this->httpRequest->getMethod(),
 			'http_request' => serialize($requestData),
 			'json_request' => json_encode($requestData),
 			'php_request' => serialize($phpRequest),
