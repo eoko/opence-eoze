@@ -30,7 +30,7 @@
 	 */
 	Ext.define('Eoze.Ext.data.model.DirtyEvents', function() {
 
-		function intercept() {
+		function interceptDirty() {
 			return function() {
 				var wasDirty = this.dirty,
 					result = this.callParent(arguments),
@@ -41,7 +41,7 @@
 				}
 
 				return result;
-			}
+			};
 		}
 
 		return {
@@ -75,12 +75,12 @@
 				return this.dirty;
 			}
 
-			,set: intercept()
-			,cancelEdit: intercept()
-			,endEdit: intercept()
-			,setDirty: intercept()
-			,reject: intercept()
-			,commit: intercept()
+			,set: interceptDirty()
+			,cancelEdit: interceptDirty()
+			,endEdit: interceptDirty()
+			,setDirty: interceptDirty()
+			,reject: interceptDirty()
+			,commit: interceptDirty()
 
 			/**
 			 * Changes the dirty state for the specified field. This method will update the dirty
