@@ -19,6 +19,8 @@ Ext4.define('Eoze.lib.Eoze', {
 		'Eoze.locale.fr.Locale',
 		// Proxy
 		'Eoze.data.proxy.GridModule',
+		// Types
+		'Eoze.data.type.HasOne',
 		// CkEditor
 		'Eoze.CkEditor.form.field.CkEditor',
 		// Cursor
