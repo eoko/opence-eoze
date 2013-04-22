@@ -21,40 +21,15 @@
  * @author Éric Ortega <eric@eoko.fr>
  */
 
-/**
- * Requires Eoze overrides.
- *
- * @since 2013-03-26 10:33
- */
-Ext4.define('Eoze.Ext.OverridesLoader', {
-	singleton: true
+(function(Ext) {
+	/**
+	 * Default configuration for {@link Ext.data.Model}.
+	 *
+	 * @since 2013-04-22 14:53
+	 */
+	Ext.define('Eoze.Ext.data.Model', {
+		override: 'Ext.data.Model'
 
-	,requires: [
-		// adds support for lazy instance creation by xclass
-		'Eoze.Ext.ComponentManager',
-		// adds animOpen & animClose options
-		'Eoze.Ext.window.Window',
-		// Formats
-		'Eoze.Ext.util.Format',
-		// Data types
-		'Eoze.Ext.data.Types',
-		// Date
-		'Eoze.Ext.Date',
-		// Model
-		'Eoze.Ext.data.Model',
-		'Eoze.Ext.data.Field',
-		'Eoze.Ext.data.model.DirtyEvents',
-		'Eoze.Ext.data.association.HasOne',
-		// Component
-		'Eoze.Ext.AbstractComponent',
-
-		// Tree with hideable nodes
-		'Eoze.Ext.tree.HideableNodeOverride',
-
-		// Fields
-		'Eoze.Ext.form.field.Trigger',
-		'Eoze.Ext.form.field.Text',
-		// File upload field, fixes rendering
-		'Eoze.Ext.form.field.File'
-	]
-});
+		,defaultProxyType: 'cqlix'
+	});
+})(window.Ext4 || Ext);
