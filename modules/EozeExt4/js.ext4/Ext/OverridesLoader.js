@@ -41,6 +41,7 @@ Ext4.define('Eoze.Ext.OverridesLoader', {
 		// Date
 		'Eoze.Ext.Date',
 		// Model
+		'Eoze.Ext.data.model.DirtyEvents',
 		'Eoze.Ext.data.association.HasOne',
 		// Component
 		'Eoze.Ext.AbstractComponent',
