@@ -81,6 +81,61 @@
 			,setDirty: intercept()
 			,reject: intercept()
 			,commit: intercept()
+
+			/**
+			 * Changes the dirty state for the specified field. This method will update the dirty
+			 * state and the modified fields of the record accordingly.
+			 *
+			 * @param {String} fieldName
+			 * @param {Boolean} dirty
+			 */
+			,setFieldDirty: function(fieldName, dirty) {
+
+				function run(fieldName, dirty) {
+
+					var modified = this.modified;
+
+					// The field was not dirty and has been modified.
+					if (dirty) {
+						// Update dirty state:
+						this.dirty = true;
+						// Update modified fields:
+						modified[fieldName] = this.data[fieldName];
+					}
+					// The field was dirty and has been modified back to its original value.
+					else {
+
+						// Update dirty state:
+						this.dirty = false;
+
+						if (modified[fieldName]) {
+							// Update modified fields:
+							delete modified[fieldName];
+
+							// If there remains some modified fields, then the record is still
+							// dirty.
+							for (var key in modified) {
+								if (modified.hasOwnProperty(key)) {
+									this.dirty = true;
+									break;
+								}
+							}
+						}
+					}
+				}
+
+				return function() {
+					var wasDirty = this.dirty,
+						result = run.apply(this, arguments),
+						isDirty = this.dirty;
+
+					if (wasDirty !== isDirty) {
+						this.fireEvent(this.EVENT_DIRTY_CHANGED, this, isDirty);
+					}
+
+					return result;
+				};
+			}()
 		};
 
 	// 2013-04-22 This is intentional (or the function is not getting called, despite it should)

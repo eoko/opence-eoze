@@ -53,12 +53,12 @@ describe('Eoze.Ext.data.model.DirtyEvents', function() {
 		record.on('dirtychanged', function() {
 			calls++;
 		});
-	});
-
-	it('should fire a dirtychanged event when the model first becomes dirty', function() {
 
 		expect(record.dirty).toBe(false);
 		expect(calls).toBe(0);
+	});
+
+	it('should fire a dirtychanged event when the model first becomes dirty', function() {
 
 		record.set('age', 30);
 
@@ -72,9 +72,6 @@ describe('Eoze.Ext.data.model.DirtyEvents', function() {
 	});
 
 	it('should intercept edit transaction & commit methods', function() {
-
-		expect(record.dirty).toBe(false);
-		expect(calls).toBe(0);
 
 		record.beginEdit();
 		record.set('age', 30);
@@ -102,5 +99,49 @@ describe('Eoze.Ext.data.model.DirtyEvents', function() {
 
 		expect(record.dirty).toBe(false);
 		expect(calls).toBe(4);
+	});
+
+	it('setFieldDirty should fire the dirtychanged event if the record became dirty', function() {
+
+		record.setFieldDirty('name', true);
+
+		expect(record.dirty).toBe(true);
+		expect(calls).toBe(1);
+
+		record.setFieldDirty('name', false);
+
+		expect(record.dirty).toBe(false);
+		expect(calls).toBe(2);
+	});
+
+	it('setFieldDirty should fire the dirtychanged event if the record became unmodified', function() {
+
+		record.set('name', 'bob');
+
+		expect(record.dirty).toBe(true);
+		expect(calls).toBe(1);
+
+		record.setFieldDirty('name', false);
+
+		expect(record.dirty).toBe(false);
+		expect(calls).toBe(2);
+	});
+
+	it('setFieldDirty should not fire any event if the dirty state remains the same', function() {
+
+		record.setFieldDirty('name', false);
+
+		expect(record.dirty).toBe(false);
+		expect(calls).toBe(0);
+
+		record.setFieldDirty('name', true);
+
+		expect(record.dirty).toBe(true);
+		expect(calls).toBe(1);
+
+		record.setFieldDirty('id', true);
+
+		expect(record.dirty).toBe(true);
+		expect(calls).toBe(1);
 	});
 });
