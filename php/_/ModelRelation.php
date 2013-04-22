@@ -6,6 +6,8 @@
  * @license http://www.planysphere.fr/licenses/psopence.txt
  */
 
+use eoko\cqlix\Exception;
+
 /**
  * Represent the information about a concrete relation bound to a specific
  * data reccord. Generic informations about the relation category are
@@ -328,6 +330,12 @@ class ModelRelationReferencesOne extends ModelRelationHasReference
 			// Requires an existing record
 			else {
 				$model = $this->targetTable->loadModel($targetId, $context);
+
+				if (!$model) {
+					$reference = $this->targetTable->getModelName() . '#' . $targetId;
+					throw new Exception\RecordNotFound("Record not found: $reference.");
+				}
+
 				$model->setFields($data);
 			}
 
