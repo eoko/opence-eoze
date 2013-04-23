@@ -3930,7 +3930,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			,columns: {
 				xtype: 'oce.rbbutton'
 				,text: "Colonnes" // i18n
-				,iconCls : 'b_ico_columns'
+				,iconCls : 'ribbon icon columns'
 				,menu: {
 					listeners: {
 						scope: this
