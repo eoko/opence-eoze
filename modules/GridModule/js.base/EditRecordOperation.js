@@ -83,7 +83,8 @@ Ext4.define('Eoze.GridModule.EditRecordOperation', {
 							return record;
 						}
 						// Record form
-						else if (record instanceof Ext.data.Record) {
+						else if (record instanceof Ext.data.Record
+								|| record instanceof Ext4.data.Record) {
 							config.record = record;
 							config.recordId = record.id;
 						}
