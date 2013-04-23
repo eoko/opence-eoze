@@ -3914,7 +3914,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				,scope: this
 				,handler: function() {this.addRecord()}
 				,text: "Ajouter" // i18n
-				,iconCls: 'b_ico_add'
+				,iconCls: 'ribbon icon add'
 				,actionId: 'add'
 			}
 			,remove: {
@@ -3922,7 +3922,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				,scope: this
 				,handler: this.deleteSelectedRecords
 				,text: "Supprimer" // i18n
-				,iconCls: 'b_ico_del'
+				,iconCls: 'ribbon icon delete'
 				,actionId: 'delete'
 				,dependsOnSelection: true
 			}

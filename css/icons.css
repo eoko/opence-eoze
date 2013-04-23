@@ -48,13 +48,12 @@
 .b_ico_earth {
 	background-image: url("../images/opence/32x32/earth.png") !important;
 }
-.b_ico_del {
+.ribbon.icon.delete {
 /*	background-image: url("../images/opence/32x32/trash_full.png") !important;*/
 	background-image: url("../images/opence/32x32/del.png") !important;
 /*	background-image: url("../images/icons_fatcow/32x32/delete.png") !important;*/
 }
-.ribbon.icon.add,
-.b_ico_add {
+.ribbon.icon.add {
 	background-image: url("../images/opence/32x32/add.png") !important;
 /*	background-image: url("../images/icons_fatcow/32x32/add.png") !important;*/
 }
