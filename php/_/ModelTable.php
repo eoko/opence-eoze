@@ -88,7 +88,7 @@ abstract class ModelTable extends ModelTableProxy implements EventManagerAwareIn
 	protected $uniqueIndexes = null;
 
 	/**
-	 * @var array[VirtualField]
+	 * @var VirtualField[]
 	 */
 	protected $virtuals = array();
 
@@ -315,7 +315,11 @@ abstract class ModelTable extends ModelTableProxy implements EventManagerAwareIn
 	 * 
 	 * @return Model
 	 */
-	abstract static function createModel($initValues = null, $strict = false, array $context = null);
+	public static function createModel($initValues = null, $strict = false, array $context = null) {
+		/** @var $modelClass Model */
+		$modelClass = static::getModelClass();
+		return $modelClass::create($initValues, $strict, $context);
+	}
 
 	/**
 	 * Creates a new Model instance (see {@link createModel()}), and set the
@@ -1870,7 +1874,7 @@ class OnePassModelSet extends ModelSet {
 	protected $reciproqueFactory;
 
 	private $i = null;
-	private $current = null;
+	protected $current = null;
 
 	public function __construct(ModelTableProxy $table, Query $query, ModelRelationReciproqueFactory $reciproqueFactory = null) {
 		$this->query = $query;
@@ -2051,6 +2055,13 @@ abstract class ModelTableProxy {
 	public abstract static function getDBTableName();
 
 	public abstract static function getModelName();
+
+	/**
+	 * @return string
+	 */
+	public static function getModelClass() {
+		return static::getModelName();
+	}
 
 	/**
 	 * @param string|ModelTableProxy $table
