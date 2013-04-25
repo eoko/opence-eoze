@@ -812,6 +812,28 @@ class Query {
 		return $this;
 	}
 
+	/**
+	 * Gets the limit clause of the query.
+	 *
+	 * @return int|false
+	 */
+	public function getLimit() {
+		return $this->limit === null
+			? false
+			: $this->limit;
+	}
+
+	/**
+	 * Gets the start part of the limit clause of the query.
+	 *
+	 * @return int|false
+	 */
+	public function getStart() {
+		return $this->limitStart === null
+			? 0
+			: $this->limitStart;
+	}
+
     /**
      * @return Query $this
      */
