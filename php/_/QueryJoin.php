@@ -1,9 +1,8 @@
 <?php
 
-abstract class QueryJoin implements QueryAliasable {
+use eoko\cqlix\legacy\QueryAliasableToAliaser;
 
-//	const LEFT = 'LEFT JOIN ';
-//	const ASSOC = 'ASSOC';
+abstract class QueryJoin implements QueryAliasable {
 
 	const TABLE_LEFT = 1;
 	const TABLE_RIGHT = 2;
@@ -14,8 +13,6 @@ abstract class QueryJoin implements QueryAliasable {
 
 	/** @var ModelTableQuery */
 	public $query;
-
-//	public $join;
 
 	private $select = array();
 
@@ -75,11 +72,11 @@ abstract class QueryJoin implements QueryAliasable {
 	 * selected with an alias, that is this alias that must be given.
 	 */
 	protected function __construct(
-		ModelTableQuery $query, 
-		ModelTableProxy $foreignTable, 
+		ModelTableQuery $query,
+		ModelTableProxy $foreignTable,
 		$leftField,
-		$rightField = null, 
-		$foreignTableAlias = null, 
+		$rightField = null,
+		$foreignTableAlias = null,
 		ModelTableProxy $leftTable = null, $leftTableAlias = null
 	) {
 
@@ -88,7 +85,10 @@ abstract class QueryJoin implements QueryAliasable {
 		$this->query = $query;
 
 		if ($foreignTable instanceof ModelTableProxy) {
-			if ($rightField === null) $rightField = $foreignTable->getPrimaryKeyName();
+			/** @var $foreignTable ModelTable */
+			if ($rightField === null) {
+				$rightField = $foreignTable->getPrimaryKeyName();
+			}
 			$this->foreignDBTableName = $foreignTable->getDBTable();
 		} else if ($rightField === null) {
 			throw new IllegalArgumentException(
@@ -117,10 +117,9 @@ abstract class QueryJoin implements QueryAliasable {
 		return $this->buildJoin();
 	}
 
-	abstract 
-	public function whereAssoc($assocField, $value = null, $boolOp = 'AND', $operator = '=');
+	abstract public function whereAssoc($assocField, $value = null, $boolOp = 'AND', $operator = '=');
 
-	public function andWhere($condition, $inputs = null) {
+	public function andWhere(/** @noinspection PhpUnusedParameterInspection */ $condition, $inputs = null) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -129,17 +128,20 @@ abstract class QueryJoin implements QueryAliasable {
 	 *
 	 * This can be done multiple times, but each call will erase the precedents.
 	 *
-	 * @param mixed $field_s	can be one field, or an array of fields, or NULL.
+	 * @param mixed $field_s    can be one field, or an array of fields, or NULL.
 	 * If one field is given, one alias is permitted. If NULL, will be selected
 	 * (and no alias is permitted). If fields is an array, then one or an array
 	 * of alias is permitted (see $alias).
-	 * @param mixed $alia_s	NULL, one alias, one alias prefix, or an array of alias.
+	 *
+	 * @internal param mixed $alia_s NULL, one alias, one alias prefix, or an array of alias.
 	 * If an alias is given for every $fields, then they must be given in the
 	 * same order (ie. the alias for a field must have the same index as this
 	 * field). If aliases are given only for a part of the fields, then they
 	 * must be given in an associative array which keys are the name of the fields.
 	 * If $fields is an array and $alias is a unique string, then it will be
 	 * applied as a prefix to all fields' name.
+	 *
+	 * @throws UnsupportedOperationException
 	 * @return Query
 	 */
 	public function select($field_s = null) {
@@ -149,21 +151,25 @@ abstract class QueryJoin implements QueryAliasable {
 				$fieldAlias = is_string($k) ? $k : null;
 
 				if ($this->foreignTable->hasRelation($fieldName)) {
-					// TODO rx select name... or other? (cf. ModelTable::LOAD_ID)
-					$this->foreignTable->getRelationInfo($fieldName)->selectName(
+					/** @var $relationInfo ModelRelationInfo */
+					$relationInfo = $this->foreignTable->getRelationInfo($fieldName);
+					$relationInfo->selectName(
 						$this->query, $fieldAlias, $fieldName
 					);
 				} else if ($this->foreignTable->hasVirtual($fieldName)) {
-					$this->foreignTable->getVirtual($fieldName)->select(
+					/** @var $virtualField VirtualField */
+					$virtualField = $this->foreignTable->getVirtual($fieldName);
+					$virtualField->select(
 						$this->query, $fieldAlias, $this
 					);
 				} else if (strstr($fieldName, '->')) {
 					throw new UnsupportedOperationException('Select linked fields');
 				} else {
-					if ($fieldAlias !== null)
+					if ($fieldAlias !== null) {
 						$this->select[] = "`$this->foreignTableAlias`.`$fieldName` AS `$fieldAlias`";
-					else
+					} else {
 						$this->select[] = "`$this->foreignTableAlias`.`$fieldName`";
+					}
 				}
 			}
 		} else if ($field_s === null || $field_s === '*') {
@@ -185,7 +191,9 @@ abstract class QueryJoin implements QueryAliasable {
 	}
 
 	public function buildSelect(&$bindings) {
-		if (count($this->select) == 0) return null;
+		if (count($this->select) == 0) {
+			return null;
+		}
 		foreach ($this->select as &$v) {
 			if ($v instanceof QuerySelect) {
 				$v = $v->buildSql(false, $bindings);
@@ -196,16 +204,22 @@ abstract class QueryJoin implements QueryAliasable {
 		return implode(', ', $this->select);
 	}
 
-	private function getQualifiedNameFor(QueryAliasable $aliasable, ModelTableProxy $table, 
+	private function getQualifiedNameFor(QueryAliasable $aliasable, ModelTableProxy $table,
 			$tableAlias, $field) {
-		// This implentation is copy-pasted from ModeTableQuery. If something
+
+		// This implementation has been copy-pasted from ModeTableQuery. If something
 		// seems wrong in here, maybe it should be sensible to go see there if
 		// the implemenation has been fixed or what...
+
+		/** @var $table ModelTable */
+
 		if ($table->hasColumn($field)) {
 			return "`$tableAlias`.`$field`";
-		} 
+		}
 		else if ($table->hasVirtual($field)) {
-			return $table->getVirtual($field)->getClause($this->query, $aliasable);
+			return $table
+				->getVirtual($field)
+				->getClause($this->query, $aliasable);
 		}
 		else {
 			if (count($parts = explode('->', $field)) > 1) {
@@ -215,18 +229,24 @@ abstract class QueryJoin implements QueryAliasable {
 				if ($relation->targetTable->hasRelation($fieldName)) {
 					throw new UnsupportedOperationException;
 					// relation name
-					$targetRelation = $relation->getRelationInfo($fieldName);
-					return $targetRelation->getNameClause($this, $field);
+//					$targetRelation = $relation->getRelationInfo($fieldName);
+//					return $targetRelation->getNameClause($this, $field);
 				} else if ($relation->targetTable->hasVirtual($fieldName)) {
 					// virtual
-					$leftAlias = $table->getDBTableName() === $tableAlias ? '' : "$tableAlias->";
-					return $relation->targetTable->getVirtual($fieldName)->getClause(
-						$this->query, $this->query->getJoin("$leftAlias$relationName")
-					);
+					$leftAlias = $table->getDBTableName() === $tableAlias
+						? ''
+						: "$tableAlias->";
+					return $relation->targetTable
+						->getVirtual($fieldName)
+						->getClause(
+							$this->query,
+							$this->query->getJoin("$leftAlias$relationName")
+						);
 				} else {
 					// field
-					return $this->query->getJoin("{$tableAlias}->$relationName")
-							->getQualifiedName($fieldName);
+					return $this->query
+						->getJoin("{$tableAlias}->$relationName")
+						->getQualifiedName($fieldName);
 				}
 			}
 			throw new Exception("No field '$field' in $table");
@@ -237,13 +257,19 @@ abstract class QueryJoin implements QueryAliasable {
 		switch ($side) {
 			case self::TABLE_LEFT:
 				return $this->getQualifiedNameFor(
-						new QueryJoinAliasable($this, self::TABLE_LEFT),
-						$this->leftTable, $this->leftTableAlias, $field);
-			case self::TABLE_RIGHT: 
+					new QueryJoinAliasable($this, self::TABLE_LEFT),
+					$this->leftTable,
+					$this->leftTableAlias,
+					$field
+				);
+			case self::TABLE_RIGHT:
 				return $this->getQualifiedNameFor(
-						$this,
-						$this->foreignTable, $this->foreignTableAlias, $field);
-			default: 
+					$this,
+					$this->foreignTable,
+					$this->foreignTableAlias,
+					$field
+				);
+			default:
 				throw new IllegalArgumentException("Invalid mode: $side");
 		}
 	}
@@ -251,12 +277,16 @@ abstract class QueryJoin implements QueryAliasable {
 	/**
 	 * Get the RelationInfo for the given relation name, relatively to this
 	 * aliasable.
+	 *
 	 * @param string $relationName
+	 * @param bool $requireType
 	 * @return ModelRelationInfo
 	 */
 	public function getRelationInfo($relationName, $requireType = false) {
 		return $this->query->table->getRelationInfo(
-				"$this->foreignTableAlias->$relationName", $requireType);
+			"$this->foreignTableAlias->$relationName",
+			$requireType
+		);
 	}
 
 	function makeRelationName($targetRelationName) {
@@ -275,6 +305,8 @@ abstract class QueryJoin implements QueryAliasable {
 	}
 
 	/**
+	 * @param string|mixed $condition
+	 * @param array|null $inputs
 	 * @return QueryWhere
 	 */
 	public function createWhere($condition = null, $inputs = null) {
@@ -316,77 +348,6 @@ abstract class QueryJoin implements QueryAliasable {
 	 * @inheritdoc
 	 */
 	public function aliases($clause, array &$bindings = null) {
-		return \eoko\cqlix\legacy\QueryAliasableToAliaser::aliases($this, $clause, $bindings);
-	}
-}
-
-class QueryJoinAliasable implements QueryAliasable {
-
-	/**
-	 * @var QueryJoin
-	 */
-	private $join;
-
-	private $side;
-
-	function __construct($join, $side) {
-		$this->join = $join;
-		$this->side = $side;
-	}
-
-	public function __toString() {
-		$side = null;
-		switch ($this->side) {
-			case QueryJoin::TABLE_LEFT: $side = 'LEFT'; break;
-			case QueryJoin::TABLE_RIGHT: $side = 'RIGHT'; break;
-			case QueryJoin::TABLE_ASSOC: $side = 'ASSOC'; break;
-			default: $side = '???'; break;
-		}
-		return "Aliasable($side) for: $this->join";
-	}
-
-	public function convertQualifiedNames($preSql, &$bindings) {
-		return $this->join->convertQualifiedNames($preSql, $bindings);
-	}
-
-	public function createWhere($conditions = null, $inputs = null) {
-		return $this->join->createWhere($conditions, $inputs);
-	}
-
-	public function &getContext() {
-		return $this->join->query->context;
-	}
-
-	public function getQualifiedName($fieldName, $side = null){
-		if ($side === null) {
-			$side = $this->side;
-		}
-		return $this->join->getQualifiedName($fieldName, $side);
-	}
-
-	public function getQuery() {
-		return $this->join->getQuery();
-	}
-
-	public function getRelationInfo($targetRelationName, $requireType = false) {
-		return $this->join->getRelationInfo($targetRelationName, $requireType);
-	}
-
-	public function makeRelationName($targetRelationName) {
-		return $this->join->makeRelationName($targetRelationName);
-	}
-
-	/**
-	 * @inheritdoc
-	 */
-	public function alias($name) {
-		return $this->getQualifiedName($name);
-	}
-
-	/**
-	 * @inheritdoc
-	 */
-	public function aliases($clause, array &$bindings = null) {
-		return \eoko\cqlix\legacy\QueryAliasableToAliaser::aliases($this, $clause, $bindings);
+		return QueryAliasableToAliaser::aliases($this, $clause, $bindings);
 	}
 }
