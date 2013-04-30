@@ -25,7 +25,25 @@ class LegacyRouter extends AbstractRouter {
 		$response = $action();
 
 		if ($response instanceof Response) {
+			$this->setResponseDefaultContent($response);
 			$response->send();
+		}
+	}
+
+	/**
+	 * Sets the default response content if it is empty and the response indicates an error.
+	 *
+	 * @param Response $response
+	 */
+	private function setResponseDefaultContent(Response $response) {
+		// if content is empty
+		if ($response->getContent() === '') {
+			// if error
+			if ($response->isClientError() || $response->isServerError()) {
+				$code = $response->getStatusCode();
+				$reason = $response->getReasonPhrase();
+				$response->setContent("<h1>Error $code: $reason</h1>");
+			}
 		}
 	}
 }
