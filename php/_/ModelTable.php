@@ -1001,11 +1001,13 @@ abstract class ModelTable extends ModelTableProxy implements EventManagerAwareIn
 	}
 
 	/**
+	 * @param string $name
 	 * @return VirtualField
 	 */
 	abstract public static function getVirtual($name);
 
 	/**
+	 * @param string $name
 	 * @return VirtualField
 	 */
 	protected function _getVirtual($name) {
