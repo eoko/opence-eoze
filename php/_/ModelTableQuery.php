@@ -17,6 +17,13 @@ class ModelTableQuery extends Query implements QueryAliasable {
 	}
 
 	/**
+	 * @return myModelTable
+	 */
+	public function getTable() {
+		return $this->table;
+	}
+
+	/**
 	 *
 	 * @param SqlVariable $field_s
 	 * @param string $aliasPrefix
