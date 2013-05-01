@@ -73,16 +73,22 @@ class QueryWhere {
 			$quoted = Query::quoteName($field);
 		}
 
-		if (!is_array($values)) {
-			$values = array($values);
+		if ($values instanceof Query) {
+			$subQuery = rtrim($values->buildSql(true, $this->bindings), ';');
+			$this->sql = $quoted . $not . ' IN (' . $subQuery . ')';
+		} else {
+			if (!is_array($values)) {
+				$values = array($values);
+			}
+
+			if (count($values) > 0) {
+				$this->sql .= $quoted . $not . ' IN (?' . str_repeat(',?', count($values) - 1) . ')';
+				$this->bindings = array_merge($this->bindings, $values);
+			} else {
+				$this->sql .= $quoted . $not . ' IN ())';
+			}
 		}
 
-		if (count($values) > 0) {
-			$this->sql .= $quoted . $not . ' IN (?' . str_repeat(',?', count($values) - 1) . ')';
-			$this->bindings = array_merge($this->bindings, $values);
-		} else {
-			$this->sql .= $quoted . $not . ' IN ())';
-		}
 		return $this;
 	}
 
