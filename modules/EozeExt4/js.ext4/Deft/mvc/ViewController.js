@@ -82,10 +82,40 @@ Ext4.define('Eoze.Deft.mvc.ViewController', {
 			}
 			getterMethod.generated = true;
 
-			if (this[getterName] == null) {
+			var existingMethod = this[getterName];
+
+			if (existingMethod) {
+
+				// /!\ /!\ /!\
+				//
+				// This will most probably bind to the method owned by *the prototype*:
+				//
+				// So:
+				//
+				// either (a) the getterMethod had better not be bound to a given scope,
+				// or (b) the function to which is attached the $previous should be unique
+				//        to the object scope.
+				//
+				// Here I choose (b) because we're running from the constructor, and not the
+				// class definition time.
+				//
+				// Unfortunately, this strategy makes the previous method's result unreachable
+				// (probably no big deal).
+
+				// Clone existing method so that we can set it's $previous without affecting the
+				// prototype.
+				var instanceMethod;
+				eval('instanceMethod = ' + existingMethod.toString());
+
+				//noinspection JSUnusedAssignment
+				this[getterName] = instanceMethod;
+
+				//noinspection JSUnusedAssignment
+				instanceMethod.$previous = getterMethod;
+
+				// ... indeed, all this was a bit ugly :/
+			} else {
 				this[getterName] = getterMethod;
-			} else if (!this[getterName].$previous) {
-				this[getterName].$previous = getterMethod;
 			}
 		}
 		this.registeredComponentReferences[id] = true;
