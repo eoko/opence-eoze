@@ -21,6 +21,9 @@ class QueryWhere {
 	}
 
 	/**
+	 * @param QueryAliasable $aliasable
+	 * @param mixed $condition
+	 * @param mixed $inputs
 	 * @return QueryWhere
 	 */
 	public static function create(QueryAliasable $aliasable, $condition = null, $inputs = null) {
@@ -56,6 +59,10 @@ class QueryWhere {
 	}
 
 	/**
+	 * @param string $field
+	 * @param array $values
+	 * @param string $op
+	 * @param string $not
 	 * @return QueryWhere
 	 */
 	private function pushInCondition($field, $values, $op, $not = '') {
@@ -64,28 +71,34 @@ class QueryWhere {
 			$this->sql .= " $op ";
 		}
 
-		$field = $this->aliasable->getQualifiedName($field);
-
-		if ($field instanceof SqlVariable) {
-			// (?) It has not been tested that the bindings were functionnal
-			$quoted = $field->buildSql(false, $this->bindings);
-		} else {
-			$quoted = Query::quoteName($field);
+		if (empty($values)) {
+			$this->sql .= ' FALSE';
 		}
 
-		if ($values instanceof Query) {
-			$subQuery = rtrim($values->buildSql(true, $this->bindings), ';');
-			$this->sql = $quoted . $not . ' IN (' . $subQuery . ')';
-		} else {
-			if (!is_array($values)) {
-				$values = array($values);
+		else {
+			$field = $this->aliasable->getQualifiedName($field);
+
+			if ($field instanceof SqlVariable) {
+				// (?) It has not been tested that the bindings were functionnal
+				$quoted = $field->buildSql(false, $this->bindings);
+			} else {
+				$quoted = Query::quoteName($field);
 			}
 
-			if (count($values) > 0) {
-				$this->sql .= $quoted . $not . ' IN (?' . str_repeat(',?', count($values) - 1) . ')';
-				$this->bindings = array_merge($this->bindings, $values);
+			if ($values instanceof Query) {
+				$subQuery = rtrim($values->buildSql(true, $this->bindings), ';');
+				$this->sql = $quoted . $not . ' IN (' . $subQuery . ')';
 			} else {
-				$this->sql .= $quoted . $not . ' IN ())';
+				if (!is_array($values)) {
+					$values = array($values);
+				}
+
+				if (count($values) > 0) {
+					$this->sql .= $quoted . $not . ' IN (?' . str_repeat(',?', count($values) - 1) . ')';
+					$this->bindings = array_merge($this->bindings, $values);
+				} else {
+					$this->sql .= $quoted . $not . ' IN ())';
+				}
 			}
 		}
 
@@ -93,32 +106,54 @@ class QueryWhere {
 	}
 
 	/**
+	 * Set the WHERE IN clause of the query.
+	 *
+	 * @param string $field
+	 * @param array $values
 	 * @return QueryWhere
 	 */
 	public function whereIn($field, $values = array()) {
-		if (func_num_args() > 2) $values = array_splice(func_get_args(), 1);
+		if (func_num_args() > 2) {
+			$values = array_splice(func_get_args(), 1);
+		}
 		$this->sql = null;
 		return $this->pushInCondition($field, $values, null);
 	}
 
 	/**
+	 * Set the WHERE NOT IN clause of the query.
+	 *
+	 * @param string $field
+	 * @param array $values
 	 * @return QueryWhere
 	 */
 	public function whereNotIn($field, $values = array()) {
-		if (func_num_args() > 2) $values = array_splice(func_get_args(), 1);
+		if (func_num_args() > 2) {
+			$values = array_splice(func_get_args(), 1);
+		}
 		$this->sql = null;
 		return $this->pushInCondition($field, $values, null, ' NOT');
 	}
 
 	/**
+	 * Adds a WHERE IN clause to the query.
+	 *
+	 * @param string $field
+	 * @param array $values
 	 * @return QueryWhere
 	 */
 	public function andWhereIn($field, $values = array()) {
-		if (func_num_args() > 2) $values = array_splice(func_get_args(), 1);
+		if (func_num_args() > 2) {
+			$values = array_splice(func_get_args(), 1);
+		}
 		return $this->pushInCondition($field, $values, 'AND');
 	}
 
 	/**
+	 * Adds a WHERE NOT IN clause to the query.
+	 *
+	 * @param string $field
+	 * @param array $values
 	 * @return QueryWhere
 	 */
 	public function andWhereNotIn($field, $values) {
@@ -127,6 +162,10 @@ class QueryWhere {
 	}
 
 	/**
+	 * Adds a WHERE IN alternative clause to the query.
+	 *
+	 * @param string $field
+	 * @param array $values
 	 * @return QueryWhere
 	 */
 	public function orWhereIn($field, $values) {
@@ -135,6 +174,10 @@ class QueryWhere {
 	}
 
 	/**
+	 * Adds a WHERE NOT IN alternative clause to the query.
+	 *
+	 * @param string $field
+	 * @param array $values
 	 * @return QueryWhere
 	 */
 	public function orWhereNotIn($field, $values) {
@@ -143,6 +186,10 @@ class QueryWhere {
 	}
 
 	/**
+	 * @param $condition
+	 * @param $inputs
+	 * @param $op
+	 * @throws UnsupportedOperationException
 	 * @return QueryWhere
 	 */
 	private function pushCondition($condition, $inputs, $op) {
@@ -157,7 +204,7 @@ class QueryWhere {
 		} else if ($condition instanceof SqlVar) {
 			throw new UnsupportedOperationException('bugged');
 			// buildSql must be modified to use an aliasable instead of a table name ...
-			$this->sql .= '(' . $condition->buildSql($this->aliasable->table, $this->bindings) . ')';
+			// $this->sql .= '(' . $condition->buildSql($this->aliasable->table, $this->bindings) . ')';
 		} else {
 			if ($this->sql !== null) {
 				$this->sql .= " $op ";
