@@ -25,7 +25,7 @@
  *
  * @since 2013-03-13 17:19
  */
-Ext.define('Eoze.AccessControl.service.Login', {
+Ext4.define('Eoze.AccessControl.service.Login', {
 
 	mixins: {
 		observable: 'Ext.util.Observable'

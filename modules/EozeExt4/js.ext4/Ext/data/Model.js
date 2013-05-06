@@ -21,15 +21,13 @@
  * @author Éric Ortega <eric@eoko.fr>
  */
 
-(function(Ext) {
-	/**
-	 * Default configuration for {@link Ext.data.Model}.
-	 *
-	 * @since 2013-04-22 14:53
-	 */
-	Ext.define('Eoze.Ext.data.Model', {
-		override: 'Ext.data.Model'
+/**
+ * Default configuration for {@link Ext.data.Model}.
+ *
+ * @since 2013-04-22 14:53
+ */
+Ext4.define('Eoze.Ext.data.Model', {
+	override: 'Ext.data.Model'
 
-		,defaultProxyType: 'cqlix'
-	});
-})(window.Ext4 || Ext);
+	,defaultProxyType: 'cqlix'
+});

@@ -220,9 +220,7 @@ class Application implements FileFinder {
 					'layout.css' => 0,
 					'menu.css' => 1,
 					'icons.css' => 2,
-					'help.css' => 3,
-					'opence.css' => 4,
-					'custom.css' => 5,
+					'opence.css' => 3,
 				)
 			);
 		} else if ($alias === '@oce-components') {
