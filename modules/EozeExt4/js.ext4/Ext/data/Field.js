@@ -21,15 +21,13 @@
  * @author Éric Ortega <eric@eoko.fr>
  */
 
-(function(Ext) {
-	/**
-	 * Eoze default configuration for {@link Ext.data.Field}.
-	 *
-	 * @since 2013-04-22 14:54
-	 */
-	Ext.define('Eoze.Ext.data.Field', {
-		override: 'Ext.data.Field'
+/**
+ * Eoze default configuration for {@link Ext.data.Field}.
+ *
+ * @since 2013-04-22 14:54
+ */
+Ext4.define('Eoze.Ext.data.Field', {
+	override: 'Ext.data.Field'
 
-		,useNull: true
-	});
-})(window.Ext4 || Ext);
+	,useNull: true
+});

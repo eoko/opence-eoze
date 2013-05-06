@@ -90,7 +90,7 @@ Ext4.define('Eoze.AjaxRouter.Route', {
 		return this.aliases || this.name && [this.name] || [];
 	}
 
-	,Matcher: Ext.define(null, {
+	,Matcher: Ext4.define(null, {
 		constructor: function(regex, map) {
 			if (Ext.isArray(regex)) {
 				this.test = this.testArray;

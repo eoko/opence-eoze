@@ -25,7 +25,7 @@
  *
  * @since 2013-03-13 16:49
  */
-Ext.define('Eoze.AccessControl.controller.LoginWindow', {
+Ext4.define('Eoze.AccessControl.controller.LoginWindow', {
 	extend: 'Deft.mvc.ViewController'
 
 	,requires: [

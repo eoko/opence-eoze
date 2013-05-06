@@ -6,7 +6,7 @@
  */
 Ext4.define('Eoze.DataSnapshots.model.DataSnapshot', {
 	
-	extend: 'Ext4.data.Model'
+	extend: 'Ext.data.Model'
 	
 	,fields: [
 		{name: 'id', type: 'int'}
