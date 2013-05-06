@@ -143,7 +143,7 @@ Oce.ClassLoader = function() {
 	var whenIdentified = function(callback) {
 		identifiedWaiters.push(callback);
 	};
-	Ext4.onReady(function() {
+	Oce.deps.wait('Eoze.app.Application', function() {
 		var security = Oce.mx.Security;
 		whenIdentified = Ext4.bind(security.whenIdentified, security);
 		identifiedWaiters.forEach(whenIdentified);
