@@ -72,7 +72,7 @@ Oce.ClassLoader = function() {
      * @param {function} [callback] callback(boolean success, array[error])
      * @param {string} [action='get_js'] callback(boolean success, array[error])
      */
-    var loadFile = function (controller, name, callback, action) {
+    var doLoadFile = function (controller, name, callback, action) {
 		console.warn("Loading module: " + name);
 
         if (action === undefined) {
@@ -137,6 +137,25 @@ Oce.ClassLoader = function() {
             });
         }
     };
+
+	// Ensures that we have a user logged before requesting files
+	var identifiedWaiters = [];
+	var whenIdentified = function(callback) {
+		identifiedWaiters.push(callback);
+	};
+	Ext4.onReady(function() {
+		var security = Oce.mx.Security;
+		whenIdentified = Ext4.bind(security.whenIdentified, security);
+		identifiedWaiters.forEach(whenIdentified);
+	});
+
+	var loadFile = function(controller, name, callback, action) {
+		var me = this,
+			args = arguments;
+		whenIdentified(function() {
+			doLoadFile.apply(me, args);
+		});
+	};
 
     var ControllerClassLoader = function(controller) {
 
