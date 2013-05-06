@@ -33,8 +33,6 @@ Ext4.define('Eoze.Ext.data.HideableNodeInterface', {
 
 	,statics: {
 		decorate: function(modelClass) {
-			debugger
-			//this.callSuper(arguments);
 			this.callParent(arguments);
 			this.applyFields(modelClass, [
 				{name: 'hidden', type: 'bool', defaultValue: false}
