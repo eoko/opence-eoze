@@ -86,6 +86,11 @@ function dump_mark($n = null) {
 }
 function dump_trace($die = true, $light = true) {
 	global $dumpPre, $endDumpPre;
+
+	if (!headers_sent()) {
+		header('Content-Type: text');
+	}
+
 	echo $dumpPre;
 //	debug_print_backtrace(false);
 	if ($light) {
