@@ -151,15 +151,6 @@ abstract class Query implements QueryAliasable {
 		'desc' => 'desc', 'DESC' => 'DESC'
 	);
 
-
-//REM	protected static $INSERT = 'insert';
-//	protected static $INSERT_OR_UPDATE = 'insert_or_update';
-//	protected static $UPDATE = 'update';
-//	protected static $SELECT = 'select';
-//	protected static $SELECT_FIRST = 'selectOne';
-//	protected static $DELETE = 'delete';
-//	protected static $COUNT = 'count';
-
 	const INSERT			= 1;
 	const INSERT_OR_UPDATE	= 2;
 	const UPDATE			= 3;
@@ -329,10 +320,8 @@ abstract class Query implements QueryAliasable {
 
 	protected function buildJoinsClauses() {
 		if ($this->joins !== null) {
-//			$selects = array();
 			$joins = array();
 			foreach ($this->joins as $join) {
-//				$join instanceof QueryJoin;
 				$joins[] = $join->buildSql($this->bindings);
 			}
 			return ' ' . implode(' ', $joins);
