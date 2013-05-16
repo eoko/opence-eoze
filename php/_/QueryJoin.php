@@ -41,6 +41,17 @@ abstract class QueryJoin implements QueryAliasable {
 	}
 
 	/**
+	 * Clones this QueryJoin object.
+	 */
+	public function __clone() {
+		$clone = array();
+		foreach ($this->select as $key => $value) {
+			$clone[$key] = is_object($value) ? clone $value : $value;
+		}
+		$this->select = $clone;
+	}
+
+	/**
 	 * Create a new JOIN. This constructor will NOT append the join to the query.
 	 *
 	 * @param Query $query				the query the join belongs to. Will be
@@ -190,15 +201,20 @@ abstract class QueryJoin implements QueryAliasable {
 		return $this->query;
 	}
 
+	/**
+	 * Resets the SELECT clause of this join.
+	 */
+	public function resetSelect() {
+		$this->select = array();
+	}
+
 	public function buildSelect(&$bindings) {
 		if (count($this->select) == 0) {
 			return null;
 		}
-		foreach ($this->select as &$v) {
+		foreach ($this->select as $i => $v) {
 			if ($v instanceof QuerySelect) {
-				$v = $v->buildSql(false, $bindings);
-//			} else if ($v instanceof QueryJoin) {
-//				$v = $v->buildSql($bindings);
+				$this->select[$i] = $v->buildSql(false, $bindings);
 			}
 		}
 		return implode(', ', $this->select);

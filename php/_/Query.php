@@ -7,6 +7,7 @@
  * @subpackage Query
  */
 
+use eoko\cqlix\Query\Clause;
 use eoko\database\Database;
 use eoko\cqlix\Aliaser;
 
@@ -80,7 +81,9 @@ class Query {
 
 	protected $select = null;
 	private $set = array();
-	/** @var QueryWhere */
+	/**
+	 * @var QueryWhere
+	 */
 	private $where = null;
 
 	private $limitStart = null, $limit = null;
@@ -106,6 +109,8 @@ class Query {
 	protected $bindings = array();
 
 	private $sqlVarId = 0;
+
+	private $selectDistinct = true;
 
 	/**
 	 * If true, then 'FOR UPDATE' will be appended to select queries.
@@ -159,6 +164,33 @@ class Query {
 	}
 
 	/**
+	 * Magic method to clone a {@link Query} object.
+	 *
+	 * @internal This method only deep clones the {@link Query::where query's where} and the
+	 * {@link Query::joins query's joins}.
+	 */
+	public function __clone() {
+
+		if ($this->where) {
+			$this->where = clone $this->where;
+		}
+
+//		$clonedArray = array();
+//		foreach ($this->select as $key => $value) {
+//			$clonedArray[$key] = clone $value;
+//		}
+//		$this->select = $clonedArray;
+
+		if ($this->joins) {
+			$clonedArray = array();
+			foreach ($this->joins as $key => $value) {
+				$clonedArray[$key] = clone $value;
+			}
+			$this->joins = $clonedArray;
+		}
+	}
+
+	/**
 	 * Create a new Query object. The database table can optionaly be specified
 	 * here.
 	 * @param String $table
@@ -169,16 +201,34 @@ class Query {
    	}
 
 	/**
+	 * Gets the Query's context.
+	 *
+	 * @return array
+	 */
+	public function & getContext() {
+		return $this->context;
+	}
+
+	/**
 	 * Reset the previously set Select option.
 	 *
 	 * However, this method doesn't clear the operation from the request, that
 	 * is the Query will be considered a Select (READ) operation if the Query
 	 * is executed now -- moreover,
 	 *
+	 * @param bool $resetJoins
 	 * @return Query
 	 */
-	public function resetSelect() {
+	public function resetSelect($resetJoins = true) {
 		$this->select = null;
+
+		if ($resetJoins && $this->joins !== null) {
+			foreach ($this->joins as $join) {
+				/** @var $join QueryJoin */
+				$join->resetSelect();
+			}
+		}
+
 		return $this;
 	}
 
@@ -227,6 +277,8 @@ class Query {
 	}
 
 	/**
+	 * @param string|mixed $condition
+	 * @param array|null $inputs
 	 * @return QueryWhere
 	 */
 	public function createWhere($condition = null, $inputs = null) {
@@ -239,11 +291,15 @@ class Query {
 	}
 
 	protected function mergeJoinSelect(&$parts = array()) {
-		if ($parts === null) $parts = array();
+		if ($parts === null) {
+			$parts = array();
+		}
 		if ($this->joins !== null) {
 			foreach ($this->joins as $join) {
-				if (($s = $join->buildSelect($this->bindings)))
+				/** @var $join QueryJoin */
+				if (($s = $join->buildSelect($this->bindings))) {
 					$parts[] = $s;
+				}
 			}
 		}
 		return $parts;
@@ -370,8 +426,6 @@ class Query {
 		$this->action = self::SELECT_FIRST;
 		return $this;
 	}
-
-	private $selectDistinct = true;
 
 	/**
 	 * @return Query
@@ -906,6 +960,22 @@ class Query {
 		return $this->addThenOrderBy($this->order, $field, $dir);
 	}
 
+	/**
+	 * @param string|mixed $field
+	 * @param string $dir
+	 * @return Query
+	 */
+	public function firstOrderBy($field, $dir = 'ASC') {
+		if ($this->order) {
+			$this->order = array_reverse($this->order);
+			$result = $this->thenOrderBy($field, $dir);
+			$this->order = array_reverse($this->order);
+			return $result;
+		} else {
+			return $this->orderBy($field, $dir);
+		}
+	}
+
 	private function addThenOrderBy(&$order, $field, $dir = 'ASC') {
 		if ($field == null || $field == '') {
 			throw new Exception('Illegal Argument Exception: $order cannot be empty');
@@ -929,13 +999,15 @@ class Query {
 			if ($field instanceof SqlVar) {
 				$this->getLogger()->warn('The next line is most probably wrong and causing problem with bindings');
 				$this->order[] = $field->buildSql(false, $this->bindings);
+				throw new DeprecatedException;
+			} else if ($field instanceof Clause) {
+				$order[] = $field;
 			} else {
-				$order[] = $this->getOrderFieldAlias($field, $dir);
-//				$alias = $this->getOrderFieldAlias($field);
-//				if (!$alias) {
-//					throw new IllegalArgumentException("Cannot find field: `$field`");
-//				}
-//				$order[] = $alias . " $dir";
+				if ($this instanceof ModelTableQuery) {
+					$order[] = $this->getOrderFieldAlias($field, $dir);
+				} else {
+					throw new UnsupportedOperationException();
+				}
 			}
 
 //			// Clear previous to add new order at the end of the list
@@ -951,13 +1023,28 @@ class Query {
 		} else if ($this->defaultOrder !== false) {
 			$order = $this->defaultOrder;
 		} else {
-			return;
+			return null;
 		}
+
+		$clauses = array();
+
+		/** @var $order array */
+		foreach ($order as $clause) {
+			if ($clause instanceof Clause) {
+				if (!$clause->isEmpty()) {
+					$clauses[] = $clause->buildSql($this, $this->bindings);
+				}
+			} else {
+				$clauses[] = $clause;
+			}
+		}
+
 		// $this->order or $this->defaultOrder can contain an empty array
-		if (!$order) {
-			return;
+		if ($clauses) {
+			return ' ORDER BY ' . implode(', ', $clauses);
+		} else {
+			return '';
 		}
-		return ' ORDER BY ' . implode(', ', $order);
 	}
 
 	public static function quoteName($name) {
