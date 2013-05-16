@@ -35,6 +35,15 @@ use eoko\config\Application;
  */
 abstract class Model {
 
+	/**
+	 * This value can be used as the `$strict` parameter for the constructor. It
+	 * will cause all data fields to be cached (the default behavior is to cache
+	 * only the model's direct fields and virtuals, and ignore the remaining ones).
+	 *
+	 * @internal Unused, kept for reference.
+	 */
+	 const OPT_CACHE_ALL_FIELDS_FAST = 2;
+
 	private static $enumLabels;
 
 	/** @var ModelInternal */
@@ -112,7 +121,12 @@ abstract class Model {
 
 		if ($initValues !== null) {
 			if ($strict) {
-				$this->setAllFieldsFromDatabase($initValues);
+				if ($strict === self::OPT_CACHE_ALL_FIELDS_FAST) {
+					throw new DeprecatedException();
+					//$this->setAllFieldsFromDatabaseFast($initValues);
+				} else {
+					$this->setAllFieldsFromDatabase($initValues);
+				}
 			} else {
 				$this->setFields($initValues, true);
 			}
@@ -123,6 +137,25 @@ abstract class Model {
 
 		$this->initiated = true;
 		$this->events->fire(self::EVT_AFTER_INIT);
+	}
+
+	/**
+	 * Create a new record.
+	 *
+	 * The new record will be considered new until its primary key is set.
+	 *
+	 * An array of values can be given to initialize the record's fields. It
+	 * is not required for all model's fields to have a value in the given
+	 * array; the absent fields will be set to NULL.
+	 *
+	 * @param array $initValues an array containing values with which the
+	 * Model's fields will be initialized. This
+	 * @param bool $strict
+	 * @param array $context
+	 * @return Model
+	 */
+	public static function create($initValues = null, $strict = false, array $context = null) {
+		return new static($initValues, $strict, $context);
 	}
 
 	/**
@@ -247,8 +280,15 @@ abstract class Model {
 				$model = $relModel;
 				$modelField = $last;
 
-//				return $relModel->__get($last);
-				return $relModel->getFieldValue($last);
+				if ($relModel instanceof ModelSet || is_array($relModel)) {
+					$values = array();
+					foreach ($relModel as $record) {
+						$values[] = $record->getFieldValue($last);
+					}
+					return $values;
+				} else {
+					return $relModel->getFieldValue($last);
+				}
 			} else {
 				if ($this->getTable()->hasRelation($relName)) {
 					return $model = $this->getForeignModel($relName);
@@ -1712,6 +1752,7 @@ abstract class Model {
 	 * @return mixed
 	 */
 	protected function applyFieldValue($fieldName, $value) {
+		return $value;
 		$method = 'apply' . ucfirst($fieldName);
 		if (method_exists($this, $method)) {
 			return $this->$method($value);
@@ -1720,7 +1761,7 @@ abstract class Model {
 		}
 	}
 
-	protected function setAllFieldsFromDatabase(array $setters) {
+	protected function setAllFieldsFromDatabase(array $setters, $cacheUnresolvedValues = false) {
 		$this->internal->dbValues = array();
 
 		foreach ($this->internal->fields as $field => $v) {
@@ -1729,6 +1770,7 @@ abstract class Model {
 			}
 			$this->internal->fields[$field] = $this->applyFieldValue($field, $setters[$field]);
 			$this->internal->dbValues[$field] = $setters[$field];
+			unset($setters[$field]);
 		}
 
 		// Load virtual fields
@@ -1745,7 +1787,41 @@ abstract class Model {
 					= $this->internal->fields[$virtual]
 					= $setters[$virtual];
 			}
+			unset($setters[$virtual]);
 		}
+
+		if ($cacheUnresolvedValues) {
+			foreach ($setters as $field => $value) {
+				$this->internal->dbValues[$field] = $value;
+				$this->internal->fields[$field] = $value;
+			}
+		}
+
+		$this->dbImage = true;
+
+		$this->afterValueInit();
+	}
+
+	/**
+	 * Sets field with less integrity checks, hence faster that setAllFieldFromDatabase.
+	 *
+	 * To prevent unpredictable outcomes, this method **MUST** be called from the constructor.
+	 *
+	 * @param array $setters
+	 *
+	 * @internal Unused, kept for reference.
+	 */
+	/** @noinspection PhpUnusedPrivateMethodInspection */
+	private function setAllFieldsFromDatabaseFast(array $setters) {
+		$this->internal->dbValues = array();
+
+		$this->internal->dbValues = $setters;
+
+		foreach ($this->internal->fields as $field => $value) {
+			$setters[$field] = $this->applyFieldValue($field, $setters[$field]);
+		}
+
+		$this->internal->fields = $setters;
 
 		$this->dbImage = true;
 
