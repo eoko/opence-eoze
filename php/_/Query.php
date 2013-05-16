@@ -24,7 +24,6 @@
 
 use eoko\cqlix\Query\Clause;
 use eoko\database\Database;
-use eoko\cqlix\Aliaser;
 
 /**
  * Utility class to submit queries to the database
@@ -2102,52 +2101,6 @@ class QueryErrorHandler {
 				throw new SqlSystemException($error, $error[2] . $sql);
 		}
 	}
-}
-
-interface QueryAliasable extends Aliaser {
-
-	function getQualifiedName($fieldName, $table = QueryJoin::TABLE_RIGHT);
-
-	function convertQualifiedNames($preSql, &$bindings);
-
-	/**
-	 * Make the given relation name relative to the aliasable. The validity or
-	 * existence of the relation itself will not be checked; all that method
-	 * does is to prepend the correct prefix to make the given name relative
-	 * to itself.
-	 * 
-	 * This method will only work with relation names, and produce chained
-	 * relation aliases. Use {@link QueryAliasable::getQualifiedName()} in
-	 * order to get name of fields in SQL format.
-	 * 
-	 * @see QueryAliasable::getRelationInfo() to directly access a relation's
-	 * info object (thus, ensuring the relation actually exists).
-	 */
-	function makeRelationName($targetRelationName);
-
-	/**
-	 * @param string $targetRelationName
-	 * @param bool $requireType
-	 * @return ModelRelationInfo
-	 */
-	function getRelationInfo($targetRelationName, $requireType = false);
-
-	/**
-	 * @param string|mixed $conditions
-	 * @param mixed|mixed[]|null $inputs
-	 * @return QueryWhere
-	 */
-	function createWhere($conditions = null, $inputs = null);
-
-	/**
-	 * @return ModelTableQuery
-	 */
-	function getQuery();
-
-	/**
-	 * @return array
-	 */
-	function &getContext();
 }
 
 class SelectExecutor {
