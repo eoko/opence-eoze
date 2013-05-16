@@ -1,10 +1,25 @@
 <?php
 /**
- * @author Éric Ortéga <eric@mail.com>
- * @copyright Copyright (c) 2010, Éric Ortéga
- * @license http://www.planysphere.fr/licenses/psopence.txt
- * @package PS-ORM-1
- * @subpackage Query
+ * Copyright (C) 2013 Eoko
+ *
+ * This file is part of Opence.
+ *
+ * Opence is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Opence is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Opence. If not, see <http://www.gnu.org/licenses/gpl.txt>.
+ *
+ * @copyright Copyright (C) 2013 Eoko
+ * @licence http://www.gnu.org/licenses/gpl.txt GPLv3
+ * @author Éric Ortega <eric@eoko.fr>
  */
 
 use eoko\cqlix\Query\Clause;
@@ -37,7 +52,7 @@ use eoko\cqlix\Aliaser;
  * </code>
  *
  * One of the 4 CRUD operations must be specified by the following methods
- * (if the operation doesn't need to sepcify any option, then the operation
+ * (if the operation doesn't need to specify any option, then the operation
  * can be specified simply by calling the corresponding executeXXX method,
  * where XXX is the name of the operation):<ul>
  * <li>Create: {@link Query::insert()}
@@ -56,7 +71,7 @@ use eoko\cqlix\Aliaser;
  * {@link Query::executeUpdate() executeUpdate()}, and
  * {@link Query::executeDelete() executeDelete()}.
  */
-class Query {
+abstract class Query implements QueryAliasable {
 
     // Right from the MySQL manual:
     //     To retrieve all rows from a certain offset up to the end of the result set, you can
@@ -79,6 +94,9 @@ class Query {
 	private $dbTable = null;
 	protected $tableAlias = null;
 
+	/**
+	 * @var QuerySelect[]
+	 */
 	protected $select = null;
 	private $set = array();
 	/**
@@ -87,11 +105,15 @@ class Query {
 	private $where = null;
 
 	private $limitStart = null, $limit = null;
+	/** @var array */
 	private $order = false;
 	private $defaultOrder = false;
 
-	protected $additionnalInserts = null;
+	protected $additionalInserts = null;
 
+	/**
+	 * @var QueryJoin[]
+	 */
 	protected $joins = null;
 	protected $joinTakenAliases = array();
 
@@ -191,9 +213,10 @@ class Query {
 	}
 
 	/**
-	 * Create a new Query object. The database table can optionaly be specified
-	 * here.
-	 * @param String $table
+	 * Create a new Query object. The database table can optionally be specified here.
+	 *
+	 * @param ModelTable|string $table
+	 * @param array $context
 	 * @return Query
 	 */
 	public static function create(ModelTable $table = null, array $context = null) {
@@ -243,7 +266,7 @@ class Query {
 	 * If the required table is also selected in the FROM clause, the aliases
 	 * will start at 2, else they will start at nothing, then 2, etc.
 	 *
-	 * <b>Important</b> it is forbiden to change the FROM clause after one alias
+	 * <b>Important</b> it is forbidden to change the FROM clause after one alias
 	 * has been generated (IllegalStateException would be thrown).
 	 *
 	 * @param string $dbTable
@@ -325,7 +348,7 @@ class Query {
 	 * of a mixing of the following:<ul>
 	 * <li>a simple string containing the name of a field
 	 * <li>a QuerySelectElement object
-	 * <li>an array containing at least a key 'name', and optionnaly a key 'alias'
+	 * <li>an array containing at least a key 'name', and optionally a key 'alias'
 	 * and/or a key 'table'
 	 * </ul>
 	 *
@@ -351,7 +374,9 @@ class Query {
 			else $fields = array($_);
 		}
 
-		if ($this->select === null) $this->select = array();
+		if ($this->select === null) {
+			$this->select = array();
+		}
 
 		foreach ($fields as $field) {
 			if ($field instanceof QuerySelect) {
@@ -399,7 +424,7 @@ class Query {
 	 * string in the $function array, then the placeholder in the second element of
 	 * $function will be replaced by the processed first element, and so on.
 	 *
-	 * Fninally, if named placeholders of the form {0}, {1} or {index} are used, then
+	 * Finally, if named placeholders of the form {0}, {1} or {index} are used, then
 	 * the $function argument must be a string, and the $field argument must be an
 	 * array. Placeholders will be replaced by the fully qualified field in the $field
 	 * array which index matches the index of the placeholder.
@@ -421,17 +446,18 @@ class Query {
 	 */
 	public function selectFirst($___ = null) {
 		if ($___ !== null) {
-			$r = $this->select($___);
+			$this->select($___);
 		}
 		$this->action = self::SELECT_FIRST;
 		return $this;
 	}
 
 	/**
+	 * @param bool $selectDistinct
 	 * @return Query
 	 */
-	public function setSelectDistinct($flag) {
-		$this->selectDistinct = (bool) $flag;
+	public function setSelectDistinct($selectDistinct) {
+		$this->selectDistinct = (bool) $selectDistinct;
 		return $this;
 	}
 
@@ -481,13 +507,10 @@ class Query {
 		if ($this->action == null) $this->action = self::UPDATE;
 
 		if (is_array($col)) {
-			foreach ($col as $col => $val) {
-				$this->set[$col] = $val;
+			foreach ($col as $colName => $val) {
+				$this->set[$colName] = $val;
 			}
 		} else {
-//			if (func_num_args() != 2) {
-//				throw new IllegalArgumentException();
-//			}
 			$this->set[$col] = $value;
 		}
 
@@ -516,8 +539,8 @@ class Query {
 	}
 
 	public function andInsert($values) {
-		if ($this->additionnalInserts === null) $this->additionnalInserts = array();
-		$this->additionnalInserts[] = $values;
+		if ($this->additionalInserts === null) $this->additionalInserts = array();
+		$this->additionalInserts[] = $values;
 	}
 
 	/**
@@ -528,7 +551,7 @@ class Query {
 	 * formatted field will be considered NULL (instead of returning a string with all 
 	 * the fields replaced by the $nullString value).
 	 * @param string $nullString The string to use to replace NULL value in fields.
-	 * @return type 
+	 * @return string
 	 */
 	public static function format($format, QueryAliasable $aliasable, $nullField = null, 
 			$nullString = '?') {
@@ -604,7 +627,8 @@ class Query {
 					$v = $v->buildSql(false, $this->bindings);
 				}
 
-				$parts[] = $col instanceof SqlVar ? $col->buildSql(false, $this->bindings)
+				$parts[] = $col instanceof SqlVar
+					? $col->buildSql(false, $this->bindings)
 					: $this->getQualifiedName($col) . " = $v";
 			} else if ($val instanceof SqlFunction) {
 				$parts[] = "{$this->getQualifiedName($col)} = {$val->getString()}";
@@ -667,12 +691,12 @@ class Query {
 		$values = implode(',', $values);
 		$table = $this->buildTable();
 
-		if ($this->additionnalInserts !== null) {
-			$n += count($this->additionnalInserts);
+		if ($this->additionalInserts !== null) {
+			$n += count($this->additionalInserts);
 			$values = array("($values)");
-			foreach ($this->additionnalInserts as $v) {
+			foreach ($this->additionalInserts as $v) {
 				$valString = array();
-				foreach ($v as $col => $val) {
+				foreach ($v as $val) {
 					if (!$val instanceof SqlFunction) {
 						$valString[] = '?';
 						$this->bindings[] = $val;
@@ -681,14 +705,13 @@ class Query {
 					}
 				}
 				$values[] = '(' . implode(',', $valString) . ')';
-//				$values[] = '(' . implode(', ', $v) . ')';
 			}
 			$values = implode(',', $values);
 		} else {
 			$values = "($values)";
 		}
 
-		$this->sql = "INSERT INTO $table ($fields) VALUES $values$colon";
+		$this->sql = "INSERT INTO $table ($fields) VALUES " . $values . $colon;
 
 		return $n;
 	}
@@ -729,7 +752,8 @@ class Query {
 	}
 
 	/**
-	 *
+	 * @param string|mixed $condition
+	 * @param array|null $inputs
 	 * @return Query
 	 */
 	public function orWhere($condition, $inputs = null) {
@@ -746,6 +770,8 @@ class Query {
 
 	/**
 	 *
+	 * @param string|mixed $field
+	 * @param mixed[] $values
 	 * @return Query
 	 */
 	public function whereIn($field, $values) {
@@ -758,6 +784,8 @@ class Query {
 	}
 
 	/**
+	 * @param string|mixed $field
+	 * @param mixed[] $values
 	 * @return Query
 	 */
 	public function whereNotIn($field, $values) {
@@ -770,6 +798,8 @@ class Query {
 	}
 
 	/**
+	 * @param string $field
+	 * @param mixed[] $values
 	 * @return Query
 	 */
 	public function andWhereIn($field, $values) {
@@ -780,6 +810,8 @@ class Query {
 	}
 
 	/**
+	 * @param string $field
+	 * @param mixed[] $values
 	 * @return Query
 	 */
 	public function andWhereNotIn($field, $values) {
@@ -790,6 +822,8 @@ class Query {
 	}
 
 	/**
+	 * @param string $field
+	 * @param mixed[] $values
 	 * @return Query
 	 */
 	public function orWhereIn($field, $values) {
@@ -800,6 +834,8 @@ class Query {
 	}
 
 	/**
+	 * @param string $field
+	 * @param mixed[] $values
 	 * @return Query
 	 */
 	public function orWhereNotIn($field, $values) {
@@ -837,11 +873,10 @@ class Query {
 	}
 
 	/**
-	 *
-	 * @param Bool $allowOnlyOne
+	 * @param bool $allowOnlyOne
 	 * @return String
 	 */
-	private function buildTable($allowOnlyOne = false) {
+	private function buildTable(/** @noinspection PhpUnusedParameterInspection */ $allowOnlyOne = false) {
 		if ($this->db !== null) {
 			return "`$this->db`.`$this->dbTable`";
 		} else {
@@ -850,14 +885,21 @@ class Query {
 	}
 
 	/**
+	 * Sets the database on which to work.
+	 *
+	 * @param string $database
 	 * @return Query
 	 */
-	public function onDatabase($db) {
-		$this->db = $db;
+	public function onDatabase($database) {
+		$this->db = $database;
 		return $this;
 	}
 
 	/**
+	 * Sets the limit and/or start parameters of the query.
+	 *
+	 * @param int $limit
+	 * @param int|null $start
 	 * @return Query
 	 */
 	public function limit($limit, $start = null) {
@@ -888,9 +930,10 @@ class Query {
 			: $this->limitStart;
 	}
 
-    /**
-     * @return Query $this
-     */
+	/**
+	 * @param int|null $start
+	 * @return Query $this
+	 */
 	public function offset($start = null) {
 		$this->limitStart = $start;
 		return $this;
@@ -927,13 +970,18 @@ class Query {
 	}
 
 	/**
-	 * Set the sort method of the query, overwritting previously set order, if
-	 * any.
+	 * Set the sort method of the query, overwriting previously set order, if any.
+	 *
+	 * @param mixed $order
+	 * @param string $dir
 	 * @return Query
 	 */
 	public function orderBy($order, $dir = 'ASC') {
 		$this->order = array();
-		if ($order === null) return;
+		if ($order === null) {
+			/** @noinspection PhpInconsistentReturnPointsInspection */
+			return;
+		}
 		return $this->thenOrderBy($order, $dir);
 	}
 
@@ -943,6 +991,8 @@ class Query {
 	}
 
 	/**
+	 * @param mixed $field
+	 * @param string $dir
 	 * @return Query
 	 */
 	public function defaultThenOrderBy($field, $dir = 'ASC') {
@@ -954,6 +1004,8 @@ class Query {
 	}
 
 	/**
+	 * @param mixed $field
+	 * @param string $dir
 	 * @return Query
 	 */
 	public function thenOrderBy($field, $dir = 'ASC') {
@@ -1003,11 +1055,7 @@ class Query {
 			} else if ($field instanceof Clause) {
 				$order[] = $field;
 			} else {
-				if ($this instanceof ModelTableQuery) {
-					$order[] = $this->getOrderFieldAlias($field, $dir);
-				} else {
-					throw new UnsupportedOperationException();
-				}
+				$order[] = $this->getOrderFieldAlias($field, $dir);
 			}
 
 //			// Clear previous to add new order at the end of the list
@@ -1071,7 +1119,7 @@ class Query {
 	}
 
 	/**
-	 *
+	 * @param PDO $pdo
 	 * @return PDOStatement
 	 */
 	private function executeSql(&$pdo = null) {
@@ -1151,6 +1199,7 @@ class Query {
 	}
 
 	/**
+	 * @param bool|null $distinct
 	 * @return int the count
 	 */
 	public function executeCount($distinct = null) {
@@ -1169,6 +1218,7 @@ class Query {
 	public function executeInsert() {
 		$this->action = self::INSERT;
 		$n = $this->buildInsert();
+		/** @var $pdo PDO */
 		if ($this->executeSql($pdo)->rowCount() == $n) {
 			if ($n == 1) {
 				return $pdo->lastInsertId();
@@ -1181,14 +1231,15 @@ class Query {
 	}
 
 	/**
-	 * @return <mixed> primary key value of the last inserted row, or NULL if
+	 * @return mixed primary key value of the last inserted row, or NULL if
 	 * the insert failed. <b>Important</b>: if an id is returned, it is NOT
-	 * garanteed to be the one of a newly created row -- it must be checked
+	 * guaranteed to be the one of a newly created row -- it must be checked
 	 * against a previously known primary key to determine that...
 	 */
 	public function executeInsertOrUpdate() {
 		$this->action = self::INSERT_OR_UPDATE;
 		$this->buildInsertOrUpdate();
+		/** @var $pdo PDO */
 		if ($this->executeSql($pdo)->rowCount() == 1) {
 			return $pdo->lastInsertId();
 		} else {
@@ -1258,7 +1309,8 @@ class Query {
 	}
 
 	/**
-	 *
+	 * @param int $fetchStyle
+	 * @param int $columnIndex
 	 * @return array
 	 */
 	public function executeSelect($fetchStyle = PDO::FETCH_ASSOC, $columnIndex = null) {
@@ -1303,9 +1355,19 @@ class Query {
 				. ';';
 	}
 
-	protected function buildCountField() {
-		throw new UnsupportedOperationException('Query::buildCountField()');
-	}
+	/**
+	 * @return string
+	 */
+	abstract protected function buildCountField();
+
+	abstract public function getOrderFieldAlias($field, $dir);
+
+	/**
+	 * @param string $field
+	 * @param int $ignored
+	 * @return string
+	 */
+	abstract public function getQualifiedName($field, $ignored = QueryJoin::TABLE_RIGHT);
 
 	public function exists() {
 		return $this->executeCount() > 0;
@@ -1363,16 +1425,27 @@ class Query {
 	private function build() {
 		switch ($this->action) {
 			case self::SELECT_FIRST:
-			case self::SELECT: return $this->buildSelect();
-			case self::UPDATE: return $this->buildUpdate();
-			case self::INSERT: return $this->buildInsert();
-			case self::DELETE: return $this->buildDelete();
-			case self::COUNT: return $this->buildCount();
-			default: throw new IllegalStateException("Illegal State: Unreachable code");
+			case self::SELECT:
+				$this->buildSelect();
+				break;
+			case self::UPDATE:
+				$this->buildUpdate();
+				break;
+			case self::INSERT:
+				$this->buildInsert();
+				break;
+			case self::DELETE:
+				$this->buildDelete();
+				break;
+			case self::COUNT:
+				$this->buildCount();
+				break;
+			default:
+				throw new IllegalStateException("Illegal State: Unreachable code");
 		}
 	}
 
-	public function buildSql($defaultTable, &$bindings) {
+	public function buildSql(/** @noinspection PhpUnusedParameterInspection */ $defaultTable, &$bindings) {
 		$this->build();
 		if (!is_array($bindings)) {
 			$bindings = array();
@@ -1451,7 +1524,9 @@ class Query {
 	public function createExecutor() {
 
 		// TODO implement QueryExecutors for all actions...
-		if ($this->action !== self::SELECT) throw new UnsupportedActionException('Not implemented yet...');
+		if ($this->action !== self::SELECT) {
+			throw new UnsupportedActionException('Not implemented yet...');
+		}
 
 		$clean = false;
 		if ($this->sql === null) {
@@ -1494,6 +1569,7 @@ class Query {
 	 * @param QueryErrorHandler $errorHandler
 	 * @return PDOStatement
 	 */
+	/** @noinspection PhpInconsistentReturnPointsInspection */
 	public static function executeQuery($sql, $errorHandler = null) {
 
 		Logger::get('Query')->debug('Executing raw query: {}', $sql);
@@ -1511,9 +1587,10 @@ class Query {
 				} else if (is_callable($errorHandler)) {
 					call_user_func($errorHandler, get_called_class(), $sth->errorInfo());
 				} else if ($errorHandler instanceof QueryErrorHandler) {
+					/** @noinspection PhpParamsInspection */
 					$errorHandler->process(get_called_class(), $sth->errorInfo());
 				} else {
-					throw new IllegalArgumentException('$errorHandler => ' . $errorHandler);
+					throw new IllegalArgumentException('$errorHandler => ' . gettype($errorHandler));
 				}
 			}
 		}
@@ -1568,19 +1645,7 @@ SQL
 //AS âge
 //
 //FROM contacts
-//WHERE prenom LIKE 'kim'
 
-// <editor-fold defaultstate="collapsed" desc="Old functions">
-//		return new SqlVariable(
-//			"(SELECT (DATE_FORMAT(FROM_DAYS(TO_DAYS(NOW())-TO_DAYS($dateField)), '%y ans %c mois, %e jours'))) AS `$alias`"
-//		);
-////		return new SqlVariable(
-////				"(SELECT IF($dateField = 0 OR $dateField IS NULL, NULL, "
-////				. "DATE_FORMAT(NOW(), '%Y') - DATE_FORMAT($dateField, '%Y')"
-////				. "- (DATE_FORMAT(NOW(), '00-%m-%d') < DATE_FORMAT($dateField, '00-%m-%d'))"
-////				. ")) AS age"
-////		);
-// </editor-fold>
 	}
 }
 
@@ -1703,9 +1768,9 @@ class QuerySelect extends SqlVariable {
 	/**
 	 *
 	 * @param mixed $defaultTableName    TRUE: means that this select's table
-	 * is the default one, it will be omited. FALSE: means that the table name
+	 * is the default one, it will be omitted. FALSE: means that the table name
 	 * must be included. Finally, a tableName (or a ModelTable) can be precised,
-	 * and the table name will be omited only if this clause's table is the same.
+	 * and the table name will be omitted only if this clause's table is the same.
 	 * @param $bindings
 	 * @return string
 	 */
@@ -1733,7 +1798,6 @@ class QuerySelect extends SqlVariable {
 					throw new IllegalStateException('Cannot select * with alias if $table is not a ModelTable');
 
 				foreach ($this->table->getColumns() as $col) {
-					$col instanceof ModelColumn;
 					$parts[] = $col->buildSelect($qTable, false, $this->alias_es, true);
 				}
 			} else {
@@ -1747,7 +1811,7 @@ class QuerySelect extends SqlVariable {
 								$qTable, false, $this->alias_es[$i], false);
 					}
 				} else {
-					foreach ($this->colName_s as $i => $colName) {
+					foreach ($this->colName_s as $colName) {
 						$alias = array_key_exists($colName, $this->alias_es) ?
 								$this->alias_es : null;
 						$parts[] = ModelColumn::buildColumnSelect($colName,
@@ -1815,7 +1879,7 @@ class QuerySelectFunctionOnField extends QuerySelectBase {
 	 * string in the $function array, then the placeholder in the second element of 
 	 * $function will be replaced by the processed first element, and so on.
 	 * 
-	 * Fninally, if named placeholders of the form {0}, {1} or {index} are used, then
+	 * Finally, if named placeholders of the form {0}, {1} or {index} are used, then
 	 * the $function argument must be a string, and the $field argument must be an
 	 * array. Placeholders will be replaced by the fully qualified field in the $field
 	 * array which index matches the index of the placeholder.
@@ -1922,6 +1986,7 @@ class QueryFormattedSelect extends QuerySelect {
 
 		$glueParts = preg_split($regex, $format);
 
+		/** @noinspection PhpUnusedLocalVariableInspection */
 		$qTable = $dbTable !== null ? Query::quoteName($dbTable) . '.' : null;
 
 		$parts = array();
@@ -2000,7 +2065,7 @@ class QueryErrorHandler {
 				if (preg_match("/^Duplicate entry '([^']+)' for key '([^']+)'$/",
 						$error[2], $matches)) {
 					$value = $matches[1];
-					$key = $matches[2];
+					//$key = $matches[2];
 					$message = lang("La valeur '%value%' doit être unique mais elle existe déjà.", $value);
 				} else {
 					$message = lang('Une des valeur entrée doit être unique.');
@@ -2008,7 +2073,7 @@ class QueryErrorHandler {
 				throw new SqlUserException(
 					$error,
 					$message,
-					lang('Erreur : valeur duppliquée')
+					lang('Erreur : valeur dupliquée')
 				);
 
 			case 1050:
@@ -2049,7 +2114,7 @@ interface QueryAliasable extends Aliaser {
 	 * Make the given relation name relative to the aliasable. The validity or
 	 * existence of the relation itself will not be checked; all that method
 	 * does is to prepend the correct prefix to make the given name relative
-	 * to iself.
+	 * to itself.
 	 * 
 	 * This method will only work with relation names, and produce chained
 	 * relation aliases. Use {@link QueryAliasable::getQualifiedName()} in
@@ -2061,11 +2126,15 @@ interface QueryAliasable extends Aliaser {
 	function makeRelationName($targetRelationName);
 
 	/**
-	 * @return ModelRelatinInfo
+	 * @param string $targetRelationName
+	 * @param bool $requireType
+	 * @return ModelRelationInfo
 	 */
 	function getRelationInfo($targetRelationName, $requireType = false);
 
 	/**
+	 * @param string|mixed $conditions
+	 * @param mixed|mixed[]|null $inputs
 	 * @return QueryWhere
 	 */
 	function createWhere($conditions = null, $inputs = null);
@@ -2100,6 +2169,6 @@ class SelectExecutor {
 			throw new SystemException($errorInfo[2]);
 		}
 
-		return $pdoStatement->fetchAll(PDO::FETCH_ASSOC);;
+		return $pdoStatement->fetchAll(PDO::FETCH_ASSOC);
 	}
 }

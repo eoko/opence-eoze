@@ -3,7 +3,7 @@
 /**
  * @method ModelTableQuery where
  */
-class ModelTableQuery extends Query implements QueryAliasable {
+class ModelTableQuery extends Query {
 
 	public $dbTable;
 
