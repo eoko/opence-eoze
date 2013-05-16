@@ -1,10 +1,15 @@
 <?php
 
+$dumpPre = '';
 if (!isset($dumpPre)) { $dumpPre = '<pre>'; $endDumpPre = '</pre>'; }
 
 // Debug function
 function dump($var, $maxDeep = 50, $die = true, $deep = 0) {
 	global $dumpPre, $endDumpPre;
+
+	if (!headers_sent()) {
+		header('Content-Type: text');
+	}
 
 //	while (ob_get_level()) {
 //		ob_end_clean();
@@ -13,10 +18,13 @@ function dump($var, $maxDeep = 50, $die = true, $deep = 0) {
 //	dump_trace(false);
 	$trace = debug_backtrace();
 //	Logger::get('dump')->debug('dumping: {}:{}', $trace[0]['file'], $trace[0]['line']);
-	foreach ($trace as $tr) {
-		if (isset($tr['file']) && $tr['file'] !== __FILE__) {
-			Logger::get('dump')->debug('dumping: {}:{}', $tr['file'], $tr['line']);
-			break;
+	if ($deep === 0) {
+		foreach ($trace as $tr) {
+			if (isset($tr['file']) && $tr['file'] !== __FILE__) {
+				Logger::get('dump')->debug('dumping: {}:{}', $tr['file'], $tr['line']);
+				echo "Dumping at $tr[file]:$tr[line]\n";
+				break;
+			}
 		}
 	}
 //	if (isset($trace[0]['file'])) {
