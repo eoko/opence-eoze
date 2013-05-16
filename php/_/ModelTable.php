@@ -1618,8 +1618,7 @@ EX
 	}
 
 	/**
-	 * @param array $pointer an array containing a reference to the variable to
-	 * be attached to.
+	 * @param $pointer
 	 * @return ModelTable
 	 */
 	public function attach(&$pointer) {
