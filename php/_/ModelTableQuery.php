@@ -469,10 +469,6 @@ class ModelTableQuery extends Query implements QueryAliasable {
 		return $this;
 	}
 
-	public function & getContext() {
-		return $this->context;
-	}
-
 	/**
 	 *
 	 * @param ModelTable $table
