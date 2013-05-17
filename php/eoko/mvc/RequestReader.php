@@ -17,9 +17,9 @@ interface RequestReader {
 	/**
 	 * Creates a new RequestReader.
 	 *
-	 * @param \Zend\Http\Request $request
-	 * @param \Zend\Mvc\Router\RouteMatch $routeMatch
-	 * @return \eoko\mvc\RequestReader
+	 * @param Request $request
+	 * @param RouteMatch $routeMatch
+	 * @return RequestReader
 	 */
 	function __construct(Request $request, RouteMatch $routeMatch);
 

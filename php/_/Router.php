@@ -89,16 +89,15 @@ class Router {
 			// Route match
 			$this->routeMatch = $this->getRouteMatch();
 
-			// Legacy eoze Request
-			$requestReader = $this->createRequestReader();
-			$this->request = $requestReader->createRequest();
+			if ($this->routeMatch) {
+				// Legacy eoze Request
+				$requestReader = $this->createRequestReader();
+				$this->request = $requestReader->createRequest();
 
-			// Monitor
-			Logger::getLogger($this)->info('Start action #{}', $this->actionTimestamp);
-			$this->logRequest($this->request->toArray());
-
-			// $_REQUEST usage must be fixed in that
-//			UserMessageService::parseRequest($this->request);
+				// Monitor
+				Logger::getLogger($this)->info('Start action #{}', $this->actionTimestamp);
+				$this->logRequest($this->request->toArray());
+			}
 		}
 	}
 
@@ -129,6 +128,7 @@ class Router {
 			Cache::cacheObject($routesConfigCacheKey, $routesConfig);
 			Cache::monitorFiles($routesConfigCacheKey, $monitors);
 		}
+		dump($routesConfig);
 
 		// Create route stack
 		$this->routeStack = new Zend\Mvc\Router\Http\TreeRouteStack;
@@ -158,16 +158,19 @@ class Router {
 	}
 
 	private function createRouter() {
+		if ($this->routeMatch) {
+			$routerClass = $this->routeMatch !== null
+				? $this->routeMatch->getParam('_Router', $this->defaultRouterClass)
+				: $this->defaultRouterClass;
 
-		$routerClass = $this->routeMatch !== null
-			? $this->routeMatch->getParam('_Router', $this->defaultRouterClass)
-			: $this->defaultRouterClass;
+			if (!class_exists($routerClass)) {
+				throw new IllegalStateException('Cannot find router class: ' . $routerClass);
+			}
 
-		if (!class_exists($routerClass)) {
-			throw new IllegalStateException('Cannot find router class: ' . $routerClass);
+			return new $routerClass($this->request, $this->routeStack, $this->routeMatch);
+		} else {
+			return new \eoko\mvc\ErrorRouter(\Zend\Http\Response::STATUS_CODE_404);
 		}
-
-		return new $routerClass($this->request, $this->routeStack, $this->routeMatch);
 	}
 
 	private function logRequest($requestData) {

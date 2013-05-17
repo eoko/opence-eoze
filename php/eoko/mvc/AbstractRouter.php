@@ -10,7 +10,7 @@ use Zend\Mvc\Router\RouteStackInterface as Router;
  *
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  * @author Éric Ortega <eric@planysphere.fr>
- * @since 3 août 2012
+ * @since 2012-08-03
  */
 class AbstractRouter {
 
