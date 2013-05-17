@@ -23,5 +23,10 @@ interface RequestReader {
 	 */
 	function __construct(Request $request, RouteMatch $routeMatch);
 
+	/**
+	 * Reads request params and returns the newly created params container.
+	 *
+	 * @return \Request
+	 */
 	function createRequest();
 }
