@@ -6,6 +6,7 @@ use Zend\Http\Request;
 use Zend\Mvc\Router\RouteMatch;
 
 /**
+ * Abstract RequestReader. Provides implementation of the constructor.
  *
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  * @author Éric Ortega <eric@planysphere.fr>
@@ -23,6 +24,9 @@ abstract class AbstractRequestReader implements RequestReader {
 	 */
 	protected $routeMatch;
 
+	/**
+	 * @inheritdoc
+	 */
 	public function __construct(Request $request, RouteMatch $routeMatch) {
 		$this->request = $request;
 		$this->routeMatch = $routeMatch;
