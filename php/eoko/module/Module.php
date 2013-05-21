@@ -2,8 +2,9 @@
 
 namespace eoko\module;
 
+use eoko\module\traits\HasCssFiles;
 use Request;
-use SystemException, SecurityException, UnsupportedOperationException,
+use SecurityException, UnsupportedOperationException,
 	IllegalStateException, IllegalArgumentException;
 
 use eoko\module\Exception\MissingExecutorException;
@@ -41,7 +42,7 @@ use eoko\php\ClassLoader;
  */
 /** @noinspection PhpInconsistentReturnPointsInspection */
 /** @noinspection PhpInconsistentReturnPointsInspection */
-class Module implements file\Finder {
+class Module implements file\Finder, HasCssFiles {
 
 	const DEFAULT_EXECUTOR           = '';
 	const DEFAULT_INTERNAL_EXECUTOR  = '_';
@@ -1001,6 +1002,18 @@ MSG
 			// fallback
 			$this->createTypeFinder($this->basePath, $this->baseUrl, $fallbackFinder)
 		);
+	}
+
+	/**
+	 * @inheritdoc
+	 */
+	public function getModuleCssUrls() {
+		$autoCssFiles = array();
+		$autoCssFiles = array_merge($autoCssFiles, $this->listLineFilesUrl('re:\.auto\d*\.css$', ''));
+		$autoCssFiles = array_merge($autoCssFiles, $this->listLineFilesUrl('re:\.auto\d*\.css$', 'css'));
+		$autoCssFiles = array_merge($autoCssFiles, $this->listLineFilesUrl('glob:*.css', 'css/auto', true));
+		$autoCssFiles = array_merge($autoCssFiles, $this->listLineFilesUrl('glob:*.css', 'css.auto', true));
+		return $autoCssFiles;
 	}
 
 }
