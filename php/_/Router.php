@@ -128,7 +128,6 @@ class Router {
 			Cache::cacheObject($routesConfigCacheKey, $routesConfig);
 			Cache::monitorFiles($routesConfigCacheKey, $monitors);
 		}
-//		dump($routesConfig);
 
 		// Create route stack
 		$this->routeStack = new Zend\Mvc\Router\Http\TreeRouteStack;

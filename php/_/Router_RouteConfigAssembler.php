@@ -22,14 +22,16 @@
  * @author Éric Ortega <eric@eoko.fr>
  */
 
-namespace eoko\context;
-use Traversable;
 use Zend\Stdlib\ArrayUtils;
 
 /**
+ * Utility class for building routes configuration. Handles extra route option 'parent_route'.
+ *
  * @since 2013-05-17 12:04 (Extracted from Router.php)
  */
 class Router_RouteConfigAssembler {
+
+	const PARENT_ROUTE = 'parent_route';
 
 	private $routes;
 
@@ -42,14 +44,14 @@ class Router_RouteConfigAssembler {
 			}
 			if (is_array($route)) {
 				// Extract children routes
-				if (isset($route['parent_segment'])) {
+				if (isset($route[self::PARENT_ROUTE])) {
 					// Trim parent segment name from route name beginning
-					$parentSegment = $route['parent_segment'];
+					$parentSegment = $route[self::PARENT_ROUTE];
 					if (strpos($name, $parentSegment . '/') === 0) {
 						$name = substr($name, strlen($parentSegment) + 1);
 					}
 					// Remove eoze custom parent_segment option
-					unset($route['parent_segment']);
+					unset($route[self::PARENT_ROUTE]);
 					// Store
 					$this->childRoutes[$parentSegment][$name] = $route;
 				} else {
@@ -62,9 +64,10 @@ class Router_RouteConfigAssembler {
 	}
 
 	/**
-	 * Construct an array of references to route configs that have a
+	 * Constructs an array of references to route configs that have a
 	 * 'child_routes' key (that is, parent routes), indexed with their
 	 * fully qualified names.
+	 *
 	 * @param array $routes
 	 * @param string $prefix
 	 * @return array
@@ -105,7 +108,7 @@ class Router_RouteConfigAssembler {
 						$map[$parent]['child_routes'][$name] = $route;
 					} else {
 						throw new RuntimeException(
-							"Invalid 'parent_segment' value: cannot find a parent "
+							"Invalid 'parent_route' value: cannot find a parent "
 							. "route named $parent."
 						);
 					}
