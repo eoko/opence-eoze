@@ -1,0 +1,9 @@
+# Resources for Ext UXs
+# =====================
+#
+# Javascript files will be loaded automatically by Ext's Loader, but CSS
+# files must be declared here to be included in the page.
+#
+ux-css:
+  - cdn/ext4ux/grid/css/GridFilters.css
+  - cdn/ext4ux/grid/css/RangeMenu.css
