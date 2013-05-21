@@ -27,21 +27,19 @@
  *
  * @since 2013-05-06 14:58
  */
-Ext.define('Eoze.Ext.view.Table.UsingGetterInsteadOfDataObject', function() {
-
-	var Ext = Ext4;
+Ext4.define('Eoze.Ext.view.Table.UsingGetterInsteadOfDataObject', function() {
 
 	/**
 	 * Ensures that the version is the same as the one against which has been applied the patch.
 	 */
 	(function ensureExtVersionHasNotChanged() {
-		var version = Ext.getVersion(),
+		var version = Ext4.getVersion(),
 			testedWorkingVersions = [
 				'4.2.0.663'
 			],
 			untestedVersion = true;
 
-		Ext.each(testedWorkingVersions, function(testVersion) {
+		Ext4.each(testedWorkingVersions, function(testVersion) {
 			if (version.equals(testVersion)) {
 				untestedVersion = false;
 			}
@@ -65,7 +63,7 @@ Ext.define('Eoze.Ext.view.Table.UsingGetterInsteadOfDataObject', function() {
 		 *
 		 * Emits the HTML representing a single grid cell into the passed output stream (which is an array of strings).
 		 *
-		 * @param {Ext.grid.column.Column} column The column definition for which to render a cell.
+		 * @param {Ext4.grid.column.Column} column The column definition for which to render a cell.
 		 * @param {Number} recordIndex The row index (zero based within the {@link #store}) for which to render the cell.
 		 * @param {Number} columnIndex The column index (zero based) for which to render the cell.
 		 * @param {String[]} out The output stream into which the HTML strings are appended.
@@ -108,7 +106,7 @@ Ext.define('Eoze.Ext.view.Table.UsingGetterInsteadOfDataObject', function() {
 			cellValues.value = (value == null || value === '') ? '&#160;' : value;
 
 			// Calculate classes to add to cell
-			classes[1] = Ext.baseCSSPrefix + 'grid-cell-' + column.getItemId();
+			classes[1] = Ext4.baseCSSPrefix + 'grid-cell-' + column.getItemId();
 
 			// On IE8, array[len] = 'foo' is twice as fast as array.push('foo')
 			// So keep an insertion point and use assignment to help IE!
@@ -127,7 +125,7 @@ Ext.define('Eoze.Ext.view.Table.UsingGetterInsteadOfDataObject', function() {
 				classes[clsInsertPoint++] = me.lastCls;
 			}
 			if (!me.enableTextSelection) {
-				classes[clsInsertPoint++] = Ext.baseCSSPrefix + 'unselectable';
+				classes[clsInsertPoint++] = Ext4.baseCSSPrefix + 'unselectable';
 			}
 
 			classes[clsInsertPoint++] = cellValues.tdCls;

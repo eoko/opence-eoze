@@ -92,13 +92,13 @@ Ext4.define('Eoze.Ext.data.model.ExpandableFieldNames', {
 	// regex to filter out square brackets [] in field name
 	var cleanRe = /^[^[]+/;
 
-	Ext.ModelManager.onModelDefined = Ext.Function.createSequence(Ext.ModelManager.onModelDefined, function(model) {
+	Ext4.ModelManager.onModelDefined = Ext4.Function.createSequence(Ext4.ModelManager.onModelDefined, function(model) {
 		var proto = model.prototype,
 			fields = proto.fields,
 			uber = fields.get;
 
 		fields.get = function(key) {
-			if (Ext.isString(key) && key.indexOf('.') !== -1) {
+			if (Ext4.isString(key) && key.indexOf('.') !== -1) {
 				var nodes = key.split('.'),
 					first = cleanRe.exec(nodes.shift())[0],
 					targetField = nodes.join('.'),
@@ -106,8 +106,8 @@ Ext4.define('Eoze.Ext.data.model.ExpandableFieldNames', {
 					targetModel = field.model,
 					targetRecordClass;
 				if (targetModel) {
-					targetRecordClass = Ext.isString(targetModel)
-						? Ext.ClassManager.get(targetModel)
+					targetRecordClass = Ext4.isString(targetModel)
+						? Ext4.ClassManager.get(targetModel)
 						: targetModel;
 					if (targetRecordClass) {
 						return targetRecordClass.prototype.fields.get(targetField);
