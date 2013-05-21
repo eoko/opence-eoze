@@ -23,4 +23,12 @@ class root extends Module implements HasJavascript, HasRoutes {
 				? $config['router']
 				: null;
 	}
+
+	/**
+	 * @return ExtJsCdnConfig
+	 */
+	public function getCdnConfig() {
+		$config = $this->getConfig()->get('cdn', false);
+		return new ExtJsCdnConfig($config);
+	}
 }

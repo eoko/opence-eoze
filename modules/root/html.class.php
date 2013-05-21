@@ -4,6 +4,7 @@ namespace eoko\modules\root;
 
 use eoko\config\Application;
 use eoko\module\executor\html\BasicHtmlExecutor;
+use eoko\module\traits\HasCssFiles;
 use eoko\template\HtmlRootTemplate;
 use eoko\template\HtmlTemplate;
 use eoko\module\ModuleManager;
@@ -71,9 +72,11 @@ class Html extends BasicHtmlExecutor {
 	 */
 	private function buildIncludes() {
 
+		/** @var root $module */
+		$module = $this->getModule();
 		$options = $this->getModuleConfig()->get('compilation', false);
 		$app = $this->getApplication();
-		$cdnConfig = $this->getModuleConfig()->get('cdn', false);
+		$cdnConfig = $module->getCdnConfig();
 
 		$java = isset($options['javaCommand'])
 				? $options['javaCommand']
@@ -378,11 +381,10 @@ JS;
 		$autoCssFiles = array();
 
 		foreach (ModuleManager::listModules(false) as $module) {
-			/** @var \eoko\module\Module $module */
-			$autoCssFiles = array_merge($autoCssFiles, $module->listLineFilesUrl('re:\.auto\d*\.css$', ''));
-			$autoCssFiles = array_merge($autoCssFiles, $module->listLineFilesUrl('re:\.auto\d*\.css$', 'css'));
-			$autoCssFiles = array_merge($autoCssFiles, $module->listLineFilesUrl('glob:*.css', 'css/auto', true));
-			$autoCssFiles = array_merge($autoCssFiles, $module->listLineFilesUrl('glob:*.css', 'css.auto', true));
+			if ($module instanceof HasCssFiles) {
+				/** @var HasCssFiles $module */
+				$autoCssFiles = array_merge($autoCssFiles, $module->getModuleCssUrls());
+			}
 		}
 
 		foreach ($autoCssFiles as $url) {
