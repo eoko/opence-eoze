@@ -133,6 +133,11 @@
 						return null;
 					} else {
 						childRecord.set(value);
+
+						// If id was in the data, we need to update phantom status
+						if (childRecord.modified.hasOwnProperty(childRecord.idProperty)) {
+							childRecord.setId(childRecord.getId());
+						}
 					}
 				} else {
 					if (Ext.isEmpty(value)) {
@@ -154,6 +159,47 @@
 		// --- Register data type
 
 		Ext.data.Types[upperCaseType] = this;
+
+		// ---
+
+		Ext.data.Model.override({
+			copyFrom: function(sourceRecord) {
+				if (sourceRecord) {
+
+					var me = this,
+						fields = me.fields.items,
+						fieldCount = fields.length,
+						field, i = 0,
+						myData = me[me.persistenceProperty],
+						sourceData = sourceRecord[sourceRecord.persistenceProperty],
+						value;
+
+					for (; i < fieldCount; i++) {
+						field = fields[i];
+
+						// Do not use setters.
+						// Copy returned values in directly from the data object.
+						// Converters have already been called because new Records
+						// have been created to copy from.
+						// This is a direct record-to-record value copy operation.
+						value = sourceData[field.name];
+
+						if (field.model) {
+							value = field.convert(value, this);
+						}
+
+						if (value !== undefined) {
+							myData[field.name] = value;
+						}
+					}
+
+					// If this is a phantom record being updated from a concrete record, copy the ID in.
+					if (me.phantom && !sourceRecord.phantom) {
+						me.setId(sourceRecord.getId());
+					}
+				}
+			}
+		});
 
 		// --- Getter & setter generation
 
