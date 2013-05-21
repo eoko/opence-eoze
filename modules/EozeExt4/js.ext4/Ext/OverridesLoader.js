@@ -47,14 +47,25 @@ Ext4.define('Eoze.Ext.OverridesLoader', {
 		'Eoze.Ext.data.association.HasOne',
 		// Component
 		'Eoze.Ext.AbstractComponent',
+		// fix ComponentQuery to accept square brackets in attributes query: mytype[attribute[x]=value]
+		'Eoze.Ext.ComponentQuery.AcceptingSquareBrackets',
+
+		// Grid
+		// Expandable dataIndex
+		'Eoze.Ext.view.Table.UsingGetterInsteadOfDataObject',
+		'Eoze.Ext.data.model.ExpandableFieldNames',
 
 		// Tree with hideable nodes
-		'Eoze.Ext.tree.HideableNodeOverride',
+//		'Eoze.Ext.tree.HideableNodeOverride',
+		'Eoze.Ext.ux.GroupTabPanel',
 
 		// Fields
 		'Eoze.Ext.form.field.Trigger',
 		'Eoze.Ext.form.field.Text',
 		// File upload field, fixes rendering
-		'Eoze.Ext.form.field.File'
+		'Eoze.Ext.form.field.File',
+
+		// ux
+		'Eoze.Ext.ux.grid.FiltersFeature'
 	]
 });
