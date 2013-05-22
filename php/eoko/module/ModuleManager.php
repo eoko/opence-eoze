@@ -599,20 +599,27 @@ class ModuleManager {
 		}
 
 		$class = $location->namespace . $location->moduleName;
+		$baseClass = $config->get('class', null);
 
 		// Generate the module class, if needed
 		if (!class_exists($class)) {
-			$baseModule = self::getModule($config->class);
-			$cacheDeps[] = $this->inNamespace("ModuleManager::getModule('$config->class');");
-			// use the base module to generate the default class
-			if (is_array($cacheDeps)) {
-				$cacheDeps[] = $baseModule->generateDefaultModuleClass($class, $config);
+			if (strstr($baseClass, '\\')) {
+				class_extend($class, $baseClass);
+			} else {
+				$baseModule = self::getModule($baseClass);
+				$cacheDeps[] = $this->inNamespace("ModuleManager::getModule('$config->class');");
+				// use the base module to generate the default class
+				if (is_array($cacheDeps)) {
+					$cacheDeps[] = $baseModule->generateDefaultModuleClass($class, $config);
+				}
 			}
 		}
 
 		// create an instance of the newly created class
 		$module = $this->createModule($location, $class);
-		if ($setExtraConfig) $module->setExtraConfig($config);
+		if ($setExtraConfig) {
+			$module->setExtraConfig($config);
+		}
 		return $module;
 	}
 

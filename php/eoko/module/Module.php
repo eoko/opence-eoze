@@ -578,7 +578,7 @@ MSG
 			throw new MissingExecutorException($this, $type);
 		}
 
-		return new $class($this, $type, $internal, $action, $request);
+		return new $class($this->getLocation(), $type, $internal, $action, $request);
 	}
 
 	/**
