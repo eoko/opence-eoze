@@ -22,7 +22,7 @@
  * @author Éric Ortega <eric@eoko.fr>
  */
 
-namespace eoko\modules\EozeExt4\controller\Rest\Cqlix\DataProxy;
+namespace eoko\modules\EozeExt4\controller\Rest\Cqlix\DataProxy\TableProxy;
 
 use eoko\modules\EozeExt4\Exception\InvalidArgument as InvalidArgumentException;
 
