@@ -183,8 +183,10 @@ class Filters extends AbstractProcessor {
 					break;
 
 				case 'string':
-					$search = $this->processColumnFilterString($value);
-					$query->andWhere("`$fieldName` LIKE ?", $search);
+					if (!empty($value)) {
+						$search = $this->processColumnFilterString($value);
+						$query->andWhere("`$fieldName` LIKE ?", $search);
+					}
 					break;
 
 				case 'age':
@@ -212,6 +214,14 @@ class Filters extends AbstractProcessor {
 						$query->andWhere("`$dobField` $op ?", $date);
 					}
 					break;
+			}
+
+			// Empty
+			if (isset($data['acceptEmpty']) && !$data['acceptEmpty']) {
+				$query->andWhere("`$fieldName` IS NULL");
+			}
+			if (isset($data['acceptNonEmpty']) && !$data['acceptNonEmpty']) {
+				$query->andWhere("`$fieldName` IS NOT NULL");
 			}
 		}
 	}
