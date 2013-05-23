@@ -116,6 +116,11 @@ class Filters extends AbstractProcessor {
 
 		foreach ($this->filters as $filter) {
 
+			if (isset($filter['property'])) {
+				$this->applyPropertyFilter($query, $filter);
+				continue;
+			}
+
 			$fieldName = $this->resolveFieldName($filter['field']);
 
 			// Depends on the client code version
@@ -223,6 +228,29 @@ class Filters extends AbstractProcessor {
 			if (isset($data['acceptNonEmpty']) && !$data['acceptNonEmpty']) {
 				$query->andWhere("`$fieldName` IS NULL");
 			}
+		}
+	}
+
+	/**
+	 * Handles filters with the following format:
+	 *
+	 *     array(
+	 *         'property' => ...,
+	 *         'value' => ...,
+	 *     )
+	 *
+	 * @param \ModelTableQuery $query
+	 * @param array $filter
+	 * @throws InvalidArgument
+	 */
+	private function applyPropertyFilter(\ModelTableQuery $query, array $filter) {
+		if (isset($filter['property']) && isset($filter['value'])) {
+			$property = $filter['property'];
+			$value = $filter['value'];
+			$field = $this->resolveFieldName($property, false);
+			$query->andWhere("`$field` LIKE ?", "$value%");
+		} else {
+			throw new InvalidArgument();
 		}
 	}
 
