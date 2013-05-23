@@ -28,6 +28,7 @@
  */
 Ext4.define('Eoze.Ext.ux.grid.FiltersFeature', {
 	requires: [
-		'Eoze.Ext.ux.grid.filter.DateFilter'
+		'Eoze.Ext.ux.grid.filter.DateFilter',
+		'Eoze.Ext.ux.grid.filter.StringFilter.EmptyValues'
 	]
 });
