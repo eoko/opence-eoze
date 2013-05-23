@@ -759,7 +759,7 @@ abstract class Query implements QueryAliasable {
 	/**
 	 *
 	 * @param string|mixed $field
-	 * @param mixed[] $values
+	 * @param mixed[]|int[]|string[] $values
 	 * @return Query
 	 */
 	public function whereIn($field, $values) {
@@ -773,7 +773,7 @@ abstract class Query implements QueryAliasable {
 
 	/**
 	 * @param string|mixed $field
-	 * @param mixed[] $values
+	 * @param mixed[]|int[]|string[] $values
 	 * @return Query
 	 */
 	public function whereNotIn($field, $values) {
@@ -787,7 +787,7 @@ abstract class Query implements QueryAliasable {
 
 	/**
 	 * @param string $field
-	 * @param mixed[] $values
+	 * @param mixed[]|int[]|string[] $values
 	 * @return Query
 	 */
 	public function andWhereIn($field, $values) {
@@ -799,7 +799,7 @@ abstract class Query implements QueryAliasable {
 
 	/**
 	 * @param string $field
-	 * @param mixed[] $values
+	 * @param mixed[]|int[]|string[] $values
 	 * @return Query
 	 */
 	public function andWhereNotIn($field, $values) {
@@ -811,7 +811,7 @@ abstract class Query implements QueryAliasable {
 
 	/**
 	 * @param string $field
-	 * @param mixed[] $values
+	 * @param mixed[]|int[]|string[] $values
 	 * @return Query
 	 */
 	public function orWhereIn($field, $values) {
@@ -823,7 +823,7 @@ abstract class Query implements QueryAliasable {
 
 	/**
 	 * @param string $field
-	 * @param mixed[] $values
+	 * @param mixed[]|int[]|string[] $values
 	 * @return Query
 	 */
 	public function orWhereNotIn($field, $values) {
