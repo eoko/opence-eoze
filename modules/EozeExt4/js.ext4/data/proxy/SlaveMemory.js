@@ -24,6 +24,8 @@
 /**
  * A memory proxy that binds to a master store for its data source.
  *
+ * @todo This class is just not finished, and not working.
+ *
  * @since 2013-05-30 10:56
  */
 Ext4.define('Eoze.data.proxy.SlaveMemory', {
