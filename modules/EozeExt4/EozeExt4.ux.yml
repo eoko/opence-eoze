@@ -5,5 +5,6 @@
 # files must be declared here to be included in the page.
 #
 ux-css:
-  - cdn/ext4ux/grid/css/GridFilters.css
-  - cdn/ext4ux/grid/css/RangeMenu.css
+  # ?? tells the compiler to use the URL instead of trying to find the file on the filesystem
+  - cdn/ext4ux/grid/css/GridFilters.css??
+  - cdn/ext4ux/grid/css/RangeMenu.css??
