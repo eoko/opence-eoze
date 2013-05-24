@@ -36,6 +36,8 @@ Ext4.define('Eoze.Ext.OverridesLoader', {
 		'Eoze.Ext.window.Window',
 		// Formats
 		'Eoze.Ext.util.Format',
+		// Filters
+		'Eoze.Ext.util.Filter.FuzzyMatch',
 		// Data types
 		'Eoze.Ext.data.Types',
 		// Date
@@ -68,6 +70,6 @@ Ext4.define('Eoze.Ext.OverridesLoader', {
 		// ux
 		'Eoze.Ext.ux.grid.FiltersFeature',
 
-		'Eoze.Ext.util.Filter.FuzzyMatch'
+		'Eoze.Ext.form.field.ComboBox.TopToolbar'
 	]
 });

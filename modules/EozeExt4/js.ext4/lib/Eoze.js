@@ -20,6 +20,7 @@ Ext4.define('Eoze.lib.Eoze', {
 		// Proxy
 		'Eoze.data.proxy.GridModule',
 		'Eoze.data.proxy.Cqlix',
+		'Eoze.data.proxy.SlaveMemory',
 		// Types
 		'Eoze.data.type.HasOne',
 		// CkEditor
