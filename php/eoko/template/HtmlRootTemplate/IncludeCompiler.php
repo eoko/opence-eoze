@@ -254,19 +254,29 @@ abstract class IncludeCompiler {
 			if ($priority === null) {
 				$priority = \PHP_INT_MAX;
 			}
-			if (substr($url, 0, $baseUrlLen) === SITE_BASE_URL
-					&& !strstr($url, '?')) {
-				$files[$priority][] = ROOT . substr($url, $baseUrlLen);
-				if ($removeLocalUrls) {
-					unset($urls[$url]);
+			if (substr($url, 0, $baseUrlLen) === SITE_BASE_URL) {
+				if (strstr($url, '?') !== false) {
+					$suffix = substr($url, -2);
+					if ($suffix === '??') {
+						// that's a "merge me but get content through http"
+						$files[$priority][] = $url;
+						if ($removeLocalUrls) {
+							unset($urls[$url]);
+						}
+					} else if ($suffix === '?!') {
+						$cleanedUrl = substr($url, 0, -2);
+						// replace the url by the cleaned one to avoid bursting the browser cache
+						unset($urls[$url]);
+						$urls[$cleanedUrl] = $priority;
+					}
+					// else consider the url to be remote because of the query string
+				} else {
+					$files[$priority][] = ROOT . substr($url, $baseUrlLen);
+					if ($removeLocalUrls) {
+						unset($urls[$url]);
+					}
 				}
 			} else if (!$this->isPreserveRemoteUrl()) {
-				// Including ?! at the end of the URL is a mean to prevent them from being
-				// merged, but that may also burst the browser cache. We don't want that,
-				// so we clean the url.
-				if (substr($url, -2) === '?!') {
-					$url = substr($url, 0, -2);
-				}
 				$files[$priority][] = $url;
 			}
 		}
