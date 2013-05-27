@@ -3,6 +3,7 @@
  * @author Éric Ortéga <eric@mail.com>
  */
 
+/** @noinspection PhpIncludeInspection */
 require_once PHP_PATH . '_/ExtJSResponse.php';
 
 use eoko\php\ErrorException;
@@ -26,6 +27,12 @@ class ExceptionHandler {
 	}
 
 	public function process(Exception $ex, $answer = true) {
+
+		if (defined('EOZE_VERBOSE_ERROR_REPORTING')) {
+			header('Content-type: text');
+			echo $ex;
+			die;
+		}
 
 		if ($ex instanceof UserException) {
 
