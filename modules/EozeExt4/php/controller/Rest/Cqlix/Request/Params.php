@@ -28,8 +28,10 @@ use Request;
 use eoko\modules\EozeExt4\controller\Rest\Cqlix\Exception;
 
 /**
- * A wrapper for the {@link Request} class, that abstract it from the user class. This class also
- * provides configured param names that are accessible with constants.
+ * Container for the parameters of the request. This class abstract the implementation of the request
+ * object from the `\..\EozeExt4\Rest` package.
+ *
+ * The class also abstract the names of well known request parameters by providing constants for them.
  *
  * @since 2013-05-21 15:31
  */
