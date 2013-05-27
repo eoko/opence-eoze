@@ -34,23 +34,13 @@ Ext4.define('Eoze.data.proxy.Cqlix', {
 
 	,alias: 'proxy.cqlix'
 
-	/**
-	 * Name of the server controller that exposes the REST API. This is used to build the endpoint
-	 * URL.
-	 *
-	 * @cfg {String} controller
-	 */
-
-	/**
-	 * Creates a new Cqlix proxy.
-	 *
-	 * @param {Object} config
-	 */
 	,constructor: function(config) {
 
 		config = config || {};
 
-		config.url = 'controller=' + config.controller;
+		var url = config.url || 'api?';
+
+		config.url = url + 'controller=' + config.controller;
 
 		config.actionMethods = Ext.apply({
 			create: 'POST'
@@ -82,7 +72,7 @@ Ext4.define('Eoze.data.proxy.Cqlix', {
 	,buildUrl: function(request) {
 		var url = this.callParent(arguments),
 			operation = request.operation,
-
+//			action = operation.action,
 			records = operation.records || [],
 			record = records[0],
 			id = record ? record.getId() : operation.id;
