@@ -37,15 +37,15 @@ use ModelTable;
 use ModelTableProxy;
 
 /**
+ * ModelRelationInfo factory.
  *
- * @category Opence
- * @package
- * @subpackage
  * @since 2013-04-16 12:14
  */
 class Factory {
 
 	/**
+	 * Creates a new {@link ModelRelationInfo} from some specs.
+	 *
 	 * @param ModelTable $table
 	 * @param $spec
 	 * @throws \IllegalArgumentException
