@@ -605,9 +605,10 @@ class ModuleManager {
 		if (!class_exists($class)) {
 			if (strstr($baseClass, '\\')) {
 				class_extend($class, $baseClass);
+				$cacheDeps[] = "class_extend('$class', '$baseClass');";
 			} else {
 				$baseModule = self::getModule($baseClass);
-				$cacheDeps[] = $this->inNamespace("ModuleManager::getModule('$config->class');");
+				$cacheDeps[] = $this->inNamespace("ModuleManager::getModule('$baseClass');");
 				// use the base module to generate the default class
 				if (is_array($cacheDeps)) {
 					$cacheDeps[] = $baseModule->generateDefaultModuleClass($class, $config);
