@@ -200,6 +200,10 @@ abstract class ModelRelationInfo extends ModelFieldBase implements RelationCardi
 		if ($value === null) {
 			return null;
 		}
+		// Returns cached records as is
+		if ($value instanceof Model) {
+			return $value;
+		}
 		switch ($this->getType()) {
 			case ModelField::T_STRING: return (string) $value;
 			case ModelField::T_INT: return (int) $value;
@@ -347,12 +351,12 @@ abstract class ModelRelationInfo extends ModelFieldBase implements RelationCardi
 	 */
 	public function selectFields(ModelTableQuery $query, $field_s) {
 //		if (false === $this instanceof ModelRelationInfoHasOne) {
-		if (!$this->canSelectFields($query, $field_s)) {
-			throw new UnsupportedOperationException($this . '::selectField()'
-					. ' Field(s) can only be selected from relations of type "has one"');
-		} else {
+//		if (!$this->canSelectFields($query, $field_s)) {
+//			throw new UnsupportedOperationException($this . '::selectField()'
+//					. ' Field(s) can only be selected from relations of type "has one"');
+//		} else {
 			return $this->doSelectFields($query, $field_s);
-		}
+//		}
 	}
 
 	final protected function doSelectFields(ModelTableQuery $query, $field_s) {
