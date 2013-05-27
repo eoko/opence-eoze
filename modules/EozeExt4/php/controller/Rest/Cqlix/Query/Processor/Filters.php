@@ -218,10 +218,10 @@ class Filters extends AbstractProcessor {
 
 			// Empty
 			if (isset($data['acceptEmpty']) && !$data['acceptEmpty']) {
-				$query->andWhere("`$fieldName` IS NULL");
+				$query->andWhere("`$fieldName` IS NOT NULL");
 			}
 			if (isset($data['acceptNonEmpty']) && !$data['acceptNonEmpty']) {
-				$query->andWhere("`$fieldName` IS NOT NULL");
+				$query->andWhere("`$fieldName` IS NULL");
 			}
 		}
 	}
