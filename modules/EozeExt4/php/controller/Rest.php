@@ -24,24 +24,17 @@
 
 namespace eoko\modules\EozeExt4\controller;
 
-use UnsupportedOperationException;
+use eoko\modules\EozeExt4\Exception;
 use Zend\Http\PhpEnvironment\Request as HttpRequest;
 use Zend\Http\Response;
 use eoko\module\executor\JsonExecutor;
 
 /**
- * Scaffolding for a RESTFul executor.
+ * Abstract scaffolding for a RESTFul executor.
  *
  * @since 2013-04-18 10:26
  */
 abstract class Rest extends JsonExecutor {
-
-	/**
-	 * Cache for HTTP request object.
-	 *
-	 * @var HttpRequest
-	 */
-	private $httpRequest;
 
 	/**
 	 * Gets the HTTP request object.
@@ -49,10 +42,7 @@ abstract class Rest extends JsonExecutor {
 	 * @return HttpRequest
 	 */
 	protected function getHttpRequest() {
-		if (!$this->httpRequest) {
-			$this->httpRequest = new HttpRequest();
-		}
-		return $this->httpRequest;
+		return $this->getRequest()->getHttpRequest();
 	}
 
 	/**
@@ -65,52 +55,66 @@ abstract class Rest extends JsonExecutor {
 	/**
 	 * Action for listing records.
 	 *
-	 * @throws UnsupportedOperationException
+	 * @throws Exception\UnsupportedOperation
 	 * @return bool|Response
 	 */
-	public function listRecords() {
-		throw new UnsupportedOperationException('TODO');
+	public function getList() {
+		throw new Exception\UnsupportedOperation('TODO');
 	}
 
 	/**
 	 * Action for deleting record(s).
 	 *
 	 * @param mixed $id
-	 * @throws UnsupportedOperationException
+	 * @throws Exception\UnsupportedOperation
 	 * @return bool|Response
 	 */
-	public function deleteRecord($id = null) {
-		throw new UnsupportedOperationException('TODO');
+	public function deleteRecord(/** @noinspection PhpUnusedParameterInspection */ $id = null) {
+		throw new Exception\UnsupportedOperation('TODO');
 	}
 
 	/**
-	 * Action for updating existing records.
+	 * Action for posting new data, that is creating a new record.
 	 *
-	 * @param mixed $id
 	 * @param array $inputData
-	 * @throws UnsupportedOperationException
+	 * @throws Exception\UnsupportedOperation
 	 * @return bool|Response
 	 */
-	public function postRecord($id = null, $inputData = null) {
-		throw new UnsupportedOperationException('TODO');
+	public function postRecord(/** @noinspection PhpUnusedParameterInspection */ $inputData = null) {
+		throw new Exception\UnsupportedOperation('TODO');
+	}
+
+	/**
+	 * Action for updating existing records with no other side effect. It is required that this method
+	 * can be executed multiple times with the same effect as executing it only one time (i.e. the
+	 * action must be idempotent).
+	 *
+	 * @param null $id
+	 * @param null $inputData
+	 * @throws Exception\UnsupportedOperation
+	 * @return bool|Response
+	 */
+	public function putRecord(/** @noinspection PhpUnusedParameterInspection */
+			$id = null, $inputData = null) {
+		throw new Exception\UnsupportedOperation('TODO');
 	}
 
 	/**
 	 * Action for reading a record's data.
 	 *
 	 * @param mixed $id
-	 * @throws UnsupportedOperationException
+	 * @throws Exception\UnsupportedOperation
 	 * @return bool|Response
 	 */
-	public function getRecord($id = null) {
-		throw new UnsupportedOperationException('TODO');
+	public function getRecord(/** @noinspection PhpUnusedParameterInspection */ $id = null) {
+		throw new Exception\UnsupportedOperation('TODO');
 	}
 
 	/**
 	 * Index action.
 	 *
 	 * @return bool|Response
-	 * @throws UnsupportedOperationException
+	 * @throws Exception\UnsupportedOperation
 	 */
 	public function index() {
 
@@ -126,23 +130,30 @@ abstract class Rest extends JsonExecutor {
 			if ($id) {
 				if ($method === $httpRequest::METHOD_GET) {
 					return $this->getRecord($id);
-				} else if ($method === $httpRequest::METHOD_POST) {
+				} else if ($method === $httpRequest::METHOD_PUT || $method === $httpRequest::METHOD_POST) {
 					$inputData = $request->req('data');
-					return $this->postRecord($id, $inputData);
+					return $this->putRecord($id, $inputData);
 				} else if ($method === $httpRequest::METHOD_DELETE) {
 					return $this->deleteRecord($id);
 				}
 			} else {
 				if ($method === $httpRequest::METHOD_GET) {
-					return $this->listRecords();
+					return $this->getList();
+				} else if ($method === $httpRequest::METHOD_POST) {
+					$inputData = $request->req('data');
+					return $this->postRecord($inputData);
 				} else {
-					throw new UnsupportedOperationException();
+					$this->set('errorCause', 'Unsupported method.');
+					$response->setStatusCode($response::STATUS_CODE_405);
+					return false;
 				}
 			}
-		} catch (UnsupportedOperationException $ex) {
+		} catch (Exception\UnsupportedOperation $ex) {
 			$response->setContent($ex->getMessage());
-			$response->setStatusCode($response::STATUS_CODE_500);
-			return $response;
+			$response->setStatusCode($response::STATUS_CODE_405);
 		}
+
+		// We can only get here from the catch block
+		return $response;
 	}
 }

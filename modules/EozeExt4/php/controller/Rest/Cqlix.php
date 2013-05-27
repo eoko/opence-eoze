@@ -24,6 +24,7 @@
 
 namespace eoko\modules\EozeExt4\controller\Rest;
 
+use Model as Record;
 use ModelTable;
 use eoko\modules\EozeExt4\controller\Rest;
 use eoko\modules\EozeExt4\controller\DatabaseAdapter\Pdo as PdoDatabaseAdapter;
@@ -75,96 +76,179 @@ abstract class Cqlix extends Rest {
 	}
 
 	/**
+	 * Gets the request params.
+	 *
+	 * @return Cqlix\Request\Params
+	 */
+	protected function getRequestParams() {
+		$request = $this->getRequest();
+		return new Cqlix\Request\Params($request);
+	}
+
+	/**
+	 * @param bool|array $defaultExpand
 	 * @return Cqlix\DataProxy
 	 */
-	protected function getDataProxy() {
+	private function getDataProxy($defaultExpand) {
 		if (!$this->dataProxy) {
-			$this->dataProxy = $this->createDataProxy();
+			$requestParams = $this->getRequestParams();
+
+			// Get from implem
+			$proxy = $this->doGetDataProxy();
+			// Configure expand params
+			$expandParam = $requestParams->get($requestParams::EXPAND, null);
+			$proxy->setExpandedParams($expandParam, $defaultExpand);
+			// Store
+			$this->dataProxy = $proxy;
 		}
+		// Return
 		return $this->dataProxy;
 	}
 
 	/**
 	 * @return Cqlix\DataProxy
 	 */
-	protected function createDataProxy() {
-		$table = $this->getTable();
-		return new Cqlix\DataProxy\Simple($table);
-	}
+	abstract protected function doGetDataProxy();
 
 	/**
 	 * @inheritdoc
 	 */
 	public function getRecord($id = null) {
 
-		$request = $this->getRequest();
+		$requestParams = $this->getRequestParams();
 		$response = $this->getResponse();
 
-		$dataProxy = $this->getDataProxy();
+		$dataProxy = $this->getDataProxy(true);
 
 		// --- Parse request params
 
 		if ($id === null) {
-			$id = $request->req('id');
+			$id = $requestParams->req($requestParams::ID);
 		}
 
 		// --- Load record
 
-		$record = $dataProxy->loadRecord($id);
+		$model = $dataProxy->loadRecord($id, $requestParams);
 
-		if (!$record) {
+		if (!$model) {
 			$response->setStatusCode($response::STATUS_CODE_404);
 			return $response;
 		}
 
 		// --- Format data
 
+		$record = Rest\Cqlix\Record::fromModel($model);
 		$data = $dataProxy->getRecordData($record);
 
 		// --- Return
 
-		$this->set('data', $data);
+		$this->set(array(
+			'expand' => $dataProxy->getResponseExpandable(),
+			'expanded' => $dataProxy->getResponseExpanded(),
+			'queries' => \Query::getExecutionCount(),
+			'data' => $data,
+		));
 
 		return true;
 	}
 
 	/**
 	 * @inheritdoc
+	 *
+	 * Creates a new record.
 	 */
-	public function postRecord($id = null, $inputData = null) {
+	public function postRecord($inputData = null) {
 
-		$request = $this->getRequest();
+		$requestParams = $this->getRequestParams();
 		$response = $this->getResponse();
 
-		$databaseAdapter = $this->getDatabaseAdapter();
-		$dataProxy = $this->getDataProxy();
+		$dataProxy = $this->getDataProxy(true);
+
+		// --- Parse request params
+
+		if ($inputData === null) {
+			$inputData = $requestParams->req($requestParams::DATA);
+		}
+
+		// --- Create record
+
+		$record = $dataProxy->createRecord(null, $requestParams);
+
+		if (!$record) {
+			$response->setStatusCode($response::STATUS_CODE_500);
+			$this->set('errorCause', 'Could not create record.');
+			return false;
+		}
+
+
+		// --- Update, save & return
+
+		return $this->updateAndSaveRecord($record, $inputData, true);
+	}
+
+	/**
+	 * @inheritdoc
+	 *
+	 * Updates an existing record.
+	 */
+	public function putRecord($id = null, $inputData = null) {
+
+		$requestParams = $this->getRequestParams();
+		$response = $this->getResponse();
+
+		// default expand fields
+		// (should it be the same as what was used to load the record?)
+		$dataProxy = $this->getDataProxy(true);
 
 		// --- Parse request params
 
 		if ($id === null) {
-			$id = $request->req('id');
+			$id = $requestParams->req($requestParams::ID);
 		}
 
 		if ($inputData === null) {
-			$inputData = $request->req('data');
+			$inputData = $requestParams->req($requestParams::DATA);
 		}
 
 		// --- Load record
 
-		$record = $dataProxy->loadRecord($id);
+		$record = $dataProxy->loadRecord($id, $requestParams);
 
 		if (!$record) {
 			$response->setStatusCode($response::STATUS_CODE_404);
 			return $response;
 		}
 
+		// --- Update, save & return
+
+		return $this->updateAndSaveRecord($record, $inputData, false);
+	}
+
+	/**
+	 * Updates the data of the passed {@link Record model}, and save it in the database.
+	 *
+	 * @param \Model $record
+	 * @param array $inputData
+	 * @param bool $newRecord
+	 * @return bool|\Zend\Http\Response
+	 */
+	private function updateAndSaveRecord(Record $record, array $inputData, $newRecord) {
+
+		$databaseAdapter = $this->getDatabaseAdapter();
+		$dataProxy = $this->getDataProxy(true);
+
+		$response = $this->getResponse();
+
 		// --- Update record
 
 		try {
 			$dataProxy->setRecordData($record, $inputData);
 		} catch (\Exception $ex) {
+
 			$this->logException($ex);
+
 			$response->setStatusCode($response::STATUS_CODE_400);
+
 			return $response;
 		}
 
@@ -172,24 +256,83 @@ abstract class Cqlix extends Rest {
 
 		try {
 			$databaseAdapter->beginTransaction();
-			$record->save();
+			$record->save($newRecord);
 			$databaseAdapter->commitTransaction();
 		} catch (\Exception $ex) {
-			$this->logException($ex);
+
 			$databaseAdapter->rollbackTransaction();
+
+			$this->logException($ex);
+
 			$response->setStatusCode($response::STATUS_CODE_500);
+
 			return $response;
 		}
 
 		// --- Load updated data
 
-		$updatedRecord = $dataProxy->loadRecord($record->getPrimaryKeyValue());
+		$updatedModel = $record->getDatabaseCopy();
+		$updatedRecord = Rest\Cqlix\Record::fromModel($updatedModel);
 		$updatedData = $dataProxy->getRecordData($updatedRecord);
 
 		// --- Return
 
-		$this->set('data', $updatedData);
+		$this->set(array(
+			'queries' => \Query::getExecutionCount(),
+			'data' => $updatedData,
+		));
 
 		return true;
 	}
+
+	/**
+	 * @inheritdoc
+	 */
+	public function getList() {
+
+		$requestParams = $this->getRequestParams();
+
+		$dataProxy = $this->getDataProxy(false);
+
+		try {
+			/** @var $records Rest\Cqlix\RecordSet */
+			$records = $dataProxy->createRequestRecords($requestParams);
+		} catch (Rest\Cqlix\Exception\UnknownField $ex) {
+			$response = $this->getResponse();
+			$response->setStatusCode($response::STATUS_CODE_400);
+			return $response;
+		} catch (\UnsupportedOperationException $ex) {
+			$response = $this->getResponse();
+			$response->setStatusCode($response::STATUS_CODE_501);
+			return $response;
+		}
+
+		$data = array();
+		foreach ($records as $record) {
+			$data[] = $dataProxy->getRecordData($record);
+		}
+
+		if ($requestParams->has($requestParams::CONFIGURE)) {
+			$this->set('metaData', $dataProxy->getMetaData());
+		}
+
+		// Data
+		$responseData = array(
+			'queries' => \Query::getExecutionCount(),
+
+			$requestParams->getParamName($requestParams::EXPAND) => $dataProxy->getResponseExpandable(),
+			$requestParams->getParamName($requestParams::EXPANDED) => $dataProxy->getResponseExpanded(),
+		);
+
+		foreach ($records->getResponseMetaData($requestParams) as $name => $value) {
+			$responseData[$name] = $value;
+		}
+
+		$this->set($responseData);
+
+		$this->set('data', $data);
+
+		return true;
+	}
+
 }
