@@ -144,4 +144,4 @@ Ext4.define('Eoze.Ext.view.Table.UsingGetterInsteadOfDataObject', function() {
 			cellValues.column = null;
 		}
 	};
-});
+}());
