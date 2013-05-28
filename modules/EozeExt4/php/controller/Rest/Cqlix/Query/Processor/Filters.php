@@ -244,11 +244,13 @@ class Filters extends AbstractProcessor {
 	 * @throws InvalidArgument
 	 */
 	private function applyPropertyFilter(\ModelTableQuery $query, array $filter) {
-		if (isset($filter['property']) && isset($filter['value'])) {
-			$property = $filter['property'];
-			$value = $filter['value'];
-			$field = $this->resolveFieldName($property, false);
-			$query->andWhere("`$field` LIKE ?", "$value%");
+		if (isset($filter['property'])) {
+			if (isset($filter['value'])) {
+				$property = $filter['property'];
+				$value = $filter['value'];
+				$field = $this->resolveFieldName($property, false);
+				$query->andWhere("`$field` LIKE ?", "$value%");
+			} // else, let's say that's not a filter!
 		} else {
 			throw new InvalidArgument();
 		}
