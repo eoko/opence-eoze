@@ -66,6 +66,8 @@ Ext4.define('Eoze.Ext.OverridesLoader', {
 		'Eoze.Ext.form.field.File',
 
 		// ux
-		'Eoze.Ext.ux.grid.FiltersFeature'
+		'Eoze.Ext.ux.grid.FiltersFeature',
+
+		'Eoze.Ext.util.Filter.FuzzyMatch'
 	]
 });
