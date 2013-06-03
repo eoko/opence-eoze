@@ -133,7 +133,7 @@ Ext4.define('Eoze.AjaxRouter.Router', {
 
 		var match = null;
 		this.getSortedRoutes().each(function(routes) {
-			routes.forEach(function(route) {
+			Ext4.each(routes, function(route) {
 				if (route.run(path)) {
 					match = route;
 					return false;
@@ -160,7 +160,7 @@ Ext4.define('Eoze.AjaxRouter.Router', {
 	,getMatch: function(path) {
 		var matchedRoute = undefined;
 		this.getSortedRoutes().each(function(routes) {
-			routes.forEach(function(route) {
+			Ext4.each(routes, function(route) {
 				if (route.test(path)) {
 					matchedRoute = route;
 					return false;
