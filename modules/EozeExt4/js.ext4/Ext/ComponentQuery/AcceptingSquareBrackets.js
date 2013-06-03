@@ -46,7 +46,8 @@ Ext4.define('Eoze.Ext.ComponentQuery.AcceptingSquareBrackets', {
 	(function ensureExtVersionHasNotChanged() {
 		var version = Ext.getVersion(),
 			testedWorkingVersions = [
-				'4.2.0.663'
+				'4.2.0.663',
+				'4.2.1.883' // not entirely check to say the truth
 			],
 			untestedVersion = true;
 
