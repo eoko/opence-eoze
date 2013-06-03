@@ -29,13 +29,16 @@
  */
 Ext4.define('Eoze.Ext.view.Table.UsingGetterInsteadOfDataObject', function() {
 
+	var Ext = Ext4;
+
 	/**
 	 * Ensures that the version is the same as the one against which has been applied the patch.
 	 */
 	(function ensureExtVersionHasNotChanged() {
-		var version = Ext4.getVersion(),
+		var version = Ext.getVersion(),
 			testedWorkingVersions = [
-				'4.2.0.663'
+				'4.2.0.663',
+				'4.2.1.883'
 			],
 			untestedVersion = true;
 
@@ -88,6 +91,7 @@ Ext4.define('Eoze.Ext.view.Table.UsingGetterInsteadOfDataObject', function() {
 			cellValues.cellIndex = columnIndex;
 			cellValues.align = column.align;
 			cellValues.tdCls = column.tdCls;
+			cellValues.innerCls = column.innerCls;
 			cellValues.style = cellValues.tdAttr = "";
 			cellValues.unselectableAttr = me.enableTextSelection ? '' : 'unselectable="on"';
 
@@ -106,7 +110,7 @@ Ext4.define('Eoze.Ext.view.Table.UsingGetterInsteadOfDataObject', function() {
 			cellValues.value = (value == null || value === '') ? '&#160;' : value;
 
 			// Calculate classes to add to cell
-			classes[1] = Ext4.baseCSSPrefix + 'grid-cell-' + column.getItemId();
+			classes[1] = Ext.baseCSSPrefix + 'grid-cell-' + column.getItemId();
 
 			// On IE8, array[len] = 'foo' is twice as fast as array.push('foo')
 			// So keep an insertion point and use assignment to help IE!
@@ -125,7 +129,7 @@ Ext4.define('Eoze.Ext.view.Table.UsingGetterInsteadOfDataObject', function() {
 				classes[clsInsertPoint++] = me.lastCls;
 			}
 			if (!me.enableTextSelection) {
-				classes[clsInsertPoint++] = Ext4.baseCSSPrefix + 'unselectable';
+				classes[clsInsertPoint++] = Ext.baseCSSPrefix + 'unselectable';
 			}
 
 			classes[clsInsertPoint++] = cellValues.tdCls;
