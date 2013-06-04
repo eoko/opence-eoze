@@ -30,6 +30,7 @@ class ExceptionHandler {
 
 		if (defined('EOZE_VERBOSE_ERROR_REPORTING')) {
 			header('Content-type: text');
+			header('HTTP/1.0 500 Server Error');
 			echo $ex;
 			die;
 		}

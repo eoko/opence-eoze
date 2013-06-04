@@ -28,7 +28,7 @@ use eoko\modules\EozeExt4\controller\Rest\Cqlix\Query\Processor as QueryProcesso
 use eoko\modules\EozeExt4\controller\Rest\Cqlix\Request\Params as RequestParams;
 use eoko\modules\EozeExt4\controller\Rest;
 use ModelTable;
-use Model as Record;
+use Model;
 use Query;
 use Request;
 use eoko\modules\EozeExt4\controller\Rest\Cqlix\DataProxy as DataProxyInterface;
@@ -161,7 +161,7 @@ abstract class AbstractProxy implements DataProxyInterface {
 	/**
 	 * @inheritdoc
 	 */
-	public function setRecordData(Record $record, array $inputData) {
+	public function setRecordData(Model $record, array $inputData) {
 		$this->doSetRecordData($record, $inputData);
 	}
 
@@ -169,12 +169,10 @@ abstract class AbstractProxy implements DataProxyInterface {
 	 * Convenience method for overriding {@link setRecordData()}, with the possibility of
 	 * specializing the record type (and not worrying about what is done in `setRecordData`).
 	 *
-	 * @param Record $record
+	 * @param Model $record
 	 * @param array $inputData
 	 */
-	protected function doSetRecordData(Record $record, array $inputData) {
-		$record->setFields($inputData, true);
-	}
+	abstract protected function doSetRecordData(Model $record, array $inputData);
 
 	/**
 	 * @inheritdoc
