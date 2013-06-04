@@ -456,6 +456,50 @@ class TableProxy extends AbstractProxy {
 		return $proxy;
 	}
 
+	private function writeField(Model $model, $clientFieldName, $value) {
+		$fieldName = $this->clientToServer($clientFieldName);
+		$config = $this->clientFieldsConfig[$clientFieldName];
+
+		if ($config) {
+			if (!empty($config['proxy'])) {
+				$proxy = $this->getProxy($clientFieldName);
+
+				if (empty($value)) {
+					$model->setField($fieldName, $value, true);
+				} else {
+					$field = $model->getTable()->getField($fieldName);
+					$associatedTable = $proxy->getTable();
+
+					if ($field instanceof \ModelRelationInfoHasOne) {
+						// Crate associated record
+						$associatedModel = $associatedTable->createModel(null, false, $model->context);
+						// Update
+						$proxy->setRecordData($associatedModel, $value);
+						// Assign
+						$model->setField($fieldName, $associatedModel);
+					} else if ($field instanceof \ModelRelationInfoHasMany) {
+						$associatedModels = array();
+						foreach ($value as $data) {
+							$associatedModel = $associatedTable->createModel(null, false, $model->context);
+							$proxy->setRecordData($associatedModel, $value);
+							$associatedModels[] = $associatedModel;
+						}
+						$model->setField($fieldName, $associatedModels);
+					} else {
+						throw new Exception\IllegalState('Unexpected field type: ' . get_class($field));
+					}
+				}
+			} else if (array_key_exists('config', $config)) {
+				if ($config['writer'] !== false) {
+					call_user_func($config['writer'], $model, $value);
+				}
+			}
+		} else {
+			// allowing null values, that will be checked later, before save
+			$model->setField($fieldName, $value, true);
+		}
+	}
+
 	/**
 	 * Reads the value of the field specified by its client name from the passed record.
 	 *
@@ -739,5 +783,22 @@ class TableProxy extends AbstractProxy {
 			$data[$clientField] = $this->readField($record, $clientField);
 		}
 		return $data;
+	}
+
+	/**
+	 * @inheritdoc
+	 */
+	protected function doSetRecordData(Model $model, array $inputData) {
+		dumpl(array(
+			$model,
+			$inputData,
+		));
+		foreach ($this->clientFieldsConfig as $clientFieldName => $config) {
+			$value = isset($inputData[$clientFieldName])
+				? $inputData[$clientFieldName]
+				: null;
+			$this->writeField($model, $clientFieldName, $value);
+		}
+		dump("$model");
 	}
 }
