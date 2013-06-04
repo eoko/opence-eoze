@@ -67,7 +67,36 @@ use eoko\modules\EozeExt4\controller\Rest\Cqlix\RecordSet;
  *
  * `requires` string[]
  *
- * List of fields names (server names) that are required to be populated in the supplied Record.
+ * List of fields names (server names) that are required to be populated in the supplied Record (for use by the
+ * reader).
+ *
+ * Writer
+ * ------
+ *
+ * `writer` callback|false
+ *
+ * A function that will be tasked with with setting the field value of the model during update operation. The
+ * proxy will entirely delegate the field writing to this function (i.e. it won't affect the model at all by
+ * itself). The function will be called with the following parameters:
+ *
+ * - `$model` Model The model to update
+ * - `$value` mixed The value to affect to the field
+ *
+ * `writer` can also be set to `false`, then the proxy will skip writing the field value into the model entirely.
+ *
+ * Update post processing
+ * ----------------------
+ *
+ * `afterUpdate` callback
+ *
+ * If present, this function will be called after update operations on a model, after all the update have been
+ * applied. The function will be called even if the input data contains no value for the field.
+ *
+ * The function will be called with the following parameters:
+ *
+ * - `$model` Model The model that have just been updated
+ * - `$value` mixed The value of the client field in the input data
+ * - `$inputData` array The whole input data array
  *
  *
  * @since 2013-05-22 16:48
@@ -460,6 +489,11 @@ class TableProxy extends AbstractProxy {
 		$fieldName = $this->clientToServer($clientFieldName);
 		$config = $this->clientFieldsConfig[$clientFieldName];
 
+		if ($clientFieldName === 'mainDemandId') {
+			dump_mark();
+			$value = 491;
+		}
+
 		if ($config) {
 			if (!empty($config['proxy'])) {
 				$proxy = $this->getProxy($clientFieldName);
@@ -489,12 +523,14 @@ class TableProxy extends AbstractProxy {
 						throw new Exception\IllegalState('Unexpected field type: ' . get_class($field));
 					}
 				}
-			} else if (array_key_exists('config', $config)) {
+			} else if (array_key_exists('writer', $config)) {
 				if ($config['writer'] !== false) {
 					call_user_func($config['writer'], $model, $value);
 				}
+			} else if ($fieldName) {
+				$model->setField($fieldName, $value, true);
 			}
-		} else {
+		} else if ($fieldName) {
 			// allowing null values, that will be checked later, before save
 			$model->setField($fieldName, $value, true);
 		}
@@ -789,16 +825,29 @@ class TableProxy extends AbstractProxy {
 	 * @inheritdoc
 	 */
 	protected function doSetRecordData(Model $model, array $inputData) {
-		dumpl(array(
-			$model,
-			$inputData,
-		));
+
+		$postProcessors = array();
+
 		foreach ($this->clientFieldsConfig as $clientFieldName => $config) {
 			$value = isset($inputData[$clientFieldName])
 				? $inputData[$clientFieldName]
 				: null;
-			$this->writeField($model, $clientFieldName, $value);
+
+			if (array_key_exists($clientFieldName, $inputData)) {
+				$this->writeField($model, $clientFieldName, $value);
+			}
+
+			if (isset($config['afterUpdate'])) {
+				$postProcessors[] = array(
+					'function' => $config['afterUpdate'],
+					'value' => $value,
+				);
+			}
 		}
-		dump("$model");
+
+		// Execute post processors
+		foreach ($postProcessors as $processor) {
+			call_user_func($processor['function'], $model, $processor['value'], $inputData);
+		}
 	}
 }
