@@ -8,6 +8,8 @@
  */
 Ext4.define('Eoze.lib.Eoze', {
 	requires: [
+		// Ext4 Fixes
+		'Eoze.fix.FixesLoader',
 		// Ext4 Overrides
 		'Eoze.Ext.OverridesLoader',
 
