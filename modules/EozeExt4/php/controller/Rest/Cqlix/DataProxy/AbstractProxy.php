@@ -97,7 +97,7 @@ abstract class AbstractProxy implements DataProxyInterface {
 	public function createRecord(array $data = null, RequestParams $requestParams) {
 		$context = $this->createWriteContext($requestParams);
 		$table = $this->getTable();
-		$record = $table->createModel($data, $context);
+		$record = $table->createModel($data, false, $context);
 		return $record;
 	}
 
