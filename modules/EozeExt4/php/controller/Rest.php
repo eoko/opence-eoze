@@ -36,6 +36,23 @@ use eoko\module\executor\JsonExecutor;
  */
 abstract class Rest extends JsonExecutor {
 
+	const OPERATION_CREATE = 'create';
+	const OPERATION_READ = 'read';
+	const OPERATION_UPDATE = 'update';
+	const OPERATION_DELETE = 'delete';
+
+	/**
+	 * CRUD operation for this request. The value is one of the constants of this class.
+	 *
+	 * @see Rest::OPERATION_CREATE
+	 * @see Rest::OPERATION_READ
+	 * @see Rest::OPERATION_UPDATE
+	 * @see Rest::OPERATION_DELETE
+	 *
+	 * @var string
+	 */
+	private $crudOperation;
+
 	/**
 	 * Gets the HTTP request object.
 	 *
@@ -111,6 +128,15 @@ abstract class Rest extends JsonExecutor {
 	}
 
 	/**
+	 * Gets the current CRUD operation.
+	 *
+	 * @return string
+	 */
+	protected function getCrudOperation() {
+		return $this->crudOperation;
+	}
+
+	/**
 	 * Index action.
 	 *
 	 * @return bool|Response
@@ -129,17 +155,22 @@ abstract class Rest extends JsonExecutor {
 		try {
 			if ($id) {
 				if ($method === $httpRequest::METHOD_GET) {
+					$this->crudOperation = self::OPERATION_READ;
 					return $this->getRecord($id);
 				} else if ($method === $httpRequest::METHOD_PUT || $method === $httpRequest::METHOD_POST) {
+					$this->crudOperation = self::OPERATION_UPDATE;
 					$inputData = $request->req('data');
 					return $this->putRecord($id, $inputData);
 				} else if ($method === $httpRequest::METHOD_DELETE) {
+					$this->crudOperation = self::OPERATION_DELETE;
 					return $this->deleteRecord($id);
 				}
 			} else {
 				if ($method === $httpRequest::METHOD_GET) {
+					$this->crudOperation = self::OPERATION_READ;
 					return $this->getList();
 				} else if ($method === $httpRequest::METHOD_POST) {
+					$this->crudOperation = self::OPERATION_CREATE;
 					$inputData = $request->req('data');
 					return $this->postRecord($inputData);
 				} else {

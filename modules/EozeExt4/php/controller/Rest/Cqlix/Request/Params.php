@@ -24,6 +24,7 @@
 
 namespace eoko\modules\EozeExt4\controller\Rest\Cqlix\Request;
 
+use eoko\modules\EozeExt4\controller\Rest;
 use Request;
 use eoko\modules\EozeExt4\controller\Rest\Cqlix\Exception;
 
@@ -66,15 +67,33 @@ class Params {
 	/**
 	 * @var \Request
 	 */
-	private $request;
+	public $request;
+
+	/**
+	 * CRUD operation for this request. The value is one of the constants of {@link Rest}.
+	 *
+	 * @var string
+	 */
+	private $crudOperation;
 
 	/**
 	 * Creates a new Params object.
 	 *
 	 * @param Request $request
+	 * @param string $crudOperation
 	 */
-	public function __construct(Request $request) {
+	public function __construct(Request $request, $crudOperation) {
 		$this->request = $request;
+		$this->crudOperation = $crudOperation;
+	}
+
+	/**
+	 * Gets the request CRUD operation. The returned value is one of {@link Rest}'s constants.
+	 *
+	 * @return string
+	 */
+	public function getCrudOperation() {
+		return $this->crudOperation;
 	}
 
 	/**

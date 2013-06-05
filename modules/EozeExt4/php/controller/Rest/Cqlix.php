@@ -82,7 +82,7 @@ abstract class Cqlix extends Rest {
 	 */
 	protected function getRequestParams() {
 		$request = $this->getRequest();
-		return new Cqlix\Request\Params($request);
+		return new Cqlix\Request\Params($request, $this->getCrudOperation());
 	}
 
 	/**
