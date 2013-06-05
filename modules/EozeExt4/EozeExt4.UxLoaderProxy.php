@@ -163,7 +163,7 @@ class UxLoaderProxy extends ExecutorBase {
 
 		$contents = '(function(Ext) {' . PHP_EOL
 			. $contents
-			. '})(window.Ext4 || Ext)';
+			. '})(window.Ext4 || Ext);';
 
 		return $this->sendJsFile($contents);
 	}
@@ -193,11 +193,11 @@ class UxLoaderProxy extends ExecutorBase {
 	 */
 	private function fixExt4BaseCssPrefix($contents) {
 		foreach (array('"', "'") as $i) {
-			$regex = "/${i}[^$i]*\\bx-[^$i]*$i/";
+			$regex = "/{$i}[^$i\\n]*\\bx-[^$i]*$i/";
 
 			$contents = preg_replace_callback($regex, function($matches) use($i) {
 				$subject = $matches[0];
-				return str_replace('x-', "$i + Ext.baseCSSPrefix + $i", $subject);
+				return preg_replace('/\\bx-/', "$i + Ext.baseCSSPrefix + $i", $subject);
 			}, $contents);
 		}
 		return $contents;
