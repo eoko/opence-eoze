@@ -26,6 +26,7 @@ namespace eoko\modules\EozeExt4\controller\Rest\Cqlix\DataProxy;
 
 use eoko\modules\EozeExt4\controller\Rest\Cqlix\Query\Processor as QueryProcessor;
 use eoko\modules\EozeExt4\controller\Rest\Cqlix\Request\Params as RequestParams;
+use eoko\modules\EozeExt4\controller\Rest;
 use ModelTable;
 use Model as Record;
 use Query;
@@ -54,48 +55,94 @@ use eoko\modules\EozeExt4\controller\Rest\Cqlix\RecordSet;
 abstract class AbstractProxy implements DataProxyInterface {
 
 	/**
-	 * Creates default data context for reading and/or writing.
+	 * Creates data context, depending on the CRUD operation (read from the {@link RequestParams}).
 	 *
+	 * @see AbstractProxy::createCreateContext()
 	 * @see AbstractProxy::createReadContext()
+	 * @see AbstractProxy::createUpdateContext()
+	 * @see AbstractProxy::createDeleteContext()
 	 * @see AbstractProxy::createWriteContext()
 	 *
 	 * @param RequestParams $requestParams
 	 * @return array|null
 	 */
-	protected function createContext(
-			/** @noinspection PhpUnusedParameterInspection */ RequestParams $requestParams) {
+	protected function createContext(RequestParams $requestParams) {
+		switch ($requestParams->getCrudOperation()) {
+			case Rest::OPERATION_CREATE:
+				return $this->createCreateContext($requestParams);
+			case Rest::OPERATION_READ:
+				return $this->createReadContext($requestParams);
+			case Rest::OPERATION_UPDATE:
+				return $this->createUpdateContext($requestParams);
+			case Rest::OPERATION_DELETE:
+				return $this->createDeleteContext($requestParams);
+			default:
+				return null;
+		}
+	}
+
+	/**
+	 * Creates data context for creation of new records.
+	 *
+	 * @param RequestParams $requestParams
+	 * @return null
+	 */
+	protected function createCreateContext(RequestParams $requestParams) {
 		return null;
 	}
 
 	/**
-	 * Creates data context for reading.
-	 *
-	 * Default implementation returns the result of {@link createContext()} method.
+	 * Creates data context for reading from existing records.
 	 *
 	 * @param RequestParams $requestParams
 	 * @return array|null
 	 */
 	protected function createReadContext(RequestParams $requestParams) {
-		return $this->createContext($requestParams);
+		return null;
 	}
 
 	/**
 	 * Creates data context for writing.
 	 *
-	 * Default implementation returns the result of {@link createContext()} method.
+	 * This is the default implementation for both {@link AbstractProxy::createUpdateContext()},
+	 * and {@link AbstractProxy::createDeleteContext()}.
 	 *
 	 * @param RequestParams $requestParams
 	 * @return array|null
 	 */
 	protected function createWriteContext(RequestParams $requestParams) {
-		return $this->createContext($requestParams);
+		return null;
+	}
+
+	/**
+	 * Creates data context for modification of existing records.
+	 *
+	 * Default implementation delegates to {@link AbstractProxy::createWriteContext()}.
+	 *
+	 * @param RequestParams $requestParams
+	 * @return array|null
+	 */
+	protected function createUpdateContext(RequestParams $requestParams) {
+		return $this->createWriteContext($requestParams);
+	}
+
+	/**
+	 * Creates data context for deletion of existing records.
+	 *
+	 * Default implementation delegates to {@link AbstractProxy::createWriteContext()}.
+	 *
+	 * @param RequestParams $requestParams
+	 * @return array|null
+	 */
+	protected function createDeleteContext(RequestParams $requestParams) {
+		return $this->createWriteContext($requestParams);
 	}
 
 	/**
 	 * @inheritdoc
 	 */
 	public function createRecord(array $data = null, RequestParams $requestParams) {
-		$context = $this->createWriteContext($requestParams);
+		$context = $this->createContext($requestParams);
 		$table = $this->getTable();
 		$record = $table->createModel($data, false, $context);
 		return $record;
@@ -105,7 +152,7 @@ abstract class AbstractProxy implements DataProxyInterface {
 	 * @inheritdoc
 	 */
 	public function loadRecord($id, RequestParams $requestParams) {
-		$context = $this->createReadContext($requestParams);
+		$context = $this->createContext($requestParams);
 		$table = $this->getTable();
 		$record = $table->loadModel($id, $context);
 		return $record;
@@ -169,7 +216,7 @@ abstract class AbstractProxy implements DataProxyInterface {
 
 		$table = $this->getTable();
 
-		$context = $this->createReadContext($requestParams);
+		$context = $this->createContext($requestParams);
 		$query = $table->createQuery($context);
 
 		// A minima, we want to select the identifier (to be able to resolve
