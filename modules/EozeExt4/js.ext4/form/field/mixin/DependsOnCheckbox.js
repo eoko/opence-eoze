@@ -50,7 +50,7 @@ Ext4.define('Eoze.form.field.mixin.DependsOnCheckbox', {
 	 * @private
 	 */
 	,initEvents: function(field) {
-		var form = field.up('form'),
+		var form = field.up('form').getForm(),
 			source = this.source,
 			checkbox = form && source
 				&& (source.indexOf('#') !== -1 ? form.down(source) : form.findField(source));
