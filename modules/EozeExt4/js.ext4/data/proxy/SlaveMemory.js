@@ -116,10 +116,13 @@ Ext4.define('Eoze.data.proxy.SlaveMemory', {
 					,params: operation.params
 				});
 				proxy.read(loadingOperation, function(operation) {
-					this.data = operation.getRecords();
+//					this.data = operation.getRecords();
+					this.setData(operation.getRecords());
+
 					var queue = this.waitingReadOperations;
 					this.waitingReadOperations = [];
 					this.loading = false;
+
 					queue.forEach(function(args) {
 						this.read.apply(this, args);
 					}, this);
@@ -128,9 +131,28 @@ Ext4.define('Eoze.data.proxy.SlaveMemory', {
 		}
 	}
 
+	// private
+	,setData: function(data) {
+		var me = this;
+		me.data = me.reader.read(data);
+	}
+
+	// private
+	,getData: function() {
+		var data = this.data;
+		return Ext4.create('Ext.data.ResultSet', {
+			count: data.count
+			,message: data.message
+			,records: data.records ? data.records.slice(0) : []
+			,success: data.success
+			,total: data.total
+			,totalRecords: data.totalRecords
+		});
+	}
+
 	,_read: function(operation, callback, scope) {
 		var me = this,
-			resultSet = operation.resultSet = me.getReader().read(me.data),
+			resultSet = operation.resultSet = me.getData(),
 			records = resultSet.records,
 			sorters = operation.sorters,
 			groupers = operation.groupers,
