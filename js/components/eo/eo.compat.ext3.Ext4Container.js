@@ -20,6 +20,7 @@ Ext.define('eo.ext4.compat.Ext4Container', {
 		
 		if (this.child) {
 			this.child = this.createComponent();
+			this.afterCreateChild(this.child);
 			this.child.render(this.el);
 		}
 		
@@ -48,6 +49,23 @@ Ext.define('eo.ext4.compat.Ext4Container', {
 			}
 		}
 	}
+
+	/**
+	 * Hook for external code to customize what properties are proxied from the child
+	 * component by the compatibility container.
+	 *
+	 * For example, AjaxRouter adds the `href` property:
+	 *
+	 *     eo.ext4.compat.Ext4Container.prototype.afterCreateChild = Ext4.Function.createSequence(
+	 *         eo.ext4.compat.Ext4Container.prototype.afterCreateChild,
+	 *         function(child) {
+	 *             this.href = child.href;
+	 *         }
+	 *     );
+	 *
+	 * @param {Ext.Component} child
+	 */
+	,afterCreateChild: function(child) {}
 	
 	/**
 	 * @private
