@@ -466,4 +466,14 @@ Ext4.define('Eoze.AjaxRouter.Router', {
 			});
 		}
 	});
+
+	// Transmit href property from compat wrapped components to their container
+	if (eo.ext4 && eo.ext4.compat) {
+		eo.ext4.compat.Ext4Container.prototype.afterCreateChild = Ext4.Function.createSequence(
+			eo.ext4.compat.Ext4Container.prototype.afterCreateChild,
+			function(child) {
+				this.href = child.href;
+			}
+		);
+	}
 });
