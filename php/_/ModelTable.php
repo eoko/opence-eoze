@@ -217,8 +217,9 @@ abstract class ModelTable extends ModelTableProxy implements EventManagerAwareIn
 		if (func_num_args() > 1) {
 			$virtuals = func_get_args();
 		}
-		foreach ($virtuals as $virtual) {
+		foreach ($virtuals as $name => $virtual) {
 			if (is_array($virtual)) {
+				/** @noinspection PhpForeachNestedOuterKeyValueVariablesConflictInspection */
 				foreach ($virtual as $name => $field) {
 					if (is_string($name)) {
 						$this->addVirtual($field, $name);
@@ -226,20 +227,44 @@ abstract class ModelTable extends ModelTableProxy implements EventManagerAwareIn
 						$this->addVirtual($field);
 					}
 				}
+			} else if (is_string($name)) {
+				$this->addVirtual($virtual, $name);
 			} else {
 				$this->addVirtual($virtual);
 			}
 		}
 	}
 
-	protected function addVirtual(VirtualField $virtual, $name = null) {
+	/**
+	 * Gets the virtual field factory used for creating virtual fields from spec string.
+	 *
+	 * @return \eoko\cqlix\VirtualField\SpecFactory
+	 */
+	private function getVirtualFactory() {
+		return \eoko\cqlix\VirtualField\SpecFactory::getDefault();
+	}
+
+	/**
+	 * @param VirtualField|string $virtual
+	 * @param string|null $name
+	 * @throws IllegalStateException
+	 * @throws InvalidArgumentException
+	 */
+	protected function addVirtual($virtual, $name = null) {
 		if ($this->constructed) {
 			throw new IllegalStateException('This operation is only allowed during initialization');
 		}
-		if ($name === null) {
-			$name = $virtual->getName();
+		if (is_string($virtual)) {
+			$virtual = $this->getVirtualFactory()->create($this, $virtual, $name);
 		}
-		$this->virtuals[$name] = $virtual;
+		if ($virtual instanceof VirtualField) {
+			if ($name === null) {
+				$name = $virtual->getName();
+			}
+			$this->virtuals[$name] = $virtual;
+		} else {
+			throw new InvalidArgumentException();
+		}
 	}
 
 	/**
