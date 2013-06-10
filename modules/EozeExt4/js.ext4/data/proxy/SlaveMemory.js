@@ -34,7 +34,8 @@ Ext4.define('Eoze.data.proxy.SlaveMemory', {
 	,alias: 'proxy.slavememory'
 
 	,requires: [
-		'Eoze.Ext.data.AbstractStore.IsLoaded'
+		'Ext.data.AbstractStore'
+//		'Eoze.Ext.data.AbstractStore.IsLoaded'
 	]
 
 	/**
@@ -45,32 +46,51 @@ Ext4.define('Eoze.data.proxy.SlaveMemory', {
 
 		// init
 		this.waitingReadOperations = [];
+		this.loading = false;
 
-		// create store
-		var store = Ext4.data.StoreManager.lookup(this.masterStore);
-		this.masterStore = store;
-
-		// initial data
-		if (store.isLoaded()) {
-			this.data = store.getRange();
+		// create proxy
+		if (this.proxy) {
+			this.setProxy(this.proxy);
+			this.proxy.relayEvents(this.proxy, ['metachange']);
 		}
 
-		// install load event handler
-		this.mon(store, {
-			scope: this
-			,load: function(store, records, success) {
-				if (success) {
-					this.data = records;
-					this.flushReadOperations(true);
-				} else {
-					this.flushReadOperations(false);
-				}
-			}
-		});
+//		// create store
+//		var store = Ext4.data.StoreManager.lookup(this.masterStore);
+//		this.masterStore = store;
+//
+//		// initial data
+//		if (store.isLoaded()) {
+//			this.data = store.getRange();
+//		}
+//
+//		// install load event handler
+//		this.mon(store, {
+//			scope: this
+//			,load: function(store, records, success) {
+//				if (success) {
+//					this.data = records;
+//					this.flushReadOperations(true);
+//				} else {
+//					this.flushReadOperations(false);
+//				}
+//			}
+//		});
+	}
+
+	,getProxy: function() {
+		return this.proxy;
 	}
 
 	,setModel: function(model) {
-		this.masterStore.proxy.setModel(model);
+		var proxy = this.proxy;
+
+		if (proxy) {
+			proxy.setModel(model);
+		} else {
+			this.setProxy(Ext4.ModelManager.getModel(model).getProxy());
+			this.relayEvents(this.getProxy(), ['metachange']);
+		}
+
 		this.callParent(arguments);
 	}
 
@@ -78,24 +98,89 @@ Ext4.define('Eoze.data.proxy.SlaveMemory', {
 	 * @inheritdoc
 	 */
 	,read: function(operation, callback, scope) {
-		var store = this.masterStore,
+		var proxy = this.getProxy(),
 			operationHash = this.hashOperation(operation),
 			currentHash = this.currentOperationHash,
 			data = this.data;
 		if (data) {
-			return this.callParent(arguments);
+			return this._read.apply(this, arguments);
+//			return this.callParent(arguments);
 		} else {
 			this.waitingReadOperations.push(Array.prototype.slice.call(arguments));
 			// start loading if needed
-			if (!store.isLoading()) {
-				store.load(operation);
-//				store.load(Ext.apply(operation, {
-//					callback: function(records, operation, success) {
-//						debugger
-//					}
-//				}));
+			if (!this.loading) {
+				var loadingOperation = Ext4.create('Ext.data.Operation', {
+					action: 'read'
+					,limit: false
+					,start: 0
+					,params: operation.params
+				});
+				proxy.read(loadingOperation, function(operation) {
+					this.data = operation.getRecords();
+					var queue = this.waitingReadOperations;
+					this.waitingReadOperations = [];
+					this.loading = false;
+					queue.forEach(function(args) {
+						this.read.apply(this, args);
+					}, this);
+				}, this);
 			}
 		}
+	}
+
+	,_read: function(operation, callback, scope) {
+		var me = this,
+			resultSet = operation.resultSet = me.getReader().read(me.data),
+			records = resultSet.records,
+			sorters = operation.sorters,
+			groupers = operation.groupers,
+			filters = operation.filters;
+
+		operation.setCompleted();
+
+		// Apply filters, sorters, and start/limit options
+		if (resultSet.success) {
+
+			// Filter the resulting array of records
+			if (filters && filters.length) {
+				records = resultSet.records = Ext4.Array.filter(records, Ext4.util.Filter.createFilterFn(filters));
+				resultSet.total = resultSet.totalRecords = records.length;
+			}
+
+			// Remotely, groupers just mean top priority sorters
+			if (groupers && groupers.length) {
+				Ext4.Array.insert(sorters||[], 0, groupers);
+			}
+
+			// Sort by the specified groupers and sorters
+			if (sorters && sorters.length) {
+				resultSet.records = Ext4.Array.sort(records, Ext4.util.Sortable.createComparator(sorters));
+			}
+
+			// Reader reads the whole passed data object.
+			// If successful and we were given a start and limit, slice the result.
+			if (me.enablePaging && operation.start !== undefined && operation.limit !== undefined) {
+
+				// Attempt to read past end of memory dataset - convert to failure
+				if (operation.start >= resultSet.total) {
+					resultSet.success = false;
+					resultSet.count = 0;
+					resultSet.records = [];
+				}
+				// Range is valid, slice it up.
+				else {
+					resultSet.records = Ext4.Array.slice(resultSet.records, operation.start, operation.start + operation.limit);
+					resultSet.count = resultSet.records.length;
+				}
+			}
+		}
+
+		if (resultSet.success) {
+			operation.setSuccessful();
+		} else {
+			me.fireEvent('exception', me, null, operation);
+		}
+		Ext4.callback(callback, scope || me, [operation]);
 	}
 
 	,hashOperation: function(operation) {
@@ -113,37 +198,40 @@ Ext4.define('Eoze.data.proxy.SlaveMemory', {
 		return operation.hash = buffer.join(';');
 	}
 
-	/**
-	 * Flushes pending read operations.
-	 *
-	 * @param {Boolean} success
-	 * @private
-	 */
-	,flushReadOperations: function(success) {
-		if (success) {
-			this.waitingReadOperations.forEach(function(args) {
-				var operation = args[0];
-				operation.setCompleted();
-				operation.setSuccessful();
-				this.read.apply(this, args);
-			}, this);
-		} else {
-			this.waitingReadOperations.forEach(function(args) {
-				var operation = args[0],
-					callback = args[1],
-					scope = args[2],
-					resultSet = this.getReader().read();
+//	/**
+//	 * Flushes pending read operations.
+//	 *
+//	 * @param {Boolean} success
+//	 * @private
+//	 */
+//	,flushReadOperations: function(success) {
+//		if (success) {
+//			this.waitingReadOperations.forEach(function(args) {
+//				var operation = args[0];
+//				operation.setCompleted();
+//				operation.setSuccessful();
+//				this.read.apply(this, args);
+//			}, this);
+//		} else {
+//			this.waitingReadOperations.forEach(function(args) {
+//				var operation = args[0],
+//					callback = args[1],
+//					scope = args[2],
+//					resultSet = this.getReader().read();
+//
+//				resultSet.success = false;
+//
+//				operation.setCompleted();
+//
+//				this.fireEvent('exception', this, null, operation);
+//
+//				Ext4.callback(callback, scope || this, [operation]);
+//			}, this);
+//		}
+//
+//		this.waitingReadOperations.clear();
+//	}
+}, function() {
 
-				resultSet.success = false;
-
-				operation.setCompleted();
-
-				this.fireEvent('exception', this, null, operation);
-
-				Ext4.callback(callback, scope || this, [operation]);
-			}, this);
-		}
-
-		this.waitingReadOperations.clear();
-	}
+	this.prototype.setProxy = Ext4.data.AbstractStore.prototype.setProxy;
 });
