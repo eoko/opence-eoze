@@ -32,6 +32,8 @@ Ext4.define('Eoze.lib.Eoze', {
 		// Plugins
 		'Eoze.form.field.mixin.DependsOnCheckbox',
 
+		'Eoze.grid.column.Integer',
+
 		// -- UX --
 		'Ext.ux.ActivityMonitor'
 	]

@@ -69,6 +69,7 @@ Ext4.define('Eoze.Ext.OverridesLoader', {
 
 		// ux
 		'Eoze.Ext.ux.grid.FiltersFeature',
+		'Eoze.Ext.grid.column.Number',
 
 		'Eoze.Ext.form.field.ComboBox.TopToolbar'
 	]
