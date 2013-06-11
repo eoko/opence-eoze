@@ -121,7 +121,7 @@ Ext4.define('Eoze.Ext.ux.grid.filter.StringFilter.EmptyValues', {
 				}
 			}
 			// if non empty values are filtered out
-			if (!field.nonEmpty.checked) {
+			if (!fields.nonEmpty.checked) {
 				if (!empty) {
 					return false;
 				}
