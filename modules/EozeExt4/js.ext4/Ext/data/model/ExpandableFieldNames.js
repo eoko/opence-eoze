@@ -36,6 +36,10 @@
 Ext4.define('Eoze.Ext.data.model.ExpandableFieldNames', {
 	override: 'Ext.data.Model'
 
+	,requires: [
+		'Eoze.Ext.util.Sorter.UsingGetOnRecords'
+	]
+
 	/**
 	 * Regular expression used to split field names to enable expandable field names.
 	 *
