@@ -34,7 +34,7 @@ Ext4.define('Eoze.util.Sorter.EmptyValuesAlwaysLast', {
 	 *
 	 * @cfg {Boolean}
 	 */
-	,emptyValueLast: true
+	,emptyValuesLast: true
 
 	,requires: [
 		'Eoze.Ext.util.Sorter.UsingGetOnRecords'
