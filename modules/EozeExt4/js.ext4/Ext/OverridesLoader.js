@@ -38,6 +38,8 @@ Ext4.define('Eoze.Ext.OverridesLoader', {
 		'Eoze.Ext.util.Format',
 		// Filters
 		'Eoze.Ext.util.Filter.FuzzyMatch',
+		// Special treatment for empty value sorting
+		'Eoze.Ext.util.Sorter.EmptyValuesAlwaysLast',
 		// Data types
 		'Eoze.Ext.data.Types',
 		// Date
