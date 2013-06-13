@@ -38,6 +38,8 @@ Ext4.define('Eoze.data.proxy.SlaveMemory', {
 //		'Eoze.Ext.data.AbstractStore.IsLoaded'
 	]
 
+	,isSynchronous: false
+
 	/**
 	 * @inheritdoc
 	 */
@@ -51,7 +53,6 @@ Ext4.define('Eoze.data.proxy.SlaveMemory', {
 		// create proxy
 		if (this.proxy) {
 			this.setProxy(this.proxy);
-			this.proxy.relayEvents(this.proxy, ['metachange']);
 		}
 
 //		// create store
@@ -77,6 +78,28 @@ Ext4.define('Eoze.data.proxy.SlaveMemory', {
 //		});
 	}
 
+	,setProxy: function(proxy) {
+
+		var previousProxy = this.proxy;
+
+		// unbind previous proxy
+		if (previousProxy && previousProxy.isProxy) {
+			if (previousProxy === proxy) {
+				return;
+			}
+		}
+
+		// uses AbstractStore implementation to auto create proxy
+		var proxy = Ext4.data.AbstractStore.prototype.setProxy.call(this, proxy);
+
+		// relay proxy events
+		proxy.relayEvents(this.proxy, ['metachange']);
+
+		this.isSynchronous = proxy.isSynchronous;
+
+		return proxy;
+	}
+
 	,getProxy: function() {
 		return this.proxy;
 	}
@@ -88,7 +111,6 @@ Ext4.define('Eoze.data.proxy.SlaveMemory', {
 			proxy.setModel(model);
 		} else {
 			this.setProxy(Ext4.ModelManager.getModel(model).getProxy());
-			this.relayEvents(this.getProxy(), ['metachange']);
 		}
 
 		this.callParent(arguments);
@@ -99,23 +121,25 @@ Ext4.define('Eoze.data.proxy.SlaveMemory', {
 	 */
 	,read: function(operation, callback, scope) {
 		var proxy = this.getProxy(),
-			operationHash = this.hashOperation(operation),
-			currentHash = this.currentOperationHash,
+//			operationHash = this.hashOperation(operation),
+//			currentHash = this.currentOperationHash,
 			data = this.data;
 		if (data) {
-			return this._read.apply(this, arguments);
-//			return this.callParent(arguments);
+			this._read.apply(this, arguments);
 		} else {
 			this.waitingReadOperations.push(Array.prototype.slice.call(arguments));
 			// start loading if needed
 			if (!this.loading) {
+				this.loading = true;
+
 				var loadingOperation = Ext4.create('Ext.data.Operation', {
 					action: 'read'
 					,limit: false
 					,start: 0
 					,params: operation.params
 				});
-				proxy.read(loadingOperation, function(operation) {
+
+				this.lastRequest = proxy.read(loadingOperation, function(operation) {
 //					this.data = operation.getRecords();
 					this.setData(operation.getRecords());
 
@@ -129,6 +153,8 @@ Ext4.define('Eoze.data.proxy.SlaveMemory', {
 				}, this);
 			}
 		}
+
+		return this.lastRequest;
 	}
 
 	// private
@@ -253,7 +279,5 @@ Ext4.define('Eoze.data.proxy.SlaveMemory', {
 //
 //		this.waitingReadOperations.clear();
 //	}
-}, function() {
 
-	this.prototype.setProxy = Ext4.data.AbstractStore.prototype.setProxy;
 });
