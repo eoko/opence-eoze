@@ -20,6 +20,7 @@ class LegacyRouter extends AbstractRouter {
 			$this->setResponseDefaultContent($response);
 			$response->send();
 		}
+		return $response;
 	}
 
 	/**

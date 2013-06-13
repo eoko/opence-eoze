@@ -256,12 +256,16 @@ class Router {
 		}
 
 		try {
-			$this->createRouter()->route();
+			$response = $this->createRouter()->route();
 
 			if ($this->requestMonitorRecord) {
 				$microtime = self::microtime($time);
 				$runningTime = $microtime - $this->microTimeStart;
-				$this->requestMonitorRecord->setFinishState('OK');
+				if ($response instanceof \Zend\Http\Response) {
+					$this->requestMonitorRecord->setFinishState($response->getStatusCode());
+				} else {
+					$this->requestMonitorRecord->setFinishState('OK');
+				}
 				$this->requestMonitorRecord->setFinishDatetime(date('Y-m-d H:i:s'), $time);
 				$this->requestMonitorRecord->setRunningTimeMicro($runningTime);
 				$this->requestMonitorRecord->save();
