@@ -121,12 +121,13 @@ Ext4.define('Eoze.data.proxy.SlaveMemory', {
 	 */
 	,read: function(operation, callback, scope) {
 		var proxy = this.getProxy(),
-//			operationHash = this.hashOperation(operation),
-//			currentHash = this.currentOperationHash,
+			operationHash = this.hashOperation(operation),
+			currentHash = this.currentOperationHash,
 			data = this.data;
-		if (data) {
+		if (data && (!currentHash || currenthash === operationhash)) {
 			this._read.apply(this, arguments);
 		} else {
+			this.currentHash = operationHash;
 			this.waitingReadOperations.push(Array.prototype.slice.call(arguments));
 			// start loading if needed
 			if (!this.loading) {
@@ -236,11 +237,30 @@ Ext4.define('Eoze.data.proxy.SlaveMemory', {
 			return operation.hash;
 		}
 
-		var options = ['action', 'filters', 'groupers', 'limit', 'params', 'sorters', 'start'],
+		var Ext = Ext4,
+			getKeys = Ext.Object.getKeys;
+
+//		var options = ['action', 'filters', 'groupers', 'limit', 'params', 'sorters', 'start'],
+		var options = ['params'],
 			buffer = [];
 
+		function hashObject(o) {
+			var keys = getKeys(o).sort(),
+				buffer = {};
+			keys.forEach(function(key) {
+				buffer[key] = o[key];
+			});
+			return Ext.encode(buffer);
+		}
+
 		options.forEach(function(name) {
-			buffer.push(operation[name]);
+			var data = operation[name];
+			if (Ext.isObject(data)) {
+				data = hashObject(data);
+			} else {
+				data = String(data);
+			}
+			buffer.push(data);
 		}, this);
 
 		return operation.hash = buffer.join(';');
