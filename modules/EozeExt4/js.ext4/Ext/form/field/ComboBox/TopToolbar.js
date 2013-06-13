@@ -29,22 +29,22 @@
 Ext4.define('Eoze.Ext.form.field.ComboBox.TopToolbar', {
 	override: 'Ext.form.field.ComboBox'
 
-	,requires: [
-		'Eoze.Ext.view.BoundList.TopToolbar'
-	]
-
-	/**
-	 * @inheritdoc
-	 */
-	,initComponent: function() {
-		var toolbar = this.toolbar,
-			listConfig = this.listConfig || {};
-
-		if (toolbar) {
-			listConfig.toolbar = toolbar;
-			this.listConfig = listConfig;
-		}
-
-		this.callParent(arguments);
-	}
+//	,requires: [
+//		'Eoze.Ext.view.BoundList.TopToolbar'
+//	]
+//
+//	/**
+//	 * @inheritdoc
+//	 */
+//	,initComponent: function() {
+//		var toolbar = this.toolbar,
+//			listConfig = this.listConfig || {};
+//
+//		if (toolbar) {
+//			listConfig.toolbar = toolbar;
+//			this.listConfig = listConfig;
+//		}
+//
+//		this.callParent(arguments);
+//	}
 });

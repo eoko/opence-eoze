@@ -29,126 +29,126 @@
 Ext4.define('Eoze.Ext.view.BoundList.TopToolbar', {
 	override: 'Ext.view.BoundList'
 
-	/**
-	 * @property {Ext.toolbar.Toolbar} [toolbar=undefined]
-	 */
-
-	,resizable: true
-
-	/**
-	 * @inheritdoc
-	 */
-	,initComponent: function() {
-		var toolbar = this.toolbar;
-		delete this.toolbar;
-
-//		if (toolbar) {
-//			toolbar.ownerCt = this;
-//			toolbar.ownerLayout = this.getComponentLayout();
+//	/**
+//	 * @property {Ext.toolbar.Toolbar} [toolbar=undefined]
+//	 */
 //
-//			Ext4.applyIf(toolbar, {
-//				height: 24
-//				,border: false
-//			});
+//	,resizable: true
+//
+//	/**
+//	 * @inheritdoc
+//	 */
+//	,initComponent: function() {
+//		var toolbar = this.toolbar;
+//		delete this.toolbar;
+//
+////		if (toolbar) {
+////			toolbar.ownerCt = this;
+////			toolbar.ownerLayout = this.getComponentLayout();
+////
+////			Ext4.applyIf(toolbar, {
+////				height: 24
+////				,border: false
+////			});
+////		}
+////		this.toolbar = Ext4.create('Opence.Contact.view.TypeFilterToolbar', {
+////		this.toolbar = Ext4.create('Ext.toolbar.Toolbar', {
+////			id: this.id + '-paging-toolbar',
+////			border: false,
+////			ownerCt: this,
+////			ownerLayout: this.getComponentLayout()
+////		});
+////		this.toolbar = this.createPagingToolbar();
+//
+//		this.callParent(arguments);
+//	}
+//
+//	/**
+//	 * @inheritdoc
+//	 */
+//	,finishRenderChildren: function() {
+//		var toolbar = this.toolbar;
+//
+//		if (toolbar) {
+//			toolbar.finishRender();
 //		}
-//		this.toolbar = Ext4.create('Opence.Contact.view.TypeFilterToolbar', {
-//		this.toolbar = Ext4.create('Ext.toolbar.Toolbar', {
-//			id: this.id + '-paging-toolbar',
-//			border: false,
-//			ownerCt: this,
-//			ownerLayout: this.getComponentLayout()
-//		});
-		this.toolbar = this.createPagingToolbar();
-
-		this.callParent(arguments);
-	}
-
-	/**
-	 * @inheritdoc
-	 */
-	,finishRenderChildren: function() {
-		var toolbar = this.toolbar;
-
-		if (toolbar) {
-			toolbar.finishRender();
-		}
-
-		this.callParent(arguments);
-	}
-
-	/**
-	 * @inheritdoc
-	 */
-	,getRefItems: function() {
-		var toolbar = this.toolbar,
-			items = this.callParent(arguments);
-
-		if (toolbar) {
-			items.push(toolbar);
-		}
-
-		return toolbar;
-	}
-
-	/**
-	 * @inheritdoc
-	 */
-	,refresh: function() {
-		var toolbar = this.toolbar,
-			rendered = this.rendered;
-
-		this.callParent(arguments);
-
-		if (rendered && toolbar && toolbar.rendered && !this.preserveScrollOnRefresh) {
-//			this.el.insertFirst(toolbar.el);
-			this.el.appendChild(toolbar.el);
-		}
-	}
-
-	/**
-	 * @inheritdoc
-	 */
-	,onDestroy: function() {
-		Ext4.destroyMembers(this, 'toolbar');
-		this.callParent(arguments);
-	}
-
-}, function() {
-
-	var Ext = Ext4,
-		proto = this.prototype,
-		tpl = proto.renderTpl;
-
-//	tpl.unshift(
-//		'{%',
-//			'var me=values.$comp, toolbar=me.toolbar;',
-//			'if (toolbar) {',
-//				'toolbar.ownerLayout = me.componentLayout;',
-//				'Ext.DomHelper.generateMarkup(toolbar.getRenderTree(), out);',
-//			'}',
-//		'%}'
-//	);
-
-	proto.renderTpl = [
-		'<div id="{id}-listEl" class="{baseCls}-list-ct ', Ext.dom.Element.unselectableCls, '" style="overflow:auto"></div>',
-        '{%',
-            'var me=values.$comp, toolbar=me.toolbar;',
-            'if (toolbar) {',
-//				'alert(1);',
-                'toolbar.ownerLayout = me.componentLayout;',
-                'Ext.DomHelper.generateMarkup(toolbar.getRenderTree(), out);',
-            '}',
-        '%}',
+//
+//		this.callParent(arguments);
+//	}
+//
+//	/**
+//	 * @inheritdoc
+//	 */
+//	,getRefItems: function() {
+//		var toolbar = this.toolbar,
+//			items = this.callParent(arguments);
+//
+//		if (toolbar) {
+//			items.push(toolbar);
+//		}
+//
+//		return toolbar;
+//	}
+//
+//	/**
+//	 * @inheritdoc
+//	 */
+//	,refresh: function() {
+//		var toolbar = this.toolbar,
+//			rendered = this.rendered;
+//
+//		this.callParent(arguments);
+//
+//		if (rendered && toolbar && toolbar.rendered && !this.preserveScrollOnRefresh) {
+////			this.el.insertFirst(toolbar.el);
+//			this.el.appendChild(toolbar.el);
+//		}
+//	}
+//
+//	/**
+//	 * @inheritdoc
+//	 */
+//	,onDestroy: function() {
+//		Ext4.destroyMembers(this, 'toolbar');
+//		this.callParent(arguments);
+//	}
+//
+//}, function() {
+//
+//	var Ext = Ext4,
+//		proto = this.prototype,
+//		tpl = proto.renderTpl;
+//
+////	tpl.unshift(
+////		'{%',
+////			'var me=values.$comp, toolbar=me.toolbar;',
+////			'if (toolbar) {',
+////				'toolbar.ownerLayout = me.componentLayout;',
+////				'Ext.DomHelper.generateMarkup(toolbar.getRenderTree(), out);',
+////			'}',
+////		'%}'
+////	);
+//
+//	proto.renderTpl = [
+//		'<div id="{id}-listEl" class="{baseCls}-list-ct ', Ext.dom.Element.unselectableCls, '" style="overflow:auto"></div>',
 //        '{%',
-//            'var me=values.$comp, pagingToolbar=me.pagingToolbar;',
-//            'if (pagingToolbar) {',
-//                'pagingToolbar.ownerLayout = me.componentLayout;',
-//                'Ext.DomHelper.generateMarkup(pagingToolbar.getRenderTree(), out);',
+//            'var me=values.$comp, toolbar=me.toolbar;',
+//            'if (toolbar) {',
+////				'alert(1);',
+//                'toolbar.ownerLayout = me.componentLayout;',
+//                'Ext.DomHelper.generateMarkup(toolbar.getRenderTree(), out);',
 //            '}',
 //        '%}',
-        {
-            disableFormats: true
-        }
-    ];
+////        '{%',
+////            'var me=values.$comp, pagingToolbar=me.pagingToolbar;',
+////            'if (pagingToolbar) {',
+////                'pagingToolbar.ownerLayout = me.componentLayout;',
+////                'Ext.DomHelper.generateMarkup(pagingToolbar.getRenderTree(), out);',
+////            '}',
+////        '%}',
+//        {
+//            disableFormats: true
+//        }
+//    ];
 
 });
