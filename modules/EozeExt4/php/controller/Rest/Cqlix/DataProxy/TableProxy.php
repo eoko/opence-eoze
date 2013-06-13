@@ -489,11 +489,6 @@ class TableProxy extends AbstractProxy {
 		$fieldName = $this->clientToServer($clientFieldName);
 		$config = $this->clientFieldsConfig[$clientFieldName];
 
-		if ($clientFieldName === 'mainDemandId') {
-			dump_mark();
-			$value = 491;
-		}
-
 		if ($config) {
 			if (!empty($config['proxy'])) {
 				$proxy = $this->getProxy($clientFieldName);
