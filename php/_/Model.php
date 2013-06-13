@@ -964,8 +964,8 @@ abstract class Model {
 			if ($new) {
 
 				// Operation is CREATE
-				$this->events->fire(self::EVT_BEFORE_SAVE_BASE, $this);
 				$this->beforeSave(true);
+				$this->events->fire(self::EVT_BEFORE_SAVE_BASE, $this);
 
 				// test integrity *after* listeners have had the opportunity
 				// to preprocess the model in the beforeSave event
@@ -991,8 +991,8 @@ abstract class Model {
 				$this->afterSave(true);
 			} else if ($this->isModified()) {
 				// Operation is UPDATE
-				$this->events->fire(self::EVT_BEFORE_SAVE_BASE, $this);
 				$this->beforeSave(false);
+				$this->events->fire(self::EVT_BEFORE_SAVE_BASE, $this);
 
 				// test integrity *after* listeners have had the opportunity
 				// to preprocess the model in the beforeSave event
