@@ -310,6 +310,10 @@ class TableProxy extends AbstractProxy {
 		}
 	}
 
+	protected function serverNameFromClient($name) {
+		return \Inflector::camelCaseToUnderscored($name);
+	}
+
 	/**
 	 * Gets the names of the expanded client fields, that is both non-expandable fields, and explicitly
 	 * or implicitly expanded fields.
@@ -838,12 +842,39 @@ class TableProxy extends AbstractProxy {
 		return $data;
 	}
 
+	private function cleanAntagonists(array $inputData) {
+
+		$antagonists = array();
+		foreach ($this->clientFieldsConfig as $clientFieldName => $config) {
+			if (isset($config['foreignKey'])) {
+				$antagonists[$clientFieldName] = $config['foreignKey'];
+				$antagonists[$config['foreignKey']] = $clientFieldName;
+			}
+		}
+
+		foreach ($antagonists as $left => $right) {
+			if (isset($inputData[$left])) {
+				if (isset($inputData[$right])) {
+					throw new Exception\InvalidArgument;
+				} else {
+					unset($inputData[$right]);
+				}
+			} else if (isset($inputData[$right])) {
+				unset($inputData[$left]);
+			}
+		}
+
+		return $inputData;
+	}
+
 	/**
 	 * @inheritdoc
 	 */
 	protected function doSetRecordData(Model $model, array $inputData) {
 
 		$postProcessors = array();
+
+		$inputData = $this->cleanAntagonists($inputData);
 
 		foreach ($this->clientFieldsConfig as $clientFieldName => $config) {
 			$value = isset($inputData[$clientFieldName])
