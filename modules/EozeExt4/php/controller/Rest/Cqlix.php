@@ -296,7 +296,7 @@ abstract class Cqlix extends Rest {
 		} catch (\UserException $ex) {
 			$response = $this->getResponse();
 			$response->setContent($ex->getUserMessage());
-			$response->setStatusCode($response::STATUS_CODE_500);
+			$response->setStatusCode($response::STATUS_CODE_409);
 			return $response;
 		} catch (\Exception $ex) {
 			$response = $this->getResponse();
