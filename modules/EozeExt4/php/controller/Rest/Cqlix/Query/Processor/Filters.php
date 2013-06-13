@@ -91,6 +91,8 @@ class Filters extends AbstractProcessor {
 		'numeric' => 'numeric',
 		'string' => 'string',
 		'age' => 'age',
+		'emptyvalue' => 'emptyValue',
+		'emptyValue' => 'emptyValue',
 	);
 
 	/**
@@ -136,7 +138,9 @@ class Filters extends AbstractProcessor {
 				throw new InvalidArgument('Invalid filter type: ' . $data['type']);
 			}
 
-			$value = $data['value'];
+			$value = isset($data['value'])
+				? $data['value']
+				: null;
 
 			switch ($type) {
 				case 'date':
