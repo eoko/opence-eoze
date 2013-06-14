@@ -46,7 +46,8 @@ class Kepler extends Module {
 		$search  = array();
 		$replace = array();
 		foreach (array(
-			'%var%' => $this->getApplication()->resolvePath('tmp'),
+			'%var%' => $this->getApplication()->resolvePath('var'),
+			'%tmp%' => $this->getApplication()->resolvePath('tmp'),
 		) as $var => $rep) {
 			$search[]  = $var;
 			$replace[] = rtrim($rep, '\/');
