@@ -49,9 +49,11 @@ class Params {
 	const CONFIGURE = 9;
 	const EXPAND = 10;
 	const EXPANDED = 11;
+	const IDS = 12;
 
 	private $map = array(
 		self::ID => 'id',
+		self::IDS => 'ids',
 		self::SORT => 'sort',
 		self::START => 'start',
 		self::LIMIT => 'limit',
