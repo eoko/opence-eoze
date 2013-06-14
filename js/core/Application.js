@@ -167,6 +167,11 @@ Oce.MainApplication = {
 			return null;
 		}
     }
+
+	,getFrontModuleComponent: function() {
+		var md = this.getMainDestination();
+		return md && md.getActiveTab();
+	}
 };
 
 // Initialize module factory register
