@@ -57,23 +57,25 @@ Ext4.define('Eoze.data.proxy.CqlixCache', {
 	 */
 	,inCache: function(operation, callback, scope) {
 		var request = this.buildRequest(operation, callback, scope);
-		var requestKey = this.computeRequestKey(request);
+		var requestKey = this.getRequestKey(request);
 
 		var cache = this.getCache();
 		this.runGarbageCollection();
 
-		if ((cache[requestKey] !== undefined) && !this.isExpired(cache[requestKey].expires)) {
-			var response = cache[requestKey].data;
+		var requestCache = cache[requestKey];
 
-			if (cache[requestKey].compressed) {
+		if ((requestCache !== undefined) && !this.isExpired(requestCache.expires)) {
+			var response = requestCache.data;
+
+			if (requestCache.compressed) {
 				Eoze.util.LzString.decompress(response).then({
 					scope: this
 					,success: function(response) {
-						cache[requestKey].data = response;
-						cache[requestKey].compressed = false;
+						requestCache.data = response;
+						requestCache.compressed = false;
 
 						response = Ext.decode(response);
-						if (cache[requestKey].type === 'xml') {
+						if (requestCache.type === 'xml') {
 							response.responseXML = this.xmlToDocument(response.responseText);
 						}
 
@@ -94,7 +96,7 @@ Ext4.define('Eoze.data.proxy.CqlixCache', {
 		}
 	}
 
-	,computeRequestKey: function(request) {
+	,getRequestKey: function(request) {
 		return request.url + '::' + Ext4.encode(request.params);
 	}
 
@@ -113,7 +115,7 @@ Ext4.define('Eoze.data.proxy.CqlixCache', {
 		if (!response._cached && request.action === 'read') {
 			var cache = this.getCache(),
 				cacheKey = this.getCacheKey(),
-				requestKey = this.computeRequestKey(request),
+				requestKey = this.getRequestKey(request),
 				requestCache = cache[requestKey];
 
 			if (requestCache === undefined) {
