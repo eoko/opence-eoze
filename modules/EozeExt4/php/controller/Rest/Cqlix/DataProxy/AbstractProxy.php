@@ -234,6 +234,14 @@ abstract class AbstractProxy implements DataProxyInterface {
 
 		$processors = array();
 
+		// --- Ids
+
+		$ids = $requestParams->get($requestParams::IDS, null);
+
+		if ($ids !== null) {
+			$processors[] = new QueryProcessor\Ids($this, $ids);
+		}
+
 		// --- Limit
 
 		$limit = $requestParams->get($requestParams::LIMIT, 25);
