@@ -442,10 +442,10 @@ Ext4.define('Eoze.AjaxRouter.Router', {
 				Eoze.AjaxRouter.Router.setActivePage(this);
 			}
 			,deactivate: function() {
-				var module = Oce.mx.application.getFrontModule(),
-					tab = module && module.tab;
-				debugger
-				Eoze.AjaxRouter.Router.setActivePage(tab, this);
+				var app = Oce.mx.application,
+					module = app.getFrontModule(),
+					page = module && module.tab || app.getFrontModuleComponent();
+				Eoze.AjaxRouter.Router.setActivePage(page, this);
 			}
 		});
 	});
@@ -460,9 +460,10 @@ Ext4.define('Eoze.AjaxRouter.Router', {
 					Eoze.AjaxRouter.Router.setActivePage(this);
 				}
 				,close: function() {
-					var module = Oce.mx.application.getFrontModule(),
-						tab = module && module.tab;
-					Eoze.AjaxRouter.Router.setActivePage(tab, this);
+					var app = Oce.mx.application,
+						module = app.getFrontModule(),
+						page = module && module.tab || app.getFrontModuleComponent();
+					Eoze.AjaxRouter.Router.setActivePage(page, this);
 				}
 			});
 		}
@@ -474,6 +475,7 @@ Ext4.define('Eoze.AjaxRouter.Router', {
 			eo.ext4.compat.Ext4Container.prototype.afterCreateChild,
 			function(child) {
 				this.href = child.href;
+				this.hrefRoute = child.hrefRoute;
 			}
 		);
 	}
