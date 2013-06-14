@@ -169,7 +169,10 @@ Ext4.define('Eoze.app.Application', {
 	 */
 	,onStarted: function(callback, scope) {
 		if (this.started) {
-			Ext.callback(callback, scope || this, [this]);
+			// If some requires have been added with Ext.require, we want them loaded before we proceed
+			Ext4.onReady(function() {
+				Ext4.callback(callback, scope || this, [this]);
+			}, this);
 		} else {
 			this.on({
 				single: true
