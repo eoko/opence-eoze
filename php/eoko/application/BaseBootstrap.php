@@ -130,7 +130,9 @@ class BaseBootstrap extends Bootstrap {
 	 */
 	protected function initCometEvents(SessionManagerInterface $sessionManager, UserSession $userSession) {
 		if (ConfigManager::get('eoko/routing', 'comet', false)) {
-			$comet = new CometEvents(MY_EOZE_PATH, $sessionManager->getId());
+
+			$basePath = Application::getInstance()->resolvePath('tmp/Kepler');
+			$comet = new CometEvents($basePath, $sessionManager->getId());
 			ExtendedModel::setDefaultCometEvents($comet);
 
 			$userSession

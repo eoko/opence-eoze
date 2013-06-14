@@ -22,7 +22,6 @@ class CometEvents {
 
 	private $basePath;
 
-	private $directory = 'Kepler';
 	private $channelFilename = 'channel-listeners';
 
 	private $disabled = false;
@@ -34,7 +33,7 @@ class CometEvents {
 		$this->id = $id;
 
 		// Create var dir
-		$this->basePath = "$basePath/$this->directory";
+		$this->basePath = $basePath;
 		if (!file_exists($this->basePath)) {
 			mkdir($this->basePath, 0700, true);
 		}
