@@ -444,6 +444,7 @@ Ext4.define('Eoze.AjaxRouter.Router', {
 			,deactivate: function() {
 				var module = Oce.mx.application.getFrontModule(),
 					tab = module && module.tab;
+				debugger
 				Eoze.AjaxRouter.Router.setActivePage(tab, this);
 			}
 		});

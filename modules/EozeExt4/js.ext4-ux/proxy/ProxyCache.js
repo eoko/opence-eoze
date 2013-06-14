@@ -149,7 +149,7 @@ Ext.define('Ext.ux.proxy.ProxyCache', {
 		if(success) { this.addToCache(request, response); }
 	},
 
-/**
+	/**
 	 * Override the read function so that we can check if the response is already cached and return it from their instead of going to the server.
 	 *
 	 * @param {Ext.data.Operation} operation The operation being executed
