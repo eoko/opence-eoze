@@ -28,6 +28,7 @@ use eoko\modules\EozeExt4\Exception;
 use Zend\Http\PhpEnvironment\Request as HttpRequest;
 use Zend\Http\Response;
 use eoko\module\executor\JsonExecutor;
+use eoko\util\Arrays;
 
 /**
  * Abstract scaffolding for a RESTFul executor.
@@ -89,6 +90,9 @@ abstract class Rest extends JsonExecutor {
 	public function deleteRecord(/** @noinspection PhpUnusedParameterInspection */ $id = null) {
 		throw new Exception\UnsupportedOperation('TODO');
 	}
+
+	// TODO doc
+	abstract public function deleteRecords($data);
 
 	/**
 	 * Action for posting new data, that is creating a new record.
@@ -163,7 +167,11 @@ abstract class Rest extends JsonExecutor {
 					return $this->putRecord($id, $inputData);
 				} else if ($method === $httpRequest::METHOD_DELETE) {
 					$this->crudOperation = self::OPERATION_DELETE;
-					return $this->deleteRecord($id);
+					if (is_array($id)) {
+						return $this->deleteRecords($id);
+					} else {
+						return $this->deleteRecord($id);
+					}
 				}
 			} else {
 				if ($method === $httpRequest::METHOD_GET) {
@@ -173,6 +181,13 @@ abstract class Rest extends JsonExecutor {
 					$this->crudOperation = self::OPERATION_CREATE;
 					$inputData = $request->req('data');
 					return $this->postRecord($inputData);
+				} else if ($method === $httpRequest::METHOD_DELETE) {
+					$this->crudOperation = self::OPERATION_DELETE;
+					$data = $request->req('data');
+					if (Arrays::isAssoc($data)) {
+						$data = array($data);
+					}
+					return $this->deleteRecords($data);
 				} else {
 					$this->set('errorCause', 'Unsupported method.');
 					$response->setStatusCode($response::STATUS_CODE_405);

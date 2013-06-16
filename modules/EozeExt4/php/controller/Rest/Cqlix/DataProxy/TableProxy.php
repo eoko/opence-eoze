@@ -485,6 +485,28 @@ class TableProxy extends AbstractProxy {
 		return $proxy;
 	}
 
+	/**
+	 * @inheritdoc
+	 */
+	public function getIdFromData(array $data, $require = true) {
+
+		$pkName = $this->getTable()->getPrimaryKeyName();
+		$map = $this->clientToServerMap;
+
+		if (isset($map[$pkName])) {
+			$clientPkName = $map[$pkName];
+			if (isset($data[$clientPkName])) {
+				return $data[$clientPkName];
+			} else if ($require) {
+				throw new Exception\InvalidArgument('Provided data does not contain id.');
+			} else {
+				return null;
+			}
+		} else {
+			throw new Exception\IllegalState('Cannot resolve id field server-side name.');
+		}
+	}
+
 	private function writeField(Model $model, $clientFieldName, $value) {
 		$fieldName = $this->clientToServer($clientFieldName);
 		$config = $this->clientFieldsConfig[$clientFieldName];
