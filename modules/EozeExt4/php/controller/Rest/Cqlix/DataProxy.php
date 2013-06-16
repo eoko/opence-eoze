@@ -30,6 +30,7 @@ use eoko\modules\EozeExt4\controller\Rest\Cqlix\RecordSet\RecordParser;
 use eoko\modules\EozeExt4\controller\Rest\Cqlix\DataProxy\TableProxy\ExpandedFields;
 use Model;
 use Query;
+use eoko\modules\EozeExt4\Exception;
 
 /**
  * Proxy used by this module's controllers to read and write to Cqlix records.
@@ -113,6 +114,17 @@ interface DataProxy extends FieldNameResolver {
 	 * @return array
 	 */
 	public function getRecordData(Record $record);
+
+	/**
+	 * Gets the primary key value of the record specified with the passed data.
+	 *
+	 * @param array $data
+	 * @param bool $require
+	 * @throws Exception\IllegalState If the proxy cannot resolve the server-side name of the id field
+	 * @throws Exception\InvalidArgument If the passed data doesn't contain record id, and require is true
+	 * @return mixed
+	 */
+	public function getIdFromData(array $data, $require = true);
 
 	/**
 	 * Updates the passed record with the given data.

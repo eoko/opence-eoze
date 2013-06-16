@@ -288,6 +288,45 @@ abstract class Cqlix extends Rest {
 	/**
 	 * @inheritdoc
 	 */
+	public function deleteRecord($id) {
+		try {
+			$ids = is_array($id) ? $id : array($id);
+			$this->getTable()->deleteWherePkIn($ids);
+			return true;
+		} catch (\UserException $ex) {
+			$response = $this->getResponse();
+			$response->setContent($ex->getUserMessage());
+			$response->setStatusCode($response::STATUS_CODE_500);
+			return $response;
+		} catch (\Exception $ex) {
+			$response = $this->getResponse();
+			$response->setStatusCode($response::STATUS_CODE_500);
+			return $response;
+		}
+	}
+
+	/**
+	 * @inheritdoc
+	 */
+	public function deleteRecords($data) {
+		$proxy = $this->getDataProxy(false);
+
+		$ids = array();
+
+		foreach ($data as $record) {
+			if (is_array($record)) {
+				$ids[] = $proxy->getIdFromData($record);
+			} else {
+				$ids[] = $record;
+			}
+		}
+
+		return $this->deleteRecord($ids);
+	}
+
+	/**
+	 * @inheritdoc
+	 */
 	public function getList() {
 
 		$requestParams = $this->getRequestParams();
