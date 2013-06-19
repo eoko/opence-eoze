@@ -422,7 +422,9 @@ Ext4.define('Eoze.AjaxRouter.Router', {
 
 				eo.app(function(app) {
 					app.onStarted(function() {
-						me.initialRoute();
+						Ext4.onReady(function() {
+							me.initialRoute();
+						});
 					});
 				});
 
