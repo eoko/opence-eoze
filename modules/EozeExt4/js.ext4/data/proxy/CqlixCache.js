@@ -43,9 +43,22 @@ Ext4.define('Eoze.data.proxy.CqlixCache', {
 		noCache: false
 	}
 
-	,VERSION: 7
+	,VERSION: 8
 
 	,cache: null
+
+	,constructor: function() {
+		this.callParent(arguments);
+
+		if (this.keplerReloadEvent) {
+			eo.Kepler.on(this.keplerReloadEvent, function() {
+				// invalid the cache
+				this.VERSION++;
+				this.cache = null;
+				this.fireEvent('cacheexpire', this);
+			}, this);
+		}
+	}
 
 	/**
 	 * Determines if response is cached and processes the cached response if it is.
@@ -71,10 +84,11 @@ Ext4.define('Eoze.data.proxy.CqlixCache', {
 				Eoze.util.LzString.decompress(response).then({
 					scope: this
 					,success: function(response) {
+						response = Ext.decode(response);
+
 						requestCache.data = response;
 						requestCache.compressed = false;
 
-						response = Ext.decode(response);
 						if (requestCache.type === 'xml') {
 							response.responseXML = this.xmlToDocument(response.responseText);
 						}
@@ -191,7 +205,8 @@ Ext4.define('Eoze.data.proxy.CqlixCache', {
 	}
 
 	/**
-	 * Override the processResponse function so that we can add the response to the cache after we have recieved it from the server.
+	 * Override the processResponse function so that we can add the response to the cache after we have
+	 * received it from the server.
 	 *
 	 * @param {Boolean} success Whether the operation was successful or not
 	 * @param {Ext.data.Operation} operation The operation being executed
@@ -204,8 +219,20 @@ Ext4.define('Eoze.data.proxy.CqlixCache', {
 		if (success) {
 			this.addToCache(request, response);
 		}
-		return this.callParent(arguments);
+		return this.callParent([success, operation, request, response, function() {
+			this.processResponseOperation(operation);
+			Ext4.callback(callback, scope, [operation]);
+		}, this]);
 	}
+
+	/**
+	 * Hook method for result set post processing by proxy.
+	 *
+	 * @param {Ext.data.Operation} operation The operation being executed
+	 * @protected
+	 * @template
+	 */
+	,processResponseOperation: function(operation) {}
 
 	/**
 	 * Override the read function so that we can check if the response is already cached and return it from their instead of going to the server.
