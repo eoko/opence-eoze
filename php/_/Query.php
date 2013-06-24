@@ -597,6 +597,15 @@ abstract class Query implements QueryAliasable {
 	}
 
 	protected function buildUpdateClause() {
+
+		$setClause = $this->buildUpdateSetClause();
+
+		return 'UPDATE ' . $this->buildTable(true)
+			. ($this->hasJoins() ? $this->buildJoinsClauses() : null)
+			. ' SET ' . $setClause;
+	}
+
+	protected function buildUpdateSetClause() {
 		$parts = array();
 
 		if (!$this->set) {
@@ -633,10 +642,7 @@ abstract class Query implements QueryAliasable {
 			}
        	}
 
-		return 'UPDATE ' . $this->buildTable(true) 
-				. ($this->hasJoins() ? $this->buildJoinsClauses() : null)
-				. ' SET '
-				. implode(', ', $parts);
+		return implode(', ', $parts);
 	}
 
 	private function buildUpdate() {
@@ -648,8 +654,18 @@ abstract class Query implements QueryAliasable {
 
 	protected function buildInsertOrUpdate() {
 		$this->buildInsert(null);
-		$this->sql .= ' ON DUPLICATE KEY '
-				. $this->buildUpdateClause()
+
+//		if ($this instanceof ModelTableQuery) {
+//			unset($this->set[$this->getTable()->getPrimaryKeyName()]);
+//		}
+
+		$parts = array();
+		foreach ($this->set as $name => $value) {
+			$parts[] .= $this->alias($name) . ' = VALUES(' . $this->alias($name) . ')';
+		}
+
+		$this->sql .= ' ON DUPLICATE KEY UPDATE '
+				. implode(', ' ,$parts)
 				. ';';
 	}
 
