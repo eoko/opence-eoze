@@ -33,3 +33,4 @@ used:
     - UserPreferences
     - DataSnapshots
     - EozeExt4
+    - LzString

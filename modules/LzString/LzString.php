@@ -1,3 +1,4 @@
+<?php
 /**
  * Copyright (C) 2013 Eoko
  *
@@ -21,10 +22,15 @@
  * @author Éric Ortega <eric@eoko.fr>
  */
 
-/**
- *
- * @since 2013-06-18 15:48
- */
-Ext4.define('LzString.Worker', {
+namespace eoko\modules\LzString;
 
-});
+use eoko\module\Module;
+
+/**
+ * @todo doc
+ *
+ * @since 2013-06-24 23:28
+ */
+class LzString extends Module {
+
+}
