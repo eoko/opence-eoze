@@ -120,7 +120,14 @@ Ext4.define('Eoze.util.LzString', {
 
 		if (deferred) {
 			delete this.waitingPromises[id];
+
+			var Logger = Deft.Logger,
+				previous = Logger.log;
+			Logger.log = Ext.emptyFn;
+
 			deferred.resolve(data);
+
+			Logger.log = previous;
 		}
 	}
 });
