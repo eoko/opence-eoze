@@ -157,9 +157,48 @@ abstract class Rest extends JsonExecutor {
 		$id = $request->get('id', null);
 
 		try {
+
+			// The request may not need to be processed if the data store has not been modified
+			if ($method === $httpRequest::METHOD_GET) {
+
+				$lastModified = $this->getLastModified();
+
+				if ($lastModified) {
+
+					$expireDate = new \DateTime();
+					$expireDate->add(new \DateInterval('P1W'));
+
+					$response->getHeaders()->addHeaders(array(
+						'Cache-Control' => 'private, max-age=604800',
+						'Last-Modified' => $lastModified->format('r'),
+						'Expires' => $expireDate->format('r'),
+					));
+
+					header_remove('Pragma');
+
+					/** @var \Zend\Http\Header\IfModifiedSince $ifModifiedSinceHeader */
+					$ifModifiedSinceHeader = $request->getHttpRequest()->getHeader('If-Modified-Since');
+					if ($ifModifiedSinceHeader) {
+						if (!$lastModified->diff($ifModifiedSinceHeader->date())->invert) {
+							$response->setStatusCode($response::STATUS_CODE_304);
+							return $response;
+						}
+					}
+				} else {
+					$response->getHeaders()->addHeaders(array(
+						'Cache-Control' => 'private, no-cache',
+					));
+				}
+			}
+
 			if ($id) {
 				if ($method === $httpRequest::METHOD_GET) {
 					$this->crudOperation = self::OPERATION_READ;
+
+					$response->getHeaders()->addHeaders(array(
+						'Cache-Control' => 'private, no-cache',
+					));
+
 					return $this->getRecord($id);
 				} else if ($method === $httpRequest::METHOD_PUT || $method === $httpRequest::METHOD_POST) {
 					$this->crudOperation = self::OPERATION_UPDATE;
@@ -201,5 +240,12 @@ abstract class Rest extends JsonExecutor {
 
 		// We can only get here from the catch block
 		return $response;
+	}
+
+	/**
+	 * @return \DateTime
+	 */
+	protected function getLastModified() {
+		return null;
 	}
 }

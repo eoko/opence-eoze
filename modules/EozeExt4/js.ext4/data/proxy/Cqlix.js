@@ -34,6 +34,10 @@ Ext4.define('Eoze.data.proxy.Cqlix', {
 
 	,alias: 'proxy.cqlix'
 
+	,mixins: {
+		httpCache: 'Eoze.data.proxy.mixin.AjaxHttpCache'
+	}
+
 	,constructor: function(config) {
 
 		config = config || {};
@@ -64,29 +68,31 @@ Ext4.define('Eoze.data.proxy.Cqlix', {
 		}
 
 		this.callParent([config]);
+
+		this.initHttpCache(config);
 	}
 
-	/**
-	 * @inheritdoc
-	 */
-	,buildUrl: function(request) {
-		var url = this.callParent(arguments),
-			operation = request.operation,
-//			action = operation.action,
-			records = operation.records || [],
-			record = records[0],
-			id = record ? record.getId() : operation.id;
-
-		if (!Ext.isEmpty(id)) {
-			if (!/\/$/.test(url)) {
-				url += '/';
-			}
-			url += id;
-		}
-
-		request.url = url;
-
-		return url;
-	}
+//	/**
+//	 * @inheritdoc
+//	 */
+//	,buildUrl: function(request) {
+//		var url = this.callParent(arguments),
+//			operation = request.operation,
+////			action = operation.action,
+//			records = operation.records || [],
+//			record = records[0],
+//			id = record ? record.getId() : operation.id;
+//
+//		if (!Ext.isEmpty(id)) {
+//			if (!/\/$/.test(url)) {
+//				url += '/';
+//			}
+//			url += id;
+//		}
+//
+//		request.url = url;
+//
+//		return url;
+//	}
 
 });
