@@ -28,7 +28,11 @@
  */
 Ext.define('Eoze.data.proxy.mixin.AjaxHttpCache', {
 
-	httpCacheEnabled: true
+	requires: [
+		'Eoze.Ext.Object'
+	]
+
+	,httpCacheEnabled: true
 
 	,hasCacheExpireEvent: true
 
@@ -55,9 +59,21 @@ Ext.define('Eoze.data.proxy.mixin.AjaxHttpCache', {
 
 					key = this.hashOperation(operation);
 
-					headers['Cache-Control'] = (!operation.invalidateHttpCache && this.verifiedCaches[key])
-						? 'max-age'
-						: 'max-age=0';
+					if (this.verifiedCaches[key]) {
+						headers['Cache-Control'] = 'max-age';
+
+						if (operation.invalidateHttpCache) {
+							if (Ext.isChrome) {
+								headers['If-Modified-Since'] = Ext.Date.format(new Date(0), 'r');
+							} else {
+								debugger // should try to find a better way!
+								headers['If-Modified-Since'] = Ext.Date.format(new Date(0), 'r');
+							}
+							delete this.verifiedCaches[key];
+						}
+					} else {
+						headers['Cache-Control'] = 'max-age=0';
+					}
 				}
 
 				Ext.apply(request, {
@@ -78,9 +94,10 @@ Ext.define('Eoze.data.proxy.mixin.AjaxHttpCache', {
 			,processResponse: createSequence(
 				this.processResponse,
 				function(success, operation, request, response) {
-					var key = this.hashOperation(operation);
-					if (operation.action === 'read') {
-						this.verifiedCaches[key] = true;
+					var key = this.hashOperation(operation),
+						lastModified = response.getResponseHeader('Last-Modified');
+					if (operation.action === 'read' && lastModified) {
+						this.verifiedCaches[key] = lastModified; //Ext.Date.add(new Date(lastModified), Date.SECOND, 1);
 					}
 				}
 			)
@@ -99,14 +116,8 @@ Ext.define('Eoze.data.proxy.mixin.AjaxHttpCache', {
 		if (operation._proxyUid) {
 			return operation._proxyUid;
 		}
-
-		var request = operation.request,
-			params = operation.request.params,
-			normalizedKeys = Ext.Object.getKeys(params).sort(),
-			normalizedParams = Ext.copyTo({}, params, normalizedKeys),
-			proxyUid = request.url + '::' + Ext.encode(normalizedParams);
-
-		return operation._proxyUid = proxyUid;
+		var request = operation.request;
+		return request.url + '::' + Ext.Object.hash(request.params);
 	}
 
 });
