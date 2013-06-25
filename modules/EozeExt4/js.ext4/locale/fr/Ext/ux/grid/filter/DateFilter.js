@@ -29,8 +29,8 @@
 Ext4.define('Eoze.locale.fr.Ext.ux.grid.filter.DateFilter', {
 	override: 'Ext.ux.grid.filter.DateFilter'
 
-	,afterText: "À partir du (inclus)"
-	,beforeText: "Jusqu'au (exclus)"
+	,afterText: "À partir du"
+	,beforeText: "Jusqu'au"
 	,dateFormat: "d/m/Y"
 	,onText: "Le"
 });
