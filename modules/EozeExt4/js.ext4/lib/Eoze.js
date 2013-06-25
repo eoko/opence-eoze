@@ -35,6 +35,7 @@ Ext4.define('Eoze.lib.Eoze', {
 		'Eoze.grid.column.Integer',
 
 		// -- UX --
-		'Ext.ux.ActivityMonitor'
+		'Ext.ux.ActivityMonitor',
+		'Ext.ux.Eoze.HttpCache'
 	]
 });
