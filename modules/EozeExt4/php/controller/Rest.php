@@ -165,13 +165,9 @@ abstract class Rest extends JsonExecutor {
 
 				if ($lastModified) {
 
-					$expireDate = new \DateTime();
-					$expireDate->add(new \DateInterval('P1W'));
-
 					$response->getHeaders()->addHeaders(array(
 						'Cache-Control' => 'private, max-age=604800',
 						'Last-Modified' => $lastModified->format('r'),
-						'Expires' => $expireDate->format('r'),
 					));
 
 					header_remove('Pragma');
