@@ -23,6 +23,10 @@
 
 /**
  *
+ * - Overrides {@link #isEqual} method to implement `ignoreTime` option.
+ *
+ * - Adds 'r' date format for [RFC2822](http://www.faqs.org/rfcs/rfc2822.html) date time.
+ *
  * @since 2012-11-28 16:14
  */
 Ext4.define('Eoze.Ext.Date', {
@@ -56,4 +60,18 @@ Ext4.define('Eoze.Ext.Date', {
 		// one or both isn't a date, only equal if both are falsey
 		return !(date1 || date2);
 	}
+}, function() {
+
+	var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+		months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+		format = this.format;
+
+	this.formatFunctions.r = function() {
+		var date = this;
+		return days[date.getDay()] + ', '
+			+ format(date, 'd ')
+			+ months[date.getMonth()]
+			+ format(date, ' Y H:i:s ')
+			+ date.getGMTOffset();
+	};
 });
