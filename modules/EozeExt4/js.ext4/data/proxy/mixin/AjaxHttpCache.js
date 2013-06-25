@@ -30,6 +30,8 @@ Ext.define('Eoze.data.proxy.mixin.AjaxHttpCache', {
 
 	httpCacheEnabled: true
 
+	,hasCacheExpireEvent: true
+
 	,initHttpCache: function(config) {
 		var createInterceptor = Ext.Function.createInterceptor,
 			createSequence = Ext.Function.createSequence;
@@ -84,6 +86,7 @@ Ext.define('Eoze.data.proxy.mixin.AjaxHttpCache', {
 			)
 		});
 
+		// TODO kepler specific should be moved out
 		if (this.keplerReloadEvent) {
 			eo.Kepler.on(this.keplerReloadEvent, function() {
 				this.verifiedCaches = {};
