@@ -30,13 +30,21 @@
 Ext.define('Eoze.Ext.grid.RowNumberer', {
 	override: 'Ext.grid.RowNumberer'
 
+	,beforeRender: function() {
+		this.callParent(arguments);
+
+		this.scope = this; // inconsistent between ext 4.2.1+ and previous
+		this.grid = this.up('tablepanel');
+	}
+
 	,renderer: function(value, metaData, record, rowIdx, colIdx, store) {
-		var rowspan = this.rowspan;
+		var grid = this.grid,
+			rowspan = grid.rowspan;
 		if (rowspan) {
 			metaData.tdAttr = 'rowspan="' + rowspan + '"';
 		}
 
-		var store = this.getStore();
+		var store = grid.getStore();
 		if (store.pageSize) {
 			rowIdx += (store.currentPage - 1) * store.pageSize;
 		}
