@@ -151,8 +151,8 @@ Ext.define('Eoze.form.field.GridPicker', {
 
 		this.grid = grid;
 
-//		grid.ownerCt = this;
-//		grid.registerWithOwnerCt();
+		grid.ownerCt = this;
+		grid.registerWithOwnerCt();
 
 		this.mon(grid, {
 			scope: this
