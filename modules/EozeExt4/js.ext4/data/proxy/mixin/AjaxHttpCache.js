@@ -32,10 +32,35 @@ Ext.define('Eoze.data.proxy.mixin.AjaxHttpCache', {
 		'Eoze.Ext.Object'
 	]
 
+	/**
+	 * Name of models that will be monitored for change on the server side using kepler,
+	 * to invalidate the cache.
+	 *
+	 * @cfg {String[]/String} watchModels
+	 */
+
+	/**
+	 * @cfg {String} keplerReloadEvent
+	 * @private
+	 */
+
+	/**
+	 * @cfg {Boolean}
+	 */
 	,httpCacheEnabled: true
 
+	/**
+	 * Flag to indicate that this proxy fires {@link #cacheexpire} events.
+	 *
+	 * @property {Boolean}
+	 */
 	,hasCacheExpireEvent: true
 
+	/**
+	 * This method must be called to initialize the mixin.
+	 *
+	 * @protected
+	 */
 	,initHttpCache: function(config) {
 		var createInterceptor = Ext.Function.createInterceptor,
 			createSequence = Ext.Function.createSequence;
@@ -105,9 +130,18 @@ Ext.define('Eoze.data.proxy.mixin.AjaxHttpCache', {
 
 		// TODO kepler specific should be moved out
 		if (this.keplerReloadEvent) {
-			eo.Kepler.on(this.keplerReloadEvent, function() {
-				this.verifiedCaches = {};
-				this.fireEvent('cacheexpire', this);
+			eo.Kepler.on(this.keplerReloadEvent, this.onKeplerDataChanged, this);
+		}
+
+		var watchModels = this.watchModels;
+		if (watchModels) {
+			if (Ext.isString(watchModels)) {
+				watchModels = watchModels.split(',');
+			} else if (!Ext.isArray(watchModels)) {
+				watchModels = [watchModels];
+			}
+			watchModels.forEach(function(model) {
+				eo.Kepler.on(model + 'Table:dataChanged', this.onKeplerDataChanged, this);
 			}, this);
 		}
 	}
@@ -118,6 +152,11 @@ Ext.define('Eoze.data.proxy.mixin.AjaxHttpCache', {
 		}
 		var request = operation.request;
 		return request.url + '::' + Ext.Object.hash(request.params);
+	}
+
+	,onKeplerDataChanged: function() {
+		this.verifiedCaches = {};
+		this.fireEvent('cacheexpire', this);
 	}
 
 });
