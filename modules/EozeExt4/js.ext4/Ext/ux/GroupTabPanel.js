@@ -63,11 +63,13 @@ Ext4.define('Eoze.Ext.ux.GroupTabPanel', {
 		);
 
 		// Keep a reference to the group config (that is lost in parent method)
+		var groupItemConfigs = [];
 		Ext.each(this.items, function(groupItem) {
 			var items = groupItem.items,
 				rootItem = items && items[0];
 			if (rootItem) {
-				rootItem.groupItemConfig = groupItem;
+				rootItem.groupItemConfigIndex = groupItemConfigs.length;
+				groupItemConfigs.push(groupItem);
 			}
 		});
 
@@ -88,7 +90,8 @@ Ext4.define('Eoze.Ext.ux.GroupTabPanel', {
 			this.setTabHidden(card, card.isHidden(), true);
 
 			// Adjust group visibility
-			var groupConfig = card.groupItemConfig; // only the root leaf (sic) will have it
+			var index = card.groupItemConfigIndex,
+				groupConfig = index !== undefined && groupItemConfigs[card.groupItemConfigIndex]; // only the root leaf (sic) will have it
 			if (groupConfig) {
 				this.setGroupHidden(card, groupConfig.hidden, true);
 
