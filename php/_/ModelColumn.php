@@ -381,7 +381,7 @@ class ModelColumn extends ModelFieldBase {
 				new QuerySelectFunctionOnField(
 					$query, 
 					$this->name, 
-					'DATE_FORMAT({}, "%Y-%m-%dT%H:%i:%s")',
+					'CONCAT(DATE_FORMAT({}, "%Y-%m-%dT%H:%i:%s"), "' . date('O') . '")',
 					$this->name
 				)
 			);
