@@ -217,7 +217,7 @@ Ext4.define('Eoze.Ext.ComponentQuery.AcceptingSquareBrackets', {
 			// <rx> Changed:
 			// re: /^(?:\[((?:@|\?)?[\w\-\$]*[^\^\$\*~%!])\s?(?:(=|.=)\s?['"]?(.*?)["']?)?\])/,
 			// To:
-			re: /^(?:\[((?:@|\?)?[\w\-\$]*[^\^\$\*~%!])\s?(?:(=|.=)\s?['"]?(.*)["']?)?\])/,
+			re: /^(?:\[((?:@|\?)?[\w\-\$]*[^\^\$\*~%!])\s?(?:(=|.=)\s?(?:"([^"]*)"|'([^']*)'|(.*?)))?\])/,
 			// </rx>
 			method: filterByAttribute
 		}, {
@@ -299,6 +299,10 @@ Ext4.define('Eoze.Ext.ComponentQuery.AcceptingSquareBrackets', {
 					// associated with this matcher, and pass the regular
 					// expression matches are arguments to the operation.
 					if (selectorMatch) {
+						// <rx>
+						// Removes capture group that didn't hit (because part of an alternative)
+						selectorMatch = selectorMatch.filter(function(s) { return s !== undefined; });
+						// </rx>
 						operations.push({
 							method: Ext.isString(matcher.method)
 								// Turn a string method into a function by formatting the string with our selector matche expression
