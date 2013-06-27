@@ -1,6 +1,7 @@
 (function(Ext) {
 /**
  * @author http://stackoverflow.com/a/17059073/1387519
+ * @author eric.ortega@eoko.fr
  */
 
 /**
@@ -24,13 +25,21 @@ Ext.define('Ext.ux.form.field.DateTime', {
 	timeCfg: null,
 
 	initComponent: function () {
-		var me = this;
+		var me = this,
+			mxField = this.mixins.field;
 		if (!me.dateCfg) me.dateCfg = {};
 		if (!me.timeCfg) me.timeCfg = {};
 		me.buildField();
 		me.callParent();
-		me.dateField = me.down('datefield')
-		me.timeField = me.down('timefield')
+		me.dateField = me.down('datefield');
+		me.timeField = me.down('timefield');
+
+		[me.dateField, me.timeField].forEach(function(field) {
+			field.on({
+				scope: me
+				,change: mxField.checkChange
+			})
+		});
 
 		me.initField();
 	},
