@@ -27,7 +27,7 @@
  * @since 2013-03-28 13:03
  */
 Ext4.define('Eoze.app.Application', {
-	extend: 'Deft.mvc.Application'
+	extend: 'Ext.app.Application'
 
 	,requires: [
 		'Eoze.app.LoginManager.LegacyLoginManager',
