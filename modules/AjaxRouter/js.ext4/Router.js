@@ -281,18 +281,36 @@ Ext4.define('Eoze.AjaxRouter.Router', {
 	 * @private
 	 */
 	,start: function() {
+		if (this.ready && !this.started) {
 
-		this.lazyRoutes.forEach(function(provider) {
-			if (Ext.isString(provider)) {
-				provider = Ext4.create(provider);
+			// 1) register must be called before started is set to true
+			this.lazyRoutes.forEach(function(provider) {
+				if (Ext.isString(provider)) {
+					provider = Ext4.create(provider);
+				}
+				this.register(provider.getRoutes());
+			}, this);
+
+			// Free memory
+			delete this.lazyRoutes;
+
+			// 2) started must be set before calling route() (or it will try to start itself)
+			this.started = true;
+
+			if (this.onReadyActivePage) {
+				this.setActivePage.apply(this, this.onReadyActivePage);
+				delete this.onReadyActivePage;
+			} else {
+				this.initialRoute();
 			}
-			this.register(provider.getRoutes());
-		}, this);
 
-		// Free memory
-		delete this.lazyRoutes;
-
-		this.started = true;
+			Ext.fly(window).on('hashchange', function() {
+				//noinspection JSAccessibilityCheck
+				Eoze.AjaxRouter.Router.onHashChange();
+			});
+		} else {
+			this.startOnReady = true;
+		}
 	}
 
 	/**
@@ -330,6 +348,11 @@ Ext4.define('Eoze.AjaxRouter.Router', {
 	 * @param {Object} [previousPage]
 	 */
 	,setActivePage: function(page, previousPage) {
+
+		if (!this.started) {
+			this.onReadyActivePage = Array.prototype.slice.call(arguments, 0);
+			return;
+		}
 
 		// Front pages are not replaced with back pages
 		var activePage = this.activePage;
@@ -395,6 +418,18 @@ Ext4.define('Eoze.AjaxRouter.Router', {
 		this.route();
 	}
 
+	/**
+	 * @private
+	 */
+	,setReady: function() {
+		if (!this.ready) {
+			this.ready = true;
+			if (this.startOnReady) {
+				this.start();
+			}
+		}
+	}
+
 }, function() {
 
 	var me = this;
@@ -419,17 +454,9 @@ Ext4.define('Eoze.AjaxRouter.Router', {
 			}
 			,success: function(data) {
 				me.register(data.routes);
-
 				eo.app(function(app) {
 					app.onStarted(function() {
-						Ext4.onReady(function() {
-							me.initialRoute();
-
-							Ext.fly(window).on('hashchange', function() {
-								//noinspection JSAccessibilityCheck
-								Eoze.AjaxRouter.Router.onHashChange();
-							});
-						});
+						me.setReady(true);
 					});
 				});
 			}
