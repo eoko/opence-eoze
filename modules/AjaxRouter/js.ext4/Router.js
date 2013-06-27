@@ -424,13 +424,13 @@ Ext4.define('Eoze.AjaxRouter.Router', {
 					app.onStarted(function() {
 						Ext4.onReady(function() {
 							me.initialRoute();
+
+							Ext.fly(window).on('hashchange', function() {
+								//noinspection JSAccessibilityCheck
+								Eoze.AjaxRouter.Router.onHashChange();
+							});
 						});
 					});
-				});
-
-				Ext.fly(window).on('hashchange', function() {
-					//noinspection JSAccessibilityCheck
-					Eoze.AjaxRouter.Router.onHashChange();
 				});
 			}
 		});
