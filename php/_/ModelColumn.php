@@ -321,6 +321,11 @@ class ModelColumn extends ModelFieldBase {
 					? null
 					: ($value ? '1' : '0');
 			case self::T_DATETIME:
+				$datetimeRegex = '/^(?<date>\d{4}-\d{2}-\d{2})[T ](?<time>\d{2}:\d{2}:\d{2})(?<zone>.+)$/';
+				if (is_string($value) && preg_match($datetimeRegex, $value, $matches)) {
+					$value = new DateTime($value);
+					$value->setTimezone(new DateTimeZone(date_default_timezone_get()));
+				}
 				if ($value instanceof DateTime) {
 					$value = $value->format('Y-m-d H:i:s');
 				}
@@ -373,21 +378,25 @@ class ModelColumn extends ModelFieldBase {
 	/**
 	 *
 	 * @param \ModelTableQuery $query
+	 * @version 2013-06-28 17:55 Selecting datetime in SQL format instead of 'Y-m-dTH:i:s'. This is
+	 * to ensure coherency between values read from database and values set into the model (casted
+	 * to SQL format)
 	 */
 	public function select(ModelTableQuery $query) {
-		if ($this->type === self::T_DATETIME) {
-			// select date time as valid ISO-8601
-			$query->select(
-				new QuerySelectFunctionOnField(
-					$query, 
-					$this->name, 
-					'CONCAT(DATE_FORMAT({}, "%Y-%m-%dT%H:%i:%s"), "' . date('O') . '")',
-					$this->name
-				)
-			);
-		} else {
+//		if ($this->type === self::T_DATETIME) {
+//			// select date time as valid ISO-8601
+//			$query->select(
+//				new QuerySelectFunctionOnField(
+//					$query,
+//					$this->name,
+//					'CONCAT(DATE_FORMAT({}, "%Y-%m-%dT%H:%i:%s"), "' . date('O') . '")',
+////					'DATE_FORMAT({}, "%Y-%m-%dT%H:%i:%s")',
+//					$this->name
+//				)
+//			);
+//		} else {
 			$query->select($this->name);
-		}
+//		}
 	}
 
 	public static function buildColumnSelect($name, $tableName = null,
