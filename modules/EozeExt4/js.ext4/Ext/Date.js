@@ -34,6 +34,7 @@ Ext4.define('Eoze.Ext.Date', {
 
 	// TODO move that to application domain
 	,defaultFormat: 'd/m/Y'
+	,defaultDateTimeFormat: 'd/m/Y H:i'
 
 	/**
 	 * This method is overridden to respect the `ignoreTime` option in dates.
@@ -62,16 +63,26 @@ Ext4.define('Eoze.Ext.Date', {
 	}
 }, function() {
 
+	var Ext = Ext4,
+		utilDate = this;
+
 	var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
 		months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
 		format = this.format;
 
-	this.formatFunctions.r = function() {
-		var date = this;
-		return days[date.getDay()] + ', '
-			+ format(date, 'd ')
-			+ months[date.getMonth()]
-			+ format(date, ' Y H:i:s ')
-			+ date.getGMTOffset();
-	};
+	Ext.apply(this.formatFunctions, {
+		r: function() {
+			var date = this;
+			return days[date.getDay()] + ', '
+				+ format(date, 'd ')
+				+ months[date.getMonth()]
+				+ format(date, ' Y H:i:s ')
+				+ date.getGMTOffset();
+		}
+
+		,'defaultDateTime': function() {
+			return utilDate.format(this, utilDate.defaultDateTimeFormat);
+		}
+
+	});
 });
