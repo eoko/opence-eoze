@@ -84,5 +84,11 @@ Ext4.define('Eoze.Ext.Date', {
 			return utilDate.format(this, utilDate.defaultDateTimeFormat);
 		}
 
+		/**
+		 * ISO 8601 Date time format, precision to the second, including time zone
+		 */
+		,ISO: function() {
+			return utilDate.format(this, 'Y-m-d\\TH:i:sO');
+		}
 	});
 });
