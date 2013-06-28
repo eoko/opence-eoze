@@ -41,4 +41,7 @@ Ext4.define('Eoze.Ext.data.Types', {
 		}
 		,type: 'daydate'
 	}
+}, function() {
+
+	this.DATETIME = this.DATE;
 });
