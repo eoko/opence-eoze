@@ -49,7 +49,7 @@ Ext4.define('Eoze.data.proxy.Cqlix', {
 		config.actionMethods = Ext.apply({
 			create: 'POST'
 			,read: 'GET'
-			,update: 'POST'
+			,update: 'PUT'
 			,destroy: 'DELETE'
 		});
 
