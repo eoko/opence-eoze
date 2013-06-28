@@ -120,6 +120,9 @@ abstract class Rest extends JsonExecutor {
 		throw new Exception\UnsupportedOperation('TODO');
 	}
 
+	// TODO doc
+	abstract public function putRecords($data);
+
 	/**
 	 * Action for reading a record's data.
 	 *
@@ -216,6 +219,13 @@ abstract class Rest extends JsonExecutor {
 					$this->crudOperation = self::OPERATION_CREATE;
 					$inputData = $request->req('data');
 					return $this->postRecord($inputData);
+				} else if ($method === $httpRequest::METHOD_PUT) {
+					$this->crudOperation = self::OPERATION_UPDATE;
+					$data = $request->req('data');
+					if (Arrays::isAssoc($data)) {
+						$data = array($data);
+					}
+					return $this->putRecords($data);
 				} else if ($method === $httpRequest::METHOD_DELETE) {
 					$this->crudOperation = self::OPERATION_DELETE;
 					$data = $request->req('data');

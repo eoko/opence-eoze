@@ -186,6 +186,19 @@ abstract class Cqlix extends Rest {
 		return $this->updateAndSaveRecord($record, $inputData, true);
 	}
 
+	public function putRecords($data) {
+		$proxy = $this->getDataProxy(false);
+
+		foreach ($data as $record) {
+			$id = $proxy->getIdFromData($record);
+			if (true !== $response = $this->putRecord($id, $record)) {
+				return $response;
+			}
+		}
+
+		return true;
+	}
+
 	/**
 	 * @inheritdoc
 	 *
