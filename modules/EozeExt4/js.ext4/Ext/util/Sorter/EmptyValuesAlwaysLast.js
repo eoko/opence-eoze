@@ -26,7 +26,7 @@
  *
  * @since 2013-06-12 10:25
  */
-Ext4.define('Eoze.util.Sorter.EmptyValuesAlwaysLast', {
+Ext4.define('Eoze.Ext.util.Sorter.EmptyValuesAlwaysLast', {
 	override: 'Ext.util.Sorter'
 
 	/**
