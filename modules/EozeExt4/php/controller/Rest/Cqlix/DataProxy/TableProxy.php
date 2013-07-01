@@ -885,9 +885,9 @@ class TableProxy extends AbstractProxy {
 				$this->writeField($model, $clientFieldName, $value);
 			}
 
-			if (isset($config['afterUpdate'])) {
+			if (isset($config['beforeUpdate'])) {
 				$postProcessors[] = array(
-					'function' => $config['afterUpdate'],
+					'function' => $config['beforeUpdate'],
 					'value' => $value,
 				);
 			}
