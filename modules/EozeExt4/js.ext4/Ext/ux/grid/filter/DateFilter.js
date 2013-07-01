@@ -22,8 +22,12 @@
  */
 
 /**
- * This override adds the {@link #dateSubmitFormat} config option, and adds the date format
- * in the filter arguments.
+ * This override:
+ *
+ * - Adds the {@link #dateSubmitFormat} config option, and adds the date format
+ *   in the filter arguments.
+ *
+ * - Replaces exclusive comparisons with inclusive ones.
  *
  * @since 2013-05-17 16:11
  */
@@ -39,6 +43,17 @@ Ext4.define('Eoze.Ext.ux.grid.filter.DateFilter', {
 
 	/**
 	 * Overridden to use {@link #dateSubmitFormat}, and include date format in the args.
+	 * @protected
+	 */
+	,compareMap : {
+		before: 'lte',
+		after:  'gte',
+		on:     'eq'
+	}
+
+	/**
+	 * Overridden to use {@link #dateSubmitFormat}, and include date format in the args.
+	 * @protected
 	 */
 	,getSerialArgs: function() {
 		var args = [];
@@ -53,6 +68,39 @@ Ext4.define('Eoze.Ext.ux.grid.filter.DateFilter', {
 			}
 		}
 		return args;
+	}
+
+	/**
+	 * Overridden to make inclusive comparisons.
+	 */
+	,validateRecord: function (record) {
+		var key,
+			pickerValue,
+			val = record.get(this.dataIndex),
+			clearTime = Ext.Date.clearTime;
+
+		if(!Ext.isDate(val)){
+			return false;
+		}
+		val = clearTime(val, true).getTime();
+
+		for (key in this.fields) {
+			if (this.fields[key].checked) {
+				pickerValue = clearTime(this.getFieldValue(key), true).getTime();
+				// rx: Replaced <= by <
+				if (key == 'before' && pickerValue < val) {
+					return false;
+				}
+				// rx: Replaced >= by >
+				if (key == 'after' && pickerValue > val) {
+					return false;
+				}
+				if (key == 'on' && pickerValue != val) {
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 
 });
