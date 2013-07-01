@@ -84,6 +84,14 @@ use eoko\modules\EozeExt4\controller\Rest\Cqlix\RecordSet;
  *
  * `writer` can also be set to `false`, then the proxy will skip writing the field value into the model entirely.
  *
+ * Read-only fields
+ * ----------------
+ *
+ * `readOnly` bool
+ *
+ * If true, the field value cannot be set. An error will be raised is some data is passed
+ * for this field.
+ *
  * Update post processing
  * ----------------------
  *
@@ -891,7 +899,11 @@ class TableProxy extends AbstractProxy {
 				: null;
 
 			if (array_key_exists($clientFieldName, $inputData)) {
-				$this->writeField($model, $clientFieldName, $value);
+				if (empty($config['readOnly'])) {
+					$this->writeField($model, $clientFieldName, $value);
+				} else {
+					throw new Exception\IllegalState('Read-only field: ' . $clientFieldName);
+				}
 			}
 
 			if (isset($config['beforeUpdate'])) {
