@@ -26,7 +26,7 @@
  *
  * @since 2013-06-04 14:08
  */
-Ext4.define('FixesLoader', {
+Ext4.define('Eoze.fix.FixesLoader', {
 	requires: [
 		'Eoze.fix.Ext.view.Table'
 	]
