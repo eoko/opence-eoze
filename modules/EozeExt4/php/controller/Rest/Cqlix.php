@@ -138,7 +138,13 @@ abstract class Cqlix extends Rest {
 		// --- Format data
 
 		$record = Rest\Cqlix\Record::fromModel($model);
-		$data = $dataProxy->getRecordData($record);
+
+		$recordData = $dataProxy->getRecordData($record);
+		$metaData = array(
+			'$expanded' => $dataProxy->getResponseExpanded(),
+		);
+
+		$data = array_merge($metaData, $recordData);
 
 		// --- Return
 
@@ -162,12 +168,16 @@ abstract class Cqlix extends Rest {
 		$requestParams = $this->getRequestParams();
 		$response = $this->getResponse();
 
-		$dataProxy = $this->getDataProxy(true);
-
 		// --- Parse request params
 
 		if ($inputData === null) {
 			$inputData = $requestParams->req($requestParams::DATA);
+		}
+
+		if (isset($inputData['$expanded'])) {
+			$dataProxy = $this->getDataProxy($inputData['$expanded']);
+		} else {
+			$dataProxy = $this->getDataProxy(true);
 		}
 
 		// --- Create record
@@ -187,7 +197,7 @@ abstract class Cqlix extends Rest {
 	}
 
 	public function putRecords($data) {
-		$proxy = $this->getDataProxy(false);
+		$proxy = $this->getDataProxy(true);
 
 		foreach ($data as $record) {
 			$id = $proxy->getIdFromData($record);
@@ -209,10 +219,6 @@ abstract class Cqlix extends Rest {
 		$requestParams = $this->getRequestParams();
 		$response = $this->getResponse();
 
-		// default expand fields
-		// (should it be the same as what was used to load the record?)
-		$dataProxy = $this->getDataProxy(true);
-
 		// --- Parse request params
 
 		if ($id === null) {
@@ -221,6 +227,12 @@ abstract class Cqlix extends Rest {
 
 		if ($inputData === null) {
 			$inputData = $requestParams->req($requestParams::DATA);
+		}
+
+		if (isset($inputData['$expanded'])) {
+			$dataProxy = $this->getDataProxy($inputData['$expanded']);
+		} else {
+			$dataProxy = $this->getDataProxy(true);
 		}
 
 		// --- Load record
