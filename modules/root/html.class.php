@@ -254,11 +254,36 @@ JS;
 	private function buildJasmineSpecIncludes() {
 
 		$urls = array();
+		$urlFiles = array();
 
 		foreach (ModuleManager::listModules(false) as $module) {
 			/** @var \eoko\module\Module $module */
-			$urls = array_merge($urls, $module->listLineFilesUrl('glob:*.js', 'js/tests', true));
-			$urls = array_merge($urls, $module->listLineFilesUrl('glob:*.js', 'js.tests', true));
+			$urls = array_merge($urls, $module->listLineFilesUrl('glob:*.js', 'js/tests', true, $urlFiles));
+			$urls = array_merge($urls, $module->listLineFilesUrl('glob:*.js', 'js.tests', true, $urlFiles));
+		}
+
+		// Selective includes
+		$includes = $this->getRequest()->get('include', null);
+
+		if ($includes) {
+			$includes = explode(',', $includes);
+			$re = '/\bdescribe\s*\(\s*(["\'])(?<name>.*?)\1/';
+			foreach ($includes as &$include) {
+				$include = '/\b' . str_replace('\*', '.*', preg_quote($include, '/')) . '\b/';
+			}
+			foreach ($urls as $i => $url) {
+				$contents = file_get_contents(isset($urlFiles[$url]) ? $urlFiles[$url] : $url);
+				if (preg_match_all($re, $contents, $matches)) {
+					foreach ($matches['name'] as $name) {
+						foreach ($includes as $nameRe) {
+							if (preg_match($nameRe, trim($name))) {
+								continue 3;
+							}
+						}
+					}
+					unset($urls[$i]);
+				}
+			}
 		}
 
 		return $urls;
