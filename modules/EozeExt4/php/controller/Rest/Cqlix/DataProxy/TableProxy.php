@@ -268,7 +268,16 @@ class TableProxy extends AbstractProxy {
 			}
 
 			if (isset($config['requires'])) {
-				foreach ($config['requires'] as $requiredField) {
+				if (is_string($config['requires'])) {
+					$requires = explode(',', $config['requires']);
+					foreach ($requires as &$field) {
+						$field = trim($field);
+					}
+					unset($field);
+				} else {
+					$requires = $config['requires'];
+				}
+				foreach ($requires as $requiredField) {
 					$this->requiredListFieldsMap[$requiredField] = true;
 				}
 			}
