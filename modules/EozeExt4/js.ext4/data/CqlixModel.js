@@ -29,7 +29,7 @@ Ext4.define('Eoze.data.CqlixModel', {
 	extend: 'Ext.data.Model'
 
 	,fields: [
-		{name: '$expanded'}
+		{name: '$expanded', defaultValue: null}
 	]
 
 });
