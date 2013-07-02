@@ -490,8 +490,8 @@ Ext4.define('Eoze.AjaxRouter.Router', {
 				}
 				,close: function() {
 					var app = Oce.mx.application,
-						module = app.getFrontModule(),
-						page = module && module.tab || app.getFrontModuleComponent();
+						module = app && app.getFrontModule(),
+						page = module && module.tab || app && app.getFrontModuleComponent();
 					Eoze.AjaxRouter.Router.setActivePage(page, this);
 				}
 			});
