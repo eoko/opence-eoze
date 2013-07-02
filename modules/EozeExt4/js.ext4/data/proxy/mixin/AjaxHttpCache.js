@@ -133,7 +133,7 @@ Ext.define('Eoze.data.proxy.mixin.AjaxHttpCache', {
 			eo.Kepler.on(this.keplerReloadEvent, this.onKeplerDataChanged, this);
 		}
 
-		var watchModels = this.watchModels;
+		var watchModels = this.watchModels || this.watchModel;
 		if (watchModels) {
 			if (Ext.isString(watchModels)) {
 				watchModels = watchModels.split(',');
