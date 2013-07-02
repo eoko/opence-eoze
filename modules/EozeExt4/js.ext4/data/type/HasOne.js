@@ -151,9 +151,23 @@
 				return childRecord[childRecord.persistenceProperty];
 			};
 		}()
+
+		/**
+		 * Gets the name of the record getter for the specified field.
+		 *
+		 * @param {Ext.data.Field} field
+		 * @return {String}
+		 */
+		,getGetterName: function(field) {
+			var fieldName = field.name,
+				associateName = fieldName.charAt(0).toUpperCase() + fieldName.slice(1);
+			return 'get' + associateName;
+		}
+
 	}, function() {
 
-		var type = this.type,
+		var HasOne = this,
+			type = this.type,
 			upperCaseType = type.toUpperCase();
 
 		// --- Register data type
@@ -196,6 +210,36 @@
 					// If this is a phantom record being updated from a concrete record, copy the ID in.
 					if (me.phantom && !sourceRecord.phantom) {
 						me.setId(sourceRecord.getId());
+					}
+				}
+			}
+		});
+
+		Ext.data.writer.Writer.override({
+			writeValue: function(data, field, record) {
+				var name = field[this.nameProperty] || field.name,
+					dateFormat = this.dateFormat || field.dateWriteFormat || field.dateFormat,
+					value = record.get(field.name),
+					fieldType = field.type && field.type.type;
+
+				// Special treatment for HasOne fields
+				if (field.type === HasOne) {
+					var getter = HasOne.getGetterName(field),
+						childRecord = record[getter]();
+
+					if (childRecord) {
+						data[name] = this.getRecordData(childRecord);
+					} else {
+						data[name] = null;
+					}
+				}
+				else {
+					if (field.serialize) {
+						data[name] = field.serialize(value, record);
+					} else if (field.type === Ext.data.Types.DATE && dateFormat && Ext.isDate(value)) {
+						data[name] = Ext.Date.format(value, dateFormat);
+					} else {
+						data[name] = value;
 					}
 				}
 			}
