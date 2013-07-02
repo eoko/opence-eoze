@@ -34,27 +34,44 @@ Ext4.define('Eoze.form.mixin.FormAsField', {
 	 * @inheritdoc
 	 */
 	,initField: function() {
-		Ext4.form.field.Field.prototype.initField.apply(this, arguments);
+		var fieldProto = Ext4.form.field.Field.prototype,
+			form = this.getForm();
+
+		// init Field mixin
+		fieldProto.initField.apply(this, arguments);
 
 		// prevent the fields from getting captured by parent form
-		this.getForm().getFields().each(function(field) {
+		form.getFields().each(function(field) {
 			field.isFormField = false;
 		});
+
+		// we don't want FormPanel.isDirty to override Field.isDirty
+		this.isDirty = fieldProto.isDirty;
 	}
 
 	/**
 	 * @inheritdoc
 	 */
 	,getValue: function() {
-		debugger
+		var form = this.getForm();
+		if (form.isDirty()) {
+			return form.getFieldValues(false);
+		} else {
+			return this.value;
+		}
 	}
+
+	/**
+	 * @inheritdoc
+	 */
+	,isEqual: Ext4.Object.equals
 
 	/**
 	 * @inheritdoc
 	 */
 	,getModelData: function() {
 		var data = {};
-		data[this.name] = this.getForm().getFieldValues(false);
+		data[this.name] = this.getValue();
 		return data;
 	}
 
@@ -62,7 +79,14 @@ Ext4.define('Eoze.form.mixin.FormAsField', {
 	 * @inheritdoc
 	 */
 	,setValue: function(value) {
-		this.getForm().setValues(value);
+		var form = this.getForm();
+		// We don't want to have a complete reference, that could get modified later
+		// without us being able to detect that it has changed.
+		this.value = Ext4.clone(value);
+
+		form.trackResetOnLoad = true;
+		form.setValues(value);
+
 		return this;
 	}
 
