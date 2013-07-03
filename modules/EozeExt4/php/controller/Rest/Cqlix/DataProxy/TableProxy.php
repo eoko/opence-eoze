@@ -852,11 +852,17 @@ class TableProxy extends AbstractProxy {
 	 * @inheritdoc
 	 */
 	public function getRecordData(Record $record) {
-		$data = array();
+		$recordData = array();
 		foreach ($this->getExpandedClientFieldNames() as $clientField) {
-			$data[$clientField] = $this->readField($record, $clientField);
+			$recordData[$clientField] = $this->readField($record, $clientField);
 		}
-		return $data;
+
+		// MetaData
+		$metaData = array(
+			'$expanded' => $this->getResponseExpanded(),
+		);
+
+		return array_merge($metaData, $recordData);
 	}
 
 	private function cleanAntagonists(array $inputData) {
