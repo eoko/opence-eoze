@@ -519,17 +519,16 @@ class ModelRelationReferedByOne extends ModelRelationByReference
 	}
 
 	public function setFromModel(Model $model) {
-		// TODO investigate why the next line was here (commented out to prevent
-		// a deadly warning "only variables should be assigned by reference")
-		// $cache =& $this->getAsModel();
+		$cache =& $this->getModelReference(true);
 		$cache = $model;
 	}
 
 	public function setFromId($id, $forceAcceptNull = false) {
-		if ($id !== null) {
-			// TODO investigate why the next line was here (commented out to prevent
-			// a deadly warning "only variables should be assigned by reference")
-			// $model =& $this->getAsModel();
+		if ($id === null) {
+			$model =& $this->getModelReference(true);
+			$model = null;
+		} else {
+			$model =& $this->getModelReference(true);
 			$model = $this->targetTable->loadModel($id, $this->parentModel->context);
 		}
 	}
