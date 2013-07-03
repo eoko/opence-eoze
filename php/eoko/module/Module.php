@@ -945,9 +945,9 @@ MSG
 			$baseUrl = $loc->url . $urlDir;
 			$urls = Files::listFilesIfDirExists($loc->path . $dir, $pattern, $recursive, false);
 			foreach ($urls as &$url) {
-				$filename = $loc->path . $dir . $url;
+				$filename = $loc->path . $dir . '/' . $url;
 				$url = "$baseUrl$url";
-				if (file_exists($filename)) {
+				if ($filename = realpath($filename)) {
 					$files[$url] = $filename;
 				}
 			}
