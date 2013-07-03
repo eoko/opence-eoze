@@ -140,11 +140,6 @@ abstract class Cqlix extends Rest {
 		$record = Rest\Cqlix\Record::fromModel($model);
 
 		$recordData = $dataProxy->getRecordData($record);
-		$metaData = array(
-			'$expanded' => $dataProxy->getResponseExpanded(),
-		);
-
-		$data = array_merge($metaData, $recordData);
 
 		// --- Return
 
