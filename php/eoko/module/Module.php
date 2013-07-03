@@ -930,7 +930,7 @@ MSG
 		return $r;
 	}
 
-	public function listLineFilesUrl($pattern, $dir, $recursive = false) {
+	public function listLineFilesUrl($pattern, $dir, $recursive = false, &$files = null) {
 		$r = array();
 		if ($dir) {
 			$urlDir = str_replace('\\', '/', $dir) . '/';
@@ -945,7 +945,11 @@ MSG
 			$baseUrl = $loc->url . $urlDir;
 			$urls = Files::listFilesIfDirExists($loc->path . $dir, $pattern, $recursive, false);
 			foreach ($urls as &$url) {
+				$filename = $loc->path . $dir . $url;
 				$url = "$baseUrl$url";
+				if (file_exists($filename)) {
+					$files[$url] = $filename;
+				}
 			}
 			$r = array_merge($r, $urls);
 		}
