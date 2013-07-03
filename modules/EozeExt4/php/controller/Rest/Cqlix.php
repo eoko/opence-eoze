@@ -138,8 +138,7 @@ abstract class Cqlix extends Rest {
 		// --- Format data
 
 		$record = Rest\Cqlix\Record::fromModel($model);
-
-		$recordData = $dataProxy->getRecordData($record);
+		$data = $dataProxy->getRecordData($record);
 
 		// --- Return
 
