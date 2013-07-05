@@ -24,11 +24,29 @@
 /**
  * Loader for overrides of Filters feature.
  *
+ * Also:
+ *
+ * - Adds support for {@link Eoze.Ext.data.Types#DAYDATE} filter.
+ *
  * @since 2013-05-17 16:15
  */
 Ext4.define('Eoze.Ext.ux.grid.FiltersFeature', {
-	requires: [
+	override: 'Ext.ux.grid.FiltersFeature'
+
+	,requires: [
 		'Eoze.Ext.ux.grid.filter.DateFilter',
 		'Eoze.Ext.ux.grid.filter.Filter.EmptyValues'
 	]
+
+	/**
+	 * Adds support for {@link Eoze.Ext.data.Types#DAYDATE}.
+	 */
+	,getFilterClass: function(type) {
+		switch (type) {
+			case 'daydate':
+				type = 'date';
+				break;
+		}
+		return this.callParent([type]);
+	}
 });
