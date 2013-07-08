@@ -85,6 +85,14 @@ eo.modules.ModuleGroupModule = Ext.extend(eo.modules.TabModule, {
 				// replace module open method
 				// TODO this works but only once the group module has been opened once >_<
 				var open = module.open;
+
+				// Support for Ext4 wrapped modules
+				if (!open) {
+					open = function(destination) {
+						module.executeAction('open', null, null, [destination])
+					};
+				}
+
 				module.open = function(destination) {
 					if (destination instanceof ModuleContainer) {
 						open.apply(module, arguments);
