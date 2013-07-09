@@ -86,18 +86,19 @@ Ext.define('Eoze.data.proxy.mixin.AjaxHttpCache', {
 
 					if (this.verifiedCaches[key]) {
 						headers['Cache-Control'] = 'max-age';
-
-						if (operation.invalidateHttpCache) {
-							if (Ext.isChrome) {
-								headers['If-Modified-Since'] = Ext.Date.format(new Date(0), 'r');
-							} else {
-								debugger // should try to find a better way!
-								headers['If-Modified-Since'] = Ext.Date.format(new Date(0), 'r');
-							}
-							delete this.verifiedCaches[key];
-						}
 					} else {
 						headers['Cache-Control'] = 'max-age=0';
+					}
+
+					if (operation.invalidateHttpCache) {
+						if (Ext.isChrome) {
+							headers['If-Modified-Since'] = Ext.Date.format(new Date(0), 'r');
+						} else {
+							debugger // should try to find a better way!
+							headers['If-Modified-Since'] = Ext.Date.format(new Date(0), 'r');
+						}
+
+						delete this.verifiedCaches[key];
 					}
 				}
 
