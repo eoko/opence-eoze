@@ -71,6 +71,15 @@ Ext.define('Eoze.Ext.data.AbstractStore.HttpCacheExpireEvent', {
 	}
 
 	/**
+	 * Overridden to clean out the `invalidateHttpCache` from `lastOptions`. We don't want
+	 * the cache to be automatically busted on each subsequent requests.
+	 */
+	,reload: function() {
+		this.callParent(arguments);
+		delete this.lastOptions.invalidateHttpCache;
+	}
+
+	/**
 	 * Reloads the store, busting the proxy's HTTP cache, if any.
 	 *
 	 * @param {Object} options
@@ -81,8 +90,6 @@ Ext.define('Eoze.Ext.data.AbstractStore.HttpCacheExpireEvent', {
 		}, options);
 
 		this.reload(options);
-
-		delete this.lastOptions.invalidateHttpCache;
 	}
 });
 })(Ext4);
