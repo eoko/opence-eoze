@@ -86,7 +86,7 @@ Ext4.define('Eoze.GridModule.EditRecordOperation', {
 						else if (record instanceof Ext.data.Record
 								|| record instanceof Ext4.data.Record) {
 							config.record = record;
-							config.recordId = record.id;
+							config.recordId = record.getId();
 						}
 						// Message form: extract arguments
 						else {
@@ -192,7 +192,7 @@ Ext4.define('Eoze.GridModule.EditRecordOperation', {
 	,getRecordId: function() {
 		if (Ext.isEmpty(this.recordId)) {
 			var record = this.getRecord();
-			this.recordId = record && record.id;
+			this.recordId = record && record.getId();
 		}
 		return this.recordId;
 	}
