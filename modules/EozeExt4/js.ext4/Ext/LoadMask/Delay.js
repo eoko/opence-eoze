@@ -39,31 +39,40 @@ Ext.define('Eoze.Ext.LoadMask.Delay', {
 	 */
 	,delay: 0
 
-	,show: function() {
+	,constructor: function() {
+		Ext.apply(this, {
+			superShow: this.show
+			,show: this.delayedShow
+		});
+
+		this.callParent(arguments);
+	}
+
+	// private
+	,delayedShow: function() {
 		var delay = this.delay;
 		if (delay) {
-			if (!this.toBeShown) {
-				this.toBeShown = true;
-				var args = arguments;
-				Ext.defer(function() {
-					if (this.toBeShown) {
-						Ext.LoadMask.prototype.show.apply(this, args);
-					}
-				}, delay, this);
-			}
+			this.toBeShown = true;
+			var args = arguments;
+			Ext.defer(function() {
+				if (this.toBeShown) {
+					this.superShow.apply(this, args);
+				}
+			}, delay, this);
 		} else {
 			this.callParent(arguments);
 		}
 	}
 
+	/**
+	 * Implements {@link #delay}.
+	 */
 	,hide: function() {
 		var delay = this.delay;
 		if (delay) {
 			this.toBeShown = false;
-			Ext.LoadMask.prototype.hide.apply(this, arguments);
-		} else {
-			this.callParent(arguments);
 		}
+		this.callParent(arguments);
 	}
 
 });
