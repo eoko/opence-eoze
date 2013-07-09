@@ -69,5 +69,20 @@ Ext.define('Eoze.Ext.data.AbstractStore.HttpCacheExpireEvent', {
 		}
 		this.callParent(arguments);
 	}
+
+	/**
+	 * Reloads the store, busting the proxy's HTTP cache, if any.
+	 *
+	 * @param {Object} options
+	 */
+	,reloadCache: function(options) {
+		options = Ext.apply({
+			invalidateHttpCache: true
+		}, options);
+
+		this.reload(options);
+
+		delete this.lastOptions.invalidateHttpCache;
+	}
 });
 })(Ext4);
