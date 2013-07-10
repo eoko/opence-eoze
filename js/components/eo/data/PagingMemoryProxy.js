@@ -457,9 +457,11 @@ Ext.define('eo.data.CachingHttpProxy.Ext4RegexIndexedDataProvider', {
  * though). The store also needs to have already been loaded before the {#getById} method 
  * is called.
  */
-eo.data.ProxyJsonStore = Ext.extend(Ext.data.JsonStore, {
+
+Ext.define('eo.data.ProxyJsonStore', {
+	extend: 'Ext.data.JsonStore'
 	
-	constructor: function(config) {
+	,constructor: function(config) {
 		
 		config = config || {};
 		
