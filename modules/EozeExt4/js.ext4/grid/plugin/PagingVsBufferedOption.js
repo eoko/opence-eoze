@@ -100,7 +100,8 @@ Ext.define('Eoze.grid.plugin.PagingVsBufferedOption', {
 	 */
 	,createStore: function(paginated, config) {
 		var grid = this.grid;
-		return Ext4.create('Ext.data.Store', Ext.apply({
+
+		config = Ext.apply({
 			model: grid.model
 
 			,remoteSort: paginated
@@ -109,7 +110,11 @@ Ext.define('Eoze.grid.plugin.PagingVsBufferedOption', {
 
 			,buffered: false
 			,pageSize: paginated ? 100 : 999999
-		}, config));
+		}, config);
+
+		Ext.apply(config, grid.storeConfig);
+
+		return Ext4.create('Ext.data.Store', config);
 	}
 
 	/**
