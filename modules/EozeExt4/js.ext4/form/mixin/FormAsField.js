@@ -85,7 +85,11 @@ Ext4.define('Eoze.form.mixin.FormAsField', {
 		this.value = Ext4.clone(value);
 
 		form.trackResetOnLoad = true;
-		form.setValues(value);
+
+		// Delay is required, or the date fields picker doesn't appear on folder add window (?!)
+		Ext.defer(function() {
+			form.setValues(value);
+		}, 1);
 
 		return this;
 	}
