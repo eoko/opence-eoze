@@ -39,39 +39,32 @@ Ext.define('Eoze.Ext.LoadMask.Delay', {
 	 */
 	,delay: 0
 
-	,constructor: function() {
-		Ext.apply(this, {
-			superShow: this.show
-			,show: this.delayedShow
-		});
+	,constructor: function(config) {
+
+		if (config.delay) {
+			var delay = config.delay,
+				uberShow = this.show;
+			this.show = function() {
+				if (!this.toBeShown) {
+					this.toBeShown = true;
+					Ext.defer(function() {
+						if (this.toBeShown) {
+							uberShow.call(this);
+						}
+						this.toBeShown = false;
+					}, delay, this);
+				}
+			};
+		}
 
 		this.callParent(arguments);
-	}
-
-	// private
-	,delayedShow: function() {
-		var delay = this.delay;
-		if (delay) {
-			this.toBeShown = true;
-			var args = arguments;
-			Ext.defer(function() {
-				if (this.toBeShown) {
-					this.superShow.apply(this, args);
-				}
-			}, delay, this);
-		} else {
-			this.callParent(arguments);
-		}
 	}
 
 	/**
 	 * Implements {@link #delay}.
 	 */
 	,hide: function() {
-		var delay = this.delay;
-		if (delay) {
-			this.toBeShown = false;
-		}
+		this.toBeShown = false;
 		this.callParent(arguments);
 	}
 
