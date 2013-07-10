@@ -1912,16 +1912,27 @@ class QuerySelectFunctionOnField extends QuerySelectBase {
 			}
 			$function = $this->fn;
 			while (preg_match('/\{(?P<index>\d+)\}/', $function, $matches)) {
-				$function = str_replace($matches[0], $fields[$matches['index']], $function);
+				$field = $fields[$matches['index']];
+				if ($field instanceof SqlVar) {
+					$field = $field->buildSql(false, $bindings);
+				}
+				$function = str_replace($matches[0], $field, $function);
 			}
 			return $function;
 		} else {
 			$field = $query->getQualifiedName($this->field);
+
+			if ($field instanceof SqlVar) {
+				$field = $field->buildSql(false, $bindings);
+			}
+
 			if (is_array($this->fn)) {
 				$r = $field;
 				foreach ($this->fn as $fn) {
 					if (strstr($fn, '{}')) {
 						$r = str_replace('{}', $r, $fn);
+					} else if (strstr($fn, '{0}')) {
+						$r = str_replace('{0}', $r, $fn);
 					} else {
 						$r = "$fn($r)";
 					}
@@ -1930,6 +1941,8 @@ class QuerySelectFunctionOnField extends QuerySelectBase {
 			} else {
 				if (strstr($this->fn, '{}')) {
 					return str_replace('{}', $field, $this->fn);
+				} else if (strstr($this->fn, '{0}')) {
+					return str_replace('{0}', $field, $this->fn);
 				} else {
 					return "$this->fn($field)";
 				}
