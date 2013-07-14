@@ -210,24 +210,34 @@ Oce.ModuleManager = function() {
 				successCallback(module);
 			}
 		}
-		,
-		getModules: function(cannonicalNames, callback) {
-			if (!Ext.isArray(cannonicalNames)) {
-				if (Ext.isString(cannonicalNames)) {
-					Oce.getModuleByName(cannonicalNames, function(module) {
+
+		,getModules: function(canonicalNames, callback) {
+			var me = this;
+			Oce.mx.Security.whenIdentified(function() {
+				me._getModules(canonicalNames, callback);
+			});
+		}
+
+		/**
+		 * @private
+		 */
+		,_getModules: function(canonicalNames, callback) {
+			if (!Ext.isArray(canonicalNames)) {
+				if (Ext.isString(canonicalNames)) {
+					Oce.getModuleByName(canonicalNames, function(module) {
 						if (callback) callback(module);
 					}, function() {
 						if (callback) callback(null);
 					});
 				} else {
-					throw new Error('Illegal Argument: cannonicalNames=' + cannonicalNames);
+					throw new Error('Illegal Argument: cannonicalNames=' + canonicalNames);
 				}
 			} else {
 
 				var response = {};
 
 				var responseLatch = new function() {
-					var todo = cannonicalNames.length;
+					var todo = canonicalNames.length;
 					this.countDown = function() {
 						if (--todo == 0) {
 							if (callback) callback(response);
@@ -235,13 +245,13 @@ Oce.ModuleManager = function() {
 					}
 				}()
 
-				for (var i=0; i<cannonicalNames.length; i++) {
-					Oce.getModuleByName(cannonicalNames[i],
+				for (var i=0; i<canonicalNames.length; i++) {
+					Oce.getModuleByName(canonicalNames[i],
 						function(module){
-							response[cannonicalNames[i]] = module;
+							response[canonicalNames[i]] = module;
 							responseLatch.countDown();
 						}, function(errors) {
-							response[cannonicalNames[i]] = null;
+							response[canonicalNames[i]] = null;
 							responseLatch.countDown();
 						}
 					);
