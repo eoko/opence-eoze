@@ -42,6 +42,10 @@ abstract class ExtendedModel extends Model {
 		self::$defaultCometEvents = $comet;
 	}
 
+	public static function getComet() {
+		return self::$defaultCometEvents;
+	}
+
 	/**
 	 * Will return the model name, with the model id appended in the form:
 	 * 
