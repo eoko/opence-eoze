@@ -73,10 +73,11 @@ Ext.define('Eoze.app.Module', {
 	 * @private
 	 */
 	,getRoutes: function() {
-		var routes = this.routes;
+		var routes = this.routes,
+			moduleName = this.moduleName;
 
 		if (routes) {
-			if (Ext.isArray(routes)) {
+			if (Ext.isArray(routes) && !Ext.isEmpty(moduleName)) {
 				var instances = [];
 				routes.forEach(function(route) {
 					if (!route.$className && route.xclass) {
