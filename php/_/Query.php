@@ -980,7 +980,7 @@ abstract class Query implements QueryAliasable {
 	 * @param string $dir
 	 * @return Query
 	 */
-	public function orderBy($order, $dir = 'ASC') {
+	public function orderBy($order, $dir = null) {
 		$this->order = array();
 		if ($order === null) {
 			/** @noinspection PhpInconsistentReturnPointsInspection */
@@ -989,7 +989,7 @@ abstract class Query implements QueryAliasable {
 		return $this->thenOrderBy($order, $dir);
 	}
 
-	public function defaultOrderBy($order, $dir = 'ASC') {
+	public function defaultOrderBy($order, $dir = null) {
 		$this->defaultOrder = array();
 		return $this->thenOrderBy($order, $dir);
 	}
@@ -999,7 +999,7 @@ abstract class Query implements QueryAliasable {
 	 * @param string $dir
 	 * @return Query
 	 */
-	public function defaultThenOrderBy($field, $dir = 'ASC') {
+	public function defaultThenOrderBy($field, $dir = null) {
 		return $this->addThenOrderBy($this->defaultOrder, $field, $dir);
 	}
 
@@ -1012,7 +1012,7 @@ abstract class Query implements QueryAliasable {
 	 * @param string $dir
 	 * @return Query
 	 */
-	public function thenOrderBy($field, $dir = 'ASC') {
+	public function thenOrderBy($field, $dir = null) {
 		return $this->addThenOrderBy($this->order, $field, $dir);
 	}
 
@@ -1021,7 +1021,7 @@ abstract class Query implements QueryAliasable {
 	 * @param string $dir
 	 * @return Query
 	 */
-	public function firstOrderBy($field, $dir = 'ASC') {
+	public function firstOrderBy($field, $dir = null) {
 		if ($this->order) {
 			$this->order = array_reverse($this->order);
 			$result = $this->thenOrderBy($field, $dir);
@@ -1032,7 +1032,7 @@ abstract class Query implements QueryAliasable {
 		}
 	}
 
-	private function addThenOrderBy(&$order, $field, $dir = 'ASC') {
+	private function addThenOrderBy(&$order, $field, $dir = null) {
 		if ($field == null || $field == '') {
 			throw new Exception('Illegal Argument Exception: $order cannot be empty');
 		}
@@ -1046,20 +1046,26 @@ abstract class Query implements QueryAliasable {
 				$this->thenOrderBy($o, $dir);
 			}
 		} else {
-			if ($dir === '') {
-				$dir = 'ASC';
-			} else {
+			if ($dir !== null) {
 				$dir = self::$dirValues[$dir]; // protect from injection
 			}
 
 			if ($field instanceof SqlVar) {
 				$this->getLogger()->warn('The next line is most probably wrong and causing problem with bindings');
-				$this->order[] = $field->buildSql(false, $this->bindings);
+				$order[] = $field->buildSql(false, $this->bindings);
 				throw new DeprecatedException;
 			} else if ($field instanceof Clause) {
-				$order[] = $field;
+				if ($dir !== null) {
+					$order[] = function($aliaser, &$bindings) use($field, $dir) {
+						return $field->isEmpty()
+							? ''
+							: $field->buildSql($aliaser, $bindings) . ' ' . $dir;
+					};
+				} else {
+					$order[] = $field;
+				}
 			} else {
-				$order[] = $this->getOrderFieldAlias($field, $dir);
+				$order[] = $this->getOrderFieldAlias($field, $dir ? $dir : 'ASC');
 			}
 
 //			// Clear previous to add new order at the end of the list
@@ -1085,6 +1091,11 @@ abstract class Query implements QueryAliasable {
 			if ($clause instanceof Clause) {
 				if (!$clause->isEmpty()) {
 					$clauses[] = $clause->buildSql($this, $this->bindings);
+				}
+			} else if (is_callable($clause)) {
+				$sql = $clause($this, $this->bindings);
+				if (!empty($sql)) {
+					$clauses[] = $sql;
 				}
 			} else {
 				$clauses[] = $clause;
