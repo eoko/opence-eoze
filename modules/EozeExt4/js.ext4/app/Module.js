@@ -68,8 +68,33 @@ Ext.define('Eoze.app.Module', {
 		}
 	}
 
+	/**
+	 * @return {Eoze.AjaxRouter.Route/Eoze.AjaxRouter.Route[]}
+	 * @private
+	 */
+	,getRoutes: function() {
+		var routes = this.routes;
+
+		if (routes) {
+			if (Ext.isArray(routes)) {
+				var instances = [];
+				routes.forEach(function(route) {
+					if (!route.$className && route.xclass) {
+						route = Ext.create(Ext.apply({
+							namePrefix: moduleName
+						}, route));
+					}
+					instances.push(route);
+				});
+				routes = instances;
+			}
+		}
+
+		return routes;
+	}
+
 	,initRouter: function() {
-		var routes = this.routes,
+		var routes = this.getRoutes(),
 			router = this.getRouter();
 
 		if (routes) {
