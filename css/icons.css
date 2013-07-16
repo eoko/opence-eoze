@@ -183,6 +183,10 @@
 .ico.download {
 	background-image: url("../images/icons_fatcow/16x16/download.png");
 }
+.ico.error {
+    background-image: url("../images/icons/exclamation.png");
+    color: #e63d1f;
+}
 .ico.eye {
 	background-image: url("../images/icons/eye.png");
 }
