@@ -262,16 +262,33 @@ class TableProxy extends AbstractProxy {
 			}
 
 			// Guess readFromModel option with reflection
-			if (isset($config['reader']) && !isset($config['readFromModel'])) {
-				/** @var $reader \Closure */
+			if (isset($config['reader'])) {
 				$reader = $config['reader'];
-				$function = new \ReflectionFunction($reader);
-				$params = $function->getParameters();
-				if (count($params) > 0) {
-					$recordClass = $params[0]->getClass()->getName();
-					$config['readFromModel'] = is_subclass_of($recordClass, 'Model');
-				} else {
-					$config['readFromModel'] = false;
+
+				if (is_string($reader) && substr($reader, 0, 2) === '::') {
+					$reader = array(
+						get_class($this),
+						substr($reader, 2),
+					);
+					$config['reader'] = $reader;
+				}
+
+				// Option readFromModel
+				if (!isset($config['readFromModel'])) {
+					if (is_array($reader)) {
+						$class = new \ReflectionClass($reader[0]);
+						$function = $class->getMethod($reader[1]);
+					} else {
+						/** @var $reader \Closure */
+						$function = new \ReflectionFunction($reader);
+					}
+					$params = $function->getParameters();
+					if (count($params) > 0) {
+						$recordClass = $params[0]->getClass()->getName();
+						$config['readFromModel'] = is_subclass_of($recordClass, 'Model');
+					} else {
+						$config['readFromModel'] = false;
+					}
 				}
 			}
 
