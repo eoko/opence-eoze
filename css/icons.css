@@ -166,6 +166,9 @@
 .ico.book_addresses {
 	background-image: url("../images/icons/book_addresses.png");
 }
+.ico.cancel {
+	background-image: url("../images/icons/cancel.png");
+}
 .ico.checkbox {
 	background-image: url("../images/icons/checkbox.png");
 }
