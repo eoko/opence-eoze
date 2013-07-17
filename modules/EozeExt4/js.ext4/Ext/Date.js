@@ -90,5 +90,50 @@ Ext4.define('Eoze.Ext.Date', {
 		,ISO: function() {
 			return utilDate.format(this, 'Y-m-d\\TH:i:sO');
 		}
+
+		/**
+		 * Friendly elapsed time representation (e.g. "5 min ago", etc.).
+		 */
+		,social: function() {
+			var dayNames = Ext4.Date.dayNames,
+				format = Ext4.String.format,
+				diff = Math.round((new Date - this) / 1000),
+				s = 1,
+				min = 60*s,
+				h = 60*min,
+				day = 24*h,
+				ago;
+			if (diff >= day) {
+				// i18n
+				return "le " + utilDate.format(this, "j M Y à H:i");
+			} else if (diff < 30*s) {
+				// i18n
+				return "à l'instant";
+			} else if (diff < min) {
+				ago = diff;
+				// i18n
+				return format("il y a {0} seconde{1}", ago, ago > 1 ? 's' : '');
+			} else if (diff < h) {
+				ago = Math.round(diff / min);
+				// i18n
+				return format("il y a {0} minute{1}", ago, ago > 1 ? 's' : '');
+			} else if (diff < day) {
+				ago = Math.round(diff / h);
+				// i18n
+				return format("il y a {0} heure{1}", ago, ago > 1 ? 's' : '');
+			} else if (diff < day*2) {
+				// i18n
+				return 'hier à ' + utilDate.format(this, 'H:i');
+			} else if (diff < day*4) {
+				// i18n
+				return dayNames[this.getDay()] + ' à ' + utilDate.format(this, 'H:i');
+			} else if (diff < day*8) {
+				// i18n
+				return dayNames[this.getDay()] + ' dernier à ' + utilDate.format(this, 'H:i');
+			} else {
+				// i18n
+				return "le " + utilDate.format(this, "j M Y à H:i");
+			}
+		}
 	});
 });
