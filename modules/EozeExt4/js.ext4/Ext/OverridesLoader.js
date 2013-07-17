@@ -63,6 +63,8 @@ Ext4.define('Eoze.Ext.OverridesLoader', {
 //		'Eoze.Ext.tree.HideableNodeOverride',
 		'Eoze.Ext.ux.GroupTabPanel',
 
+		// Form
+		'Eoze.Ext.form.Panel.UpdateRecord',
 		// Fields
 		'Eoze.Ext.form.field.Trigger',
 		'Eoze.Ext.form.field.Picker',
