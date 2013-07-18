@@ -33,11 +33,6 @@ use eoko\module\Module;
  */
 class Markdown extends Module {
 
-	public function init() {
-		parent::init();
-		require_once __DIR__ . '/lib/markdown.php';
-	}
-
 	/**
 	 * Render the passed text to HTML.
 	 *
@@ -45,6 +40,7 @@ class Markdown extends Module {
 	 * @return string
 	 */
 	public function render($text) {
-		return \Markdown($text);
+		require_once __DIR__ . '/lib/markdown.php';
+		return Markdown($text);
 	}
 }
