@@ -255,21 +255,21 @@ class LegacyGridModule {
 
 	private static function generateI18n($texts, $convertAll = false) {
 
-		// Load markdown lib
-		ModuleManager::getModule('Markdown');
+		/** @var \eoko\modules\Markdown\Markdown $renderer */
+		$renderer = ModuleManager::getModule('Markdown');
 
 		$htmlTexts = array();
 
 		foreach ($texts as $k => $text) {
 			if (substr($k, 0, 1) === '>') {
 				// removes the <p>...</p>
-				$text = Markdown($text);
+				$text = $renderer->render($text);
 				$text = substr($text, 3);
 				$text = substr($text, 0, -5);
 				$htmlTexts[substr($k, 1)] = $text;
 			} else if ($convertAll) {
 				// removes the <p>...</p>
-				$text = Markdown($text);
+				$text = $renderer->render($text);
 				if (!strstr($text, "\n\n")) {
 					$text = substr($text, 3);
 					$text = substr($text, 0, -5);
