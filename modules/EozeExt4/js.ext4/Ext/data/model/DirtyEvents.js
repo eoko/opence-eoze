@@ -31,12 +31,13 @@
 	Ext.define('Eoze.Ext.data.model.DirtyEvents', function() {
 
 		function interceptDirty() {
+			// We want each intercepted method to remain a unique instance (with a method name, etc.)
 			return function() {
 				var wasDirty = this.dirty,
 					result = this.callParent(arguments),
 					isDirty = this.dirty;
 
-				if (wasDirty !== isDirty) {
+				if (!this.editing && wasDirty !== isDirty) {
 					this.fireEvent(this.EVENT_DIRTY_CHANGED, this, isDirty);
 				}
 
@@ -129,7 +130,7 @@
 						result = run.apply(this, arguments),
 						isDirty = this.dirty;
 
-					if (wasDirty !== isDirty) {
+					if (!this.editing && wasDirty !== isDirty) {
 						this.fireEvent(this.EVENT_DIRTY_CHANGED, this, isDirty);
 					}
 
