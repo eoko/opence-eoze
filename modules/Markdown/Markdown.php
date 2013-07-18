@@ -45,6 +45,6 @@ class Markdown extends Module {
 	 * @return string
 	 */
 	public function render($text) {
-		return Markdown($text);
+		return \Markdown($text);
 	}
 }
