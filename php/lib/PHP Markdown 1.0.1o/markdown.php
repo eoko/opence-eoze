@@ -1,4 +1,5 @@
 <?php
+dump_trace();
 #
 # Markdown  -  A text-to-HTML conversion tool for web writers
 #

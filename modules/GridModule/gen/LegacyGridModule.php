@@ -255,7 +255,8 @@ class LegacyGridModule {
 
 	private static function generateI18n($texts, $convertAll = false) {
 
-		require_once LIBS_PATH . 'markdown.php';
+// 2013-07-18 Removed (markdown has become an eoze module)
+//		require_once LIBS_PATH . 'markdown.php';
 
 		$htmlTexts = array();
 
