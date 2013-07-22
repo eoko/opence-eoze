@@ -560,12 +560,29 @@ class TableProxy extends AbstractProxy {
 					$associatedTable = $proxy->getTable();
 
 					if ($field instanceof \ModelRelationInfoHasOne) {
-						// Crate associated record
-						$associatedModel = $associatedTable->createModel(null, false, $model->context);
-						// Update
-						$proxy->setRecordData($associatedModel, $value);
-						// Assign
-						$model->setField($fieldName, $associatedModel);
+						// 2013-07-22 11:44
+						//
+						// Instead of creating an empty record, we're trying to use an
+						// existing linked model. Then, only if there is no linked model
+						// do we create a new one and link it to the main model.
+						//
+						// Prior to this modification, the whole code was identical to
+						// the one in the else alternative bellow.
+
+						//$associatedModel = $associatedTable->createModel(null, false, $model->context);
+						$associatedModel = $model->getField($fieldName);
+
+						if ($associatedModel) {
+							// Update
+							$proxy->setRecordData($associatedModel, $value);
+						} else {
+							// Create
+							$associatedModel = $associatedTable->createModel(null, false, $model->context);
+							// Update
+							$proxy->setRecordData($associatedModel, $value);
+							// Assign
+							$model->setField($fieldName, $associatedModel);
+						}
 					} else if ($field instanceof \ModelRelationInfoHasMany) {
 						$associatedModels = array();
 						foreach ($value as $data) {
