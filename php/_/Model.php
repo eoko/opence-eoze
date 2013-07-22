@@ -848,6 +848,13 @@ abstract class Model {
 		return $this->table->loadModel($this->getPrimaryKeyValue(), $this->context);
 	}
 
+	/**
+	 * @return Model
+	 */
+	public function getStoredCopy($fromDatabase = null) {
+		return $this->doGetStoredCopy($fromDatabase);
+	}
+
 	public function getInitialValue($fieldName) {
 		if ($this->internal->dbValues === null) {
 			if ($this->isNew()) {
@@ -1394,7 +1401,7 @@ abstract class Model {
 	 */
 	protected function doGetStoredCopy($loadFromDb = false) {
 		if ($loadFromDb === true) {
-			return $this->doDoGetStoredCopy(true);
+			$this->cachedStoredCopy = $this->doDoGetStoredCopy(true);
 		} else if (!$this->cachedStoredCopy) {
 			$this->cachedStoredCopy = $this->doDoGetStoredCopy($loadFromDb);
 		}
