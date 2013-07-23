@@ -496,6 +496,18 @@ abstract class Model {
 	 *     'MyRelation->id',
 	 * </code>
 	 *
+	 * <h2>Nesting</h2>
+	 *
+	 * Data can be retrieved from hasOne and hasMany relations.
+	 *
+	 * <code>
+	 *     'alias' => array(
+	 *         'relationName' => array(
+	 *             // standard getDataAs spec
+	 *         )
+	 *     )
+	 * </code>
+	 *
 	 * @param array $fields
 	 * @return array
 	 */
@@ -509,6 +521,26 @@ abstract class Model {
 					if (!array_key_exists($alias, $return)) {
 						$return[$alias] = $value;
 					}
+				}
+			} else if (is_array($field)) {
+				foreach ($field as $subName => $subFields) {
+					// get data
+					$data = $this->getFieldValue($subName);
+					// convert Model & ModelSet
+					if ($data instanceof ModelSet) {
+						$setData = array();
+						foreach ($data as $model) {
+							$setData[] = $model->getDataAs($subFields);
+						}
+						$data = $setData;
+					} else if ($data instanceof Model) {
+						$data = $data->getDataAs($subFields);
+					}
+					// save
+					if (!is_string($alias)) {
+						$alias = $field;
+					}
+					$return[$alias] = $data;
 				}
 			} else {
 				// get data
@@ -848,12 +880,7 @@ abstract class Model {
 		return $this->table->loadModel($this->getPrimaryKeyValue(), $this->context);
 	}
 
-	/**
-	 * @return Model
-	 */
-	public function getStoredCopy($fromDatabase = null) {
-		return $this->doGetStoredCopy($fromDatabase);
-	}
+	abstract public function getStoredCopy($loadFromDB = null);
 
 	public function getInitialValue($fieldName) {
 		if ($this->internal->dbValues === null) {
