@@ -60,7 +60,7 @@ class Modification extends AbstractEntry {
 		//$this->grabOriginalValues();
 
 		// make a copy of the data in the database, before they are changed
-		$this->originalModel = $this->model->getDatabaseCopy();
+		$this->originalModel = $this->model->getStoredCopy();
 
 		// initialization
 		$parserStack = $this->getContext()->getDeltaParserStack();

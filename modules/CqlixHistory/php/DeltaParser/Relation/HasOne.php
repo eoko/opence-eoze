@@ -49,8 +49,12 @@ class HasOne extends AbstractRelation {
 		/** @var $modifiedTarget Model */
 		$modifiedTarget = $modifiedModel->{$relationName};
 
-		$previousValue = $originalTarget->getPrimaryKeyValue();
-		$newValue = $modifiedTarget->getPrimaryKeyValue();
+		$previousValue = $originalTarget
+			? $originalTarget->getPrimaryKeyValue()
+			: null;
+		$newValue = $modifiedTarget ?
+			$modifiedTarget->getPrimaryKeyValue()
+			: null;
 
 		if ($previousValue !== $newValue) {
 			$table = $this->getTable();

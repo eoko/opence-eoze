@@ -149,10 +149,14 @@ abstract class AbstractEntry implements Enum {
 	 * @return History
 	 */
 	protected function getHistoryRecord() {
-		/** @var HasHistory $model */
-		$model = $this->model->getStoredCopy();
+		if (!$this->model->isNew()) {
+			/** @var HasHistory $model */
+			$model = $this->model->getStoredCopy();
 
-		$this->historyRecord = $model->getHistory();
+			// Using stored copy, in order to safeguard partial representations of
+			// existing models.
+			$this->historyRecord = $model->getHistory();
+		}
 
 		if (empty($this->historyRecord)) {
 			$this->historyRecord = $this->createHistoryRecord();
