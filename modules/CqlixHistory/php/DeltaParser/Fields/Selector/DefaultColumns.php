@@ -140,7 +140,7 @@ class DefaultColumns extends AbstractSelector {
 	 */
 	protected function isIncluded(ModelColumn $column) {
 		if ($this->includedFieldsMap !== null) {
-			return isset($this->includedFieldsMap[$column]);
+			return isset($this->includedFieldsMap[$column->name]);
 		} else {
 			$fieldName = $column->getName();
 			return !isset($this->excludedFieldsMap[$fieldName])
