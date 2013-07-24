@@ -765,11 +765,7 @@ abstract class ModelTable extends ModelTableProxy implements EventManagerAwareIn
 
 		$this->applyLoadQueryDefaultOrder($query);
 
-		foreach ($this->virtuals as $virtual) {
-			if ($columns === null || isset($columns[$virtual->getName()])) {
-				$virtual->select($query);
-			}
-		}
+		$this->selectLoadQueryVirtuals($query, $columns);
 
 		if (is_array($relationsMode)) {
 			foreach ($relationsMode as $mode => $values) {
@@ -824,6 +820,14 @@ abstract class ModelTable extends ModelTableProxy implements EventManagerAwareIn
 		}
 
 		return $query;
+	}
+
+	protected function selectLoadQueryVirtuals(\ModelTableQuery $query, $columns) {
+		foreach ($this->virtuals as $virtual) {
+			if ($columns === null || isset($columns[$virtual->getName()])) {
+				$virtual->select($query);
+			}
+		}
 	}
 
 	protected function applyLoadQueryDefaultOrder(Query $query) {}
