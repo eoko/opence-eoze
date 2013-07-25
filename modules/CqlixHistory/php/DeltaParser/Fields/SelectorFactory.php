@@ -84,7 +84,7 @@ class SelectorFactory {
 			return $type;
 		} else {
 			$class = __NAMESPACE__ . '\Selector\\' . $type;
-			if (class_exists($type)) {
+			if (class_exists($class)) {
 				return $class;
 			}
 		}
