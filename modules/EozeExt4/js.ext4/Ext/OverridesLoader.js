@@ -73,6 +73,8 @@ Ext4.define('Eoze.Ext.OverridesLoader', {
 		// File upload field, fixes rendering
 		'Eoze.Ext.form.field.File',
 
+		'Eoze.Ext.tab.Bar.ToolsToolbar',
+
 		// Row numberer fix
 		'Eoze.Ext.grid.RowNumberer',
 
