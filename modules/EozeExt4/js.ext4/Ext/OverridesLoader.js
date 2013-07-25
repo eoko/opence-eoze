@@ -48,6 +48,7 @@ Ext4.define('Eoze.Ext.OverridesLoader', {
 		'Eoze.Ext.data.Model',
 		'Eoze.Ext.data.Field',
 		'Eoze.Ext.data.model.DirtyEvents',
+		'Eoze.Ext.data.model.UpdateAssociationsOnSave',
 		'Eoze.Ext.data.association.HasOne',
 		// Component
 		'Eoze.Ext.AbstractComponent',
