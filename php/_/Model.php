@@ -1576,6 +1576,8 @@ abstract class Model {
 		) {
 			$m = 'get' . ucfirst($name);
 			$v = $this->$m();
+		} else {
+			throw new Exception();
 		}
 
 		return $this->table->getField($name)->castValue($v);
