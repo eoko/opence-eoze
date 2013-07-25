@@ -95,14 +95,7 @@ abstract class AbstractParser implements DeltaParser {
 	/**
 	 * @inheritdoc
 	 */
-	public function initOriginalModel(Model $model) {
-		$this->checkIntegrity();
-	}
-
-	/**
-	 * @inheritdoc
-	 */
-	final public function getDeltaRecords(Model $originalModel, Model $modifiedModel, array $excludedFieldsMap = null) {
+	final public function getDeltaRecords(array $originalValues, Model $modifiedModel, array $excludedFieldsMap = null) {
 
 		$this->checkIntegrity();
 
@@ -120,7 +113,7 @@ abstract class AbstractParser implements DeltaParser {
 		}
 
 		// Get the delta records
-		$records = $this->doGetDeltaRecords($originalModel, $modifiedModel, $whiteList);
+		$records = $this->doGetDeltaRecords($originalValues, $modifiedModel, $whiteList);
 
 		// Ensure we return an array (even if doGetDeltaRecords returned nothing)
 		return $records ? $records : array();
@@ -139,12 +132,12 @@ abstract class AbstractParser implements DeltaParser {
 	}
 
 	/**
-	 * @param Model $originalModel
+	 * @param array $originalValues
 	 * @param Model $modifiedModel
 	 * @param array $fields
 	 * @return array|null
 	 */
-	abstract protected function doGetDeltaRecords(Model $originalModel, Model $modifiedModel, array $fields);
+	abstract protected function doGetDeltaRecords(array $originalValues, Model $modifiedModel, array $fields);
 
 	/**
 	 * @param array $values

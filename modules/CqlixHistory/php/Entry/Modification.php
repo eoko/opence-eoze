@@ -44,10 +44,8 @@ class Modification extends AbstractEntry {
 	protected $operation = self::OPERATION_EDIT;
 
 	/**
-	 * @var Model
+	 * @var array
 	 */
-	private $originalModel;
-
 	private $originalValues;
 
 	/**
@@ -57,14 +55,11 @@ class Modification extends AbstractEntry {
 	 */
 	protected function init() {
 		parent::init();
-		//$this->grabOriginalValues();
 
-		// make a copy of the data in the database, before they are changed
-		$this->originalModel = $this->model->getStoredCopy();
+		$parsers = $this->getContext()->getDeltaParserStack();
 
-		// initialization
-		$parserStack = $this->getContext()->getDeltaParserStack();
-		$parserStack->initOriginalModel($this->originalModel);
+		$model = $this->model->getStoredCopy();
+		$this->originalValues = $parsers->readValues($model);
 	}
 
 	/**
@@ -74,12 +69,12 @@ class Modification extends AbstractEntry {
 	 */
 	public function populateEntry(HistoryEntry $entry) {
 
-		$originalModel = $this->originalModel;
+		$originalValues = $this->originalValues;
 		$modifiedModel = $this->model;
 
 		$parserStack = $this->getContext()->getDeltaParserStack();
 
-		$deltaRecords = $parserStack->getDeltaRecords($originalModel, $modifiedModel);
+		$deltaRecords = $parserStack->getDeltaRecords($originalValues, $modifiedModel);
 
 		$entry->setDeltas($deltaRecords);
 

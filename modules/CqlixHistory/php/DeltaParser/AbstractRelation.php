@@ -50,19 +50,6 @@ abstract class AbstractRelation extends SingleFieldParser {
 	private $nameReader;
 
 	/**
-	 * @inheritdoc
-	 *
-	 * Triggers the loading of the tracked model copy's relations from the database (because that won't
-	 * be possible anymore after the model has been saved).
-	 */
-	public function initOriginalModel(Model $model) {
-		parent::initOriginalModel($model);
-
-		// preload the relation target
-		$model->getRelation($this->getRelationName())->get();
-	}
-
-	/**
 	 * Configure the relation name.
 	 *
 	 * @param $relationName

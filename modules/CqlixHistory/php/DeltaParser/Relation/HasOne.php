@@ -26,6 +26,7 @@ namespace eoko\modules\CqlixHistory\DeltaParser\Relation;
 
 use Model;
 use eoko\modules\CqlixHistory\DeltaParser\AbstractRelation;
+use eoko\modules\CqlixHistory\Exception;
 
 /**
  * Delta parser for has one relations.
@@ -40,14 +41,31 @@ class HasOne extends AbstractRelation {
 	/**
 	 * @inheritdoc
 	 */
-	protected function getDeltaRecord(Model $originalModel, Model $modifiedModel) {
+	public function readValues(Model $model, array $fields = null) {
+		$fieldName = $this->getFieldName();
+		if ($fields === null || in_array($fieldName, $fields)) {
+			return array(
+				$fieldName => $model->{$this->getRelationName()},
+			);
+		} else {
+			return array();
+		}
+	}
+
+	/**
+	 * @inheritdoc
+	 */
+	protected function getDeltaRecord(array $originalValues, Model $modifiedModel) {
 
 		$relationName = $this->getRelationName();
+		$fieldName = $this->getFieldName();
+
+		$newValues = $this->readValues($modifiedModel);
 
 		/** @var $originalTarget Model */
-		$originalTarget = $originalModel->{$relationName};
+		$originalTarget = $originalValues[$fieldName];
 		/** @var $modifiedTarget Model */
-		$modifiedTarget = $modifiedModel->{$relationName};
+		$modifiedTarget = $newValues[$fieldName];
 
 		$previousValue = $originalTarget
 			? $originalTarget->getPrimaryKeyValue()
@@ -69,6 +87,8 @@ class HasOne extends AbstractRelation {
 				$sqlTable = $table->getDbTable();
 			} else if ($relationInfo instanceof \ModelRelationInfoIsRefered) {
 				$sqlTable = $relationInfo->getTargetTable();
+			} else {
+				throw new Exception\IllegalState();
 			}
 
 			$deltaRecord = $this->createDeltaRecord(array(

@@ -54,13 +54,15 @@ abstract class AbstractSelector implements Selector {
 	public function __construct(array $config = null) {
 		if ($config) {
 			foreach ($config as $key => $value) {
-				$method = isset(static::$configAliases[$key])
+				$method = array_key_exists($key, static::$configAliases)
 					? static::$configAliases[$key]
 					: 'set' . ucfirst($key);
-				if (method_exists($this, $method)) {
-					$this->$method($value);
-				} else {
-					throw new Exception\InvalidArgument('Invalid config key: ' . $key);
+				if ($method !== null) {
+					if (method_exists($this, $method)) {
+						$this->$method($value);
+					} else {
+						throw new Exception\InvalidArgument('Invalid config key: ' . $key);
+					}
 				}
 			}
 		}

@@ -91,15 +91,29 @@ class SingleFieldParser extends AbstractParser {
 
 	/**
 	 * @inheritdoc
+	 */
+	public function readValues(Model $model, array $fields = null) {
+		$fieldName = $this->getFieldName();
+		if ($fields === null || in_array($fieldName, $fields)) {
+			return array(
+				$fieldName => $model->getField($fieldName),
+			);
+		} else {
+			return array();
+		}
+	}
+
+	/**
+	 * @inheritdoc
 	 *
 	 * Proxies the call to {@link getDeltaRecord()} method, and ensures the returned result is an array.
 	 */
-	protected function doGetDeltaRecords(Model $originalModel, Model $modifiedModel, array $fields) {
+	protected function doGetDeltaRecords(array $originalValues, Model $modifiedModel, array $fields) {
 		if ($fields) {
-			$record = $this->getDeltaRecord($originalModel, $modifiedModel);
+			$record = $this->getDeltaRecord($originalValues, $modifiedModel);
 			if ($record) {
 				return is_array($record)
-					? $recod
+					? $record
 					: array($record);
 			}
 		}
@@ -111,16 +125,17 @@ class SingleFieldParser extends AbstractParser {
 	 * This method should be used/overridden preferably to {@link doGetDeltaRecords()}, in order to
 	 * benefit from boilerplate code in there.
 	 *
-	 * @param Model $originalModel
+	 * @param array $originalValues
 	 * @param Model $modifiedModel
 	 * @return DeltaRecordInterface
 	 */
-	protected function getDeltaRecord(Model $originalModel, Model $modifiedModel) {
+	protected function getDeltaRecord(array $originalValues, Model $modifiedModel) {
 
 		$fieldName = $this->getFieldName();
+		$newValues = $this->readValues($modifiedModel);
 
-		$originalValue = $originalModel->getField($fieldName);
-		$modifiedValue = $modifiedModel->getField($fieldName);
+		$originalValue = $originalValues[$fieldName];
+		$modifiedValue = $newValues[$fieldName];
 
 		if ($originalValue !== $modifiedValue) {
 
@@ -165,7 +180,7 @@ class SingleFieldParser extends AbstractParser {
 	 * History tracking of a field requires that this field's label meta be set (or a DomainException will be
 	 * raised).
 	 *
-	 * @param ModelField [$field] The tracked field. Can be provided if it is available in the calling context,
+	 * @param ModelField $field The tracked field. Can be provided if it is available in the calling context,
 	 * to avoid retrieving it twice.
 	 * @return string
 	 * @throws Exception\Domain

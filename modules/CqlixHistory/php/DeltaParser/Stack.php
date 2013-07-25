@@ -63,14 +63,14 @@ class Stack implements DeltaParser {
 	/**
 	 * @inheritdoc
 	 */
-	public function getDeltaRecords(Model $originalModel, Model $modifiedModel, array $excludedFieldsMap = null) {
+	public function getDeltaRecords(array $originalValues, Model $modifiedModel, array $excludedFieldsMap = null) {
 
 		$records = array();
 
 		foreach ($this->parsers as $parser) {
 
 			// Get the delta records
-			$newRecords = $parser->getDeltaRecords($originalModel, $modifiedModel, $excludedFieldsMap);
+			$newRecords = $parser->getDeltaRecords($originalValues, $modifiedModel, $excludedFieldsMap);
 
 			if ($newRecords) {
 				// Store the new records in the returned array
@@ -89,6 +89,19 @@ class Stack implements DeltaParser {
 	/**
 	 * @inheritdoc
 	 */
+	public function readValues(Model $model, array $fields = null) {
+		$values = array();
+
+		foreach ($this->parsers as $parser) {
+			$values += $parser->readValues($model, $fields);
+		}
+
+		return $values;
+	}
+
+	/**
+	 * @inheritdoc
+	 */
 	public function getTrackedFieldNames() {
 		if ($this->parsedFieldNames === null) {
 			$map = array();
@@ -102,14 +115,5 @@ class Stack implements DeltaParser {
 			$this->parsedFieldNames = array_keys($map);
 		}
 		return $this->parsedFieldNames;
-	}
-
-	/**
-	 * @inheritdoc
-	 */
-	public function initOriginalModel(Model $model) {
-		foreach ($this->parsers as $parser) {
-			$parser->initOriginalModel($model);
-		}
 	}
 }

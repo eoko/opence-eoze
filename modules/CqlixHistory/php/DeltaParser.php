@@ -53,13 +53,22 @@ interface DeltaParser extends Enum {
 	 * The black list must be passed as an associative array in which the excluded field names are
 	 * used as the keys, and the associated value is always `true`.
 	 *
-	 * @param Model $originalModel
+	 * @param array $originalValues
 	 * @param Model $modifiedModel
 	 * @param bool[] $excludedFieldsMap
 	 * @throws Exception\Domain If the parser configuration is incomplete.
 	 * @return DeltaRecordInterface[]
 	 */
-	public function getDeltaRecords(Model $originalModel, Model $modifiedModel, array $excludedFieldsMap = null);
+	public function getDeltaRecords(array $originalValues, Model $modifiedModel, array $excludedFieldsMap = null);
+
+	/**
+	 * @todo doc
+	 *
+	 * @param Model $model
+	 * @param array $fields
+	 * @return array
+	 */
+	public function readValues(Model $model, array $fields = null);
 
 	/**
 	 * Get the name of the fields that are tracked by this parser. This is needed in order to
@@ -72,12 +81,4 @@ interface DeltaParser extends Enum {
 	 * @return string[]
 	 */
 	public function getTrackedFieldNames();
-
-	/**
-	 * Do initialization work (if needed) on the model copy made from the database by the
-	 * {@link eoko\modules\CqlixHistory\Entry\Modification modification entry}.
-	 *
-	 * @param Model $model
-	 */
-	public function initOriginalModel(Model $model);
 }

@@ -67,16 +67,33 @@ class Fields extends AbstractParser {
 	/**
 	 * @inheritdoc
 	 */
-	protected function doGetDeltaRecords(Model $originalModel, Model $modifiedModel, array $fields) {
+	public function readValues(Model $model, array $fields = null) {
+		if ($fields === null) {
+			$fields = $this->getTrackedFieldNames();
+		}
+
+		$values = array();
+		foreach ($fields as $fieldName) {
+			$values[$fieldName] = $model->$fieldName;
+		}
+		return $values;
+	}
+
+	/**
+	 * @inheritdoc
+	 */
+	protected function doGetDeltaRecords(array $originalValues, Model $modifiedModel, array $fields) {
 
 		$table = $this->getTable();
 
 		$deltaRecords = array();
 
+		$newValues = $this->readValues($modifiedModel, $fields);
+
 		foreach ($fields as $fieldName) {
 
-			$newValue = $modifiedModel->getField($fieldName);
-			$previousValue = $originalModel->getField($fieldName);
+			$newValue = $newValues[$fieldName];
+			$previousValue = $originalValues[$fieldName];
 
 			if ($previousValue !== $newValue) {
 				$field = $table->getField($fieldName);

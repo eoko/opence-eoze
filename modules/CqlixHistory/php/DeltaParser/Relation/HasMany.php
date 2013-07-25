@@ -40,17 +40,40 @@ class HasMany extends AbstractRelation {
 	/**
 	 * @inheritdoc
 	 */
-	protected function doGetDeltaRecords(Model $originalModel, Model $modifiedModel, array $fields) {
+	public function readValues(Model $model, array $fields = null) {
+		if ($fields === null) {
+			$fields = $this->getTrackedFieldNames();
+		}
 
+		$fieldName = $this->getFieldName();
+		$values = array();
+
+		if (in_array($fieldName, $fields)) {
+			$relationName = $this->getRelationName();
+			/** @var \ModelSet $set */
+			$set = $model->getRelation($relationName)->get();
+			$values[$fieldName] = $set->toArray();
+		}
+
+		return $values;
+	}
+
+	/**
+	 * @inheritdoc
+	 */
+	protected function doGetDeltaRecords(array $originalValues, Model $modifiedModel, array $fields) {
+
+		if (!$fields) {
+			return null;
+		}
+
+		$fieldName = $this->getFieldName();
 		$relationName = $this->getRelationName();
 
-//		$table = $this->getTable();
-//		$relationInfo = $table->getRelationInfo($relationName);
-
+		/** @var $originalModels Model[] */
+		$originalModels = $originalValues[$fieldName];
 		/** @var $newModels Model[] */
 		$newModels = $modifiedModel->getRelation($relationName)->get();
-		/** @var $originalModels Model[] */
-		$originalModels = $originalModel->getRelation($relationName)->get();
 
 		$newIds = array();
 		$oldIds = array();
