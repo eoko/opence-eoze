@@ -23,11 +23,14 @@
  */
 
 /**
+ * List of history entries.
  *
  * @since 2013-07-23 15:06
  */
 Ext.define('Eoze.CqlixHistory.view.History', {
 	extend: 'Ext.view.View'
+
+	,controller: 'Eoze.CqlixHistory.view.controller.History'
 
 	,autoScroll: true
 
@@ -35,7 +38,7 @@ Ext.define('Eoze.CqlixHistory.view.History', {
 
 	,itemSelector: 'div.eo-cqlix-history-item'
 
-	,emptyText: "L'historique est vide"
+	,emptyText: "L'historique est vide" // i18n
 
 	,tpl: [
 '<tpl for=".">',
@@ -61,8 +64,7 @@ Ext.define('Eoze.CqlixHistory.view.History', {
 								'<tr>',
 								'<tpl>',
 									'<td>{fieldLabel:ifEmpty(values.field)}</td>',
-									'<td>{originalValueDisplay:ifEmpty(values.originalValue)}</td>',
-//									'<td>{newValueDisplay:ifEmpty(values.newValue)}</td>',
+									'<td>{[this.formatCqlixValue(values.originalValueDisplay, values.originalValue, values.type)]}</td>',
 									'<td>{[this.formatCqlixValue(values.newValueDisplay, values.newValue, values.type)]}</td>',
 									'',
 								'</tpl>',
@@ -89,6 +91,7 @@ Ext.define('Eoze.CqlixHistory.view.History', {
 						default:
 							debugger
 						case 'text':
+						case 'string':
 							return escapeText(value);
 					}
 				} else {
