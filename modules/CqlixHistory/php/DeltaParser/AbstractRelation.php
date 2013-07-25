@@ -41,11 +41,6 @@ use eoko\modules\CqlixHistory\DeltaRecordInterface;
 abstract class AbstractRelation extends SingleFieldParser {
 
 	/**
-	 * @var string
-	 */
-	private $relationName;
-
-	/**
 	 * @var callback
 	 */
 	private $idReader;
@@ -134,8 +129,8 @@ abstract class AbstractRelation extends SingleFieldParser {
 	 * @param Model $model
 	 * @return string|null
 	 */
-	protected function extractModelFriendlyName(Model $model) {
-		if ($this->nameReader) {
+	protected function extractModelFriendlyName(Model $model = null) {
+		if ($model && $this->nameReader) {
 			return call_user_func($this->nameReader, $model);
 		} else {
 			return null;
