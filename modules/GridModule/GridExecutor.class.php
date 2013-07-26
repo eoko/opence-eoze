@@ -1381,6 +1381,8 @@ MSG;
 		// tmp
 		$query = $this->createLoadQuery('grid', null, array_keys($fields));
 
+		$this->beforeExecuteLoadQuery($query);
+
 //		$start = $this->request->get('realstart', false, true);
 //		if ($start === false) $start = $this->request->get('start', 0, true);
 //
