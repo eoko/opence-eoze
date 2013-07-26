@@ -777,11 +777,18 @@ abstract class GridExecutor extends JsonExecutor {
 
 		$r = $query->executeSelect();
 
-		foreach ($r as &$record) {
-			foreach ($record as $field => &$value) {
-				$value = $this->table->getField($field)->castValue($value);
+		if (count($r)) {
+			$fields = array();
+			foreach (array_keys($r[0]) as $field) {
+				$fields[$field] = $this->table->getField($field)->getActualField();
 			}
-			unset($value);
+
+			foreach ($r as &$record) {
+				foreach ($record as $field => &$value) {
+					$value = $fields[$field]->castValue($value);
+				}
+				unset($value);
+			}
 		}
 
 		if (count($r) === 0) {
