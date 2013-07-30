@@ -1,5 +1,3 @@
-(function(Ext){
-
 /**
  * @class Ext.ux.ActivityMonitor
  * @author Arthur Kay (http://www.akawebdesign.com)
@@ -101,5 +99,3 @@ Ext.define('Ext.ux.ActivityMonitor', {
 	}
 
 });
-
-})(Ext4);

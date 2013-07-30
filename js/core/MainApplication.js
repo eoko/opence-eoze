@@ -57,17 +57,38 @@
 		}
 
 		,loadConfiguration: function(callback) {
-			eo.Ajax.request({
-				params: {
-					controller: 'root.application'
-					,action: 'configure'
+			Ext4.require('Opence.Opence.model.Configuration');
+			Ext4.onReady(function() {
+				var latch = 2,
+					dt;
+
+				function next() {
+					if (--latch === 0) {
+						callback(dt.config, dt);
+					}
 				}
-				,scope: this
-				,success: function(data) {
-					var cfg = this.initialConfig = data.config;
-					callback(cfg, data);
-				}
-			});
+
+				Opence.Opence.model.Configuration.load('default', {
+					scope: this
+					,success: function(record) {
+						this.openceConfiguration = record;
+						next();
+					}
+				});
+
+				eo.Ajax.request({
+					params: {
+						controller: 'root.application'
+						,action: 'configure'
+					}
+					,scope: this
+					,success: function(data) {
+						dt = data;
+						this.initialConfig = data.config;
+						next();
+					}
+				});
+			}, this);
 		}
 
 		,doStart: function(config) {
@@ -124,6 +145,26 @@
 					// (the module main tab resizing itself 50ms after they
 					// are shown)
 					,layoutOnTabChange: true
+
+					,itemTpl: new Ext.Template(
+						'<li class="{cls}" id="{id}"><a class="x-tab-strip-close"></a>',
+						'<a class="x-tab-right" href="{href}"><em class="x-tab-left">',
+						'<span class="x-tab-strip-inner"><span class="x-tab-strip-text {iconCls}">{text}</span></span>',
+						'</em></a></li>'
+					)
+					,getTemplateArgs: function(item) {
+						var args = Ext.TabPanel.prototype.getTemplateArgs.apply(this, arguments);
+						return Ext.apply(args, {
+							href: item.href
+						});
+					}
+
+					,listeners: {
+						tabchange: function(panel, tab) {
+							Eoze.AjaxRouter.Router.setActivePage(tab);
+						}
+					}
+
 				}, Oce.mx.TaskBar = new Oce.TaskBarToolbar({
 					height: 26
 					,id:"window-dock"

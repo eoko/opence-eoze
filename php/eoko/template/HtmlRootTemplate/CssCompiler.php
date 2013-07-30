@@ -1,12 +1,13 @@
 <?php
 
 namespace eoko\template\HtmlRootTemplate;
+use eoko\util\Files;
 
 /**
  *
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  * @author Éric Ortega <eric@planysphere.fr>
- * @since 19 juil. 2012
+ * @since 2012-07-19
  */
 class CssCompiler extends IncludeCompiler {
 
@@ -18,10 +19,10 @@ class CssCompiler extends IncludeCompiler {
 
 	// replaces images urls with their path relative to the web dir url
 	protected function getFileContent($file) {
-		$content =  file_get_contents($file);
+		$content = file_get_contents($file);
 		$dir = dirname($file);
 		$content = preg_replace_callback('/url\(([^)]+)\)/', function($matches) use($dir) {
-			$rel = \eoko\util\Files::getRelativePath(WEB_DIR_PATH, $dir);
+			$rel = Files::getRelativePath(WEB_DIR_PATH, $dir);
 			if (substr($rel, -1) !== '/') {
 				$rel .= '/';
 			}

@@ -11,6 +11,8 @@
 
 	"require": {
 		"php": ">=5.3.3",
+
+		"kriswallsmith/assetic": "1.*",
 	
 		"symfony/yaml": "2.*",
 

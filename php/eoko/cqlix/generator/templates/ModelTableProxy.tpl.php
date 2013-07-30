@@ -1,13 +1,18 @@
+<?php if (isset($proxyNamespace)): ?>
+namespace <?php echo $proxyNamespace ?>;
+<?php endif ?>
+
 /**
  * Proxy of the <?php echo $modelName ?> Table.
- * @package <?php echo $package ?>
- * @subpackage models_base
+ *
+ * @category <?php echo $this->modelCategory, PHP_EOL ?>
+ * @package <?php echo $this->modelPackage, PHP_EOL ?>
+ * @subpackage <?php echo $this->proxySubPackage, PHP_EOL ?>
 <?php if ($version): ?>
- * @since <?php echo $version ?>
-
+ * @since <?php echo $version, PHP_EOL ?>
 <?php endif ?>
  */
-class <?php echo $tableName ?>Proxy extends ModelTableProxy {
+class <?php echo $proxyName ?> extends \ModelTableProxy {
 
 	private static $tableVars = array();
 
@@ -22,8 +27,11 @@ class <?php echo $tableName ?>Proxy extends ModelTableProxy {
 		return self::$instance;
 	}
 
+	/**
+	 * @return <?php echo $proxyName, PHP_EOL ?>
+	 */
 	public static function getInstance() {
-		$table = <?php echo $tableName ?>::getInstance();
+		$table = <?php echo $tableClass ?>::getInstance();
 		foreach (self::$tableVars as &$pointer) {
 			$pointer = $table;
 		}
@@ -31,7 +39,8 @@ class <?php echo $tableName ?>Proxy extends ModelTableProxy {
 	}
 
 	/**
-	 * @return ModelTableProxy
+	 * @param $pointer
+	 * @return \ModelTableProxy
 	 */
 	public function attach(&$pointer) {
 		self::$tableVars[] =& $pointer;

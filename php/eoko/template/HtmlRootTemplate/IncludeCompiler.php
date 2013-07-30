@@ -35,6 +35,9 @@ abstract class IncludeCompiler {
 
 	protected $force = false;
 
+	/**
+	 * @var Callback
+	 */
 	private $builder;
 
 	private $urls;
@@ -120,8 +123,11 @@ abstract class IncludeCompiler {
 	 */
 	public function compile($prioritizedUrls) {
 
-		$names = $this->getTargetNames();
-		extract($names);
+		/** @var $mergedFile */
+		/** @var $mergedUrl */
+		/** @var $compressedFile */
+		/** @var $compressedUrl */
+		extract($this->getTargetNames());
 
 		// Merge
 		if ($this->is('merge')) {
@@ -166,12 +172,15 @@ abstract class IncludeCompiler {
 	private function build() {
 
 		$names = $this->getTargetNames();
-		extract($names); // mergedFile & mergedUrl
+
+		/** @var $mergedFile */
+		/** @var $mergedUrl */
+		extract($names);
 
 		// if configured to merge
 		if ($this->is('merge')) {
 			// if already merged: done
-			if (file_exists($mergedFile)) {
+			if (false && file_exists($mergedFile)) {
 				$this->urls = array($mergedUrl);
 				return;
 			}
@@ -233,7 +242,7 @@ abstract class IncludeCompiler {
 	 *	 array(
 	 *		 'http://my.url/myFile.js' => 1,
 	 *	 )
-	 * @param bool $keepRemoteUrls `true` to add raw remote URLs to the returned array.
+	 * @param int[] &$url
 	 * @param bool $removeLocalUrls `true` to remove local URLs from the passed $urls array.
 	 * @return string[]
 	 */
@@ -245,11 +254,27 @@ abstract class IncludeCompiler {
 			if ($priority === null) {
 				$priority = \PHP_INT_MAX;
 			}
-			if (substr($url, 0, $baseUrlLen) === SITE_BASE_URL
-					&& !strstr($url, '?')) {
-				$files[$priority][] = ROOT . substr($url, $baseUrlLen);
-				if ($removeLocalUrls) {
-					unset($urls[$url]);
+			if (substr($url, 0, $baseUrlLen) === SITE_BASE_URL) {
+				if (strstr($url, '?') !== false) {
+					$suffix = substr($url, -2);
+					if ($suffix === '??') {
+						// that's a "merge me but get content through http"
+						$files[$priority][] = $url;
+						if ($removeLocalUrls) {
+							unset($urls[$url]);
+						}
+					} else if ($suffix === '?!') {
+						$cleanedUrl = substr($url, 0, -2);
+						// replace the url by the cleaned one to avoid bursting the browser cache
+						unset($urls[$url]);
+						$urls[$cleanedUrl] = $priority;
+					}
+					// else consider the url to be remote because of the query string
+				} else {
+					$files[$priority][] = ROOT . substr($url, $baseUrlLen);
+					if ($removeLocalUrls) {
+						unset($urls[$url]);
+					}
 				}
 			} else if (!$this->isPreserveRemoteUrl()) {
 				$files[$priority][] = $url;

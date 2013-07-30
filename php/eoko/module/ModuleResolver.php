@@ -29,14 +29,15 @@ class ModuleResolver {
 	 * The meaning of the second form, which doesn't specify the name of the
 	 * Executor may vary depending on the situation it is used. In the context
 	 * where the $controller was given as a Module name, the Executor will most
-	 * oftenly not be precised; on the opposite, in the context where
+	 * often not be precised; on the opposite, in the context where
 	 * $controller was given for an Executor, that will mean the default
 	 * Executor of the Module. In the later case, the notation "module." can be
-	 * used to explicitely name the default Executor.
+	 * used to explicitly name the default Executor.
 	 *
-	 * @param Module           $controller
-	 * @param string|Module    &$module
-	 * @param string|Executor  &$executor
+	 * @param Module $controller
+	 * @param string|Module &$module
+	 * @param string|Executor &$executor
+	 * @throws \IllegalArgumentException
 	 */
 	private static function parseModule($controller, &$module, &$executor = null) {
 		if ($controller instanceof Module) {
@@ -98,6 +99,10 @@ class ModuleResolver {
 	 */
 	public static function parseAction($controller, $action, $request) {
 
+		if ($controller instanceof Executor) {
+			return $controller;
+		}
+
 		self::parseModule($controller, $module, $executor);
 		// $module instanceof Module;
 
@@ -112,6 +117,7 @@ class ModuleResolver {
 	 * Parses the given request to extract the information to create the serving
 	 * executor.
 	 * @param Request $request
+	 * @throws \eoko\routing\InvalidRequestException
 	 * @return Executor
 	 */
 	public static function parseRequestAction(Request $request) {

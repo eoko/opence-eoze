@@ -120,7 +120,12 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	 */
 
 	,constructor: function(config) {
-		
+
+		// Initial hidden state
+		Ext.each(this.columns, function(col) {
+			col.initialHidden = !!col.hidden;
+		});
+
 		this.addAsyncConstructTask(this.onApplyPreferences, this);
 
 		this.my = Ext.apply({
@@ -134,6 +139,8 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		Ext.apply(this, this.my);
 		
 		Ext.apply(this, config);
+
+		this.editWindowAdapter = this.createEditWindowAdapter();
 		
 		this.sc = this.extra.shortcuts;
 
@@ -276,6 +283,15 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				});
 			}, this);
 		}
+	}
+
+	/**
+	 * @return Eoze.GridModule.form.EditWindowAdapter
+	 */
+	,createEditWindowAdapter: function() {
+		return Ext4.create('Eoze.GridModule.form.EditWindowAdapter', {
+			module: this
+		});
 	}
 	
 	/**
@@ -488,7 +504,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 					controller: controller
 					,action:'load'
 				}, this.storeBaseParams),
-				url: 'index.php',
+				url: 'api',
 				root: 'data',
 				idProperty: this.primaryKeyName,
 				totalProperty: 'count',
@@ -583,86 +599,92 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		});
 	}
 
-	,editRecord: function(recordId, startTab, cb, scope) {
-		// Msg syntax
-		if (Ext.isObject(recordId)) {
-			cb = recordId.callback;
-			scope = recordId.scope || this;
-			startTab = recordId.tab;
-			recordId = recordId.id;
-		}
-		// Verify args
-		if (recordId === undefined || recordId === null) {
-			throw new Error('Record id is required');
-		}
-		// Go, baby!
-		return this.editRowById(recordId, startTab, cb, scope);
+	/**
+	 * Initiates action for editing (or viewing the specified record).
+	 *
+	 * This method also accepts params as documented for {@link #doEditRecord}.
+	 *
+	 * @param {Object/Eoze.GridModule.EditRecordOperation/Ext.data.Record/String} param
+	 * @param {String/Ext.data.Record} param.record
+	 * @param {Integer/String} [param.startTab]
+	 * @param {Function} [param.callback] Callback triggered after loading.
+	 * @param {Object} [param.scope]
+	 * @param {Ext.Element} [param.sourceEl]
+	 *
+	 * @return {Eoze.GridModule.EditRecordOperation} operation
+	 *
+	 * @todo #gridmodule This should be moved to a controller.
+	 */
+	,editRecord: function(record, startTab, callback, scope, sourceEl) {
+		var operation = Eoze.GridModule.EditRecordOperation.parseOperation(arguments);
+		this.doEditRecord(operation);
+		return operation;
 	}
 
-	,editRowById: function(rowId, startTab, cb, scope) {
-		var win = this.getEditWindow(rowId, function(win) {
-			if (!win.hasBeenLoaded) {
-				win.setRowId(rowId);
-				win.form.reset();
-				win.show();
-				win.formPanel.refresh(function() {
-					win.hasBeenLoaded = true;
-					if (cb) cb.call(scope, win);
-				});
-			} else {
-				win.show();
-			}
+	/**
+	 * Actual implementation of {@link #editRecord}. This method should be preferred for overriding,
+	 * since all arguments preparation has been done beforehand.
+	 *
+	 * Only the record id is mandatory, all other arguments are optional and can be left blank. Even if
+	 * `record` is supplied, `recordId` must be passed as the first argument.
+	 *
+	 * @param {Eoze.GridModule.EditRecordOperation} params
+	 *
+	 * @protected
+	 *
+	 * @todo #gridmodule This should be moved to a controller.
+	 */
+	,doEditRecord: function(operation) {
 
-			if (startTab) {
-				win.setTab(startTab);
-			}
-		});
+		var adapter = this.editWindowAdapter;
+
+		this.getEditWindow(operation)
+
+			.then({
+				success: function() {
+					adapter.showWindow(operation);
+					adapter.loadWindow(operation);
+				}
+			})
+
+			.otherwise(function() {
+				debugger
+			});
+//			.otherwise(adapter.handleError, adapter); // TODO
 	}
 
 	,editRow: function(row) {
 
 		var el,
-			index = this.grid.store.indexOf(row);
+			index = this.grid.store.indexOf(row),
+			id = row.data[this.primaryKeyName];
+
 		if (index >= 0) {
 			var rc = this.grid.view.resolveCell(index,0);
-			if (rc) el = Ext.get(rc.cell);
+			if (rc) {
+				el = Ext.get(rc.cell);
+			}
 		}
 
-		var win = this.getEditWindow(row.data[this.primaryKeyName], function(win) {
-			if (!win.hasBeenLoaded) {
-				win.setRow(row);
-//				win.form.reset();
-				win.show(el);
-				
-				// 15/12/11 05:56 added form.record for opence's season module
-				var form = win.formPanel.form;
-				if (form) {
-					form.record = row;
-				}
-				
-				win.formPanel.refresh(function() {
-					win.hasBeenLoaded = true;
-				});
-			} else {
-				win.show();
-			}
+		this.editRecord({
+			record: row
+			,sourceEl: el
 		});
 	}
 
-	,editReccordLine: function(grid, rowIndex) {
-		debugger // this method is deprecated (typo in its name)
-		return this.editRecordLine(grid, rowIndex);
-	}
-	
 	,editRecordLine: function(grid, rowIndex) {
 		if (this.my.recordEditable !== false) {
 			this.editRow(grid.store.getAt(rowIndex))
 		}
 	}
 
-	,beforeCreateGrid: function(config) {
-
-	}
+	/**
+	 * @param {Object} config
+	 *
+	 * @template
+	 * @protected
+	 */
+	,beforeCreateGrid: function(config) {}
 	
 	// private
 	,onSelectionChange: function(selectionModel) {
@@ -740,7 +762,10 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			}
 		});
 		this.savePrefs('columns', config);
-		this.savePrefs('columnPositions', positions);
+		this.savePrefs('columnPositions', {
+			columns: positions
+			,version: eo.getApplication().getOpenceVersion()
+		});
 	}
 	
 	/**
@@ -855,17 +880,17 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	 * @protected
 	 */
 	,onEditWindowExternallyModified: function(win, external) {
-		
+
 		var actionMsg, okHandler;
 
 		if (win.refresh) {
-			
+
 			// If the form is not dirty, reload without confirmation
 			if (!win.formPanel.isModified()) {
 				win.refresh(true);
 				return;
 			}
-			
+
 			else {
 				actionMsg = "Les données vont être rechargées.";
 				okHandler = function() {
@@ -887,7 +912,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			,modalGroup: 'refresh'
 
 			,title: 'Modification' + (external ? ' extérieure' : '')
-			,message: "L'enregistrement a été modifié"  
+			,message: "L'enregistrement a été modifié"
 				+ (external ? ' par un autre utilisateur. ' : '. ')
 				+ actionMsg
 
@@ -899,7 +924,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			}
 		});
 	}
-	
+
 	,onEditWindowExternallyDeleted: function(win) {
 		NS.AlertWindow.show({
 
@@ -915,7 +940,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				this.close();
 				win.close();
 			}
-			
+
 			,cancelHandler: function() {
 				// Restore the normal warning on close behavior
 				win.forceClosing = false;
@@ -1011,7 +1036,12 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	}
 
 	,afterAdded: function(newId) {
-		if (this.extra.editAfterAdd) this.editRowById(newId, this.extra.editAfterAddTab);
+		if (this.extra.editAfterAdd) {
+			this.editRecord({
+				record: newId
+				,startTab: this.extra.editAfterAddTab
+			});
+		}
 	}
 	
 	,onFormSaveSuccess: function(form, data, options) {
@@ -1188,7 +1218,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			}
 			
 			var opts = {
-				url: 'index.php'
+				url: 'api'
 				
 				// post process data
 				,win: win
@@ -1788,152 +1818,107 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 
 	/**
 	 * Get the instance of the module to be used for editing. If editing is not done by another module,
-	 * then this method will return `true`. In the contrary, the method will return `false` and use
-	 * the supplied callback to provide the module.
+	 * then this method will return `false`. In the contrary, the method will return a promise that
+	 * will resolve with the edit module's own {@link #getEditWindow} promise.
 	 *
 	 * This option can be set in configuration with {@link #editModule}.
 	 *
-	 * @param {Function} callback
-	 * @param {Object} [scope]
-	 * @return {Boolean}
+	 * @params {Eoze.GridModule.EditRecordOperation} operation
+	 * @return {Deft.Promise|false}
 	 * @protected
 	 */
-	,getEditModule: function(callback, scope) {
+	,getEditModule: function(operation) {
 		var editModule = this.editModule || this.extra.editModule;
 
+		// Using another edit module
 		if (editModule) {
 			if (Ext.isString(editModule)) {
+				var deferred = Ext4.create('Deft.Deferred');
 				Oce.getModule(editModule, function(module) {
-					Ext.callback(callback, scope, [module]);
+					module.getEditWindow(operation).then({
+						scope: deferred
+						,update: deferred.update
+						,success: deferred.resolve
+						,failure: deferred.reject
+					});
 				});
+				return deferred.getPromise();
 			} else {
-				Ext.callback(callback, scope, [editModule]);
+				return editModule.getEditWindow(operation);
 			}
+		}
+
+		// Not using another edit module
+		else {
 			return false;
-		} else {
-			return true;
 		}
 	}
 
-	,getEditWindow: function(rowId, cb, opts) { // 08/12/11 21:03 added opts
+	/**
+	 * @version 2011-12-08 21:03 Added opts
+	 * @version 2013-03-19 14:26 Removed opts
+	 * @version 2013-03-19 16:20 Removed callback
+	 *
+	 * @params {Eoze.GridModule.EditRecordOperation} operation
+	 * @return {Deft.Promise} Promise of a {@link Ext.Window}.
+	 *
+	 * @protected
+	 */
+	,getEditWindow: function(operation) {
 
-		var args = arguments,
-			editModule = this.getEditModule(function(module) {
-				module.getEditWindow.apply(module, args);
-			}, this);
+		var editModulePromise = this.getEditModule(operation);
 
-		if (editModule !== true) {
-			return;
+		if (editModulePromise) {
+			return editModulePromise;
 		}
 
-		if (rowId !== null && rowId in this.editWindows) {
-			if (cb) {
-				cb(this.editWindows[rowId]);
-			} else {
-				return this.editWindows[rowId];
-			}
+		var deferred = Ext4.create('Deft.Deferred'),
+			recordId = operation.getRecordId(),
+			editWindows = this.editWindows;
+
+		// Test for already existing window
+		var existingWindow = recordId && editWindows[recordId];
+
+		// Already opened window
+		if (existingWindow) {
+			operation.setWindow(existingWindow, true);
+			deferred.resolve(existingWindow);
 		}
 
-		var fn = function(win) {
+		// New window
+		else {
+			this.createEditWindow(operation).then({
+				scope: this
+				,success: function(win) {
 
-			this.editWindows[rowId] = win;
-			
-			this.fireEvent('aftercreatewindow', this, win, 'edit', rowId, opts);
-			this.afterCreateWindow(win, 'edit', rowId, opts); // 08/12/11 21:04 added opts
-			this.afterCreateEditWindow(win, rowId, opts); // 08/12/11 21:04 added opts
+					// Operation
+					operation.setWindow(win);
 
-	//		win.on('destroy', function(){
-	//			delete this.editWindows[rowId]
-	//		}.createDelegate(this))
+					// Instance lookup
+					editWindows[recordId] = win;
 
-			win.forceClosing = false;
-			win.forceClose = function() {
-				win.forceClosing = true;
-				win.close();
-			};
-			win.on({
-				// 17/09/12 21:22 change from hide to close, in prevision of future
-				// support for focus edit panel
-				close: function() {
-					this.editWindows[rowId].destroy();
-					delete this.editWindows[rowId];
+					win.on({
+						close: function() {
+							editWindows[recordId].destroy();
+							delete editWindows[recordId];
+
+							// Notify operation
+							operation.notifyClosed();
+						}
+					});
+
+					// Events
+					this.fireEvent('aftercreatewindow', this, win, 'edit', recordId, operation);
+					this.afterCreateWindow(win, 'edit', recordId, operation);
+					this.afterCreateEditWindow(win, recordId, operation);
+
+					// Promise
+					deferred.resolve(win);
 				}
-				,beforerefresh: function(win) {
-					if (win.formPanel.isModified()) {
-						NS.AlertWindow.show({
-							modalTo: win
-							// i18n
-							,title: "Confirmer le rechargement"
-							,msg: "Cette fenêtre comporte des modifications qui n'ont pas été "
-								+ "enregistrées. Si elle est rechargée maintenant, ces "
-								+ "modifications seront perdues. Souhaitez-vous continuer "
-								+ "en abandonnant les modifications ?"
-							,buttons: {
-								yes: "Recharger"
-								,cancel: "Annuler"
-							}
-							,fn: function(btn) {
-								switch (btn) {
-									case 'yes':
-										win.refresh(true);
-										break;
-									case 'cancel':
-										break;
-								}
-							}
-						});
-
-						return false;
-					}
-					return true;
-				}
-				,beforeclose: function() {
-					if (win.forceClosing) {
-						return true;
-					}
-					if (win.formPanel.isModified()) {
-						// i18n
-						NS.AlertWindow.show({
-							modalTo: win
-							,title: "Confirmer la fermeture"
-							,msg: "Cette fenêtre comporte des modifications qui n'ont pas été "
-								+ "enregistrées. Souhaitez-vous les enregistrer ?"
-							,buttons: {
-								yes: "Oui"
-								,no: "Non"
-								,cancel: "Annuler"
-							}
-							,fn: function(btn) {
-								switch (btn) {
-									case 'yes':
-										win.formPanel.save(function(){
-											win.forceClosing = true;
-											win.close();
-										});
-										break;
-									case 'no':
-										win.forceClosing = true;
-										win.close();
-										break;
-									case 'cancel':
-										break;
-								}
-							}
-						});
-						return false;
-					}
-					return true;
-				}
-				,scope: this
 			});
+		}
 
-			if (cb) cb(win);
-		}.createDelegate(this);
-
-		var win = this.createEditWindow(rowId, fn, opts); // 08/12/11 21:03 added opts
-		if (win) fn(win);
-
-		return undefined;
+		return deferred.promise;
 	}
 
 	/**
@@ -1991,10 +1976,12 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	 * @param {String/Integer} recordId If the action was `'edit'`,
 	 * then the id of the record being edited will passed as the
 	 * third argument.
+	 *
+	 * @param {Eoze.GridModule.EditRecordOperation} operation
 	 * 
 	 * @protected
 	 */
-	,afterCreateWindow: function(win, action, recordId) {
+	,afterCreateWindow: function(win, action, recordId, operation) {
 		var me = this;
 		win.getKeplerOriginString = function() {
 			return me.makeKeplerOriginString(win);
@@ -2019,15 +2006,18 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	 * @param {String/Integer} recordId If the action was `'edit'`,
 	 * then the id of the record being edited will passed as the
 	 * third argument.
+	 *
+	 * @param {Eoze.GridModule.EditRecordOperation} operation
 	 * 
 	 * @protected
 	 */
-	,afterCreateEditWindow: function(win, recordId) {
+	,afterCreateEditWindow: function(win, recordId, operation) {
+
 		this.parseContextHelpItems(win);
-		
+
+		// Change event
 		var event = String.format('{0}#{1}:modified', this.modelName, recordId);
 		
-		// Change event
 		win.mon(eo.Kepler, event, function(e, origin) {
 			var instanceId = Oce.mx.application.instanceId;
 			if (origin !== instanceId + '/' + win.id) {
@@ -2037,6 +2027,27 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				this.onEditWindowExternallyModified(win, external)
 			}
 		}, this);
+
+		// Route
+		var route = Eoze.AjaxRouter.Router.getRoute(this.name + '.open')
+				|| Eoze.AjaxRouter.Router.getRoute(this.name + '.edit');
+		if (route) {
+			win.href = route.assemble({
+				id: recordId
+			});
+
+			// Tab panel
+			var tabPanel = win.formPanel.items.get(0);
+			if (tabPanel instanceof Ext.TabPanel) {
+				tabPanel.on('tabchange', function(tabPanel, item) {
+					win.href = route.assemble({
+						id: recordId
+						,tab: item.slug || item.tabName
+					});
+					Eoze.AjaxRouter.Router.setActivePage(win);
+				});
+			}
+		}
 	}
 
 	,parseContextHelpItems: function(win) {
@@ -2052,7 +2063,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 					helpItems.push({
 						cmp: item
 						,topic: topic
-					})
+					});
 				}
 				if (item instanceof Ext.Container && item.items) {
 					walkChildren(item);
@@ -2213,8 +2224,10 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	
 	/**
 	 * Builds the title for the edit window from the given data.
+	 *
 	 * @param {Object} data The data from the record, or as loaded into
 	 * the form.
+	 *
 	 * @protected
 	 */
 	,buildEditWindowTitle: function(data) {
@@ -2240,10 +2253,15 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	 * by the GridModule. Any other use should use the getEditWindow, which
 	 * takes keeps track of already opened edit windows, to avoid opening twice
 	 * the same record for edit
+	 *
+	 * @version 2013-03-19 15:33 Replaced arguments with single operation param.
+	 *
+	 * @param {Eoze.GridModule.EditRecordOperation} [operation]
+	 * @return {Deft.Promise}
 	 */
-	,createEditWindow: function(recordId, cb) {
-		
-		var moduleTitle = this.title,
+	,createEditWindow: function(operation) {
+
+		var recordId = operation.getRecordId(),
 			me = this;
 			
 		var winConfig = Ext.apply({}, this.applyExtraWinConfig('edit', {
@@ -2269,7 +2287,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		this.beforeCreateWindow(winConfig, 'edit', recordId);
 		this.beforeCreateEditWindow(winConfig, recordId);
 
-		return this.createFormWindow(
+		var win = this.createFormWindow(
 			this.getEditFormConfig(),
 			winConfig,
 			this.saveEdit,
@@ -2279,6 +2297,8 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				,saveWithoutCloseButton: true
 			}
 		);
+
+		return Deft.Promise.when(win);
 	}
 	
 	,applyExtraWinConfig: function(action, config) {
@@ -2462,7 +2482,10 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		}
 
 		if (opts) {
-			if (opts.form) {
+			if (opts.window) {
+				win = opts.window;
+				win.okHandler = doRequest;
+			} else if (opts.form) {
 
 				var form = !Ext.isArray(opts.form) ? opts.form : {
 					xtype: 'oce.form'
@@ -2496,6 +2519,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			case 'xls': 
 			case 'pdf':
 			case 'csv':
+			case 'ods':
 				break;
 			default:Ext.MessageBox.alert('Format Invalide', "Désolé, ce format de "
 				+ "fichier n'est pas pris en charge. Il s'agit vraisemblablement "
@@ -2661,7 +2685,9 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	
 	,buildGridColumnsConfig: function() {
 		
-		var defaults = this.getGridColumnDefaults();
+		var defaults = this.getGridColumnDefaults(),
+			columns = this.columns,
+			renderers = this.renderers;
 		
 		var columnConfigMap = {},
 			initialColumns = [];
@@ -2671,9 +2697,9 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		});
 
 		var col;
-		for (var i=0,l=this.columns.length; i<l; i++) {
+		for (var i=0,l=columns.length; i<l; i++) {
 
-			col = this.columns[i];
+			col = columns[i];
 
 			// Primary
 			if (col.primary) {
@@ -2689,7 +2715,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			});
 
 			if (Ext.isString(col.renderer)) {
-				col.renderer = this.renderers[col.renderer];
+				col.renderer = renderers[col.renderer];
 			}
 			if (((col.formField && col.formField.xtype === "htmleditor")
 					|| (col.type && col.type === "htmleditor"))
@@ -2724,7 +2750,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 					}
 					this.autoExpandColumn = col.id;
 				}
-				
+
 				this.gridColumns.push(col);
 				columnConfigMap[col.name] = col;
 			}
@@ -2735,19 +2761,23 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			}, col.store));
 		}
 
-		if (this.columnPositions
-				// ensure that columns have not changed since the prefs were saved
-				&& (this.gridColumns.length == this.gridColumns.length - initialColumns.length)) {
-			var ordered = initialColumns;
-			Ext.each(this.columnPositions, function(name) {
-				var col = columnConfigMap[name];
-				if (col) {
-					ordered.push(columnConfigMap[name]);
-				} else {
-					eo.warn("Missing configuration for column: " + name);
-				}
-			});
-			this.gridColumns = ordered;
+		// --- User Preference: positions of the columns
+
+		var columnPositions = this.columnPositions;
+		if (columnPositions && columnPositions.version === eo.getApplication().getOpenceVersion()) {
+			var positions = columnPositions && columnPositions.columns;
+			if (positions) {
+				var ordered = initialColumns;
+				Ext.each(positions, function(name) {
+					var col = columnConfigMap[name];
+					if (col) {
+						ordered.push(columnConfigMap[name]);
+					} else {
+						eo.warn("Missing configuration for column: " + name);
+					}
+				});
+				this.gridColumns = ordered;
+			}
 		}
 	}
 
@@ -2976,10 +3006,23 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		return tab;
 	}
 
+	/**
+	 * @return {Eoze.AjaxRouter.Router.Route}
+	 */
+	,getRoute: function() {
+		return Eoze.AjaxRouter.Router.getRoute(this.name + '.index')
+			|| Eoze.AjaxRouter.Router.getRoute(this.name);
+	}
+
 	,beforeCreateTabPanel: function(config) {
 		// toolbar plugin
 		if (this.toolbarConfig !== false) {
 			config.tbar = this.getToolbar(true);
+		}
+		// route
+		var route = this.getRoute();
+		if (route) {
+			config.href = route.assemble();
 		}
 	}
 	
@@ -3053,7 +3096,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				} else if (Ext.isObject(tabConfig)) {
 					if (tabConfig.xtype) {
 						tab = Ext.applyIf(tabConfig, {
-							tabName: tabName.toLowerCase
+							tabName: tabName.toLowerCase()
 						});
 					} else if (tabConfig.page !== undefined) {
 						// This is an html page tab
@@ -3395,12 +3438,12 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			var me = this;
 
 			var tbar = Ext.create('Eoze.GridModule.multisort.Toolbar', {
-				getDefaultSortParams: function() {
+				getDefaultSortParams: Ext.bind(function() {
 					return [
 						me.defaultSortColumn || me.getDefaultSortColumn(me.grid),
 						me.defaultSortDirection || 'ASC'
 					];
-				}
+				}, this)
 			});
 
 			config.tbar = tbar;
@@ -3419,7 +3462,13 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 		
 		this.opening = true;
 		
-		if (!destination) destination = Oce.mx.application.getMainDestination();
+		if (!destination) {
+			destination = Oce.mx.application.getMainDestination();
+		}
+
+		if (this.tab && this.tab.isDestroyed) {
+			this.destroy();
+		}
 
 		if (!this.tab) {
 			this.tab = this.create(config);
@@ -3633,6 +3682,29 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			this.store.reload(o);
 		}
 	}
+
+	/**
+	 * Reset displayed columns according to default initial config.
+	 *
+	 * @private
+	 */
+	,resetHiddenColumns: function() {
+		var grid = this.grid,
+			view = grid.view,
+			cm = grid.getColumnModel(),
+			colCount = cm.getColumnCount(),
+			config;
+		for (var i = 0; i < colCount; i++) {
+			config = cm.config[i];
+			config.hidden = config.initialHidden;
+			delete cm.totalWidth;
+		}
+
+		view.refresh(true);
+		cm.fireEvent('bulkhiddenchange', cm);
+
+		this.reload();
+	}
 	
 	// private
 	,columnMenu_onBeforeShow: function(colMenu) {
@@ -3641,6 +3713,15 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			checkGroups = [];
 
 		colMenu.removeAll();
+
+		// Reset defaults item
+		colMenu.add({
+			text: "Reset" // i18n
+			,tooltip: "Afficher les colonnes par défaut" // i18n
+			,iconCls: 'ico reset'
+			,scope: this
+			,handler: this.resetHiddenColumns
+		});
 		
 		// --- Select all ---
 		var checkAllItem = new Ext.menu.CheckItem({
@@ -3648,7 +3729,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			,checked:!(this.checkIndexes instanceof Array)
 			,hideOnClick:false
 		});
-		colMenu.add(checkAllItem,'-');
+		colMenu.add(checkAllItem, '-');
 
 		var checkAllGroup = Ext.create('eo.form.SelectableCheckGroup', checkAllItem);
 		colMenu.checkGroup = checkAllGroup;
@@ -3837,7 +3918,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				,scope: this
 				,handler: function() {this.addRecord()}
 				,text: "Ajouter" // i18n
-				,iconCls: 'b_ico_add'
+				,iconCls: 'ribbon icon add'
 				,actionId: 'add'
 			}
 			,remove: {
@@ -3845,7 +3926,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				,scope: this
 				,handler: this.deleteSelectedRecords
 				,text: "Supprimer" // i18n
-				,iconCls: 'b_ico_del'
+				,iconCls: 'ribbon icon delete'
 				,actionId: 'delete'
 				,dependsOnSelection: true
 			}
@@ -3853,7 +3934,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			,columns: {
 				xtype: 'oce.rbbutton'
 				,text: "Colonnes" // i18n
-				,iconCls : 'b_ico_columns'
+				,iconCls : 'ribbon icon columns'
 				,menu: {
 					listeners: {
 						scope: this
@@ -3867,6 +3948,12 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				,handler: this.exportData.createDelegate(this, ['pdf'])
 				,text: "Pdf" // i18n
 				,iconCls: 'ribbon icon export_pdf'
+			}
+			,ods: {
+				xtype: 'oce.rbbutton'
+				,handler: this.exportData.createDelegate(this, ['ods'])
+				,text: "OOCalc" // i18n
+				,iconCls: 'ribbon icon export_ods'
 			}
 			,xls: {
 				xtype: 'oce.rbbutton'
@@ -3921,7 +4008,7 @@ Oce.GridModule.plugins = {
 
 			Ext.apply(gm, {
 
-				beforeCreateWindow: Ext.Function.createSequence(gm.beforeCreateWindow, 
+				beforeCreateWindow: Ext.Function.createSequence(gm.beforeCreateWindow,
 					function(config, action) {
 						this.configWindowIcon(config, action);
 					}
@@ -3957,7 +4044,7 @@ Oce.GridModule.plugins = {
 						config.iconCls = ic;
 					}
 				}
-				
+
 				,afterCreateGridStore: Ext.Function.createSequence(gm.afterCreateGridStore, function(store) {
 					store.on({
 						scope: this
@@ -3980,15 +4067,20 @@ Oce.GridModule.plugins = {
 							}
 						}
 					});
-				})				
+				})
 
 			});
 		}
 	})
-}
+};
 
-Oce.deps.reg('Oce.GridModule');
-// Required for inheritance dependency
-Oce.deps.reg('Oce.Modules.GridModule.GridModule');
-	
+// Makes all children wait for the Ext4 application to be started
+Oce.deps.wait('Eoze.app.Application', function() {
+	eo.getApplication().onStarted(function() {
+		Oce.deps.reg('Oce.GridModule');
+		// Required for inheritance dependency
+		Oce.deps.reg('Oce.Modules.GridModule.GridModule');
+	});
+});
+
 })(); // closure

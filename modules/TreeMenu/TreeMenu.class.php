@@ -103,12 +103,9 @@ class TreeMenu extends Module implements HasMenuActions {
 
 	public function createDefaultMenu() {
 
-		$userSession = $this->getApplication()->getUserSession();
-
 		// #auth
-		$userSession->requireLoggedIn();
+		$this->getApplication()->getUserSession()->requireLoggedIn();
 
-		$userId = $userSession->getUserId();
 		$items = $this->getConfig()->get('defaultMenu');
 
 		$nodes = $this->createMenuItems($items);
@@ -122,12 +119,7 @@ class TreeMenu extends Module implements HasMenuActions {
 
 	private function createMenuItem($name, $config) {
 
-		$userSession = $this->getApplication()->getUserSession();
-
-		// #auth
-		$userSession->requireLoggedIn();
-
-		$userId = $userSession->getUserId();
+		$userId = $this->getApplication()->getActiveUserId(true);
 
 		$children = null;
 		if (is_array($config)) {

@@ -1,7 +1,7 @@
 Ext.ns('Oce.mx', 'Oce.ext');
 
 Ext.BLANK_IMAGE_URL = Oce.ext.BLANK_IMAGE_URL || 'images/s.gif';
-Ext.Ajax.url = 'index.php';
+Ext.Ajax.url = 'api';
 
 /**
  * @class eo
@@ -232,15 +232,19 @@ if (!Array.prototype.indexOf) {
     }
 }
 
-eo.warn = function() {
+eo.warn = function(message) {
 	if (console) {
-		(console.warn || console.log).apply(console, arguments);
+		if (console.warn) {
+			console.warn(message);
+		} else if (console.log) {
+			console.log(message);
+		}
 	}
 };
 
 // Must be in init, very first, as to not override eo.app namespace
 eo.app = function(callback, scope) {
-	Oce.deps.wait('eo.app.Application', function() {
+	Oce.deps.wait('Eoze.app.Application', function() {
 		callback.call(scope || window, eo.getApplication());
 	});
 };

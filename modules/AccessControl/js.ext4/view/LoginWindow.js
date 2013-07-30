@@ -25,14 +25,14 @@
  *
  * @since 2013-03-13 09:50
  */
-Ext4.define('Eoze.modules.AccessControl.view.LoginWindow', {
+Ext4.define('Eoze.AccessControl.view.LoginWindow', {
 	extend: 'Ext.Window'
 
 	,requires: [
 		'Eoze.button.Countdown'
 	]
 
-	,controller: 'Eoze.modules.AccessControl.controller.LoginWindow'
+	,controller: 'Eoze.AccessControl.controller.LoginWindow'
 
 	,title: "Identification" // i18n
 

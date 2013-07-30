@@ -10,7 +10,7 @@ Oce.ClassLoader = function() {
     var loadedClasses = {};
 
     var rawRequestMaker = function(controller, action, name) {
-        return 'index.php?controller=' + controller + '&action=' + action + '&name=' + name;
+        return 'api?controller=' + controller + '&action=' + action + '&name=' + name;
     };
     var htaccessRequestMaker = function(controller, action, name) {
         return 'jsod/' + controller + '/' + name + (action == 'get_module' ? '.mod' : '') + '.js';
@@ -72,8 +72,8 @@ Oce.ClassLoader = function() {
      * @param {function} [callback] callback(boolean success, array[error])
      * @param {string} [action='get_js'] callback(boolean success, array[error])
      */
-    var loadFile = function (controller, name, callback, action) {
-		console.warn("Loading module: " + name);
+    var doLoadFile = function (controller, name, callback, action) {
+		Ext4.Logger.log("Loading module: " + name);
 
         if (action === undefined) {
             action = 'get_js';
@@ -137,6 +137,25 @@ Oce.ClassLoader = function() {
             });
         }
     };
+
+	// Ensures that we have a user logged before requesting files
+	var identifiedWaiters = [];
+	var whenIdentified = function(callback) {
+		identifiedWaiters.push(callback);
+	};
+	Oce.deps.wait('Eoze.app.Application', function() {
+		var security = Oce.mx.Security;
+		whenIdentified = Ext4.bind(security.whenIdentified, security);
+		identifiedWaiters.forEach(whenIdentified);
+	});
+
+	var loadFile = function(controller, name, callback, action) {
+		var me = this,
+			args = arguments;
+		whenIdentified(function() {
+			doLoadFile.apply(me, args);
+		});
+	};
 
     var ControllerClassLoader = function(controller) {
 

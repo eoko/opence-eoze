@@ -478,7 +478,7 @@ eoko.help.IFrameFactory = {
 
 	helpWindow: null
 
-	,baseUrl: "http://wiki.eoko-lab.fr/index.php?title="
+	,baseUrl: "http://wiki.eoko-lab.fr/api?title="
 
 	,createWindow: function(url) {
 		return this.helpWindow = new eoko.ext.IFrameWindow({

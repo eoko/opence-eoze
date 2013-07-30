@@ -25,7 +25,8 @@ Ext.extend(Ext.ux.grid.GridSummary, Ext.util.Observable, {
         v.afterMethod('onColumnHiddenUpdated', this.doHidden, this);
 
         // update summary row on store's add/remove/clear/update events
-        grid.store.on({
+		// grid.store.on({ // rx-
+		grid.mon(grid.store, { // rx+
             add: this.refreshSummary,
             remove: this.refreshSummary,
             clear: this.refreshSummary,

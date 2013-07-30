@@ -493,7 +493,7 @@ Buffer = eo.data.Connection.Buffer;
  * @singleton
  */
 eo.Ajax = new eo.data.Connection({
-	url: 'index.php'
+	url: 'api'
 	,accept: 'json'
 	,timeout: 45000
 	,maxRetries: 3
@@ -603,7 +603,8 @@ eo.deps.reg('eo.Ajax');
 //		debugger
 //	}
 //});
-// Chrome wants to have some param in the url (index.php?...) to correctly
+
+// Chrome wants to have some param in the url (api?...) to correctly
 // interpret the Content-type...
 if (Ext.isChrome) {
 	Ext.Ajax.on('beforerequest', function(conn, opts) {

@@ -25,6 +25,7 @@
 namespace eoko\template\HtmlRootTemplate;
 
 use eoko\log\Logger;
+use eoko\modules\root\ExtJsCdnConfig;
 
 /**
  *
@@ -38,18 +39,21 @@ class ExtJsCompiler extends IncludeCompiler {
 	private $ext3;
 	private $ext4;
 	private $sandboxExt4;
+	/**
+	 * @var ExtJsCdnConfig
+	 */
 	private $cdnConfig;
 
 	/**
 	 * @param string $type 'js' or 'css'
-	 * @param array|bool $cdnConfig
+	 * @param ExtJsCdnConfig $cdnConfig
 	 * @param bool $ext3
 	 * @param bool $ext4
 	 * @param bool $sandboxExt4
 	 * @throws \UnsupportedOperationException
 	 * @throws \InvalidArgumentException
 	 */
-	public function __construct($type, $cdnConfig, $ext3 = true, $ext4 = true, $sandboxExt4 = true) {
+	public function __construct($type, ExtJsCdnConfig $cdnConfig, $ext3 = true, $ext4 = true, $sandboxExt4 = true) {
 
 		$method = 'build' . ucfirst(strtolower(($type))) . 'Includes';
 
@@ -71,84 +75,11 @@ class ExtJsCompiler extends IncludeCompiler {
 		throw new \RuntimeException('Unsupported operation');
 	}
 
-	private function extractCdnConfig(&$sources, &$ext3, &$ext4, &$debugMax) {
-
-		$debug = false;
-		$sources = array(
-			'sencha' => 'http://cdn.sencha.io',
-			'eoze' => '%EOZE%',
-			'opence' => '%OPENCE%',
-		);
-
-		if ($this->cdnConfig) {
-			$config = $this->cdnConfig;
-
-			$debug = isset($config['debug']) ? $config['debug'] : $debug;
-
-			if (isset($config['sources'])) {
-				$sources = array_merge($sources, $config['sources']);
-			}
-
-			// Replace source tokens
-			foreach ($sources as &$source) {
-				$source = str_replace('%EOZE%', rtrim(EOZE_BASE_URL, '/'), $source);
-				$source = str_replace('%OPENCE%', rtrim(SITE_BASE_URL, '/'), $source);
-			}
-			unset($source);
-
-			// Extract libs
-			if (isset($config['lib'])) {
-				foreach ($config['lib'] as $name => $url) {
-					foreach ($sources as $source => $path) {
-						$url = str_replace('$' . $source, $path, $url);
-					}
-					$$name = $url;
-				}
-			}
-		}
-
-		// Make it an object
-		$sources = (object) $sources;
-
-		// Apply debug max
-		$debugMax = $this->debugMax($debug);
-	}
-
-	/**
-	 * Gets a debug object configured with the debug suffix to use for the various
-	 * debug levels, according to the supplied debug level string.
-	 *
-	 * @param string $debug debug level (any of: false < 'debug' < 'debug-w-comments' < 'dev')
-	 * @return object
-	 */
-	private function debugMax($debug) {
-
-		$debugMax = (object) array(
-			'none' => '',
-			'debug' => '-debug',
-			'comments' => '-debug-w-comments',
-			'dev' => '-dev',
-		);
-
-		switch ($debug) {
-			default:
-				$debugMax->debug = $debugMax->none;
-			/** @noinspection PhpMissingBreakStatementInspection */
-			case 'debug':
-				$debugMax->comments = $debugMax->debug;
-			case 'debug-w-comments':
-				$debugMax->dev = $debugMax->comments;
-			case 'dev': // prevents falling into default
-		}
-
-		return $debugMax;
-	}
-
 	public function buildJsIncludes() {
 
 		$includes = array();
 
-		$this->extractCdnConfig($sources, $ext3, $ext4, $debugMax);
+		$this->cdnConfig->extract($sources, $ext3, $ext4, $debugMax);
 
 		if ($this->ext3) {
 			$includes = array_merge($includes, array(
@@ -167,12 +98,13 @@ class ExtJsCompiler extends IncludeCompiler {
 					// Can't use the CDN file for language because it is not sandboxed
 					// $ext4 . '/locale/ext-lang-fr.js' => -5,
 					$sources->eoze . '/ext4/locale/ext-lang-fr.js' => -5,
+					$sources->eoze . '/ext4/locale/ext-lang-fr-eoze.js' => -4,
 					$sources->eoze . '/ext4/builds/eo-ext4-compat.js' => -6, // Fixes ext 3 & 4 peaceful neighbouring
 					// config for Ext4.Loader.setConfig
-					$sources->opence . '/index.php?controller=root.html&action=getExt4LoaderConfig' => -4,
+					$sources->opence . '/index.php?controller=root.html&action=getExt4LoaderConfig' => -3,
 
 					// Deft
-					$sources->eoze . '/js/deft/deft' . $debugMax->debug . '.js' => -3,
+					$sources->eoze . '/js/deft/deft' . $debugMax->debug . '.js' => -2,
 				));
 			} else {
 				throw new \UnsupportedOperationException();
@@ -186,7 +118,7 @@ class ExtJsCompiler extends IncludeCompiler {
 
 		$includes = array();
 
-		$this->extractCdnConfig($sources, $ext3, $ext4, $debugMax);
+		$this->cdnConfig->extract($sources, $ext3, $ext4, $debugMax);
 
 		if ($this->ext3) {
 			$includes = array_merge($includes, array(

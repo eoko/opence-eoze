@@ -8,13 +8,13 @@
  * has border = false.
  * 
  */
-Ext4.define('Eoze.modules.DataSnapshots.view.Main', {
+Ext4.define('Eoze.DataSnapshots.view.Main', {
 	
 	extend: 'Ext4.Panel'
-	,controller: 'Eoze.modules.DataSnapshots.controller.Module'
+	,controller: 'Eoze.DataSnapshots.controller.Module'
 	
 	,requires: [
-		'Eoze.modules.DataSnapshots.model.DataSnapshot'
+		'Eoze.DataSnapshots.model.DataSnapshot'
 	]
 	
 	,uses: [
@@ -39,7 +39,7 @@ Ext4.define('Eoze.modules.DataSnapshots.view.Main', {
 	,initComponent: function() {
 		
 		var store = new Ext4.data.Store({
-			model: 'Eoze.modules.DataSnapshots.model.DataSnapshot'
+			model: 'Eoze.DataSnapshots.model.DataSnapshot'
 			,data: [
 				{id: 1, name: 'hop la li', date:'2012-01-01', version:'4.0.1'}
 				,{id: 2, name: 'boum lala', date:'2012-01-01', version:'4.0.1'}
@@ -48,7 +48,7 @@ Ext4.define('Eoze.modules.DataSnapshots.view.Main', {
 			]
 		});
 
-		this.items = Ext.create('Eoze.modules.DataSnapshots.view.SnapshotGrid', {
+		this.items = Ext.create('Eoze.DataSnapshots.view.SnapshotGrid', {
 			store: store
 			,border: false
 		})

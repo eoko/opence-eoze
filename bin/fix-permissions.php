@@ -14,8 +14,8 @@ $required_dirs = array(
 	MODEL_PATH,
 	MODEL_BASE_PATH,
 	MODEL_PROXY_PATH,
-	LOG_PATH,
-	CACHE_PATH,
+	LOG_PATH, // TODO: deprecated on 2013-02-16
+	CACHE_PATH, // TODO: deprecated on 2013-02-16
 );
 
 

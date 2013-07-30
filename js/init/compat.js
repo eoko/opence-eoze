@@ -118,7 +118,7 @@ Ext.reg = function(xtype, cls) {
 var setClass = function(cls, o) {
 	var parts = cls.split('.'),
 		name = parts.pop();
-	Ext.namespace(parts.join('.'))[name] = o;
+	return Ext.namespace(parts.join('.'))[name] = o;
 };
 
 var alias = function(aliases, c) {
@@ -142,7 +142,8 @@ var alias = function(aliases, c) {
 var define = function(cls, o, createFn) {
 	var parentCls,
 		parent,
-		deps;
+		deps,
+		previous = cls && resolve(cls, false);
 
 	if (o.extend) {
 		parentCls = o.extend;
@@ -168,7 +169,12 @@ var define = function(cls, o, createFn) {
 		c.prototype.$className = cls;
 		alias(o.alias, c);
 		if (cls) {
-			setClass(cls, c);
+			var C = setClass(cls, c);
+
+			if (previous) {
+				Ext.apply(C, previous);
+			}
+
 			Ext.reg(cls, cls);
 			Oce.deps.reg(cls);
 		}
@@ -193,27 +199,6 @@ var define = function(cls, o, createFn) {
 };
 
 Ext.define = function(cls, o, createFn) {
-//	if (o.singleton) {
-//		var previous = resolve(cls, false),
-//			constructor = define(cls, o, createFn),
-//			instance = new constructor;
-//		if (cls) {
-//			var matches = /^(?:(.*)\.)?([^.]+)$/.exec(cls),
-//				name = matches[2],
-//				ns = matches[1],
-//				node = window;
-//			if (ns) {
-//				node = resolve(ns, true);
-//			}
-//			node[name] = instance;
-//			if (previous) {
-//				Ext.apply(instance, previous);
-//			}
-//		}
-//		return instance;
-//	} else {
-//		return define(cls, o, createFn);
-//	}
 	if (o.singleton) {
 		var previous = resolve(cls, false),
 			instance;
@@ -238,7 +223,7 @@ Ext.define = function(cls, o, createFn) {
 			Ext4.callback(createFn, this, arguments);
 		};
 
-		constructor = define(cls, o, postCreate);
+		define(cls, o, postCreate);
 
 		return instance;
 	} else {
@@ -308,11 +293,14 @@ Ext.Date.isEqual = function (date1,date2){
 
 // String
 
-Ext.ns('Ext.String');
+Ext.String = Ext4.String;
 
-Ext.String.format = function() {
-	return String.format.apply(String, arguments);
-};
+
+// --- Mixed collection ---
+
+(function(p) {
+	p.sortByKey = p.keySort;
+})(Ext.util.MixedCollection.prototype);
 
 
 // --- QuickTips: use only Ext4 manager, dismiss Ext3's entirely ---
@@ -327,14 +315,14 @@ Ext4.require('Eoze.Ext3.CompatibilityFixes');
 
 // --- Standard functions ---
 
-Ext.copyTo(Ext4, Ext, [
-	'apply',
-	'applyIf',
-	// Copy
-	'copyTo',
-	// Clone
-	'clone'
-]);
+//Ext.copyTo(Ext, Ext4, [
+//	'apply',
+//	'applyIf',
+//	// Copy
+//	'copyTo',
+//	// Clone
+//	'clone'
+//]);
 
 // --- Ext3 & 4 window z-index conflicts ---
 

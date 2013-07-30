@@ -148,20 +148,94 @@ Oce.MainApplication = {
 	,getMainDestination: function() {
 		return Ext.getCmp('main-destination');
 	}
-    
+
+	/**
+	 * Get the currently displayed module.
+	 *
+	 * @return {Oce.BaseModule/null}
+	 */
     ,getFrontModule: function() {
         var md = this.getMainDestination(),
             t = md && md.getActiveTab();
-        if (t && t.getActiveModule) {
-            return t.getActiveModule();
-        } else {
-            return t.module;
-        }
+        if (t) {
+			if (t.getActiveModule) {
+				return t.getActiveModule();
+			} else {
+				return t.module;
+			}
+		} else {
+			return null;
+		}
     }
+
+	,getFrontModuleComponent: function() {
+		var md = this.getMainDestination();
+		return md && md.getActiveTab();
+	}
 };
 
 // Initialize module factory register
 Oce.MainApplication.moduleFactories = [];
+
+/**
+ * Registers a module factory.
+ *
+ * For dynamic resolving of module names, this method also accepts skipping the first argument. In
+ * this case, the factoryFunction must return `true` if it decide to resolve the module itself.
+ *
+ * Example:
+ *
+ *     Oce.registerModuleFactory(function(name, callback) {
+ *         if (name === resolvableModuleName) {
+ *             resolveModule()
+ *                 .always(callback); // assuming resolveModule returns a Promise
+ *
+ *             // return true to indicate that the module manager must stop searching
+ *             return true;
+ *         }
+ *     });
+ *
+ * @param {String} moduleName
+ * @param {Function} factoryFunction
+ * @param {Object} [scope]
+ */
+Oce.registerModuleFactory = function registerModuleFactory(moduleName, factoryFunction, scope) {
+	// Arguments
+	if (Ext.isFunction(moduleName)) {
+		scope = factoryFunction;
+		factoryFunction = moduleName;
+	}
+
+	// Register with module name
+	if (moduleName) {
+		if (moduleName.indexOf('.') === -1) {
+			moduleName = Ext.String.format('Oce.Modules.{0}.{0}', moduleName);
+		}
+		var fn = factoryFunction;
+		factoryFunction = function(name, callback) {
+			if (moduleName === name) {
+				var promise = fn.call(scope, callback);
+
+				Oce.deps.reg(moduleName);
+
+				if (promise) {
+					promise.then({
+						success: callback
+					});
+				}
+
+				return true;
+			}
+		};
+	}
+	// Register without module name (runtime binding)
+	else if (scope) {
+		factoryFunction = Ext.Function.bind(factoryFunction, scope);
+	}
+
+	// push
+	Oce.MainApplication.moduleFactories.push(factoryFunction);
+};
 
 Oce.getFrontModule = function() {
     return Oce.mx.application.getFrontModule();

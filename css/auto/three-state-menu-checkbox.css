@@ -1,3 +1,13 @@
+.x4-menu-item-unchecked.undetermined .x4-menu-item-icon,
+.x4-menu-item-unchecked.undetermined .x4-menu-item-icon-right,
+.x4-menu-item-checked.undetermined .x4-menu-item-icon,
+.x4-menu-item-checked.undetermined .x4-menu-item-icon-right,
+
+.x-menu-item-unchecked.undetermined .x-menu-item-icon,
+.x-menu-item-unchecked.undetermined .x-menu-item-icon-right,
+.x-menu-item-checked.undetermined .x-menu-item-icon,
+.x-menu-item-checked.undetermined .x-menu-item-icon-right,
+
 .x-menu-check-item.undetermined .x-menu-item-icon {
     background-image: url("images/undetermined-menu-checkbox.gif");
 }

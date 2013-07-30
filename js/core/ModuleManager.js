@@ -60,7 +60,9 @@ Oce.NameParser = new function() {
 	this.parse = function(cannonicalName, defaultNamespace, defaultController) {
 		var parts = cannonicalName.split('.');
 
-		if (parts < 2) throw new 'Illegal Argument';
+		if (parts < 2) {
+			throw new Error('Illegal Argument');
+		}
 
 		var props = {};
 
@@ -213,8 +215,10 @@ Oce.ModuleManager = function() {
 
 		,getModules: function(canonicalNames, callback) {
 			var me = this;
-			Oce.mx.Security.whenIdentified(function() {
-				me._getModules(canonicalNames, callback);
+			eo.app(function() {
+				Oce.mx.Security.whenIdentified(function() {
+					me._getModules(canonicalNames, callback);
+				});
 			});
 		}
 
@@ -315,7 +319,9 @@ Oce.ModuleManager = function() {
 		get: function(canonicalName, successCallback, errorCallback) {
 			var props = Oce.NameParser.parse(cannonicalName);
 			if (props.isModule) {
-				if (!props.isComplete) throw new 'IllegalArgument: ' + canonicalName;
+				if (!props.isComplete) {
+					throw new Error('IllegalArgument: ' + canonicalName);
+				}
 				return this.getModuleIn(props.namespace, props.controller, props.name, successCallback, errorCallback);
 			} else {
 				return this.getFunctionnality(props.functionnalityName, successCallback, errorCallback);

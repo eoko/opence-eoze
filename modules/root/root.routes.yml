@@ -32,6 +32,13 @@ router:
         options:
           route: /index.php
 
+      api:
+        type: segment
+        options:
+          route: /api[/]
+          # More permissive route: should we accept that?
+          # route: /api[/]
+
       jasmine:
         type: literal
         options:

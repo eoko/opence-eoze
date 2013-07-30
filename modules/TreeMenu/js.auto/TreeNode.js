@@ -78,39 +78,69 @@ Ext.define('eo.ui.menu.tree.Node', {
 			this.toggle();
 		}
 	}
-	
+
+	/**
+	 * @return {Deft.Promise}
+	 */
 	,run: function() {
 		if (this.action) {
-			this.runAction();
+			return this.runAction();
 		} else if (this.cmd) {
-			this.runCmd();
+			return this.runCmd();
 		}
 	}
-	
-	// private
+
+	/**
+	 * @return {Deft.Promise}
+	 *
+	 * @private
+	 */
 	,runAction: function() {
+		var deferred = Ext4.create('Deft.Deferred');
+
 		Oce.Module.executeAction(this.action, {
 			scope: this
 			,before: this.setLoading.createDelegate(this, [true])
 			,after: function(success) {
 				this.setLoading(false);
-				if (!success) {
+				if (success) {
+					deferred.resolve();
+				} else {
+					deferred.reject();
+
 					Ext.Msg.alert(
 						"Échec de l'action", 
 						"Le module visé pas l'action n'est pas accessible."
 					);
 				}
 			}
-		})
+		});
+
+		return deferred.getPromise();
 	}
-	
-	// private
+
+	/**
+	 * @return {Deft.Promise}
+	 *
+	 * @private
+	 */
 	,runCmd: function() {
-		this.setLoading();
-		this.cmd();
-		this.setLoading(false);
+		var me = this,
+			deferred = Ext4.create('Deft.Deferred');
+
+		me.setLoading(true);
+		me.cmd(function() {
+			me.setLoading(false);
+			deferred.resolve();
+		});
+
+		return deferred.getPromise();
 	}
-	
+
+	/**
+	 * @param {Boolean} [loading=true]
+	 * @private
+	 */
 	,setLoading: function(loading) {
 		if (loading !== false) {
 			this.getUI().addClass("loading");
@@ -205,7 +235,9 @@ Ext.define('eo.ui.menu.tree.Node', {
 				}
 				this.setCls("x-tree-node-leaf");
 			} else {
-				if (this.el) this.el.removeClass("x-tree-node-leaf");
+				if (this.el) {
+					this.el.removeClass("x-tree-node-leaf");
+				}
 			}
 		}
 	}

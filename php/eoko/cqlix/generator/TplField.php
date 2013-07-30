@@ -42,11 +42,17 @@ class TplField extends ModelColumn implements ConfigConstants {
 
 	public $unsigned = false;
 
-	function __construct($field, $type, $length = null, $canNull = false,
+	/**
+	 * @var ClassLookup
+	 */
+	private $classLookup;
+
+	function __construct(ClassLookup $classLookup, $field, $type, $length = null, $canNull = false,
 			$default = null, $unique = false, $foreignKeyToTable = null,
 			$primaryKey = false, $autoIncrement = false) {
 
 		$meta = null;
+		$this->classLookup = $classLookup;
 
 		// Length
 		if ($length !== null && preg_match('/(\d+),(\d+)/', $length, $m)) {
@@ -65,17 +71,15 @@ class TplField extends ModelColumn implements ConfigConstants {
 			case 'time':
 				$type = self::T_TIME;
 				break;
+			case 'timestamp':
 			case 'bigint':
-			case 'int': // TODO DBG => int(1) == bool
-//				if ($length == null || $length != 1) { $type = self::T_INT; break; }
-//				if ($length == null || $length != 1) { $type = self::T_INT; break; }
-				$type = self::T_INT; break;
+			case 'int':
+				$type = self::T_INT;
+				break;
 			case 'tinyint':
-				if ($length != null && $length != 1) {
-					$type = self::T_INT;
-				} else {
-					$type = self::T_BOOL;
-				}
+				$type = $length !== null && $length != 1
+					? self::T_INT
+					: self::T_BOOL;
 				break;
 			case 'bool':
 				$type = self::T_BOOL;
@@ -95,9 +99,6 @@ class TplField extends ModelColumn implements ConfigConstants {
 			case 'double':
 			case 'float':
 				$type = self::T_FLOAT;
-				break;
-			case 'timestamp':
-				$type = self::T_INT;
 				break;
 			default:
 				throw new IllegalStateException('Unrecognized type: "' . $type . '"');
@@ -221,6 +222,7 @@ class TplField extends ModelColumn implements ConfigConstants {
 	public function getConfiguredRelation() {
 		if (isset($this->relationConfig['foreignModel'])) {
 			return new TplRelationReferencesOne(
+				$this->classLookup,
 				$this->parentTable->dbTable,
 				NameMaker::dbFromModel($this->relationConfig['foreignModel']),
 				$this->localRelationAlias,
@@ -395,9 +397,14 @@ class TplField extends ModelColumn implements ConfigConstants {
 //			. "$nullable, {$this->getTplDefault()}, $primary)";
 
 		if ($this->foreignKeyToTable !== null) {
-			$name = NameMaker::tableFromDB($this->foreignKeyToTable);
-			if ($name === $tableName) $foreignKeyToTable = '$this';
-			else $foreignKeyToTable = $name . 'Proxy::get()';
+//			$name = NameMaker::tableFromDB($this->foreignKeyToTable);
+//			if ($name === $tableName) {
+//				$foreignKeyToTable = '$this';
+//			} else {
+//				$foreignKeyToTable = $name . 'Proxy::get()';
+//			}
+			$proxyClass = $this->classLookup->proxyFromDb($this->foreignKeyToTable);
+			$foreignKeyToTable = $proxyClass . '::get()';
 		} else {
 			$foreignKeyToTable = 'null';
 		}

@@ -6,10 +6,10 @@
  * @author Éric Ortega <eric@planysphere.fr>
  * @since 4 oct. 2012
  */
-Ext4.define('Eoze.modules.DataSnapshots.view.EditPanel', {
+Ext4.define('Eoze.DataSnapshots.view.EditPanel', {
 	
 	extend: 'Ext4.form.Panel'
-	,alias: ['widget.Eoze.modules.DataSnapshots.view.EditPanel']
+	,alias: ['widget.Eoze.DataSnapshots.view.EditPanel']
 	
 	// requires & uses are in the ViewController class
 	
