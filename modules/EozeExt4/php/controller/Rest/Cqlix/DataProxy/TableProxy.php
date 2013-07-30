@@ -933,6 +933,17 @@ class TableProxy extends AbstractProxy {
 
 		$inputData = $this->cleanAntagonists($inputData);
 
+		// Preprocessors
+		foreach ($this->clientFieldsConfig as $clientFieldName => $config) {
+			if (isset($config['beforeUpdate'])) {
+				$value = isset($inputData[$clientFieldName])
+					? $inputData[$clientFieldName]
+					: null;
+
+				call_user_func($config['beforeUpdate'], $model, $value, &$inputData);
+			}
+		}
+
 		foreach ($this->clientFieldsConfig as $clientFieldName => $config) {
 			$value = isset($inputData[$clientFieldName])
 				? $inputData[$clientFieldName]
@@ -946,9 +957,9 @@ class TableProxy extends AbstractProxy {
 				}
 			}
 
-			if (isset($config['beforeUpdate'])) {
+			if (isset($config['afterUpdate'])) {
 				$postProcessors[] = array(
-					'function' => $config['beforeUpdate'],
+					'function' => $config['afterUpdate'],
 					'value' => $value,
 				);
 			}
