@@ -35,11 +35,13 @@ class Markdown extends Module {
 
 	public function init() {
 		parent::init();
-		require_once __DIR__ . '/lib/markdown.php';
+		require_once(EOZE_PATH . 'vendor/brainsware/php-markdown-extra-extended/markdown_extended.php');
+		// require_once __DIR__ . '/lib/markdown.php';
 	}
 
 	public function __wakeup() {
-		require_once __DIR__ . '/lib/markdown.php';
+		require_once(EOZE_PATH . 'vendor/brainsware/php-markdown-extra-extended/markdown_extended.php');
+		// require_once __DIR__ . '/lib/markdown.php';
 	}
 
 	/**
@@ -49,6 +51,7 @@ class Markdown extends Module {
 	 * @return string
 	 */
 	public function render($text) {
-		return \Markdown($text);
+		return \MarkdownExtended($text);
+		// return \Markdown($text);
 	}
 }
