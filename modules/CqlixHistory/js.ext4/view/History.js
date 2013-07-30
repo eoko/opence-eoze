@@ -55,6 +55,11 @@ Ext.define('Eoze.CqlixHistory.view.History', {
 					'<p>{label}</p>',
 					'<tpl if="!Ext.isEmpty(values.deltas)">',
 						'<table width="100%">',
+							'<colgroup>',
+								'<col />',
+								'<col width="40%" />',
+								'<col width="40%" />',
+							'</colgroup>',
 							'<thead><tr>',
 								'<th>Champ</th>',
 								'<th>Ancienne valeur</th>',
@@ -99,10 +104,14 @@ Ext.define('Eoze.CqlixHistory.view.History', {
 				}
 			}
 			,escapeText: function(text) {
-				return text
-					.replace(/&/g, '&amp;')
-					.replace(/</g, '&lt;')
-					.replace(/>/g, '&gt;');
+				if (Ext.isEmpty(text)) {
+					return '';
+				} else {
+					return text
+						.replace(/&/g, '&amp;')
+						.replace(/</g, '&lt;')
+						.replace(/>/g, '&gt;');
+				}
 			}
 		}]
 });
