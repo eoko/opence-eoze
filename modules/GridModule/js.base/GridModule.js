@@ -3435,11 +3435,13 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	 */
 	,doInitMultisortPlugin: function(store) {
 		this.beforeCreateGrid = Ext.Function.createSequence(this.beforeCreateGrid, function(config) {
+			var me = this;
+
 			var tbar = Ext.create('Eoze.GridModule.multisort.Toolbar', {
 				getDefaultSortParams: Ext.bind(function() {
 					return [
-						this.defaultSortColumn || this.getDefaultSortColumn(this.grid),
-						this.defaultSortDirection || 'ASC'
+						me.defaultSortColumn || me.getDefaultSortColumn(me.grid),
+						me.defaultSortDirection || 'ASC'
 					];
 				}, this)
 			});
@@ -3808,7 +3810,9 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 
 		for(var i = 0; i < colCount; i++){
 			if(cm.config[i].hideable !== false){
-				var dest = groups[cm.config[i].dataIndex];
+				var config = cm.config[i],
+					text = config.extra && config.extra.groupText || cm.getColumnHeader(i),
+					dest = groups[config.dataIndex];
 
 				if (!dest) {
 					dest = colMenu;
@@ -3817,7 +3821,7 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 
 				var item = new Ext.menu.CheckItem({
 					itemId: 'col-'+cm.getColumnId(i),
-					text: cm.getColumnHeader(i),
+					text: text,
 					checked: !cm.isHidden(i),
 					hideOnClick:false,
 					disabled: cm.config[i].hideable === false,

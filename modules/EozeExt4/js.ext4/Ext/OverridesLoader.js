@@ -30,6 +30,8 @@ Ext4.define('Eoze.Ext.OverridesLoader', {
 	singleton: true
 
 	,requires: [
+		// Fixes sort methods, broken up to 4.2.1
+		'Eoze.Ext.util.MixedCollection.FixSort',
 		// adds support for lazy instance creation by xclass
 		'Eoze.Ext.ComponentManager',
 		// adds animOpen & animClose options

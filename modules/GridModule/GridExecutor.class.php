@@ -787,11 +787,18 @@ abstract class GridExecutor extends JsonExecutor {
 
 		$r = $query->executeSelect();
 
-		foreach ($r as &$record) {
-			foreach ($record as $field => &$value) {
-				$value = $this->table->getField($field)->castValue($value);
+		if (count($r)) {
+			$fields = array();
+			foreach (array_keys($r[0]) as $field) {
+				$fields[$field] = $this->table->getField($field)->getActualField();
 			}
-			unset($value);
+
+			foreach ($r as &$record) {
+				foreach ($record as $field => &$value) {
+					$value = $fields[$field]->castValue($value);
+				}
+				unset($value);
+			}
 		}
 
 		if (count($r) === 0) {
@@ -1397,6 +1404,8 @@ MSG;
 
 		// tmp
 		$query = $this->createLoadQuery('grid', null, array_keys($fields));
+
+		$this->beforeExecuteLoadQuery($query);
 
 //		$start = $this->request->get('realstart', false, true);
 //		if ($start === false) $start = $this->request->get('start', 0, true);
