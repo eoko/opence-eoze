@@ -438,6 +438,13 @@ class ModelRelationReferedByOne extends ModelRelationByReference
 		implements ModelRelationHasOne {
 
 	/**
+	 * True if the relation has been assigned the value null.
+	 *
+	 * @var bool
+	 */
+	private $deleted = false;
+
+	/**
 	 * @internal
 	 * Tries to load the target model from the datastore and, optionnaly,
 	 * create it. This method is intended for subclassing.
@@ -510,11 +517,17 @@ class ModelRelationReferedByOne extends ModelRelationByReference
 	}
 
 	public function doSet($values, $forceAcceptNull = false) {
-		if (is_array($values)) {
-			$model =& $this->getModelReference(true);
-			$model->setFields($values, $forceAcceptNull);
+		if ($values === null) {
+			$this->deleted = true;
 		} else {
-			parent::doSet($values, $forceAcceptNull);
+			$this->deleted = false;
+
+			if (is_array($values)) {
+				$model =& $this->getModelReference(true);
+				$model->setFields($values, $forceAcceptNull);
+			} else {
+				parent::doSet($values, $forceAcceptNull);
+			}
 		}
 	}
 
@@ -525,9 +538,9 @@ class ModelRelationReferedByOne extends ModelRelationByReference
 
 	public function setFromId($id, $forceAcceptNull = false) {
 		if ($id === null) {
-			$model =& $this->getModelReference(true);
-			$model = null;
+			$this->deleted = true;
 		} else {
+			$this->deleted = false;
 			$model =& $this->getModelReference(true);
 			$model = $this->targetTable->loadModel($id, $this->parentModel->context);
 		}
@@ -535,7 +548,24 @@ class ModelRelationReferedByOne extends ModelRelationByReference
 
 	public function save() {
 		if (null !== $model = $this->getAsModel()) {
-			return $model->save();
+			if ($this->deleted) {
+				$model =& $this->getModelReference(false);
+
+				if ($model) {
+					// If the associated model can't live on its own, then delete it
+					$referenceField = $this->getTargetTable()->getField($this->getReferenceField());
+					if (!$referenceField->isNullable()) {
+						$model->delete();
+					}
+					$model = null;
+				}
+
+				$this->deleted = false;
+
+				return true;
+			} else {
+				return $model->save();
+			}
 		} else {
 			return true;
 		}
