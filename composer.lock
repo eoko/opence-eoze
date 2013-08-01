@@ -3,7 +3,7 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "1a2dd6da3dc2d1198b6d4aab5893475b",
+    "hash": "37070dbd52c769afaf0cdd589e22f8df",
     "packages": [
         {
             "name": "brainsware/php-markdown-extra-extended",
@@ -429,6 +429,60 @@
                 "source": "https://github.com/zendframework/Component_ZendEventManager/tree/release-2.2.1"
             },
             "time": "2013-06-12 19:45:10"
+        },
+        {
+            "name": "zendframework/zend-filter",
+            "version": "2.2.2",
+            "target-dir": "Zend/Filter",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/zendframework/Component_ZendFilter.git",
+                "reference": "release-2.2.2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://packages.zendframework.com/composer/zendframework-zend-filter-2.2.2-release-2.2.2-6ab69c.zip",
+                "reference": "2.2.2",
+                "shasum": "8371fb3785a99e76a5a56b6de0bfeb10131c3d62"
+            },
+            "require": {
+                "php": ">=5.3.3",
+                "zendframework/zend-stdlib": "self.version"
+            },
+            "require-dev": {
+                "zendframework/zend-crypt": "self.version"
+            },
+            "suggest": {
+                "zendframework/zend-crypt": "Zend\\Crypt component",
+                "zendframework/zend-i18n": "Zend\\I18n component",
+                "zendframework/zend-stdlib": "Zend\\Stdlib component",
+                "zendframework/zend-uri": "Zend\\Uri component for UriNormalize filter",
+                "zendframework/zend-validator": "Zend\\Validator component"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.2-dev",
+                    "dev-develop": "2.3-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "Zend\\Filter\\": ""
+                }
+            },
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "description": "provides a set of commonly needed data filters",
+            "keywords": [
+                "filter",
+                "zf2"
+            ],
+            "support": {
+                "source": "https://github.com/zendframework/Component_ZendFilter/tree/release-2.2.2"
+            },
+            "time": "2013-06-28 17:00:32"
         },
         {
             "name": "zendframework/zend-http",

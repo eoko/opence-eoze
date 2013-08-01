@@ -22,6 +22,7 @@
 		"zendframework/zend-session": "2.*",
 		"zendframework/zend-db": "2.*",
 		"zendframework/zend-authentication": "2.*",
+		"zendframework/zend-filter": "2.*",
 
 		"brainsware/php-markdown-extra-extended": "dev-master"
 	}
