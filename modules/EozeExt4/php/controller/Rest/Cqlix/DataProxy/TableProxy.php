@@ -39,6 +39,7 @@ use eoko\modules\EozeExt4\Exception\InvalidArgument as InvalidArgumentException;
 use eoko\modules\EozeExt4\controller\Rest\Cqlix\Exception\UnknownField as UnknownFieldException;
 use eoko\modules\EozeExt4\controller\Rest\Cqlix\DataProxy\TableProxy\IdQueryCache;
 use eoko\modules\EozeExt4\controller\Rest\Cqlix\RecordSet;
+use eoko\modules\EozeExt4\controller\Rest\Cqlix\Request\Params as RequestParams;
 
 /**
  * A complete {@link DataProxy} implementation that is bound to a Cqlix's {@link ModelTable}, and uses
@@ -749,7 +750,7 @@ class TableProxy extends AbstractProxy {
 	/**
 	 * @inheritdoc
 	 */
-	public function selectListFields(Query $query, $fieldPrefix = '') {
+	public function selectListFields(Query $query, $fieldPrefix = '', RequestParams $request) {
 
 		$table = $this->getTable();
 
@@ -793,7 +794,8 @@ class TableProxy extends AbstractProxy {
 					}
 
 					if ($field instanceof \ModelRelationInfoHasOne) {
-						$childParser = $proxy->selectListFields($query, $fqFieldName . '->');
+						$this->mergeContextFromProxy($query, $proxy, $request, false);
+						$childParser = $proxy->selectListFields($query, $fqFieldName . '->', $request);
 						$parser->addFieldValueReader($serverField, $childParser);
 					} else {
 						/** @var $field \ModelRelationInfo */
@@ -819,7 +821,8 @@ class TableProxy extends AbstractProxy {
 						;
 
 						/** @var RecordParser $childRecordParser */
-						$childRecordParser = $proxy->selectListFields($childQuery, $fieldPrefix . $serverField . '->');
+						$this->mergeContextFromProxy($query, $proxy, $request, false);
+						$childRecordParser = $proxy->selectListFields($childQuery, $fieldPrefix . $serverField . '->', $request);
 						$childRecordParser->setParentIdFieldName($rootPkField);
 
 						$childSet = new RecordSet\OnePass($childRecordParser, $childQuery);
@@ -846,6 +849,29 @@ class TableProxy extends AbstractProxy {
 		}
 
 		return $parser;
+	}
+
+	private function mergeContextFromProxy(Query $query, DataProxy $proxy, RequestParams $request, $allowOverride = false) {
+		if ($proxy instanceof HasQueryContext) {
+			$context =& $query->getContext();
+			$newContext = $proxy->createContext($request);
+			if ($newContext) {
+				foreach ($newContext as $key => $value) {
+					if ($context === null) {
+						$context = array(
+							$key => $value,
+						);
+					} else if (array_key_exists($key, $context)) {
+						if (!$allowOverride && $newContext[$key] !== $context[$key]) {
+							// TODO
+							throw new \RuntimeException;
+						}
+					} else {
+						$context[$key] = $value;
+					}
+				}
+			}
+		}
 	}
 
 	/**
