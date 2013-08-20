@@ -153,9 +153,10 @@ interface DataProxy extends FieldNameResolver {
 	 *
 	 * @param Query $query
 	 * @param string $fieldPrefix
+	 * @param Request\Params $requestParams
 	 * @return RecordParser
 	 */
-	public function selectListFields(Query $query, $fieldPrefix = '');
+	public function selectListFields(Query $query, $fieldPrefix = '', RequestParams $requestParams);
 
 	/**
 	 * Gets the meta data for the record type represented by this proxy. This data is intended

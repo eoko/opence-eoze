@@ -52,7 +52,11 @@ use eoko\modules\EozeExt4\controller\Rest\Cqlix\RecordSet;
  *
  * @since 2013-04-25 12:19
  */
-abstract class AbstractProxy implements DataProxyInterface {
+abstract class AbstractProxy implements DataProxyInterface, HasQueryContext {
+
+	public function createQueryContext(RequestParams $request) {
+		return $this->createContext($request);
+	}
 
 	/**
 	 * Creates data context, depending on the CRUD operation (read from the {@link RequestParams}).
@@ -185,7 +189,7 @@ abstract class AbstractProxy implements DataProxyInterface {
 		$query = $this->createListQuery($requestParams);
 
 		// select proxy's fields
-		$parser = $this->selectListFields($query);
+		$parser = $this->selectListFields($query, '', $requestParams);
 
 		// --- Query processors
 
