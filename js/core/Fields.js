@@ -109,7 +109,7 @@ Oce.Format.date = function(v, format) {
 			v = new Date(Date.parse(v));
 		}
 	}
-	return v.dateFormat(format || "m/d/Y");
+	return v.dateFormat(format || "d/m/Y");
 }
 
 Oce.Format.dateRenderer = function(format) {

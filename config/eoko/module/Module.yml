@@ -2,4 +2,4 @@ extjs4:
 
   namespaceAliases:
     eoko.modules.EozeExt4: Eoze
-    eoko: Eoze
+    eoko.modules: Eoze

@@ -1,19 +1,22 @@
 <?php
 
 namespace eoko\cqlix\generator;
+
+use ModelRelationReferencesOne;
 use eoko\script\Script;
-use eoko\database\Query;
 use eoko\database\Database;
 use eoko\template\Template;
-use eoko\plugin\PluginManager;
 use eoko\config\ConfigManager;
+use eoko\config\Paths;
 
 use PDO;
 use ModelColumn;
 use ReflectionClass, ReflectionMethod;
 use Logger, Debug;
-use Exception, SystemException, IllegalStateException, IllegalArgumentException, UnsupportedOperationException;
+use SystemException, IllegalStateException, IllegalArgumentException, UnsupportedOperationException;
 use ConfigurationException;
+
+use eoko\cqlix\Exception;
 
 /**
  * Generates the data model information by reverse engineering the database
@@ -68,7 +71,12 @@ class Generator extends Script {
 
 	const EVT_BEFORE = 'before';
 
-	private $database;
+	/**
+	 * @var Database
+	 */
+	protected $database;
+
+	private $databaseName;
 
 	private $proxyTableMethods;
 	private $proxyModelMethods;
@@ -84,6 +92,7 @@ class Generator extends Script {
 	/** @var Config */
 	private $baseConfig;
 
+	/** @var TplTable[] */
 	private $tables;
 	private $modelsConfig;
 
@@ -95,6 +104,26 @@ class Generator extends Script {
 
 	private $config;
 
+	protected $databaseProxyName = null;
+
+	/**
+	 * @var \eoko\util\FilePathResolver
+	 */
+	protected $paths = array(
+		'base' => ':model/Base',
+		'proxy' => ':model/Proxy',
+	);
+
+	/**
+	 * @var ClassLookup
+	 */
+	protected $classLookup;
+
+	/**
+	 * @var string
+	 */
+	protected $modelNamespace = null;
+
 	public function __construct() {
 
 		// We want exceptions to show off at the face of the user, not being
@@ -105,9 +134,20 @@ class Generator extends Script {
 		// Includes all relation templates classes
 		RelationTemplates::load();
 
+		if (!$this->database) {
+			$this->database = Database::getDefault();
+		}
+
+		$this->classLookup = new ClassLookup($this->modelNamespace);
+
 		$this->config = ConfigManager::get('eoko/cqlix/Generator');
 
-		$this->tplPath = dirname(__FILE__) . DS . 'templates' . DS;
+		$this->tplPath = __DIR__ . DS . 'templates' . DS;
+
+		// --- Paths
+
+		$this->paths = new Paths($this->paths);
+
 
 		// TODO
 		// I think this is not really used, and its initial objective has been
@@ -128,7 +168,26 @@ class Generator extends Script {
 
 		$startTime = microtime();
 
-		$this->database = Database::getDefaultAdapter()->getDatabaseName();
+		// --- Configure
+
+		// Database
+		$this->databaseName = $this->database->getDatabaseName();
+		echo "Using database: $this->databaseName\n";
+
+		// Prepare paths
+		$this->prepareOutputDirectories();
+
+// REM
+////		 Guess namespaces
+//		$this->guessNamespaces();
+//		$this->classLookup->setNamespace(array(
+//			'model' => $this->modelNamespace,
+//			'modelBase' => $this->baseNamespace,
+//			'table' => $this->modelNamespace,
+//			'tableBase' => $this->baseNamespace,
+//			'proxy' => $this->proxyNamespace,
+//		));
+
 
 		// Reverse engineer the ModelTable and Model classes, to discover the
 		// proxy methods (protected methods prefixed with an underscore _) to
@@ -170,9 +229,10 @@ class Generator extends Script {
 		if (count($this->referencesOneRelations) > 0) {
 			foreach ($this->referencesOneRelations as $table => $rels) {
 				foreach ($rels as $r) {
-					$r instanceof ModelRelationReferencesOne;
-					$this->tableFields[$r->localDBTableName][$r->referenceField]
-							->setForeignKeyToTable($r->targetDBTableName);
+					/** @var TplRelationReferencesOne $r */
+					/** @var TplField $referenceField */
+					$referenceField = $this->tableFields[$r->localDBTableName][$r->referenceField];
+					$referenceField->setForeignKeyToTable($r->targetDBTableName);
 				}
 			}
 		}
@@ -212,27 +272,19 @@ class Generator extends Script {
 
 		// --- Process -----------------------------------------------------------------
 
-		foreach (array(MODEL_BASE_PATH, MODEL_PROXY_PATH) as $dir) {
-			if (!file_exists($dir)) {
-				mkdir($dir, 0744);
-			} else {
-				foreach (glob($dir . '*.php') as $file) {
-					unlink($file);
-				}
-			}
-		}
+		list($modelPath, $modelBasePath, $proxyPath) = $this->paths->resolve(array('model', 'base', 'proxy'));
 
 		foreach ($this->tableFields as $table => $fields) {
 
 			$modelName = NameMaker::modelFromDB($table);
 			$tableName = NameMaker::tableFromDB($table);
 
-			$modelFilename = MODEL_PATH . $modelName . '.php';
-			$modelBaseFilename = MODEL_BASE_PATH . $modelName . 'Base' . '.php';
+			$modelFilename = $modelPath . $modelName . '.php';
+			$modelBaseFilename = $modelBasePath . $modelName . 'Base' . '.php';
 
-			$tableFilename = MODEL_PATH . $tableName . '.php';
-			$tableBaseFilename = MODEL_BASE_PATH . $tableName . 'Base' . '.php';
-			$tableProxyFilename = MODEL_PROXY_PATH . $tableName . 'Proxy' . '.php';
+			$tableFilename = $modelPath . $tableName . '.php';
+			$tableBaseFilename = $modelBasePath . $tableName . 'Base' . '.php';
+			$tableProxyFilename = $proxyPath . $tableName . 'Proxy' . '.php';
 
 			$params = array($table, $fields);
 
@@ -252,17 +304,83 @@ class Generator extends Script {
 		echo PHP_EOL . $msg . PHP_EOL . PHP_EOL;
 	}
 
+	private $outputDirectoriesPermissions = 0744;
+
+	/**
+	 * Creates output directories as needed, ensures that existing output directory are actual directories
+	 * (not plain files), and empties cache output directories (i.e. base & proxy).
+	 *
+	 * @throws \eoko\cqlix\Exception\RuntimeException
+	 */
+	private function prepareOutputDirectories() {
+
+		$modelPath = $this->paths->resolve('model');
+
+		if (file_exists($modelPath)) {
+			if (!is_dir($modelPath)) {
+				throw new Exception\RuntimeException("Model output directory is a plain file: $modelPath");
+			}
+		} else {
+			mkdir($modelPath, $this->outputDirectoriesPermissions);
+		}
+
+		// Clean base & proxy paths
+		foreach ($this->paths->resolve(array('base', 'proxy')) as $dir) {
+			if (file_exists($dir)) {
+				if (is_dir($dir)) {
+					foreach (glob($dir . '*.php') as $file) {
+						unlink($file);
+					}
+				} else {
+					throw new Exception\RuntimeException("Output directory is a plain file: $modelPath");
+				}
+			} else {
+				mkdir($dir, $this->outputDirectoriesPermissions);
+			}
+		}
+	}
+
+// REM
+//	/**
+//	 * Guess namespaces based on {@link modelNamespace} and {@link paths}.
+//	 *
+//	 * Must be called *after* all output directories are resolvable.
+//	 */
+//	private function guessNamespaces() {
+//		if (isset($this->modelNamespace)) {
+//
+//			$this->paths->resolve('model');
+//			$this->paths->resolve('proxy');
+//
+//			list($modelPath, $basePath, $proxyPath) = $this->paths->resolveReal(array('model/', 'base', 'proxy'));
+//
+//			$modelPath = $this->paths->resolveReal('model/');
+//			$modelPathLength = strlen($modelPath);
+//
+//			foreach (array('proxy', 'base') as $dir) {
+//				$property = $dir . 'Namespace';
+//				$path = $this->paths->resolveReal($dir);
+//
+//				if (!isset($this->$property) && $path) {
+//					if (substr($path, 0, $modelPathLength) === $modelPath) {
+//						$this->$property = $this->modelNamespace . '\\' . substr($path, $modelPathLength);
+//					}
+//				}
+//			}
+//		}
+//	}
+
 	private function discoverTables() {
 
 		$config = $this->modelsConfig;
 
-		$tables = Query::executeQuery("SHOW TABLES FROM `$this->database`;")
+		$tables = $this->database->query("SHOW TABLES FROM `$this->databaseName`;")
 				->fetchAll(PDO::FETCH_COLUMN);
 
 		$this->tables = array();
 		foreach ($tables as $table) {
 			if (!isset($config[$table]) || $config[$table] !== false) {
-				$this->tables[$table] = new TplTable($table);
+				$this->tables[$table] = new TplTable($this->classLookup, $table);
 			}
 		}
 	}
@@ -274,9 +392,10 @@ class Generator extends Script {
 		foreach ($this->tables as $dbTable => $table) {
 
 			echo "Reading: `$dbTable`" . PHP_EOL;
-			$result = Query::executeQuery("SHOW COLUMNS FROM `$dbTable` FROM `$this->database`;");
+			$result = $this->database->query("SHOW COLUMNS FROM `$dbTable` FROM `$this->databaseName`;");
 			$result = $result->fetchAll(PDO::FETCH_NAMED);
 
+			/** @var $fields TplField[] */
 			$fields = array();
 			foreach ($result as $r) {
 
@@ -300,7 +419,7 @@ class Generator extends Script {
 				$autoIncrement = stristr($r['Extra'], 'auto_increment') !== false ? true : false;
 				$canNull = $r['Null'] == 'YES' ? true : false;
 
-				$tplField = new TplField($field, $type, $length, $canNull, $default,
+				$tplField = new TplField($this->classLookup, $field, $type, $length, $canNull, $default,
 						false, null, $primaryKey, $autoIncrement);
 
 				if (isset($matches['unsigned'])) {
@@ -312,13 +431,16 @@ class Generator extends Script {
 
 			// --- Index ---
 
-			$createTable = Query::executeQuery('SHOW CREATE TABLE `' . $dbTable . '`;');
+			$createTable = $this->database->query('SHOW CREATE TABLE `' . $dbTable . '`;');
 			$createTable = $createTable->fetchColumn(1);
 
 			if (!preg_match('/(?:,|\s)ENGINE\s*=\s*(\w+)\s+/', $createTable, $matches)) {
 				throw new IllegalStateException('Cannot parse ENGINE');
 			}
 			$engine = $matches[1];
+
+			// Indexes
+			$table->setUniqueIndexes($this->parseCreateTableUniqueIndexes($createTable));
 
 			if (strtolower($engine) !== 'innodb') {
 				Logger::get($this)->warn('Table {} engine is not InnoDB (it is {})', $dbTable, $engine);
@@ -403,6 +525,30 @@ class Generator extends Script {
 		}
 	}
 
+	private function parseCreateTableUniqueIndexes($createTable) {
+
+		$pattern = '/UNIQUE\s*KEY\s*`(?<name>[^`]+)`\s*\((?<columns>[^\)]+)\)/';
+
+		if (preg_match_all($pattern, $createTable, $matches, PREG_SET_ORDER)) {
+
+			$indexes = array();
+
+			foreach ($matches as $match) {
+				$columns = explode(',', $match['columns']);
+
+				foreach ($columns as &$column) {
+					$column = trim($column, '` ');
+				}
+
+				$indexes[] = $columns;
+			}
+
+			return $indexes;
+		}
+
+		return null;
+	}
+
 	private function getTableConfig($table, $key = null, $default = null) {
 		if (isset($this->modelsConfig[$table][$key])) {
 			return $this->modelsConfig[$table][$key];
@@ -479,18 +625,18 @@ class Generator extends Script {
 				}
 
 				if ($unique) {
-					$reciproqueRelation = new TplRelationReferedByOne($relation->targetDBTableName, $dbTable,
+					$reciproqueRelation = new TplRelationReferedByOne($this->classLookup, $relation->targetDBTableName, $dbTable,
 							$alias, $relation, $relation->getReferenceField(), null);
 				} else if (isset($relation->prefix)) {
 					if (NameMaker::isSingular($relation->prefix)) {
-						$reciproqueRelation = new TplRelationReferedByOne($relation->targetDBTableName, $dbTable,
+						$reciproqueRelation = new TplRelationReferedByOne($this->classLookup, $relation->targetDBTableName, $dbTable,
 								$alias, $relation, $relation->getReferenceField(), $relation->prefix);
 					} else {
-						$reciproqueRelation = new TplRelationReferedByMany($relation->targetDBTableName, $dbTable,
+						$reciproqueRelation = new TplRelationReferedByMany($this->classLookup, $relation->targetDBTableName, $dbTable,
 								$alias, $relation, $relation->getReferenceField(), $relation->prefix);
 					}
 				} else {
-					$reciproqueRelation = new TplRelationReferedByMany($relation->targetDBTableName, $dbTable,
+					$reciproqueRelation = new TplRelationReferedByMany($this->classLookup, $relation->targetDBTableName, $dbTable,
 							$alias, $relation, $relation->getReferenceField(), null);
 				}
 
@@ -586,11 +732,11 @@ class Generator extends Script {
 
 							if ($leftRelationType !== null && $rightRelationType !== null) {
 								$leftRelation = new $leftRelationType(
-										null, $leftTable, $rightTable, null, $dbTable, $leftReferencingField,
+										$this->classLookup, null, $leftTable, $rightTable, null, $dbTable, $leftReferencingField,
 										$rightReferencingField);
 
 								$rightRelation = new $rightRelationType(
-										null, $rightTable, $leftTable, $leftRelation, $dbTable, $rightReferencingField,
+										$this->classLookup, null, $rightTable, $leftTable, $leftRelation, $dbTable, $rightReferencingField,
 										$leftReferencingField);
 
 								Logger::get('CQLIX')->info('Adding secondary relation: ' . $rightRelation);
@@ -677,42 +823,69 @@ class Generator extends Script {
 		}
 	}
 
-	function tplModel($tableName, $fields) {
-		$modelName = NameMaker::modelFromDB($tableName);
-		$package = APP_NAME;
-		$version = $this->getVersionString();
-		ob_start();
-		include $this->tplPath . 'Model.tpl.php';
-		return ob_get_clean();
+	/**
+	 * @var string
+	 */
+	protected $baseNamespace = null;
+	/**
+	 * @var string
+	 */
+	protected $proxyNamespace = null;
+
+	// Used in the templates
+	/**
+	 * @var string
+	 */
+	protected $modelCategory = APP_NAME;
+	/**
+	 * @var string
+	 */
+	private $modelPackage = 'Model';
+	/**
+	 * @var string
+	 */
+	private $tableSubPackage = 'Table';
+	/**
+	 * @var string
+	 */
+	private $baseSubPackage = 'Base';
+	/**
+	 * @var string
+	 */
+	private $proxySubPackage = 'Proxy';
+
+	function tplModel($dbTableName, $fields) {
+		return $this->createTemplate($dbTableName, 'Model')->render(true);
 	}
 
 	private static $excludedFields = array(
 //		'deleted'
 	);
 
-	function tplModelBase($table, $fields) {
+	function tplModelBase($dbTable, $fields) {
 
-		$modelInfos = $this->baseConfig->buildModelInfo($table);
-		extract($modelInfos);
+		// -- Proxy methods
 
-//		$modelName = NameMaker::modelFromDB($table);
-//		$tableName = NameMaker::tableFromDB($table);
-		$primaryField = self::getPrimaryField($fields);
-		$package = APP_NAME;
-		$version = $this->getVersionString();
+		$tableName = $this->classLookup->tableFromDb($dbTable);
+		$modelName = $this->classLookup->modelFromDb($dbTable);
 
 		$proxyMethods = $this->proxyModelMethods;
 		foreach ($proxyMethods as &$method) {
 			$method = str_replace('%%ModelTable%%', $tableName, $method);
 			$method = str_replace('%%Model%%', $modelName, $method);
-		} unset($method);
+		}
+		unset($method);
 
+		// -- Fields
+
+		// Excluded fields
 		foreach (array_keys($fields) as $name) {
 			if (in_array($name, self::$excludedFields, true)) {
 				unset($fields[$name]);
 			}
 		}
 
+		// Enum fields
 		$hasEnum = false;
 		$enumLabels = array();
 		foreach ($fields as $field) {
@@ -724,29 +897,42 @@ class Generator extends Script {
 			}
 		}
 
-		$relations = $this->allRelations[$table];
+		// -- Relations
+
+		$relations = $this->allRelations[$dbTable];
 
 		// TODO
-		// removing dupplicates caused by mirror relations
-		if ($relations) foreach ($relations as $i => $rel) {
-			foreach ($relations as $i2 => $rel2) {
-				if (($i !== $i2) && ($rel->getName() === $rel2->getName())) {
-					$yes = 1;
-					unset($relations[$i]);
-					break;
+		// removing duplicates caused by mirror relations
+		if ($relations) {
+			foreach ($relations as $i => $rel) {
+				foreach ($relations as $i2 => $rel2) {
+					if (($i !== $i2) && ($rel->getName() === $rel2->getName())) {
+						$yes = 1;
+						unset($relations[$i]);
+						break;
+					}
 				}
 			}
+		} else {
+			$relations = array();
 		}
 
-		$tpl->relations = $relations;
+		// -- Return
 
-		if (!is_array($relations)) $relations = array();
+		$variables = array_merge(
+			// modelName & tableName
+			$this->baseConfig->buildModelInfo($dbTable),
+			array(
+				'fields' => $fields,
+				'primaryField' => self::getPrimaryField($fields),
+				'hasEnum' => $hasEnum,
+				'enumLabels' => $enumLabels,
+				'relations' => $relations,
+				'proxyMethods' => $proxyMethods,
+			)
+		);
 
-		$generator = $this;
-
-		ob_start();
-		include $this->tplPath . 'ModelBase.tpl.php';
-		return ob_get_clean();
+		return $this->createTemplate($dbTable, 'ModelBase', $variables)->render(true);
 	}
 
 	public static function makeEnumConstName($field, $code) {
@@ -759,22 +945,77 @@ class Generator extends Script {
 		return 'VE_' . strtoupper($field) . "_$code";
 	}
 
-	function tplTable($tableName, $fields) {
-		$className = NameMaker::tableFromDB($tableName);
-		$package = APP_NAME;
-		$version = $this->getVersionString();
-		ob_start();
-		include $this->tplPath . 'ModelTable.tpl.php';
-		return ob_get_clean();
+	private function tplTable($dbTable, $fields) {
+		$variables = array(
+			'className' => NameMaker::tableFromDB($dbTable),
+		);
+		return $this->createTemplate($dbTable, 'ModelTable', $variables)->render(true);
 	}
 
-	function tplTableProxy($tableName, $fields) {
-		$tpl = Template::create()->setFile($this->tplPath . 'ModelTableProxy.tpl.php');
+	private function tplTableProxy($tableName, $fields) {
+		$tpl = $this->createTemplate($tableName, 'ModelTableProxy');
 		$this->tplSetTableBaseVars($tpl, $tableName, $fields);
 		return $tpl->render(true);
 	}
 
-	function tplSetTableBaseVars(Template &$tpl, $tableName, $fields) {
+	/**
+	 * @param string $name
+	 * @param array|null $variables
+	 * @return \eoko\template\Template
+	 */
+	private function createTemplate($dbTable, $name, $variables = null) {
+
+		// --- Create template
+
+		$file = $this->tplPath . $name . '.tpl.php';
+		$template = Template::create()->setFile($file);
+
+		// --- Set default variables
+
+		// Classes
+		$template->set(array(
+			'modelName' => NameMaker::modelFromDB($dbTable),
+			'modelClass' => $this->classLookup->modelFromDb($dbTable),
+			'modelBaseClass' => $this->classLookup->modelBaseFromDb($dbTable),
+			'tableClass' => $this->classLookup->tableFromDb($dbTable),
+			'tableBaseClass' => $this->classLookup->tableBaseFromDb($dbTable),
+			'proxyClass' => $this->classLookup->proxyFromDb($dbTable),
+			'proxyName' => $this->classLookup->proxyFromDb($dbTable, false),
+		));
+
+		// Default
+		$template->set(array(
+			'version' => $this->getVersionString(),
+
+			'modelCategory' => $this->modelCategory,
+			'modelPackage' => $this->modelPackage,
+			'baseSubPackage' => $this->baseSubPackage,
+			'proxySubPackage' => $this->proxySubPackage,
+		));
+
+		$template->set('makeEnumConstName', array($this, 'makeEnumConstName'));
+
+		if (isset($this->modelNamespace)) {
+			foreach (array('model', 'modelBase', 'table', 'tableBase', 'proxy') as $ns) {
+				$template->set($ns . 'Namespace', $this->classLookup->resolveNamespace($ns));
+			}
+		}
+
+		// Arguments
+		$template->set($variables);
+
+		// Proxy
+		if (isset($this->databaseProxyName)) {
+			$databaseProxyName = str_replace("'", "\\'", $this->databaseProxyName);
+			$template->set('databaseProxyName', $databaseProxyName);
+		}
+
+		// --- Return
+
+		return $template;
+	}
+
+	private function tplSetTableBaseVars(Template &$tpl, $tableName, $fields) {
 
 		$modelInfos = $this->baseConfig->buildModelInfo($tableName);
 
@@ -818,54 +1059,30 @@ class Generator extends Script {
 
 		$tpl->relations = $relations;
 
-		if (!is_array($tpl->relations)) $tpl->relations = array();
-
-		$tpl->package = APP_NAME;
-		$tpl->version = $this->getVersionString();
-	}
-
-	function tplTableBase($tableName, $fields) {
-		$tpl = Template::create()->setFile($this->tplPath . 'ModelTableBase.tpl.php');
-		$this->tplSetTableBaseVars($tpl, $tableName, $fields);
-		return $tpl->render(true);
-	}
-
-	/**
-	 * @deprecated
-	 */
-	function tplModelQuery($tableName, $fields) {
-		$tpl = Template::create()->setFile($this->tplPath . 'ModelQuery.tpl.php');
-		$this->tplSetTableBaseVars($tpl, $tableName, $fields);
-
-		$parentClassReflection = new ReflectionClass('Query');
-
-		$queryMethods = array();
-		foreach ($parentClassReflection->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
-			$method instanceof ReflectionMethod;
-			if (preg_match('/@return\s+Query\s/', $method->getDocComment())) {
-
-				$this->rebuildReflectionMethodParams($method, $paramsDeclaration);
-				$queryMethods[] = $method->getName() . '(' . $paramsDeclaration . ')';
-			}
+		if (!is_array($tpl->relations)) {
+			$tpl->relations = array();
 		}
+	}
 
-		$tpl->queryMethods = $queryMethods;
-
+	private function tplTableBase($dbTable, $fields) {
+		$tpl = $this->createTemplate($dbTable, 'ModelTableBase');
+		$this->tplSetTableBaseVars($tpl, $dbTable, $fields);
 		return $tpl->render(true);
 	}
 
-	function rebuildReflectionMethodParams(ReflectionMethod $method,
+	private function rebuildReflectionMethodParams(ReflectionMethod $method,
 			&$paramsDeclaration, &$paramsPass = null) {
 
 		$passingParams = array();
 		$paramsDeclaration = array();
 		foreach ($method->getParameters() as $p) {
-			$p instanceof ReflectionParameter;
 
 			$passingParams[] = '$' . $p->getName();
 
+			$class = $p->getClass();
+
 			$s = '';
-			$s .= $p->getClass() !== null ? $p->getClass()->getName() . ' ' : '';
+			$s .= $class !== null ? '\\' . $class->getName() . ' ' : '';
 			$s .= $p->isArray() ? 'array ' : null;
 			$s .= $p->isPassedByReference() ? '&' : '';
 			$s .= '$' . $p->getName();
@@ -899,7 +1116,7 @@ class Generator extends Script {
 					&& !$method->isDeprecated()
 					&& (substr($method->getName(), 0, 1) == '_' && substr($method->getName(), 1, 1) != '_')) {
 
-				$method instanceof ReflectionMethod;
+				/** @var ReflectionMethod $method */
 
 				$this->rebuildReflectionMethodParams($method, $paramsDeclaration, $paramsPass);
 
@@ -1160,6 +1377,7 @@ class Generator extends Script {
 						$otherField = $this->primaryKeys[$otherTable];
 
 						$rel = new TplRelationReferencesOne(
+							$this->classLookup,
 							$tableName,
 							$otherTable,
 							$field->localRelationAlias,
@@ -1238,6 +1456,7 @@ class Generator extends Script {
 						Logger::get($this)->warn('Foreign Key constraint found on non-primary key ' + $otherField + ' in table ' + $otherTable);
 					} else {
 						$rel = new TplRelationReferencesOne(
+								$this->classLookup,
 								$tableName,
 								$otherTable,
 								$field->localRelationAlias ? $field->localRelationAlias : $alias,

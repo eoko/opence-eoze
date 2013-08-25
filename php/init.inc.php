@@ -33,21 +33,6 @@ if (file_exists($filename = ROOT . '../config.php')
 if (!defined('APP_NAME')) define('APP_NAME', 'opence');
 if (!defined('APP_TITLE')) define('APP_TITLE', 'Open.CE');
 
-// removed on 2/26/11 2:27 PM
-//$phpSubDirs = array(
-//	'GridModule'
-//);
-
-// deprecated on 2/26/11 2:10 PM
-//if (!isset($dbConfig)) {
-//	$dbConfig = array(
-//		'user' => 'root'
-//		,'host' => 'localhost'
-//		,'database' => 'oce_dev'
-//		,'password' => 'root'
-//	);
-//}
-
 if (!defined('WEB_DIR')) define('WEB_DIR', 'public');
 if (!defined('WEB_DIR_URL')) define('WEB_DIR_URL', SITE_BASE_URL . WEB_DIR . '/');
 if (!defined('WEB_DIR_PATH')) define('WEB_DIR_PATH', ROOT . WEB_DIR . DS);
@@ -68,11 +53,9 @@ if (!defined('PHP_PATH')) define('PHP_PATH', EOZE_PATH . PHP_DIR . DS);
 if (!defined('APP_PATH')) define('APP_PATH', ROOT . 'app' . DS);
 if (!defined('APP_PHP_PATH')) define('APP_PHP_PATH', APP_PATH . PHP_DIR . DS);
 
+// Home directory
 if (!defined('MY_EOZE_PATH')) define('MY_EOZE_PATH', ROOT . '.eoze' . DS);
-if (!defined('CACHE_PATH')) define('CACHE_PATH', MY_EOZE_PATH . 'cache' . DS);
-if (!defined('LOG_PATH')) define('LOG_PATH', MY_EOZE_PATH . 'log' . DS);
-if (!defined('TMP_PATH')) define('TMP_PATH', MY_EOZE_PATH . 'tmp' . DS);
-if (!defined('VAR_PATH')) define('VAR_PATH', MY_EOZE_PATH . 'var' . DS);
+
 if (!defined('HELP_PATH')) define('HELP_PATH', ROOT . 'help' . DS);
 if (!defined('LIBS_PATH')) define('LIBS_PATH', PHP_PATH . 'lib' . DS);
 if (!defined('DATABASE_DUMP_PATH')) define('DATABASE_DUMP_PATH', ROOT . 'mysql' . DS);
@@ -94,9 +77,9 @@ if (!defined('LIB_BASE_URL')) define('LIB_BASE_URL', SITE_BASE_URL . LIB_DIR . '
 if (!defined('LIB_IMAGES_BASE_URL')) define('LIB_IMAGES_BASE_URL', LIB_BASE_URL . 'images' . '/');
 if (!defined('LIB_PHP_BASE_URL')) define('LIB_PHP_BASE_URL', LIB_BASE_URL . PHP_DIR . '/');
 
-if (!defined('MEDIA_PATH')) define('MEDIA_PATH', ROOT . 'medias' . DS);
+//if (!defined('MEDIA_PATH')) define('MEDIA_PATH', ROOT . 'medias' . DS);
 if (!defined('MEDIA_BASE_URL')) define('MEDIA_BASE_URL', SITE_BASE_URL . 'medias/');
-if (!defined('EXPORTS_PATH')) define('EXPORTS_PATH', MEDIA_PATH . 'exports' . DS);
+//if (!defined('EXPORTS_PATH')) define('EXPORTS_PATH', MEDIA_PATH . 'exports' . DS);
 if (!defined('EXPORTS_BASE_URL')) define('EXPORTS_BASE_URL', MEDIA_BASE_URL . 'exports/');
 
 if (!defined('BACKUPS_PATH')) define('BACKUPS_PATH', ROOT . 'backup' . DS);
@@ -111,7 +94,10 @@ if (defined('APP_MODULES_DIR')) {
 
 if (!defined('MODULES_NAMESPACE')) define('MODULES_NAMESPACE', 'eoko\\modules\\');
 
-exec('rm -rf ' . TMP_PATH);
+// Models
+if (!defined('MODEL_PATH')) define('MODEL_PATH', ROOT . 'models' . DS);
+if (!defined('MODEL_BASE_PATH')) define('MODEL_BASE_PATH', ROOT . 'models' . DS . 'base' . DS);
+if (!defined('MODEL_PROXY_PATH')) define('MODEL_PROXY_PATH', ROOT . 'models' . DS . 'proxy' . DS);
 
 function createEozeDirIf($path) {
 	if (!file_exists($path)) {
@@ -122,10 +108,6 @@ createEozeDirIf(MY_EOZE_PATH);
 if (!file_exists(MY_EOZE_PATH . '.htaccess')) {
 	file_put_contents(MY_EOZE_PATH . '.htaccess', 'DENY FROM ALL' . PHP_EOL);
 }
-createEozeDirIf(CACHE_PATH);
-createEozeDirIf(LOG_PATH);
-createEozeDirIf(TMP_PATH);
-createEozeDirIf(VAR_PATH);
 
 // web dir
 createEozeDirIf(WEB_DIR_PATH);
@@ -184,120 +166,26 @@ if ((!isset($test) || !$test) && (!isset($is_script) || !$is_script)
 	require_once (PHP_PATH . '_/ExceptionHandler.php');
 }
 
-// --- Class loader --
-// Autoload for helpers in /inc
-require_once PHP_PATH . 'eoko' . DS . 'php' . DS . 'ClassLoader.php';
-$classLoader = eoko\php\ClassLoader::register();
 
-$classLoader->addIncludePath(array(
-	PHP_PATH,
-	APP_PHP_PATH,
-));
+// === Bootstrap ===
 
-foreach (explode(':', get_include_path()) as $path) {
-	if ($path !== '.') {
-		$classLoader->addIncludePath($path);
-	}
-}
-
-if (USE_CONTROLLER_CACHE) $classLoader->addIncludePath(CACHE_PATH . 'php');
-
-// removed on 2/26/11 2:27 PM
-//foreach ($phpSubDirs as $dir) {
-//	$classLoader->addIncludePath(PHP_PATH . $dir . DS);
-//	$classLoader->addIncludePath(APP_PHP_PATH . $dir . DS);
-//}
-
-// === Configure application ===
+// ClassLoader not plugged yet!
+require_once __DIR__ . '/eoko/application/Bootstrap.php';
+require_once __DIR__ . '/eoko/application/BaseBootstrap.php';
 
 if (function_exists('configure_application')) {
 	$bootstrap = configure_application();
 }
-if (!isset($bootstrap)) $bootstrap = new \eoko\application\BaseBootstrap();
+
+if (!isset($bootstrap)) {
+	$bootstrap = new \eoko\application\BaseBootstrap();
+}
+
 $bootstrap();
 
 
-// Load directories configuration (from eoze\application)
-function loadAppConfig($classLoader) {
-	$appConfig = ConfigManager::get('eoze\application');
-	if (isset($appConfig['directories'])) {
-		$dc = $appConfig['directories'];
-		if (isset($dc['models'])) {
-			$m = $dc['models'];
-			if (substr($m, -1) !== DS) $m .= DS;
-			define('MODEL_PATH', ROOT . $m);
-			define('MODEL_BASE_PATH', MODEL_PATH . 'base' . DS);
-			define('MODEL_PROXY_PATH', MODEL_PATH . 'proxy' . DS);
-
-			$classLoader->addIncludePath(array(
-				MODEL_PATH, MODEL_PROXY_PATH
-			));
-		}
-	}
-}
-
-loadAppConfig($classLoader);
-
-// === Configure Plugins ===
-
-eoko\plugin\PluginManager::init();
-
-//$sessionManager = new eoko\php\SessionManager();
-
-$config = new \Zend\Session\Config\SessionConfig();
-$config
-	->setName('Eoze_Authentication')
-	->setRememberMeSeconds(3600*24);
-$sessionManager = new \Zend\Session\SessionManager($config);
-
-$dbAdapter = \eoko\database\Database::getDefaultDbAdapter();
-
-use Zend\Session\Validator\HttpUserAgent;
-use Zend\Session\Validator\RemoteAddr;
-
-$validators = $sessionManager->getValidatorChain();
-$validators->attach('session.validate', array(new HttpUserAgent(), 'isValid'));
-$validators->attach('session.validate', array(new RemoteAddr(), 'isValid'));
-
-use Eoze\Session\SaveHandler\ObservableDbTableGateway;
-
-// --- Session Manager
-// TableGateway
-$tableGateway = new \Zend\Db\TableGateway\TableGateway('zf_sessions', $dbAdapter);
-// Save Handler
-$saveHandlerOptions = new \Zend\Session\SaveHandler\DbTableGatewayOptions();
-$saveHandler = new ObservableDbTableGateway($tableGateway, $saveHandlerOptions);;
-// SessionManager
-$sessionManager->setSaveHandler($saveHandler);
-
-Application::setDefaultSessionManager($sessionManager);
-Zend\Session\Container::setDefaultManager($sessionManager);
-$userSession = Application::getInstance()->getUserSession();
-
-if (ConfigManager::get('eoko/routing', 'comet', false)) {
-	$comet = new \eoko\modules\Kepler\CometEvents(MY_EOZE_PATH, $sessionManager->getId());
-	\eoko\cqlix\ExtendedModel::setDefaultCometEvents($comet);
-
-	$userSession
-		->onLogin(function() use($comet, $userSession) {
-			$comet->start($userSession->getUserId());
-		});
-
-	$saveHandler->getEventManager()->attach(
-		ObservableDbTableGateway::EVENT_DESTROY,
-		function() use($comet) {
-			$comet->destroy();
-		}
-	);
-}
-
-// Finally, start the session (must be done after the autoloader has been set,
-// so that object stored in session (notably: UserSession) can be instantiated)
-//session_start();
-
-//require_once 'debug.inc.php'; // there's nothing in there...
-
 // == Logging ==
+
 if (ConfigManager::get('eoko/log/appenders/Output') || isset($_GET['olog'])) {
 	Logger::addAppender(new LoggerOutputAppender());
 }
@@ -320,7 +208,13 @@ if (!defined('ADD_LOG_APPENDERS') || ADD_LOG_APPENDERS) {
 	}
 }
 
+
+// == File types ==
+
 \eoko\util\file\FileTypes::getInstance();
+
+
+// == Routing ==
 
 if ((!isset($test) || !$test)
 		&& (!isset($is_script) || !$is_script)

@@ -90,10 +90,12 @@ Ext4.onReady(function() {
 
     if (Ext4.util.Format) {
         Ext4.apply(Ext4.util.Format, {
-            thousandSeparator: '.',
+//            thousandSeparator: '.',
+            thousandSeparator: ' ',
             decimalSeparator: ',',
-            currencySign: '\u20ac',
-            // French Euro
+////            currencySign: '\u8239\u20ac',
+//            currencySign: '\u202F\u20ac', // Espace fine insécable + euro
+//            // French Euro
             dateFormat: 'd/m/Y'
         });
     }

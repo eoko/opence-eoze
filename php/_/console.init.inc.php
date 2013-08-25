@@ -66,8 +66,6 @@ defineIf('PHP_PATH', EOZE_PATH . PHP_DIR . DS);
 defineIf('APP_PATH', ROOT . 'app' . DS);
 defineIf('APP_PHP_PATH', APP_PATH . PHP_DIR . DS);
 
-defineIf('CACHE_PATH', EOZE_PATH . 'cache' . DS);
-defineIf('LOG_PATH', EOZE_PATH . 'log' . DS);
 defineIf('HELP_PATH', ROOT . 'help' . DS);
 defineIf('LIBS_PATH', PHP_PATH . 'lib' . DS);
 defineIf('DATABASE_DUMP_PATH', ROOT . 'mysql' . DS);
@@ -94,9 +92,9 @@ defineIf('LIB_BASE_URL', SITE_BASE_URL . LIB_DIR . '/');
 defineIf('LIB_IMAGES_BASE_URL', LIB_BASE_URL . 'images' . '/');
 defineIf('LIB_PHP_BASE_URL', LIB_BASE_URL . PHP_DIR . '/');
 
-defineIf('MEDIA_PATH', ROOT . 'medias' . DS);
+//defineIf('MEDIA_PATH', ROOT . 'medias' . DS);
 defineIf('MEDIA_BASE_URL', SITE_BASE_URL . 'medias/');
-defineIf('EXPORTS_PATH', MEDIA_PATH . 'exports' . DS);
+//defineIf('EXPORTS_PATH', MEDIA_PATH . 'exports' . DS);
 defineIf('EXPORTS_BASE_URL', MEDIA_BASE_URL . 'exports/');
 
 defineIf('BACKUPS_PATH', ROOT . 'backup' . DS);

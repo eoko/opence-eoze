@@ -19,6 +19,9 @@
 .ribbon.icon.export_excel {
 	background-image: url("../images/opence/32x32/export_excel.png");
 }
+.ribbon.icon.export_ods {
+    background-image: url("../images/opence/32x32/export_ods.png");
+}
 .ribbon.icon.export_csv {
 	background-image: url("../images/opence/32x32/export_csv.png");
 }
@@ -45,13 +48,12 @@
 .b_ico_earth {
 	background-image: url("../images/opence/32x32/earth.png") !important;
 }
-.b_ico_del {
+.ribbon.icon.delete {
 /*	background-image: url("../images/opence/32x32/trash_full.png") !important;*/
 	background-image: url("../images/opence/32x32/del.png") !important;
 /*	background-image: url("../images/icons_fatcow/32x32/delete.png") !important;*/
 }
-.ribbon.icon.add,
-.b_ico_add {
+.ribbon.icon.add {
 	background-image: url("../images/opence/32x32/add.png") !important;
 /*	background-image: url("../images/icons_fatcow/32x32/add.png") !important;*/
 }
@@ -96,7 +98,7 @@
 	background-image: url("../images/opence/32x32/green_ball.png") !important;
 }
 
-.b_ico_columns {
+.icon.ribbon.columns {
 	background-image: url("../images/unlicensed/icon_columns.png") !important;
 }
 
@@ -164,6 +166,9 @@
 .ico.book_addresses {
 	background-image: url("../images/icons/book_addresses.png");
 }
+.ico.cancel {
+	background-image: url("../images/icons/cancel.png");
+}
 .ico.checkbox {
 	background-image: url("../images/icons/checkbox.png");
 }
@@ -177,6 +182,10 @@
 }
 .ico.download {
 	background-image: url("../images/icons_fatcow/16x16/download.png");
+}
+.ico.error {
+    background-image: url("../images/icons/exclamation.png");
+    color: #e63d1f;
 }
 .ico.eye {
 	background-image: url("../images/icons/eye.png");
@@ -227,6 +236,9 @@
 .ico_user {
 	background-image: url("../images/icons/user.png");
 }
+.ico.reset {
+    background-image: url("../images/icons/arrow_rotate_anticlockwise.png") !important;
+}
 .ico.tick,
 .ico_tick {
 	background-image: url("../images/icons/tick.png");
@@ -265,6 +277,9 @@
 .ico_help {
 	background-image: url("../images/icons/help.png");
 }
+.ico.lightning {
+    background-image: url("../images/icons/lightning.png") !important;
+}
 .ico.lock {
 	background-image: url("../images/icons/lock.png");
 }
@@ -280,6 +295,9 @@
 }
 .ico.layout_content {
 	background-image: url("../images/icons/layout_content.png");
+}
+.ico.plugin {
+    background-image: url("../images/icons/plugin.png") !important;
 }
 .ico_male {
 	background-image: url("../images/icons/male.png");

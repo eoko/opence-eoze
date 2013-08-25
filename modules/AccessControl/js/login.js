@@ -19,7 +19,7 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 
 	,createLoginWindow: function(config) {
 
-		var win = Ext4.create('Eoze.modules.AccessControl.view.LoginWindow', config),
+		var win = Ext4.create('Eoze.AccessControl.view.LoginWindow', config),
 			service = win.getController().getLoginService();
 
 		// relay login event (legacy)

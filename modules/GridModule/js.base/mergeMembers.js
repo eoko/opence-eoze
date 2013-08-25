@@ -71,7 +71,7 @@ Oce.deps.wait('Oce.GridModule', function() {
 				var form = win.formPanel.form;
 				if (form.isValid) {
 					form.submit({
-						url: 'index.php'
+						url: 'api'
 						,params: {
 							controller: me.controller
 							,action: 'merge_members'

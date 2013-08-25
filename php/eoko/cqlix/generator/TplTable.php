@@ -38,7 +38,16 @@ class TplTable implements ConfigConstants {
 	 */
 	private $indirectRelations = array();
 
-	public function __construct($dbTableName) {
+	/**
+	 * @var ClassLookup
+	 */
+	private $classLookup;
+
+	private $uniqueIndexes;
+
+	public function __construct(ClassLookup $classLookup, $dbTableName) {
+
+		$this->classLookup = $classLookup;
 
 		NameMaker::generateTableEntries($dbTableName);
 
@@ -101,8 +110,8 @@ class TplTable implements ConfigConstants {
 	}
 
 	private function configureColumns($config) {
-		foreach ($config as $field => $config) {
-			$this->getField($field)->configure($config);
+		foreach ($config as $field => $cfg) {
+			$this->getField($field)->configure($cfg);
 		}
 	}
 
@@ -112,7 +121,7 @@ class TplTable implements ConfigConstants {
 
 		if (!$this->config) return;
 
-		$colConfig;
+		$colConfig = null;
 		if (isset($this->config[self::CFG_COLUMNS])) {
 			$colConfig = $this->config[self::CFG_COLUMNS];
 		}
@@ -161,6 +170,7 @@ class TplTable implements ConfigConstants {
 					$excludedFields[] = $relation['referenceField'];
 
 					$relations[] = $rel = new TplRelationReferencesOne(
+						$this->classLookup,
 						$this->dbTable,
 						NameMaker::dbFromModel($relation['target']),
 						$alias,
@@ -255,6 +265,14 @@ class TplTable implements ConfigConstants {
 		}
 
 		$this->columns[$field->getName()] = $field;
+	}
+
+	public function setUniqueIndexes(array $indexes = null) {
+		$this->uniqueIndexes = $indexes;
+	}
+
+	public function getUniqueIndexes() {
+		return $this->uniqueIndexes;
 	}
 
 //	public function addRelation(TplRelation $relation) {

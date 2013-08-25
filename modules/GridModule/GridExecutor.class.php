@@ -11,6 +11,7 @@ use eoko\database\Database;
 use eoko\util\Strings;
 use eoko\module\ModuleManager;
 use eoko\util\date\Date;
+use eoko\config\Application;
 
 use eoko\cqlix\Exception\ModelAlreadyDeletedException;
 
@@ -141,7 +142,7 @@ abstract class GridExecutor extends JsonExecutor {
 					$this->errorMessage = "La valeur '$matches[value]' "
 							. ($label ? "pour le champ <em>$label</em> " : null)
 							. 'doit être unique.';
-				} 
+				}
 				break;
 		}
 		return false;
@@ -732,29 +733,38 @@ abstract class GridExecutor extends JsonExecutor {
 
 	/**
 	 * Loads the grid records.
-	 * 
-	 * 
+	 *
+	 *
 	 * @option int|bool [limit = 20]
-	 * 
+	 *
 	 * A positive integer sets the row limit to that number.
-	 * 
+	 *
 	 * `false` means no limit.
-	 * 
-	 * 
+	 *
+	 *
 	 * @option int [start = 0]
-	 * 
+	 *
 	 * Sets the index of the first record to load.
-	 * 
-	 * 
+	 *
+	 *
 	 * @option int [realstart = null]
-	 * 
+	 *
 	 * Will be used instead of start, to set the index of the first record to loard,
 	 * if specified.
-	 * 
-	 * 
+	 *
+	 *
 	 * @version 1.0.0 25/04/12 22:37
 	 */
 	public function load() {
+
+		$id = $this->request->get(
+			$this->table->getPrimaryKeyName(),
+			$this->request->get('id', null)
+		);
+
+		if ($id !== null) {
+			return $this->loadOne($id);
+		}
 
 		$this->beforeLoad();
 
@@ -820,6 +830,9 @@ abstract class GridExecutor extends JsonExecutor {
 	 // LOAD -- One Model
 	//////////////////////////////////////////////////////////////////////////
 
+	/**
+	 * @deprecated Use `loadOne()` instead.
+	 */
 	public function load_one($id = null) {
 		Logger::get($this)->warn('Deprecated, use loadOne');
 		return $this->loadOne($id);
@@ -860,7 +873,7 @@ MSG;
 
 		$this->loadOne_addExtraData($data, $model);
 
-		$this->data = $data;
+		$this->set('data', $data);
 
 		return true;
 	}
@@ -890,7 +903,7 @@ MSG;
 		//			break;
 		//		}
 		//	}
-		// 
+		//
 		// return $model->getDataAs($specs);
 	}
 	protected function loadOne_addExtraData(array &$data, Model $model) {}
@@ -1113,7 +1126,7 @@ MSG;
 
 		try {
 			return $this->callInTransaction('doDelete');
-		} 
+		}
 
 		catch (ModelAlreadyDeletedException $ex) {
 
@@ -1331,6 +1344,10 @@ MSG;
 		return $this->earl;
 	}
 
+	protected function getCeAddress() {
+		return '';
+	}
+
 	public function export() {
 
 		set_time_limit(180);
@@ -1424,12 +1441,7 @@ MSG;
 		$user = $this->getApplication()->getActiveUser();
 
 		$report = $earl->createReport()
-				->setAddress(<<<TXT
-CE Rhodia - Site Belle Étoile
-BP 103
-69192 SAINT FONS CEDEX
-TXT
-				)
+				->setAddress($this->getCeAddress())
 				->setTitle($this->makePdfTitle())
 				->setUser($user->getDisplayName(User::DNF_PRETTY))
 				->setUserEmail($user->getEmail());
@@ -1481,7 +1493,7 @@ TXT
 
 		$slug = $this->getSlug();
 		$slugDir = $slug ? "$slug/" : null;
-		$directory = EXPORTS_PATH . $slugDir;
+		$directory = Application::getInstance()->resolvePath('media/exports/') . $slugDir;
 		$filename = $this->makeExportFilename($directory, $format);
 
 		$file = $directory . $filename;
@@ -1493,7 +1505,7 @@ TXT
 //		$exporter->setDirectory($this->getSlug());
 //
 //		switch ($format) {
-//			case 'csv': 
+//			case 'csv':
 //				$url = $exporter->exportCSV($result);
 //				break;
 //			case 'pdf':

@@ -2,7 +2,9 @@
 
 namespace eoko\modules\root;
 
+use eoko\config\Application;
 use eoko\module\executor\html\BasicHtmlExecutor;
+use eoko\module\traits\HasCssFiles;
 use eoko\template\HtmlRootTemplate;
 use eoko\template\HtmlTemplate;
 use eoko\module\ModuleManager;
@@ -11,6 +13,7 @@ use eoko\template\HtmlRootTemplate\PassThroughCompiler;
 use eoko\template\HtmlRootTemplate\JavascriptCompiler;
 use eoko\template\HtmlRootTemplate\CssCompiler;
 use eoko\template\HtmlRootTemplate\ExtJsCompiler;
+use eoko\module\traits\HasJavascriptFiles;
 
 class Html extends BasicHtmlExecutor {
 
@@ -69,9 +72,11 @@ class Html extends BasicHtmlExecutor {
 	 */
 	private function buildIncludes() {
 
+		/** @var root $module */
+		$module = $this->getModule();
 		$options = $this->getModuleConfig()->get('compilation', false);
 		$app = $this->getApplication();
-		$cdnConfig = $this->getModuleConfig()->get('cdn', false);
+		$cdnConfig = $module->getCdnConfig();
 
 		$java = isset($options['javaCommand'])
 				? $options['javaCommand']
@@ -139,6 +144,11 @@ class Html extends BasicHtmlExecutor {
 			$includes['js'] = array_merge($includes['js'], $this->buildJasmineSpecIncludes());
 
 			$includes['js'][] = $this->getRouter()->assemble(array(), array('name' => 'index/jasmine/app'));
+		}
+
+		// Javascript bootstrap
+		else if (file_exists(ROOT . 'app.js')) {
+			$includes['js'][] = SITE_BASE_URL . 'app.js';
 		}
 
 		return $includes;
@@ -244,11 +254,36 @@ JS;
 	private function buildJasmineSpecIncludes() {
 
 		$urls = array();
+		$urlFiles = array();
 
 		foreach (ModuleManager::listModules(false) as $module) {
 			/** @var \eoko\module\Module $module */
-			$urls = array_merge($urls, $module->listLineFilesUrl('glob:*.js', 'js/tests', true));
-			$urls = array_merge($urls, $module->listLineFilesUrl('glob:*.js', 'js.tests', true));
+			$urls = array_merge($urls, $module->listLineFilesUrl('glob:*.js', 'js/tests', true, $urlFiles));
+			$urls = array_merge($urls, $module->listLineFilesUrl('glob:*.js', 'js.tests', true, $urlFiles));
+		}
+
+		// Selective includes
+		$includes = $this->getRequest()->get('include', null);
+
+		if ($includes) {
+			$includes = explode(',', $includes);
+			$re = '/\bdescribe\s*\(\s*(["\'])(?<name>.*?)\1/';
+			foreach ($includes as &$include) {
+				$include = '/\b' . str_replace('\*', '.*', preg_quote($include, '/')) . '\b/';
+			}
+			foreach ($urls as $i => $url) {
+				$contents = file_get_contents(isset($urlFiles[$url]) ? $urlFiles[$url] : $url);
+				if (preg_match_all($re, $contents, $matches)) {
+					foreach ($matches['name'] as $name) {
+						foreach ($includes as $nameRe) {
+							if (preg_match($nameRe, trim($name))) {
+								continue 3;
+							}
+						}
+					}
+					unset($urls[$i]);
+				}
+			}
 		}
 
 		return $urls;
@@ -334,6 +369,16 @@ JS;
 				);
 			}
 			$baseJsFiles = array_merge($baseJsFiles, $module->listLineFilesUrl('glob:*.js', 'js.base', true));
+
+			if ($module instanceof HasJavascriptFiles) {
+				/** @var HasJavascriptFiles $module */
+				$moduleJsUrls = $module->getModuleJavascriptUrls();
+				if (isset($moduleJsUrls['base'])) {
+					$baseJsFiles = array_merge($baseJsFiles, $moduleJsUrls['base']);
+					unset($moduleJsUrls['base']);
+				}
+				$autoJsFiles = array_merge($autoJsFiles, $moduleJsUrls);
+			}
 		}
 
 		foreach($baseJsFiles as $url) {
@@ -361,11 +406,10 @@ JS;
 		$autoCssFiles = array();
 
 		foreach (ModuleManager::listModules(false) as $module) {
-			/** @var \eoko\module\Module $module */
-			$autoCssFiles = array_merge($autoCssFiles, $module->listLineFilesUrl('re:\.auto\d*\.css$', ''));
-			$autoCssFiles = array_merge($autoCssFiles, $module->listLineFilesUrl('re:\.auto\d*\.css$', 'css'));
-			$autoCssFiles = array_merge($autoCssFiles, $module->listLineFilesUrl('glob:*.css', 'css/auto', true));
-			$autoCssFiles = array_merge($autoCssFiles, $module->listLineFilesUrl('glob:*.css', 'css.auto', true));
+			if ($module instanceof HasCssFiles) {
+				/** @var HasCssFiles $module */
+				$autoCssFiles = array_merge($autoCssFiles, $module->getModuleCssUrls());
+			}
 		}
 
 		foreach ($autoCssFiles as $url) {

@@ -13,17 +13,20 @@ RewriteRule ^jsod/([^/]*)/([^/]*)\.mod\.js$         index.php?controller=$1&acti
 RewriteRule ^jsod/([^/]*)/([^/]*).js$	            index.php?controller=$1&action=get_js&name=$2
 
 # Modules images
-RewriteRule ^(?:modules|Opence)/(?:[^/]*)/_images/(.*)$	    eoze/images/$1
+RewriteRule ^(?:modules|Opence)/(?:.*)/_images/(.*)$	    eoze/images/$1
 
 # Protect configuration files
 RewriteRule \.(sql|yml|ini|xml)$                    eoze/php/error404.php [L]
 RewriteRule (^|/)config(/|$)                        eoze/php/error404.php [L]
 
 # Route medias directory downloads through the application
-#RewriteRule ^medias/?(.*)$                          index.php/medias/$1 [L]
+RewriteRule ^medias/?(.*)$                          index.php/medias/$1 [L]
 
 RewriteRule ^doc\b                                  doc
 RewriteRule ^eoze/doc\b                             eoze/doc
 
 RewriteRule ^$                                      index.php
-RewriteRule !\.(js|ico|gif|jpg|png|css)$            index.php
+RewriteRule ^api\/?$                                index.php
+# CDN proxy
+RewriteRule ^cdn(?:\/|$)                            index.php
+RewriteRule !\.(js|ico|gif|jpg|png|css|svg)$        index.php

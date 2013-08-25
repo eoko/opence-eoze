@@ -24,7 +24,7 @@ Oce.form.AutoTextField = Ext.extend(Ext.form.TextArea, {
 		});
 
 		this.store = new Ext.data.JsonStore({
-			url: 'index.php',
+			url: 'api',
 			baseParams: Ext.apply({
 				controller: this.controller
 				,action: this.action || 'load_subset'

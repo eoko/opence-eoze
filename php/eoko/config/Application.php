@@ -4,10 +4,12 @@ namespace eoko\config;
 
 use eoko\database\Database;
 use eoko\file, eoko\file\Finder as FileFinder, eoko\file\FileType;
+use eoko\hg\Mercurial;
 use eoko\util\Files;
 use eoko\config\ConfigManager;
 use Zend\Session\SessionManager;
 use eoko\Authentification\UserSession;
+use eoko\log\Logger;
 
 class Application implements FileFinder {
 
@@ -23,32 +25,36 @@ class Application implements FileFinder {
 	/**
 	 * @var bool[MODE]
 	 */
-	private $modes;
+	private $modes = false; // let null available for caching
 
 	private static $defaultSessionManager;
 
 	/**
 	 * @var SessionManager
 	 */
-	private $sessionManager;
+	private $sessionManager = null;
 
 	/**
 	 * @var UserSession
 	 */
-	private $userSession;
+	private $userSession = null;
 
-	private function __construct(SessionManager $sessionManager) {
-		$this->sessionManager = $sessionManager;
+	/**
+	 * @var Paths
+	 */
+	private $paths;
 
-		// UserSession
-		// TODO service locator
-		$this->userSession = $this->createUserSession();
+	private function __construct() {
+		// Paths
+		$this->paths = new Paths\Defaults();
+		$this->paths->setPath('opence', MY_EOZE_PATH);
 
-		// Configure modes
-		$this->modes = $this->getConfig()->get('modes');
-		if (!isset($this->modes['dev'])) {
-			$this->modes['dev'] = $this->findDevMode();
-		}
+// 2013-03-14 13:14
+//		// Configure modes
+//		$this->modes = $this->getConfig()->get('modes');
+//		if (!isset($this->modes['dev'])) {
+//			$this->modes['dev'] = $this->findDevMode();
+//		}
 	}
 
 	private function getConfig() {
@@ -56,6 +62,35 @@ class Application implements FileFinder {
 			$this->config = ConfigManager::get('eoze/application');
 		}
 		return new Config($this->config);
+	}
+
+	/**
+	 * Alias for {@link Paths::resolve() $this->paths->resolve}.
+	 *
+	 * @param string $path
+	 * @param bool $create True to create the directory if needed.
+	 * @throws \RuntimeException
+	 * @return string
+	 */
+	public function resolvePath($path, $create = true) {
+		$path = $this->paths->resolve($path);
+
+		if (!is_dir($path)) {
+			if (file_exists($path)) {
+				throw new \RuntimeException('Cannot create directory in place of existing file: ' . $path);
+			} else {
+				@mkdir($path, 0700, true);
+			}
+		}
+
+		return $path;
+	}
+
+	/**
+	 * @return Paths
+	 */
+	public function getPaths() {
+		return $this->paths;
 	}
 
 	public static function setDefaultSessionManager(SessionManager $sessionManager) {
@@ -66,7 +101,9 @@ class Application implements FileFinder {
 	 * @return SessionManager
 	 */
 	public function getSessionManager() {
-		return $this->sessionManager;
+		return $this->sessionManager !== null
+			? $this->sessionManager
+			: self::$defaultSessionManager;
 	}
 
 	private function findDevMode() {
@@ -91,6 +128,21 @@ class Application implements FileFinder {
 	}
 
 	/**
+	 * Configures modes. We don't want to do that in the constructor because we cannot offer
+	 * a dependency on the ConfigManager there...
+	 */
+	private function getModes() {
+		// Configure modes
+		if ($this->modes === false) {
+			$this->modes = $this->getConfig()->get('modes', null);
+			if (!isset($this->modes['dev'])) {
+				$this->modes['dev'] = $this->findDevMode();
+			}
+		}
+		return $this->modes;
+	}
+
+	/**
 	 * Returns `true` if the specified tag matches an active execution mode.
 	 * A unique execution mode may have multiple aliases tags.
 	 *
@@ -100,7 +152,8 @@ class Application implements FileFinder {
 	 * @return bool
 	 */
 	public function isMode($tag) {
-		return isset($this->modes[$tag]) && $this->modes[$tag];
+		$modes = $this->getModes();
+		return isset($modes[$tag]) && $modes[$tag];
 	}
 
 	/**
@@ -110,7 +163,7 @@ class Application implements FileFinder {
 		if (self::$instance) {
 			return self::$instance;
 		} else {
-			return self::$instance = new Application(self::$defaultSessionManager);
+			return self::$instance = new Application();
 		}
 	}
 
@@ -126,6 +179,10 @@ class Application implements FileFinder {
 		return $this->getFileFinder()->findPath($name, $type, $getUrl, $forbidUpward);
 	}
 
+	/**
+	 * @deprecated
+	 * @todo #broken
+	 */
 	private function getCssPathsUrl($urlPrefix = null) {
 		$r = array();
 		if (defined('APP_CSS_PATH')) $r[APP_CSS_PATH] = $urlPrefix . APP_CSS_URL;
@@ -133,6 +190,10 @@ class Application implements FileFinder {
 		return $r;
 	}
 
+	/**
+	 * @deprecated
+	 * @todo #broken
+	 */
 	private function getJSPathsUrl($urlPrefix = null) {
 		$r = array();
 		if (defined('APP_JS_PATH')) $r[APP_JS_PATH] = $urlPrefix . APP_JS_URL;
@@ -159,9 +220,7 @@ class Application implements FileFinder {
 					'layout.css' => 0,
 					'menu.css' => 1,
 					'icons.css' => 2,
-					'help.css' => 3,
-					'opence.css' => 4,
-					'custom.css' => 5,
+					'opence.css' => 3,
 				)
 			);
 		} else if ($alias === '@oce-components') {
@@ -214,11 +273,12 @@ class Application implements FileFinder {
 
 	/**
 	 * Gets the code base version unique identifier.
+	 * @throws \Exception
 	 * @return string
 	 */
 	public function getVersionId() {
 		try {
-			$hg = new \eoko\hg\Mercurial(ROOT);
+			$hg = new Mercurial(ROOT);
 			return $hg->getId();
 		} catch (\Exception $ex) {
 			Logger::get($this)->error($ex);
@@ -234,6 +294,9 @@ class Application implements FileFinder {
 	 * @return UserSession
 	 */
 	public function getUserSession() {
+		if ($this->userSession === null) {
+			$this->userSession = $this->createUserSession();
+		}
 		return $this->userSession;
 	}
 
@@ -241,20 +304,32 @@ class Application implements FileFinder {
 	 *
 	 * #UserSession
 	 *
+	 * @param bool $requireAuthenticatedUser
 	 * @return \User|null
 	 */
-	public function getActiveUser() {
-		return $this->getUserSession()->getUser();
+	public function getActiveUser($requireAuthenticatedUser = false) {
+		$userSession = $this->getUserSession();
+		if ($requireAuthenticatedUser) {
+			// TODO #auth
+			$userSession->requireLoggedIn();
+		}
+		return $userSession->getUser();
 	}
 
 	/**
 	 *
 	 * #UserSession
 	 *
+	 * @param bool $requireAuthenticatedUser
 	 * @return int|null
 	 */
-	public function getActiveUserId() {
-		return $this->getUserSession()->getUserId();
+	public function getActiveUserId($requireAuthenticatedUser = false) {
+		$userSession = $this->getUserSession();
+		if ($requireAuthenticatedUser) {
+			// TODO #auth
+			$userSession->requireLoggedIn();
+		}
+		return $userSession->getUserId();
 	}
 
 	private function createUserSession() {

@@ -1,24 +1,10 @@
 Oce.deps.wait('Oce.GridModule', function() {
 
-	//Oce.ContentKit = Ext.extend(Ext.Observable, {
-	//
-	//	component: null
-	//
-	//	,winConfig: {
-	//
-	//	}
-	//
-	//	,tabConfig: {
-	//
-	//	}
-	//
-	//	,toolbar: null
-	//
-	//});
-
 	Oce.GridModule.ContentKit = Ext.extend(Ext.util.Observable, {
 
 		component: null
+
+		,EVENT_FORM_PANEL_CREATE: 'formpanelcreate'
 
 		,constructor: function(config) {
 			
@@ -31,20 +17,18 @@ Oce.deps.wait('Oce.GridModule', function() {
 		}
 
 		,createWindow: function() {
-			var win = new Oce.FormWindow(Ext.apply({
+
+			var config = Ext.apply({
 				pkName: this.pkName
 				,kit: this
 				,formPanel: this.content
-			}, this.winConfig));
-			
-//			var win = new Oce.FormWindowPanel(Ext.apply({
-//				pkName: this.pkName
-//				,kit: this
-//				,formPanel: this.content
-//			}, this.winConfig));
-//			Oce.mx.application.getMainDestination().add(win);
+			}, this.winConfig);
 
-			this.fireEvent("formpanelcreate", win.formPanel);
+			var cls = config.xclass || 'Eoze.GridModule.form.EditWindow';
+
+			var win = Ext.create(cls, config);
+
+			this.fireEvent(this.EVENT_FORM_PANEL_CREATE, win.formPanel);
 
 			return win;
 		}
@@ -64,7 +48,9 @@ Oce.deps.wait('Oce.GridModule', function() {
 
 Oce.FormWindowPanel = Ext.extend(Ext.Panel, {
 	
-	initComponent: function() {
+	EVENT_CLOSE: 'close'
+
+	,initComponent: function() {
 		
 		this.formRefreshers = [];
 		
@@ -116,7 +102,7 @@ Oce.FormWindowPanel = Ext.extend(Ext.Panel, {
 	}
 
 	,close: function() {
-		this.fireEvent('close', this);
+		this.fireEvent(this.EVENT_CLOSE, this);
 		this.destroy(); // there is no risk at destroying multiple times
 	}
 

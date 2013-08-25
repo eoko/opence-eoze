@@ -203,7 +203,7 @@ Oce.deps.wait('eo.form.ClearableComboBox', function() {
 			}
 
 			this.store = new Ext.data.JsonStore({
-				url: 'index.php'
+				url: 'api'
 
 				,baseParams: storeBaseParams
 
@@ -543,4 +543,3 @@ Oce.deps.wait('eo.form.ClearableComboBox', function() {
 
 	Oce.deps.reg('Oce.form.ForeignComboBox');
 });
-

@@ -302,7 +302,7 @@ eo.data.CachingHttpProxy.DataProvider = Ext.extend(Ext.util.Observable, {
 		if (!this.loadingCache) {
 			this.loadingCache = true;
 
-			eo.Ajax.request({
+			this.doRequest({
 				url: this.url
 				,params: Ext.apply({
 					caching: true
@@ -311,17 +311,32 @@ eo.data.CachingHttpProxy.DataProvider = Ext.extend(Ext.util.Observable, {
 				,failure: function() {
 					this.loadingCache = false;
 				}
-				,success: function(data) {
-					this.loadingCache = false;
-					try {
-						this.setData(data.success, data);
-					} catch (e) {
-						this.setData(data.success, data);
-						this.processWaitingRequests(false, e);
-					}
-				}
+				,success: this.onRequestSuccess
 			});
 		}
+	}
+
+	/**
+	 * Handler for AJAX requests success.
+	 *
+	 * @protected
+	 */
+	,onRequestSuccess: function(data) {
+		this.loadingCache = false;
+		try {
+			this.setData(data.success, data);
+		} catch (e) {
+			this.setData(data.success, data);
+			this.processWaitingRequests(false, e);
+		}
+	}
+
+	/**
+	 * @param {Object} opts AJAX request options
+	 * @protected
+	 */
+	,doRequest: function(opts) {
+		eo.Ajax.request(opts);
 	}
 
 	,refresh: function(reload) {
@@ -414,6 +429,26 @@ eo.data.CachingHttpProxy.RegexIndexedDataProvider = Ext.extend(eo.data.CachingHt
 });
 
 /**
+ * An extension of RegexIndexedDataProvider that makes it compatible with eoze cqlix
+ * REST controllers.
+ */
+Ext.define('eo.data.CachingHttpProxy.Ext4RegexIndexedDataProvider', {
+	extend: 'eo.data.CachingHttpProxy.RegexIndexedDataProvider'
+
+	,doRequest: function(opts) {
+		Ext.Ajax.request(Ext.apply(opts, {
+			method: 'GET'
+		}));
+	}
+
+	,onRequestSuccess: function(data) {
+		data = data.responseJSON || Ext.decode(data.responseText);
+		this.callParent([data]);
+	}
+
+});
+
+/**
  * A {@link Ext.data.JsonStore JsonStore} that allows retrieving of records by id, even
  * if the records have been filtered out of the store. This is possible through the use
  * of an {@link eo.data.IndexedCachingHttpProxy IndexedCachingHttpProxy}, that can retrieve 
@@ -422,9 +457,11 @@ eo.data.CachingHttpProxy.RegexIndexedDataProvider = Ext.extend(eo.data.CachingHt
  * though). The store also needs to have already been loaded before the {#getById} method 
  * is called.
  */
-eo.data.ProxyJsonStore = Ext.extend(Ext.data.JsonStore, {
+
+Ext.define('eo.data.ProxyJsonStore', {
+	extend: 'Ext.data.JsonStore'
 	
-	constructor: function(config) {
+	,constructor: function(config) {
 		
 		config = config || {};
 		

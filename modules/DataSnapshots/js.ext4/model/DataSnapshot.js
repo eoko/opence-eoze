@@ -4,9 +4,9 @@
  * @author Éric Ortega <eric@planysphere.fr>
  * @since 3 oct. 2012
  */
-Ext4.define('Eoze.modules.DataSnapshots.model.DataSnapshot', {
+Ext4.define('Eoze.DataSnapshots.model.DataSnapshot', {
 	
-	extend: 'Ext4.data.Model'
+	extend: 'Ext.data.Model'
 	
 	,fields: [
 		{name: 'id', type: 'int'}

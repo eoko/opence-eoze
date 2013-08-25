@@ -1,5 +1,5 @@
 abstract: true
 
-workingPath: %var%/Kepler
+workingPath: %tmp%/Kepler
 
 refreshRate: 1

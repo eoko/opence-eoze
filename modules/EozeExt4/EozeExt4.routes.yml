@@ -1,0 +1,12 @@
+router:
+
+  cdn:
+    type: segment
+    parent_route: index
+    options:
+      route: /cdn/:cdn/:file
+      constraints:
+        file: .*
+      defaults:
+        controller: EozeExt4.UxLoaderProxy
+        action: index

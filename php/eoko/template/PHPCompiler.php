@@ -5,7 +5,7 @@ namespace eoko\template;
 use \SystemException;
 
 /**
- * @method PHPCompiler create($opts)
+ * @method static PHPCompiler create($opts = null)
  */
 class PHPCompiler extends Template {
 

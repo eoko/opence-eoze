@@ -63,7 +63,7 @@ Oce.Modules.root.login = Ext.extend(Oce.Module, {
 			}
 		}
 
-		this.loginForm.getForm().url = 'index.php';
+		this.loginForm.getForm().url = 'api';
 		this.loginForm.add([
 			{
 				xtype: 'box',

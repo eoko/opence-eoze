@@ -2,9 +2,9 @@
 
 namespace eoko\cache;
 
+use eoko\config\Application;
 use eoko\log\Logger;
-
-const PATH = CACHE_PATH;
+use eoko\php\ClassLoader;
 
 /**
  * @todo real implementation
@@ -15,6 +15,8 @@ class Cache {
 	public static $debugInfo = false;
 
 	private static $useValidityMonitors = true;
+
+	private static $path;
 
 	private function __construct() {}
 
@@ -31,7 +33,14 @@ class Cache {
 	}
 
 	private static function getNamespacePath($ns) {
-		return PATH . 'php' . DS . str_replace('\\', DS, trim($ns, '\\'));
+		if (!self::$path) {
+			self::$path = Application::getInstance()->resolvePath('cache/php/');
+
+			if (USE_CONTROLLER_CACHE) {
+				ClassLoader::getInstance()->addIncludePath(self::$path);
+			}
+		}
+		return self::$path . str_replace('\\', DS, trim($ns, '\\'));
 	}
 
 	private static function createNamespaceDir($ns) {
@@ -123,6 +132,7 @@ class Cache {
 			if (is_object($class) && isset($class->cacheVersion)) {
 				$version = $class->cacheVersion;
 			} else if (property_exists($class, 'cacheVersion')) {
+				/** @noinspection PhpUndefinedVariableInspection */
 				$version = $class::$cacheVersion;
 			}
 		}
@@ -293,7 +303,7 @@ class Cache {
 			list(, $version, $index) = $parts;
 			if ($index === '') $index = null;
 		} else {
-			throw new IllegalStateException('Invalid cache filename: ' . $filename);
+			throw new \IllegalStateException('Invalid cache filename: ' . $filename);
 		}
 	}
 

@@ -6,14 +6,17 @@
  */
 Ext4.define('Eoze.locale.fr.Locale', {
 	extend: 'Eoze.i18n.Locale'
-	
+
 	,requires: [
 		'Eoze.locale.fr.Ext.util.Format',
-		'Eoze.locale.fr.Ext.form.field.Date'
+		'Eoze.locale.fr.Ext.Date',
+		'Eoze.locale.fr.Ext.form.field.Date',
+		'Eoze.locale.fr.Ext.data.validations',
+		'Eoze.locale.fr.Ext.ux.grid.FiltersFeature'
 	]
-	
+
 	,code: 'fr-FR'
-	
+
 	,isPlural: function(count) {
 		return count <= 1;
 	}

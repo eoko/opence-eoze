@@ -7,7 +7,7 @@ use MenuNode, MenuNodeTable;
 use eoko\database\Database;
 
 /**
- * @method \eoko\modules\TreeMenu\TreeMenu getModule()
+ * @method TreeMenu getModule()
  */
 class Json extends JsonExecutor {
 
@@ -108,6 +108,7 @@ class Json extends JsonExecutor {
 			}
 		}
 
+		$children = array();
 		foreach ($children as $node) {
 			$node instanceof MenuNode;
 			if (isset($lookup[$node->getParentMenuNodesId()])) {
@@ -161,11 +162,7 @@ class Json extends JsonExecutor {
 			return $this->userId;
 		}
 
-		$userSession = $this->getApplication()->getUserSession();
-		// #auth
-		$userSession->requireLoggedIn();
-
-		return $this->userId = $userSession->getUser()->id;
+		return $this->userId = $this->getApplication()->getActiveUserId(true);
 	}
 
 	private function doSaveNode($data) {
