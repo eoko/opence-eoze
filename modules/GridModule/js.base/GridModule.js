@@ -3423,7 +3423,8 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 							} else {
 								field = sort;
 							}
-							tbar.addSortField(field, dir);
+							tbar.addSortField(field, dir, true);
+							tbar.configureStoreSort();
 						});
 					}
 				}

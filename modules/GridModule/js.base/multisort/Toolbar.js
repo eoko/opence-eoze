@@ -299,6 +299,27 @@ Ext.define('Eoze.GridModule.multisort.Toolbar', {
 		}
 	}
 
+	// configure multisort info in store, without triggering a loading
+	,configureStoreSort: function() {
+		var store = this.grid.store,
+			sorters = this.getSorters();
+		if (sorters.length > 0) {
+			this.hasMultiSort = true;
+			this.ignoreSingleSort = true;
+			store.multiSortInfo = {
+				sorters: sorters,
+				direction: 'ASC'
+			};
+			store.sortInfo = {
+				json: {
+					sort: store.multiSortInfo.sorters
+				}
+			};
+		} else {
+			this.clearSort();
+		}
+	}
+
 	/**
 	 * Returns an array of sortData from the sorter buttons.
 	 *
