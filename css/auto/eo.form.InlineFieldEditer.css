@@ -1,0 +1,136 @@
+/* 
+    Document   : Ext.form.TextField
+    Created on : 13 sept. 2012, 15:19:51
+    Author     : Éric Ortega <eric@plansyphere.fr>
+        Style for inline editable text field.
+*/
+
+.x-eo-editable-field .shorten {
+	/*min-width: 30px;*/
+}
+.x-eo-editable-field .shorten.x-form-empty-field {
+	font-style: italic;
+}
+
+.x-eo-editable-field.x-form-text {
+	/*display: block;*/
+	display: inline-block;
+	background: none;
+	border-color: transparent;
+	padding-right: 24px;
+}
+.ext-webkit .x-eo-editable-field.x-form-text {
+	/*padding-top: 2px;*/
+	/*padding-left: 4px;*/
+}
+.x-eo-editable-field.x-form-text {
+	position: relative;
+}
+.x-eo-editable-field.x-form-text:hover {
+	border: 1px solid #AAA;
+}
+
+.x-eo-editable-field.x-form-text:hover .ico {
+	display: block;
+}
+
+.x-eo-editable-field.x-form-text .ico {
+	display: none;
+	
+	position: absolute;
+	right: 0;
+	top: 0;
+	
+	height: 100%;
+	
+	background-position: 2px 2px;
+	
+	border-left: 1px solid white;
+	border-color: white white #DDD #DDD;
+}
+
+.x-eo-editable-field.x-form-text .ico:hover {
+	cursor: pointer;
+	border-color: white white rgb(187, 187, 187) #BBB;
+}
+
+.x-eo-editable-field-buttons-ct {
+/*	width: 68px;
+	height: 32px;*/
+	
+	background-color: #DDEDFF;
+	border: 1px solid #A7C8FF;
+	border-radius: 0 0 3px 3px;
+	border-top: 0;
+	
+	padding: 4px 5px 2px 5px;
+	
+	position: absolute;
+	z-index: 10000;
+	left: 10px;
+	top: 10px;
+	
+	border-color: #7EADD9;
+	
+}
+
+.x-eo-editable-field-buttons-ct button {
+	
+	height: 22px;
+	padding: 0;
+	width: 28px;
+
+	background: #EEE;
+	border: 1px solid #AAA;
+	
+	background-image: -moz-linear-gradient(100% 100% 90deg, #DFDFDF, white);
+	background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(white), to(#DFDFDF));
+	background-image: -webkit-linear-gradient(white, #DFDFDF);
+	background-image: -o-linear-gradient(white, #DFDFDF);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#dfdfdf',GradientType=0 );
+}
+.x-eo-editable-field-buttons-ct button:hover {
+	border-color: #666;
+}
+.x-eo-editable-field-buttons-ct button:active {
+	background-image: -moz-linear-gradient(100% 100% 90deg, #D8E4F0, #CAD5E0);
+	background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#CAD5E0), to(#D8E4F0));
+	background-image: -webkit-linear-gradient(#CAD5E0, #D8E4F0);
+	background-image: -o-linear-gradient(#CAD5E0, #D8E4F0);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#CAD5E0', endColorstr='#D8E4F0',GradientType=0 );
+}
+.x-eo-editable-field-buttons-ct button.save {
+	border-radius: 3px 0 0 3px;
+}
+.x-eo-editable-field-buttons-ct button.cancel {
+	border-radius: 0 3px 3px 0;
+	border-left-color: #EEE;
+}
+.x-eo-editable-field-buttons-ct button.cancel:active,
+.x-eo-editable-field-buttons-ct button.cancel:hover {
+	border-left-color: #666;
+}
+.x-eo-editable-field-buttons-ct button span {
+	padding: 0;
+	line-height: 1px;
+}
+
+/* --- Submit --- */
+
+/*.x-eo-editable-field.x-form-field.x-form-text.x-item-disabled {*/
+.x-form-text.x-eo-editable-field-submitting {
+	background: #F3F3EF;
+	border: 1px solid #4E91FE;
+	border: 1px solid #7EADD9;
+}
+
+.x-eo-editable-field-ajax-loader {
+	display: block;
+	position: absolute;
+	height: 18px;
+	width: 18px;
+	background-color: white;
+	background-position: 2px 2px;
+	z-index: 10000;
+	margin: 0;
+}

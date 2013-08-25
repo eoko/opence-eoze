@@ -1,0 +1,22 @@
+levels:
+  -
+    id: 1
+    name: Gestionnaire
+    level: 10
+    active: 1
+  -
+    id: 2
+    name: Développeur
+    level: -1
+    active: 1
+  -
+    id: 3
+    name: Administrateur
+    level: 0
+    active: 1
+  -
+    id: 4
+    name: Disabled Admin
+    level: 0
+    active: 0
+    

@@ -1,0 +1,21 @@
+class: TabModule
+abstract: true
+
+#title: ...
+
+config:
+  mainViewClass: eo.DirectModule.MainView
+
+extra:
+  iconCls: ico %module% %action%
+
+  menu:
+    family:
+      id: %module%
+      label: %title%
+
+    actions:
+      - id: open
+        label: %title%
+        action: open
+        command: "@%module%#open"
