@@ -45,6 +45,9 @@ class Router {
 	 */
 	private $routeMatch;
 
+	/**
+	 * @var Request
+	 */
 	public $request;
 	public $actionTimestamp;
 
@@ -64,7 +67,9 @@ class Router {
 	 * @return Router
 	 */
 	public static function getInstance() {
-		if (self::$instance === null) self::$instance = new Router();
+		if (self::$instance === null) {
+			self::$instance = new Router();
+		}
 		return self::$instance;
 	}
 
@@ -84,16 +89,15 @@ class Router {
 			// Route match
 			$this->routeMatch = $this->getRouteMatch();
 
-			// Legacy eoze Request
-			$requestReader = $this->createRequestReader();
-			$this->request = $requestReader->createRequest();
+			if ($this->routeMatch) {
+				// Legacy eoze Request
+				$requestReader = $this->createRequestReader();
+				$this->request = $requestReader->createRequest();
 
-			// Monitor
-			Logger::getLogger($this)->info('Start action #{}', $this->actionTimestamp);
-			$this->logRequest($this->request->toArray());
-
-			// $_REQUEST usage must be fixed in that
-//			UserMessageService::parseRequest($this->request);
+				// Monitor
+				Logger::getLogger($this)->info('Start action #{}', $this->actionTimestamp);
+				$this->logRequest($this->request->toArray());
+			}
 		}
 	}
 
@@ -153,16 +157,19 @@ class Router {
 	}
 
 	private function createRouter() {
+		if ($this->routeMatch) {
+			$routerClass = $this->routeMatch !== null
+				? $this->routeMatch->getParam('_Router', $this->defaultRouterClass)
+				: $this->defaultRouterClass;
 
-		$routerClass = $this->routeMatch !== null
-			? $this->routeMatch->getParam('_Router', $this->defaultRouterClass)
-			: $this->defaultRouterClass;
+			if (!class_exists($routerClass)) {
+				throw new IllegalStateException('Cannot find router class: ' . $routerClass);
+			}
 
-		if (!class_exists($routerClass)) {
-			throw new IllegalStateException('Cannot find router class: ' . $routerClass);
+			return new $routerClass($this->request, $this->routeStack, $this->routeMatch);
+		} else {
+			return new \eoko\mvc\ErrorRouter(\Zend\Http\Response::STATUS_CODE_404);
 		}
-
-		return new $routerClass($this->request, $this->routeStack, $this->routeMatch);
 	}
 
 	private function logRequest($requestData) {
@@ -187,6 +194,7 @@ class Router {
 		$this->requestMonitorRecord = MonitorRequest::create(array(
 			'datetime' => date('Y-m-d H:i:s', $this->actionTimestamp),
 			'action_timestamp' => $this->actionTimestamp,
+			'http_method' => $this->httpRequest->getMethod(),
 			'http_request' => serialize($requestData),
 			'json_request' => json_encode($requestData),
 			'php_request' => serialize($phpRequest),
@@ -200,15 +208,20 @@ class Router {
 	}
 
 	public static function getActionTimestamp() {
-		return self::getInstance()->actionTimestamp;
+		// We don't use getInstance() to avoid initialization only for the timestamp (which will fail
+		// in most early crashes)
+		return self::$instance
+			? self::$instance->actionTimestamp
+			: null;
 	}
 
 	public static function getRequestId() {
-		if (null !== $record = self::getInstance()->requestMonitorRecord) {
-			return $record->getId();
-		} else {
-			return null;
+		if (self::$instance) {
+			if (null !== $record = self::getInstance()->requestMonitorRecord) {
+				return $record->getId();
+			}
 		}
+		return null;
 	}
 
 	private function isAllowMultipleRouteCalls() {
@@ -243,12 +256,16 @@ class Router {
 		}
 
 		try {
-			$this->createRouter()->route();
+			$response = $this->createRouter()->route();
 
 			if ($this->requestMonitorRecord) {
 				$microtime = self::microtime($time);
 				$runningTime = $microtime - $this->microTimeStart;
-				$this->requestMonitorRecord->setFinishState('OK');
+				if ($response instanceof \Zend\Http\Response) {
+					$this->requestMonitorRecord->setFinishState($response->getStatusCode());
+				} else {
+					$this->requestMonitorRecord->setFinishState('OK');
+				}
 				$this->requestMonitorRecord->setFinishDatetime(date('Y-m-d H:i:s'), $time);
 				$this->requestMonitorRecord->setRunningTimeMicro($runningTime);
 				$this->requestMonitorRecord->save();
@@ -281,96 +298,5 @@ class Router {
 		$this->requestMonitorRecord->setFinishDatetime(date('Y-m-d H:i:s'), $time);
 		$this->requestMonitorRecord->setRunningTimeMicro($runningTime);
 		$this->requestMonitorRecord->save();
-	}
-}
-
-class Router_RouteConfigAssembler {
-
-	private $routes;
-
-	private $childRoutes;
-
-	public function addRoutes($routes) {
-		foreach ($routes as $name => $route) {
-			if ($route instanceof Traversable) {
-				$route = ArrayUtils::iteratorToArray($route);
-			}
-			if (is_array($route)) {
-				// Extract children routes
-				if (isset($route['parent_segment'])) {
-					// Trim parent segment name from route name beginning
-					$parentSegment = $route['parent_segment'];
-					if (strpos($name, $parentSegment . '/') === 0) {
-						$name = substr($name, strlen($parentSegment) + 1);
-					}
-					// Remove eoze custom parent_segment option
-					unset($route['parent_segment']);
-					// Store
-					$this->childRoutes[$parentSegment][$name] = $route; 
-				} else {
-					$this->routes[$name] = $route;
-				}
-			} else {
-				$this->routes[$name] = $route;
-			}
-		}
-	}
-
-	/**
-	 * Construct an array of references to route configs that have a 
-	 * 'child_routes' key (that is, parent routes), indexed with their
-	 * fully qualified names.
-	 * @param array $routes
-	 * @param string $prefix
-	 * @return array
-	 */
-	private static function mapParentRoutes(&$routes, $prefix = null) {
-		$map = array();
-		if (!$routes) {
-			return $map;
-		}
-		foreach ($routes as $name => &$route) {
-			if ($route instanceof Traversable) {
-				$route = ArrayUtils::iteratorToArray($route);
-			}
-			if (is_array($route)) {
-				if (isset($route['child_routes'])) {
-					$fqRouteName = $prefix . $name;
-					$map[$fqRouteName] =& $route;
-					$map += self::mapParentRoutes($route['child_routes'], $fqRouteName . '/');
-				}
-			}
-		}
-		return $map;
-	}
-
-	public function assembleRoutes() {
-		if ($this->childRoutes) {
-			// Build parent name map
-			$map = self::mapParentRoutes($this->routes);
-			foreach ($this->childRoutes as &$routes) {
-				$map += self::mapParentRoutes($routes);
-			}
-			unset($routes);
-
-			// Assemble
-			foreach ($this->childRoutes as $parent => $children) {
-				foreach ($children as $name => $route) {
-					if (isset($map[$parent])) {
-						$map[$parent]['child_routes'][$name] = $route;
-					} else {
-						throw new RuntimeException(
-							"Invalid 'parent_segment' value: cannot find a parent "
-							. "route named $parent."
-						);
-					}
-				}
-			}
-
-			// prevent reprocessing if the method is called again
-			unset($this->childRoutes);
-		}
-
-		return $this->routes;
 	}
 }

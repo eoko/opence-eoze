@@ -13,76 +13,17 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 		);
 	}
 
-	,createLoginWindow: function(modal, text) {
-		
-//		return new Ext.Window({
-//			width: 100
-//			,height: 100
-//			,buttons: [{ // Ok
-//				text: 'Ok'
-//				,scope: this
-//				,handler: function() {
-//					this.onSubmitForm(loginWindow, formPanel);
-//				}
-//			},{ // Reset
-//					text: 'Réinitialiser',
-//					handler: function() {
-//						formPanel.getForm().reset();
-//					}
-//			}]
-//		});
-		
-		var db;
-		
-//		var formPanel = new Oce.DefaultFormPanel({
-//			items: [{
-//				xtype: 'box',
-//				autoEl: {
-//					tag: 'div',
-//					html: '<div class="app-msg">'
-//					+ (text ? text : "<?php _jsString($text) ?>")
-//					+ '<br /><br />'
-//					+ '</div>'
-//				}
-//			},db = Ext.widget({
-//				xtype: 'textfield',
-//				name: 'username',
-//				fieldLabel: 'Identifiant',
-//				allowBlank: false,
-//				minLength: 3,
-//				maxLength: 45,
-//				listeners: {
-//					specialkey: {
-//						scope: this
-//						,fn: function(field, el) {
-//							if (el.getKey() == Ext.EventObject.ENTER) {
-//								this.onSubmitForm(loginWindow, formPanel);
-//							}
-//						}
-//					}
-//				}
-//			}),{
-//				xtype: 'textfield',
-//				name: 'password',
-//				fieldLabel: 'Mot de passe',
-//				inputType: 'password',
-//				allowBlank: false,
-//				minLength: 4,
-//				maxLength: 255,
-//				listeners: {
-//					specialkey: {
-//						scope: this
-//						,fn: function(field, el) {
-//							if (el.getKey() == Ext.EventObject.ENTER) {
-//								this.onSubmitForm(loginWindow, formPanel);
-//							}
-//						}
-//					}
-//				}
-//			}]
-//		});
-		var formPanel = new Oce.DefaultFormPanel({
-			items: [{
+	,x4_createLoginWindow: function(modal, text) {
+		var formPanel = new Ext4.form.Panel({
+			border: false
+			,padding: 20
+			,bodyStyle: {
+				backgroundColor: 'transparent'
+			}
+			,defaults: {
+				validateOnChange: false
+			}
+			,items: [{
 				xtype: 'box',
 				autoEl: {
 					tag: 'div',
@@ -93,64 +34,144 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 				}
 			},{
 				xtype: 'textfield'
-				,afterRender: function() {
-					debugger
-					Ext.form.TextField.prototype.afterRender.call(this);
+				,itemId: 'loginField'
+				,name: 'username'
+				,fieldLabel: 'Identifiant'
+				,allowBlank: false
+				,minLength: 3
+				,maxLength: 45
+				,listeners: {
+					specialkey: {
+						scope: this
+						,fn: function(field, el) {
+							if (el.getKey() == Ext.EventObject.ENTER) {
+								this.onSubmitForm(loginWindow, formPanel);
+							}
+						}
+					}
 				}
-				
-//			},{
-//				xtype: 'textfield',
-//				name: 'username',
-//				fieldLabel: 'Identifiant',
-//				allowBlank: false,
-//				minLength: 3,
-//				maxLength: 45,
-//				listeners: {
-//					specialkey: {
-//						scope: this
-//						,fn: function(field, el) {
-//							if (el.getKey() == Ext.EventObject.ENTER) {
-//								this.onSubmitForm(loginWindow, formPanel);
-//							}
-//						}
-//					}
-//				}
-//			},{
-//			},db = Ext.widget({
-//				xtype: 'textfield',
-//				name: 'username',
-//				fieldLabel: 'Identifiant',
-//				allowBlank: false,
-//				minLength: 3,
-//				maxLength: 45,
-//				listeners: {
-//					specialkey: {
-//						scope: this
-//						,fn: function(field, el) {
-//							if (el.getKey() == Ext.EventObject.ENTER) {
-//								this.onSubmitForm(loginWindow, formPanel);
-//							}
-//						}
-//					}
-//				}
 //			}),{
-//				xtype: 'textfield',
-//				name: 'password',
-//				fieldLabel: 'Mot de passe',
-//				inputType: 'password',
-//				allowBlank: false,
-//				minLength: 4,
-//				maxLength: 255,
-//				listeners: {
-//					specialkey: {
-//						scope: this
-//						,fn: function(field, el) {
-//							if (el.getKey() == Ext.EventObject.ENTER) {
-//								this.onSubmitForm(loginWindow, formPanel);
-//							}
-//						}
-//					}
-//				}
+			},{
+				xtype: 'textfield',
+				name: 'password',
+				fieldLabel: 'Mot de passe',
+				inputType: 'password',
+				allowBlank: false,
+				minLength: 4,
+				maxLength: 255,
+				listeners: {
+					specialkey: {
+						scope: this
+						,fn: function(field, el) {
+							if (el.getKey() == Ext.EventObject.ENTER) {
+								this.onSubmitForm(loginWindow, formPanel);
+							}
+						}
+					}
+				}
+//			},{
+//				xtype: 'component'
+//				,html: '<a href="">Un oubli&nbsp;?</a>'
+			}]
+		});
+		
+		var loginWindow = new Ext4.Window({
+			
+			title: "Connexion"
+			
+			,defaultFocus: 'loginField'
+			,width: 380
+			
+			,modal: modal
+			
+			,closable: false
+			,maximizable: false
+			,minimizable: false
+			,collapsible: false
+			,draggable: false
+			,resizable: false
+			
+			,items: formPanel
+			
+			,buttons: [
+				{ // Ok
+					text: 'Ok'
+					,scope: this
+					,handler: function() {
+						this.onSubmitForm(loginWindow, formPanel);
+					}
+				},{ // Reset
+						text: 'Réinitialiser',
+						handler: function() {
+							formPanel.getForm().reset();
+							formPanel.getComponent('loginField').focus();
+						}
+				}
+/*<?php if ($help): ?>*/
+				,{ // Help
+					iconCls: 'ico_help',
+					handler: this.showHelp
+				}
+/*<?php endif ?>*/
+			]
+		});
+
+		return loginWindow;
+	}
+	
+	,createLoginWindow: function(modal, text) {
+		// TODO Ext4
+		if (window.Ext4) {
+			return this.x4_createLoginWindow(modal, text);
+		}
+		
+		var db;
+		
+		var formPanel = new Oce.DefaultFormPanel({
+			items: [{
+				xtype: 'box',
+				autoEl: {
+					tag: 'div',
+					html: '<div class="app-msg">'
+					+ (text ? text : "<?php _jsString($text) ?>")
+					+ '<br /><br />'
+					+ '</div>'
+				}
+			},db = Ext.widget({
+				xtype: 'textfield',
+				name: 'username',
+				fieldLabel: 'Identifiant',
+				allowBlank: false,
+				minLength: 3,
+				maxLength: 45,
+				listeners: {
+					specialkey: {
+						scope: this
+						,fn: function(field, el) {
+							if (el.getKey() == Ext.EventObject.ENTER) {
+								this.onSubmitForm(loginWindow, formPanel);
+							}
+						}
+					}
+				}
+			}),{
+				xtype: 'textfield',
+				name: 'password',
+				fieldLabel: 'Mot de passe',
+				inputType: 'password',
+				allowBlank: false,
+				minLength: 4,
+				maxLength: 255,
+				listeners: {
+					specialkey: {
+						scope: this
+						,fn: function(field, el) {
+							if (el.getKey() == Ext.EventObject.ENTER) {
+								this.onSubmitForm(loginWindow, formPanel);
+							}
+						}
+					}
+				}
 			}]
 		});
 		
@@ -168,7 +189,7 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 			,minimizable: false
 			,collapsible: false
 			,draggable: false
-//			,resizable: false
+			,resizable: false
 			
 			,items: formPanel
 			
@@ -225,7 +246,7 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 					}
 					if (success) {
 						// Success
-						if (data.success) {
+						if (data.success && data.loginInfos) {
 							loginWindow.close();
 							this.fireEvent('login', data.loginInfos);
 						}
@@ -233,9 +254,9 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 						// Failure
 						else {
 							Ext.Msg.alert(
-								data.title || 'Erreur'
+								data.title || "Échec de l'identification" // i18n
 								,data.errorMessage || data.message || data.msg 
-									|| "L'identification a échoué."
+									|| "Identifiant ou mot de passe incorrect." // i18n
 								,function() {
 									loginWindow.defaultButton.focus();
 								}

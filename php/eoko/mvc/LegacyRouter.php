@@ -15,6 +15,20 @@ use Zend\Http\PhpEnvironment\Response;
 class LegacyRouter extends AbstractRouter {
 
 	public function route() {
+		$response = $this->getResponse();
+		if ($response instanceof Response) {
+			$this->setResponseDefaultContent($response);
+			$response->send();
+		}
+		return $response;
+	}
+
+	/**
+	 * Gets the Response from the routed action.
+	 *
+	 * @return Response|mixed
+	 */
+	protected function getResponse() {
 
 		$action = ModuleResolver::parseRequestAction($this->requestData);
 
@@ -22,10 +36,23 @@ class LegacyRouter extends AbstractRouter {
 			$action->setRouter($this->router);
 		}
 
-		$response = $action();
+		return $action();
+	}
 
-		if ($response instanceof Response) {
-			$response->send();
+	/**
+	 * Sets the default response content if it is empty and the response indicates an error.
+	 *
+	 * @param Response $response
+	 */
+	private function setResponseDefaultContent(Response $response) {
+		// if content is empty
+		if ($response->getContent() === '') {
+			// if error
+			if ($response->isClientError() || $response->isServerError()) {
+				$code = $response->getStatusCode();
+				$reason = $response->getReasonPhrase();
+				$response->setContent("<h1>Error $code: $reason</h1>");
+			}
 		}
 	}
 }

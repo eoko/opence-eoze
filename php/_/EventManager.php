@@ -47,6 +47,7 @@ class EventManager {
 		$this->listeners[$eventName][] = array(
 			0 => $callback, 1 => $extraArgs
 		);
+		return $this;
 	}
 
 	public function onOnce($eventName, $callback, $extraArgs = null) {
@@ -56,5 +57,6 @@ class EventManager {
 		$this->waiters[$eventName][] = array(
 			0 => $callback, 1 => $extraArgs
 		);
+		return $this;
 	}
 }

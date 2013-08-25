@@ -4,12 +4,12 @@
  * @author Éric Ortega <eric@planysphere.fr>
  * @since 3 oct. 2012
  */
-Ext4.define('Eoze.modules.DataSnapshots.view.EditWindow', {
+Ext4.define('Eoze.DataSnapshots.view.EditWindow', {
 	
 	extend: 'Ext4.window.Window'
 	
 	,uses: [
-		'Eoze.modules.DataSnapshots.view.EditPanel'
+		'Eoze.DataSnapshots.view.EditPanel'
 	]
 	
 	,itemId: 'editWindow'
@@ -24,6 +24,6 @@ Ext4.define('Eoze.modules.DataSnapshots.view.EditWindow', {
 	,animHide: false
 
 	,items: [{
-		xclass: 'Eoze.modules.DataSnapshots.view.EditPanel'
+		xclass: 'Eoze.DataSnapshots.view.EditPanel'
 	}]
 });

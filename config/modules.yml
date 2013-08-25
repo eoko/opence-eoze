@@ -17,6 +17,7 @@ used:
   eoko(eoko):
     - GridModule
     - root
+    - AjaxRouter
     - MediaManager
     - CrocodocViewer
     - AccessControl
@@ -32,3 +33,4 @@ used:
     - UserPreferences
     - DataSnapshots
     - EozeExt4
+    - LzString

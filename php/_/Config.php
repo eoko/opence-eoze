@@ -425,7 +425,7 @@ class Config implements ArrayAccess, IteratorAggregate {
 	/**
 	 * Apply the given $values to this config (ie. set the keys in this config
 	 * to their value in the array).
-	 * @param Traversable $values
+	 * @param Traversable|array $values
 	 * @param bool $maxRecursionLevel
 	 * @return Config this config item
 	 * @internal default for $maxRecursionLevel changed on 01/03/11 07:30

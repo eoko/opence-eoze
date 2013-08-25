@@ -5,6 +5,8 @@
  * @subpackage Routing
  */
 
+use Zend\Http\PhpEnvironment\Request as HttpRequest;
+
 use eoko\util\Arrays;
 use eoko\util\Json;
 use eoko\url\Maker as UrlMaker;
@@ -13,6 +15,11 @@ use eoze\message\Message;
 use eoze\util\Data\DataArray;
 
 class Request implements Message {
+
+	/**
+	 * @var HttpRequest
+	 */
+	private static $httpRequest = null;
 
 	private $params;
 
@@ -28,13 +35,13 @@ class Request implements Message {
 	}
 
 	/**
-	 * @return Request
+	 * @return HttpRequest
 	 */
 	public static function getHttpRequest() {
-		if (self::$httpRequest !== null) {
-			return self::$httpRequest;
+		if (self::$httpRequest === null) {
+			self::$httpRequest = new HttpRequest();
 		}
-		return Router::getInstance()->request;
+		return self::$httpRequest;
 	}
 
 	public static function setHttpRequest($request) {
@@ -225,9 +232,9 @@ class Request implements Message {
 	 * @param String $key
 	 * @param Boolean $excludeEmptyString if set to true, the param will not be
 	 * considered set if it contains an empty string
-	 * @param String $exceptionMessage	a custom message for the exception
-	 * @return Boolean
+	 * @param bool|String $exceptionMessage a custom message for the exception
 	 * @throws MissingRequiredRequestParamException
+	 * @return mixed
 	 * @see hasKey()
 	 */
 	public function req($key, $excludeEmptyString = false, $exceptionMessage = false) {

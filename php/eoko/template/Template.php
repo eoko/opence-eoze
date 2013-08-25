@@ -8,6 +8,7 @@ use eoko\log\Logger;
 use IllegalArgumentException;
 
 /**
+ * @method static \eoko\template\Template create($opts = null)
  * @method \eoko\template\Template setFile(\string $filename)
  */
 class Template extends Renderer {

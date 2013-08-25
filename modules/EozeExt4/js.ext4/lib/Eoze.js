@@ -1,4 +1,6 @@
+//noinspection JSLastCommaInArrayLiteral
 /**
+ * Eoze for ExtJS4 standard library. In essence, this class requires all standard Eoze classes.
  *
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  * @author Éric Ortega <eric@planysphere.fr>
@@ -6,29 +8,35 @@
  */
 Ext4.define('Eoze.lib.Eoze', {
 	requires: [
-		// Deft
-		// Add support callParent with generated getters
-		'Eoze.Deft.mvc.ViewController',
+		// Ext4 Fixes
+		'Eoze.fix.FixesLoader',
+		// Ext4 Overrides
+		'Eoze.Ext.OverridesLoader',
 
-		// adds support for lazy instance creation by xclass
-		'Eoze.Ext.ComponentManager',
-		// adds animOpen & animClose options
-		'Eoze.Ext.window.Window',
+		// Deft
+		'Eoze.Deft.Overrides',
 		// i18n
 		'Eoze.i18n.Locale',
 		// Locale
 		'Eoze.locale.fr.Locale',
-		// Data types
-		'Eoze.Ext.data.Types',
-		// Date
-		'Eoze.Ext.Date',
-		// Model
-		'Eoze.Ext.data.association.HasOne',
+		// Proxy
+		'Eoze.data.proxy.GridModule',
+		'Eoze.data.proxy.Cqlix',
+		'Eoze.data.proxy.SlaveMemory',
+		// Types
+		'Eoze.data.type.HasOne',
+		// CkEditor
+		'Eoze.CkEditor.form.field.CkEditor',
+		// Cursor
+		'Eoze.Cursor',
+		// Plugins
+		'Eoze.form.field.mixin.DependsOnCheckbox',
 
-		// File upload field, fixes rendering
-		'Eoze.Ext.form.field.File',
+		'Eoze.grid.column.DateTime',
+		'Eoze.grid.column.Integer',
 
 		// -- UX --
-		'Ext.ux.ActivityMonitor'
+		'Ext.ux.ActivityMonitor',
+		'Ext.ux.Eoze.HttpCache'
 	]
 });

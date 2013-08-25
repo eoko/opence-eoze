@@ -25,18 +25,14 @@ class Json extends JsonExecutor {
 
 	public function getUserPreferences() {
 
-		$userSession = $this->getApplication()->getUserSession();
-
-		// #auth
-		$userSession->requireLoggedIn();
-		$userId = $userSession->getUserId();
+		$userId = $this->getApplication()->getActiveUserId(true);
 
 		$row = $this->getTable()->createQuery()
 			->where('user_id = ?', $userId)
 			->select('json_preferences')
 			->executeSelectFirst();
 
-		$this->preferences = $row ? $row['json_preferences'] : null;
+		$this->set('preferences', $row ? $row['json_preferences'] : null);
 
 		return true;
 	}
@@ -46,6 +42,7 @@ class Json extends JsonExecutor {
 		$userId = $this->getApplication()->getUserSession()->getUserId();
 
 		$table = $this->getTable();
+		/** @var \UserPreference $record */
 		$record = $table->findOneWhere('user_id = ?', $userId);
 
 		if (!$record) {

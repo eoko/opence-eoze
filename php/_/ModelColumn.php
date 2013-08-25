@@ -19,12 +19,12 @@ class ModelColumn extends ModelFieldBase {
 	/** @var string */
 	public $type;
 	protected $sqlType;
-	/** @var Int */
+	/** @var int */
 	public $length;
-	/** @var <mixed> */
+	/** @var mixed */
 	public $default;
 	/**
-	 * @var <mixed>
+	 * @var mixed
 	 * <p>NULL if autoValue if off for all operations.
 	 * <p>May be an Array OPERATION => {$value | NULL} to precise different 
 	 * autoValue for different operations.
@@ -152,7 +152,7 @@ class ModelColumn extends ModelFieldBase {
 
 	/**
 	 * Get the default field's value, as stored in the database.
-	 * @return <mixed>
+	 * @return mixed|null|void <mixed>
 	 */
 	public function getDefault() {
 		return $this->default;
@@ -196,7 +196,7 @@ class ModelColumn extends ModelFieldBase {
 
 		switch ($this->type) {
 			case self::T_BOOL: return rand(0, 1);
-			case self:T_TEXT:
+			case self::T_TEXT:
 			case self::T_STRING: return Debug::randomString(rand(
 					max(1, $this->getLength()-5), min($this->getLength(), 20)));
 			case self::T_DATE: return DateHelper::getTimeAs(time() + rand(0,50000), DateHelper::SQL_DATE);
@@ -208,7 +208,8 @@ class ModelColumn extends ModelFieldBase {
 	}
 
 	/**
-	 * @param Const $operation {ModelColumn::CREATE | ModelColumn::UPDATE }
+	 * @param string $operation {ModelColumn::CREATE | ModelColumn::UPDATE }
+	 * @return array|mixed|null
 	 */
 	public function getAutoValueId($operation) {
 		if ($this->autoValue === null) {
@@ -237,6 +238,7 @@ class ModelColumn extends ModelFieldBase {
 
 	/**
 	 * Whether the field is automatically set <b>by the model</b>.
+	 * @param $operation
 	 * @return Bool
 	 */
 	public function isAuto($operation) {
@@ -278,7 +280,8 @@ class ModelColumn extends ModelFieldBase {
 	}
 
 	function getPhpType() {
-		return ucfirst($this->type);
+		return $this->type;
+//		return ucfirst($this->type);
 	}
 
 	public function getPhpConvertTypeString() {
@@ -295,6 +298,7 @@ class ModelColumn extends ModelFieldBase {
 		return $this->name;
 	}
 
+	// TODO #deprecate
 	public function setConverter($converter) {
 		$this->converter = $converter;
 	}
@@ -307,11 +311,21 @@ class ModelColumn extends ModelFieldBase {
 			}
 		}
 
-		if ($value === '' || $value === null) return null;
+		if ($value === '' || $value === null) {
+			return null;
+		}
 
-		switch ($this->type) {
-			case self::T_BOOL: return $value === null || $value === '' ? null : ($value ? 1 : 0);
+		switch ($this->sqlType) {
+			case self::T_BOOL:
+				return $value === null || $value === ''
+					? null
+					: ($value ? '1' : '0');
 			case self::T_DATETIME:
+				$datetimeRegex = '/^(?<date>\d{4}-\d{2}-\d{2})[T ](?<time>\d{2}:\d{2}:\d{2})(?<zone>.+)$/';
+				if (is_string($value) && preg_match($datetimeRegex, $value, $matches)) {
+					$value = new DateTime($value);
+					$value->setTimezone(new DateTimeZone(date_default_timezone_get()));
+				}
 				if ($value instanceof DateTime) {
 					$value = $value->format('Y-m-d H:i:s');
 				}
@@ -322,16 +336,26 @@ class ModelColumn extends ModelFieldBase {
 				} else {
 					$value = DateHelper::dateExtToSql($value);
 				}
+				if ($value && preg_match('/^(?<date>[^T]+)T.+$/', $value, $matches)) {
+					$value = $matches['date'];
+				}
 				return $value;
-			case self::T_INT: return $value === null || $value === '' ? null
+			case self::T_INT:
 				// 2012-12-04 16:12 changed
 				// : (($value === 0 ? '0' : $value));
-				: "$value";
-			case self::T_FLOAT: return $value === null || $value === '' ? null
-				: (float) str_replace(',', '.', $value);
-			case self::T_DECIMAL: return $value === null || $value === '' ? null
-				: str_replace(',', '.', $value);
-			default: return $value;
+				return $value === null || $value === ''
+					? null
+					: "$value";
+			case self::T_FLOAT:
+				return $value === null || $value === ''
+					? null
+					: (float) str_replace(',', '.', $value);
+			case self::T_DECIMAL:
+				return $value === null || $value === ''
+					? null
+					: str_replace(',', '.', $value);
+			default:
+				return $value;
 		}
 	}
 
@@ -353,22 +377,26 @@ class ModelColumn extends ModelFieldBase {
 
 	/**
 	 *
-	 * @param Query $query
+	 * @param \ModelTableQuery $query
+	 * @version 2013-06-28 17:55 Selecting datetime in SQL format instead of 'Y-m-dTH:i:s'. This is
+	 * to ensure coherency between values read from database and values set into the model (casted
+	 * to SQL format)
 	 */
 	public function select(ModelTableQuery $query) {
-		if ($this->type === self::T_DATETIME) {
-			// select date time as valid ISO-8601
-			$query->select(
-				new QuerySelectFunctionOnField(
-					$query, 
-					$this->name, 
-					'DATE_FORMAT({}, "%Y-%m-%dT%H:%i:%s")',
-					$this->name
-				)
-			);
-		} else {
+//		if ($this->type === self::T_DATETIME) {
+//			// select date time as valid ISO-8601
+//			$query->select(
+//				new QuerySelectFunctionOnField(
+//					$query,
+//					$this->name,
+//					'CONCAT(DATE_FORMAT({}, "%Y-%m-%dT%H:%i:%s"), "' . date('O') . '")',
+////					'DATE_FORMAT({}, "%Y-%m-%dT%H:%i:%s")',
+//					$this->name
+//				)
+//			);
+//		} else {
 			$query->select($this->name);
-		}
+//		}
 	}
 
 	public static function buildColumnSelect($name, $tableName = null,

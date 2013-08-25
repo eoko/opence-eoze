@@ -24,14 +24,16 @@
 
 namespace eoko\cqlix\legacy;
 
+use eoko\cqlix\Exception\RequireBindingsException;
+
 /**
+ * Utility class that supports migration from legacy {@link QueryAliasable} to {@link \eoko\cqlix\Aliaser}.
  *
- * @category Opence
- * @package
- * @subpackage
  * @since 2012-12-11 15:52
  */
 final class QueryAliasableToAliaser {
+
+	private function __construct() {}
 
 	public static function aliases(\QueryAliasable $aliasable, $clause, array &$bindings = null) {
 		if ($bindings !== null) {
@@ -40,7 +42,7 @@ final class QueryAliasableToAliaser {
 			$bindings = array();
 			$convertedClause = $aliasable->convertQualifiedNames($clause, $bindings);
 			if (count($bindings) > 0) {
-				throw new \eoko\cqlix\Exception\RequireBindingsException();
+				throw new RequireBindingsException();
 			}
 			return $convertedClause;
 		}

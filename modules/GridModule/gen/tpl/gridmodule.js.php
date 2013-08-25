@@ -147,7 +147,11 @@ return moduleClass;
 <?php endif ?>
 
 if (!deferedRegistering) {
-	completeRegistering();
+	if (<?php echo $namespace ?>.<?php echo $controller ?>.<?php echo $name ?>) {
+		completeRegistering();
+	} else {
+		Oce.deps.wait(<?php echo $namespace ?>.<?php echo $controller ?>.<?php echo $name ?>, completeRegistering);
+	}
 }
 
 <?php if (isset($uses)): ?>

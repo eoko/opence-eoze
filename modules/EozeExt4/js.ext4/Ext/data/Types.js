@@ -23,22 +23,53 @@
 
 Ext4.define('Eoze.Ext.data.Types', {
 	override: 'Ext.data.Types'
+}, function() {
 
-	/**
-	 * @property {Object}
-	 */
-	,DAYDATE: {
-		convert: function(v, data) {
-			var DATE = Ext4.data.Types.DATE;
-			var date = DATE.convert(v, data);
-			if (date) {
-				date.ignoreTime = true;
+	var Ext = Ext4,
+		DATE = Ext.data.Types.DATE,
+		extDate = Ext.Date,
+		clearTime = extDate.clearTime,
+		clone = Ext.clone,
+		dateConvert;
+
+	Ext.apply(this, {
+
+		DATE: {
+			convert: dateConvert = function(v, data) {
+				if (Ext.isEmpty(v)) {
+					return null;
+				} else {
+					if (!(v instanceof Date)) {
+						v = new Date(v);
+					}
+					return v;
+				}
 			}
-			return date;
 		}
-		,sortType: function(v) {
-			return Ext4.Date.format(v, 'Ymd');
+
+		/**
+		 * @property {Object}
+		 */
+		,DATETIME: this.DATE
+
+		/**
+		 * @property {Object}
+		 */
+		,DAYDATE: {
+			convert: function(v, data) {
+				var date = dateConvert(v, data);
+				if (date) {
+					date.ignoreTime = true;
+					clearTime(date);
+				}
+				return date;
+			}
+			,sortType: function(v) {
+				return Ext4.Date.format(v, 'Ymd');
+			}
+			,type: 'daydate'
 		}
-		,type: 'daydate'
-	}
+	});
+
+	this.DATETIME = this.DATE;
 });

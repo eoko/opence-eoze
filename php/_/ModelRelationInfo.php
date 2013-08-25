@@ -2,6 +2,9 @@
 
 use eoko\cqlix\FieldMetadata;
 use eoko\cqlix\Aliaser;
+use eoko\cqlix\Model\Relation\Cardinality as RelationCardinality;
+
+require_once __DIR__ . '/../eoko/cqlix/Model/Relation/Cardinality.php';
 
 interface ModelRelationInfoHasOne extends ModelRelationMarkerHasOne {}
 interface ModelRelationInfoHasMany extends ModelRelationMarkerHasMany {}
@@ -19,6 +22,7 @@ class ModelRelationReciproqueFactory {
 	}
 
 	/**
+	 * @param Model $parentModel
 	 * @return ModelRelation
 	 */
 	public function init(Model $parentModel) {
@@ -33,10 +37,10 @@ class ModelRelationReciproqueFactory {
  * (as opposed to {@link ModelRelation} which represent concrete informations
  * bound to a specific data reccord -- it is the same difference as between
  * ModelTable and Model).
- * @property ModelTable $targetTable
- * @property ModelTable $localTable
+ * @property myModelTable $targetTable
+ * @property myModelTable $localTable
  */
-abstract class ModelRelationInfo extends ModelFieldBase {
+abstract class ModelRelationInfo extends ModelFieldBase implements RelationCardinality {
 
 	/** @var string */
 	public $name;
@@ -83,6 +87,17 @@ abstract class ModelRelationInfo extends ModelFieldBase {
 			'localTable' => $this->localTable,
 			'targetTable' => $this->targetTable
 		);
+	}
+
+	/**
+	 * @inheritdoc
+	 */
+	public function getCardinality() {
+		if ($this instanceof ModelRelationInfoHasOne) {
+			return self::ONE_TO_ONE;
+		} else if ($this instanceof ModelRelationInfoHasMany) {
+			return self::ONE_TO_MANY;
+		}
 	}
 
 	public function configureMeta(array $config = null) {
@@ -147,22 +162,24 @@ abstract class ModelRelationInfo extends ModelFieldBase {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param Model $parentModel
+	 * @throws UnsupportedOperationException
 	 * @return ModelRelation
 	 */
-	public function createRelation(Model $parentModel) {
+	public function createRelation(/** @noinspection PhpUnusedParameterInspection */ Model $parentModel) {
 		throw new UnsupportedOperationException(
 			'Not supported yet: ' . $this . '->createRelation()'
 		);
 	}
 
-	public function select(Query $query) {
+	public function select(/** @noinspection PhpUnusedParameterInspection */ Query $query) {
 		throw new UnsupportedOperationException;
 	}
 
 	protected $selectable = false;
 
+	/** @noinspection PhpInconsistentReturnPointsInspection */
 	public function getType() {
 		if ($this->selectable) {
 			if ($this instanceof ModelRelationInfoHasOne) {
@@ -182,6 +199,10 @@ abstract class ModelRelationInfo extends ModelFieldBase {
 	public function castValue($value) {
 		if ($value === null) {
 			return null;
+		}
+		// Returns cached records as is
+		if ($value instanceof Model) {
+			return $value;
 		}
 		switch ($this->getType()) {
 			case ModelField::T_STRING: return (string) $value;
@@ -227,17 +248,19 @@ abstract class ModelRelationInfo extends ModelFieldBase {
 	/**
 	 * @internal this code is legacy from ModelTableQuery::getOrderFieldAlias() v5.0
 	 *
-	 * @param ModelTableQuery $query
-	 * @param QueryAliasable $aliaser
+	 * @param Aliaser $aliaser
 	 * @return string
 	 */
-	protected function doGetSortClause(QueryAliasable $aliaser) {
+	protected function doGetSortClause(Aliaser $aliaser) {
 		$query = $aliaser->getQuery();
 		$fieldName = $this->getTargetTable()->getNameFieldName();
 		return $query->join($this)->alias($fieldName);
 	}
 
-	public function getNameClause(ModelTableQuery $query, $relationName = null, $alias = null) {
+	public function getNameClause(
+			/** @noinspection PhpUnusedParameterInspection */
+			ModelTableQuery $query, $relationName = null, $alias = null) {
+
 		if (!$this->selectable) return null;
 
 		$this->parseSelectJoinAlias($relationName, $joinAlias, $leftAlias);
@@ -287,22 +310,20 @@ abstract class ModelRelationInfo extends ModelFieldBase {
 		return $query;
 	}
 
-	public function selectId(Query $query, $alias = null) {
-		if (!$this->selectable) return $query;
+	public function selectId(ModelTableQuery $query, $alias = null) {
+		if (!$this->selectable) {
+			// TODO a warning should be issued here, no?
+			return;
+		}
 
 		$this->parseSelectJoinAlias($alias, $joinAlias, $leftAlias);
-//		if ($alias === null) $alias = $this->name;
-
-//		dumpl(array(
-//			$this, $alias, $joinAlias, $leftAlias
-//		));
 
 		if ($this->targetTable->hasPrimaryKey()) {
 			$join = $query->join($this, $joinAlias, $leftAlias);
 			$join->select(array($alias => $this->targetTable->getPrimaryKeyName()));
-		} else {
-			return $query;
 		}
+
+		// TODO a warning should be issued here, no?
 	}
 
 	/**
@@ -310,29 +331,32 @@ abstract class ModelRelationInfo extends ModelFieldBase {
 	 *
 	 * This method add to the given query the selection of one or more of this
 	 * relation's fields.
-	 * 
-	 * If a single field name is given as a string, and neither an alias nor 
+	 *
+	 * If a single field name is given as a string, and neither an alias nor
 	 * an alias prefix is specified for it, then the default alias
 	 * `RelationName->fieldName` will be used.
 	 *
-	 * @param ModelTableQuery $query	the {@link Query} on which to operate
-	 *		selection
-	 * @param mixed $field	the name of one of this relation's fields,
-	 *		an array of field, or an associative indicating both aliases and
-	 *		field names ({@see ModelTableQuery::select() for the complete syntax)
-	 * @param string $aliasPrefix	a prefix to be applied to all selected field's
-	 *		names or alias
+	 * @param ModelTableQuery $query    the {@link Query} on which to operate
+	 *        selection
+	 * @param string|string[] $field_s The name of one of this relation's fields,
+	 *        an array of field, or an associative indicating both aliases and
+	 *        field names ({@see ModelTableQuery::select() for the complete syntax)
+	 *
+	 * @throws UnsupportedOperationException
+	 *
+	 * @return \ModelTableQuery
+	 *
 	 * @see ModelTableQuery::select() for the complete syntax of the field and
-	 *		alias params
+	 *        alias params
 	 */
 	public function selectFields(ModelTableQuery $query, $field_s) {
 //		if (false === $this instanceof ModelRelationInfoHasOne) {
-		if (!$this->canSelectFields($query, $field_s)) {
-			throw new UnsupportedOperationException($this . '::selectField()'
-					. ' Field(s) can only be selected from relations of type "has one"');
-		} else {
+//		if (!$this->canSelectFields($query, $field_s)) {
+//			throw new UnsupportedOperationException($this . '::selectField()'
+//					. ' Field(s) can only be selected from relations of type "has one"');
+//		} else {
 			return $this->doSelectFields($query, $field_s);
-		}
+//		}
 	}
 
 	final protected function doSelectFields(ModelTableQuery $query, $field_s) {
@@ -344,13 +368,17 @@ abstract class ModelRelationInfo extends ModelFieldBase {
 		return $query;
 	}
 
-	protected function canSelectFields(ModelTableQuery $query, $field_s) {
+	protected function canSelectFields(
+			/** @noinspection PhpUnusedParameterInspection */
+			ModelTableQuery $query, $field_s) {
+
 		return $this instanceof ModelRelationInfoHasOne;
 	}
 
 	protected $relationInstances = array();
 
 	/**
+	 * @param string $name
 	 * @return ModelRelationInfo
 	 */
 	public function getRelationInfo($name) {
@@ -395,6 +423,9 @@ abstract class ModelRelationInfo extends ModelFieldBase {
 	}
 
 	/**
+	 * @param ModelTableQuery $query
+	 * @param string $alias
+	 * @param string $leftAlias
 	 * @return QueryJoin
 	 */
 	public function createJoin(ModelTableQuery $query, $alias = null, $leftAlias = null) {
@@ -412,22 +443,37 @@ abstract class ModelRelationInfo extends ModelFieldBase {
 	 * where clause can be handled by the ModelRelationInfo implementation
 	 * when it creates the join, instead of relying on the base class for calling
 	 * this method; in this case this method should just return the passed join.
+	 *
+	 * @param QueryJoin $join
+	 * @throws UnsupportedOperationException
 	 * @return QueryJoin
+	 *
 	 * @see ModelRelationInfo::createJoin()
 	 */
-	protected function addJoinWhere(QueryJoin $join) {
+	protected function addJoinWhere(/** @noinspection PhpUnusedParameterInspection */ QueryJoin $join) {
 		throw new UnsupportedOperationException("$this::addJoinWhere()");
 	}
 
 	/**
+	 * @param ModelTableQuery $query
+	 * @param string $alias
+	 * @param string $leftAlias
+	 * @throws UnsupportedOperationException
 	 * @return QueryJoin
 	 */
-	protected function doCreateJoin(ModelTableQuery $query, $alias = null, $leftAlias = null) {
+	protected function doCreateJoin(
+			/** @noinspection PhpUnusedParameterInspection */
+			ModelTableQuery $query, $alias = null, $leftAlias = null) {
+
 		throw new UnsupportedOperationException("$this::createJoin()");
 	}
 
-	public function orderClause($dir, $tableAlias = null) {
+	public function orderClause(
+			/** @noinspection PhpUnusedParameterInspection */
+			$dir, $tableAlias = null) {
+
 		$dir = Query::protectDir($dir);
+
 		return new SqlVariable("`$this->name` $dir");
 	}
 
@@ -592,6 +638,10 @@ abstract class ModelRelationInfoByReference extends ModelRelationInfo {
 		$this->referenceField = $referenceField;
 	}
 
+	public function getReferenceFieldName() {
+		return $this->referenceField;
+	}
+
 	protected function addJoinWhere(QueryJoin $join) {
 
 		$this->targetTable->addJoinWhere($join);
@@ -638,6 +688,8 @@ abstract class ModelRelationInfoHasReference extends ModelRelationInfoByReferenc
 	public $onDeleteAction = null;
 
 	/**
+	 * @param $targetPkValue
+	 * @param bool $ignoreAssocWhere
 	 * @return ModelTableQuery
 	 */
 	public function createFindTargetQuery($targetPkValue, $ignoreAssocWhere = false) {
@@ -654,13 +706,15 @@ abstract class ModelRelationInfoHasReference extends ModelRelationInfoByReferenc
 
 	/**
 	 * Dispatches on delete processing of a record being refered by other tables.
-	 * 
+	 *
 	 * If the table's database engine support automatic cascadding, then nothing
 	 * will be done here.
-	 * 
+	 *
 	 * @param mixed $targetPkValue the value of the primary key of the record
 	 * being removed
-	 * 
+	 *
+	 * @throws IllegalArgumentException
+	 * @throws SqlUserException
 	 * @return mixed
 	 */
 	final public function onTargetDelete($targetPkValue) {
@@ -675,21 +729,21 @@ abstract class ModelRelationInfoHasReference extends ModelRelationInfoByReferenc
 				case self::ODA_RESTRICT:
 					throw new SqlUserException(
 						null, 
-						lang(
-							"Cet enregistrement ne peut pas être supprimé car il est référencé par "
-							. "d'autres enregistrements."
-						), 
-						lang("Contrainte d'intégrité")
+						"Cet enregistrement ne peut pas être supprimé car il est référencé par "
+						. "d'autres enregistrements.",
+						"Contrainte d'intégrité"
 					);
 				default:
 					throw new IllegalArgumentException();
 			}
 		}
+		return null;
 	}
 
 	/**
 	 * Gets the current onDelete action.
-	 * @return const<ODA>
+	 *
+	 * @return string
 	 */
 	private function getOnDeleteAction() {
 		return $this->onDeleteAction !== null
@@ -703,13 +757,15 @@ abstract class ModelRelationInfoHasReference extends ModelRelationInfoByReferenc
 	 * onDelete action has been set. The method is called at the time it is
 	 * needed, so it can access variables in the context to dynamically decide
 	 * what the onDelete action should be.
+	 *
 	 * @internal The determining of the default onDelete action is mostly
 	 * dependant on the kind of relation and the properties of the tables and
 	 * reference fields. It cannot be determined in the constructor of the
 	 * relation though, because trying to access the ModelTable instances from
 	 * there would most oftenly result in infinite loops at the Relation
 	 * building stage...
-	 * @return const<ODA>
+	 *
+	 * @return string
 	 */
 	protected function getDefaultOnDeleteAction() {
 		return self::ODA_SET_NULL;
@@ -814,7 +870,10 @@ class ModelRelationInfoReferencesOne extends ModelRelationInfoHasReference
 	 * Create the left join representing this relation, using the given
 	 * {@link Query}. Note: the join is <b>not</b> registered in the Query by
 	 * this method.
-	 * @param Query $query
+	 *
+	 * @param \ModelTableQuery|\Query $query
+	 * @param string $alias
+	 * @param string $leftAlias
 	 * @return QueryJoin
 	 */
 	protected function doCreateJoin(ModelTableQuery $query, $alias = null, $leftAlias = null) {
@@ -860,6 +919,7 @@ class ModelRelationInfoIsRefered extends ModelRelationInfoByReference {
 				return $relInfo;
 			}
 		}
+		return null;
 	}
 
 	public function notifyDeleteToRefering($deletedValue) {
@@ -947,7 +1007,10 @@ class ModelRelationInfoReferredByOneAssoc extends ModelRelationInfoReferedByOne 
 	}
 
 	protected final function doConstruct($info, $name, $referenceField) {
-		if ($name === null) $name = "$info->name*";
+		/** @var $info ModelRelationInfoIndirectHasOne */
+		if ($name === null) {
+			$name = "$info->name*";
+		}
 		$this->assocRelationInfo = $info;
 		parent::__construct(
 			$name, // name
@@ -977,9 +1040,11 @@ class ModelRelationInfoReferredByOneAssocMirror extends ModelRelationInfoReferre
 
 	/**
 	 * @internal
+	 *
 	 * Callback for creating the {@link QueryJoinLeft} ON clause.
+	 *
 	 * @param array $leftField
-	 * @param string $rightField
+	 * @param array|string $rightField
 	 * @return string
 	 */
 	public function buildOnJoinClause($leftField, array $rightField) {
@@ -1034,9 +1099,11 @@ class ModelRelationInfoReferedByOneOnMultipleFields extends ModelRelationInfoRef
 
 	/**
 	 * @internal
+	 *
 	 * Callback for creating the {@link QueryJoinLeft} ON clause.
+	 *
 	 * @param array $leftField
-	 * @param string $rightField
+	 * @param array|string $rightField
 	 * @return string
 	 */
 	public function buildOnJoinClause($leftField, array $rightField) {
@@ -1103,15 +1170,12 @@ class ModelRelationInfoReferedByMany extends ModelRelationInfoIsRefered
 		if (!$this->localTable->hasPrimaryKey()) {
 			$tableName = get_class($this->localTable);
 			throw new UnsupportedOperationException(
-				"Cannot natively select name from table $tableName with no primary key.",
-				$previous
+				"Cannot natively select name from table $tableName with no primary key."
 			);
 		}
 
 		$this->parseSelectJoinAlias($relationName, $joinAlias, $leftAlias);
 		$join = $query->join($this, $joinAlias, $leftAlias);
-
-		$localField = $this->localTable->getPrimaryKeyName();
 
 		$leftField = $join->getQualifiedName(
 				$this->localTable->getPrimaryKeyName(), QueryJoin::TABLE_LEFT);
@@ -1137,21 +1201,19 @@ class ModelRelationInfoReferedByMany extends ModelRelationInfoIsRefered
 		);
 	}
 
-	public function createLoadQueryFor($pkValue, array $context = array(), $joinAlias = null) {
+	public function createLoadQueryFor(
+			/** @noinspection PhpUnusedParameterInspection */
+			$pkValue, array $context = array(), $joinAlias = null) {
+
 		return $this->targetTable
 				->createLoadQuery(ModelSet::ONE_PASS, $context)
 				->applyAssocWhere($this->targetTable, "$this->referenceField=?", $pkValue);
-//		return $query->where(
-//			$this->targetTable->addAssocWhere(
-//				$query->createWhere("$this->referenceField=?",$pkValue)
-//				,$query
-//			)
-//		);
 	}
 
 	/**
 	 * Select fields from this relation, considering it as an associative
 	 * relation {@internal (effectively bypassing the canSelectFields() test)}.
+	 *
 	 * @param ModelTableQuery $query
 	 * @param mixed $field_s
 	 * @return ModelTableQuery
@@ -1162,9 +1224,6 @@ class ModelRelationInfoReferedByMany extends ModelRelationInfoIsRefered
 
 }
 
-/**
- * @var ModelTable
- */
 abstract class ModelRelationInfoByAssoc extends ModelRelationInfo {
 
 	/**
@@ -1185,7 +1244,7 @@ abstract class ModelRelationInfoByAssoc extends ModelRelationInfo {
 
 	protected $whereAssoc;
 
-	function  __construct(
+	public function  __construct(
 		$name,
 		ModelTableProxy $localTable, ModelTableProxy $targetTableProxy,
 		ModelTableProxy $assocTableProxy,
@@ -1209,6 +1268,67 @@ abstract class ModelRelationInfoByAssoc extends ModelRelationInfo {
 		$this->assocRelationName = $assocRelationName;
 	}
 
+	/**
+	 * @param array $config
+	 * @return ModelRelationInfoByAssoc
+	 * @throws InvalidArgumentException
+	 */
+	public static function create(array $config) {
+
+		$requiredParams = array('name', 'localTable', 'targetTable', 'assocTable');
+		$optionalParams = array('reciproqueRelation', 'assocRelation');
+		$proxies = array('localTable', 'targetTable', 'assocTable');
+
+		$aliases = array(
+			'reciproqueRelationName' => 'reciproqueRelation',
+			'assocRelationName' => 'assocRelation',
+		);
+
+		$params = array();
+
+		foreach ($config as $key => $value) {
+			$paramName = isset($aliases[$key])
+				? $aliases[$key]
+				: $key;
+
+			$params[$paramName] = $value;
+		}
+
+		foreach ($requiredParams as $name) {
+			if (!isset($params[$name])) {
+				throw new InvalidArgumentException('Missing required configuration key: ' . $name);
+			}
+		}
+
+		foreach ($optionalParams as $name) {
+			if (!isset($params[$name])) {
+				$params[$name] = null;
+			}
+		}
+
+		foreach ($proxies as $name) {
+			$params[$name] = ModelTableProxy::getFor($params[$name]);
+		}
+
+		/** @var $relationInfo ModelRelationInfo */
+		$relationInfo = new static(
+			$params['name'],
+			$params['localTable'],
+			$params['targetTable'],
+			$params['assocTable'],
+			$params['localForeignKey'],
+			$params['targetForeignKey'],
+			$params['reciproqueRelation'],
+			$params['assocRelation']
+		);
+
+		return $relationInfo;
+	}
+
+	/**
+	 * @return ModelRelationInfoReferedByMany
+	 * @throws IllegalStateException
+	 */
 	public function getAssocRelationInfo() {
 		if (!$this->assocRelationInfo) {
 			if (!$this->assocRelationName) throw new IllegalStateException(
@@ -1224,6 +1344,18 @@ abstract class ModelRelationInfoByAssoc extends ModelRelationInfo {
 	 */
 	public function getAssocTable() {
 		return $this->assocTable;
+	}
+
+	/**
+	 * Get the relation info from the assoc table to the target table.
+	 *
+	 * @param bool $require
+	 * @return ModelRelationInfoHasReference|null
+	 * @throws IllegalStateException
+	 */
+	public function getAssocTableTargetRelationInfo($require = false) {
+		$assocTable = $this->assocTable;
+		return $assocTable->getFieldRelationInfo($this->getReferenceField(), $require);
 	}
 
 	protected function doCreateJoin(ModelTableQuery $query, $alias = null, $leftTableAlias = null) {
@@ -1326,8 +1458,7 @@ class ModelRelationInfoIndirectHasMany extends ModelRelationInfoByAssoc
 		if (!$localTable->hasPrimaryKey()) {
 			$tableName = get_class($localTable);
 			throw new UnsupportedOperationException(
-				"Cannot natively select name from table $tableName with no primary key.",
-				$previous
+				"Cannot natively select name from table $tableName with no primary key."
 			);
 		}
 
@@ -1382,9 +1513,10 @@ class ModelRelationInfoIndirectHasMany extends ModelRelationInfoByAssoc
 
 		$pk = $this->getLocalTable()->getPrimaryKeyName();
 
-		if ($alias === null) $alias = $this->name;
-
-		$assocTable = $this->assocTable->getDBTableName();
+		// TODO $alias ?
+		if ($alias === null) {
+			$alias = $this->name;
+		}
 
 		$idField = $query->getQualifiedName($pk);
 
@@ -1394,15 +1526,6 @@ class ModelRelationInfoIndirectHasMany extends ModelRelationInfoByAssoc
 				->applyAssocWhere($this->assocTable, "`$this->localForeignKey` = $idField");
 
 		$query->select(new QuerySelectSub($assocQuery, $this->name));
-
-		// <editor-fold defaultstate="collapsed" desc="Alternative Query">
-//		$query
-//			->select(new QuerySelectRaw("@{$this->name}Ids as $alias"))
-//			->andWhere(
-//				"(@{$this->name}Ids:=(SELECT GROUP_CONCAT(`$this->localForeignKey`) "
-//				. "FROM `$assocTable` WHERE `$this->localForeignKey` = $idField))"
-//			);
-		// </editor-fold>
 	}
 
 	public function createLoadQuery(array $context = array(), $joinAlias = null, &$join = null) {
@@ -1428,6 +1551,7 @@ class ModelRelationInfoIndirectHasMany extends ModelRelationInfoByAssoc
 	}
 
 	public function createLoadQueryFor($pkValue, array $context = array(), $joinAlias = null) {
+		/** @var QueryJoin $join */
 		$query = $this->createLoadQuery($context, $joinAlias, $join);
 
 		$where = $query->createWhere(
@@ -1510,7 +1634,7 @@ abstract class ModelRelationInfoChain extends ModelRelationInfo {
 
 	// overriden so that the target relation (ie the last one in the chain) 
 	// uses the correct $alias and not its own one
-	public function selectId(Query $query, $alias = null) {
+	public function selectId(ModelTableQuery $query, $alias = null) {
 		parent::selectId(
 			$query,
 			$alias !== null ? $alias : $this->name

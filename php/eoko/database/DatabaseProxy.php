@@ -7,6 +7,9 @@ use eoko\util\collection\ImmutableMap;
 
 use RuntimeException;
 
+/**
+ * Creates a database Adapter according to the given configuration.
+ */
 class DatabaseProxy {
 
 	private $adapter = null;
@@ -17,8 +20,13 @@ class DatabaseProxy {
 
 	private $sourceConfig = null;
 
+	private $defaultConfig = array(
+		'characterSet' => 'utf8',
+		'collation' => 'utf8_general_ci',
+	);
+
 	public function __construct(array $sourceConfig) {
-		$this->sourceConfig = $sourceConfig;
+		$this->sourceConfig = Arrays::apply($this->defaultConfig, $sourceConfig);
 	}
 
 	/**
@@ -64,6 +72,10 @@ class DatabaseProxy {
 				Arrays::apply($config, $envConfig);
 			}
 
+			if (isset($config['username']) && !isset($config['user'])) {
+				$config['user'] = $config['username'];
+			}
+
 			$this->config = new \eoko\util\collection\ImmutableMap($config);
 		}
 		return $this->config;
@@ -88,7 +100,7 @@ class DatabaseProxy {
 	}
 
 	/**
-	 * @return PDO
+	 * @return \PDO
 	 */
 	public function getConnection() {
 		if (!$this->connection) {

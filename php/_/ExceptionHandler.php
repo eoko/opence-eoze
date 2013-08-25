@@ -3,6 +3,7 @@
  * @author Éric Ortéga <eric@mail.com>
  */
 
+/** @noinspection PhpIncludeInspection */
 require_once PHP_PATH . '_/ExtJSResponse.php';
 
 use eoko\php\ErrorException;
@@ -12,8 +13,8 @@ class ExceptionHandler {
 	private static $instance;
 
 	public function __construct() {
-		set_exception_handler(array($this, 'process'));
-		ErrorException::registerErrorHandler();
+//		set_exception_handler(array($this, 'process'));
+//		ErrorException::registerErrorHandler();
 		self::$instance = $this;
 	}
 
@@ -26,6 +27,13 @@ class ExceptionHandler {
 	}
 
 	public function process(Exception $ex, $answer = true) {
+
+		if (defined('EOZE_VERBOSE_ERROR_REPORTING')) {
+			header('Content-type: text');
+			header('HTTP/1.0 500 Server Error');
+			echo $ex;
+			die;
+		}
 
 		if ($ex instanceof UserException) {
 
@@ -73,8 +81,7 @@ class ExceptionHandler {
 //			if (!$reason && eoko\config\Application::getInstance()->isDevMode()) {
 //				$reason = "$ex";
 //			}
-			ExtJSResponse::failure($reason, $systemError, $errorTitle, true, false,
-				$includeTimestamp);
+			ExtJSResponse::failure($reason, $systemError, $errorTitle, true, false, $includeTimestamp);
 		}
 	}
 

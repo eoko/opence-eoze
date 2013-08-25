@@ -1,14 +1,29 @@
 <?php
 /**
- * @author Éric Ortéga <eric@mail.com>
- * @copyright Copyright (c) 2010, Éric Ortéga
- * @license http://www.planysphere.fr/licenses/psopence.txt
- * @package PS-ORM-1
- * @subpackage Query
+ * Copyright (C) 2013 Eoko
+ *
+ * This file is part of Opence.
+ *
+ * Opence is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Opence is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Opence. If not, see <http://www.gnu.org/licenses/gpl.txt>.
+ *
+ * @copyright Copyright (C) 2013 Eoko
+ * @licence http://www.gnu.org/licenses/gpl.txt GPLv3
+ * @author Éric Ortega <eric@eoko.fr>
  */
 
+use eoko\cqlix\Query\Clause;
 use eoko\database\Database;
-use eoko\cqlix\Aliaser;
 
 /**
  * Utility class to submit queries to the database
@@ -36,7 +51,7 @@ use eoko\cqlix\Aliaser;
  * </code>
  *
  * One of the 4 CRUD operations must be specified by the following methods
- * (if the operation doesn't need to sepcify any option, then the operation
+ * (if the operation doesn't need to specify any option, then the operation
  * can be specified simply by calling the corresponding executeXXX method,
  * where XXX is the name of the operation):<ul>
  * <li>Create: {@link Query::insert()}
@@ -55,7 +70,7 @@ use eoko\cqlix\Aliaser;
  * {@link Query::executeUpdate() executeUpdate()}, and
  * {@link Query::executeDelete() executeDelete()}.
  */
-class Query {
+abstract class Query implements QueryAliasable {
 
     // Right from the MySQL manual:
     //     To retrieve all rows from a certain offset up to the end of the result set, you can
@@ -63,6 +78,11 @@ class Query {
 	const MAX_ROW_COUNT = '18446744073709551615';
 
 	private static $executionCount = 0;
+
+	/**
+	 * @var PDO
+	 */
+	private $pdo = null;
 
 	private $db = null;
 
@@ -73,17 +93,26 @@ class Query {
 	private $dbTable = null;
 	protected $tableAlias = null;
 
+	/**
+	 * @var QuerySelect[]
+	 */
 	protected $select = null;
 	private $set = array();
-	/** @var QueryWhere */
+	/**
+	 * @var QueryWhere
+	 */
 	private $where = null;
 
 	private $limitStart = null, $limit = null;
+	/** @var array */
 	private $order = false;
 	private $defaultOrder = false;
 
-	protected $additionnalInserts = null;
+	protected $additionalInserts = null;
 
+	/**
+	 * @var QueryJoin[]
+	 */
 	protected $joins = null;
 	protected $joinTakenAliases = array();
 
@@ -102,6 +131,8 @@ class Query {
 
 	private $sqlVarId = 0;
 
+	private $selectDistinct = true;
+
 	/**
 	 * If true, then 'FOR UPDATE' will be appended to select queries.
 	 *
@@ -119,15 +150,6 @@ class Query {
 		'asc' => 'ASC', 'ASC' => 'ASC',
 		'desc' => 'desc', 'DESC' => 'DESC'
 	);
-
-
-//REM	protected static $INSERT = 'insert';
-//	protected static $INSERT_OR_UPDATE = 'insert_or_update';
-//	protected static $UPDATE = 'update';
-//	protected static $SELECT = 'select';
-//	protected static $SELECT_FIRST = 'selectOne';
-//	protected static $DELETE = 'delete';
-//	protected static $COUNT = 'count';
 
 	const INSERT			= 1;
 	const INSERT_OR_UPDATE	= 2;
@@ -154,14 +176,51 @@ class Query {
 	}
 
 	/**
-	 * Create a new Query object. The database table can optionaly be specified
-	 * here.
-	 * @param String $table
+	 * Magic method to clone a {@link Query} object.
+	 *
+	 * @internal This method only deep clones the {@link Query::where query's where} and the
+	 * {@link Query::joins query's joins}.
+	 */
+	public function __clone() {
+
+		if ($this->where) {
+			$this->where = clone $this->where;
+		}
+
+//		$clonedArray = array();
+//		foreach ($this->select as $key => $value) {
+//			$clonedArray[$key] = clone $value;
+//		}
+//		$this->select = $clonedArray;
+
+		if ($this->joins) {
+			$clonedArray = array();
+			foreach ($this->joins as $key => $value) {
+				$clonedArray[$key] = clone $value;
+			}
+			$this->joins = $clonedArray;
+		}
+	}
+
+	/**
+	 * Create a new Query object. The database table can optionally be specified here.
+	 *
+	 * @param ModelTable|string $table
+	 * @param array $context
 	 * @return Query
 	 */
 	public static function create(ModelTable $table = null, array $context = null) {
 		return new static($table, $context);
    	}
+
+	/**
+	 * Gets the Query's context.
+	 *
+	 * @return array
+	 */
+	public function & getContext() {
+		return $this->context;
+	}
 
 	/**
 	 * Reset the previously set Select option.
@@ -170,10 +229,19 @@ class Query {
 	 * is the Query will be considered a Select (READ) operation if the Query
 	 * is executed now -- moreover,
 	 *
+	 * @param bool $resetJoins
 	 * @return Query
 	 */
-	public function resetSelect() {
+	public function resetSelect($resetJoins = true) {
 		$this->select = null;
+
+		if ($resetJoins && $this->joins !== null) {
+			foreach ($this->joins as $join) {
+				/** @var $join QueryJoin */
+				$join->resetSelect();
+			}
+		}
+
 		return $this;
 	}
 
@@ -188,7 +256,7 @@ class Query {
 	 * If the required table is also selected in the FROM clause, the aliases
 	 * will start at 2, else they will start at nothing, then 2, etc.
 	 *
-	 * <b>Important</b> it is forbiden to change the FROM clause after one alias
+	 * <b>Important</b> it is forbidden to change the FROM clause after one alias
 	 * has been generated (IllegalStateException would be thrown).
 	 *
 	 * @param string $dbTable
@@ -222,6 +290,8 @@ class Query {
 	}
 
 	/**
+	 * @param string|mixed $condition
+	 * @param array|null $inputs
 	 * @return QueryWhere
 	 */
 	public function createWhere($condition = null, $inputs = null) {
@@ -234,11 +304,15 @@ class Query {
 	}
 
 	protected function mergeJoinSelect(&$parts = array()) {
-		if ($parts === null) $parts = array();
+		if ($parts === null) {
+			$parts = array();
+		}
 		if ($this->joins !== null) {
 			foreach ($this->joins as $join) {
-				if (($s = $join->buildSelect($this->bindings)))
+				/** @var $join QueryJoin */
+				if (($s = $join->buildSelect($this->bindings))) {
 					$parts[] = $s;
+				}
 			}
 		}
 		return $parts;
@@ -246,10 +320,8 @@ class Query {
 
 	protected function buildJoinsClauses() {
 		if ($this->joins !== null) {
-//			$selects = array();
 			$joins = array();
 			foreach ($this->joins as $join) {
-//				$join instanceof QueryJoin;
 				$joins[] = $join->buildSql($this->bindings);
 			}
 			return ' ' . implode(' ', $joins);
@@ -264,7 +336,7 @@ class Query {
 	 * of a mixing of the following:<ul>
 	 * <li>a simple string containing the name of a field
 	 * <li>a QuerySelectElement object
-	 * <li>an array containing at least a key 'name', and optionnaly a key 'alias'
+	 * <li>an array containing at least a key 'name', and optionally a key 'alias'
 	 * and/or a key 'table'
 	 * </ul>
 	 *
@@ -290,7 +362,9 @@ class Query {
 			else $fields = array($_);
 		}
 
-		if ($this->select === null) $this->select = array();
+		if ($this->select === null) {
+			$this->select = array();
+		}
 
 		foreach ($fields as $field) {
 			if ($field instanceof QuerySelect) {
@@ -338,7 +412,7 @@ class Query {
 	 * string in the $function array, then the placeholder in the second element of
 	 * $function will be replaced by the processed first element, and so on.
 	 *
-	 * Fninally, if named placeholders of the form {0}, {1} or {index} are used, then
+	 * Finally, if named placeholders of the form {0}, {1} or {index} are used, then
 	 * the $function argument must be a string, and the $field argument must be an
 	 * array. Placeholders will be replaced by the fully qualified field in the $field
 	 * array which index matches the index of the placeholder.
@@ -360,19 +434,18 @@ class Query {
 	 */
 	public function selectFirst($___ = null) {
 		if ($___ !== null) {
-			$r = $this->select($___);
+			$this->select($___);
 		}
 		$this->action = self::SELECT_FIRST;
 		return $this;
 	}
 
-	private $selectDistinct = true;
-
 	/**
+	 * @param bool $selectDistinct
 	 * @return Query
 	 */
-	public function setSelectDistinct($flag) {
-		$this->selectDistinct = (bool) $flag;
+	public function setSelectDistinct($selectDistinct) {
+		$this->selectDistinct = (bool) $selectDistinct;
 		return $this;
 	}
 
@@ -422,13 +495,10 @@ class Query {
 		if ($this->action == null) $this->action = self::UPDATE;
 
 		if (is_array($col)) {
-			foreach ($col as $col => $val) {
-				$this->set[$col] = $val;
+			foreach ($col as $colName => $val) {
+				$this->set[$colName] = $val;
 			}
 		} else {
-//			if (func_num_args() != 2) {
-//				throw new IllegalArgumentException();
-//			}
 			$this->set[$col] = $value;
 		}
 
@@ -457,8 +527,8 @@ class Query {
 	}
 
 	public function andInsert($values) {
-		if ($this->additionnalInserts === null) $this->additionnalInserts = array();
-		$this->additionnalInserts[] = $values;
+		if ($this->additionalInserts === null) $this->additionalInserts = array();
+		$this->additionalInserts[] = $values;
 	}
 
 	/**
@@ -469,7 +539,7 @@ class Query {
 	 * formatted field will be considered NULL (instead of returning a string with all 
 	 * the fields replaced by the $nullString value).
 	 * @param string $nullString The string to use to replace NULL value in fields.
-	 * @return type 
+	 * @return string
 	 */
 	public static function format($format, QueryAliasable $aliasable, $nullField = null, 
 			$nullString = '?') {
@@ -507,7 +577,7 @@ class Query {
 	}
 
 	/**
-	 * @return PDOStatement
+	 * @return Query
 	 */
 	public function delete() {
 		$this->action = self::DELETE;
@@ -527,6 +597,15 @@ class Query {
 	}
 
 	protected function buildUpdateClause() {
+
+		$setClause = $this->buildUpdateSetClause();
+
+		return 'UPDATE ' . $this->buildTable(true)
+			. ($this->hasJoins() ? $this->buildJoinsClauses() : null)
+			. ' SET ' . $setClause;
+	}
+
+	protected function buildUpdateSetClause() {
 		$parts = array();
 
 		if (!$this->set) {
@@ -545,7 +624,8 @@ class Query {
 					$v = $v->buildSql(false, $this->bindings);
 				}
 
-				$parts[] = $col instanceof SqlVar ? $col->buildSql(false, $this->bindings)
+				$parts[] = $col instanceof SqlVar
+					? $col->buildSql(false, $this->bindings)
 					: $this->getQualifiedName($col) . " = $v";
 			} else if ($val instanceof SqlFunction) {
 				$parts[] = "{$this->getQualifiedName($col)} = {$val->getString()}";
@@ -562,10 +642,7 @@ class Query {
 			}
        	}
 
-		return 'UPDATE ' . $this->buildTable(true) 
-				. ($this->hasJoins() ? $this->buildJoinsClauses() : null)
-				. ' SET '
-				. implode(', ', $parts);
+		return implode(', ', $parts);
 	}
 
 	private function buildUpdate() {
@@ -577,8 +654,18 @@ class Query {
 
 	protected function buildInsertOrUpdate() {
 		$this->buildInsert(null);
-		$this->sql .= ' ON DUPLICATE KEY '
-				. $this->buildUpdateClause()
+
+//		if ($this instanceof ModelTableQuery) {
+//			unset($this->set[$this->getTable()->getPrimaryKeyName()]);
+//		}
+
+		$parts = array();
+		foreach ($this->set as $name => $value) {
+			$parts[] .= $this->alias($name) . ' = VALUES(' . $this->alias($name) . ')';
+		}
+
+		$this->sql .= ' ON DUPLICATE KEY UPDATE '
+				. implode(', ' ,$parts)
 				. ';';
 	}
 
@@ -608,12 +695,12 @@ class Query {
 		$values = implode(',', $values);
 		$table = $this->buildTable();
 
-		if ($this->additionnalInserts !== null) {
-			$n += count($this->additionnalInserts);
+		if ($this->additionalInserts !== null) {
+			$n += count($this->additionalInserts);
 			$values = array("($values)");
-			foreach ($this->additionnalInserts as $v) {
+			foreach ($this->additionalInserts as $v) {
 				$valString = array();
-				foreach ($v as $col => $val) {
+				foreach ($v as $val) {
 					if (!$val instanceof SqlFunction) {
 						$valString[] = '?';
 						$this->bindings[] = $val;
@@ -622,14 +709,13 @@ class Query {
 					}
 				}
 				$values[] = '(' . implode(',', $valString) . ')';
-//				$values[] = '(' . implode(', ', $v) . ')';
 			}
 			$values = implode(',', $values);
 		} else {
 			$values = "($values)";
 		}
 
-		$this->sql = "INSERT INTO $table ($fields) VALUES $values$colon";
+		$this->sql = "INSERT INTO $table ($fields) VALUES " . $values . $colon;
 
 		return $n;
 	}
@@ -637,6 +723,9 @@ class Query {
 	/**
 	 * Set the WHERE condition of the Query, overriding any previously set
 	 * WHERE clause.
+	 *
+	 * @param string|QueryWhere $condition
+	 * @param array|string[] $inputs
 	 * @return Query
 	 */
 	public function where($condition, $inputs = null) {
@@ -649,6 +738,8 @@ class Query {
 
 	/**
 	 *
+	 * @param string|QueryWhere $condition
+	 * @param array|string[] $inputs
 	 * @return Query
 	 * @see where
 	 */
@@ -665,7 +756,8 @@ class Query {
 	}
 
 	/**
-	 *
+	 * @param string|mixed $condition
+	 * @param array|null $inputs
 	 * @return Query
 	 */
 	public function orWhere($condition, $inputs = null) {
@@ -682,6 +774,8 @@ class Query {
 
 	/**
 	 *
+	 * @param string|mixed $field
+	 * @param mixed[]|int[]|string[] $values
 	 * @return Query
 	 */
 	public function whereIn($field, $values) {
@@ -694,6 +788,8 @@ class Query {
 	}
 
 	/**
+	 * @param string|mixed $field
+	 * @param mixed[]|int[]|string[] $values
 	 * @return Query
 	 */
 	public function whereNotIn($field, $values) {
@@ -706,6 +802,8 @@ class Query {
 	}
 
 	/**
+	 * @param string $field
+	 * @param mixed[]|int[]|string[] $values
 	 * @return Query
 	 */
 	public function andWhereIn($field, $values) {
@@ -716,6 +814,8 @@ class Query {
 	}
 
 	/**
+	 * @param string $field
+	 * @param mixed[]|int[]|string[] $values
 	 * @return Query
 	 */
 	public function andWhereNotIn($field, $values) {
@@ -726,6 +826,8 @@ class Query {
 	}
 
 	/**
+	 * @param string $field
+	 * @param mixed[]|int[]|string[] $values
 	 * @return Query
 	 */
 	public function orWhereIn($field, $values) {
@@ -736,6 +838,8 @@ class Query {
 	}
 
 	/**
+	 * @param string $field
+	 * @param mixed[]|int[]|string[] $values
 	 * @return Query
 	 */
 	public function orWhereNotIn($field, $values) {
@@ -773,11 +877,10 @@ class Query {
 	}
 
 	/**
-	 *
-	 * @param Bool $allowOnlyOne
+	 * @param bool $allowOnlyOne
 	 * @return String
 	 */
-	private function buildTable($allowOnlyOne = false) {
+	private function buildTable(/** @noinspection PhpUnusedParameterInspection */ $allowOnlyOne = false) {
 		if ($this->db !== null) {
 			return "`$this->db`.`$this->dbTable`";
 		} else {
@@ -786,14 +889,21 @@ class Query {
 	}
 
 	/**
+	 * Sets the database on which to work.
+	 *
+	 * @param string $database
 	 * @return Query
 	 */
-	public function onDatabase($db) {
-		$this->db = $db;
+	public function onDatabase($database) {
+		$this->db = $database;
 		return $this;
 	}
 
 	/**
+	 * Sets the limit and/or start parameters of the query.
+	 *
+	 * @param int $limit
+	 * @param int|null $start
 	 * @return Query
 	 */
 	public function limit($limit, $start = null) {
@@ -802,9 +912,32 @@ class Query {
 		return $this;
 	}
 
-    /**
-     * @return Query $this
-     */
+	/**
+	 * Gets the limit clause of the query.
+	 *
+	 * @return int|false
+	 */
+	public function getLimit() {
+		return $this->limit === null
+			? false
+			: $this->limit;
+	}
+
+	/**
+	 * Gets the start part of the limit clause of the query.
+	 *
+	 * @return int|false
+	 */
+	public function getStart() {
+		return $this->limitStart === null
+			? 0
+			: $this->limitStart;
+	}
+
+	/**
+	 * @param int|null $start
+	 * @return Query $this
+	 */
 	public function offset($start = null) {
 		$this->limitStart = $start;
 		return $this;
@@ -841,25 +974,32 @@ class Query {
 	}
 
 	/**
-	 * Set the sort method of the query, overwritting previously set order, if
-	 * any.
+	 * Set the sort method of the query, overwriting previously set order, if any.
+	 *
+	 * @param mixed $order
+	 * @param string $dir
 	 * @return Query
 	 */
-	public function orderBy($order, $dir = 'ASC') {
+	public function orderBy($order, $dir = null) {
 		$this->order = array();
-		if ($order === null) return;
+		if ($order === null) {
+			/** @noinspection PhpInconsistentReturnPointsInspection */
+			return;
+		}
 		return $this->thenOrderBy($order, $dir);
 	}
 
-	public function defaultOrderBy($order, $dir = 'ASC') {
+	public function defaultOrderBy($order, $dir = null) {
 		$this->defaultOrder = array();
 		return $this->thenOrderBy($order, $dir);
 	}
 
 	/**
+	 * @param mixed $field
+	 * @param string $dir
 	 * @return Query
 	 */
-	public function defaultThenOrderBy($field, $dir = 'ASC') {
+	public function defaultThenOrderBy($field, $dir = null) {
 		return $this->addThenOrderBy($this->defaultOrder, $field, $dir);
 	}
 
@@ -868,13 +1008,31 @@ class Query {
 	}
 
 	/**
+	 * @param mixed $field
+	 * @param string $dir
 	 * @return Query
 	 */
-	public function thenOrderBy($field, $dir = 'ASC') {
+	public function thenOrderBy($field, $dir = null) {
 		return $this->addThenOrderBy($this->order, $field, $dir);
 	}
 
-	private function addThenOrderBy(&$order, $field, $dir = 'ASC') {
+	/**
+	 * @param string|mixed $field
+	 * @param string $dir
+	 * @return Query
+	 */
+	public function firstOrderBy($field, $dir = null) {
+		if ($this->order) {
+			$this->order = array_reverse($this->order);
+			$result = $this->thenOrderBy($field, $dir);
+			$this->order = array_reverse($this->order);
+			return $result;
+		} else {
+			return $this->orderBy($field, $dir);
+		}
+	}
+
+	private function addThenOrderBy(&$order, $field, $dir = null) {
 		if ($field == null || $field == '') {
 			throw new Exception('Illegal Argument Exception: $order cannot be empty');
 		}
@@ -888,22 +1046,26 @@ class Query {
 				$this->thenOrderBy($o, $dir);
 			}
 		} else {
-			if ($dir === '') {
-				$dir = 'ASC';
-			} else {
+			if ($dir !== null) {
 				$dir = self::$dirValues[$dir]; // protect from injection
 			}
 
 			if ($field instanceof SqlVar) {
 				$this->getLogger()->warn('The next line is most probably wrong and causing problem with bindings');
-				$this->order[] = $field->buildSql(false, $this->bindings);
+				$order[] = $field->buildSql(false, $this->bindings);
+				throw new DeprecatedException;
+			} else if ($field instanceof Clause) {
+				if ($dir !== null) {
+					$order[] = function($aliaser, &$bindings) use($field, $dir) {
+						return $field->isEmpty()
+							? ''
+							: $field->buildSql($aliaser, $bindings) . ' ' . $dir;
+					};
+				} else {
+					$order[] = $field;
+				}
 			} else {
-				$order[] = $this->getOrderFieldAlias($field, $dir);
-//				$alias = $this->getOrderFieldAlias($field);
-//				if (!$alias) {
-//					throw new IllegalArgumentException("Cannot find field: `$field`");
-//				}
-//				$order[] = $alias . " $dir";
+				$order[] = $this->getOrderFieldAlias($field, $dir ? $dir : 'ASC');
 			}
 
 //			// Clear previous to add new order at the end of the list
@@ -919,13 +1081,33 @@ class Query {
 		} else if ($this->defaultOrder !== false) {
 			$order = $this->defaultOrder;
 		} else {
-			return;
+			return null;
 		}
+
+		$clauses = array();
+
+		/** @var $order array */
+		foreach ($order as $clause) {
+			if ($clause instanceof Clause) {
+				if (!$clause->isEmpty()) {
+					$clauses[] = $clause->buildSql($this, $this->bindings);
+				}
+			} else if (is_callable($clause)) {
+				$sql = $clause($this, $this->bindings);
+				if (!empty($sql)) {
+					$clauses[] = $sql;
+				}
+			} else {
+				$clauses[] = $clause;
+			}
+		}
+
 		// $this->order or $this->defaultOrder can contain an empty array
-		if (!$order) {
-			return;
+		if ($clauses) {
+			return ' ORDER BY ' . implode(', ', $clauses);
+		} else {
+			return '';
 		}
-		return ' ORDER BY ' . implode(', ', $order);
 	}
 
 	public static function quoteName($name) {
@@ -938,14 +1120,28 @@ class Query {
 	}
 
 	/**
-	 *
+	 * @return PDO
+	 */
+	protected function getConnection() {
+		if (!$this->pdo) {
+			$this->pdo = Database::getDefaultConnection();
+		}
+		return $this->pdo;
+	}
+
+	public function setConnection(PDO $connection) {
+		$this->pdo = $connection;
+	}
+
+	/**
+	 * @param PDO $pdo
 	 * @return PDOStatement
 	 */
 	private function executeSql(&$pdo = null) {
 
 		self::$executionCount++;
 
-		$pdo = Database::getDefaultConnection();
+		$pdo = $this->getConnection();
 		$pdoStatement = $pdo->prepare($this->sql);
 
 		$logger = $this->getLogger();
@@ -1018,6 +1214,7 @@ class Query {
 	}
 
 	/**
+	 * @param bool|null $distinct
 	 * @return int the count
 	 */
 	public function executeCount($distinct = null) {
@@ -1036,6 +1233,7 @@ class Query {
 	public function executeInsert() {
 		$this->action = self::INSERT;
 		$n = $this->buildInsert();
+		/** @var $pdo PDO */
 		if ($this->executeSql($pdo)->rowCount() == $n) {
 			if ($n == 1) {
 				return $pdo->lastInsertId();
@@ -1048,14 +1246,15 @@ class Query {
 	}
 
 	/**
-	 * @return <mixed> primary key value of the last inserted row, or NULL if
+	 * @return mixed primary key value of the last inserted row, or NULL if
 	 * the insert failed. <b>Important</b>: if an id is returned, it is NOT
-	 * garanteed to be the one of a newly created row -- it must be checked
+	 * guaranteed to be the one of a newly created row -- it must be checked
 	 * against a previously known primary key to determine that...
 	 */
 	public function executeInsertOrUpdate() {
 		$this->action = self::INSERT_OR_UPDATE;
 		$this->buildInsertOrUpdate();
+		/** @var $pdo PDO */
 		if ($this->executeSql($pdo)->rowCount() == 1) {
 			return $pdo->lastInsertId();
 		} else {
@@ -1125,7 +1324,8 @@ class Query {
 	}
 
 	/**
-	 *
+	 * @param int $fetchStyle
+	 * @param int $columnIndex
 	 * @return array
 	 */
 	public function executeSelect($fetchStyle = PDO::FETCH_ASSOC, $columnIndex = null) {
@@ -1170,9 +1370,19 @@ class Query {
 				. ';';
 	}
 
-	protected function buildCountField() {
-		throw new UnsupportedOperationException('Query::buildCountField()');
-	}
+	/**
+	 * @return string
+	 */
+	abstract protected function buildCountField();
+
+	abstract public function getOrderFieldAlias($field, $dir);
+
+	/**
+	 * @param string $field
+	 * @param int $ignored
+	 * @return string
+	 */
+	abstract public function getQualifiedName($field, $ignored = QueryJoin::TABLE_RIGHT);
 
 	public function exists() {
 		return $this->executeCount() > 0;
@@ -1230,16 +1440,27 @@ class Query {
 	private function build() {
 		switch ($this->action) {
 			case self::SELECT_FIRST:
-			case self::SELECT: return $this->buildSelect();
-			case self::UPDATE: return $this->buildUpdate();
-			case self::INSERT: return $this->buildInsert();
-			case self::DELETE: return $this->buildDelete();
-			case self::COUNT: return $this->buildCount();
-			default: throw new IllegalStateException("Illegal State: Unreachable code");
+			case self::SELECT:
+				$this->buildSelect();
+				break;
+			case self::UPDATE:
+				$this->buildUpdate();
+				break;
+			case self::INSERT:
+				$this->buildInsert();
+				break;
+			case self::DELETE:
+				$this->buildDelete();
+				break;
+			case self::COUNT:
+				$this->buildCount();
+				break;
+			default:
+				throw new IllegalStateException("Illegal State: Unreachable code");
 		}
 	}
 
-	public function buildSql($defaultTable, &$bindings) {
+	public function buildSql(/** @noinspection PhpUnusedParameterInspection */ $defaultTable, &$bindings) {
 		$this->build();
 		if (!is_array($bindings)) {
 			$bindings = array();
@@ -1261,7 +1482,8 @@ class Query {
 //			$s .= '{ NULL }';
 //		} else {
 //			$s .= count($this->table) == 1 ? 'on table ' : 'on tables ';
-			$s .= "on table $this->dbTable";
+//			$s .= "on table $this->dbTable";
+			$s .= "on ";
 			$s .= $this->buildTable();
 
 			if ($this->action === null) {
@@ -1317,7 +1539,9 @@ class Query {
 	public function createExecutor() {
 
 		// TODO implement QueryExecutors for all actions...
-		if ($this->action !== self::SELECT) throw new UnsupportedActionException('Not implemented yet...');
+		if ($this->action !== self::SELECT) {
+			throw new UnsupportedActionException('Not implemented yet...');
+		}
 
 		$clean = false;
 		if ($this->sql === null) {
@@ -1360,6 +1584,7 @@ class Query {
 	 * @param QueryErrorHandler $errorHandler
 	 * @return PDOStatement
 	 */
+	/** @noinspection PhpInconsistentReturnPointsInspection */
 	public static function executeQuery($sql, $errorHandler = null) {
 
 		Logger::get('Query')->debug('Executing raw query: {}', $sql);
@@ -1377,9 +1602,10 @@ class Query {
 				} else if (is_callable($errorHandler)) {
 					call_user_func($errorHandler, get_called_class(), $sth->errorInfo());
 				} else if ($errorHandler instanceof QueryErrorHandler) {
+					/** @noinspection PhpParamsInspection */
 					$errorHandler->process(get_called_class(), $sth->errorInfo());
 				} else {
-					throw new IllegalArgumentException('$errorHandler => ' . $errorHandler);
+					throw new IllegalArgumentException('$errorHandler => ' . gettype($errorHandler));
 				}
 			}
 		}
@@ -1434,19 +1660,7 @@ SQL
 //AS âge
 //
 //FROM contacts
-//WHERE prenom LIKE 'kim'
 
-// <editor-fold defaultstate="collapsed" desc="Old functions">
-//		return new SqlVariable(
-//			"(SELECT (DATE_FORMAT(FROM_DAYS(TO_DAYS(NOW())-TO_DAYS($dateField)), '%y ans %c mois, %e jours'))) AS `$alias`"
-//		);
-////		return new SqlVariable(
-////				"(SELECT IF($dateField = 0 OR $dateField IS NULL, NULL, "
-////				. "DATE_FORMAT(NOW(), '%Y') - DATE_FORMAT($dateField, '%Y')"
-////				. "- (DATE_FORMAT(NOW(), '00-%m-%d') < DATE_FORMAT($dateField, '00-%m-%d'))"
-////				. ")) AS age"
-////		);
-// </editor-fold>
 	}
 }
 
@@ -1569,9 +1783,9 @@ class QuerySelect extends SqlVariable {
 	/**
 	 *
 	 * @param mixed $defaultTableName    TRUE: means that this select's table
-	 * is the default one, it will be omited. FALSE: means that the table name
+	 * is the default one, it will be omitted. FALSE: means that the table name
 	 * must be included. Finally, a tableName (or a ModelTable) can be precised,
-	 * and the table name will be omited only if this clause's table is the same.
+	 * and the table name will be omitted only if this clause's table is the same.
 	 * @param $bindings
 	 * @return string
 	 */
@@ -1599,7 +1813,6 @@ class QuerySelect extends SqlVariable {
 					throw new IllegalStateException('Cannot select * with alias if $table is not a ModelTable');
 
 				foreach ($this->table->getColumns() as $col) {
-					$col instanceof ModelColumn;
 					$parts[] = $col->buildSelect($qTable, false, $this->alias_es, true);
 				}
 			} else {
@@ -1613,7 +1826,7 @@ class QuerySelect extends SqlVariable {
 								$qTable, false, $this->alias_es[$i], false);
 					}
 				} else {
-					foreach ($this->colName_s as $i => $colName) {
+					foreach ($this->colName_s as $colName) {
 						$alias = array_key_exists($colName, $this->alias_es) ?
 								$this->alias_es : null;
 						$parts[] = ModelColumn::buildColumnSelect($colName,
@@ -1681,7 +1894,7 @@ class QuerySelectFunctionOnField extends QuerySelectBase {
 	 * string in the $function array, then the placeholder in the second element of 
 	 * $function will be replaced by the processed first element, and so on.
 	 * 
-	 * Fninally, if named placeholders of the form {0}, {1} or {index} are used, then
+	 * Finally, if named placeholders of the form {0}, {1} or {index} are used, then
 	 * the $function argument must be a string, and the $field argument must be an
 	 * array. Placeholders will be replaced by the fully qualified field in the $field
 	 * array which index matches the index of the placeholder.
@@ -1710,16 +1923,27 @@ class QuerySelectFunctionOnField extends QuerySelectBase {
 			}
 			$function = $this->fn;
 			while (preg_match('/\{(?P<index>\d+)\}/', $function, $matches)) {
-				$function = str_replace($matches[0], $fields[$matches['index']], $function);
+				$field = $fields[$matches['index']];
+				if ($field instanceof SqlVar) {
+					$field = $field->buildSql(false, $bindings);
+				}
+				$function = str_replace($matches[0], $field, $function);
 			}
 			return $function;
 		} else {
 			$field = $query->getQualifiedName($this->field);
+
+			if ($field instanceof SqlVar) {
+				$field = $field->buildSql(false, $bindings);
+			}
+
 			if (is_array($this->fn)) {
 				$r = $field;
 				foreach ($this->fn as $fn) {
 					if (strstr($fn, '{}')) {
 						$r = str_replace('{}', $r, $fn);
+					} else if (strstr($fn, '{0}')) {
+						$r = str_replace('{0}', $r, $fn);
 					} else {
 						$r = "$fn($r)";
 					}
@@ -1728,6 +1952,8 @@ class QuerySelectFunctionOnField extends QuerySelectBase {
 			} else {
 				if (strstr($this->fn, '{}')) {
 					return str_replace('{}', $field, $this->fn);
+				} else if (strstr($this->fn, '{0}')) {
+					return str_replace('{0}', $field, $this->fn);
 				} else {
 					return "$this->fn($field)";
 				}
@@ -1788,6 +2014,7 @@ class QueryFormattedSelect extends QuerySelect {
 
 		$glueParts = preg_split($regex, $format);
 
+		/** @noinspection PhpUnusedLocalVariableInspection */
 		$qTable = $dbTable !== null ? Query::quoteName($dbTable) . '.' : null;
 
 		$parts = array();
@@ -1866,7 +2093,7 @@ class QueryErrorHandler {
 				if (preg_match("/^Duplicate entry '([^']+)' for key '([^']+)'$/",
 						$error[2], $matches)) {
 					$value = $matches[1];
-					$key = $matches[2];
+					//$key = $matches[2];
 					$message = lang("La valeur '%value%' doit être unique mais elle existe déjà.", $value);
 				} else {
 					$message = lang('Une des valeur entrée doit être unique.');
@@ -1874,7 +2101,7 @@ class QueryErrorHandler {
 				throw new SqlUserException(
 					$error,
 					$message,
-					lang('Erreur : valeur duppliquée')
+					lang('Erreur : valeur dupliquée')
 				);
 
 			case 1050:
@@ -1905,48 +2132,6 @@ class QueryErrorHandler {
 	}
 }
 
-interface QueryAliasable extends Aliaser {
-
-	function getQualifiedName($fieldName, $table = QueryJoin::TABLE_RIGHT);
-
-	function convertQualifiedNames($preSql, &$bindings);
-
-	/**
-	 * Make the given relation name relative to the aliasable. The validity or
-	 * existence of the relation itself will not be checked; all that method
-	 * does is to prepend the correct prefix to make the given name relative
-	 * to iself.
-	 * 
-	 * This method will only work with relation names, and produce chained
-	 * relation aliases. Use {@link QueryAliasable::getQualifiedName()} in
-	 * order to get name of fields in SQL format.
-	 * 
-	 * @see QueryAliasable::getRelationInfo() to directly access a relation's
-	 * info object (thus, ensuring the relation actually exists).
-	 */
-	function makeRelationName($targetRelationName);
-
-	/**
-	 * @return ModelRelatinInfo
-	 */
-	function getRelationInfo($targetRelationName, $requireType = false);
-
-	/**
-	 * @return QueryWhere
-	 */
-	function createWhere($conditions = null, $inputs = null);
-
-	/**
-	 * @return ModelTableQuery
-	 */
-	function getQuery();
-
-	/**
-	 * @return array
-	 */
-	function &getContext();
-}
-
 class SelectExecutor {
 
 	private $sql, $bindings;
@@ -1966,6 +2151,6 @@ class SelectExecutor {
 			throw new SystemException($errorInfo[2]);
 		}
 
-		return $pdoStatement->fetchAll(PDO::FETCH_ASSOC);;
+		return $pdoStatement->fetchAll(PDO::FETCH_ASSOC);
 	}
 }

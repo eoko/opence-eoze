@@ -54,7 +54,8 @@ class menu extends BasicHtmlExecutor {
 	}
 
 	/**
-	 * @param string $name
+	 * @param $menu
+	 * @internal param string $name
 	 * @return HtmlTemplate
 	 */
 	private function createMenu($menu) {

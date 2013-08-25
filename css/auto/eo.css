@@ -27,7 +27,10 @@
  */
 
 .eo-form-panel .x-panel-body,
+.eo-form-window .x4-window-body,
 .eo-form {
     padding: 10px;
-    border: 2px solid red;
+    background-color: #fff;
+    /*background-color: transparent;*/
+    /*border: 2px solid red;*/
 }

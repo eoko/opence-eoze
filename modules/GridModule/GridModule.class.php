@@ -30,7 +30,8 @@ class GridModule extends Module implements HasTitle, HasJavascript {
 
 		$config = $this->getConfig();
 		$modelName = $config->model;
-		$tpl->tableName = ModelTable::getModelTable($modelName);
+
+		$tpl->tableName = '\\' . get_class(ModelTable::getModelTable($modelName));
 
 		$gen = new gen\ExecutorGenerator($this->name, $config);
 		$gen->populate($tpl);

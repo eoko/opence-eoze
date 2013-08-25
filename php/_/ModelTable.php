@@ -6,7 +6,12 @@
  * @license http://www.planysphere.fr/licenses/psopence.txt
  */
 
+use Zend\EventManager\EventManager;
+use Zend\EventManager\EventManagerAwareInterface;
+use Zend\EventManager\EventManagerInterface;
 use eoko\config\ConfigManager;
+use eoko\database\Database;
+use eoko\cqlix\Model\Relation\Info\Factory as ModelRelationInfoFactory;
 
 /**
  * Base class of model's tables
@@ -39,15 +44,15 @@ use eoko\config\ConfigManager;
  * parent method from the child class from their static singleton instance.
  *
  * @method static ModelTable getInstance()
- * @method string getDBTable()
- * @method bool hasPrimaryKey()
- * @method string getPrimaryKeyName()
- * @method ModelColumn getPrimaryKeyColumn()
+ * @method static string getDBTable()
+ * @method static bool hasPrimaryKey()
+ * @method static string getPrimaryKeyName()
+ * @method static ModelColumn getPrimaryKeyColumn()
  * @method static Model createNewModel($initValues = null, $strict = false, array $context = null)
  *
  * %%ModelTable%% from its name. This method is static in concrete ModelTable
  * implementations, but it is abstract in ModelTable class.
- * @method ModelColumn[] getColumns($excludeAutoOperation = false, $excludeFinal = false) This
+ * @method static ModelColumn[] getColumns($excludeAutoOperation = false, $excludeFinal = false) This
  * method is static in concrete ModelTable implementations, but it is abstract
  * in ModelTable class.
  * 
@@ -55,7 +60,17 @@ use eoko\config\ConfigManager;
  * @property string $tableName		name/class of this instance
  * @property string $dbTableName	name of the associated database table
  */
-abstract class ModelTable extends ModelTableProxy {
+abstract class ModelTable extends ModelTableProxy implements EventManagerAwareInterface {
+
+	/**
+	 * Fired when a new model is created.
+	 */
+	const EVENT_MODEL_CREATED = 'modelCreated';
+
+	/**
+	 * @var EventManagerInterface
+	 */
+	private $events;
 
 	/**
 	 * @var array[string]ModelColumn
@@ -68,7 +83,12 @@ abstract class ModelTable extends ModelTableProxy {
 	private $relations;
 
 	/**
-	 * @var array[VirtualField]
+	 * @var string[]|null
+	 */
+	protected $uniqueIndexes = null;
+
+	/**
+	 * @var VirtualField[]
 	 */
 	protected $virtuals = array();
 
@@ -92,6 +112,7 @@ abstract class ModelTable extends ModelTableProxy {
 	 * xxxModelTableBase subclasses need to call their parent's one...
 	 *
 	 * @param array $cols
+	 * @param $relations
 	 */
 	protected function __construct(&$cols, &$relations) {
 
@@ -129,7 +150,39 @@ abstract class ModelTable extends ModelTableProxy {
 		// initialization ...
 	}
 
+	/**
+	 * @inheritdoc
+	 */
+	public function setEventManager(EventManagerInterface $events) {
+		$events->setIdentifiers(array(__CLASS__, get_called_class()));
+		$this->events = $events;
+		return $this;
+	}
+
+	/**
+	 * @inheritdoc
+	 */
+	public function getEventManager() {
+		if (!$this->events) {
+			$this->setEventManager(new EventManager());
+		}
+		return $this->events;
+	}
+
+	public function onModelCreate(Model $model) {
+		$this->getEventManager()->trigger(self::EVENT_MODEL_CREATED, $this, array(
+			'model' => $model,
+		));
+	}
+
 	private $config;
+
+	/**
+	 * @return Database
+	 */
+	public function getDatabase() {
+		return Database::getDefault();
+	}
 
 	protected function getConfig() {
 		return $this->config;
@@ -164,8 +217,9 @@ abstract class ModelTable extends ModelTableProxy {
 		if (func_num_args() > 1) {
 			$virtuals = func_get_args();
 		}
-		foreach ($virtuals as $virtual) {
+		foreach ($virtuals as $name => $virtual) {
 			if (is_array($virtual)) {
+				/** @noinspection PhpForeachNestedOuterKeyValueVariablesConflictInspection */
 				foreach ($virtual as $name => $field) {
 					if (is_string($name)) {
 						$this->addVirtual($field, $name);
@@ -173,27 +227,77 @@ abstract class ModelTable extends ModelTableProxy {
 						$this->addVirtual($field);
 					}
 				}
+			} else if (is_string($name)) {
+				$this->addVirtual($virtual, $name);
 			} else {
 				$this->addVirtual($virtual);
 			}
 		}
 	}
 
-	protected function addVirtual(VirtualField $virtual, $name = null) {
-		if ($this->constructed) {
-			throw new IllegalStateException('This operation is only allowed during initialization');
-		}
-		if ($name === null) {
-			$name = $virtual->getName();
-		}
-		$this->virtuals[$name] = $virtual;
+	/**
+	 * Gets the virtual field factory used for creating virtual fields from spec string.
+	 *
+	 * @return \eoko\cqlix\VirtualField\SpecFactory
+	 */
+	private function getVirtualFactory() {
+		return \eoko\cqlix\VirtualField\SpecFactory::getDefault();
 	}
 
-	protected function addRelation(ModelRelationInfo $relation) {
+	/**
+	 * @param VirtualField|string $virtual
+	 * @param string|null $name
+	 * @throws IllegalStateException
+	 * @throws InvalidArgumentException
+	 */
+	protected function addVirtual($virtual, $name = null) {
 		if ($this->constructed) {
 			throw new IllegalStateException('This operation is only allowed during initialization');
 		}
+		if (is_string($virtual)) {
+			$virtual = $this->getVirtualFactory()->create($this, $virtual, $name);
+		}
+		if ($virtual instanceof VirtualField) {
+			if ($name === null) {
+				$name = $virtual->getName();
+			}
+			$this->virtuals[$name] = $virtual;
+		} else {
+			throw new InvalidArgumentException();
+		}
+	}
+
+	/**
+	 * Adds a relation to this table.
+	 *
+	 * This method must be called in {@link doConfigure()} or {@link preConfigure()}.
+	 *
+	 * @param string|array|ModelRelationInfo $relation
+	 * @return ModelRelationInfo
+	 * @throws IllegalStateException
+	 * @throws InvalidArgumentException
+	 * @throws UnsupportedOperationException
+	 */
+	protected function addRelation($relation) {
+
+		if ($this->constructed) {
+			throw new IllegalStateException('This operation is only allowed during initialization');
+		}
+
+		if ($relation instanceof ModelRelationInfo) {
+			return $this->addRelationInfo($relation);
+		} else if (is_string($relation)) {
+			return $this->addRelationInfo(ModelRelationInfoFactory::fromSpec($this, $relation));
+		} else if (is_array($relation)) {
+			throw new UnsupportedOperationException('TODO');
+		} else {
+			throw new InvalidArgumentException();
+		}
+	}
+
+	private function addRelationInfo(ModelRelationInfo $relation) {
 		$this->relations[$relation->getName()] = $relation;
+		return $relation;
 	}
 
 	/**
@@ -236,7 +340,11 @@ abstract class ModelTable extends ModelTableProxy {
 	 * 
 	 * @return Model
 	 */
-	abstract static function createModel($initValues = null, $strict = false, array $context = null);
+	public static function createModel($initValues = null, $strict = false, array $context = null) {
+		/** @var $modelClass Model */
+		$modelClass = static::getModelClass();
+		return $modelClass::create($initValues, $strict, $context);
+	}
 
 	/**
 	 * Creates a new Model instance (see {@link createModel()}), and set the
@@ -245,7 +353,7 @@ abstract class ModelTable extends ModelTableProxy {
 	 * @param array $initValues see {@link createModel()}
 	 * @param boolean $strict   see {@link createModel()}
 	 * @param array $context     see {@link createModel()}
-	 * @return Model
+	 * @return \Model
 	 */
 	protected function _createNewModel($initValues = null, $strict = false, array $context = null) {
 		return $this->createModel($initValues, $strict, $context)->forceNew();
@@ -300,10 +408,12 @@ abstract class ModelTable extends ModelTableProxy {
 	 * @param string $colName
 	 * @return ModelColumn
 	 */
-	abstract static protected function getColumn($colName);
+	abstract static public function getColumn($colName);
 
 	/**
-	 * Get whether the given object is an instance of this table's model
+	 * Get whether the given object is an instance of this table's model.
+	 *
+	 * @param $obj
 	 * @return Bool TRUE if $obj is an instance of <?php echo $modelName ?>
 	 */
 	abstract static public function isInstanceOfModel($obj);
@@ -317,23 +427,57 @@ abstract class ModelTable extends ModelTableProxy {
 	}
 
 	/**
-	 * @param string $modelName
+	 * @param string|ModelTable|null $tableName
 	 * @return ModelTable
 	 */
-	public static function getTable($tableName) {
-		if ($tableName instanceof ModelTable) return $tableName;
-		return call_user_func(array($tableName, 'getInstance'));
+	public static function getTable($tableName = null) {
+		if ($tableName === null) {
+			return self::getInstance();
+		} else if ($tableName instanceof ModelTable) {
+			return $tableName;
+		} else {
+			return call_user_func(array($tableName, 'getInstance'));
+		}
 	}
 
 	/**
 	 * Creates a new Query based on this table.
 	 *
 	 * @param array $context
-	 * @return Query
+	 * @return ModelTableQuery
 	 */
 	public static function createQuery(array $context = null) {
-		return static::doCreateQuery($context);
+		return static::getInstance()->onCreateQuery($context);
 	}
+
+	/**
+	 * Name of the database {@link \eoko\database\Database::registerProxy() named proxy} to
+	 * use.
+	 *
+	 * @var string|null
+	 */
+	protected $databaseProxyName = null;
+
+	/**
+	 * @param array $context
+	 * @return Query
+	 */
+	private function onCreateQuery(array $context = null) {
+		$query = $this->doCreateQuery($context);
+
+		if (isset($this->databaseProxyName)) {
+			$pdo = Database::getProxy($this->databaseProxyName)->getConnection();
+			$query->setConnection($pdo);
+		}
+
+		return $query;
+	}
+
+	/**
+	 * @param array $context
+	 * @return Query
+	 */
+	protected abstract function doCreateQuery(array $context = null);
 
 	/**
 	 * Gets the default controller for CRUD operation on this table's model.
@@ -471,11 +615,13 @@ abstract class ModelTable extends ModelTableProxy {
 
 	// TODO field/col disambiguation
 	/**
-	 * Get a ModelTableColumn of %%ModelTable%% from its name
+	 * Get a ModelTableColumn of %%ModelTable%% from its name.
+	 *
 	 * @param string $name
+	 * @param bool $require
+	 * @throws \IllegalStateException
 	 * @return ModelColumn the column matching the given field name, or NULL if
 	 * this Model have no field matching this name
-	 * @ignore
 	 */
 	protected function _getColumn($name, $require = true) {
 		if (isset($this->cols[$name])) {
@@ -541,7 +687,7 @@ abstract class ModelTable extends ModelTableProxy {
 	 * If you don't want a field with such a name to be considered as the
 	 * display name, overrides this method and/or {@link hasName()}.
 	 * 
-	 * @param {Boolean} $require If `true`, the method will throw an 
+	 * @param bool $require If `true`, the method will throw an
 	 * {@link IllegalStateException} if it cannot find a display name.
 	 * 
 	 * @return string
@@ -573,7 +719,7 @@ abstract class ModelTable extends ModelTableProxy {
 	 * Creates a Query with its WHERE claused configured to match only
 	 * 
 	 * @param array $context
-	 * @return ModelTableQuery 
+	 * @return \ModelTableQuery 
 	 */
 	abstract public static function createReadQuery(array $context = null);
 
@@ -591,12 +737,15 @@ abstract class ModelTable extends ModelTableProxy {
 	const LOAD_FULL   = 3;
 
 	/**
-	 * @return ModelTableQuery
+	 * @param const $relationsMode
+	 * @param array $context
+	 * @param array $columns
+	 * @return \ModelTableQuery
 	 */
 	abstract public static function createLoadQuery($relationsMode = ModelTable::LOAD_NAME, 
 			array $context = null, $columns = null);
 	/**
-	 * @return ModelTableQuery
+	 * @return \ModelTableQuery
 	 */
 	protected function _createLoadQuery($relationsMode = ModelTable::LOAD_NAME, 
 			array $context = null, $columns = null) {
@@ -616,11 +765,7 @@ abstract class ModelTable extends ModelTableProxy {
 
 		$this->applyLoadQueryDefaultOrder($query);
 
-		foreach ($this->virtuals as $virtual) {
-			if ($columns === null || isset($columns[$virtual->getName()])) {
-				$virtual->select($query);
-			}
-		}
+		$this->selectLoadQueryVirtuals($query, $columns);
 
 		if (is_array($relationsMode)) {
 			foreach ($relationsMode as $mode => $values) {
@@ -677,17 +822,54 @@ abstract class ModelTable extends ModelTableProxy {
 		return $query;
 	}
 
+	protected function selectLoadQueryVirtuals(\ModelTableQuery $query, $columns) {
+		foreach ($this->virtuals as $virtual) {
+			if ($columns === null || isset($columns[$virtual->getName()])) {
+				$virtual->select($query);
+			}
+		}
+	}
+
 	protected function applyLoadQueryDefaultOrder(Query $query) {}
 
 	/**
+	 * Gets the relation info with the specified name. As opposed to {@link getRelationInfo()},
+	 * this method won't try to expand chained relations, so it will be usable before the relation
+	 * graph has been constructed.
+	 *
+	 * @param string $name
+	 * @param bool $require
 	 * @return ModelRelationInfo
+	 * @throws IllegalStateException
+	 */
+	public function getRelationInfoDeclaration($name, $require = false) {
+		if (isset($this->relations[$name])) {
+			return $this->relations[$name];
+		} else {
+			if ($require) {
+				throw new IllegalStateException('No relation info declared with name: ' . $name);
+			} else {
+				return null;
+			}
+		}
+	}
+
+	/**
+	 * @param string $name
+	 * @param bool $requireType
+	 * @throws \IllegalStateException
+	 * @throws \IllegalArgumentException
+	 * @return \ModelRelationInfo
 	 */
 	public abstract static function getRelationInfo($name, $requireType = false);
 
 	/**
 	 *
 	 * @param string $name
-	 * @return ModelRelationInfo
+	 * @param bool $requireType
+	 * @throws \IllegalStateException
+	 * @throws \IllegalArgumentException
+	 * @return \ModelRelationInfo
 	 */
 	protected function _getRelationInfo($name, $requireType = false) {
 
@@ -711,9 +893,13 @@ abstract class ModelTable extends ModelTableProxy {
 			return $relation;
 		} else {
 			if ($requireType === ModelRelation::HAS_MANY) {
-				if ($relation instanceof ModelRelationInfoHasMany) return $relation;
+				if ($relation instanceof ModelRelationInfoHasMany) {
+					return $relation;
+				}
 			} else if ($requireType === ModelRelation::HAS_ONE) {
-				if ($relation instanceof ModelRelationInfoHasOne) return $relation;
+				if ($relation instanceof ModelRelationInfoHasOne) {
+					return $relation;
+				}
 			} else {
 				throw new IllegalArgumentException('$requireType');
 			}
@@ -760,11 +946,67 @@ abstract class ModelTable extends ModelTableProxy {
 		return $this->relations;
 	}
 
+	/**
+	 * @return ModelRelationInfo[]
+	 */
 	abstract public static function getRelationsInfo();
 
 	abstract public static function getRelationNames();
 	protected function _getRelationNames() {
 		return array_keys($this->getRelationsInfo());
+	}
+
+	/**
+	 * Result cache for method {@link getFieldRelationInfo()}.
+	 *
+	 * @var array
+	 */
+	private $relationInfoByFieldCache = null;
+
+	/**
+	 * Get the relation info for the given field in this table. This only works for *referred* relations,
+	 * that is if the reference field is owned by this table.
+	 *
+	 * @param string|ModelField $field
+	 * @param bool $require
+	 * @return ModelRelationInfoHasReference|null
+	 * @throws IllegalStateException
+	 */
+	public function getFieldRelationInfo($field, $require = false) {
+
+		$fieldName = $field instanceof ModelField
+			? $field->getName()
+			: $field;
+
+		if (!isset($this->relationInfoByFieldCache[$fieldName])) {
+			$this->relationInfoByFieldCache[$fieldName] = $this->discoverFieldRelationInfo($fieldName);
+		}
+
+		$relationInfo = $this->relationInfoByFieldCache[$fieldName];
+
+		if ($relationInfo === false) {
+			if ($require) {
+				$tableName = $this->getModelName();
+				throw new IllegalStateException("Cannot find relation for field: $tableName.$fieldName");
+			} else {
+				return null;
+			}
+		} else {
+			return $relationInfo;
+		}
+	}
+
+	private function discoverFieldRelationInfo($fieldName) {
+
+		foreach ($this->getRelationsInfo() as $relationInfo) {
+			if ($relationInfo instanceof ModelRelationInfoHasReference) {
+				if ($relationInfo->getReferenceFieldName() === $fieldName) {
+					return $relationInfo;
+				}
+			}
+		}
+
+		return false;
 	}
 
 	abstract public static function hasField($name);
@@ -788,11 +1030,13 @@ abstract class ModelTable extends ModelTableProxy {
 	}
 
 	/**
+	 * @param string $name
 	 * @return VirtualField
 	 */
 	abstract public static function getVirtual($name);
 
 	/**
+	 * @param string $name
 	 * @return VirtualField
 	 */
 	protected function _getVirtual($name) {
@@ -822,6 +1066,27 @@ abstract class ModelTable extends ModelTableProxy {
 		} else {
 			return false;
 		}
+	}
+
+	public function isUniqueBy($fields) {
+		if (!is_array($fields)) {
+			$fields = func_get_args();
+		}
+
+		$n = count($fields);
+
+		foreach ($this->uniqueIndexes as $indexFields) {
+			if (count($indexFields) === $n) {
+				foreach ($fields as $field) {
+					if (array_search($field, $indexFields, true) === false) {
+						continue 2;
+					}
+				}
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -919,21 +1184,24 @@ abstract class ModelTable extends ModelTableProxy {
 	/**
 	 * Starts a search in %%ModelTable%%
 	 * @param $condition
-	 * @param $inputs,...
+	 * @param $inputs
+	 * @param array $context
 	 * @return ModelTableFinder
 	 * @see QueryWhere for the syntax of a search
 	 * @ignore
 	 */
-	protected function _find($condition = null, $inputs = null) {
-		if (func_num_args() > 2) $inputs = array_splice(func_get_args(), 1);
-		return new ModelTableFinder($this, $condition, $inputs);
+	protected function _find($condition = null, $inputs = null, array $context = null) {
+		// 2013-03-21 Deprecated multiple inputs args
+		// if (func_num_args() > 2) $inputs = array_splice(func_get_args(), 1);
+		return new ModelTableFinder($this, $condition, $inputs, $context);
 	}
 
 	/**
 	 *
 	 * @param string $col
 	 * @param mixed $value
-	 * @param Const $mode
+	 * @param int $mode
+	 * @throws IllegalArgumentException
 	 * @return ModelSet
 	 */
 	protected function _findBy($col, $value, $mode) {
@@ -1001,12 +1269,14 @@ abstract class ModelTable extends ModelTableProxy {
 	 */
 	abstract public static function findFirst(QueryWhere $where = null, array $context = null, 
 			$aliasingCallback = null);
+
 	/**
-	 * @param QueryWhere $where
+	 * @param \QueryWhere $where
 	 * @param array $context
-	 * @return %%Model%%
+	 * @param callback $aliasingCallback
+	 * @return \Model|null %%Model%%
 	 */
-	protected function _findFirst(QueryWhere $where = null, array $context = null, 
+	protected function _findFirst(\QueryWhere $where = null, array $context = null,
 			$aliasingCallback = null) {
 
 		$query = $this->createQuery($context);
@@ -1050,7 +1320,7 @@ abstract class ModelTable extends ModelTableProxy {
 	}
 
 	/**
-	 * @return ModelTableQuery
+	 * @return \ModelTableQuery
 	 */
 	private function createFindOneQuery($condition, $inputs, $context, $aliasingCallback) {
 
@@ -1122,12 +1392,21 @@ EX
 //	}
 
 	/**
+	 * @param string $condition
+	 * @param array $inputs
+	 * @param array $context
 	 * @return ModelTableFinder
 	 * @ignore
 	 */
-	abstract public static function find($condition = null, $inputs = null);
+	abstract public static function find($condition = null, $inputs = null, array $context = null);
 
 	/**
+	 * @param string $condition
+	 * @param array $inputs
+	 * @param int $mode
+	 * @param array $context
+	 * @param callback $aliasingCallback
+	 * @param ModelRelationReciproqueFactory $reciproqueFactory
 	 * @return ModelSet
 	 * @ignore
 	 */
@@ -1138,16 +1417,19 @@ EX
 		$aliasingCallback = null,
 		ModelRelationReciproqueFactory $reciproqueFactory = null
 	);
+
 	/**
 	 * Execute a search in %%ModelTable%%, and returns the result as a ModelSet
 	 *
 	 * <b>Attention</b>: this method's syntax differs from the other find...
 	 * methods; the $inputs argument must necessarily be given as an array!
 	 *
-	 * @param $condition
+	 * @param string $condition
 	 * @param array $inputs
-	 * @param Const $mode one of the {@link ModelSet} format constants
-	 * @param ModelRelation $existingRelation
+	 * @param int $mode one of the {@link ModelSet} format constants
+	 * @param array $context
+	 * @param callback $aliasingCallback
+	 * @param ModelRelationReciproqueFactory $reciproqueFactory
 	 *
 	 * @return ModelSet
 	 * @see QueryWhere::where() for the syntax of a search
@@ -1177,6 +1459,11 @@ EX
 	}
 
 	/**
+	 * @param array $ids
+	 * @param int $modelSet
+	 * @param array $context
+	 * @param callback $aliasingCallback
+	 * @param ModelRelationReciproqueFactory $reciproqueFactory
 	 * @return ModelSet
 	 */
 	abstract public static function findWherePkIn(
@@ -1317,6 +1604,7 @@ EX
 			$this->createModelSet($query->where($where), ModelSet::ONE_PASS)
 			as $model
 		) {
+			/** @var $model Model */
 			$model->notifyDelete();
 		}
 		// Actually remove the data from the data store
@@ -1359,8 +1647,7 @@ EX
 	}
 
 	/**
-	 * @param array $pointer an array containing a reference to the variable to
-	 * be attached to.
+	 * @param $pointer
 	 * @return ModelTable
 	 */
 	public function attach(&$pointer) {
@@ -1369,434 +1656,5 @@ EX
 
 }  // <-- ModelTable
 
-abstract class ModelSet implements Iterator {
-
-	const RAW = -1;
-	const ONE_PASS = 0;
-	const RANDOM_ACCESS = 1;
-
-	/**
-	 * Get the number of records in this set.
-	 *
-	 * @return int
-	 */
-	abstract public function count();
-
-	/**
-	 * @return Model[]
-	 */
-	abstract public function toArray();
-
-	/**
-	 *
-	 * @param Query $query
-	 * @param Const $mode
-	 * @param ModelRelation $existingRelation
-	 * @return ModelSet
-	 */
-	public static function create(
-			ModelTableProxy $table,
-			Query $query,
-			$mode = ModelSet::ONE_PASS,
-			ModelRelationReciproqueFactory $reciproqueFactory = null
-		) {
-
-		switch ($mode) {
-			case ModelSet::ONE_PASS:
-				return new OnePassModelSet($table, $query, $reciproqueFactory);
-				break;
-			case ModelSet::RANDOM_ACCESS:
-				return new RandomAccessModelSet($table, $query, $reciproqueFactory);
-				break;
-			case ModelSet::RAW:
-				return $query->executeSelect();
-			default:
-				throw new IllegalArgumentException('Unknown mode: ' . $mode);
-		}
-	}
-
-	public static function createEmpty(ModelTableProxy $table, $mode = ModelSet::RANDOM_ACCESS) {
-		switch ($mode) {
-			case ModelSet::ONE_PASS:
-//				return new OnePassModelSet($table, null, $reciproqueFactory);
-				throw new IllegalArgumentException('There is absolutly no point in creating'
-						. 'an empty one-pass model set...');
-				break;
-			case ModelSet::RANDOM_ACCESS:
-				return new RandomAccessModelSet($table, null);
-				break;
-			case ModelSet::RAW:
-				return array();
-			default:
-				throw new IllegalArgumentException('Unknown mode: ' . $mode);
-		}
-	}
-
-	public function __toString() {
-		$r = get_class($this) . '[';
-		$empty = true;
-		foreach ($this as $k => $v) {
-			$empty = false;
-			$r .= "\n\t$k => " . $v;
-		}
-		return $r . ($empty ? '' : "\n") . ']';
-	}
-}
-
-class RandomAccessModelSet extends ModelSet implements ArrayAccess {
-
-	/**
-	 * @var Model[]
-	 */
-	protected $set;
-	protected $context = null;
-
-	public function __construct(ModelTableProxy $table, Query $query = null,
-			ModelRelationReciproqueFactory $reciproqueFactory = null) {
-
-		$this->set = array();
-
-		if ($query !== null) {
-			foreach ($query->executeSelect() as $results) {
-				$this->set[] = $table->loadModelFromData($results, $query->context);
-			}
-			$this->context = $query->context;
-		}
-
-		if ($reciproqueFactory !== null) {
-			foreach ($this->set as $model) {
-				$reciproqueFactory->init($model);
-			}
-		}
-	}
-
-	public function groupBy($fieldName, $asc = true) {
-		$r = array();
-		foreach ($this as $model) {
-			$r[$model->__get($fieldName)][] = $model;
-		}
-
-		if ($asc) ksort($r);
-		else krsort($r);
-
-		return $r;
-	}
-
-	public function groupByBoolean($fieldName, $asc = true) {
-		$r = array();
-		foreach ($this as $model) {
-			$r[(bool) $model->__get($fieldName)][] = $model;
-		}
-
-		if ($asc) ksort($r);
-		else krsort($r);
-
-		return $r;
-	}
-
-	public function count() {
-		return count($this->set);
-	}
-
-	public function size() {
-		return count($this->set);
-	}
-
-	/**
-	 * @inheritdoc
-	 */
-	public function toArray() {
-		return $this->set;
-	}
-
-	public function getModelsData() {
-		$r = array();
-		foreach ($this->set as $model) {
-			$r[] = $model->getData();
-		}
-		return $r;
-	}
-
-	public function push(Model $model) {
-		$this->set[] = $model;
-		if ($this->context !== null) $model->setContextIf($this->context);
-	}
-
-	public function pop() {
-		return array_pop($this->set);
-	}
-
-	/**
-	 * @param mixed $value	the value of the primary key of the model to remove,
-	 * or a Model from which the id wil be taken. If the Model is new (hence,
-	 * has no id, an IllegalArgumentException will be thrown.
-	 * @throws IllegalArgumentException
-	 */
-	public function removeById($value) {
-		if ($value instanceof Model) {
-			if ($value->isNew()) throw new IllegalArgumentException(
-				'It is impossible to remove by id a new model'
-			);
-			$value = $value->getPrimaryKeyValue();
-		}
-		foreach ($this->set as $i => $m) {
-			if ($m->getPrimaryKeyValue() === $value) {
-				unset($this->set[$i]);
-				return $m;
-			}
-		}
-		return false;
-	}
-
-	public function offsetExists($offset) {
-		return array_key_exists($offset, $this->set);
-	}
-
-	/**
-	 *
-	 * @param int $offset
-	 * @return Model
-	 */
-	public function offsetGet($offset) {
-		return $this->set[$offset];
-	}
-
-	public function offsetSet($offset, $value) {
-		throw new UnsupportedOperationException('Read Only');
-	}
-
-	public function offsetUnset($offset) {
-//		throw new UnsupportedOperationException('Read Only');
-//		unset($this->set[$offset]);
-		for ($i=$offset, $l=count($this->set)-1; $i<$l; $i++) {
-			$this->set[$i] = $this->set[$i+1];
-		}
-		array_pop($this->set);
-	}
-
-	protected $i;
-
-	public function key() {
-		return $this->i;
-	}
-
-	public function next() {
-		$this->i++;
-	}
-
-	public function rewind() {
-		$this->i = 0;
-	}
-
-	public function valid() {
-		return array_key_exists($this->i, $this->set);
-	}
-
-	/**
-	 *
-	 * @return Model
-	 */
-	public function current() {
-		return $this->set[$this->i];
-	}
-
-}
-
-class OnePassModelSet extends ModelSet {
-
-	/** @var ModelTable */
-	protected $table;
-
-	/** @var Query */
-	protected $query;
-	protected $pdoStatement;
-
-	protected $reciproqueFactory;
-
-	private $i = null;
-	private $current = null;
-
-	public function __construct(ModelTableProxy $table, Query $query, ModelRelationReciproqueFactory $reciproqueFactory = null) {
-		$this->query = $query;
-		$table->attach($this->table);
-		$this->reciproqueFactory = $reciproqueFactory;
-	}
-
-	protected $count = null;
-
-	public function count() {
-		if ($this->count !== null) return $this->count;
-		else return $this->count = $this->query->executeCount();
-	}
-
-	/**
-	 * @inheritdoc
-	 */
-	public function toArray() {
-		$r = array();
-		foreach($this as $record) $r[] = $record;
-		return $r;
-	}
-
-	/**
-	 * 
-	 * @return Model
-	 */
-	public function current() {
-		$model = $this->table->loadModelFromData($this->current, $this->query->context);
-
-		if ($this->reciproqueFactory !== null) {
-			$this->reciproqueFactory->init($model);
-		}
-
-		return $model;
-	}
-
-	public function key() {
-		return $this->i;
-	}
-
-	public function next() {
-		$this->i++;
-		$this->current = $this->pdoStatement->fetch(PDO::FETCH_ASSOC);
-	}
-
-	public function rewind() {
-		if ($this->i === null) {
-			$this->pdoStatement = $this->query->executeSelectRaw();
-		} else {
-			$this->pdoStatement = $this->query->reExecuteSelectRaw();
-		}
-		$this->i = 0;
-		$this->current = $this->pdoStatement->fetch(PDO::FETCH_ASSOC);
-	}
-
-	public function valid() {
-		return $this->current !== false;
-	}
-
-}
-
-/**
- * @method ModelTableFinder where($condition, $inputs)
- * @method ModelTableFinder whereIn($field, $values)
- * @method ModelTableFinder whereNotIn($field, $values)
- * @method ModelTableFinder andWhere($condition, $inputs)
- * @method ModelTableFinder andWhereIn($field, $values)
- * @method ModelTableFinder andWhereNotIn($field, $values)
- * @method ModelTableFinder orWhere($condition, $inputs)
- * @method ModelTableFinder orWhereIn($field, $values)
- * @method ModelTableFinder orWhereNotIn($field, $values)
- */
-class ModelTableFinder extends QueryWhere {
-
-	/** @var ModelTable */
-	private $table;
-	/** @var ModelTableQuery */
-	public $query;
-
-	public function __construct(ModelTable $table, $condition = null, $inputs = null) {
-		$this->table = $table;
-		$this->query = $this->table->createQuery();
-		parent::__construct($this->query, $condition, $inputs);
-//		if ($condition !== null) $this->where($condition, $inputs);
-	}
-
-	/**
-	 * Accesses the query used internally by the Finder.
-	 * @return ModelTableQuery
-	 */
-	public function getQuery() {
-		return $this->query;
-	}
-
-	/**
-	 * Gets a clone of the finder's query.
-	 * @return ModelTableQuery
-	 */
-	public function cloneQuery() {
-		$q = clone $this->query;
-		$q->where($this)->select();
-		return $q;
-	}
-
-	/**
-	 * DEPRECATED DOC !!!
-	 * Execute the search query and returns the result as a {@link ModelSet}
-	 * @param Const $mode one of the {@link ModelSet} format constants
-	 * @param ModelRelation $existingRelation
-	 * @return ModelSet
-	 */
-	public function execute($mode = ModelSet::ONE_PASS) {
-		return ModelSet::create($this->table, $this->query->andWhere($this), $mode);
-	}
-
-}
-
-/**
- * @method ModelTableFirstFinder where($condition, $inputs)
- * @method ModelTableFirstFinder whereIn($field, $values)
- * @method ModelTableFirstFinder whereNotIn($field, $values)
- * @method ModelTableFirstFinder andWhere($condition, $inputs)
- * @method ModelTableFirstFinder andWhereIn($field, $values)
- * @method ModelTableFirstFinder andWhereNotIn($field, $values)
- * @method ModelTableFirstFinder orWhere($condition, $inputs)
- * @method ModelTableFirstFinder orWhereIn($field, $values)
- * @method ModelTableFirstFinder orWhereNotIn($field, $values)
- */
-class ModelTableFirstFinder extends QueryWhere {
-
-	/** @var ModelTable */
-	private $table;
-
-	public function __construct(ModelTable $table, $condition = null, $inputs = null) {
-		$this->table = $table;
-		if ($condition !== null) $this->where($condition, $inputs);
-	}
-
-	/**
-	 *
-	 * @return Query
-	 */
-	public function getQuery() {
-		return $this->table->createQuery()->selectFirst()->where($this);
-	}
-
-	/**
-	 * Execute the search query and returns the result as a {@link ModelSet}
-	 * @return Model
-	 */
-	public function execute() {
-		$result = $this->table->createQuery()->where($this)->executeSelectFirst();
-		if ($result === null) return null;
-		else return $this->table->createModel($result, true);
-	}
-
-	public function __toString() {
-		return $this->table->createQuery()->selectFirst()->where($this)->__toString();
-	}
-
-}
-
-/**
- * @var string $tableName
- * @var string $dbTableName
- * @var string $modelName
- */
-abstract class ModelTableProxy {
-
-	/**
-	 * @return ModelTable
-	 */
-	public abstract static function getInstance();
-
-	public abstract function attach(&$pointer);
-
-	public abstract static function getTableName();
-
-	public abstract static function getDBTableName();
-
-	public abstract static function getModelName();
-}
-
+// WTF?
 require_once __DIR__ . '/VirtualField.php';
