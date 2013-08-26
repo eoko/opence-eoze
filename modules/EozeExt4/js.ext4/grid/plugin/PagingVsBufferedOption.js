@@ -161,11 +161,11 @@ Ext.define('Eoze.grid.plugin.PagingVsBufferedOption', {
 					s = n > 1 ? 's' : '',
 					infoItem = pagingToolbar.child('#displayItem');
 				if (n === 0) {
-					infoItem.setText("Aucun résultat");
+					infoItem.setText("Aucun résultat"); // i18n
 				} else {
 					infoItem.setText(String.format(
 						pagingToolbar.displayMsg,
-						n, 1, n
+						1, n, n
 					));
 				}
 			});
