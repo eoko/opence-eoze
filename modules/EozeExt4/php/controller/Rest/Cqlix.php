@@ -394,8 +394,6 @@ abstract class Cqlix extends Rest {
 	}
 
 	protected function getLastModified() {
-//		dump($this->getTable()->getLastModified());
 		return $this->getTable()->getLastModified();
-		return new \DateTime('2013-01-26 23:54:03');
 	}
 }
