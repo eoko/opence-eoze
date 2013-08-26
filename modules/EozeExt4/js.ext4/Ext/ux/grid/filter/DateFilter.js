@@ -1,3 +1,4 @@
+(function(Ext) {
 /**
  * Copyright (C) 2013 Eoko
  *
@@ -31,7 +32,7 @@
  *
  * @since 2013-05-17 16:11
  */
-Ext4.define('Eoze.Ext.ux.grid.filter.DateFilter', {
+Ext.define('Eoze.Ext.ux.grid.filter.DateFilter', {
 	override: 'Ext.ux.grid.filter.DateFilter'
 
 	/**
@@ -104,3 +105,4 @@ Ext4.define('Eoze.Ext.ux.grid.filter.DateFilter', {
 	}
 
 });
+})(window.Ext4 || Ext.getVersion && Ext);
