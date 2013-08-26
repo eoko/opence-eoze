@@ -145,6 +145,12 @@ Ext.define('Eoze.grid.plugin.PagingVsBufferedOption', {
 		} else {
 			grid.bindStore(grid.createStore(false));
 			pagingToolbar.bindStore(null);
+
+			grid.getStore().on('datachanged', function() {
+				var n = this.getCount(),
+					s = n > 1 ? 's' : '';
+				pagingToolbar.child('#displayItem').setText(n + ' enregistrement' + s);
+			});
 		}
 
 		// Column filters
