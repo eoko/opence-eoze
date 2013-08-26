@@ -99,7 +99,8 @@ Ext.define('Eoze.grid.plugin.PagingVsBufferedOption', {
 	 * @return {Ext.data.Store}
 	 */
 	,createStore: function(paginated, config) {
-		var grid = this.grid;
+		var grid = this.grid,
+			previousStore = grid.getStore();
 
 		config = Ext.apply({
 			model: grid.model
@@ -112,7 +113,16 @@ Ext.define('Eoze.grid.plugin.PagingVsBufferedOption', {
 			,pageSize: paginated ? 100 : 999999
 		}, config);
 
-		Ext.apply(config, grid.storeConfig);
+		if (previousStore) {
+			config.filters = previousStore.filters.items;
+			config.sorters = previousStore.sorters.items;
+		}
+
+		var defaultConfig = Ext.apply({}, grid.storeConfig);
+		delete defaultConfig.filters;
+		delete defaultConfig.sorters;
+
+		Ext.apply(config, defaultConfig);
 
 		return Ext4.create('Ext.data.Store', config);
 	}
@@ -148,8 +158,16 @@ Ext.define('Eoze.grid.plugin.PagingVsBufferedOption', {
 
 			grid.getStore().on('datachanged', function() {
 				var n = this.getCount(),
-					s = n > 1 ? 's' : '';
-				pagingToolbar.child('#displayItem').setText(n + ' enregistrement' + s);
+					s = n > 1 ? 's' : '',
+					infoItem = pagingToolbar.child('#displayItem');
+				if (n === 0) {
+					infoItem.setText("Aucun résultat");
+				} else {
+					infoItem.setText(String.format(
+						pagingToolbar.displayMsg,
+						n, 1, n
+					));
+				}
 			});
 		}
 
