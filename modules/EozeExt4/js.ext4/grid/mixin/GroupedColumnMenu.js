@@ -40,12 +40,7 @@ Ext4.define('Eoze.grid.mixin.GroupedColumnMenu', {
 	 */
 	,enableColumnHide: false
 
-	/**
-	 * Get show/hide column menu items.
-	 *
-	 * @return {Ext.menu.Items[]}
-	 */
-	,getColumnMenuItems: function() {
+	,getGenericColumnMenuItems: function(query, checkHandler, scope, isChecked) {
 		var Ext = Ext4,
 			me = this,
 			headerContainer = this.headerCt,
@@ -53,7 +48,7 @@ Ext4.define('Eoze.grid.mixin.GroupedColumnMenu', {
 			menuItems = [],
 			i = 0,
 			item,
-			items = headerContainer.query('>gridcolumn[hideable]'),
+			items = headerContainer.query(query),
 			itemsLn = items.length,
 			menuItem,
 			group,
@@ -61,14 +56,20 @@ Ext4.define('Eoze.grid.mixin.GroupedColumnMenu', {
 
 		for (; i < itemsLn; i++) {
 			item = items[i];
+
+			if (!item.dataIndex) {
+				continue;
+			}
+
 			menuItem = new Ext.menu.CheckItem({
 				text: item.menuText || item.text,
-				checked: !item.hidden,
+				checked: isChecked(item),
 				hideOnClick: false,
 				headerId: item.id,
-				menu: item.isGroupHeader ? headerContainer.getColumnMenu(item) : undefined,
-				checkHandler: headerContainer.onColumnCheckChange,
-				scope: headerContainer
+				dataIndex: item.dataIndex,
+				//menu: item.isGroupHeader ? headerContainer.getColumnMenu(item) : undefined,
+				checkHandler: checkHandler,
+				scope: scope || headerContainer
 			});
 
 			group = item.group;
@@ -167,6 +168,27 @@ Ext4.define('Eoze.grid.mixin.GroupedColumnMenu', {
 		menuItems = menuItems.concat(ungroupedItems);
 
 		return menuItems;
+	}
+
+	/**
+	 * Get show/hide column menu items.
+	 *
+	 * @return {Ext.menu.Items[]}
+	 */
+	,getColumnMenuItems: function() {
+
+		function isChecked(item) {
+			return !item.hidden;
+		}
+
+		return this.getGenericColumnMenuItems(
+			'>gridcolumn[hideable]',
+			function() {
+				return this.onColumnCheckChange.apply(this, arguments);
+			},
+			null, // scope
+			isChecked
+		);
 	}
 
 });
