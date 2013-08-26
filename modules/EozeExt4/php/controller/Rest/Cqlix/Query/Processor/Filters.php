@@ -252,8 +252,21 @@ class Filters extends AbstractProcessor {
 			if (isset($filter['value'])) {
 				$property = $filter['property'];
 				$value = $filter['value'];
-				$field = $this->resolveFieldName($property, false);
-				$query->andWhere("`$field` LIKE ?", "$value%");
+				if (is_array($property)) {
+					$where = $query->createWhere();
+					foreach ($property as $p) {
+						$field = $this->resolveFieldName($p, false);
+						if ($field) {
+							$where->orWhere("`$field` LIKE ?", "%$value%");
+						}
+					}
+					$query->andWhere($where);
+				} else {
+					$field = $this->resolveFieldName($property, false);
+					if ($field) {
+						$query->andWhere("`$field` LIKE ?", "%$value%");
+					}
+				}
 			} // else, let's say that's not a filter!
 		} else {
 			throw new InvalidArgument();
