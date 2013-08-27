@@ -52,7 +52,7 @@ Ext4.define('Eoze.Ext.OverridesLoader', {
 		'Eoze.Ext.data.model.DirtyEvents',
 		'Eoze.Ext.data.model.UpdateAssociationsOnSave',
 		'Eoze.Ext.data.association.HasOne',
-		'Eoze.Ext.data.proxy.Server',
+		'Eoze.Ext.data.proxy.Server.FilterGetRemoteData',
 		// Component
 		'Eoze.Ext.AbstractComponent',
 		// fix ComponentQuery to accept square brackets in attributes query: mytype[attribute[x]=value]
