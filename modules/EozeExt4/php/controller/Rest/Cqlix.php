@@ -29,6 +29,7 @@ use ModelTable;
 use eoko\modules\EozeExt4\controller\Rest;
 use eoko\modules\EozeExt4\controller\DatabaseAdapter\Pdo as PdoDatabaseAdapter;
 use eoko\modules\EozeExt4\controller\DatabaseAdapter;
+use Zend\Http\Header\Accept;
 
 /**
  * Base implementation for a {@link eoko\modules\EozeExt4\controller\Rest RESTFul executor}
@@ -370,30 +371,113 @@ abstract class Cqlix extends Rest {
 			$data[] = $dataProxy->getRecordData($record);
 		}
 
-		if ($requestParams->has($requestParams::CONFIGURE)) {
-			$this->set('metaData', $dataProxy->getMetaData());
+		// Alternative formats
+		if (null !== $earl = $this->answerAlternativeFormat($dataProxy, $data)) {
+
+			$extension = $earl->getExtension();
+			$directory = $this->getApplication()->resolvePath('media/exports/') . 'dossiers';
+			$basename = 'export_' . date('Ymd_His');
+
+			// Create directory
+			if (!is_dir($directory)) {
+				mkdir($directory, 0755, true);
+			}
+
+			// Ensure free filename
+			$n = null;
+			$i = 0;
+			while (file_exists($directory . '/' . $basename . $n . '.' . $extension)) {
+				$i++;
+				$n = "_$i";
+			}
+
+			$file = $directory . '/' . $basename . $n . '.' . $extension;
+
+			$earl->writeFile($file);
+
+			// $file may be modified by writeFile
+			$url = EXPORTS_BASE_URL . 'dossiers/' . basename($file);
+
+			$this->set(array(
+				'url' => $url,
+			));
 		}
 
-		// Data
-		$responseData = array(
-			'queries' => \Query::getExecutionCount(),
+		// Json
+		else {
+			if ($requestParams->has($requestParams::CONFIGURE)) {
+				$this->set('metaData', $dataProxy->getMetaData());
+			}
 
-			$requestParams->getParamName($requestParams::EXPAND) => $dataProxy->getResponseExpandable(),
-			$requestParams->getParamName($requestParams::EXPANDED) => $dataProxy->getResponseExpanded(),
-		);
+			// Data
+			$responseData = array(
+				'queries' => \Query::getExecutionCount(),
 
-		foreach ($records->getResponseMetaData($requestParams) as $name => $value) {
-			$responseData[$name] = $value;
+				$requestParams->getParamName($requestParams::EXPAND) => $dataProxy->getResponseExpandable(),
+				$requestParams->getParamName($requestParams::EXPANDED) => $dataProxy->getResponseExpanded(),
+			);
+
+			foreach ($records->getResponseMetaData($requestParams) as $name => $value) {
+				$responseData[$name] = $value;
+			}
+
+			$this->set($responseData);
+
+			$this->set('data', $data);
 		}
-
-		$this->set($responseData);
-
-		$this->set('data', $data);
 
 		return true;
 	}
 
 	protected function getLastModified() {
 		return $this->getTable()->getLastModified();
+	}
+
+	private $mimeToEarlReportFormat = array(
+		'application/pdf' => 'pdf',
+		'application/vnd.oasis.opendocument.spreadsheet' => 'ods',
+		'application/vnd.ms-excel' => 'xls',
+		'text/csv' => 'csv',
+	);
+
+	/**
+	 * @param DataProxy $dataProxy
+	 * @param array $data
+	 * @return Cqlix\EarlResponse|null
+	 */
+	private function answerAlternativeFormat($dataProxy, $data) {
+
+		$requestParams = $this->getRequestParams();
+
+		$accept = $requestParams->get('accept');
+
+		if ($accept) {
+			if (isset($this->mimeToEarlReportFormat[$accept])) {
+				$mime = $accept;
+				$format = $this->mimeToEarlReportFormat[$mime];
+			}
+		} else {
+			// Hook for format alternatives to JSON
+			/** @var Accept $accept */
+			$accept = $this->getHttpRequest()->getHeader('Accept');
+
+			foreach ($accept->getPrioritized() as $acceptPart) {
+				/** @var Accept\FieldValuePart\AcceptFieldValuePart $acceptPart */
+				if (isset($this->mimeToEarlReportFormat[$acceptPart->getTypeString()])) {
+					$mime = $acceptPart->getTypeString();
+					$format = $this->mimeToEarlReportFormat[$mime];
+					continue;
+				}
+			}
+		}
+
+		if (isset($format) && isset($mime)) {
+
+			$fields = json_decode($requestParams->req('fields'), true);
+
+			$user = $this->getApplication()->getActiveUser();
+
+			return new Rest\Cqlix\EarlResponse($user, $dataProxy, $data, $fields, $format);
+		}
 	}
 }
