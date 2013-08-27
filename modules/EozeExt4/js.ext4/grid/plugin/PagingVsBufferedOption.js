@@ -156,17 +156,29 @@ Ext.define('Eoze.grid.plugin.PagingVsBufferedOption', {
 			grid.bindStore(grid.createStore(false));
 			pagingToolbar.bindStore(null);
 
-			grid.getStore().on('datachanged', function() {
-				var n = this.getCount(),
-					s = n > 1 ? 's' : '',
-					infoItem = pagingToolbar.child('#displayItem');
-				if (n === 0) {
-					infoItem.setText("Aucun résultat"); // i18n
-				} else {
-					infoItem.setText(String.format(
-						pagingToolbar.displayMsg,
-						1, n, n
-					));
+			grid.getStore().on({
+				// We don't want the server to filter the results when there is
+				// no paging.
+				beforeload: function(store, operation) {
+					delete operation.filters;
+				}
+
+				// Update paging toolbar message.
+				,datachanged: function() {
+					var n = this.getCount(),
+						s = n > 1 ? 's' : '',
+						infoItem = pagingToolbar.child('#displayItem');
+					if (n === 0) {
+						// This message would display when the store is loading,
+						// which is *not* the same behaviour as the default one.
+						//
+						// infoItem.setText("Aucun résultat"); // i18n
+					} else {
+						infoItem.setText(String.format(
+							pagingToolbar.displayMsg,
+							1, n, n
+						));
+					}
 				}
 			});
 		}
