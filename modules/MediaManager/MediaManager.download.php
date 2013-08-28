@@ -40,7 +40,9 @@ class download extends ExecutorBase {
 		$path = $this->getModule()->getDownloadPath($this->request->req('path'));
 
 		if (file_exists($path)) {
+			$filename = basename($path);
 			$response->getHeaders()->addHeaderLine('Content-Type: ' . self::getMime($path));
+			$response->getHeaders()->addHeaderLine('Content-Disposition: attachment; filename="' . $filename . '"');
 			$response->setContent(file_get_contents($path));
 		} else {
 			$response->setStatusCode(Response::STATUS_CODE_404);
