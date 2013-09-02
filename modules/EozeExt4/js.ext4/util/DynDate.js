@@ -98,7 +98,7 @@ Ext.define('Eoze.util.DynDate', {
 }, function() {
 
 	var tpl = new Ext.XTemplate(
-		'<span data-qtip="Le {date:date(\"j M Y à H:i\")}" data-dyndate="{date:date(\'@!Y-m-d\TH:i:s\')}">',
+		'<span data-qtip="Le {date:date(\"j M Y à H:i\")}" data-dyndate="{date:date(\'@!Y-m-d\\\\TH:i:s\')}">',
 			'{date:date("social")}',
 		'</span>'
 	);
