@@ -62,6 +62,14 @@ Ext4.define('Eoze.Ext.util.Filter.FuzzyMatch', {
 			escapeRe = Ext.String.escapeRegex,
 			parts;
 
+		function normalize(value) {
+			value = escapeRe(value);
+			if (ignoreAccents) {
+				value = me.normalizeAccents(value);
+			}
+			return value;
+		}
+
 		if (value === null) {
 			return value;
 		}
@@ -73,15 +81,12 @@ Ext4.define('Eoze.Ext.util.Filter.FuzzyMatch', {
 				parts = [];
 				value.split(' ').forEach(function(value) {
 					if (anyMatch === true) {
-						value = escapeRe(value);
+						value = normalize(value);
 					} else {
-						value = '\\b' + escapeRe(value);
+						value = '\\b' + normalize(value);
 						if (exactMatch === true) {
 							value += '\\b';
 						}
-					}
-					if (ignoreAccents) {
-						value = me.normalizeAccents(value);
 					}
 					parts.push(new RegExp(value, caseSensitive ? '' : 'i'));
 				});
@@ -98,15 +103,12 @@ Ext4.define('Eoze.Ext.util.Filter.FuzzyMatch', {
 				};
 			} else {
 				if (anyMatch === true) {
-					value = escapeRe(value);
+					value = normalize(value);
 				} else {
-					value = '^' + escapeRe(value);
+					value = '^' + normalize(value);
 					if (exactMatch === true) {
 						value += '$';
 					}
-				}
-				if (ignoreAccents) {
-					value = me.normalizeAccents(value);
 				}
 				value = new RegExp(value, caseSensitive ? '' : 'i');
 			}
