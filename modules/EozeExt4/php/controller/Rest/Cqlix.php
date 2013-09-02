@@ -449,26 +449,26 @@ abstract class Cqlix extends Rest {
 
 		$requestParams = $this->getRequestParams();
 
-		$accept = $requestParams->get('accept');
+		$accept = $requestParams->get('exportMimeType');
 
 		if ($accept) {
 			if (isset($this->mimeToEarlReportFormat[$accept])) {
 				$mime = $accept;
 				$format = $this->mimeToEarlReportFormat[$mime];
 			}
-		} else {
-			// Hook for format alternatives to JSON
-			/** @var Accept $accept */
-			$accept = $this->getHttpRequest()->getHeader('Accept');
-
-			foreach ($accept->getPrioritized() as $acceptPart) {
-				/** @var Accept\FieldValuePart\AcceptFieldValuePart $acceptPart */
-				if (isset($this->mimeToEarlReportFormat[$acceptPart->getTypeString()])) {
-					$mime = $acceptPart->getTypeString();
-					$format = $this->mimeToEarlReportFormat[$mime];
-					continue;
-				}
-			}
+//		} else {
+//			// Hook for format alternatives to JSON
+//			/** @var Accept $accept */
+//			$accept = $this->getHttpRequest()->getHeader('Accept');
+//
+//			foreach ($accept->getPrioritized() as $acceptPart) {
+//				/** @var Accept\FieldValuePart\AcceptFieldValuePart $acceptPart */
+//				if (isset($this->mimeToEarlReportFormat[$acceptPart->getTypeString()])) {
+//					$mime = $acceptPart->getTypeString();
+//					$format = $this->mimeToEarlReportFormat[$mime];
+//					continue;
+//				}
+//			}
 		}
 
 		if (isset($format) && isset($mime)) {
