@@ -1,3 +1,4 @@
+(function(Ext) {
 /**
  * Copyright (C) 2013 Eoko
  *
@@ -22,13 +23,16 @@
  */
 
 /**
- * Require this class to include all the fixes.
  *
- * @since 2013-06-04 14:08
+ * @since 2013-09-02 10:57
  */
-Ext4.define('Eoze.fix.FixesLoader', {
-	requires: [
-		'Eoze.fix.Ext.view.Table',
-		'Eoze.fix.Ext.tip.Tip',
-	]
+Ext.define('Eoze.fix.Ext.tip.Tip', {
+
+}, function() {
+	delete Ext.tip.Tip.prototype.minWidth;
+
+	if (Ext.getVersion().isGreaterThan('4.2.0')) {
+		debugger // is this fix still needed?
+	}
 });
+})(window.Ext4 || Ext.getVersion && Ext);
