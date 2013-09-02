@@ -1,0 +1,63 @@
+/**
+ * Copyright (C) 2013 Eoko
+ *
+ * This file is part of Opence.
+ *
+ * Opence is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Opence is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Opence. If not, see <http://www.gnu.org/licenses/gpl.txt>.
+ *
+ * @copyright Copyright (C) 2013 Eoko
+ * @licence http://www.gnu.org/licenses/gpl.txt GPLv3
+ * @author Éric Ortega <eric@eoko.fr>
+ */
+
+/**
+ * From Tweeter Bootstrap 3.0
+ *
+ * @since 2013-09-02 17:40
+ */
+.eo-info-box.success {
+    background-color: #DFF0D8;
+    border-color: #D6E9C6;
+    color: #468847;
+}
+
+.eo-info-box {
+    border: 1px solid transparent;
+    border-radius: 4px 4px 4px 4px;
+    margin-bottom: 20px;
+    padding: 15px;
+}
+
+/*.eo-info-box, .eo-info-box:before, .eo-info-box:after {*/
+    /*-moz-box-sizing: border-box;*/
+    /*-webkit-box-sizing: border-box;*/
+/*}*/
+
+.eo-info-box.info {
+    background-color: #D9EDF7;
+    border-color: #BCE8F1;
+    color: #3A87AD;
+}
+
+.eo-info-box.warning {
+    background-color: #FCF8E3;
+    border-color: #FBEED5;
+    color: #C09853;
+}
+
+.eo-info-box.danger {
+    background-color: #F2DEDE;
+    border-color: #EED3D7;
+    color: #B94A48;
+}
