@@ -20,6 +20,14 @@ Ext.define('eo.ext4.compat.Ext4Container', {
 		
 		if (this.child) {
 			this.child = this.createComponent();
+
+			this.child.relayEvents(this, [
+				'beforeactivate',
+				'activate',
+				'beforedeactivate',
+				'deactivate'
+			]);
+
 			this.afterCreateChild(this.child);
 			this.child.render(this.el);
 		}
