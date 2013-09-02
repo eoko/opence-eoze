@@ -69,12 +69,18 @@ Ext.define('Eoze.data.proxy.mixin.AjaxHttpCache', {
 
 		this.verifiedCaches = {};
 
+		// This param is used to burst the cache on a per-request basis on Gecko
+		// which completely ignores the If-Modified-Since header in the request...
+		if (Ext.isGecko) {
+			this.requestDates = {};
+		}
+
 		Ext.apply(this, {
 			doRequest: function(operation, callback, scope) {
 				var writer  = this.getWriter(),
 					request = this.buildRequest(operation),
 					headers = Ext.apply({}, this.headers),
-					key;
+					key, params;
 
 				if (operation.allowWrite()) {
 					request = writer.write(request);
@@ -93,12 +99,23 @@ Ext.define('Eoze.data.proxy.mixin.AjaxHttpCache', {
 					if (operation.invalidateHttpCache) {
 						if (Ext.isChrome) {
 							headers['If-Modified-Since'] = Ext.Date.format(new Date(0), 'r');
+						} else if (Ext.isGecko) {
+							headers['If-Modified-Since'] = Ext.Date.format(new Date(0), 'r');
+							this.requestDates[key] = Ext.Date.format(new Date, 'r');
 						} else {
 							debugger // should try to find a better way!
 							headers['If-Modified-Since'] = Ext.Date.format(new Date(0), 'r');
 						}
 
 						delete this.verifiedCaches[key];
+					}
+
+					if (Ext.isGecko) {
+						if (!this.requestDates[key]) {
+							this.requestDates[key] = Ext.Date.format(new Date, 'r');
+						}
+						params = request.params = request.params || {};
+						params['If-Last-Modified'] = this.requestDates[key];
 					}
 				}
 
@@ -157,6 +174,9 @@ Ext.define('Eoze.data.proxy.mixin.AjaxHttpCache', {
 
 	,onKeplerDataChanged: function() {
 		this.verifiedCaches = {};
+		if (Ext.isGecko) {
+			this.requestDates = {};
+		}
 		this.fireEvent('cacheexpire', this);
 	}
 
