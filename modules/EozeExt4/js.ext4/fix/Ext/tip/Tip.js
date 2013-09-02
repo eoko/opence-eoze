@@ -31,7 +31,7 @@ Ext.define('Eoze.fix.Ext.tip.Tip', {
 }, function() {
 	delete Ext.tip.Tip.prototype.minWidth;
 
-	if (Ext.getVersion().isGreaterThan('4.2.0')) {
+	if (Ext.getVersion().isGreaterThan('4.2.0.663')) {
 		debugger // is this fix still needed?
 	}
 });
