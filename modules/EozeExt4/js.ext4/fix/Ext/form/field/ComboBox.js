@@ -1,3 +1,4 @@
+(function(Ext) {
 /**
  * Copyright (C) 2013 Eoko
  *
@@ -22,14 +23,20 @@
  */
 
 /**
- * Require this class to include all the fixes.
  *
- * @since 2013-06-04 14:08
+ * @since 2013-09-06 15:53
  */
-Ext4.define('Eoze.fix.FixesLoader', {
-	requires: [
-		'Eoze.fix.Ext.view.Table',
-		'Eoze.fix.Ext.tip.Tip',
-		'Eoze.fix.Ext.form.field.ComboBox'
-	]
+Ext.define('Eoze.fix.Ext.form.field.ComboBox', {
+	override: 'Ext.form.field.ComboBox'
+
+	// Fixes combo ping pong bug, when tabbing from one combo to another triggers
+	// an infinite focus loop between the two.
+	,triggerBlur: function() {
+		if (Ext.isWebKit) {
+			this.inputFocusTask.cancel();
+		}
+		this.callParent(arguments);
+	}
+
 });
+})(window.Ext4 || Ext.getVersion && Ext);
