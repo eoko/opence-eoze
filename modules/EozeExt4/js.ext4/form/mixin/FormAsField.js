@@ -64,11 +64,6 @@ Ext4.define('Eoze.form.mixin.FormAsField', {
 	/**
 	 * @inheritdoc
 	 */
-	,isEqual: Ext4.Object.equals
-
-	/**
-	 * @inheritdoc
-	 */
 	,getModelData: function() {
 		var data = {};
 		data[this.name] = this.getValue();
@@ -80,16 +75,11 @@ Ext4.define('Eoze.form.mixin.FormAsField', {
 	 */
 	,setValue: function(value) {
 		var form = this.getForm();
-		// We don't want to have a complete reference, that could get modified later
-		// without us being able to detect that it has changed.
-		this.value = Ext4.clone(value);
 
 		form.trackResetOnLoad = true;
 
-		// Delay is required, or the date fields picker doesn't appear on folder add window (?!)
-		Ext.defer(function() {
-			form.setValues(value);
-		}, 1);
+		form.setValues(value);
+		this.value = Ext4.isEmpty(value) ? value : form.getFieldValues();
 
 		return this;
 	}
