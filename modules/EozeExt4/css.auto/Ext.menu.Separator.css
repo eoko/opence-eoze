@@ -37,5 +37,6 @@
 .x4-menu-item-separator.title {
     color: #04468c;
     font-weight: bold;
-    font-stretch: 11px;
+    font-size: 11px;
+    cursor: default;
 }
