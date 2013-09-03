@@ -213,6 +213,24 @@
 					}
 				}
 			}
+
+			// Update associated records dirty state as well.
+			,commit: function(silent, modifiedFieldNames) {
+				var me = this,
+					hasOneFields = me.fields.items.filter(function(field) {
+						return !!field.model;
+					});
+
+				hasOneFields.forEach(function(field) {
+					var name = field.name,
+						targetRecord = me[name + instanceSuffix];
+					if (targetRecord) {
+						targetRecord.commit(silent, modifiedFieldNames && modifiedFieldNames[name]);
+					}
+				});
+
+				this.callParent(arguments);
+			}
 		});
 
 		Ext.data.writer.Writer.override({
