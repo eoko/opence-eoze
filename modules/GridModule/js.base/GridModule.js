@@ -1119,7 +1119,11 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	 */
 	,processFormError: function(win, form, data, options) {
 		var msg = data.errorMessage,
-			errors = data.erros;
+			errors = data.errors;
+
+		if (options && options.errorMessageDisplayed) {
+			return;
+		}
 			
 		if (errors) {
 			debugger

@@ -63,9 +63,8 @@ eo.handleResponseError = function(responseData, options) {
 		,modalTo: sc
 		,okHandler: function() {
 			win.close();
-			if (cb) {
-				cb.call(scope);
-			}
+			options.errorMessageDisplayed = true;
+			Ext.callback(cb, scope, [options, false, responseData]);
 		}
 	});
 }
