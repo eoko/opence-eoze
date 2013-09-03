@@ -26,6 +26,6 @@
  *
  * @since 2013-09-04 16:28
  */
-.eo-boundlist-item-alt {
+.eo-boundlist-item-alt:not(.x4-boundlist-item-over):not(.x-boundlist-item-over) {
     background-color: #f4f4f4;
 }
