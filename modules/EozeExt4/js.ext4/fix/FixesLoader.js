@@ -29,6 +29,6 @@
 Ext4.define('Eoze.fix.FixesLoader', {
 	requires: [
 		'Eoze.fix.Ext.view.Table',
-		'Eoze.fix.Ext.tip.Tip',
+		'Eoze.fix.Ext.tip.Tip'
 	]
 });
