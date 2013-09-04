@@ -25,9 +25,9 @@
  *
  * @since 2013-06-17 17:46
  */
-Ext4.define('Eoze.Ext.form.field.Picker', {
-	override: 'Ext.form.field.Picker'
+Ext4.define('Eoze.Ext.form.field.Date', {
+	override: 'Ext.form.field.Date'
 
-	,pickerAlign: 'tr-br'
+	,pickerAlign: 'tr-br?'
 
 });

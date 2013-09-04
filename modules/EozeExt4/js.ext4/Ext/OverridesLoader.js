@@ -71,7 +71,7 @@ Ext4.define('Eoze.Ext.OverridesLoader', {
 		'Eoze.Ext.form.Panel.UpdateRecord',
 		// Fields
 		'Eoze.Ext.form.field.Trigger',
-		'Eoze.Ext.form.field.Picker',
+		'Eoze.Ext.form.field.Date',
 		'Eoze.Ext.form.field.Text',
 		// File upload field, fixes rendering
 		'Eoze.Ext.form.field.File',
