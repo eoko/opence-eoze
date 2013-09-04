@@ -313,13 +313,13 @@ abstract class ModelTable extends ModelTableProxy implements EventManagerAwareIn
 	/**
 	 * Creates a new Model.
 	 *
-	 * The new reccord will be considered new until its primary key is set. This
+	 * The new record will be considered new until its primary key is set. This
 	 * default behaviour can be controlled with the {@link ModelTable::forceNew()
 	 * forceNew()} method (if you intend to use forceNew() just after the call
 	 * of the present method, both calls can be combined by using the {@link
 	 * createNewModel()} method).
 	 *
-	 * An array of values can be given to initialize the reccord's fields. It
+	 * An array of values can be given to initialize the record's fields. It
 	 * is not required for all model's fields to have a value in the given
 	 * array; the absent fields will be set to NULL.
 	 *
