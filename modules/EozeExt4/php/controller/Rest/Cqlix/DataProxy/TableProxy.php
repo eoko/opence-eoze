@@ -966,7 +966,7 @@ class TableProxy extends AbstractProxy {
 					? $inputData[$clientFieldName]
 					: null;
 
-				call_user_func($config['beforeUpdate'], $model, $value, $inputData);
+				call_user_func_array($config['beforeUpdate'], array($model, $value, &$inputData));
 			}
 		}
 
@@ -993,7 +993,7 @@ class TableProxy extends AbstractProxy {
 
 		// Execute post processors
 		foreach ($postProcessors as $processor) {
-			call_user_func($processor['function'], $model, $processor['value'], $inputData);
+			call_user_func_array($processor['function'], array($model, $processor['value'], $inputData));
 		}
 	}
 }
