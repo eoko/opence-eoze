@@ -966,7 +966,7 @@ class TableProxy extends AbstractProxy {
 					? $inputData[$clientFieldName]
 					: null;
 
-				call_user_func($config['beforeUpdate'], $model, $value, &$inputData);
+				call_user_func($config['beforeUpdate'], $model, $value, $inputData);
 			}
 		}
 
