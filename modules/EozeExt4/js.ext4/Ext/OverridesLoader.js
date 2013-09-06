@@ -70,6 +70,7 @@ Ext4.define('Eoze.Ext.OverridesLoader', {
 		// Form
 		'Eoze.Ext.form.Panel.UpdateRecord',
 		// Fields
+		'Eoze.Ext.form.field.Field.TolerantIsEqual',
 		'Eoze.Ext.form.field.Trigger',
 		'Eoze.Ext.view.BoundList.StripeRows',
 		'Eoze.Ext.form.field.Date',
