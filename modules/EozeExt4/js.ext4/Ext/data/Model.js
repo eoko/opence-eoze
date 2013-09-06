@@ -24,10 +24,20 @@
 /**
  * Default configuration for {@link Ext.data.Model}.
  *
+ * Fixes {@link isEqual} to evaluate arrays according to their content.
+ *
  * @since 2013-04-22 14:53
  */
 Ext4.define('Eoze.Ext.data.Model', {
 	override: 'Ext.data.Model'
 
 	,defaultProxyType: 'cqlix'
+
+	,isEqual: function(a, b) {
+		if (a instanceof Array && b instanceof Array) {
+			return String(a) === String(b);
+		} else {
+			return this.callParent(arguments);
+		}
+	}
 });
