@@ -86,6 +86,7 @@ Ext4.define('Eoze.Ext.OverridesLoader', {
 		'Eoze.Ext.ux.grid.FiltersFeature',
 		'Eoze.Ext.grid.column.Number',
 
-		'Eoze.Ext.form.field.ComboBox.TopToolbar'
+		'Eoze.Ext.form.field.ComboBox.TopToolbar',
+		'Eoze.Ext.form.field.ComboBox.AllowBlankForceSelection'
 	]
 });
