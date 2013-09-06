@@ -35,7 +35,8 @@ Ext4.define('Eoze.Ext.data.Model', {
 
 	,isEqual: function(a, b) {
 		if (a instanceof Array && b instanceof Array) {
-			return String(a) === String(b);
+			return String(a) === String(b)
+				&& Ext.encode(a) === Ext.encode(b);
 		} else {
 			return this.callParent(arguments);
 		}
