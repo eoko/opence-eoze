@@ -17,6 +17,10 @@ class root extends Module implements HasJavascript, HasRoutes {
 		return rtrim(file_get_contents($path));
 	}
 
+	public function getJavascriptDependencyKey() {
+		return null;
+	}
+
 	public function getRoutesConfig() {
 		$config = $this->getConfig();
 		return isset($config['router'])

@@ -11,4 +11,6 @@ namespace eoko\module;
 interface HasJavascript {
 
 	function getJavascriptAsString();
+
+	function getJavascriptDependencyKey();
 }

@@ -316,8 +316,14 @@ JS;
 
 		$contents = array();
 
+		$depKeys = array();
+
 		foreach (ModuleManager::listModules(false) as $module) {
 			if ($module instanceof \eoko\module\HasJavascript) {
+				$depKey = $module->getJavascriptDependencyKey();
+				if ($depKey !== null) {
+					$depKeys[] = $depKey;
+				}
 				$content = $module->getJavascriptAsString();
 				/** @var \eoko\module\Module $module */
 				if ($content) {
@@ -346,6 +352,15 @@ JS;
 				}
 			}
 		}
+
+		$depKeys = json_encode($depKeys);
+		$contents[] = <<<JS
+(function(depKeys) {
+	Oce.deps.wait($depKeys, function() {
+		Oce.deps.reg('opence-modules');
+	});
+})($depKeys);
+JS;
 
 		// merge modules javascript
 		file_put_contents($path, implode(PHP_EOL . PHP_EOL, $contents));

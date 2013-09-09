@@ -26,8 +26,8 @@ used:
     - TabModule
     - ModuleGroupModule
     - MercurialConsole
-    - DirectModule
-    - DirectGridModule
+#    - DirectModule
+#    - DirectGridModule
     - Prolix
     - Kepler
     - UserPreferences

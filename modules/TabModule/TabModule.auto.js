@@ -131,3 +131,5 @@ eo.modules.TabModule = Ext.extend(Oce.BaseModule, {
 });
 
 Oce.deps.reg('eo.modules.TabModule');
+// opence-module dependency key
+Oce.deps.reg('Oce.Modules.TabModule.TabModule');

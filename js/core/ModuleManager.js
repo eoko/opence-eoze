@@ -215,9 +215,13 @@ Oce.ModuleManager = function() {
 
 		,getModules: function(canonicalNames, callback) {
 			var me = this;
-			eo.app(function() {
-				Oce.mx.Security.whenIdentified(function() {
-					me._getModules(canonicalNames, callback);
+			// Waiting for modules (that comes in a single merged file in prod context),
+			// before trying to load anything.
+			Oce.deps.wait('opence-modules', function() {
+				eo.app(function() {
+					Oce.mx.Security.whenIdentified(function() {
+						me._getModules(canonicalNames, callback);
+					});
 				});
 			});
 		}

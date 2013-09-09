@@ -57,4 +57,14 @@ class GridModule extends Module implements HasTitle, HasJavascript {
 			}
 		}
 	}
+
+	public function getJavascriptDependencyKey() {
+		if ($this->getConfig()->getValue('private/generateJavascriptModule', true)) {
+			if (!$this->isAbstract()
+					|| $this->getConfig()->getValue('private/generateAbstractJavascriptModule', false)) {
+				$name = $this->getName();
+				return "Oce.Modules.$name.$name";
+			}
+		}
+	}
 }
