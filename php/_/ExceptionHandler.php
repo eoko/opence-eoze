@@ -31,6 +31,7 @@ class ExceptionHandler {
 		if (defined('EOZE_VERBOSE_ERROR_REPORTING')) {
 			header('Content-type: text');
 			header('HTTP/1.0 500 Server Error');
+			header('X-Exception: ' . str_replace("\n", '  ', $ex));
 			echo $ex;
 			die;
 		}
@@ -38,6 +39,9 @@ class ExceptionHandler {
 		if ($ex instanceof UserException) {
 
 			// User error are not logged
+
+			$statusCode = $ex->getHttpStatusHeader();
+			header('HTTP/1.1 ' . $statusCode);
 
 			$systemError = false;
 			$errorTitle = $ex->hasErrorTitle() ? $ex->getErrorTitle() :
