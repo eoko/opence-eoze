@@ -322,7 +322,7 @@ Ext4.define('Eoze.GridModule.EditRecordOperation', {
 		this.win = win;
 
 		// Legacy callback (probably slightly broken, deprecate!)
-		Ext.callback(this.callback, this.scope, win);
+		Ext.callback(this.callback, this.scope, [win]);
 
 		// Event
 		if (!existing) {
