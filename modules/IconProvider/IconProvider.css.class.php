@@ -21,6 +21,7 @@ class Css extends TemplateExecutor {
 
 	public function getIconCss() {
 
+		/** @var IconProvider $module */
 		$module = $this->getModule();
 
 		$icons = array();
@@ -30,7 +31,6 @@ class Css extends TemplateExecutor {
 
 			$icons[] = array(
 				'class' => $module->makeClass($file),
-//				'url' => 'icons' . DS . $file,
 				'url' => UrlMaker::getFor($this, 'getIconImage', array('img' => $file)),
 			);
 		}
