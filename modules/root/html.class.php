@@ -194,11 +194,20 @@ JS;
 		$paths = json_encode($loaders);
 
 		header('Content-type: text/javascript');
+		header('Cache-control: no-cache');
+		header('Expires: Tue, 03 Jul 2001 06:00:00 GMT');
+
+		$app = $this->getApplication();
+		$version = $this->getApplication()->isDevMode()
+			? 'false'
+			: $version = "'{$app->getVersionId()}'";
 
 		echo <<<JS
 Ext4.Loader.setConfig({
 	enabled: true
 	,disableCaching: false
+	,cachingKey: $version
+	,cachingParam: '_ck'
 	,paths: $paths
 });
 JS;
