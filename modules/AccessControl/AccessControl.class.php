@@ -16,4 +16,8 @@ class AccessControl extends Module implements HasJavascript {
 		$path = $this->findPath('login', FileType::JS);
 		return file_get_contents($path);
 	}
+
+	public function getJavascriptDependencyKey() {
+		return 'Oce.Modules.AccessControl.login';
+	}
 }
