@@ -196,7 +196,7 @@ class Zend implements \eoko\Authentification\UserSession {
 	}
 
 	public function logout() {
-		$this->auth->clearIdentity();
+		$this->auth->getStorage()->clear();
 	}
 
 	public function onLogin($callback) {
@@ -228,5 +228,10 @@ class Storage extends \Zend\Authentication\Storage\Session {
 		}
 
 		return $result;
+	}
+
+	public function clear() {
+		parent::clear();
+		$this->session->getManager()->writeClose();
 	}
 }
