@@ -215,10 +215,14 @@ Oce.Ajax = function() {
 		}
 	}
 
-	Ext.Ajax.on('requestcomplete', function(conn, response, options) {
-		if (!options.raw) {
-			Oce.Ajax.handleRequestResponse.apply(Oce.Ajax, arguments);
-		}
+	eo.app(function() {
+		Ext.Ajax.on('requestcomplete', function(conn, response, options) {
+			if (!options.raw) {
+				Oce.Ajax.handleRequestResponse.apply(Oce.Ajax, arguments);
+			}
+		});
+
+		Ext.Ajax.on('requestexception', eo.handleRequestException);
 	});
 
 	return {

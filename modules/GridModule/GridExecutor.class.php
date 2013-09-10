@@ -496,9 +496,11 @@ abstract class GridExecutor extends JsonExecutor {
 
 	protected function createLoadQuery_sort(ModelTableQuery $query) {
 
-		if ($this->request->has('sort')) {
-			$sort = $this->request->get('sort', null);
-			$dir = $this->request->get('dir', 'ASC');
+		$request = $this->getRequest();
+
+		if ($request->has('sort')) {
+			$sort = $request->get('sort', null);
+			$dir = $request->get('dir', 'ASC');
 
 			if (is_array($sort)) {
 				foreach ($sort as $sortEntry) {
