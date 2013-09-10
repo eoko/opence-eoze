@@ -72,7 +72,9 @@ Ext.define('Eoze.GridModule.multisort.Toolbar', {
 		}, {
 			iconCls: 'ico clear'
 			,scope: this
-			,handler: this.clearSort
+			,handler: function() {
+				this.clearSort();
+			}
 		}];
 
 		this.callParent(arguments);

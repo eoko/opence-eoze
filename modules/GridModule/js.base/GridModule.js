@@ -3450,11 +3450,38 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 			var tbar = Ext.create('Eoze.GridModule.multisort.Toolbar', {
 				getDefaultSortParams: Ext.bind(function() {
 					return [
-						me.defaultSortColumn || me.getDefaultSortColumn(me.grid),
+						defaultSort || me.getDefaultSortColumn(me.grid),
 						me.defaultSortDirection || 'ASC'
 					];
 				}, this)
 			});
+
+			if (Ext.isArray(defaultSort)) {
+				tbar.clearSort = function() {
+					this.hasMultiSort = false;
+
+					Ext.each(this.findByType('button'), function(button) {
+						if (button.reorderable) {
+							this.remove(button);
+						}
+					}, this);
+
+					Ext.each(defaultSort, function(sort) {
+						var field,
+							dir = 'ASC';
+						if (Ext.isObject(sort)) {
+							field = sort.field;
+							dir = sort.dir || sort.direction || dir;
+						} else {
+							field = sort;
+						}
+						tbar.addSortField(field, dir, true);
+//						tbar.configureStoreSort();
+					});
+
+					this.doSort();
+				};
+			}
 
 			config.tbar = tbar;
 
