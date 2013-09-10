@@ -70,6 +70,24 @@ Ext.define('Eoze.CqlixHistory.view.controller.History', {
 		}
 	}
 
+	,getToolbarItems: function() {
+		var sortDirection = this.sortDirection,
+			tooltips = {
+				ASC: "Les plus anciens d'abord &mdash; Cliquez pour inverser"
+				,DESC: "Les plus récents d'abord &mdash; Cliquez pour inverser"
+			};
+
+		return ['->',{
+			iconCls: 'oce-comment-ico ' + sortDirection
+			,height: 18
+			,width: 18
+			,scope: this
+			,handler: this.onDirectionToggle
+			,tooltips: tooltips
+			,tooltip: tooltips[sortDirection]
+		}]
+	}
+
 	/**
 	 * @param {Ext.Button} button
 	 * @private
