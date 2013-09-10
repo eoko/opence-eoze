@@ -509,57 +509,7 @@ eo.Ajax = new eo.data.Connection({
 	}
 });
 (function() {
-	var leaving = false;
-	window.addEventListener('beforeunload', function() {
-		leaving = true;
-	}, false);
-	eo.Ajax.on('requestexception', function(conn, response, options) {
-		if (!leaving) {
-			if (response.status >= 400 && response.status < 500) {
-				if (response.status === 401) {
-					Oce.mx.Security.notifyDisconnection();
-				} else {
-					// hope that an error handler further down the road will
-					// handle it
-				}
-			} else {
-				var warn = function(msg) {
-					if (window.console) {
-						if (console.warn) {
-							console.warn(msg);
-						} else if (console.log) {
-							console.log("WARNING: " + msg);
-						}
-					}
-				};
-				// retries
-				var retries = options.maxRetries || conn.maxRetries;
-				options.retryCount = options.retryCount || 0;
-				if (retries && options.retryCount < retries) {
-					options.retryCount++;
-					conn.request(options);
-					warn("Retrying failed request ("+options.retryCount+"/"+retries+")...");
-					return false;
-				}
-				// no more retry
-				else {
-					// info
-					warn("Aborting request after " + options.retryCount + " trials: "
-						+ Ext.encode(options.params));
-					// message
-					Ext.Msg.alert(
-						'Erreur de connection',
-						"Vérifiez l'état de votre connection internet. Si le problème "
-							+ "persiste, il peut s'agir d'un problème avec le serveur ; "
-							+ "dans ce cas veuillez contacter la personne responsable de la "
-							+ "maintenance du système."
-							+ "<p>Code d'erreur : f0c93<p>"
-					);
-					debugger; // ERROR
-				}
-			}
-		}
-	});
+	eo.Ajax.on('requestexception', eo.handleRequestException);
 	eo.Ajax.on('requestcomplete', function(conn, data, options) {
 		if (!data.success) {
 			eo.handleResponseError(data, options);
