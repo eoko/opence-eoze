@@ -122,5 +122,9 @@ Ext.define('Eoze.CqlixHistory.view.History', {
 				}
 			}
 		}]
+
+	,getToolbarItems: function() {
+		return this.getController().getToolbarItems();
+	}
 });
 })(window.Ext4 || Ext.getVersion && Ext);
