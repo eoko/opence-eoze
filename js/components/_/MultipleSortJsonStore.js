@@ -18,6 +18,7 @@ Oce.MultipleSortJsonStore = Ext.extend(Ext.data.JsonStore, {
 			return;
 		}
 
+		var hadMultiSort = this.hasMultiSort;
 		this.hasMultiSort = true;
 		direction = direction || "ASC";
 
@@ -28,7 +29,7 @@ Oce.MultipleSortJsonStore = Ext.extend(Ext.data.JsonStore, {
 
 		// 2012-12-13 22:05
 		// Avoid applying the same sort twice
-		if (this.multiSortInfo) {
+		if (hadMultiSort && this.multiSortInfo) {
 			if (Ext.encode(this.multiSortInfo.sorters) === Ext.encode(sorters)) {
 				return;
 			}
