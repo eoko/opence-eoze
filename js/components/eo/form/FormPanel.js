@@ -366,10 +366,23 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
                     });
                 } else {
                     win.close();
-                    Ext.MessageBox.alert(
-						"Erreur", // i18n
-						"Impossible de charger les données" // i18n
-					);
+
+					var response = action && action.response,
+						status = response && response.status,
+						userError = status && status >= 400 && status < 500,
+						msg = "Impossible de charger les données"; // i18n
+
+					if (userError) {
+						try {
+							var data = Ext.decode(response.responseText);
+							msg = data['errorMessage'] || msg;
+						} catch (e) {
+							// ignore invalid JSON
+						}
+					}
+
+					// i18n
+                    Ext.MessageBox.alert("Erreur", msg);
                 }
             }
         };
