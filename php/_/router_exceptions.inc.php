@@ -98,6 +98,8 @@ class UserException extends OpenceException {
 
 	private $errorTitle;
 
+	private $httpStatusHeader = '400 Bad Request';
+
 	function __construct($message = '', $errorTitle = '', $debugMessage = '', Exception $previous = null) {
 		parent::__construct($debugMessage, $message, $previous);
 		$this->errorTitle = $errorTitle;
@@ -109,6 +111,20 @@ class UserException extends OpenceException {
 
 	public function hasErrorTitle() {
 		return $this->errorTitle != '';
+	}
+
+	/**
+	 * @param string $httpStatusHeader
+	 */
+	public function setHttpStatusHeader($httpStatusHeader) {
+		$this->httpStatusHeader = $httpStatusHeader;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getHttpStatusHeader() {
+		return $this->httpStatusHeader;
 	}
 }
 
