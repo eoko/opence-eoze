@@ -28,20 +28,12 @@ class ExceptionHandler {
 
 	public function process(Exception $ex, $answer = true) {
 
-		if (defined('EOZE_VERBOSE_ERROR_REPORTING')) {
-			header('Content-type: text');
-			header('HTTP/1.0 500 Server Error');
-			header('X-Exception: ' . str_replace("\n", '  ', $ex));
-			echo $ex;
-			die;
-		}
-
 		if ($ex instanceof UserException) {
 
 			// User error are not logged
 
 			$statusCode = $ex->getHttpStatusHeader();
-			header('HTTP/1.1 ' . $statusCode);
+			header('HTTP/1.0 ' . $statusCode);
 
 			$systemError = false;
 			$errorTitle = $ex->hasErrorTitle() ? $ex->getErrorTitle() :
@@ -56,6 +48,14 @@ class ExceptionHandler {
 		}
 
 		else {
+			if (defined('EOZE_VERBOSE_ERROR_REPORTING')) {
+				header('Content-type: text');
+				header('HTTP/1.0 500 Server Error');
+				header('X-Exception: ' . str_replace("\n", '  ', $ex));
+				echo $ex;
+				die;
+			}
+
 			$systemError = true;
 			$errorTitle = lang('Erreur Système');
 			$includeTimestamp = true;
