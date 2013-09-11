@@ -427,6 +427,8 @@ abstract class GridExecutor extends JsonExecutor {
 
 	protected function createLoadQuery($selContext = 'form', $relModes = null, $columns = null) {
 
+		$request = $this->getRequest();
+
 		if ($relModes === null) {
 			if (null === $relModes = $this->getRelationSelectionModes($selContext)) {
 				$relModes = ModelTable::LOAD_NONE;
@@ -441,7 +443,7 @@ abstract class GridExecutor extends JsonExecutor {
 //		unset($relModes[3]['Contact->Conjoint']);
 
 		if ($columns === null) {
-			$columns = $this->request->get('columns');
+			$columns = $request->get('columns');
 		}
 
 		// Add alwaysLoad columns
@@ -468,7 +470,7 @@ abstract class GridExecutor extends JsonExecutor {
 		}
 
 		if ($this->table instanceof TableHasFilters) {
-			$this->table->addLoadQueryFilters($query, $this->request->get('filters'));
+			$this->table->addLoadQueryFilters($query, $request->get('filters'));
 		}
 
         $this->afterCreateLoadQuery($query);
