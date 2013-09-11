@@ -11,6 +11,8 @@ interface VirtualField extends ModelField {
 
 	function isCachable();
 
+	function isSelectable(QueryAliasable $aliaser);
+
 	function configureMeta($config);
 }
 
@@ -81,6 +83,10 @@ abstract class VirtualFieldBase extends ModelFieldBase implements VirtualField {
 
 	public function isCachable() {
 		return $this->cachable;
+	}
+
+	public function isSelectable(QueryAliasable $aliaser) {
+		return true;
 	}
 
 	public function getName() {
