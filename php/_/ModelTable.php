@@ -825,7 +825,9 @@ abstract class ModelTable extends ModelTableProxy implements EventManagerAwareIn
 	protected function selectLoadQueryVirtuals(\ModelTableQuery $query, $columns) {
 		foreach ($this->virtuals as $virtual) {
 			if ($columns === null || isset($columns[$virtual->getName()])) {
-				$virtual->select($query);
+				if ($virtual->isSelectable($query)) {
+					$virtual->select($query);
+				}
 			}
 		}
 	}
