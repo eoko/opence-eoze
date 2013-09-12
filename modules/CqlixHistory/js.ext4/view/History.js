@@ -40,6 +40,10 @@ Ext.define('Eoze.CqlixHistory.view.History', {
 
 	,emptyText: "L'historique est vide" // i18n
 
+	,style: {
+		backgroundColor: '#fff'
+	}
+
 	,tpl: [
 '<tpl for=".">',
 	'<div class="eo-cqlix-history-item oce-comment-list-item">',
@@ -93,11 +97,15 @@ Ext.define('Eoze.CqlixHistory.view.History', {
 					switch (type) {
 						case 'date':
 							return formats.date(value);
+						case 'bool':
+							return value ? 'Oui' : 'Non';
 						default:
-							debugger
+							debugger;
 						case 'text':
 						case 'string':
 							return escapeText(value);
+						case 'int':
+							return value;
 					}
 				} else {
 					return valueDisplay;
