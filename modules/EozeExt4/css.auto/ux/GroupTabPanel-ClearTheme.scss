@@ -207,7 +207,7 @@ $borderColor: #99BBE8;
     margin-top: -2px !important;
   }
 
-  .#{$x}grouptabbar .#{$x}grouptab .#{$x}tree-icon-parent {
+  .#{$x}grouptabbar .#{$x}grouptab .#{$x}tree-icon-parent:not(.ico) {
     display: none;
   }
 
