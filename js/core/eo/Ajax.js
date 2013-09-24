@@ -509,7 +509,9 @@ eo.Ajax = new eo.data.Connection({
 	}
 });
 (function() {
-	eo.Ajax.on('requestexception', eo.handleRequestException);
+	Oce.deps.wait('eo.handleResponseException', function() {
+		eo.Ajax.on('requestexception', eo.handleRequestException);
+	});
 	eo.Ajax.on('requestcomplete', function(conn, data, options) {
 		if (!data.success) {
 			eo.handleResponseError(data, options);

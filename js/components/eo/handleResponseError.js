@@ -15,12 +15,33 @@ Ext.ns('eo');
 
 	eo.handleRequestException = function(conn, response, options) {
 		if (!leaving) {
+
+			function handleError(userError) {
+				var data;
+				try {
+					data = Ext.decode(response.responseText);
+					eo.handleResponseError(data, options);
+				} catch (e) {
+					Ext.Msg.alert(
+						"Erreur" + (userError ? "" : " serveur"),
+						"Une erreur " + (userError ? "" : "serveur ") + "a empêcher l'exécution correcte de cette opération."
+						+ "Nous sommes désolé pour le désagrément, vous pouvez signaler cette erreur au support "
+						+ "technique pour " + (userError ? "obtenir de l'aide" : "aider à la résoudre") + "."
+					);
+				}
+			}
+
 			if (response.status >= 400 && response.status < 500) {
 				if (response.status === 401) {
 					Oce.mx.Security.notifyDisconnection();
 				} else {
-					// hope that an error handler further down the road will
-					// handle it
+					// Hope that an error handler further down the road will
+					// handle it... Give them 200ms!
+					setTimeout(function() {
+						if (!options || !options.errorMessageDisplayed) {
+							handleError("Erreur");
+						}
+					}, 200);
 				}
 			} else if (response.status === 0) {
 				var warn = function(msg) {
@@ -58,18 +79,7 @@ Ext.ns('eo');
 					debugger; // ERROR
 				}
 			} else {
-				var data;
-				try {
-					data = Ext.decode(response.responseText);
-					eo.handleResponseError(data, options);
-				} catch (e) {
-					Ext.Msg.alert(
-						"Erreur serveur",
-						"Une erreur serveur a empêcher l'exécution correcte de cette opération."
-						+ "Nous sommes désolé pour le désagrément, vous pouvez signaler "
-						+ "cette erreur au support technique pour aider à la résoudre."
-					);
-				}
+				handleError();
 			}
 		}
 	};
@@ -128,6 +138,7 @@ Ext.ns('eo');
 			title: title
 			,message: msg
 			,modalTo: sc
+			,modal: !sc
 			,okHandler: function() {
 				win.close();
 				options.errorMessageDisplayed = true;
@@ -135,5 +146,8 @@ Ext.ns('eo');
 			}
 		});
 	};
+
+	Oce.deps.reg('eo.handleResponseException');
+	Oce.deps.reg('eo.handleResponseError');
 
 })(); // closure
