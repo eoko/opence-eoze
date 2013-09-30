@@ -11,7 +11,8 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
 
     ,constructor: function(config) {
 
-		this.loadingCallbacks = [];
+		this.successCallbacks = [];
+		this.failureCallbacks = [];
 
         this.addEvents({
             modificationcleared: true
@@ -308,7 +309,21 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
 	,load: function(callback) {
 
 		if (callback) {
-			this.loadingCallbacks.push(callback);
+			if (Ext.isFunction(callback)) {
+				this.successCallbacks.push(callback);
+			} else {
+				function bind(fn) {
+					return callback.scope
+						? Ext4.bind(fn, callback.scope)
+						: fn;
+				}
+				if (callback.success) {
+					this.successCallbacks.push(bind(callback.success));
+				}
+				if (callback.failture) {
+					this.failureCallbacks.push(bind(callback.failure));
+				}
+			}
 		}
 
 		if (this.loading) {
@@ -320,6 +335,7 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
 
         var options = {
             url: 'api'
+			,sourceComponent: win
             ,waitMsg: "Chargement des données" // i18n
             ,waitTitle: "Veuillez patientez" // i18n
             ,scope: this
@@ -352,39 +368,21 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
 
 				// Flush callbacks
 				var form = this.form;
-				this.loadingCallbacks.forEach(function(cb) {
+				this.successCallbacks.forEach(function(cb) {
 					cb(form)
 				}, this);
-				this.loadingCallbacks = [];
-            }
+				this.successCallbacks = [];
+				this.failureCallbacks = [];
+			}
 
 			,failure: function(form, action) {
-                me.preventModificationEvents = false;
-                if (action && action.result && action.result.cause === 'sessionTimeout') {
-                    Oce.mx.Security.onOnce('login', function() {
-                        me.refresh();
-                    });
-                } else {
-                    win.close();
-
-					var response = action && action.response,
-						status = response && response.status,
-						userError = status && status >= 400 && status < 500,
-						msg = "Impossible de charger les données"; // i18n
-
-					if (userError) {
-						try {
-							var data = Ext.decode(response.responseText);
-							msg = data['errorMessage'] || msg;
-						} catch (e) {
-							// ignore invalid JSON
-						}
-					}
-
-					// i18n
-                    Ext.MessageBox.alert("Erreur", msg);
-                }
-            }
+				// Flush callbacks
+				this.failureCallbacks.forEach(function(cb) {
+					cb(form);
+				});
+				this.successCallbacks = [];
+				this.failureCallbacks = [];
+			}
         };
 
         var params = {

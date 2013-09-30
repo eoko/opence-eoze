@@ -16,6 +16,14 @@ Ext.ns('eo');
 	eo.handleRequestException = function(conn, response, options) {
 		if (!leaving) {
 
+			// Ext.form.Action replaces the options object it has been given
+			// with its own; thus losing all the custom property we may have
+			// set. Fortunately, we can access it back fromt he Action object
+			// that is itself used as the scope of the Ajax call.
+			if (options.scope instanceof Ext.form.Action) {
+				options = options.scope.options;
+			}
+
 			function handleError(userError) {
 				var data;
 				try {
@@ -23,10 +31,10 @@ Ext.ns('eo');
 					eo.handleResponseError(data, options);
 				} catch (e) {
 					Oce.Modules.GridModule.AlertWindow.show({
-						title: 'Erreur'
+						title: "Erreur" // i18n
 						,message: msg
 
-						,modalTo: options && options.win
+						,modalTo: options && options.sourceComponent || options.win
 
 						,okHandler: function() {
 							this.close();
