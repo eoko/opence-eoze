@@ -22,12 +22,22 @@ Ext.ns('eo');
 					data = Ext.decode(response.responseText);
 					eo.handleResponseError(data, options);
 				} catch (e) {
-					Ext.Msg.alert(
-						"Erreur" + (userError ? "" : " serveur"),
-						"Une erreur " + (userError ? "" : "serveur ") + "a empêcher l'exécution correcte de cette opération."
-						+ "Nous sommes désolé pour le désagrément, vous pouvez signaler cette erreur au support "
-						+ "technique pour " + (userError ? "obtenir de l'aide" : "aider à la résoudre") + "."
-					);
+					Oce.Modules.GridModule.AlertWindow.show({
+						title: 'Erreur'
+						,message: msg
+
+						,modalTo: options && options.win
+
+						,okHandler: function() {
+							this.close();
+						}
+					});
+//					Ext.Msg.alert(
+//						"Erreur" + (userError ? "" : " serveur"),
+//						"Une erreur " + (userError ? "" : "serveur ") + "a empêcher l'exécution correcte de cette opération."
+//						+ "Nous sommes désolé pour le désagrément, vous pouvez signaler cette erreur au support "
+//						+ "technique pour " + (userError ? "obtenir de l'aide" : "aider à la résoudre") + "."
+//					);
 				}
 			}
 

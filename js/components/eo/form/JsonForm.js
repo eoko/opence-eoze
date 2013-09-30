@@ -121,6 +121,8 @@ eo.form.JsonForm = Ext.extend(Ext.form.BasicForm, {
 			,scope: this
 			
 			,callback: function(options, success, data) {
+				opts.ajaxOptions = options;
+
 				var scope = opts.scope;
 				this.fireEvent('aftersave', this, success, data, opts);
 				if (opts.callback) {

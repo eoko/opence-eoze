@@ -1119,8 +1119,15 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	 */
 	,processFormError: function(win, form, data, options) {
 
-		if (options && options.errorMessageDisplayed) {
-			return;
+		if (options) {
+			if (options.errorMessageDisplayed || options.ajaxOptions && options.ajaxOptions.errorMessageDisplayed) {
+				return;
+			} else {
+				if (options.ajaxOptions) {
+					options.ajaxOptions.errorMessageDisplayed = true;
+				}
+				options.errorMessageDisplayed = true;
+			}
 		}
 
 		if (data.status && data.status >= 400 && data.status < 500) {
