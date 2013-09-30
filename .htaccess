@@ -1,0 +1,10 @@
+RewriteEngine On
+
+# Modules images
+RewriteRule ^modules/(?:[^/]*)/_images/(.*)$	    images/$1
+
+RewriteRule .yml$                                   php/error404.php
+RewriteRule .sql$                                   php/error404.php
+RewriteRule ^config(/|$)                            php/error404.php
+
+RewriteRule !\.(js|ico|gif|jpg|png|css)$            php/error404.php

@@ -1,0 +1,29 @@
+{
+	"name": "eoko/eoze",
+	"license": "GPLv3",
+
+	"repositories": [
+		{
+			"type": "composer",
+			"url": "http://packages.zendframework.com/"
+		}
+	],
+
+	"require": {
+		"php": ">=5.3.3",
+
+		"kriswallsmith/assetic": "1.*",
+	
+		"symfony/yaml": "2.*",
+
+		"zendframework/zend-config": "2.*",
+		"zendframework/zend-http": "2.*",
+		"zendframework/zend-mvc": "2.*",
+		"zendframework/zend-session": "2.*",
+		"zendframework/zend-db": "2.*",
+		"zendframework/zend-authentication": "2.*",
+		"zendframework/zend-filter": "2.*",
+
+		"brainsware/php-markdown-extra-extended": "dev-master"
+	}
+}

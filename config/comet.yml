@@ -1,0 +1,6 @@
+
+eoko:
+  routing:
+    comet: true
+    CometEvents:
+      userLevel: 99

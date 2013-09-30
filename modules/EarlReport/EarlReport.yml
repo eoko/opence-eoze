@@ -1,0 +1,17 @@
+abstract: true
+
+dateFormat: Y-m-d
+dateTimeFormat: Y-m-d H:i:s
+
+## {String} soffice command
+#soffice: /usr/bin/soffice
+#
+## {String} unoconv command
+#unoconv: /usr/bin/unoconv
+
+Converter:
+    class: EarlReport\Converter\OoDaemonConverter
+    host: localhost
+    port: 2003
+#    columnOptimalWidth: true
+    destroySourceFile : true

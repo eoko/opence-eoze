@@ -1,0 +1,12 @@
+config.node: eoko\config
+
+directories:
+  - %lib%/eoko/config/config
+  - %app%/config
+
+items:
+  eoko\database:
+    file: database
+  eoko\module\ModuleManager:
+    file: modules
+

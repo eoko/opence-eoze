@@ -1,0 +1,42 @@
+/**
+ * Copyright (C) 2013 Eoko
+ *
+ * This file is part of Opence.
+ *
+ * Opence is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Opence is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Opence. If not, see <http://www.gnu.org/licenses/gpl.txt>.
+ *
+ * @copyright Copyright (C) 2013 Eoko
+ * @licence http://www.gnu.org/licenses/gpl.txt GPLv3
+ * @author Éric Ortega <eric@eoko.fr>
+ */
+
+/**
+ *
+ * @since 2013-09-04 11:50
+ * @todo #theme
+ */
+.x4-menu-item-separator.title,
+.x4-menu-item-separator.text {
+    height: auto;
+    border-top: 0;
+    border-bottom: solid 1px #e0e0e0;
+    background: none;
+}
+
+.x4-menu-item-separator.title {
+    color: #04468c;
+    font-weight: bold;
+    font-size: 11px;
+    cursor: default;
+}
