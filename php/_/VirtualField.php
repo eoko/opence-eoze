@@ -172,6 +172,35 @@ abstract class VirtualFieldBase extends ModelFieldBase implements VirtualField {
 class AbstractVirtualField extends VirtualFieldBase {
 
 	protected $alias = true;
+
+	protected function doGetClause(Aliaser $aliaser) {
+		if (null !== $sql = $this->getSql()) {
+			return $aliaser->aliases($sql);
+		} else {
+			return parent::doGetClause($aliaser);
+		}
+	}
+
+	/**
+	 * This method can be implemented instead of {@link doGetClause()}, and offers
+	 * a more concise syntax for virtual field that just returns some SQL statement.
+	 *
+	 * The statement can contains Cqlix field names relative to the model owning the
+	 * virtual field. These names will automatically be converted to fully qualified
+	 * names; the `Aliaser` is provided only for more complex operations.
+	 *
+	 * E.g.
+	 *
+	 *     protected function getSql() {
+	 *         return 'CONT(`ChildModel->id`);
+	 *     }
+	 *
+	 * @param eoko\cqlix\Aliaser $aliaser
+	 * @return string
+	 */
+	protected function getSql(Aliaser $aliaser) {
+		return null;
+	}
 }
 
 //class FieldAliasVirtualField extends VirtualFieldBase {
