@@ -376,6 +376,11 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
 			}
 
 			,failure: function(form, action) {
+				// Close windows that never load
+				if (!this.loaded) {
+					win.close();
+				}
+
 				// Flush callbacks
 				this.failureCallbacks.forEach(function(cb) {
 					cb(form);
