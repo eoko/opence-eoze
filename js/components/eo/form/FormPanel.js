@@ -320,7 +320,7 @@ Oce.FormPanel = Ext.extend(Ext.FormPanel, {
 				if (callback.success) {
 					this.successCallbacks.push(bind(callback.success));
 				}
-				if (callback.failture) {
+				if (callback.failure) {
 					this.failureCallbacks.push(bind(callback.failure));
 				}
 			}
