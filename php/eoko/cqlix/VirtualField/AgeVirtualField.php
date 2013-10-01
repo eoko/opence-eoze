@@ -22,7 +22,7 @@
  * @author Éric Ortega <eric@eoko.fr>
  */
 
-namespace Eoze\Cqlix\VirtualField;
+namespace eoko\cqlix\VirtualField;
 
 use eoko\cqlix\Aliaser;
 use ModelColumn;
