@@ -22,7 +22,12 @@
  * @author Éric Ortega <eric@eoko.fr>
  */
 
+namespace eoko\cqlix\VirtualField;
+
 use eoko\cqlix\VirtualField\AbstractVirtualField;
+use ModelColumn;
+use Query;
+use QueryAliasable;
 
 /**
  * @todo doc
