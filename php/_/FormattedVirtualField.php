@@ -22,6 +22,8 @@
  * @author Éric Ortega <eric@eoko.fr>
  */
 
+use eoko\cqlix\VirtualField\AbstractVirtualField;
+
 /**
  * @todo doc
  *
