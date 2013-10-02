@@ -5,6 +5,14 @@ use eoko\cqlix\Aliaser;
 
 interface VirtualField extends ModelField {
 
+	/**
+	 * Sets the alias (i.e. field name) of the virtual field.
+	 *
+	 * @param string $alias
+	 * @return VirtualField $this
+	 */
+	function setAlias($alias);
+
 	function select(ModelTableQuery $query, $alias = null, QueryAliasable $aliasable = null);
 
 	function getClause(ModelTableQuery $query, QueryAliasable $aliasable = null);
@@ -30,7 +38,7 @@ abstract class VirtualFieldBase extends ModelFieldBase implements VirtualField {
 	 */
 	private $meta;
 
-	function __construct($alias = null) {
+	public function __construct($alias = null) {
 		if ($alias !== null) {
 			$this->alias = $alias;
 		} else if ($this->defaultAlias) {
@@ -97,6 +105,11 @@ abstract class VirtualFieldBase extends ModelFieldBase implements VirtualField {
 		}
 	}
 
+	public function setAlias($alias) {
+		$this->alias = $alias;
+		return $this;
+	}
+
 	public function getType() {
 		if ($this->type !== null) {
 			return $this->type;
@@ -114,7 +127,9 @@ abstract class VirtualFieldBase extends ModelFieldBase implements VirtualField {
 	}
 
 	public function select(ModelTableQuery $query, $alias = null, QueryAliasable $aliasable = null) {
-		if ($alias === null) $alias = $this->alias;
+		if ($alias === null) {
+			$alias = $this->alias;
+		}
 
 		$clause = $this->getClause($query, $aliasable);
 
