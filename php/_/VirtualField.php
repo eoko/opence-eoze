@@ -84,7 +84,7 @@ abstract class VirtualFieldBase extends ModelFieldBase implements VirtualField {
 
 	private function guessAliasFromClassName() {
 		$class = get_class($this);
-		if (preg_match('/(?:^|_)([^_]+?)(?:VirtualField)?$/', $class, $matches)) {
+		if (preg_match('/(?:^|_|\\\\)([^_\\\\]+?)(?:VirtualField)?$/', $class, $matches)) {
 			return lcfirst($matches[1]);
 		}
 	}
