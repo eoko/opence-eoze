@@ -1610,58 +1610,6 @@ abstract class Query implements QueryAliasable {
 			}
 		}
 	}
-
-	public static function ageFunction($dateField, $alias = 'age', $quoteField = false) {
-		if ($quoteField) $dateField = "`$dateField`";
-
-		return new SqlVariable(
-<<<SQL
-CONVERT(CONCAT(IF((@years := (DATE_FORMAT(NOW(), '%Y') - DATE_FORMAT($dateField, '%Y')
-- (@postBD := (DATE_FORMAT(NOW(), '00-%m-%d') < DATE_FORMAT($dateField, '00-%m-%d')))
-)) > 0,CONCAT(@years,' an',IF(@years>1,'s','')),''),IF(@years >= 21, '', CONCAT(
-IF((@months := FLOOR((@days := DATEDIFF(NOW(),DATE_FORMAT($dateField,
-CONCAT(YEAR(CURRENT_DATE()) - @postBD,'-%m-%d')))) / 30.4375)) >= 0
-,CONCAT(' ',@months,' mois'),''),IF(@years >= 3, '', CONCAT(' '
-,(@days := FLOOR(MOD(@days, 30.4375))),CONCAT(' jour',IF(@days>0,'s',''))
-))))) USING utf8) AS `$alias`
-SQL
-		);
-//SELECT
-//
-//#Last birthday
-//CONVERT(CONCAT(
-//IF(
-//  (@years := (
-//    DATE_FORMAT(NOW(), '%Y') - DATE_FORMAT(date_birth, '%Y')
-//    - (DATE_FORMAT(NOW(), '00-%m-%d') < DATE_FORMAT(date_birth, '00-%m-%d'))
-//  )) > 0
-//  ,CONCAT(@years,' an',IF(@year>1,'s ',' '))
-//  ,''
-//)
-//
-//,IF(@years > 21, '', CONCAT(
-//    (@months := FLOOR(
-//      (@days := DATEDIFF(
-//        NOW(),
-//        DATE_FORMAT(date_birth, CONCAT(YEAR(CURRENT_DATE()),'-%m-%d'))
-//      )) / 30.4375
-//    ))
-//    ,' mois '
-//
-//    ,IF(@years > 3, '', CONCAT(
-//      (@days := FLOOR(MOD(@days, 30.4375)))
-//      ,CONCAT(' jour',IF(@days>0,'s',''))
-//    ))
-//))
-//
-//) USING utf8)
-//
-//
-//AS âge
-//
-//FROM contacts
-
-	}
 }
 
 class SqlVariable implements SqlVar {
