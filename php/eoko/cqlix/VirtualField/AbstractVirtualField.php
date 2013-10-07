@@ -15,7 +15,7 @@ abstract class AbstractVirtualField extends VirtualFieldBase {
 
 	protected $alias = true;
 
-	protected function doGetClause(Aliaser $aliaser) {
+	protected function doGetClause(\QueryAliasable $aliaser) {
 		if (null !== $sql = $this->getSql($aliaser)) {
 			return $aliaser->aliases($sql);
 		} else {
