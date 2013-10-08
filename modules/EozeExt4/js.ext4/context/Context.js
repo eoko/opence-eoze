@@ -273,7 +273,9 @@ Ext.define('Eoze.context.Context', {
 			previousValue = data[field],
 			apply = 'apply' + field.substr(0,1).toUpperCase() + field.substr(1);
 
-		value = Ext.value(value, null);
+		if (value === undefined) {
+			value = null;
+		}
 
 		if (this[apply]) {
 			value = this[apply](value);
