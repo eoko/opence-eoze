@@ -199,6 +199,9 @@ var define = function(cls, o, createFn) {
 };
 
 Ext.define = function(cls, o, createFn) {
+	if (Ext.isFunction(o)) {
+		o = o();
+	}
 	if (o.singleton) {
 		var previous = resolve(cls, false),
 			instance;
