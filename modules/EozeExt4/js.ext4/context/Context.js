@@ -269,14 +269,21 @@ Ext4.define('Eoze.context.Context', {
 	 */
 	,onSet: function(field, value) {
 		var data = this.data,
-			previousValue = data[field];
+			previousValue = data[field],
+			apply = 'apply' + field.substr(0,1).toUpperCase() + field.substr(1);
 
 		value = Ext4.value(value, null);
 
-		if (value !== previousValue) {
-			data[field] = value;
-			this.fireProxy(field, 'change', [value, previousValue]);
-			return true;
+		if (this[apply]) {
+			value = this[apply](value);
+		}
+
+		if (false !== this.fireProxy(field, 'convert', [value, previousValue])) {
+			if (value !== previousValue) {
+				data[field] = value;
+				this.fireProxy(field, 'change', [value, previousValue]);
+				return true;
+			}
 		}
 
 		return false;
