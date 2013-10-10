@@ -107,11 +107,11 @@ Ext.ns('eo');
 	 * @param {Object} responseData
 	 *
 	 * @param {Object} options
-	 * @param {Ext.Component} options.sourceComponent The source component, that will be
+	 * @param {Ext.Component} [options.sourceComponent] The source component, that will be
 	 * masked if required.
-	 * @param {Function} options.callback A function that will be called after the user
+	 * @param {Function} [options.callback] A function that will be called after the user
 	 * has acknowledged the issue.
-	 * @param {Object} options.scope The scope in which the acknowledge callback will be
+	 * @param {Object} [options.scope] The scope in which the acknowledge callback will be
 	 * called.
 	 */
 	eo.handleResponseError = function(responseData, options) {
