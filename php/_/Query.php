@@ -725,7 +725,7 @@ abstract class Query implements QueryAliasable {
 	 * WHERE clause.
 	 *
 	 * @param string|QueryWhere $condition
-	 * @param array|string[] $inputs
+	 * @param array|string[]|mixed $inputs
 	 * @return Query
 	 */
 	public function where($condition, $inputs = null) {
