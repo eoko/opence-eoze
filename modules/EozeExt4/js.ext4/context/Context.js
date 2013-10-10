@@ -1,3 +1,4 @@
+(function(Ext) {
 /**
  * Copyright (C) 2013 Eoko
  *
@@ -85,7 +86,7 @@
  *
  * @since 2013-01-28 21:43
  */
-Ext4.define('Eoze.context.Context', {
+Ext.define('Eoze.context.Context', {
 	mixins: {
 		observable: 'Ext.util.Observable'
 	}
@@ -239,7 +240,7 @@ Ext4.define('Eoze.context.Context', {
 	 * @return {Boolean} True if the field value has changed, else false.
 	 * @private
 	 */
-	,set: Ext4.Function.flexSetter(function(field, value) {
+	,set: Ext.Function.flexSetter(function(field, value) {
 		var method = 'set' + field.substr(0, 1).toUpperCase() + field.substr(1);
 		return this[method].call(this, value);
 	})
@@ -272,7 +273,7 @@ Ext4.define('Eoze.context.Context', {
 			previousValue = data[field],
 			apply = 'apply' + field.substr(0,1).toUpperCase() + field.substr(1);
 
-		value = Ext4.value(value, null);
+		value = Ext.value(value, null);
 
 		if (this[apply]) {
 			value = this[apply](value);
@@ -338,7 +339,7 @@ Ext4.define('Eoze.context.Context', {
 		if (proxies[field]) {
 			return proxies[field];
 		} else {
-			return proxies[field] = Ext4.create('Eoze.context.Proxy', {
+			return proxies[field] = Ext.create('Eoze.context.Proxy', {
 				context: this
 				,field: field
 			});
@@ -375,7 +376,7 @@ Ext4.define('Eoze.context.Context', {
 	 * @param {String} field
 	 * @param {Ext.Component/Array} component
 	 */
-	,attachToComponent: Ext4.Function.flexSetter(function(field, component) {
+	,attachToComponent: Ext.Function.flexSetter(function(field, component) {
 		var method = 'setContext';
 		if (Ext.isArray(component)) {
 			method = component[1];
@@ -384,3 +385,4 @@ Ext4.define('Eoze.context.Context', {
 		component[method](this.getProxy(field));
 	})
 });
+})(window.Ext4 || Ext.getVersion && Ext);
