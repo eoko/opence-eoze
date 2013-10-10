@@ -74,12 +74,20 @@ function dump_mark($n = null) {
 	static $count = null;
 
 	if ($n !== null) {
-		if ($count === null) {
-			$count = $n;
+		if (is_bool($n)) {
+			if ($n === false) {
+				return;
+			}
 		} else {
-			$count--;
+			if ($count === null) {
+				$count = $n;
+			} else {
+				$count--;
+			}
+			if ($count > 0) {
+				return;
+			}
 		}
-		if ($count > 0) return;
 	}
 	global $dump_after_mark;
 	$dump_after_mark = true;
