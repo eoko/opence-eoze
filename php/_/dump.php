@@ -116,6 +116,9 @@ function dump_trace_after($die = true) {
 	global $dump_after_mark;
 	global $dumpPre, $endDumpPre;
 	if ($dump_after_mark) {
+		if (!headers_sent() && $die) {
+			header('Content-Type: text');
+		}
 		echo $dumpPre;
 		$e = new Exception();
 		print_r(str_replace(ROOT, '', $e->getTraceAsString()));
