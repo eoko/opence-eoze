@@ -149,7 +149,8 @@ Ext.ns('eo');
 
 		else {
 			debugger // TODO
-			throw new Error('TODO');
+			title = "Erreur";
+			msg = "Une erreur a empêché l'exécution de cette opération.";
 		}
 
 		var win = Oce.Modules.GridModule.AlertWindow.show({
