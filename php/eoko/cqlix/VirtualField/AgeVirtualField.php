@@ -72,7 +72,7 @@ class AgeVirtualField extends VirtualFieldBase {
 		$dateField = $aliasable->getQualifiedName($this->dateField);
 
 		$context = $aliasable->getQuery()->getContext();
-		$now = isset($context['date'])
+		$now = !empty($context['date'])
 			? Database::getDefaultConnection()->quote($context['date'])
 			: 'CURRENT_DATE()';
 
