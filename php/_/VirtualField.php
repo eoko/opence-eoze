@@ -210,6 +210,25 @@ class AgeVirtualField extends VirtualFieldBase {
 
 	protected function doGetClause(QueryAliasable $aliasable) {
 		$dateField = $aliasable->getQualifiedName($this->dateField);
+
+		$context = $aliasable->getQuery()->getContext();
+		$now = isset($context['date']) && !empty($context['date'])
+			? "'" . mysql_escape_string($context['date']) . "'"
+			: 'NOW()';
+
+		return <<<SQL
+(SELECT( CONVERT(CONCAT(IF((@years := (DATE_FORMAT($now, '%Y') - DATE_FORMAT($dateField, '%Y')
+- (@postBD := (DATE_FORMAT($now, '00-%m-%d') < DATE_FORMAT($dateField, '00-%m-%d')))
+)) > 0,CONCAT(@years,' an',IF(@years>1,'s','')),''),IF(0, '', CONCAT(
+IF((@months := FLOOR((@days := DATEDIFF($now,DATE_FORMAT($dateField,
+CONCAT(YEAR($now) - @postBD,'-%m-%d')))) / 30.4375)) >= 0
+,CONCAT(' ',@months,' mois'),''),IF(0, '', CONCAT(' '
+,(@days := FLOOR(MOD(@days, 30.4375))),CONCAT(' jour',IF(@days>0,'s',''))
+))))) USING utf8) ))
+SQL;
+
+
+
 		return <<<SQL
 (SELECT( CONVERT(CONCAT(IF((@years := (DATE_FORMAT(NOW(), '%Y') - DATE_FORMAT($dateField, '%Y')
 - (@postBD := (DATE_FORMAT(NOW(), '00-%m-%d') < DATE_FORMAT($dateField, '00-%m-%d')))
