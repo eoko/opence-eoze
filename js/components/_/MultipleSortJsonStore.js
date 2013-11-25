@@ -139,10 +139,13 @@ Oce.MultipleSortJsonStore = Ext.extend(Ext.data.JsonStore, {
             var pn = this.paramNames;
 			options.params = Ext.apply({}, options.params);
 			if ('json' in this.sortInfo) {
+				delete options.params[pn.sort];
+				delete options.params[pn.dir];
 				options.params.json_sort = encodeURIComponent(
 					Ext.util.JSON.encode(this.sortInfo.json.sort)
 				);
 			} else {
+				delete options.params.json_sort;
 				options.params[pn.sort] = this.sortInfo.field;
 				options.params[pn.dir] = this.sortInfo.direction;
 			}
