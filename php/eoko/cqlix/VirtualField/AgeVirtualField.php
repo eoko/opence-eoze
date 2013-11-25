@@ -87,25 +87,5 @@ CONCAT(YEAR($now) - @postBD,'-%m-%d')))) / 30.4375)) > 0
 ,@days,CONCAT(' jour',IF(@days>1,'s',''))
 )))))) USING utf8)
 SQL;
-//		return <<<SQL
-//(SELECT( CONVERT(CONCAT(IF((@years := (DATE_FORMAT(NOW(), '%Y') - DATE_FORMAT($dateField, '%Y')
-//- (@postBD := (DATE_FORMAT(NOW(), '00-%m-%d') < DATE_FORMAT($dateField, '00-%m-%d')))
-//)) > 0,CONCAT(@years,' an',IF(@years>1,'s','')),''),IF(@years > 18, '', CONCAT(
-//IF((@months := FLOOR((@days := DATEDIFF(NOW(),DATE_FORMAT($dateField,
-//CONCAT(YEAR(CURRENT_DATE()) - @postBD,'-%m-%d')))) / 30.4375)) >= 0
-//,CONCAT(' ',@months,' mois'),''),IF(@years >= 3, '', CONCAT(' '
-//,(@days := FLOOR(MOD(@days, 30.4375))),CONCAT(' jour',IF(@days>0,'s',''))
-//))))) USING utf8) ))
-//SQL;
-//		return <<<SQL
-//(SELECT( CONVERT(CONCAT(IF((@years := (DATE_FORMAT(NOW(), '%Y') - DATE_FORMAT($dateField, '%Y')
-//- (@postBD := (DATE_FORMAT(NOW(), '00-%m-%d') < DATE_FORMAT($dateField, '00-%m-%d')))
-//)) > 0,CONCAT(@years,' an',IF(@years>1,'s','')),''),IF(@years >= 21, '', CONCAT(
-//IF((@months := FLOOR((@days := DATEDIFF(NOW(),DATE_FORMAT($dateField,
-//CONCAT(YEAR(CURRENT_DATE()) - @postBD,'-%m-%d')))) / 30.4375)) >= 0
-//,CONCAT(IF(@year>1,' ',''),@months,' mois'),''),IF(@years >= 3, '', CONCAT(' '
-//,(@days := FLOOR(MOD(@days, 30.4375))),CONCAT(' jour',IF(@days>0,'s',''))
-//))))) USING utf8) ))
-//SQL;
 	}
 }

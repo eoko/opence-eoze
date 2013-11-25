@@ -64,7 +64,7 @@ abstract class VirtualFieldBase extends ModelFieldBase implements VirtualField {
 					);
 				} else {
 					throw new IllegalStateException('Invalid virtual configuration: '
-					. print_r($config, true));
+						. print_r($config, true));
 				}
 			}
 		}
