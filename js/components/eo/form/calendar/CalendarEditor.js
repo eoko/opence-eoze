@@ -204,7 +204,12 @@ eo.form.calendar.ZonesEditor = Ext.extend(Ext.form.Field, {
 		
 		this.createMonthEditors(true);
 	}
-	
+
+	,reset: function() {
+		this.clear();
+		return this;
+	}
+
 	,setValue: function(v) {
 		
 		var DR = eo.form.calendar.DateRange,
