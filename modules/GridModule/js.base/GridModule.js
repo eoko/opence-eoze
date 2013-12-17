@@ -528,6 +528,10 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 				);
 //			}
 
+			this.store.on('beforeload', function(store, options) {
+				options.useRanges = true;
+			});
+
 			this.afterInitStore(this.store);
 //			this.doFirstLoad();
 		}

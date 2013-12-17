@@ -13,12 +13,13 @@ Ext.ns('eo');
 		leaving = true;
 	}, false);
 
+	// TODO 20131220-145738
 	eo.handleRequestException = function(conn, response, options) {
 		if (!leaving) {
 
 			// Ext.form.Action replaces the options object it has been given
 			// with its own; thus losing all the custom property we may have
-			// set. Fortunately, we can access it back fromt he Action object
+			// set. Fortunately, we can access it back from he Action object
 			// that is itself used as the scope of the Ajax call.
 			if (options.scope instanceof Ext.form.Action) {
 				options = options.scope.options;
@@ -32,7 +33,8 @@ Ext.ns('eo');
 				} catch (e) {
 					Oce.Modules.GridModule.AlertWindow.show({
 						title: "Erreur" // i18n
-						,message: msg
+						// TODO 20131220-145738
+//						,message: msg
 
 						,modalTo: options && options.sourceComponent || options.win
 
@@ -87,7 +89,7 @@ Ext.ns('eo');
 						+ Ext.encode(options.params));
 					// message
 					Ext.Msg.alert(
-						'Erreur de connection',
+						"Erreur de connection",
 						"Vérifiez l'état de votre connection internet. Si le problème "
 							+ "persiste, il peut s'agir d'un problème avec le serveur ; "
 							+ "dans ce cas veuillez contacter la personne responsable de la "
@@ -119,7 +121,7 @@ Ext.ns('eo');
 		var sc = options.sourceComponent,
 			cb = options.callback,
 			scope = options.scope,
-			title, msg;
+			title;
 
 		if (responseData.errorMessage) {
 			title = responseData.title || "Erreur"; // i18n
