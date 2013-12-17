@@ -18,7 +18,13 @@ class LegacyRouter extends AbstractRouter {
 		$response = $this->getResponse();
 		if ($response instanceof Response) {
 			$this->setResponseDefaultContent($response);
-			$response->send();
+//			$response->send();
+
+			$content = $response->getContent();
+			$response->getHeaders()->addHeaderLine('ETag: ' . md5($content));
+			$response->sendHeaders();
+			// TODO 20131220-145849
+			http_send_data($content);
 		}
 		return $response;
 	}
