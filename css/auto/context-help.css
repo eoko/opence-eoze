@@ -1,0 +1,30 @@
+
+.context-help-mask {
+	background-color: #ccc;
+	position:absolute;
+	width:100%;
+	height:100%;
+	left:0;
+	top:0;
+	opacity:0.5;
+	z-index:10;
+}
+
+a.context-help-zone,
+div.context-help-zone {
+	border: 1px solid darkblue;
+	background-color: blue;
+	opacity: .25;
+	/* needed to prevent the element from taking space in the container, when created */
+	position: absolute;
+	display: block;
+	/* field labels have z-index 2, we want to be above them */
+	z-index: 20;
+}
+
+a.context-help-zone:hover {
+/*	border: 1px solid yellow;*/
+	background-color: yellow;
+/*	opacity: .5;*/
+	cursor: help;
+}

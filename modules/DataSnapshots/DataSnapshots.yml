@@ -1,0 +1,11 @@
+abstract: true
+class: TabModule
+
+title: Data Snapshots
+
+tabChild:
+  xtype: compat.container
+  child:
+    xclass: Eoze.modules.DataSnapshots.view.Main
+
+extra.iconCls: ico DataSnapshots %module% %action%

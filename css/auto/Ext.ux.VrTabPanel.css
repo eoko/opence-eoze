@@ -1,0 +1,40 @@
+/* Left Panel background */
+.x-vr-tab-panel {		
+	background: #CEDFF5;	
+	font: 11px tahoma,arial,helvetica,sans-serif;
+}
+
+/* Left Panel */
+.x-vr-tab-panel-header {
+	float: left;
+}
+
+/* Right Panel */
+.x-vr-tab-panel-bwrap {
+	border-left: 1px solid #99BBE8;
+	float: right;
+	/* padding: 32px 8px 8px 8px; */
+	padding: 8px;
+	background: #fff;
+}
+
+/* Menu Items */
+.x-vr-tab-panel ul.x-tab-strip li {
+	display: inline-block;
+	float: left;
+	width: 100%;
+	overflow: hidden;
+	white-space: nowrap;		
+}
+
+
+.x-vr-tab-panel .x-tab-strip span.x-tab-strip-text,
+/* Active Items */
+.x-vr-tab-panel .x-tab-strip-active .x-tab-right span.x-tab-strip-text {
+	padding: 5px 0px;
+}
+
+/* Top Margin */
+.x-vr-tab-panel ul.x-tab-strip {
+	margin-top: 8px;
+}

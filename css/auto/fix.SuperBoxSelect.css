@@ -1,0 +1,7 @@
+input.x-form-field.x-superboxselect-input-field {
+/*	display: none;*/
+}
+div.x-superboxselect.x-superboxselect-display-btns {
+	min-height: 25px !important;
+	_height: 25px;
+}

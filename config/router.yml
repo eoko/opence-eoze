@@ -1,0 +1,11 @@
+config.node: eoko\router
+
+indexModule: root
+
+# Boolean
+# default: false
+# Whether multiple calls to the route() method are allowed. This method parses
+# the HTTP request in order to route it to the appropriate module and executor.
+# In normal conditions, it should be called only once; multiple calls can 
+# indicate some error, in PHP configuration or elsewhere.
+allowMultipleCalls: false

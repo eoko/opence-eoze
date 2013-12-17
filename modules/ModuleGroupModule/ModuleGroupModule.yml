@@ -1,0 +1,4 @@
+abstract: true
+class: TabModule
+
+jsParentClass: eo.modules.ModuleGroupModule

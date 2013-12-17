@@ -1,0 +1,46 @@
+/**
+ * Copyright (C) 2013 Eoko
+ *
+ * This file is part of Opence.
+ *
+ * Opence is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Opence is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Opence. If not, see <http://www.gnu.org/licenses/gpl.txt>.
+ *
+ * @copyright Copyright (C) 2013 Eoko
+ * @licence http://www.gnu.org/licenses/gpl.txt GPLv3
+ * @author Éric Ortega <eric@eoko.fr>
+ */
+
+/**
+ *
+ * @since 2013-07-05 14:54
+ */
+.x4-btn.x-btn-pill {
+    /*border-color: #99BBE8;*/
+    border: 1px solid #99BBE8;
+    position: relative;
+    -moz-border-radius: 6px;
+    -webkit-border-radius: 6px;
+    border-radius: 6px;
+    o-border-radius: 6px;
+    khtml-border-radius: 6px;
+    background: #DEE7F8 none;
+}
+
+.x4-btn.x-btn-pill .x4-btn-split-right {
+    background: url(../../../../GridModule/images/multisort/close.png) no-repeat scroll right 4px top;
+}
+
+.x4-btn-over.x-btn-pill .x4-btn-split-right {
+    background-position: right 4px top -12px;
+}

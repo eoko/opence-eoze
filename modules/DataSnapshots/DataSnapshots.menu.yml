@@ -1,0 +1,12 @@
+extra.menu:
+  family:
+    id: %module%
+    label: Data Snapshots
+    accessLevel: -1
+    
+  actions:
+    - id: open
+      accessLevel: -1
+      label: Data Snapshots
+      action: open
+      command: '@%module%#open'

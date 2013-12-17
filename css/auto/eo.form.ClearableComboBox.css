@@ -1,0 +1,11 @@
+/* 
+    Document   : eo.form.ClearableComboBox
+    Created on : 25 févr. 2012, 22:49:53
+    Author     : Éric Ortega <eric@planysphere.fr>
+*/
+
+.eo-clearable-combo.readOnly {
+	background: transparent;
+	border-color: transparent;
+	cursor: default;
+}
