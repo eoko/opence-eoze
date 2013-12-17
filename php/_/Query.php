@@ -949,6 +949,7 @@ abstract class Query implements QueryAliasable {
 
 	public function groupBy($field) {
 		$this->groupBy[] = $field;
+		return $this;
 	}
 
 	protected function buildGroupBy() {
