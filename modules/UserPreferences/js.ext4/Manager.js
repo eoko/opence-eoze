@@ -136,7 +136,7 @@ Ext4.define('Eoze.UserPreferences.Manager', {
 				,action: 'saveUserPreferences'
 				,jsonPreferences: Ext.encode(this.data)
 			}
-			,async: async
+			,async: async !== false
 			,success: function(data) {
 //				debugger
 			}
