@@ -36,6 +36,20 @@ class JsonExecutor extends TemplateExecutor {
 			if ($return) {
 				return $this->getData();
 			} else {
+				$data = $this->getData();
+
+				$headers = $response->getHeaders();
+
+				if (isset($data['timestamp'])) {
+					$headers->addHeaderLine('X-Eoze-Request-Timestamp: ' . $data['timestamp']);
+					$this->__unset('timestamp');
+				}
+
+				if (isset($data['requestId'])) {
+					$headers->addHeaderLine('X-Eoze-Request-Id: ' . $data['requestId']);
+					$this->__unset('requestId');
+				}
+
 				$response->setContent($tpl->render(true));
 			}
 		}
