@@ -18,13 +18,27 @@ class LegacyRouter extends AbstractRouter {
 		$response = $this->getResponse();
 		if ($response instanceof Response) {
 			$this->setResponseDefaultContent($response);
-//			$response->send();
+			$response->send();
 
-			$content = $response->getContent();
-			$response->getHeaders()->addHeaderLine('ETag: ' . md5($content));
-			$response->sendHeaders();
-			// TODO 20131220-145849
-			http_send_data($content);
+//			$content = $response->getContent();
+//			$response->getHeaders()->addHeaderLine('ETag: ' . md5($content));
+//			$response->sendHeaders();
+//			// TODO 20131220-145849
+//
+//			/*
+//			 * The last available version of pecl_http seems broken. Using version 1.7.6
+//			 * works... (see: http://forums.bitcasa.com/index.php?/topic/575-pecl-http-on-ubuntu-1204/)
+//			 *
+//			 *     sudo pecl uninstall pecl_http
+//			 *     sudo pecl install pecl_http-1.7.6
+//			 */
+//			http_send_data($content);
+
+			// sudo apt-get install libapache2-mod-xsendfile
+//			$tmp = tmpfile();
+//			fwrite($tmp, $content);
+//			http_send_stream($tmp);
+//			fclose($tmp);
 		}
 		return $response;
 	}
