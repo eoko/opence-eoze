@@ -22,6 +22,8 @@
  */
 
 (function() {
+	return; // disabled
+
 	var makeRequest = Ext.lib.Ajax.makeRequest;
 
 //	Ext.data.HttpProxy.
