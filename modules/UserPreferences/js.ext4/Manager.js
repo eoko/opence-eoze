@@ -79,7 +79,7 @@ Ext4.define('Eoze.UserPreferences.Manager', {
 		Ext.EventManager.on(window, 'beforeunload', function() {
 			if (this.commitTask.isDelayed()) {
 				this.commitTask.cancel();
-				this.doCommit(false);
+				this.doCommit(true);
 			}
 		}, this);
 	}
@@ -126,7 +126,7 @@ Ext4.define('Eoze.UserPreferences.Manager', {
 	 * Handler for commit DelayedTask.
 	 * @private
 	 */
-	,doCommit: function(async) {
+	,doCommit: function(synchronous) {
 		// Using basex request, for synchronous request support.
 		// Synchronous requests in beforeunload event will be fired by most browsers,
 		// will even return in some cases.
@@ -136,7 +136,7 @@ Ext4.define('Eoze.UserPreferences.Manager', {
 				,action: 'saveUserPreferences'
 				,jsonPreferences: Ext.encode(this.data)
 			}
-			,async: async
+			,async: !synchronous
 			,success: function(data) {
 //				debugger
 			}
