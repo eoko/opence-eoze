@@ -31,7 +31,18 @@ class LoginExecutor extends JsonExecutor {
 		} else {
 			//$this->messages = implode('<br/>', $result->getMessages());
 			$this->loginInfos = false;
-			$this->message = 'Identifiant ou mot de passe incorrect. Veuillez réessayer.';
+			if ($result->getMessages()) {
+				$this->message = '<p>' . implode('</p><p>', $result->getMessages()) . '</p>';
+			} else {
+				switch ($result->getCode()) {
+					case $result::SUCCESS:
+						throw new \IllegalStateException;
+					default:
+					case $result::FAILURE_CREDENTIAL_INVALID:
+						$this->message = 'Identifiant ou mot de passe incorrect. Veuillez réessayer.';
+						break;
+				}
+			}
 			return true;
 		}
 	}
