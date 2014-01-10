@@ -13,8 +13,17 @@ Ext.ns('eo');
 		leaving = true;
 	}, false);
 
+	// TODO 20131220-145738
 	eo.handleRequestException = function(conn, response, options) {
 		if (!leaving) {
+
+			// Ext.form.Action replaces the options object it has been given
+			// with its own; thus losing all the custom property we may have
+			// set. Fortunately, we can access it back from he Action object
+			// that is itself used as the scope of the Ajax call.
+			if (options.scope instanceof Ext.form.Action) {
+				options = options.scope.options;
+			}
 
 			function handleError(userError) {
 				var data;
@@ -23,10 +32,11 @@ Ext.ns('eo');
 					eo.handleResponseError(data, options);
 				} catch (e) {
 					Oce.Modules.GridModule.AlertWindow.show({
-						title: 'Erreur'
-						,message: msg
+						title: "Erreur" // i18n
+						// TODO 20131220-145738
+//						,message: msg
 
-						,modalTo: options && options.win
+						,modalTo: options && options.sourceComponent || options.win
 
 						,okHandler: function() {
 							this.close();
@@ -79,7 +89,7 @@ Ext.ns('eo');
 						+ Ext.encode(options.params));
 					// message
 					Ext.Msg.alert(
-						'Erreur de connection',
+						"Erreur de connection",
 						"Vérifiez l'état de votre connection internet. Si le problème "
 							+ "persiste, il peut s'agir d'un problème avec le serveur ; "
 							+ "dans ce cas veuillez contacter la personne responsable de la "
@@ -99,11 +109,11 @@ Ext.ns('eo');
 	 * @param {Object} responseData
 	 *
 	 * @param {Object} options
-	 * @param {Ext.Component} options.sourceComponent The source component, that will be
+	 * @param {Ext.Component} [options.sourceComponent] The source component, that will be
 	 * masked if required.
-	 * @param {Function} options.callback A function that will be called after the user
+	 * @param {Function} [options.callback] A function that will be called after the user
 	 * has acknowledged the issue.
-	 * @param {Object} options.scope The scope in which the acknowledge callback will be
+	 * @param {Object} [options.scope] The scope in which the acknowledge callback will be
 	 * called.
 	 */
 	eo.handleResponseError = function(responseData, options) {
@@ -111,7 +121,7 @@ Ext.ns('eo');
 		var sc = options.sourceComponent,
 			cb = options.callback,
 			scope = options.scope,
-			title, msg;
+			title;
 
 		if (responseData.errorMessage) {
 			title = responseData.title || "Erreur"; // i18n
@@ -141,7 +151,8 @@ Ext.ns('eo');
 
 		else {
 			debugger // TODO
-			throw new Error('TODO');
+			title = "Erreur";
+			msg = "Une erreur a empêché l'exécution de cette opération.";
 		}
 
 		var win = Oce.Modules.GridModule.AlertWindow.show({

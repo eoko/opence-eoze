@@ -51,6 +51,23 @@ Ext4.define('Eoze.context.Proxy', {
 			 * @param {Mixed} previousValue
 			 */
 			'change'
+			/**
+			 * @event
+			 * @preventable
+			 *
+			 * Fires before a value is applied to the proxy.
+			 *
+			 * Returning `false` from an event listener will stop the context
+			 * from setting the value.
+			 *
+			 * In that case, it is expected that the listener that has interrupted
+			 * the event calls {@link #setValue} with the converted value.
+			 *
+			 * @param {Eoze.Context.Context} context
+			 * @param {Mixed} newValue
+			 * @param {Mixed} previousValue
+			 */
+			,'convert'
 			,'beforeload'
 		);
 

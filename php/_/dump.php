@@ -74,12 +74,20 @@ function dump_mark($n = null) {
 	static $count = null;
 
 	if ($n !== null) {
-		if ($count === null) {
-			$count = $n;
+		if (is_bool($n)) {
+			if ($n === false) {
+				return;
+			}
 		} else {
-			$count--;
+			if ($count === null) {
+				$count = $n;
+			} else {
+				$count--;
+			}
+			if ($count > 0) {
+				return;
+			}
 		}
-		if ($count > 0) return;
 	}
 	global $dump_after_mark;
 	$dump_after_mark = true;
@@ -108,6 +116,9 @@ function dump_trace_after($die = true) {
 	global $dump_after_mark;
 	global $dumpPre, $endDumpPre;
 	if ($dump_after_mark) {
+		if (!headers_sent() && $die) {
+			header('Content-Type: text');
+		}
 		echo $dumpPre;
 		$e = new Exception();
 		print_r(str_replace(ROOT, '', $e->getTraceAsString()));

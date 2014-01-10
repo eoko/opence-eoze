@@ -7,8 +7,9 @@
  * Ext.data.JsonStore, etc.)
  */
 Ext.ns('Ext.ux.data');
-Ext.ux.data.PagingStore = Ext.extend(Ext.data.Store, {
-    add: function (records) {
+Ext.define('Ext.ux.data.PagingStore', {
+    extend: 'Ext.data.Store'
+    ,add: function (records) {
         records = [].concat(records);
         if (records.length < 1) {
             return;
@@ -437,8 +438,9 @@ Ext.ux.data.PagingDirectStore = Ext.extend(Ext.ux.data.PagingStore, {
 });
 Ext.reg('pagingdirectstore', 'Ext.ux.data.PagingDirectStore');
 
-Ext.ux.data.PagingJsonStore = Ext.extend(Ext.ux.data.PagingStore, {
-    constructor: function() {
+Ext.define('Ext.ux.data.PagingJsonStore', {
+    extend: 'Ext.ux.data.PagingStore'
+    ,constructor: function() {
 		Ext.data.JsonStore.prototype.constructor.apply(this, arguments);
 	}
 });
