@@ -23,48 +23,45 @@
  */
 
 namespace eoko\cqlix\VirtualField;
-
-use eoko\cqlix\Aliaser;
 use ModelTable;
 
 /**
- * @todo doc
+ * Virtual field that aliases another field.
  *
- * @since 2013-06-10 10:32
+ * @internal Field type cannot be retrieved in the constructor, at the risk of going into
+ * tables required each other in an infinite loop.
+ *
+ * @since 2013-10-02 14:48
  */
-class RelationCount extends AbstractVirtualField {
-
-	protected $type = self::T_INT;
-
-	private $table;
-	private $relation;
+class Alias extends AbstractVirtualField {
 
 	/**
-	 * Creates a new RelationCount virtual field.
-	 *
-	 * If the alias is not specified, one will be generated from the singular relation name, in
-	 * camelCase.
-	 *
-	 * @param ModelTable $table
-	 * @param string $relation
-	 * @param string|null $alias
+	 * @var string
 	 */
-	public function __construct(\ModelTable $table, $relation, $alias = null) {
+	private $fieldName;
 
-		if ($alias === null) {
-			$alias = lcfirst(\Inflector::singularize($relation)) . 'Count';
-		}
+	/**
+	 * @var \ModelTable
+	 */
+	private $table;
 
+	/**
+	 * @param \ModelTable $table Model table. Used for lazy retrieval of the field type.
+	 * @param string $fieldName Name of the aliased field. Can be relative.
+	 * @param string $alias
+	 * @internal param string $type Field type. Use constants from {@link ModelField}
+	 */
+	public function __construct(ModelTable $table, $fieldName, $alias = null) {
+		$this->fieldName = $fieldName;
 		$this->table = $table;
-		$this->relation = $relation;
-
 		parent::__construct($alias);
 	}
 
 	/**
-	 * Creates a RelationCount virtual field if the spec if of the form:
+	 * Creates an Alias virtual field if the spec if of the form:
 	 *
-	 *     COUNT($relationName)
+	 *     ALIAS($fieldName)
+	 *     alias($fieldName)
 	 *
 	 * @param ModelTable $table
 	 * @param string $spec
@@ -72,17 +69,20 @@ class RelationCount extends AbstractVirtualField {
 	 * @return RelationCount
 	 */
 	public static function fromString(ModelTable $table, $spec, $name = null) {
-		if (preg_match('/^COUNT\((?<relation>[^)]+)\)$/i', $spec, $matches)) {
-			return new self($table, $matches['relation'], $name);
+		if (preg_match('/^ALIAS\((?<fieldName>[^)]+)\)$/i', $spec, $matches)) {
+			$fieldName = $matches['fieldName'];
+			return new self($table, $fieldName, $name);
 		}
 	}
 
-	/**
-	 * @inheritdoc
-	 */
-	protected function doGetClause(Aliaser $aliaser) {
-		$table = $this->table;
-		$relationInfo = $table->getRelationInfo($this->relation);
-		return $relationInfo->getNameClause($aliaser->getQuery());
+	public function getType() {
+		if ($this->type === null) {
+			$this->type = $this->table->getField($this->fieldName)->getType();
+		}
+		return $this->type;
+	}
+
+	protected function getSQl() {
+		return "`$this->fieldName`";
 	}
 }
