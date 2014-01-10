@@ -27,6 +27,7 @@ namespace eoko\Authentification\UserSession;
 use eoko\config\Application;
 use Zend\Authentication\AuthenticationService;
 use Zend\Authentication\Adapter\DbTable as AuthAdapter;
+use Zend\Authentication\Result;
 use Zend\Db\Adapter\Adapter as DbAdapter;
 use Zend\Session\ManagerInterface as SessionManager;
 use Eoze\Session\SaveHandler\ObservableInterface as ObservableSaveHandler;
@@ -185,6 +186,18 @@ class Zend implements \eoko\Authentification\UserSession {
 
 			// Save record as identity
 			$userData = (array) $authAdapter->getResultRowObject(null, $omittedColumns);
+
+			if (!$userData['actif']) {
+				return new Result(Result::FAILURE, $username, array('Compte désactivé.'));
+			}
+
+			$endUse = $userData['end_use'];
+			if ($endUse) {
+				$endUseDate = new \DateTime($endUse);
+				if ($endUseDate->getTimestamp() < time()) {
+					return new Result(Result::FAILURE, $username, array('Compte expiré.'));
+				}
+			}
 
 			$storage = $this->auth->getStorage();
 			$storage->write($userData, true);

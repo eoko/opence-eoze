@@ -1,3 +1,5 @@
+require_once __DIR__ . '/../base/<?php echo $tableName ?>Base.php';
+
 <?php if (isset($proxyNamespace)): ?>
 namespace <?php echo $proxyNamespace ?>;
 <?php endif ?>

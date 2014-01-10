@@ -267,7 +267,7 @@ abstract class IncludeCompiler {
 						$cleanedUrl = substr($url, 0, -2);
 						// replace the url by the cleaned one to avoid bursting the browser cache
 						unset($urls[$url]);
-						$urls[$cleanedUrl] = $priority;
+						$externalUrls[$cleanedUrl] = $priority;
 					}
 					// else consider the url to be remote because of the query string
 				} else {
@@ -280,6 +280,9 @@ abstract class IncludeCompiler {
 				$files[$priority][] = $url;
 			}
 		}
+
+		$urls = $externalUrls;
+
 		ksort($files);
 		$list = array();
 		foreach ($files as $fileGroup) {

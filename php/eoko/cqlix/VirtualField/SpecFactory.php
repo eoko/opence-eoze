@@ -38,6 +38,8 @@ class SpecFactory {
 
 	private $providers = array(
 		'eoko\cqlix\VirtualField\RelationCount',
+		'eoko\cqlix\VirtualField\NotNull',
+		'eoko\cqlix\VirtualField\Alias',
 	);
 
 	/**

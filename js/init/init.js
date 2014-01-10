@@ -3,6 +3,8 @@ Ext.ns('Oce.mx', 'Oce.ext');
 Ext.BLANK_IMAGE_URL = Oce.ext.BLANK_IMAGE_URL || 'images/s.gif';
 Ext.Ajax.url = 'api';
 
+Ext.Ajax.timeout = Ext4.Ajax.timeout = 10*60*1000;
+
 /**
  * @class eo
  * Eoze core utilities and functions.

@@ -324,12 +324,22 @@ class Application implements FileFinder {
 	 * @return int|null
 	 */
 	public function getActiveUserId($requireAuthenticatedUser = false) {
-		$userSession = $this->getUserSession();
-		if ($requireAuthenticatedUser) {
-			// TODO #auth
-			$userSession->requireLoggedIn();
+		if ($this->activeUserId !== null) {
+			return $this->activeUserId;
+		} else {
+			$userSession = $this->getUserSession();
+			if ($requireAuthenticatedUser) {
+				// TODO #auth
+				$userSession->requireLoggedIn();
+			}
+			return $userSession->getUserId();
 		}
-		return $userSession->getUserId();
+	}
+
+	private $activeUserId = null;
+
+	public function setActiveUserId($id) {
+		$this->activeUserId = $id;
 	}
 
 	private function createUserSession() {

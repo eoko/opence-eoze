@@ -199,6 +199,18 @@ var define = function(cls, o, createFn) {
 };
 
 Ext.define = function(cls, o, createFn) {
+	if (Ext.isFunction(o)) {
+		o = o();
+	}
+	if (o.statics) {
+		function staticPostCreate() {
+			Ext.apply(this, o.statics);
+			this.prototype.self = this;
+		}
+		createFn = createFn
+			? Ext4.Function.createSequence(createFn, staticPostCreate)
+			: staticPostCreate;
+	}
 	if (o.singleton) {
 		var previous = resolve(cls, false),
 			instance;
