@@ -260,6 +260,8 @@ abstract class ModelTable extends ModelTableProxy implements EventManagerAwareIn
 		if ($virtual instanceof VirtualField) {
 			if ($name === null) {
 				$name = $virtual->getName();
+			} else {
+				$virtual->setAlias($name);
 			}
 			$this->virtuals[$name] = $virtual;
 		} else {

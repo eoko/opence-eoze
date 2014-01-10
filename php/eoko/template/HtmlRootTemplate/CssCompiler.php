@@ -22,11 +22,16 @@ class CssCompiler extends IncludeCompiler {
 		$content = file_get_contents($file);
 		$dir = dirname($file);
 		$content = preg_replace_callback('/url\(([^)]+)\)/', function($matches) use($dir) {
-			$rel = Files::getRelativePath(WEB_DIR_PATH, $dir);
-			if (substr($rel, -1) !== '/') {
-				$rel .= '/';
+			$file = trim($matches[1], '\'" ');
+			if (substr($matches[1], 0, 5) === 'data:') {
+				return 'url("' . $file . '")';
+			} else {
+				$rel = Files::getRelativePath(WEB_DIR_PATH, $dir);
+				if (substr($rel, -1) !== '/') {
+					$rel .= '/';
+				}
+				return 'url("' . $rel . $file . '")';
 			}
-			return 'url("' . $rel . trim($matches[1], '\'" ') . '")';
 		}, $content);
 		return $content;
 	}

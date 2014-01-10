@@ -270,6 +270,10 @@ eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 			config = undefined;
 		}
 
+		config = Ext.apply({
+			contextDate: this.contextDate
+		}, config);
+
 		var field = this.createField(config);
 		
 		// base params
@@ -636,7 +640,13 @@ eo.form.contact.AbstractFieldSet = Ext.extend(Ext.form.FieldSet, {
 	,reset: function() {
 		this.setValue([]);
 	}
-	
+
+	,setContextDate: function(date) {
+		this.contextDate = date;
+//		if (this.findBy(function(){return true}).length) {
+//			debugger
+//		}
+	}
 });
 
 Ext.reg('contactfieldset', 'eo.form.contact.AbstractFieldSet');

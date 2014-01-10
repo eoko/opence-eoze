@@ -354,9 +354,10 @@ eo.form.contact.AbstractField = Ext.extend(Ext.form.CompositeField, {
 		};
 		
 		return function(method) {
-			var fields = [];
+			var fields = [],
+				config = {contextDate: this.contextDate};
 			if (this[method]) {
-				fields = this[method]();
+				fields = this[method](config);
 			}
 			if (!Ext.isArray(fields)) {
 				fields = [fields];

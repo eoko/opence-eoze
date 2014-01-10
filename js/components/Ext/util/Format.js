@@ -1,4 +1,3 @@
-<?php
 /**
  * Copyright (C) 2013 Eoko
  *
@@ -23,30 +22,24 @@
  */
 
 /**
- * @category Eoze
- * @package UserSession
- * @since 2013-03-04 18:16
+ * Custom formats for Ext3.
+ *
+ * @since 2013-10-09 16:09
  */
+Ext.apply(Ext.util.Format, {
 
-/**
- * @deprecated
- */
-class UserSessionTimeout extends UserException {
-
-	public function  __construct($message = null, $errorTitle = null, $debugMessage = '', Exception $previous = null) {
-		if ($message === null) {
-			$message = lang(
-				'Vous avez été déconnecté suite à une longue période d\'inactivité. '
-				. 'Veuillez vous identifier à nouveau pour continuer votre travail.'
-			);
+	/**
+	 * Returns the specified string if the value is greater than 1, else
+	 * returns an empty string.
+	 *
+	 * @param {Integer/undefined/null} value
+	 * @param {String} plural
+	 * @return {String}
+	 */
+	ifPlural: function(value, plural) {
+		if (!Ext.isDefined(plural)) {
+			plural = 's';
 		}
-
-		if ($errorTitle === null) {
-			$errorTitle = lang('Déconnexion');
-		}
-
-		parent::__construct($message, $errorTitle, $debugMessage, $previous);
-
-		ExtJSResponse::put('cause', 'sessionTimeout');
+		return value > 1 ? plural : '';
 	}
-}
+});
