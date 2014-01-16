@@ -1,0 +1,22 @@
+abstract: true
+class: TabModule
+
+config:
+  controller: MercurialConsole.json
+  tab:
+    title: Mercurial Console
+
+extra:
+  
+  menu:
+    family:
+      id: mercurial
+      label: Mercurial Console
+
+    actions:
+      - id: open
+        accessLevel: -1
+        label: Mercurial Console
+        action: open
+        command: @%module%#open
+        

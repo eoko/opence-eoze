@@ -1,0 +1,1 @@
+The i18n bundle of Eoze adds internationalization support in ExtJS 4.
