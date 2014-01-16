@@ -435,11 +435,12 @@ Ext.Ajax.request = function(o){
 		var p = o.params,
 			url = o.url || me.url,
 			method,
-			cb = {success: me.handleResponse,
-				  failure: me.handleFailure,
-				  scope: me,
-				  argument: {options: o},
-				  timeout : o.timeout || me.timeout
+			cb = {
+				success: me.handleResponse,
+				failure: me.handleFailure,
+				scope: me,
+				argument: {options: o},
+				timeout: o.async !== false && (o.timeout || me.timeout) || undefined
 			},
 			form,
 			serForm;
