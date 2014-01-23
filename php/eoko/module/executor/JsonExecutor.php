@@ -57,4 +57,14 @@ class JsonExecutor extends TemplateExecutor {
 		return $response;
 	}
 
+	/**
+	 * Multipurpose test action.
+	 *
+	 * @return bool
+	 */
+	public function ping() {
+		$this->set('time', time());
+		return true;
+	}
+
 }
