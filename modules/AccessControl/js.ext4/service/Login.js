@@ -158,8 +158,33 @@ Ext.define('Eoze.AccessControl.service.Login', {
 
 	// public (mainly legacy)
 	,notifyDisconnection: function(data) {
+		var me = this;
+
 		// care, data argument is optional
-		debugger
+		Ext.Msg.wait(
+			"La connection au serveur a été perdue. Tentative de rétablissement en cours, "
+				+ "veuillez patienter. Ne rechargez pas la page pour éviter de perdre votre "
+				+ "travail en cours.",
+			"Connection perdue",
+			{width: 300}
+		).setWidth(450);
+
+		function retry() {
+			var promise = me.doAuthenticate({
+					token: me.loginInfos.token
+				})
+				.then(function() {
+					Ext.Msg.hide();
+				});
+
+			promise.otherwise(function() {
+				setTimeout(retry, 5000);
+			});
+
+			return promise;
+		}
+
+		return retry();
 	}
 
 	/**
@@ -170,6 +195,19 @@ Ext.define('Eoze.AccessControl.service.Login', {
 	 * @return {Deft.Promise}
 	 */
 	,authenticate: function(username, password) {
+		return this.doAuthenticate({
+			username: username
+			,password: password
+		});
+	}
+
+	/**
+	 * Authenticate by credentials or token.
+	 *
+	 * @param {Object} data
+	 * @return {Deft.promise.Promise}
+	 */
+	,doAuthenticate: function(data) {
 		var me = this,
 			deferred = new Deft.Deferred;
 		eo.Ajax.request({
@@ -177,10 +215,7 @@ Ext.define('Eoze.AccessControl.service.Login', {
 				controller: 'AccessControl.login'
 				,action: 'login'
 			}
-			,jsonData: {
-				username: username
-				,password: password
-			}
+			,jsonData: data
 			,callback: function(options, success, data) {
 				if (success) {
 					// Success
