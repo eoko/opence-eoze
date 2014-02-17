@@ -1,3 +1,4 @@
+(function(Ext) {
 /**
  * Copyright (C) 2013 Eoko
  *
@@ -25,7 +26,7 @@
  *
  * @since 2013-03-13 17:19
  */
-Ext4.define('Eoze.AccessControl.service.Login', {
+Ext.define('Eoze.AccessControl.service.Login', {
 
 	mixins: {
 		observable: 'Ext.util.Observable'
@@ -42,11 +43,48 @@ Ext4.define('Eoze.AccessControl.service.Login', {
 			 */
 			'login'
 		);
+
+		this.initDb();
+	}
+
+	// private
+	,initDb: function() {
+		// Let us open our database
+		var dbRequest = window.indexedDB.open(this.$className),
+			me = this;
+
+		dbRequest.onerror = me.dbOnError;
+
+		dbRequest.onupgradeneeded = function(e) {
+			var db = e.target.result;
+			var objectStore = db.createObjectStore('auth');
+		};
+
+		dbRequest.onsuccess = function() {
+			var db = dbRequest.result,
+				transaction = db.transaction(['auth'], 'read'),
+				store = transaction.objectStore('auth'),
+				request = store.get('userId');
+
+			db.onerror = me.dbOnError;
+
+			request.onsuccess = function() {
+				debugger
+			};
+		};
+	}
+
+	// private
+	,dbOnError: function() {
+		throw new Error('Authentification indexed database error.');
+	}
+
+	,isIdentified: function() {
+		debugger
 	}
 
 	,authenticate: function(username, password) {
-
-		var deferred = Ext4.create('Deft.Deferred');
+		var deferred = new Deft.Deferred;
 
 		eo.Ajax.request({
 
@@ -65,6 +103,7 @@ Ext4.define('Eoze.AccessControl.service.Login', {
 				if (success) {
 					// Success
 					if (data.loginInfos) {
+						this.setLoginInfos(data.loginInfos);
 						deferred.resolve(data.loginInfos);
 						this.fireEvent('login', this, data.loginInfos);
 					}
@@ -81,4 +120,16 @@ Ext4.define('Eoze.AccessControl.service.Login', {
 
 		return deferred.promise;
 	}
+
+	// private
+	,setLoginInfos: function(loginInfos) {
+
+		debugger
+	}
+}, function() {
+	// Polyfills
+	if (!window.indexedDB) {
+		throw new Error('IndexedDB support is required.');
+	}
 });
+}(window.Ext4 || Ext.getVersion && Ext));

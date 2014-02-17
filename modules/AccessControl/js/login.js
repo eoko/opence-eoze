@@ -66,20 +66,21 @@ Oce.Modules.AccessControl.login = Ext.extend(Oce.Module, {
 	}
 
 	,start: function(modal, text) {
-		Ext.getBody().addClass('bg');
-		this.createLoginWindow({
-			modal: modal
-			,message: text
-			,exitButton: false
-		}).show();
+//		Ext.getBody().addClass('bg');
+//		this.createLoginWindow({
+//			modal: modal
+//			,message: text
+//			,exitButton: false
+//		}).show();
 	}
 	
 	,showLoginWindow: function(modal, text) {
-		this.createLoginWindow({
-			modal: modal
-			,message: text
-			,exitButton: true
-		}).show();
+		debugger
+//		this.createLoginWindow({
+//			modal: modal
+//			,message: text
+//			,exitButton: true
+//		}).show();
 	}
 
 });
