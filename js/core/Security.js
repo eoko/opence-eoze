@@ -2,25 +2,30 @@ Ext4.require('Ext.ux.ActivityMonitor');
 
 Oce.Security = function() {
 
-	var identified;
+//	var identified;
 	var eventManager = new Oce.EventManager(this);
 	var loginInfos;
-	var appLoaded;
+//	var appLoaded;
+
+	function getService() {
+		return Deft.Injector.resolve('auth');
+	}
 
 	function setIdentified(flag, args) {
-		if (flag === identified) return;
-
-		identified = flag;
-
-		if (identified) {
-			appLoaded = true;
-			loginInfos = args;
-			eventManager.fire('login');
-
-			startIdleMonitor();
-		} else {
-			eventManager.fire('logout', args);
-		}
+		throw new Error('deprecated');
+//		if (flag === identified) return;
+//
+//		identified = flag;
+//
+//		if (identified) {
+//			appLoaded = true;
+//			loginInfos = args;
+//			eventManager.fire('login');
+//
+//			startIdleMonitor();
+//		} else {
+//			eventManager.fire('logout', args);
+//		}
 	}
 
 	function startIdleMonitor() {
@@ -39,6 +44,7 @@ Oce.Security = function() {
 	}
 
 	function logout() {
+		debugger // TODO
 		setIdentified(false);
 		eo.Ajax.request({
 			params: {
@@ -57,7 +63,7 @@ Oce.Security = function() {
 	};
 
 	this.isIdentified = function() {
-		return identified;
+		return getService().isIdentified();
 	};
 
 	this.getLoginInfos = function() {
@@ -74,25 +80,26 @@ Oce.Security = function() {
 
 	var loginModule = null;
 
-	this.requestLogin = function(modal, text) {
-		var loginFn = appLoaded ? "showLoginWindow" : "start";
-		if (loginModule !== null) {
-			loginModule[loginFn](modal, text);
-		} else {
-			Oce.ModuleManager.requireModuleByName('Oce.Modules.AccessControl.login',
-				function(m) {
-					loginModule = m;
-					m.on('login', function(infos) {
-						setIdentified(true, infos);
-					});
-					m[loginFn](modal, text);
-				}
-			);
-		}
-	};
+//	this.requestLogin = function(modal, text) {
+//		var loginFn = appLoaded ? "showLoginWindow" : "start";
+//		if (loginModule !== null) {
+//			loginModule[loginFn](modal, text);
+//		} else {
+//			Oce.ModuleManager.requireModuleByName('Oce.Modules.AccessControl.login',
+//				function(m) {
+//					loginModule = m;
+//					m.on('login', function(infos) {
+//						setIdentified(true, infos);
+//					});
+//					m[loginFn](modal, text);
+//				}
+//			);
+//		}
+//	};
 
 	this.logout = function() {
-		setIdentified(false);
+		debugger // TODO
+		//setIdentified(false);
 	};
 
 	this.get = function() {
@@ -100,8 +107,8 @@ Oce.Security = function() {
 		return Oce.Security;
 	};
 
-	appLoaded = Oce.Security.initIdentified;
-	setIdentified(Oce.Security.initIdentified, Oce.Security.loginInfos);
+//	appLoaded = Oce.Security.initIdentified;
+//	setIdentified(Oce.Security.initIdentified, Oce.Security.loginInfos);
 
 	return this;
 };

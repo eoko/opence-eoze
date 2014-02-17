@@ -92,25 +92,25 @@ Ext4.define('Eoze.app.Application', {
 
 		Oce.deps.reg('Oce.Bootstrap.start');
 
-		var firstLogin = true;
-
-		Oce.mx.Security.addListener('logout', function(src, info) {
-			Oce.mx.Security.requestLogin(true, info && (info.text || info.message));
-		});
-
-		Oce.mx.Security.addListener('login', function() {
-			if (firstLogin) {
-				Oce.mx.application.start();
-				firstLogin = false;
-			}
-		});
-
-		if (Oce.mx.Security.isIdentified()) {
-			firstLogin = false;
-			Oce.mx.application.start();
-		} else {
-			Oce.mx.Security.requestLogin(false);
-		}
+//		var firstLogin = true;
+//
+//		Oce.mx.Security.addListener('logout', function(src, info) {
+//			Oce.mx.Security.requestLogin(true, info && (info.text || info.message));
+//		});
+//
+//		Oce.mx.Security.addListener('login', function() {
+//			if (firstLogin) {
+//				Oce.mx.application.start();
+//				firstLogin = false;
+//			}
+//		});
+//
+//		if (Oce.mx.Security.isIdentified()) {
+//			firstLogin = false;
+//			Oce.mx.application.start();
+//		} else {
+//			Oce.mx.Security.requestLogin(false);
+//		}
 	}
 
 	/**
