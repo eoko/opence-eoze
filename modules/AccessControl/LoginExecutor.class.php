@@ -18,8 +18,26 @@ class LoginExecutor extends JsonExecutor {
 
 	public function login() {
 
-		$username = $this->request->req('username', true);
-		$password = $this->request->req('password', true);
+		$request = $this->getRequest();
+
+		if ($request->has('token')) {
+			$token = $request->get('token');
+			dump_trace(); // TODO
+//			session_id($token);
+//			$userSession = $this->getApplication()->getUserSession();
+//			dump(array(
+//				$token,
+//				$_SESSION,
+//				session_id(),
+//				$userSession->getLoginInfos(),
+//			));
+//			$userSession->requireLoggedIn();
+//			$this->loginInfos = $userSession->getLoginInfos();
+//			return true;
+		} else {
+			$username = $this->request->req('username', true);
+			$password = $this->request->req('password', true);
+		}
 
 		$userSession = $this->getApplication()->getUserSession();
 

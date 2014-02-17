@@ -135,7 +135,7 @@
 
             var msgEl = Ext.get('msg');
 
-            Ext.get('usernameField').focus();
+            Ext.get('usernameField').focus(10);
 
             Ext.get('loginForm').on('submit', function(e) {
 
@@ -180,7 +180,9 @@
 
             function start() {
                 Oce.mx.application.start();
-                Pace.stop();
+                if (window.Pace) {
+                    Pace.stop();
+                }
             }
         }(window.Ext4 || Ext.getVersion && Ext));
     </script>
