@@ -218,18 +218,16 @@ Ext.define('Eoze.AccessControl.service.Login', {
 			,jsonData: data
 			,callback: function(options, success, data) {
 				if (success) {
-					// Success
 					if (data.loginInfos) {
+						// Success
 						me.setLoginInfos(data.loginInfos);
 						deferred.resolve(data.loginInfos);
-					}
-					// Failure
-					else {
+					}else {
+						// Failure
 						deferred.reject(data);
 					}
 				} else {
-					// TODO handle error
-					debugger
+					deferred.reject(data);
 				}
 			}
 		});
