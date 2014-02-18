@@ -158,7 +158,8 @@ Ext.define('Eoze.AccessControl.service.Login', {
 
 	// public (mainly legacy)
 	,notifyDisconnection: function(data) {
-		var me = this;
+		var me = this,
+			deferred = new Deft.Deferred;
 
 		// care, data argument is optional
 		Ext.Msg.wait(
@@ -170,21 +171,20 @@ Ext.define('Eoze.AccessControl.service.Login', {
 		).setWidth(450);
 
 		function retry() {
-			var promise = me.doAuthenticate({
+			me.doAuthenticate({
 					token: me.loginInfos.token
 				})
 				.then(function() {
 					Ext.Msg.hide();
+				})
+				.otherwise(function() {
+					setTimeout(retry, 5000);
 				});
-
-			promise.otherwise(function() {
-				setTimeout(retry, 5000);
-			});
-
-			return promise;
 		}
 
-		return retry();
+		retry();
+
+		return deferred.promise;
 	}
 
 	/**
