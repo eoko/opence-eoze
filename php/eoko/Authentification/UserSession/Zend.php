@@ -64,11 +64,29 @@ class Zend implements \eoko\Authentification\UserSession {
 	 */
 	private $loginListeners = array();
 
+	private $authAdapter;
+
+	protected $omittedColumns = 'pwd';
+
+	// Should start and end with a character that is forbidden in
+	// username (i.e. ' ')
+	private $tokenSeparator = ' <|> ';
+
+	/**
+	 * Name of the cookie that will be used to restore the session, if
+	 * the session is lost and the cookie is present.
+	 *
+	 * The default name is slightly obfuscated...
+	 *
+	 * @var string
+	 */
+	private $restoreCookieName = 'Eoze_Auhentication_Validity';
+
 	public function __construct(DbAdapter $dbAdapter) {
 
 		$this->dbAdapter = $dbAdapter;
 
-		$storage = new Storage();
+		$storage = new Zend\SessionStorage();
 		$this->auth = new AuthenticationService($storage);
 	}
 
@@ -80,6 +98,24 @@ class Zend implements \eoko\Authentification\UserSession {
 		} else {
 			// TODO:
 			throw new \UserSessionTimeout();
+		}
+	}
+
+	/**
+	 * Proxies the call to the AuthenticationService, trying to restore
+	 * the session first if the session restoration cookie is present.
+	 *
+	 * @return bool
+	 */
+	private function hasIdentity() {
+		if ($this->auth->hasIdentity()) {
+			return true;
+		} else if (isset($_COOKIE[$this->restoreCookieName])) {
+			$this->decryptToken($_COOKIE[$this->restoreCookieName], $username, $password);
+			$this->login($username, $password);
+			return $this->auth->hasIdentity();
+		} else {
+			return false;
 		}
 	}
 
@@ -102,7 +138,7 @@ class Zend implements \eoko\Authentification\UserSession {
 	 * @return int|null
 	 */
 	public function getUserId($require = false) {
-		if ($this->auth->hasIdentity()) {
+		if ($this->hasIdentity()) {
 			$userData = $this->auth->getIdentity();
 			return $userData['id'];
 		} else if ($require) {
@@ -117,7 +153,7 @@ class Zend implements \eoko\Authentification\UserSession {
 	}
 
 	private function getAuthToken() {
-		if ($this->auth->hasIdentity()) {
+		if ($this->hasIdentity()) {
 			$userData = $this->auth->getIdentity();
 			return $userData['token'];
 		} else {
@@ -125,8 +161,17 @@ class Zend implements \eoko\Authentification\UserSession {
 		}
 	}
 
+	private function decryptToken($token, &$username, &$password) {
+		$parts = explode(
+			$this->tokenSeparator,
+			$this->getCrypter()->decrypt($token)
+		);
+		$username = $parts[0];
+		$password = $parts[1];
+	}
+
 	public function isAuthorized($level) {
-		if ($this->auth->hasIdentity()) {
+		if ($this->hasIdentity()) {
 
 			if ($level instanceof \Level) {
 				$level = $level->level;
@@ -155,8 +200,6 @@ class Zend implements \eoko\Authentification\UserSession {
 		// TODO: Implement setLoginAdapter() method.
 	}
 
-	private $authAdapter;
-
 	public function setAuthAdapter(AuthAdapter $authAdapter) {
 		$this->authAdapter = $authAdapter;
 		return $this;
@@ -179,9 +222,18 @@ class Zend implements \eoko\Authentification\UserSession {
 		return $this->authAdapter;
 	}
 
-	protected $omittedColumns = 'pwd';
+	public function loginByToken($token) {
+		$this->decryptToken($token, $username, $password);
+		return $this->login($username, $password);
+	}
 
 	public function login($username, $password) {
+
+		// We want a new session id, because the current may be expired
+		// or lost some way or another, and if we don't change it, the cookie
+		// won't be set again in the request (don't know who decide to set
+		// it or not)...
+		session_regenerate_id();
 
 		$omittedColumns = explode(',', $this->omittedColumns);
 
@@ -212,7 +264,7 @@ class Zend implements \eoko\Authentification\UserSession {
 			}
 
 			$userData['token'] = $this->getCrypter()->encrypt(
-				$username . ' <|> ' . $password
+				$username . $this->tokenSeparator . $password
 			);
 
 			$storage = $this->auth->getStorage();
@@ -237,24 +289,5 @@ class Zend implements \eoko\Authentification\UserSession {
 		foreach ($this->loginListeners as $callback) {
 			call_user_func($callback, $userId);
 		}
-	}
-}
-
-/**
- * Session storage with support for instant close.
- */
-class Storage extends \Zend\Authentication\Storage\Session {
-	/**
-	 * @inheritdoc
-	 */
-	public function write($contents, $close = false) {
-		/** @noinspection PhpVoidFunctionResultUsedInspection */
-		$result = parent::write($contents);
-
-		if ($close) {
-			$this->session->getManager()->writeClose();
-		}
-
-		return $result;
 	}
 }

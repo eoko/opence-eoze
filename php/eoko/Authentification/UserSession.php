@@ -62,8 +62,14 @@ interface UserSession {
 	 * @return \Zend\Authentication\Result
 	 */
 	public function login($username, $password);
-	public function logout();
 
+	/**
+	 * @param string $token
+	 * @return \Zend\Authentication\Result
+	 */
+	public function loginByToken($token);
+
+	public function logout();
 
 	/**
 	 * @param callback $callback
