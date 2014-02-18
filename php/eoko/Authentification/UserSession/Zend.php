@@ -26,7 +26,7 @@ namespace eoko\Authentification\UserSession;
 
 use eoko\config\Application;
 use Zend\Authentication\AuthenticationService;
-use Zend\Authentication\Adapter\DbTable as AuthAdapter;
+use Zend\Authentication\Adapter\DbTable\CredentialTreatmentAdapter as AuthAdapter;
 use Zend\Authentication\Result;
 use Zend\Db\Adapter\Adapter as DbAdapter;
 use Zend\Session\ManagerInterface as SessionManager;
@@ -136,6 +136,7 @@ class Zend implements \eoko\Authentification\UserSession {
 		return array(
 			'restricted' => !$this->isAuthorized(100), // TODO security
 			'userId' => $this->getUserId(),
+			'token' => session_id(),
 		);
 	}
 

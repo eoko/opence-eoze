@@ -53,7 +53,7 @@ Ext.ns('eo');
 
 			if (response.status >= 400 && response.status < 500) {
 				if (response.status === 401) {
-					Oce.mx.Security.notifyDisconnection();
+					Deft.Injector.resolve('auth').notifyDisconnection();
 				} else {
 					// Hope that an error handler further down the road will
 					// handle it... Give them 200ms!
@@ -167,6 +167,10 @@ Ext.ns('eo');
 			}
 		});
 	};
+
+	Ext4.onReady(function() {
+		Ext4.Ajax.on('requestexception', eo.handleRequestException);
+	});
 
 	Oce.deps.reg('eo.handleResponseException');
 	Oce.deps.reg('eo.handleResponseError');

@@ -219,7 +219,7 @@ Oce.ModuleManager = function() {
 			// before trying to load anything.
 			Oce.deps.wait('opence-modules', function() {
 				eo.app(function() {
-					Oce.mx.Security.whenIdentified(function() {
+					Deft.Injector.resolve('auth').whenIdentified(function() {
 						me._getModules(canonicalNames, callback);
 					});
 				});

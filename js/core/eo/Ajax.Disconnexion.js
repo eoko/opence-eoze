@@ -8,11 +8,12 @@ eo.deps.wait('eo.Ajax', function() {
 	
 	eo.Ajax.on('requestcomplete', function(conn, data, options) {
 		if (data.success === false && data.cause === 'sessionTimeout') {
+			var service = Deft.Injector.resolve('auth');
 			
 			// Will pop up the message
-			Oce.mx.Security.notifyDisconnection(data);
-			
-			Oce.mx.Security.onOnce("login", function() {
+			service.notifyDisconnection(data);
+
+			service.whenIdentified(function() {
 				eo.Ajax.request(options);
 			});
 			

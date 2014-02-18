@@ -42,15 +42,16 @@ if (!eo.Testing.isUnitTestEnv()) {
 	})
 } else {
 	Ext.onReady(function() {
-		var security = new Oce.Security;
-		if (security.isIdentified()) {
-			
+		var authService = Deft.Injector.resolve('auth');
+
+		authService.whenIdentified(function() {
+
 			var currentTest;
-			
+
 			Ext.iterate(eo.Testing.unitTests, function(name, test) {
 				var a = Ext.getBody().createChild({
 					tag: 'div'
-		//			,href: 'javascript:void(0)'
+					//			,href: 'javascript:void(0)'
 					,html: name
 					,id: 'eose-openlink-' + name
 					,style: 'border: 1px solid; padding: 5px; margin: 5px;'
@@ -61,22 +62,23 @@ if (!eo.Testing.isUnitTestEnv()) {
 					eo.Testing.startUnitTest(name);
 				}, {single: true});
 			});
-			
+
 			var next = Ext.getBody().createChild({
 				tag: 'div'
 				,style: 'float: right; border: 1px solid red; padding: 5px; margin: 10px'
 				,html: 'Next test'
 				,id: 'eoze-unit-test-next-test'
 			});
-			
+
 			next.on('click', eo.Testing.nextStep, eo.Testing);
-			
-		} else {
-			security.addListener('login', function() {
-				window.location = window.location;
-			});
-			security.requestLogin(false);
-		}
+
+		});
+
+		// TODO, broken by legacy... With authService, we can't requestLogin...
+		security.addListener('login', function() {
+			window.location = window.location;
+		});
+		security.requestLogin(false);
 	});
 }
 

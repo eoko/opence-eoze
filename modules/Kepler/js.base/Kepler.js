@@ -23,16 +23,15 @@ eo.Kepler = Ext.extend(Ext.util.Observable, {
 	
 	,constructor: function() {
 		var me = this;
+
 		Oce.deps.wait('Oce.Bootstrap.start', function() {
-			if (Oce.mx.Security.isIdentified()) {
-//				userId = Oce.mx.Security.getLoginInfos().userId;
+			var service = Deft.Injector.resolve('auth');
+			service.on('logged', function(loginManager, infos) {
+				debugger
 				me.poll();
-			}
-			Oce.mx.Security.addListener('login', function(info) {
-//				userId = info.userId;
-				me.poll();
-			});
+			}, me);
 		});
+
 		eo.Kepler.superclass.constructor.apply(this, arguments);
 	}
 	
@@ -108,38 +107,3 @@ eo.Kepler = Ext.extend(Ext.util.Observable, {
 });
 
 eo.Kepler = new eo.Kepler;
-
-Oce.deps.wait('Oce.Bootstrap.start', function() {
-
-//	debugger
-//	eo.Kepler.start();
-
-//	var userId;
-//	if (Oce.mx.Security.isIdentified()) {
-//		userId = Oce.mx.Security.getLoginInfos().userId;
-//		poll();
-//	}
-//	Oce.mx.Security.addListener('login', function(info) {
-//		userId = info.userId;
-//		poll();
-//	});
-//
-//	function poll() {
-//		Ext.Ajax.request({
-//			url: "comet.php"
-//			,params: {
-//				id: userId
-//			}
-//			,success: function(response) {
-//				var o = Ext.decode(response.responseText);
-//				if (o.alert) {
-//					alert(o.alert);
-//				}
-//				poll();
-//			}
-//			,failure: function() {
-//				poll()
-//			}
-//		});
-//	}
-});
