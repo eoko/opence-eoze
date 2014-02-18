@@ -24,13 +24,11 @@
 
 namespace eoko\Authentification\UserSession;
 
-use eoko\config\Application;
+use eoko\Authentification\Helper\Crypter;
 use Zend\Authentication\AuthenticationService;
 use Zend\Authentication\Adapter\DbTable\CredentialTreatmentAdapter as AuthAdapter;
 use Zend\Authentication\Result;
 use Zend\Db\Adapter\Adapter as DbAdapter;
-use Zend\Session\ManagerInterface as SessionManager;
-use Eoze\Session\SaveHandler\ObservableInterface as ObservableSaveHandler;
 
 use \User;
 
@@ -114,6 +112,19 @@ class Zend implements \eoko\Authentification\UserSession {
 		}
 	}
 
+	private function getCrypter() {
+		return new Crypter;
+	}
+
+	private function getAuthToken() {
+		if ($this->auth->hasIdentity()) {
+			$userData = $this->auth->getIdentity();
+			return $userData['token'];
+		} else {
+			throw new \RuntimeException();
+		}
+	}
+
 	public function isAuthorized($level) {
 		if ($this->auth->hasIdentity()) {
 
@@ -136,7 +147,7 @@ class Zend implements \eoko\Authentification\UserSession {
 		return array(
 			'restricted' => !$this->isAuthorized(100), // TODO security
 			'userId' => $this->getUserId(),
-			'token' => session_id(),
+			'token' => $this->getAuthToken(),
 		);
 	}
 
@@ -187,6 +198,10 @@ class Zend implements \eoko\Authentification\UserSession {
 
 			// Save record as identity
 			$userData = (array) $authAdapter->getResultRowObject(null, $omittedColumns);
+
+			$userData['token'] = $this->getCrypter()->encrypt(
+				$username . ' <|> ' . $password
+			);
 
 			if (!$userData['actif']) {
 				return new Result(Result::FAILURE, $username, array('Compte désactivé.'));
