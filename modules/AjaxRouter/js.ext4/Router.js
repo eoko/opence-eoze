@@ -304,6 +304,12 @@ Ext4.define('Eoze.AjaxRouter.Router', {
 				this.initialRoute();
 			}
 
+			if (!this.lookup['Folder.edit']) {
+				// TODO You've probably caught a race condition that makes
+				//      all route unavailable, except sm ones...
+				debugger
+			}
+
 			Ext.fly(window).on('hashchange', function() {
 				//noinspection JSAccessibilityCheck
 				Eoze.AjaxRouter.Router.onHashChange();
@@ -401,10 +407,17 @@ Ext4.define('Eoze.AjaxRouter.Router', {
 	 */
 	,assemble: function(config) {
 		if (config) {
-			if (Ext.isString(config)) {
-				return this.getByName(config).assemble();
-			} else {
-				return this.getByName(config.route).assemble(config);
+			try {
+				if (Ext.isString(config)) {
+					return this.getByName(config).assemble();
+				} else {
+					return this.getByName(config.route).assemble(config);
+				}
+			} catch (e) {
+				if (console && console.error) {
+					console.error(e);
+				}
+				return false;
 			}
 		} else {
 			throw new Error('Illegal argument');
