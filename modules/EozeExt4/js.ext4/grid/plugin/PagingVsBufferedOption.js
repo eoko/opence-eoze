@@ -41,6 +41,10 @@ Ext.define('Eoze.grid.plugin.PagingVsBufferedOption', {
 	 */
 	,defaultPagingEnabled: true
 
+	,constructor: function(config) {
+		Ext.apply(this, config);
+	}
+
 	,init: function(grid) {
 
 		this.grid = grid;
@@ -67,7 +71,10 @@ Ext.define('Eoze.grid.plugin.PagingVsBufferedOption', {
 		//grid.stateEvents.push('pagingtoggled', 'beforedestroy');
 
 		// Initial state
-		var initialEnabled = grid.lastState && grid.lastState.pagingEnabled;
+		var initialEnabled = this.isPagingEnabled();
+		if (grid.lastState && grid.lastState.pagingEnabled != null) {
+			initialEnabled = grid.lastState.pagingEnabled;
+		}
 
 		grid.applyState = Ext.Function.createSequence(
 			grid.applyState
