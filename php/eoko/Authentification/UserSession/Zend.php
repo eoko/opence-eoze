@@ -186,15 +186,10 @@ class Zend implements \eoko\Authentification\UserSession {
 		$omittedColumns = explode(',', $this->omittedColumns);
 
 		$authAdapter = $this->getAuthAdapter();
-		$storage = $this->auth->getStorage();
 
 		$authAdapter
 			->setIdentity($username)
 			->setCredential($password);
-
-		if ($storage instanceof Storage) {
-			$storage->autoClose = false;
-		}
 
 		$result = $this->auth->authenticate($authAdapter);
 
@@ -220,6 +215,7 @@ class Zend implements \eoko\Authentification\UserSession {
 				$username . ' <|> ' . $password
 			);
 
+			$storage = $this->auth->getStorage();
 			$storage->write($userData, true);
 
 			$this->fireLoginEvent($this->getUserId(true));
@@ -245,12 +241,9 @@ class Zend implements \eoko\Authentification\UserSession {
 }
 
 /**
- * Session storage that automatically close the session on writing, unless otherwise specified.
+ * Session storage with support for instant close.
  */
 class Storage extends \Zend\Authentication\Storage\Session {
-
-	public $autoClose = true;
-
 	/**
 	 * @inheritdoc
 	 */
@@ -263,12 +256,5 @@ class Storage extends \Zend\Authentication\Storage\Session {
 		}
 
 		return $result;
-	}
-
-	public function clear() {
-		parent::clear();
-		if ($this->autoClose) {
-			$this->session->getManager()->writeClose();
-		}
 	}
 }
