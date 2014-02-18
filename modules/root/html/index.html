@@ -104,7 +104,7 @@
     }
 </style>
 
-<div id="login-page">
+<div id="login-page" style="display: none;">
     <form id="loginForm" method="post">
         <h1>Open.ce</h1>
         <p><strong>Bienvenue sur Open.ce&nbsp;!</strong></p>
@@ -116,6 +116,20 @@
 
     <script>
         (function(Ext) {
+            var loginInfos = Oce && Oce.Security && Oce.Security.loginInfos;
+
+            if (loginInfos && loginInfos.userId) {
+                Ext.onReady(function() {
+                    Oce.deps.wait('Oce.Bootstrap.start', function() {
+                        var service = Deft.Injector.resolve('auth');
+                        service.on('logged', start);
+                        service.setLoginInfos(loginInfos);
+                    });
+                });
+                return;
+            } else {
+                Ext.get('login-page').setDisplayed(true);
+            }
 
             var waiting = false;
 
@@ -144,10 +158,11 @@
                             var service = Deft.Injector.resolve('auth');
 
                             service.authenticate(username, password)
-                                    .then({
-                                        success: onSuccess
-                                        ,failure: onFailure
-                                    });
+                                .then({
+                                    success: onSuccess
+                                    ,failure: onFailure
+                                })
+                                .done();
                         });
                     }
                 }
@@ -155,6 +170,7 @@
 
             function onSuccess() {
                 Ext.get('login-page').destroy();
+                start();
             }
 
             function onFailure() {
@@ -162,6 +178,10 @@
                 msgEl.update("Identifiant ou mot de passe incorrect.");
             }
 
+            function start() {
+                Oce.mx.application.start();
+                Pace.stop();
+            }
         }(window.Ext4 || Ext.getVersion && Ext));
     </script>
 </div>

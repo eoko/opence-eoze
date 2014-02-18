@@ -30,48 +30,107 @@ Ext.define('Eoze.AccessControl.service.Login', {
 
 	mixins: {
 		observable: 'Ext.util.Observable'
+		,loginManager: 'Eoze.app.LoginManager'
 	}
 
+	,loginInfos: null
+
 	,constructor: function(config) {
-		this.mixins.observable.constructor.call(this, config);
+		var mx = this.mixins;
+		mx.observable.constructor.call(this, config);
+		mx.loginManager.constructor.call(this, config);
 
 		this.addEvents(
 			/**
 			 * @event login
 			 * @param {Eoze.AccessControl.service.Login} this
 			 * @param {Object} loginInfos
+			 * @param {Integer} loginInfos.userId
+			 * @param {String} loginInfos.userName
+			 * @param {Boolean} loginInfos.restricted
 			 */
 			'login'
 		);
 
-		this.initDb();
+		this.initDb().then({
+			scope: this
+			,success: this.setLoginData
+		}).done();
+	}
+
+	/**
+	 *
+	 * @return {Object}
+	 * @return {Integer} return.userId
+	 * @return {Boolean} return.restricted
+	 * @public
+	 */
+	,getLoginInfos: function() {
+		return this.loginInfos;
 	}
 
 	// private
 	,initDb: function() {
 		// Let us open our database
-		var dbRequest = window.indexedDB.open(this.$className),
+		var deferred = new Deft.Deferred,
+			dbRequest = window.indexedDB.open(this.$className, 2),
 			me = this;
 
 		dbRequest.onerror = me.dbOnError;
 
 		dbRequest.onupgradeneeded = function(e) {
 			var db = e.target.result;
-			var objectStore = db.createObjectStore('auth');
+			if (!db.objectStoreNames.contains('auth')) {
+				db.createObjectStore('auth');
+			}
 		};
 
-		dbRequest.onsuccess = function() {
-			var db = dbRequest.result,
-				transaction = db.transaction(['auth'], 'read'),
-				store = transaction.objectStore('auth'),
-				request = store.get('userId');
+		dbRequest.onsuccess = function(e) {
+			var db = e.target.result,
+				transaction = db.transaction(['auth'], 'readonly');
 
+			me.db = db;
 			db.onerror = me.dbOnError;
 
-			request.onsuccess = function() {
-				debugger
-			};
+			var keys = ['userId', 'lastActivity', 'token'];
+
+			Deft.Promise.all(keys.map(function(key) {
+				return me.requestFromDb(key, transaction)
+			})).then(function(result) {
+				var data = {};
+				result.forEach(function(value, i) {
+					data[keys[i]] = value;
+				});
+				deferred.resolve(data);
+			}).otherwise(function() {
+				deferred.reject();
+			}).done();
 		};
+
+		return deferred.promise;
+	}
+
+	// private
+	,requestFromDb: function(key, transaction) {
+		var deferred = new Deft.Deferred,
+			db = this.db;
+
+		if (!transaction) {
+			transaction = db.transaction(['auth'], 'readonly');
+		}
+
+		var store = transaction.objectStore('auth'),
+			request = store.get(key);
+
+		request.onsuccess = function() {
+			deferred.resolve(request.result);
+		};
+
+		request.onerror = function(e) {
+			deferred.reject(e);
+		}
+
+		return deferred.promise;
 	}
 
 	// private
@@ -80,32 +139,54 @@ Ext.define('Eoze.AccessControl.service.Login', {
 	}
 
 	,isIdentified: function() {
+		throw new Error('Deprecated. Use asynchronous API instead.');
+	}
+
+	// public (legacy support?)
+	,whenIdentified: function(fn, scope) {
+		var loginInfos = this.loginInfos;
+		if (loginInfos) {
+			fn.call(scope || this, this, loginInfos);
+		} else {
+			this.on({
+				scope: scope || this
+				,single: true
+				,logged: fn
+			});
+		}
+	}
+
+	// public (mainly legacy)
+	,notifyDisconnection: function(data) {
+		// care, data argument is optional
 		debugger
 	}
 
+	/**
+	 * Tries to authenticate user with the supplied credentials.
+	 *
+	 * @param {String} username
+	 * @param {String} password
+	 * @return {Deft.Promise}
+	 */
 	,authenticate: function(username, password) {
-		var deferred = new Deft.Deferred;
-
+		var me = this,
+			deferred = new Deft.Deferred;
 		eo.Ajax.request({
-
 			params: {
 				controller: 'AccessControl.login'
 				,action: 'login'
 			}
-
 			,jsonData: {
 				username: username
 				,password: password
 			}
-
-			,scope: this
 			,callback: function(options, success, data) {
 				if (success) {
 					// Success
 					if (data.loginInfos) {
-						this.setLoginInfos(data.loginInfos);
+						me.setLoginInfos(data.loginInfos);
 						deferred.resolve(data.loginInfos);
-						this.fireEvent('login', this, data.loginInfos);
 					}
 					// Failure
 					else {
@@ -117,15 +198,54 @@ Ext.define('Eoze.AccessControl.service.Login', {
 				}
 			}
 		});
-
 		return deferred.promise;
 	}
 
-	// private
-	,setLoginInfos: function(loginInfos) {
-
-		debugger
+	,logout: function() {
+		Ext.getBody().mask("Déconnexion", 'x-mask-loading');
+		Oce.Ajax.request({
+			params: {
+				controller: 'AccessControl'
+				,action: 'logout'
+			},
+			onSuccess: function() {
+				window.location.hash = '';
+				window.location.reload();
+			}
+		});
 	}
+
+	/**
+	 * Applies the login info received from the server.
+	 *
+	 * @param {Object} loginInfos
+	 * @private
+	 */
+	,setLoginInfos: function(loginInfos) {
+		var previous = this.loginInfos;
+
+		// must be set before letting events out
+		this.loginInfos = loginInfos;
+
+		this.fireEvent('login', this, loginInfos);
+
+		if (!previous) {
+			this.fireEvent('logged', this, loginInfos);
+		}
+	}
+
+	/**
+	 * Applies the login data read from the local storage.
+	 *
+	 * @param {Object} data
+	 * @private
+	 */
+	,setLoginData: function(data) {
+		if (data.userId && data.token) {
+			debugger
+		}
+	}
+
 }, function() {
 	// Polyfills
 	if (!window.indexedDB) {

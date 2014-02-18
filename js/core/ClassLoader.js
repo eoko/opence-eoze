@@ -144,8 +144,8 @@ Oce.ClassLoader = function() {
 		identifiedWaiters.push(callback);
 	};
 	Oce.deps.wait('Eoze.app.Application', function() {
-		var security = Oce.mx.Security;
-		whenIdentified = Ext4.bind(security.whenIdentified, security);
+		var auth = Deft.Injector.resolve('auth');
+		whenIdentified = Ext4.bind(auth.whenIdentified, auth);
 		identifiedWaiters.forEach(whenIdentified);
 	});
 

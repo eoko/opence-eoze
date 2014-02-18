@@ -26,18 +26,42 @@
  * @since 2013-03-28 12:09
  */
 Ext4.define('Eoze.app.LoginManager', {
-	extend: 'Ext.util.Observable'
 
-	,EVENT_LOGGED: 'logged'
+	EVENT_LOGGED: 'logged'
 	,EVENT_LOGIN: 'login'
 	,EVENT_LOGOUT: 'logout'
 
 	,constructor: function(config) {
-		this.callParent(arguments);
-
 		this.addEvents(
+			/**
+			 * @event logged
+			 *
+			 * Fires one time, when the user is logged.
+			 *
+			 * @param {Eoze.app.LoginManager} this
+			 * @param {Object} loginInfos
+			 * @param {Integer} loginInfos.userId
+			 * @param {Boolean} loginInfos.restricted
+			 */
 			this.EVENT_LOGGED,
+			/**
+			 * @event login
+			 *
+			 * Fires each time the user successfully authenticate themselves.
+			 *
+			 * @param {Eoze.app.LoginManager} this
+			 * @param {Object} loginInfos
+			 * @param {Integer} loginInfos.userId
+			 * @param {Boolean} loginInfos.restricted
+			 */
 			this.EVENT_LOGIN,
+			/**
+			 * @even logout
+			 *
+			 * Fires each time the user successfully close their authenticated session.
+			 *
+			 * @param {Eoze.app.LoginManager} this
+			 */
 			this.EVENT_LOGOUT
 		);
 	}

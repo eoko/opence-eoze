@@ -47,6 +47,8 @@ class UserSessionTimeout extends UserException {
 
 		parent::__construct($message, $errorTitle, $debugMessage, $previous);
 
+		$this->setHttpStatusHeader(401);
+
 		ExtJSResponse::put('cause', 'sessionTimeout');
 	}
 }

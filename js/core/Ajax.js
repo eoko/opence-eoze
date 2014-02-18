@@ -69,9 +69,11 @@ Oce.Ajax = function() {
 		if (!obj.cause) return false;
 		switch(obj.cause) {
 			case 'sessionTimeout':
-				Oce.mx.Security.notifyDisconnection(obj);
-				if (onCorrected) Oce.mx.Security.onOnce('login', onCorrected);
-//				Oce.mx.Security.
+				var service = Deft.Injector.resolve('auth');
+				service.notifyDisconnection(obj);
+				if (onCorrected) {
+					service.whenIdentified(onCorrected);
+				}
 				return true;
 
 			default: return false;

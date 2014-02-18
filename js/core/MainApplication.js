@@ -14,8 +14,10 @@
 			mask.show();
 
 			// Log infos
-			var logInfo = Oce.mx.Security.getLoginInfos();
-			if (!logInfo) throw new Error();
+			var logInfo = Deft.Injector.resolve('auth').getLoginInfos();
+			if (!logInfo) {
+				throw new Error();
+			}
 
 			// Init tasks
 			this.initStateProvider();
@@ -350,23 +352,14 @@
 		,appClass: NS.MainApplication
 
 		,start: function() {
-			if (!this.app) this.app = this.appClass.create();
+			if (!this.app) {
+				this.app = this.appClass.create();
+			}
 			this.app.start();
 		}
 
 		,create: function() {
 			return new this();
-		}
-
-		,destroySessionData: function(id) {
-			Oce.Ajax.request({
-				params: {
-					controller: this.controller
-					,action: 'destroy_session_data'
-					,id: id
-				}
-				,waitMsg: false
-			});
 		}
 	});
 
