@@ -27,7 +27,6 @@ eo.Kepler = Ext.extend(Ext.util.Observable, {
 		Oce.deps.wait('Oce.Bootstrap.start', function() {
 			var service = Deft.Injector.resolve('auth');
 			service.on('logged', function(loginManager, infos) {
-				debugger
 				me.poll();
 			}, me);
 		});
