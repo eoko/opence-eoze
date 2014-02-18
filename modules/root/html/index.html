@@ -143,7 +143,7 @@
 
                 if (!waiting) {
                     var username = this.down('[name=username]').getValue(),
-                            password = this.down('[name=password]').getValue();
+                        password = this.down('[name=password]').getValue();
 
                     if (Ext.isEmpty(username) || Ext.isEmpty(password)) {
                         msgEl.addCls('error');
@@ -153,6 +153,9 @@
                         );
                     } else {
                         waiting = true;
+
+                        msgEl.update('...');
+                        msgEl.removeCls('error');
 
                         Ext.onReady(function() {
                             var service = Deft.Injector.resolve('auth');
@@ -169,11 +172,13 @@
             });
 
             function onSuccess() {
+                waiting = false;
                 Ext.get('login-page').destroy();
                 start();
             }
 
             function onFailure() {
+                waiting = false;
                 msgEl.addCls('error');
                 msgEl.update("Identifiant ou mot de passe incorrect.");
             }
