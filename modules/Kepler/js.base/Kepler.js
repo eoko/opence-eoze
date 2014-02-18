@@ -26,9 +26,7 @@ eo.Kepler = Ext.extend(Ext.util.Observable, {
 
 		Oce.deps.wait('Oce.Bootstrap.start', function() {
 			var service = Deft.Injector.resolve('auth');
-			service.on('logged', function(loginManager, infos) {
-				me.poll();
-			}, me);
+			service.on('login', me.poll, me);
 		});
 
 		eo.Kepler.superclass.constructor.apply(this, arguments);
@@ -68,19 +66,21 @@ eo.Kepler = Ext.extend(Ext.util.Observable, {
 	}
 	
 	,onPollFailure: function() {
+		this.running = false;
+		this.polling = false;
 		if (++this.failureCount < 10) {
 			var me = this;
 			setTimeout(function() {
-				me.continuePolling();
-			}, 2000);
+				me.resumePolling();
+			}, 10000);
 		} else {
-			this.running = false;
 			debugger
 			// TODO handle errors
 		}
 	}
 	
 	,onPollSuccess: function(data) {
+		this.polling = false;
 		var entries = data.entries;
 		if (data.success && entries) {
 			if (entries.events) {
@@ -92,10 +92,10 @@ eo.Kepler = Ext.extend(Ext.util.Observable, {
 				}
 			}
 		}
-		this.continuePolling();
+		this.resumePolling();
 	}
 	
-	,continuePolling: function() {
+	,resumePolling: function() {
 		this.polling = false;
 		this.poll();
 	}
