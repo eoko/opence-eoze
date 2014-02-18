@@ -240,9 +240,24 @@ Oce.Ajax = function() {
 
 		defaultSuccessMsgHandler: function(msg, showMsgBox) {
 
-			if (showMsgBox === undefined) showMsgBox = true;
+			var defaultLevelTitles = {
+				ERROR: "Erreur"
+				,INFO: "Information"
+				,WARNING: "Attention"
+			};
 
-			var boxMessage = null, boxTitle = null;
+			var level = false;
+			if (Ext.isObject(msg)) {
+				level = (msg.level || level).toUpperCase();
+				msg = msg.text;
+			}
+
+			if (showMsgBox === undefined) {
+				showMsgBox = true;
+			}
+
+			var boxMessage = null,
+				boxTitle = null;
 
 			if (Ext.isArray(msg)) {
 				boxMessage = '<ul>';
@@ -252,7 +267,7 @@ Oce.Ajax = function() {
 				}
 				boxMessage += '</ul>';
 			} else if (Ext.isObject(msg)) {
-				if ('title' in msg) boxTitle = msg.title;
+				boxTitle = msg.title;
 				boxMessage = arguments.callee(Oce.pickFirst(msg, 'message', 'msg'), false);
 			} else if (Ext.isString(msg)) {
 				boxMessage = msg;
@@ -263,7 +278,10 @@ Oce.Ajax = function() {
 				clearWaitBox();
 
 				if (showMsgBox) {
-					Ext.Msg.alert(boxTitle, boxMessage);
+					Ext.Msg.alert(boxTitle || defaultLevelTitles[level], boxMessage);
+					if (level && Ext.Msg[level] != null) {
+						Ext.Msg.setIcon(Ext.Msg[level]);
+					}
 				} else {
 					if (boxTitle !== null) {
 						return '<b>' + boxTitle + '</b> : ' + boxMessage;
