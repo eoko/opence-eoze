@@ -35,6 +35,34 @@ use \User;
 /**
  * UserSession implementation built upon Zend Framework Authentication package.
  *
+ * Session recovery
+ * ----------------
+ *
+ * Three session recovery mechanisms are in place to prevent losing session. All
+ * of them are based on an authentication token that is provided to the client
+ * upon successful login request.
+ *
+ * The server asks the client to pass this token with each request as a cookie
+ * (see {@link $restoreCookieName}). Independently from that, the client can
+ * also pass this token as a custom header 'X-Eoze-Session'.
+ *
+ * When the session is lost on the server-side and the server can find the token
+ * in any of these headers (custom or cookie), it will use it to recreate the
+ * session. The custom header allows the strategy to be effective even with
+ * clients that don't accept to set cookies.
+ *
+ * The last recovery mechanism is implemented on the client-side only. When the
+ * javascript client detects that the authenticated session has been lost, it
+ * will try to recreate it by authenticating with the token it has kept in memory.
+ *
+ * The two server-side recovery strategy will recover the session without the
+ * client even knowing, and so the request will be fulfilled transparently.
+ *
+ * The client-side strategy, however, cannot blindly repeat the fail request
+ * because it doesn't really know its content and/or if it would have side
+ * effects. So, in most case, the failed request will effectively be lost, and
+ * the user will have to repeat their action once the session has been restored.
+ *
  * @category Eoze
  * @package Authentification
  * @subpackage UserSession
@@ -110,6 +138,9 @@ class Zend implements \eoko\Authentification\UserSession {
 	private function hasIdentity() {
 		if ($this->auth->hasIdentity()) {
 			return true;
+		} else if (isset($_SERVER['HTTP_X_EOZE_SESSION'])) {
+			$this->loginByToken($_SERVER['HTTP_X_EOZE_SESSION']);
+			return $this->auth->hasIdentity();
 		} else if (isset($_COOKIE[$this->restoreCookieName])) {
 			$this->loginByToken($_COOKIE[$this->restoreCookieName]);
 			return $this->auth->hasIdentity();

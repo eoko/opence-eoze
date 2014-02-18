@@ -264,11 +264,24 @@ Ext.define('Eoze.AccessControl.service.Login', {
 		// must be set before letting events out
 		this.loginInfos = loginInfos;
 
+		this.setToken(loginInfos.token);
+
 		this.fireEvent('login', this, loginInfos);
 
 		if (!previous) {
 			this.fireEvent('logged', this, loginInfos);
 		}
+	}
+
+	// private
+	,setToken: function(token) {
+		[
+			window.Ext.data.Connection.prototype,
+			Ext.data.Connection.prototype
+		].forEach(function(proto) {
+			proto.defaultHeaders = proto.defaultHeaders || {};
+			proto.defaultHeaders['X-Eoze-Session'] = token;
+		});
 	}
 
 	/**
@@ -288,5 +301,28 @@ Ext.define('Eoze.AccessControl.service.Login', {
 	if (!window.indexedDB) {
 		throw new Error('IndexedDB support is required.');
 	}
+
+//	// Hook on connection
+//	var proto = this.prototype;
+//	[
+//		window.Ext.data.Connection.prototype,
+//		Ext.data.Connection.prototype
+//	].forEach(function(connProto) {
+//		var uber = connProto.request;
+//		connProto.request = function(options) {
+//			if (options) {
+//				var token = proto.authToken;
+//				if (token) {
+//					options.headers = options.headers || {};
+//					options.headers['X-Eoze-Session'] = token;
+//				}
+//			}
+//			return uber.apply(this, arguments);
+//		};
+//	});
+//
+//	proto.setToken = function(token) {
+//		proto.authToken = token;
+//	};
 });
 }(window.Ext4 || Ext.getVersion && Ext));
