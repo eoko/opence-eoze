@@ -186,10 +186,15 @@ class Zend implements \eoko\Authentification\UserSession {
 		$omittedColumns = explode(',', $this->omittedColumns);
 
 		$authAdapter = $this->getAuthAdapter();
+		$storage = $this->auth->getStorage();
 
 		$authAdapter
 			->setIdentity($username)
 			->setCredential($password);
+
+		if ($storage instanceof Storage) {
+			$storage->autoClose = false;
+		}
 
 		$result = $this->auth->authenticate($authAdapter);
 
@@ -198,10 +203,6 @@ class Zend implements \eoko\Authentification\UserSession {
 
 			// Save record as identity
 			$userData = (array) $authAdapter->getResultRowObject(null, $omittedColumns);
-
-			$userData['token'] = $this->getCrypter()->encrypt(
-				$username . ' <|> ' . $password
-			);
 
 			if (!$userData['actif']) {
 				return new Result(Result::FAILURE, $username, array('Compte désactivé.'));
@@ -215,7 +216,10 @@ class Zend implements \eoko\Authentification\UserSession {
 				}
 			}
 
-			$storage = $this->auth->getStorage();
+			$userData['token'] = $this->getCrypter()->encrypt(
+				$username . ' <|> ' . $password
+			);
+
 			$storage->write($userData, true);
 
 			$this->fireLoginEvent($this->getUserId(true));
@@ -245,6 +249,8 @@ class Zend implements \eoko\Authentification\UserSession {
  */
 class Storage extends \Zend\Authentication\Storage\Session {
 
+	public $autoClose = true;
+
 	/**
 	 * @inheritdoc
 	 */
@@ -261,6 +267,8 @@ class Storage extends \Zend\Authentication\Storage\Session {
 
 	public function clear() {
 		parent::clear();
-		$this->session->getManager()->writeClose();
+		if ($this->autoClose) {
+			$this->session->getManager()->writeClose();
+		}
 	}
 }
