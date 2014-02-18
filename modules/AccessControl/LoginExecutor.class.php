@@ -2,8 +2,8 @@
 
 namespace eoko\modules\AccessControl;
 
+use eoko\Authentification\Helper\Crypter;
 use eoko\module\executor\JsonExecutor;
-use eoko\file\FileType;
 use eoko\template\Template;
 
 /**
@@ -22,21 +22,13 @@ class LoginExecutor extends JsonExecutor {
 
 		if ($request->has('token')) {
 			$token = $request->get('token');
-			dump_trace(); // TODO
-//			session_id($token);
-//			$userSession = $this->getApplication()->getUserSession();
-//			dump(array(
-//				$token,
-//				$_SESSION,
-//				session_id(),
-//				$userSession->getLoginInfos(),
-//			));
-//			$userSession->requireLoggedIn();
-//			$this->loginInfos = $userSession->getLoginInfos();
-//			return true;
+			$crypter = new Crypter;
+			$credentials = explode(' <|> ', $crypter->decrypt($token));
+			$username = $credentials[0];
+			$password = $credentials[1];
 		} else {
-			$username = $this->request->req('username', true);
-			$password = $this->request->req('password', true);
+			$username = $request->req('username', true);
+			$password = $request->req('password', true);
 		}
 
 		$userSession = $this->getApplication()->getUserSession();
