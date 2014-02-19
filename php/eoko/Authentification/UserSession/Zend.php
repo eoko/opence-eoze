@@ -111,8 +111,7 @@ class Zend implements \eoko\Authentification\UserSession {
 		if ($this->auth->hasIdentity()) {
 			return true;
 		} else if (isset($_COOKIE[$this->restoreCookieName])) {
-			$this->decryptToken($_COOKIE[$this->restoreCookieName], $username, $password);
-			$this->login($username, $password);
+			$this->loginByToken($_COOKIE[$this->restoreCookieName]);
 			return $this->auth->hasIdentity();
 		} else {
 			return false;
