@@ -160,13 +160,20 @@ class Zend implements \eoko\Authentification\UserSession {
 		}
 	}
 
-	private function decryptToken($token, &$username, &$password) {
-		$parts = explode(
-			$this->tokenSeparator,
-			$this->getCrypter()->decrypt($token)
+	private function createToken($username, $password) {
+		// random gibberish added for token obfuscation
+		return $this->getCrypter()->encrypt(
+			$username . $this->tokenSeparator . $password . substr(md5(rand()), 0, 10)
 		);
-		$username = $parts[0];
-		$password = $parts[1];
+	}
+
+	private function decryptToken($token, &$username, &$password) {
+		$decrypted = $this->getCrypter()->decrypt($token);
+		$parts = explode($this->tokenSeparator, substr($decrypted, 0, -10));
+		if (count($parts) === 2) {
+			$username = $parts[0];
+			$password = $parts[1];
+		}
 	}
 
 	public function isAuthorized($level) {
@@ -262,9 +269,9 @@ class Zend implements \eoko\Authentification\UserSession {
 				}
 			}
 
-			$userData['token'] = $this->getCrypter()->encrypt(
-				$username . $this->tokenSeparator . $password
-			);
+			$token = $this->createToken($username, $password);
+			$userData['token'] = $token;
+			setcookie($this->restoreCookieName, $token);
 
 			$storage = $this->auth->getStorage();
 			$storage->write($userData, true);
@@ -276,6 +283,8 @@ class Zend implements \eoko\Authentification\UserSession {
 	}
 
 	public function logout() {
+		// unset restoration cookie
+		setcookie($this->restoreCookieName, '', time() - 3600);
 		$this->auth->getStorage()->clear();
 	}
 
