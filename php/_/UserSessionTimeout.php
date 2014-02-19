@@ -36,8 +36,7 @@ class UserSessionTimeout extends UserException {
 	public function  __construct($message = null, $errorTitle = null, $debugMessage = '', Exception $previous = null) {
 		if ($message === null) {
 			$message = lang(
-				'Vous avez été déconnecté suite à une longue période d\'inactivité. '
-				. 'Veuillez vous identifier à nouveau pour continuer votre travail.'
+				'Veuillez vous identifier pour accéder à cette ressource.'
 			);
 		}
 
