@@ -513,7 +513,7 @@ eo.Ajax = new eo.data.Connection({
 		eo.Ajax.on('requestexception', eo.handleRequestException);
 	});
 	eo.Ajax.on('requestcomplete', function(conn, data, options) {
-		if (!data.success) {
+		if (!data.success && options.handleErrors !== false) {
 			eo.handleResponseError(data, options);
 			return false;
 		}
