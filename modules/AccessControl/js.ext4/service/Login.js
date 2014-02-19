@@ -173,7 +173,7 @@ Ext.define('Eoze.AccessControl.service.Login', {
 		function retry() {
 			me.doAuthenticate({
 					token: me.loginInfos.token
-				})
+				}, false)
 				.then(function() {
 					Ext.Msg.hide();
 				})
@@ -205,9 +205,12 @@ Ext.define('Eoze.AccessControl.service.Login', {
 	 * Authenticate by credentials or token.
 	 *
 	 * @param {Object} data
+	 * @param {Boolean} handleErrors False to prevent the automatic error handler
+	 *        to handle possible response errors (we don't want errors to be popped
+	 *        to the user when we're trying to reestablish lost connection).
 	 * @return {Deft.promise.Promise}
 	 */
-	,doAuthenticate: function(data) {
+	,doAuthenticate: function(data, handleErrors) {
 		var me = this,
 			deferred = new Deft.Deferred;
 		eo.Ajax.request({
@@ -216,6 +219,7 @@ Ext.define('Eoze.AccessControl.service.Login', {
 				,action: 'login'
 			}
 			,jsonData: data
+			,handleErrors: handleErrors
 			,callback: function(options, success, data) {
 				if (success) {
 					if (data.loginInfos) {
