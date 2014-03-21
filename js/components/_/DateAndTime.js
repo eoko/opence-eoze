@@ -94,6 +94,33 @@
 			}, config);
 			eo.form.DateField.superclass.constructor.call(this, config);
 		}
+		,parseDate: function(value) {
+			var match;
+			if (value && (match = /^s(\d{1,2})\w*(?:([+-])(\d))?$/.exec(value))) {
+				var week = match[1],
+					sign = match[2],
+					days = match[3],
+					date;
+				if (String(week).length === 1) {
+					week = '0' + week;
+				}
+				if (date = Ext4.Date.parseDate(week, 'W')) {
+					if (sign && days < 7) {
+						if (sign === '+') {
+							return Ext4.Date.add(date, Ext4.Date.DAY, days);
+						} else if (sign === '-') {
+							return Ext4.Date.add(date, Ext4.Date.DAY, -days);
+						} else {
+							// this is invalid
+							return undefined;
+						}
+					}
+				}
+				return date;
+			} else {
+				return this.callParent(arguments);
+			}
+		}
 	});
 
 	eo.form.TimeField = Ext.extend(Ext.form.TimeField, {
