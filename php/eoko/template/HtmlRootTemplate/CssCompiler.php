@@ -19,6 +19,9 @@ class CssCompiler extends IncludeCompiler {
 
 	// replaces images urls with their path relative to the web dir url
 	protected function getFileContent($file) {
+		if (substr($file, 0, 2) === '//') {
+			$file = "http:$file";
+		}
 		$content = file_get_contents($file);
 		$dir = dirname($file);
 		$content = preg_replace_callback('/url\(([^)]+)\)/', function($matches) use($dir) {

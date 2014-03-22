@@ -20,7 +20,7 @@ bcscale(2);
 if (!defined('DS')) define('DS', DIRECTORY_SEPARATOR);
 if (!defined('ROOT')) define('ROOT', realpath(__DIR__ . DS . '..' . DS . '..') . DS);
 
-if (!defined('SITE_BASE_URL')) define('SITE_BASE_URL', 'http://' .
+if (!defined('SITE_BASE_URL')) define('SITE_BASE_URL', '//' .
 		(isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost')
 		. rtrim(dirname($_SERVER['PHP_SELF']) , '/\\') . '/' );
 
