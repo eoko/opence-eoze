@@ -88,6 +88,10 @@ class UxLoaderProxy extends ExecutorBase {
 			//$path = $ext4BaseUrl . '/examples/ux/' . $file;
 			$path = $ext4BaseUrl . '/' . $file;
 
+			if (substr($path, 0, 2) === '//') {
+				$path = 'http:' . $path;
+			}
+
 			// We're working with an URL here, we can't rely on file_exists
 			try {
 				$contents = file_get_contents($path);

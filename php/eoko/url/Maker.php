@@ -129,8 +129,11 @@ class Maker {
 	}
 
 	public static function makeAbsolute($url) {
-		if (substr($url, 0, 7) === 'http://') return $url;
-		else return BASE_URL . $url;
+		if (preg_match('/^https?:\/\//', $url)) {
+			return $url;
+		} else {
+			return BASE_URL . $url;
+		}
 	}
 
 	public static function getExtra() {

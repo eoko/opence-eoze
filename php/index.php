@@ -20,7 +20,7 @@ call_user_func(function() {
 
 	$context->rootPath = $root;
 
-	$context->baseUrl = 'http://' .
+	$context->baseUrl = '//' .
 			(isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost')
 			. rtrim(dirname($_SERVER['PHP_SELF']) , '/\\') . '/' ;
 

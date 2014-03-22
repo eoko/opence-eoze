@@ -108,7 +108,7 @@ class ExtJsCdnConfig {
 
 		$debug = false;
 		$sources = array(
-			'sencha' => 'http://cdn.sencha.io',
+			'sencha' => '//cdn.sencha.io',
 			'eoze' => '%EOZE%',
 			'opence' => '%OPENCE%',
 		);

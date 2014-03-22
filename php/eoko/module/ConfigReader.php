@@ -38,7 +38,7 @@ class ConfigReader extends \eoko\config\ConfigReader {
 //			$url = str_replace(array('%lib%', '%eoze%'), LIB_PHP_BASE_URL . 'eoko/', $url);
 			$url = str_replace('%eoze%', EOZE_BASE_URL, $url);
 			$url = preg_replace('@([^:/])//@', '$1/', $url);
-			if (!strstr($url, '://')) {
+			if (!strstr($url, '://') && substr($url, 0, 2) !== '//') {
 				$url = SITE_BASE_URL . $url;
 			}
 			if (substr($url, -1) !== '/') $url .= '/';

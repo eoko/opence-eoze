@@ -23,7 +23,7 @@ function defineIf($name, $value) {
 defineIf('DS', DIRECTORY_SEPARATOR);
 defineIf('ROOT', realpath(dirname(__FILE__) . DS . '..' . DS . '..') . DS);
 
-defineIf('SITE_BASE_URL', 'http://' .
+defineIf('SITE_BASE_URL', '//' .
         (isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost')
         . rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . '/');
 

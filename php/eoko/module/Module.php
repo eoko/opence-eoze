@@ -1013,8 +1013,12 @@ MSG
 	 * @inheritdoc
 	 */
 	public function getModuleCssUrls() {
+		dump_mark($this->getName() === 'GridModule');
 		$autoCssFiles = array();
 		$autoCssFiles = array_merge($autoCssFiles, $this->listLineFilesUrl('re:\.auto\d*\.css$', ''));
+//		dump_after(array(
+//			$autoCssFiles,
+//		));
 		$autoCssFiles = array_merge($autoCssFiles, $this->listLineFilesUrl('re:\.auto\d*\.css$', 'css'));
 		$autoCssFiles = array_merge($autoCssFiles, $this->listLineFilesUrl('glob:*.css', 'css/auto', true));
 		$autoCssFiles = array_merge($autoCssFiles, $this->listLineFilesUrl('glob:*.css', 'css.auto', true));
