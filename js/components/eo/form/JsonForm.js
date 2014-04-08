@@ -193,8 +193,13 @@ eo.form.JsonForm = Ext.extend(Ext.form.BasicForm, {
 				if (f instanceof Ext.form.CheckboxGroup) {
 					// radio
 					if (f instanceof Ext.form.RadioGroup) {
-						if (v && v.getGroupValue) {
-							v = v.getGroupValue();
+						if (v) {
+							if (Ext.isArray(v)) {
+								v = v[0];
+							}
+							if (v.getGroupValue) {
+								v = v.getGroupValue();
+							}
 						}
 						pushValue(n, v);
 					}
