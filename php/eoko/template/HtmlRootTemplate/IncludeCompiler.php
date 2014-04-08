@@ -259,7 +259,7 @@ abstract class IncludeCompiler {
 					$suffix = substr($url, -2);
 					if ($suffix === '??') {
 						// that's a "merge me but get content through http"
-						$files[$priority][] = $url;
+						$files[$priority][] = substr($url, 0, -2);
 						if ($removeLocalUrls) {
 							unset($urls[$url]);
 						}
