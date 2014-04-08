@@ -311,7 +311,7 @@ class ModelColumn extends ModelFieldBase {
 			}
 		}
 
-		if ($value === '' || $value === null) {
+		if ($value === null || $value === '' && $this->isNullable()) {
 			return null;
 		}
 
