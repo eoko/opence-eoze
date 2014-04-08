@@ -37,6 +37,7 @@ use IllegalArgumentException;
 use ModelSaveException;
 
 use eoko\util\GlobalEvents;
+use eoko\cqlix\VirtualField\AgeVirtualField;
 
 abstract class GridExecutor extends JsonExecutor {
 
@@ -627,8 +628,8 @@ abstract class GridExecutor extends JsonExecutor {
 
 							// dob column
 							$field = $this->table->getField($filter['field']);
-							if ($field->getActualField() instanceof \AgeVirtualField) {
-								/** @var \AgeVirtualField $field */
+							if ($field->getActualField() instanceof AgeVirtualField) {
+								/** @var AgeVirtualField $field */
 								$dobField = $field->getDateField($query);
 							} else {
 								throw new \RuntimeException("Not an age field: $filter[field]");
