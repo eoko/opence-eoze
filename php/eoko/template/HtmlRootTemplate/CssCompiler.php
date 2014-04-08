@@ -24,9 +24,16 @@ class CssCompiler extends IncludeCompiler {
 		}
 		$content = file_get_contents($file);
 		$dir = dirname($file);
-		$content = preg_replace_callback('/url\(([^)]+)\)/', function($matches) use($dir) {
+		$remoteDir = preg_match('@^(?:https?:)?//@', $dir);
+		if ($remoteDir) {
+			$dir = preg_replace('@^(?:https?:)@', '', $dir);
+			$dir = rtrim($dir, '/') . '/';
+		}
+		$content = preg_replace_callback('/url\(([^)]+)\)/', function($matches) use($dir, $remoteDir) {
 			$file = trim($matches[1], '\'" ');
-			if (substr($matches[1], 0, 5) === 'data:') {
+			if ($remoteDir) {
+				return 'url("' . $dir . $file . '")';
+			} else if (substr($matches[1], 0, 5) === 'data:') {
 				return 'url("' . $file . '")';
 			} else {
 				$rel = Files::getRelativePath(WEB_DIR_PATH, $dir);
