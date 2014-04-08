@@ -49,24 +49,17 @@ Ext.override(Ext.form.RadioGroup, function() {
 			}
 		}
 		,isDirty: function() {
-			var originalValue = this.originalValue;
-			if (Ext.isArray(originalValue)) {
-				var result = true;
-				this.eachItem(function(item) {
-					if (item.getValue()) {
-						if (originalValue.indexOf(item.inputValue) === -1) {
-							result = false;
-						}
-					} else {
-						if (originalValue.indexOf(item.inputValue) !== -1) {
-							result = false;
-						}
+			return cast(this.getValue()) !== cast(this.originalValue);
+			function cast(value) {
+				if (value) {
+					if (Ext.isArray(value)) {
+						value = value[0];
 					}
-					return result;
-				});
-				return result;
-			} else {
-				return this.originalValue !== this.getValue();
+					if (Ext.isDefined(value.inputValue)) {
+						value = value.inputValue;
+					}
+				}
+				return value;
 			}
 		}
 	};
