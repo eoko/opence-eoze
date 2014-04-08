@@ -1608,9 +1608,10 @@ abstract class Model {
 	 */
 	public function setField($name, $value, $forceAcceptNull = false) {
 
-		if ($value === '') {
-			$value = null;
-		}
+// 2014-04-08 Removed this overly aggressive line
+//		if ($value === '') {
+//			$value = null;
+//		}
 
 		// 2013-04-19 Setting clear undetermination (while before it crashed)
 		$this->clearUndetermined($name);
