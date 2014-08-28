@@ -1217,9 +1217,13 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 	,save: function(win, action, onSuccess, loadModelData) {
 		
 		var form = win.getForm();
+		var error = this.isFormValid(form, win);
 
-		if (form.isValid()) {
-
+		if (error === false) {
+			Ext.MessageBox.alert("Erreur", 'Certains champs ne sont pas correctement remplis.'); // i18n
+		} else if (Ext.isString(error)) {
+			Ext.MessageBox.alert("Erreur", error); // i18n
+		} else {
 			var extraParams;
 			
 			if (Ext.isObject(action)) {
@@ -1297,9 +1301,12 @@ Oce.GridModule = Ext.extend(Ext.util.Observable, {
 
 			form.submit(opts);
 //			this.submitForm(form, opts);
-		} else {
-			Ext.MessageBox.alert("Erreur", 'Certains champs ne sont pas correctement remplis.') // i18n
 		}
+	}
+
+	// protected
+	,isFormValid: function(form, win) {
+		return form.isValid()
 	}
 	
 //	,submitForm: function(form, opts) {
