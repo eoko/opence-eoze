@@ -145,7 +145,7 @@ class Template extends Renderer {
 
 	protected function doRender() {
 		extract($this->vars);
-		eval("namespace eoko\\template { ?>{$this->getContent()}<? } ?>");
+		eval("namespace eoko\\template { ?>{$this->getContent()}<?php } ?>");
 	}
 
 }
