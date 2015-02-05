@@ -2,7 +2,7 @@
 #AddType x-mapp-php5 .php
 
 # Enabke URL Rewriting
-Options +FollowSymlinks
+Options +SymLinksIfOwnerMatch
 RewriteEngine On
 
 # 1and1 needs RewriteBase /subdir
