@@ -1567,9 +1567,20 @@ abstract class Query implements QueryAliasable {
 
 		$sql = $this->sql;
 
-		foreach ($this->bindings as $b) {
-			$sql = preg_replace('/\?/', "'$b'", $sql, 1);
-		}
+		$i = 0;
+		$bindings = $this->bindings;
+		$sql = preg_replace_callback(
+			'/(?<pre>(?:[\'"]|^)[^\'"]*)\?(?<post>[^\'"]*(?:[\'"]|$))/',
+			function($m) use($bindings, &$i) {
+				// skip string literals of the form '?' or "?"
+				if ($m['pre'] === $m['post'] && $m['pre'] === '"' || $m['pre'] === "'") {
+					return $m[0];
+				} else {
+					return "$m[pre]{$bindings[$i++]}$m[post]";
+				}
+			},
+			$sql
+		);
 
 		if ($clean) {
 			$this->sql = null;
