@@ -64,16 +64,26 @@ Ext4.define('Eoze.AjaxRouter.Router', {
 	 */
 	,sorted: false
 
+	,getInstance: function() {
+		return this;
+	}
+
 	/**
 	 * @private
 	 */
 	,constructor: function() {
-		this.routes = Ext4.create('Ext.util.MixedCollection');
+		// Aggressively prevent multi instance (because there's something gory happening
+		// between deft ioc and this being a singleton for Ext's class system)
+		if (Eoze.AjaxRouter && Eoze.AjaxRouter.Router && Eoze.AjaxRouter.Router.getInstance) {
+			return Eoze.AjaxRouter.Router;
+		}
+
+		this.routes = new Ext.util.MixedCollection;
 		this.lookup = {};
 		this.lazyRoutes = [];
 
 		// URL update is buffered for those that burst in at the same time
-		this.updateTask = Ext4.create('Ext.util.DelayedTask', function() {
+		this.updateTask = new Ext.util.DelayedTask(function() {
 			window.location.hash = this.hash;
 		}, this);
 	}
@@ -445,16 +455,22 @@ Ext4.define('Eoze.AjaxRouter.Router', {
 
 }, function() {
 
+	// prevent multi instance (how the fuck can a post create function get called twice???)
+	if (Eoze.AjaxRouter && Eoze.AjaxRouter.Router && Eoze.AjaxRouter.Router.initialized) {
+		return;
+	} else {
+		Eoze.AjaxRouter.Router.initialized = true;
+	}
+
 	var me = this;
 
 	// Legacy aliases
-	Eoze.AjaxRouter.Router = this;
 	Eoze.AjaxRouter.Router.Route = Eoze.AjaxRouter.Route;
 
 	//noinspection JSUnresolvedFunction
-	var initialPath = this.getCurrentPath();
+	var initialPath = me.getCurrentPath();
 
-	this.initialRoute = function() {
+	me.initialRoute = function() {
 		this.route(initialPath);
 	};
 

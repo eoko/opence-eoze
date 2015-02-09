@@ -29,6 +29,10 @@
 Ext.define('Eoze.app.Module', {
 	extend: 'Eoze.app.Controller'
 
+	,requires: [
+		'Eoze.AjaxRouter.Router'
+	]
+
 	,inject: ['injector', 'router']
 
 	/**
