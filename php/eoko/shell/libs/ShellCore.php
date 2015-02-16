@@ -526,7 +526,7 @@ class ShellCore extends ShellLib {
 				if (!isset($this->_args[$name]['delim']))# unique value entry
 					$this->settedArgs[$name] = isset($argv[++$i]) ? $argv[$i] : FALSE;
 				else # multiple value argument 
-					$this->settedArgs[$name] = split($this->_args[$name]['delim'], $argv[++$i]);
+					$this->settedArgs[$name] = explode($this->_args[$name]['delim'], $argv[++$i]);
 				if (isset($this->_args[$name]['validation_callback'])) { # run optionnal validation callback
 					$cb_ret = call_user_func($this->_args[$name]['validation_callback'], $this->settedArgs[$name]);
 					if ($cb_ret === FALSE) { # callback failed so display error message and then help

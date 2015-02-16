@@ -98,7 +98,9 @@ class ModelFormatter {
 				$return[$alias],
 				$this->getFieldConfig($alias)
 			);
-			$this->applyUiConfig(&$return[$alias], $column);
+			// 2014-02-16 Unchecked change (compat)
+			$p =& $return[$alias];
+			$this->applyUiConfig($p, $column);
 		}
 		dump($return);
 		return $return;
