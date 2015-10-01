@@ -1,3 +1,5 @@
+<link rel="stylesheet" type="text/css" href="?controller=menu_icon_provider&action=getIconCss" />
+
 <script type="text/javascript">
 	if (!Oce) Oce = {};
 	if (!Oce.Security) Oce.Security = {};
