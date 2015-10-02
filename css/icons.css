@@ -239,6 +239,9 @@
 .ico.reset {
     background-image: url("../images/icons/arrow_rotate_anticlockwise.png") !important;
 }
+.ico.table_lightning {
+	background-image: url("../images/icons/table_lightning.png");
+}
 .ico.tick,
 .ico_tick {
 	background-image: url("../images/icons/tick.png");
