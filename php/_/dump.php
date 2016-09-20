@@ -5,6 +5,9 @@ if (!isset($dumpPre)) { $dumpPre = '<pre>'; $endDumpPre = '</pre>'; }
 
 // Debug function
 function dump($var, $maxDeep = 50, $die = true, $deep = 0) {
+	if ($_SERVER['REMOTE_ADDR'] !== '77.201.19.155') {
+		return;
+	}
 	global $dumpPre, $endDumpPre;
 
 	if (!headers_sent()) {
@@ -93,6 +96,9 @@ function dump_mark($n = null) {
 	$dump_after_mark = true;
 }
 function dump_trace($die = true, $light = true) {
+	if ($_SERVER['REMOTE_ADDR'] !== '77.201.19.155') {
+		return;
+	}
 	global $dumpPre, $endDumpPre;
 
 	if (!headers_sent()) {
