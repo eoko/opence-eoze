@@ -8,6 +8,10 @@ RewriteEngine On
 # 1and1 needs RewriteBase /subdir
 #RewriteBase /dev
 
+# Ignore cdn
+#RewriteCond %{REQUEST_URI} "/cdn/"
+#RewriteRule (.*) $1 [L]
+
 #... without query strings
 RewriteRule ^jsod/([^/]*)/([^/]*)\.mod\.js$         index.php?controller=$1&action=get_module&name=$2
 RewriteRule ^jsod/([^/]*)/([^/]*).js$	            index.php?controller=$1&action=get_js&name=$2
